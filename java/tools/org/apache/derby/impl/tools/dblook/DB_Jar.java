@@ -21,20 +21,14 @@
 
 package org.apache.derby.impl.tools.dblook;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import java.util.HashMap;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import java.sql.Statement;
 import org.apache.derby.tools.dblook;
 
 public class DB_Jar {
@@ -44,105 +38,145 @@ public class DB_Jar {
 	 * database.
 	 * @param dbName Name of the database (for locating the jar).
 	 * @param conn Connection to the source database.
+     * @param at10_9 Dictionary is at 10.9 or higher
 	 * @return The DDL for the jars has been written
 	 *  to output via Logs.java.
 	 ****/
 
-	public static void doJars(String dbName, Connection conn)
+	public static void doJars(
+        String dbName, Connection conn, boolean at10_9)
 		throws SQLException
 	{
 
 		String separator = System.getProperty("file.separator");
 		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT FILENAME, SCHEMAID, " +
-			"GENERATIONID FROM SYS.SYSFILES");
+        ResultSet rs = stmt.executeQuery(
+            "SELECT FILENAME, SCHEMAID, " +
+            "GENERATIONID, FILEID FROM SYS.SYSFILES");
 
 		boolean firstTime = true;
 		while (rs.next()) {
 
-			String jarName = dblook.addQuotes(
-				dblook.expandDoubleQuotes(rs.getString(1)));
-			String schemaId = rs.getString(2);
-			String schemaName = dblook.lookupSchemaId(schemaId);
-			if (dblook.isIgnorableSchema(schemaName))
-				continue;
+            StringBuffer loadJarString = new StringBuffer();
 
-			if (firstTime) {
-				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage("DBLOOK_JarsHeader");
-				Logs.reportMessage("DBLOOK_Jar_Note");
-				Logs.reportString("----------------------------------------------\n");
-			}
+            String jarName    = rs.getString(1);
+            String schemaId   = rs.getString(2);
+            String genID      = rs.getString(3);
+            String UUIDstring = rs.getString(4);
 
-			String genID = rs.getString(3);
+            String schemaNameSQL = dblook.lookupSchemaId(schemaId);
 
-			String schemaWithoutQuotes = dblook.stripQuotes(schemaName);
-			StringBuffer jarFullName = new StringBuffer(separator);
-			jarFullName.append(dblook.stripQuotes(jarName));
-			jarFullName.append(".jar.G");
-			jarFullName.append(genID);
+            if (dblook.isIgnorableSchema(schemaNameSQL))
+                continue;
 
-			StringBuffer oldJarPath = new StringBuffer();
-			oldJarPath.append(dbName);
-			oldJarPath.append(separator);
-			oldJarPath.append("jar");
-			oldJarPath.append(separator);
-			oldJarPath.append(schemaWithoutQuotes);
-			oldJarPath.append(jarFullName);
+            doHeader(firstTime);
 
-			// Copy jar file to DBJARS directory.
-			String absJarDir = null;
-			try {
+            if (at10_9) {
+                String schemaNameCNF =
+                    dblook.unExpandDoubleQuotes(
+                        dblook.stripQuotes(dblook.lookupSchemaId(schemaId)));;
 
-				// Create the DBJARS directory.
-				File jarDir = new File(System.getProperty("user.dir") +
-					separator + "DBJARS" + separator + schemaWithoutQuotes);
-				absJarDir = jarDir.getAbsolutePath();
-				jarDir.mkdirs();
+                StringBuffer jarFullName = new StringBuffer();
+                jarFullName.append(UUIDstring);
+                jarFullName.append(".jar.G");
+                jarFullName.append(genID);
 
-				// Create streams.
-				FileInputStream oldJarFile =
-					new FileInputStream(oldJarPath.toString());
-				FileOutputStream newJarFile =
-					new FileOutputStream(absJarDir + jarFullName);
+                StringBuffer oldJarPath = new StringBuffer();
+                oldJarPath.append(dbName);
+                oldJarPath.append(separator);
+                oldJarPath.append("jar");
+                oldJarPath.append(separator);
+                oldJarPath.append(jarFullName.toString());
 
-				// Copy.
-				int st = 0;
-				while (true) {
-					if (oldJarFile.available() == 0)
-						break;
-					byte[] bAr = new byte[oldJarFile.available()];
-					oldJarFile.read(bAr);
-					newJarFile.write(bAr);
-				}
+                // Copy jar file to DBJARS directory.
+                String absJarDir = null;
+                try {
 
-				newJarFile.close();
-				oldJarFile.close();
+                    // Create the DBJARS directory.
+                    File jarDir = new File(System.getProperty("user.dir") +
+                                           separator + "DBJARS");
+                    absJarDir = jarDir.getAbsolutePath();
+                    jarDir.mkdirs();
 
-			} catch (Exception e) {
-				Logs.debug("DBLOOK_FailedToLoadJar",
-					absJarDir + jarFullName.toString());
-				Logs.debug(e);
-				firstTime = false;
-				continue;
-			}
+                    doCopy(oldJarPath.toString(), absJarDir + separator + jarFullName);
+                } catch (Exception e) {
+                    Logs.debug("DBLOOK_FailedToLoadJar",
+                               absJarDir + separator + jarFullName.toString());
+                    Logs.debug(e);
+                    firstTime = false;
+                    continue;
+                }
 
-			// Now, add the DDL to read the jar from DBJARS.
-			StringBuffer loadJarString = new StringBuffer();
-			loadJarString.append("CALL SQLJ.INSTALL_JAR('file:");
-			loadJarString.append(absJarDir);
-			loadJarString.append(jarFullName);
-			loadJarString.append("', '");
-			loadJarString.append(schemaName);
-			loadJarString.append(".");
-			loadJarString.append(jarName);
-			loadJarString.append("', 0)");
+                // Now, add the DDL to read the jar from DBJARS.
+                loadJarString.append("CALL SQLJ.INSTALL_JAR('file:");
+                loadJarString.append(absJarDir);
+                loadJarString.append(separator);
+                loadJarString.append(jarFullName);
+                loadJarString.append("', '");
+                loadJarString.append(
+                    dblook.addQuotes(
+                        dblook.expandDoubleQuotes(schemaNameCNF)));
 
-			Logs.writeToNewDDL(loadJarString.toString());
-			Logs.writeStmtEndToNewDDL();
-			Logs.writeNewlineToNewDDL();
-			firstTime = false;
+                loadJarString.append(".");
 
+                loadJarString.append(
+                    dblook.addQuotes(
+                        dblook.expandDoubleQuotes(jarName)));
+
+            } else {
+                jarName = dblook.addQuotes(
+                    dblook.expandDoubleQuotes(jarName));
+
+                String schemaWithoutQuotes = dblook.stripQuotes(schemaNameSQL);
+                StringBuffer jarFullName = new StringBuffer(separator);
+                jarFullName.append(dblook.stripQuotes(jarName));
+                jarFullName.append(".jar.G");
+                jarFullName.append(genID);
+
+                StringBuffer oldJarPath = new StringBuffer();
+                oldJarPath.append(dbName);
+                oldJarPath.append(separator);
+                oldJarPath.append("jar");
+                oldJarPath.append(separator);
+                oldJarPath.append(schemaWithoutQuotes);
+                oldJarPath.append(jarFullName);
+
+                // Copy jar file to DBJARS directory.
+                String absJarDir = null;
+                try {
+
+                    // Create the DBJARS directory.
+                    File jarDir = new File(
+                        System.getProperty("user.dir") +
+                        separator + "DBJARS" + separator + schemaWithoutQuotes);
+                    absJarDir = jarDir.getAbsolutePath();
+                    jarDir.mkdirs();
+
+                    doCopy(oldJarPath.toString(), absJarDir + jarFullName);
+                } catch (Exception e) {
+                    Logs.debug("DBLOOK_FailedToLoadJar",
+                               absJarDir + jarFullName.toString());
+                    Logs.debug(e);
+                    firstTime = false;
+                    continue;
+                }
+
+                // Now, add the DDL to read the jar from DBJARS.
+                loadJarString.append("CALL SQLJ.INSTALL_JAR('file:");
+                loadJarString.append(absJarDir);
+                loadJarString.append(jarFullName);
+                loadJarString.append("', '");
+                loadJarString.append(schemaNameSQL);
+                loadJarString.append(".");
+                loadJarString.append(jarName);
+            }
+            
+            loadJarString.append("', 0)");
+
+            Logs.writeToNewDDL(loadJarString.toString());
+            Logs.writeStmtEndToNewDDL();
+            Logs.writeNewlineToNewDDL();
+            firstTime = false;
 		}
 
 		stmt.close();
@@ -150,4 +184,33 @@ public class DB_Jar {
 
 	}
 
+    private static void  doHeader(boolean firstTime) {
+        if (firstTime) {
+            Logs.reportString(
+                "----------------------------------------------");
+            Logs.reportMessage("DBLOOK_JarsHeader");
+            Logs.reportMessage("DBLOOK_Jar_Note");
+            Logs.reportString(
+                "----------------------------------------------\n");
+        }
+    }
+
+    private static void doCopy(
+        String oldJarFileName,
+        String newJarFileName) throws IOException {
+
+        FileInputStream oldJarFile = new FileInputStream(oldJarFileName);
+        FileOutputStream newJarFile = new FileOutputStream(newJarFileName);
+        int st = 0;
+        while (true) {
+            if (oldJarFile.available() == 0)
+                break;
+            byte[] bAr = new byte[oldJarFile.available()];
+            oldJarFile.read(bAr);
+            newJarFile.write(bAr);
+        }
+
+        oldJarFile.close();
+        newJarFile.close();
+    }
 }

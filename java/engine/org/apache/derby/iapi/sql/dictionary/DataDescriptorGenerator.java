@@ -45,6 +45,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.Statistics;
 import java.sql.Timestamp;
 import java.io.InputStream;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
@@ -424,19 +425,30 @@ public class DataDescriptorGenerator
 		return uuidf;
 	}
 
-	/**
-	  @see DataDescriptorGenerator#newFileInfoDescriptor
-	  */
-	public FileInfoDescriptor newFileInfoDescriptor(
-								UUID             id,
-								SchemaDescriptor sd,
-								String           SQLName,
-								long              generationId
-								)
-	{
-		if (id == null) id = getUUIDFactory().createUUID();
-		return new FileInfoDescriptor(dataDictionary, id,sd,SQLName,generationId);
-	}
+    /**
+     * Create  a new {@code FileInfoDescriptor} using the supplied arguments.
+     * 
+     * id unique id to be used for the new file descriptor
+     * sd schema of the new file to be stored in the database
+     * SQLName the SQL name of the new schema object representing the file
+     * generationID version numberof the file the descriptor describes
+     * 
+     * @return the newly created file info descriptor
+     */
+    public FileInfoDescriptor newFileInfoDescriptor(
+                                UUID             id,
+                                SchemaDescriptor sd,
+                                String           sqlName,
+                                long             generationId
+                                )
+    {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(id != null);
+        }
+
+        return new FileInfoDescriptor(
+                dataDictionary, id, sd, sqlName, generationId);
+    }
 
 	public UserDescriptor newUserDescriptor
         (

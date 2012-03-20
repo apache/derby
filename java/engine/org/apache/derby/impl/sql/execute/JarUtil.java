@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,11 +29,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
-
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -41,8 +49,9 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.store.access.FileResource;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.util.IdUtil;
-
+import org.apache.derby.io.StorageFile;
 
 public class JarUtil
 {
@@ -127,12 +136,13 @@ public class JarUtil
         try {
             notifyLoader(false);
             dd.invalidateAllSPSPlans();
-            final String jarExternalName = JarUtil.mkExternalName(schemaName,
-                    sqlName, fr.getSeparatorChar());
+            UUID id = Monitor.getMonitor().getUUIDFactory().createUUID();
+            final String jarExternalName = JarUtil.mkExternalName(
+                id, schemaName, sqlName, fr.getSeparatorChar());
 
             long generationId = setJar(jarExternalName, is, true, 0L);
 
-            fid = ddg.newFileInfoDescriptor(/*DJD*/null, sd, sqlName, generationId);
+            fid = ddg.newFileInfoDescriptor(id, sd, sqlName, generationId);
             dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
                     false, lcc.getTransactionExecute());
             return generationId;
@@ -205,9 +215,11 @@ public class JarUtil
 			DependencyManager dm = dd.getDependencyManager();
 			dm.invalidateFor(fid, DependencyManager.DROP_JAR, lcc);
 
+            UUID id = fid.getUUID();
 			dd.dropFileInfoDescriptor(fid);
-
-			fr.remove(JarUtil.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
+            fr.remove(
+                JarUtil.mkExternalName(
+                    id, schemaName, sqlName, fr.getSeparatorChar()),
 				fid.getGenerationId());
 		} finally {
 			notifyLoader(true);
@@ -276,7 +288,8 @@ public class JarUtil
 			dd.invalidateAllSPSPlans();
 			dd.dropFileInfoDescriptor(fid);
             final String jarExternalName =
-                JarUtil.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
+                JarUtil.mkExternalName(
+                    fid.getUUID(), schemaName, sqlName, fr.getSeparatorChar());
 
 			//
 			//Replace the file.
@@ -385,16 +398,91 @@ public class JarUtil
     /**
       Make an external name for a jar file stored in the database.
       */
-    public static String mkExternalName(String schemaName, String sqlName, char separatorChar)
+    public static String mkExternalName(
+            UUID id, 
+            String schemaName, 
+            String sqlName, 
+            char separatorChar) throws StandardException
+    {
+        return mkExternalNameInternal(
+            id, schemaName, sqlName, separatorChar, false, false);
+    }
+
+    private static String mkExternalNameInternal(
+            UUID id,
+            String schemaName,
+            String sqlName,
+            char separatorChar,
+            boolean upgrading,
+            boolean newStyle) throws StandardException
     {
         StringBuffer sb = new StringBuffer(30);
-
         sb.append(FileResource.JAR_DIRECTORY_NAME);
         sb.append(separatorChar);
-        sb.append(schemaName);
-        sb.append(separatorChar);
-        sb.append(sqlName);
-        sb.append(".jar");
+
+        boolean uuidSupported = false;
+
+        if (!upgrading) {
+            LanguageConnectionContext lcc =
+                (LanguageConnectionContext)ContextService.getContextOrNull(
+                    LanguageConnectionContext.CONTEXT_ID);
+
+            // DERBY-5357 UUIDs introduced in jar file names in 10.9
+            uuidSupported =
+                lcc.getDataDictionary().
+                checkVersion(DataDictionary.DD_VERSION_DERBY_10_9, null);
+        }
+
+
+        if (!upgrading && uuidSupported || upgrading && newStyle) {
+            sb.append(id.toString());
+            sb.append(".jar");
+        } else {
+            sb.append(schemaName);
+            sb.append(separatorChar);
+            sb.append(sqlName);
+            sb.append(".jar");
+        }
+
         return sb.toString();
+    }
+
+    /**
+     * Upgrade code: upgrade one jar file to new style (>= 10.9)
+     *
+     * @param tc transaction controller
+     * @param fid the jar file to be upgraded
+     * @throws StandardException
+     */
+    public static void upgradeJar(
+            TransactionController tc,
+            FileInfoDescriptor fid)
+            throws StandardException {
+
+        FileResource fh = tc.getFileHandler();
+
+        StorageFile oldFile = fh.getAsFile(
+            mkExternalNameInternal(
+                fid.getUUID(),
+                fid.getSchemaDescriptor().getSchemaName(),
+                fid.getName(),
+                File.separatorChar,
+                true,
+                false),
+            fid.getGenerationId());
+
+        StorageFile newFile = fh.getAsFile(
+            mkExternalNameInternal(
+                fid.getUUID(),
+                fid.getSchemaDescriptor().getSchemaName(),
+                fid.getName(),
+                File.separatorChar,
+                true,
+                true),
+            fid.getGenerationId());
+
+        FileUtil.copyFile(
+                new File(oldFile.getPath()),
+                new File(newFile.getPath()), null);
     }
 }

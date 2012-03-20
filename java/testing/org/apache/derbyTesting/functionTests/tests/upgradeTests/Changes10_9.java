@@ -20,12 +20,17 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -35,6 +40,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -66,6 +72,7 @@ public class Changes10_9 extends UpgradeChange
     public Changes10_9(String name)
     {
         super(name);
+        initPattern();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +81,14 @@ public class Changes10_9 extends UpgradeChange
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static final String[] SUPPORT_FILES_SOURCE =
+    {
+        "functionTests/tests/lang/dcl_java.jar",
+        "functionTests/tests/lang/dcl_emc1.jar",
+        "functionTests/tests/lang/dcl_emc2.jar",
+    };
+    
+    
     /**
      * Return the suite of tests to test the changes made in 10.7.
      * @param phase an integer that indicates the current phase in
@@ -84,7 +99,9 @@ public class Changes10_9 extends UpgradeChange
         TestSuite suite = new TestSuite("Upgrade test for 10.9");
 
         suite.addTestSuite(Changes10_9.class);
-        return new SupportFilesSetup((Test) suite);
+        
+        return new SupportFilesSetup(
+                (Test)suite, SUPPORT_FILES_SOURCE);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -491,6 +508,338 @@ public class Changes10_9 extends UpgradeChange
         for (int i = 0; i < USERS.length; i++) {
             Connection c = ds.getConnection(USERS[i][0], USERS[i][1]);
             c.close();
+        }
+    }
+
+
+    /**
+     * For 10.9 and later storage of jar files changed. DERBY-5357.
+     */
+    public void testJarStorage()  throws Exception
+    {
+        Statement s = createStatement();
+
+        switch (getPhase()) {
+        case PH_CREATE: // create with old version
+            createSchema("EMC");
+            createSchema("FOO");
+
+            s.executeUpdate(
+                "create procedure EMC.ADDCONTACT(id INT, e_mail VARCHAR(30)) " +
+                "MODIFIES SQL DATA " +
+                "external name " +
+                "'org.apache.derbyTesting.databaseclassloader.emc.addContact'" +
+                " language java parameter style java");
+            s.executeUpdate(
+                "create table EMC.CONTACTS " +
+                "    (id int, e_mail varchar(30))");
+
+            installJar("dcl_emc1.jar", "EMC.MAIL_APP");
+            installJar("dcl_java.jar", "EMC.MY_JAVA");
+            installJar("dcl_emc2.jar", "FOO.BAR");
+
+            setDBClasspath("EMC.MAIL_APP");
+            tryCall();
+            setDBClasspath(null);
+
+            break;
+
+        case PH_SOFT_UPGRADE:
+            // boot with new version and soft-upgrade
+        case PH_POST_SOFT_UPGRADE:
+            // soft-downgrade: boot with old version after soft-upgrade
+
+            setDBClasspath("EMC.MAIL_APP");
+            tryCall();
+            setDBClasspath(null);
+            
+            // if we can do this, it hasn't moved already:
+            replaceJar("dcl_emc1.jar", "EMC.MAIL_APP");
+
+            setDBClasspath("EMC.MAIL_APP");
+            tryCall();
+            setDBClasspath(null);
+
+            break;
+            
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+
+            setDBClasspath("EMC.MAIL_APP");
+            tryCall();
+            setDBClasspath(null);
+
+            installJar("dcl_emc1.jar", "FOO.\"BAR/..\\../\"");
+
+            verifyNewLocations(4);
+            
+            removeJar("EMC.MAIL_APP");
+            installJar("dcl_emc1.jar", "EMC.MAIL_APP");
+            
+            setDBClasspath("EMC.MAIL_APP");
+            tryCall();
+            setDBClasspath(null);
+            
+            // finally, check that all the rest are also here
+            replaceJar("dcl_java.jar", "EMC.MY_JAVA");
+            replaceJar("dcl_emc2.jar", "FOO.BAR");
+            replaceJar("dcl_emc1.jar", "FOO.\"BAR/..\\../\"");
+
+            // clean up
+            removeJar("EMC.MY_JAVA");
+            removeJar("FOO.BAR");
+            removeJar("FOO.\"BAR/..\\../\"");
+            removeJar("EMC.MAIL_APP");
+            s.executeUpdate("drop table EMC.CONTACTS");
+            s.executeUpdate("drop procedure EMC.ADDCONTACT");
+            s.executeUpdate("drop schema FOO restrict");
+            s.executeUpdate("drop schema EMC restrict");
+
+            break;
+        }
+        
+        s.close();
+    }
+
+    private void createSchema(String name) throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("create schema " + name);
+        s.close();
+    }
+
+    private void installJar(String resource, String jarName)
+            throws SQLException, MalformedURLException {        
+
+        URL jar = SupportFilesSetup.getReadOnlyURL(resource);
+        
+        CallableStatement cs = prepareCall("CALL SQLJ.INSTALL_JAR(?, ?, 0)");
+        cs.setString(1, jar.toExternalForm());
+        cs.setString(2, jarName);
+        cs.executeUpdate();
+        cs.close();
+    }
+    
+    private void replaceJar(String resource, String jarName)
+            throws SQLException, MalformedURLException {        
+
+        URL jar = SupportFilesSetup.getReadOnlyURL(resource);
+        CallableStatement cs = prepareCall("CALL SQLJ.REPLACE_JAR(?, ?)");
+        cs.setString(1, jar.toExternalForm());
+        cs.setString(2, jarName);
+        cs.executeUpdate();
+        cs.close();
+    }
+    
+    private void removeJar(String jarName) throws SQLException {
+        CallableStatement cs = prepareCall("CALL SQLJ.REMOVE_JAR(?, 0)");       
+        cs.setString(1, jarName);       
+        cs.executeUpdate();        
+        cs.close();
+    }
+
+    private void setDBClasspath(String cp) throws SQLException {
+        CallableStatement cs = prepareCall(
+          "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
+          "'derby.database.classpath', ?)");
+
+        cs.setString(1, cp);
+        cs.executeUpdate();
+        cs.close();
+    }
+
+    private void tryCall() throws SQLException {
+        if (JDBC.vmSupportsJSR169()) {
+            return; // skip, EMC uses DriverManager
+        }
+
+        CallableStatement cs = prepareCall("CALL EMC.ADDCONTACT(?, ?)");
+        cs.setInt(1, 0);
+        cs.setString(2, "now@classpathchange.com");
+        cs.executeUpdate();
+        cs.close();
+    }
+
+    private void verifyNewLocations(int noOfObjects)
+            throws SQLException {
+        TestConfiguration tc = TestConfiguration.getCurrent();
+        String dbPath = tc.getPhysicalDatabaseName(tc.getDefaultDatabaseName());
+        String jarDirName =
+            "system" + File.separator + dbPath + File.separator + "jar";
+        File jarDir = new File(jarDirName);
+
+        assertTrue(jarDir.isDirectory());
+
+        File[] contents = jarDir.listFiles();
+        
+        // <db>/jar should now contain this no of files, none of which are
+        // directories
+        assertEquals(noOfObjects, contents.length);
+        
+        // assert that all the old style directories are gone
+        for (int i=0; i < contents.length; i++) {
+            File f = contents[i];
+            assertTrue(f.isFile());
+            assertFileNameShape(f.getName());
+        }
+    }
+
+
+    /**
+     * Regexp pattern to match the file name of a jar file stored in the
+     * database (version >= 10.9).
+     */
+    private Goal[] pattern;
+    
+    /**
+     * Initialize a pattern corresponding to:
+     * <p/>
+     * &lt;Derby uuid string&gt;[.]jar[.]G[0-9]+
+     * <p/>
+     * where:
+     * <p/>
+     * &lt;Derby uuid string&gt; has the form
+     * hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh
+     * <p/>
+     * where <em>h</em> id a lower case hex digit.
+     */
+    private void initPattern() {
+        List l = new ArrayList(100);
+        // The UUID format is determined by
+        // org.apache.derby.impl.services.uuid.BasicUUID#toString
+
+        for (int i=0; i < 8; i++) {
+            l.add(new CharRange(new char[][]{{'0','9'},{'a','f'}}));
+        }
+
+        l.add(new SingleChar('-'));
+        
+        for (int j = 0; j < 3; j++) {
+            for (int i=0; i < 4; i++) {
+                l.add(new CharRange(new char[][]{{'0','9'},{'a','f'}}));
+            }
+            
+            l.add(new SingleChar('-'));
+        }
+        
+        for (int i=0; i < 12; i++) {
+            l.add(new CharRange(new char[][]{{'0','9'},{'a','f'}}));
+        }
+        
+        l.add(new SingleChar('.'));
+        l.add(new SingleChar('j'));
+        l.add(new SingleChar('a'));
+        l.add(new SingleChar('r'));
+        l.add(new SingleChar('.'));
+        l.add(new SingleChar('G'));
+        l.add(new CharRange(new char[][]{{'0','9'}}, Goal.REPEAT));
+        this.pattern = new Goal[l.size()];
+        System.arraycopy(l.toArray(), 0, this.pattern, 0, l.size());
+    }
+
+    /**
+     * assert that fName has the expected shape of a jar file
+     * in the database (version >= 10.9).
+     */
+    private void assertFileNameShape(String fName) {
+        assertTrue(matches(fName, pattern));
+    }
+    
+    /**
+     * Poor man's regexp matcher: can match patterns of type below, where
+     * start "^" and end "$" is implied: must match whole string.
+     * <p/>
+     * reg.exp: ( '[' &lt;fromchar&gt;-&lt;tochar&gt; ] '+'? ']' |
+     *            &lt;char&gt; '+'? )*
+     */
+    private boolean matches(String fName, Goal[] pattern) {
+        int patIdx = 0;
+        for (int i = 0; i < fName.length(); i++) {
+            Goal p = pattern[patIdx];
+            char c = fName.charAt(i);
+
+            if (p.matches(c)) {
+                if (!p.isRepeatable()) {
+                    patIdx++;
+                } 
+                p.setFoundOnce();
+                continue;
+            } 
+                
+            // Goal did not match: if we have a repeatable goal and we already
+            // found one occurence it's ok, to step on to next goal in pattern
+            // and see it that matches.
+            patIdx++;
+            if (p.matches(c)) {
+                if (!p.isRepeatable()) {
+                    patIdx++;
+                } 
+                p.setFoundOnce();
+                continue;
+            }
+
+            return false;
+            
+        }
+        
+        return patIdx >= (pattern.length - 1); // exact match
+    }
+    
+    abstract class Goal {
+        public abstract boolean matches(char c);
+        
+        public final static int REPEAT = 0; // optional goal property
+        int option = -1;
+        boolean foundOnce = false;
+
+        public boolean isRepeatable () {
+            return option == REPEAT;
+        }
+        
+        public void setFoundOnce() {
+            this.foundOnce = true;
+        }
+        
+        public boolean foundOnce () {
+            return this.foundOnce;
+        }
+    }
+
+    private class CharRange extends Goal {
+        private char[][] ranges;
+        
+        public CharRange(char[][]ranges) {
+            this.ranges = (char[][])ranges.clone();
+        }
+        
+        public CharRange(char[][]ranges, int option) {
+            this.ranges = (char[][])ranges.clone();
+            this.option = option;
+        }
+        
+        public boolean matches(char c) {
+            for (int i = 0; i < ranges.length; i++) {
+                if (c >= ranges[i][0] && c <= ranges[i][1]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private class SingleChar extends Goal {
+        private char c;
+        private int option = -1;
+        private boolean foundOnce = false;
+        
+        public SingleChar(char c) {
+            this.c = c;
+        }
+    
+        public SingleChar(char c, int option) {
+            this.c = c;
+            this.option = option;
+        }
+        public boolean matches(char c) {
+            return c == this.c;
         }
     }
 }

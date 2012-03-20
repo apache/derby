@@ -72,7 +72,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.io.Serializable;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -81,6 +80,8 @@ import java.net.URL;
 
 import java.security.PrivilegedExceptionAction;
 import java.lang.SecurityException;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
@@ -805,7 +806,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 // copy will fail while copying the backup dir onto itself in 
                 // recursion
 
-                String [] jarSchemaList = privList(jarDir);
+                String [] jarDirContents = privList(jarDir);
                 File backupJarDir = new File(backupcopy, 
                                              FileResource.JAR_DIRECTORY_NAME);
                 // Create the backup jar directory
@@ -816,19 +817,57 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                           (File) backupJarDir);
                 }
 
-                for (int i = 0; i < jarSchemaList.length; i++)
-                {
-                    StorageFile jarSchemaDir = 
-                        storageFactory.newStorageFile(jarDir, jarSchemaList[i]);
-                    File backupJarSchemaDir = 
-                        new File(backupJarDir, jarSchemaList[i]);
+                LanguageConnectionContext lcc = 
+                    (LanguageConnectionContext)ContextService.getContextOrNull(
+                        LanguageConnectionContext.CONTEXT_ID);
+        
+                // DERBY-5357 UUIDs introduced in jar file names in 10.9
+                boolean uuidSupported =
+                    lcc.getDataDictionary().
+                    checkVersion(DataDictionary.DD_VERSION_DERBY_10_9, null);
 
-                    if (!privCopyDirectory(jarSchemaDir, backupJarSchemaDir, 
-                                           (byte[])null, null, false)) 
-                    {
-                        throw StandardException.
-                            newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-                                         jarSchemaDir, backupJarSchemaDir);  
+                if (uuidSupported) {
+                    // no subdirectories
+                    for (int i = 0; i < jarDirContents.length; i++) {
+                        StorageFile jar = storageFactory.newStorageFile(
+                            jarDir, jarDirContents[i]);
+                        File backupJar =
+                            new File(backupJarDir, jarDirContents[i]);
+
+                        if (privIsDirectory(new File(jar.getPath()))) {
+                            continue; // We no longer expect directories inside
+                                      // 'jar'. Need check to make the weird
+                                      // test #2 in BackupPathTests.java work:
+                                      // it does a backup of the db into its
+                                      // own(!) jar file directory, so trying
+                                      // to copy that db file into itself two
+                                      // levels down would fail.
+                        }
+
+                        if (!privCopyFile(jar, backupJar)) {
+                            throw StandardException.
+                                newException(
+                                    SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                    jar, backupJar);
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < jarDirContents.length; i++) {
+                        StorageFile jarSchemaDir =
+                            storageFactory.newStorageFile(
+                                jarDir, jarDirContents[i]);
+
+                        File backupJarSchemaDir =
+                            new File(backupJarDir, jarDirContents[i]);
+
+                        if (!privCopyDirectory(
+                                    jarSchemaDir, backupJarSchemaDir,
+                                    (byte[])null, null, false)) {
+                            throw StandardException.
+                                newException(
+                                    SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                    jarSchemaDir, backupJarSchemaDir);
+                        }
                     }
                 }
             }

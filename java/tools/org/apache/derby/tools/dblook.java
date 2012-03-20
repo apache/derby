@@ -518,6 +518,7 @@ public final class dblook {
 			prepForDump();
 
             boolean at10_6 = atVersion( conn, 10, 6 );
+            boolean at10_9 = atVersion( conn, 10, 9 );
 
 			// Generate DDL.
 
@@ -530,7 +531,7 @@ public final class dblook {
 
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
-				DB_Jar.doJars(sourceDBName, this.conn);
+                DB_Jar.doJars(sourceDBName, this.conn, at10_9);
 				DB_Alias.doProceduresFunctionsAndUDTs(this.conn, at10_6 );
 			}
 
@@ -1013,6 +1014,36 @@ public final class dblook {
 		return new String(result, 0, j);
 
 	}
+
+    /**
+     * inverse of expandDoubleQuotes
+     */
+    public static String unExpandDoubleQuotes(String name) {
+
+        if ((name == null) || (name.indexOf("\"") < 0))
+        // nothing to do.
+            return name;
+
+        char [] cA = name.toCharArray();
+
+        char [] result = new char[cA.length];
+
+        int j = 0;
+        for (int i = 0; i < cA.length; i++) {
+
+            if (cA[i] == '"') {
+                result[j++] = cA[i];
+                j++; // skip next char which must be " also
+            }
+            else
+                result[j++] = cA[i];
+
+        }
+
+        return new String(result, 0, j);
+
+    }
+
 
 	/* ************************************************
 	 * lookupSchemaId:

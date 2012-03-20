@@ -502,6 +502,13 @@ public	class DD_Version implements	Formatable
             // On upgrade from versions before 10.9, create system catalogs
             // added in 10.9
             bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSUSERS_CATALOG_NUM );
+
+            // On upgrade from versions before 10.9, upgrade the way we store
+            // jars: we now use UUID as part of the file name and sanitize the
+            // sql (schema, schema object) parts of the file name to remove
+            // path delimiters. ALso, we now use no schema subdirectories since
+            // there is no chance of name collision with the UUID.
+            bootingDictionary.upgradeJarStorage(tc);
         }
 
         // Grant PUBLIC access to some system routines

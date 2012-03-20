@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.io.File;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -179,6 +180,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import java.sql.Types;
+import java.util.Map;
+import org.apache.derby.iapi.services.io.FileUtil;
+import org.apache.derby.iapi.store.access.FileResource;
+import org.apache.derby.impl.sql.execute.JarUtil;
+import org.apache.derby.io.StorageFile;
 
 /**
  * Standard database implementation of the data dictionary
@@ -8342,6 +8348,69 @@ public final class	DataDictionaryImpl
 		makeCatalog(ti, (catalogNumber == SYSDUMMY1_CATALOG_NUM) ? getSysIBMSchemaDescriptor() :
 								getSystemSchemaDescriptor(), tc);
 	}
+
+
+    /**
+     * Called by the upgrade code to upgrade the way we store jar files in the
+     * database.<p/>
+     * We now use UUID as part of the file name to avoid problems with path
+     * delimiters. Also, we henceforth use no schema subdirectories since there
+     * is no chance of name collision with the UUID.
+     *
+     * @param tc TransactionController to use.
+     */
+    protected void upgradeJarStorage(TransactionController tc)
+        throws StandardException
+    {
+        TabInfoImpl             ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
+        SYSFILESRowFactory rf = (SYSFILESRowFactory)ti.getCatalogRowFactory();
+
+        ExecRow outRow = rf.makeEmptyRow();
+
+        /*
+        ** Table scan
+        */
+        ScanController scanController = tc.openScan(
+                ti.getHeapConglomerate(),     // conglomerate to open
+                false,                        // don't hold open across commit
+                0,                            // for read
+                TransactionController.MODE_TABLE,
+                TransactionController.ISOLATION_REPEATABLE_READ,
+                (FormatableBitSet) null,      // all fields as objects
+                (DataValueDescriptor[]) null, // start position - first row
+                0,                            // startSearchOperation - none
+                (Qualifier[][]) null,         // scanQualifier,
+                (DataValueDescriptor[]) null, // stop position -through last row
+                0);                           // stopSearchOperation - none
+
+        Map schemas = new HashMap();
+
+        try
+        {
+            while (scanController.fetchNext(outRow.getRowArray()))
+            {
+                FileInfoDescriptor fid = (FileInfoDescriptor)rf.
+                    buildDescriptor(outRow, null, this);
+                schemas.put(fid.getSchemaDescriptor().getSchemaName(), null);
+                JarUtil.upgradeJar(tc, fid);
+            }
+        }
+        finally
+        {
+            scanController.close();
+        }
+
+        Iterator i = schemas.keySet().iterator();
+        FileResource fh = tc.getFileHandler();
+
+        // remove those directories with their contents
+        while(i.hasNext()) {
+            fh.removeJarDir(
+                    FileResource.JAR_DIRECTORY_NAME +
+                    File.separatorChar +
+                    (String)i.next());
+        }
+    }
 
 	/**
 	 *	The dirty work of creating a catalog.

@@ -148,7 +148,36 @@ class RFResource implements FileResource {
 		return generationId;
 	}
 
-	/**
+    /**
+     * @see FileResource#removeJarDir
+     */
+    public void removeJarDir(String f) throws StandardException {
+        if (factory.isReadOnly())
+            throw StandardException.newException(SQLState.FILE_READ_ONLY);
+
+        ContextManager cm =
+            ContextService.getFactory().getCurrentContextManager();
+
+        RawTransaction tran =
+            factory.getRawStoreFactory().getXactFactory().findUserTransaction(
+                        factory.getRawStoreFactory(),
+                        cm,
+                        AccessFactoryGlobals.USER_TRANS_NAME);
+
+        StorageFile ff = factory.storageFactory.newStorageFile(f);
+        Serviceable s = new RemoveFile(ff);
+
+        // Since this code is only used during upgrade to post-10.8 databases
+        // we do no bother to build code for a special RemoveDirOperation and
+        // do tran.logAndDo (cf. logic in #remove). If the post-commit removal
+        // doesn't get completed, that is no big issue, the dirs can be removed
+        // by hand if need be. A prudent DBA will rerun the upgrade from a
+        // backup if something crashes anyway..
+
+        tran.addPostCommitWork(s);
+    }
+
+    /**
 	  @see FileResource#remove
 	  @exception StandardException Oops
 	  */
@@ -256,9 +285,16 @@ final class RemoveFile implements Serviceable, PrivilegedExceptionAction
     public Object run() throws StandardException {
         // SECURITY PERMISSION - MP1, OP5
         if (fileToGo.exists()) {
-            if (!fileToGo.delete()) {
-                throw StandardException.newException(
-                        SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+            if (fileToGo.isDirectory()) {
+                if (!fileToGo.deleteAll()) {
+                    throw StandardException.newException(
+                            SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+                }
+            } else {
+                if (!fileToGo.delete()) {
+                    throw StandardException.newException(
+                            SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+                }
             }
         }
         return null;

@@ -87,6 +87,14 @@ public interface FileResource {
 	public void remove(String name, long currentGenerationId)
 		throws StandardException;
 
+    /**
+     * During hard upgrade to >= 10.9, remove a jar directory (at post-commit 
+     * time) from the database.
+     * @param f
+     * @exception standard error policy
+     */
+    public void removeJarDir(String f) throws StandardException;
+    
 	/**
 	  Replace a file resource with a new version.
 
