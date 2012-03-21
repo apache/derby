@@ -1169,6 +1169,55 @@ public class CallableStatement extends PreparedStatement
             throw se.getSQLException();
         }
     }
+
+    //----------------------------overrides----------------------------------
+
+    public void completeExecuteCall(Sqlca sqlca, Cursor singletonParams) // no result sets returned
+    {
+        super.completeExecuteCall( sqlca, singletonParams );
+
+        //
+        // For INOUT parameters, propagate return values back to the input parameter array.
+        // See DERBY-2515.
+        //
+
+        if ( singletonParams == null ) { return ; }
+        if ( parameterMetaData_ == null ) { return; }
+
+        int     cursorParamCount = singletonParams.columns_;
+        
+        for ( int i = 0; i < cursorParamCount; i++ )
+        {
+            if ( parameterMetaData_.sqlxParmmode_[ i ] == java.sql.ParameterMetaData.parameterModeInOut )
+            {
+                int jdbcParamNumber = i + 1;
+                Object  returnArg;
+                
+                try {
+                    returnArg = singletonParams.isNull_[ i ] ? null : singletonParams.getObject( jdbcParamNumber );
+                } catch (SqlException se)
+                {
+                    IllegalArgumentException iae = new IllegalArgumentException( se.getMessage() );
+                    iae.initCause( se );
+                    throw iae;
+                }
+                
+                //
+                // special case to coerce Integer to Short for SMALLINT
+                //
+                if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
+                {
+                    if ( (returnArg != null) && (returnArg instanceof Integer) )
+                    {
+                        returnArg = new Short( ((Integer) returnArg).shortValue() );
+                    }
+                }
+                
+                setInput( jdbcParamNumber, returnArg );
+            }   // end if INOUT arg
+        }       // end loop through args
+    }
+
     
     //----------------------------helper methods----------------------------------
 
