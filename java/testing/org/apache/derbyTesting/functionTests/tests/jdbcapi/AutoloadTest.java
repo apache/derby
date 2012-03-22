@@ -30,6 +30,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 import java.util.Enumeration;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -40,6 +41,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -52,9 +54,34 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * driver was not accidentally loaded by some other test.
  */
 public class AutoloadTest extends BaseJDBCTestCase
-{		
+{
+    private Class spawnedTestClass;
+
 	public	AutoloadTest( String name ) { super( name ); }
 
+    /**
+     * Create a test case that runs this test in a separate JVM.
+     *
+     * @param wrapper a test class that decorates {@code AutoloadTest} with the
+     * desired configuration
+     */
+    private AutoloadTest(Class wrapper) {
+        this("spawnProcess");
+        spawnedTestClass = wrapper;
+    }
+
+    /**
+     * Get the name of the test case.
+     */
+    public String getName() {
+        String name = super.getName();
+        if (spawnedTestClass != null) {
+            // Append the name of the class that decorates the test case to
+            // make it easier to see which configuration it runs under.
+            name += ":" + spawnedTestClass.getSimpleName();
+        }
+        return name;
+    }
     
     /**
      * Only run a test if the driver will be auto-loaded.
@@ -176,6 +203,58 @@ public class AutoloadTest extends BaseJDBCTestCase
             suite.addTest(new AutoloadTest("testAutoloadDriverUnregister"));
         }
         return suite;
+    }
+
+    /**
+     * <p>
+     * Generate the full suite of autoload tests. Each test will be started
+     * in its own JVM so that we know that the driver hasn't been loaded
+     * accidentally by another test.
+     * </p>
+     *
+     * <p>
+     * The test suite runs {@code AutoloadTest} in the following
+     * configurations:
+     * </p>
+     *
+     * <ul>
+     * <li>No jdbc.drivers property</li>
+     * <li>jdbc.drivers property specifying embedded driver</li>
+     * <li>jdbc.drivers property specifying client driver</li>
+     * <li>jdbc.drivers property specifying both drivers</li>
+     * </ul>
+     */
+    static Test fullAutoloadSuite() {
+        TestSuite suite = new TestSuite("AutoloadTest:All");
+        suite.addTest(new AutoloadTest(AutoloadTest.class));
+        suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
+        suite.addTest(new AutoloadTest(JDBCDriversClientTest.class));
+        suite.addTest(new AutoloadTest(JDBCDriversAllTest.class));
+
+        // The forked test processes will access the default test database, so
+        // stop the engine in the main test process to prevent attempts to
+        // double-boot the database.
+        return new TestSetup(suite) {
+            protected void setUp() {
+                TestConfiguration.getCurrent().shutdownEngine();
+            }
+        };
+    }
+
+    /**
+     * Run {@code AutoloadTest} in a separate JVM.
+     */
+    public void spawnProcess() throws Exception {
+        String[] cmd = {
+            "junit.textui.TestRunner", spawnedTestClass.getName()
+        };
+
+        SpawnedProcess proc =
+            new SpawnedProcess(execJavaCmd(cmd), spawnedTestClass.getName());
+
+        if (proc.complete() != 0) {
+            fail(proc.getFailMessage("Test process failed"));
+        }
     }
 
 	// ///////////////////////////////////////////////////////////

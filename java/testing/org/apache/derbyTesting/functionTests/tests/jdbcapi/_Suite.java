@@ -168,6 +168,9 @@ public class _Suite extends BaseTestCase  {
             // XA and ConnectionPool Datasource are not available with
             // JSR169 so can't run InternationalConnectTest. 
             suite.addTest(InternationalConnectTest.suite());
+
+            // Test requires java.sql.DriverManager
+            suite.addTest(AutoloadTest.fullAutoloadSuite());
         }
 
         return suite;
