@@ -213,11 +213,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         selectUpdateBlob2("BlobTest #6", selectBlob2, selectBlob,
                 BIG_LOB_SZ, 0, 1, DATAFILE);
 
-        deleteTable("BLOBTBL2", 1);
+        deleteAndTruncateTable("BLOBTBL2", 1);
 
         commit();
 
-        deleteTable("BLOBTBL", 3);
+        deleteAndTruncateTable("BLOBTBL", 3);
     }
 
     public void test_02_BlobNegative() throws SQLException {
@@ -384,7 +384,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             // stream length is one less than actual length of the stream
             assertSQLState("XSDA4", sqle);
         }
-        deleteTable("CLOBTBL2", 2);
+        deleteAndTruncateTable("CLOBTBL2", 2);
 
         try {
             // give -ve streamlength
@@ -397,7 +397,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
         selectClob("ClobTest #12.2", selectClob, BIG_LOB_SZ, 4, 0);
 
-        deleteTable("CLOBTBL", 2);
+        deleteAndTruncateTable("CLOBTBL", 2);
 
         // Negative tests use the setClob API to insert a 4GB clob
 
@@ -425,6 +425,21 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         rollback();
 
         // ADD NEW TESTS HERE
+    }
+
+    //DERBY-5638
+    // Following shutdown will ensure that all the logs are applied to the
+    // database and hence there are no unapplied log files left at the end 
+    // of the suite. 
+    //This test deals will large data objects which can cause us to have 
+    // large log files and if the database is not shutdown at the end of the 
+    // suite, the suite will finish successfully but will leave a database 
+    // directory with large number of big log files. Nightly machines which
+    // run this suite on a regular basis can eventually run out of disk space
+    // if those machines do not delete the database directories from multiple 
+    // runs.
+    public void test_06_shutdownDB() throws Exception {
+        TestConfiguration.getCurrent().shutdownDatabase();
     }
 
     private void negativeSpaceTruncationTest(String msg)
@@ -825,10 +840,19 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         assertEquals(file, lobstream);
     }
 
-    private void deleteTable(String table,
+    private void deleteAndTruncateTable(String table,
             int expectedRows) throws SQLException {
-        int count = createStatement().executeUpdate(
+    	Statement s = createStatement();
+        //Keep the delete call to exercise delete of long blobs and clobs.
+    	// This is a separate code path through Derby compared to truncate
+    	// table code path.
+        int count = s.executeUpdate(
                 "DELETE FROM " + JDBC.escape(table));
+        //DERBY-5638
+        //Adding truncate call which will give back the disk space being 
+        // used by the table at commit time rather than wait for test 
+        // infrastructure to drop the table.
+        s.executeUpdate("TRUNCATE TABLE " + JDBC.escape(table));
         commit();
         verifyTest(count, expectedRows, "Rows deleted =");
     }
