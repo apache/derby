@@ -24,8 +24,8 @@ import java.net.InetAddress;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -33,7 +33,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derbyTesting.junit.BaseTestCase;
 
 /**
  * Test decorator that starts the network server on startup
@@ -184,6 +183,11 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
         if (startServerAtSetup)
         {
+            // DERBY-4201: A network server instance used in an earlier test
+            // case might not have completely shut down and released the server
+            // port yet. Wait here until the port has been released.
+            waitForAvailablePort();
+
             if (useSeparateProcess)
             { spawnedServer = startSeparateProcess(); }
             else if (asCommand)
@@ -205,6 +209,56 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     fail(msg);
                 }
             }
+        }
+    }
+
+    /**
+     * Wait until the server port has been released by server instances used
+     * by earlier test cases, or until the timeout specified by
+     * {@link #getWaitTime()} has elapsed.
+     *
+     * @throws Exception if the port didn't become available before the timeout
+     */
+    private void waitForAvailablePort() throws Exception {
+        TestConfiguration conf = TestConfiguration.getCurrent();
+        InetAddress serverAddress = InetAddress.getByName(conf.getHostName());
+        int port = conf.getPort();
+        long giveUp = System.currentTimeMillis() + getWaitTime();
+
+        while (true) {
+            try {
+                probeServerPort(port, serverAddress);
+                break;
+            } catch (IOException ioe) {
+                if (System.currentTimeMillis() < giveUp) {
+                    Thread.sleep(SLEEP_TIME);
+                } else {
+                    BaseTestCase.fail(
+                        "Timed out waiting for server port to become available",
+                        ioe);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if a server socket can be opened on the specified port.
+     *
+     * @param port the port to check
+     * @param addr the address of the network interface
+     * @throws IOException if a server socket couldn't be opened
+     */
+    private void probeServerPort(final int port, final InetAddress addr)
+            throws IOException {
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    new ServerSocket(port, 0, addr).close();
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
         }
     }
 
