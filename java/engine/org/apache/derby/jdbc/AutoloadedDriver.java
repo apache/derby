@@ -33,6 +33,7 @@ import java.util.Properties;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
 
 
