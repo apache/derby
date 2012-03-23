@@ -1455,14 +1455,25 @@ public class SystemProcedures  {
                                replace, false);
 		}catch(SQLException se)
 		{
-			//issue a rollback on any errors
-			conn.rollback();
-			throw  se;
+			rollBackAndThrowSQLException(conn, se);
 		}
 		//import finished successfull, commit it.
 		conn.commit();
 	}
-
+	
+    /**
+     * issue a rollback when SQLException se occurs. If SQLException ouccurs when rollback,
+     * the new SQLException will be added into the chain of se. 
+     */
+    private static void rollBackAndThrowSQLException(Connection conn,
+            SQLException se) throws SQLException {
+        try {
+            conn.rollback();
+        } catch (SQLException e) {
+            se.setNextException(e);
+        }
+        throw se;
+    }
 
     /**
      * Import  data from a given file to a table. Data for large object 
@@ -1496,9 +1507,7 @@ public class SystemProcedures  {
                                );
         }catch(SQLException se)
         {
-            //issue a rollback on any errors
-            conn.rollback();
-            throw  se;
+            rollBackAndThrowSQLException(conn, se);
         }
         //import finished successfull, commit it.
         conn.commit();
@@ -1539,9 +1548,7 @@ public class SystemProcedures  {
 								  codeset, replace, false);
 		}catch(SQLException se)
 		{
-			//issue a rollback on any errors
-			conn.rollback();
-			throw  se;
+		    rollBackAndThrowSQLException(conn, se);
 		}
 
 		//import finished successfull, commit it.
@@ -1587,9 +1594,7 @@ public class SystemProcedures  {
                               codeset, replace, true);
         }catch(SQLException se)
         {
-            //issue a rollback on any errors
-            conn.rollback();
-            throw  se;
+            rollBackAndThrowSQLException(conn, se);
         }
 
         //import finished successfull, commit it.
