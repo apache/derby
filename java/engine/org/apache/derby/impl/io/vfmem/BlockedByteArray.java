@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.io.vfmem;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * Stores data in blocks, and supports reading/writing data from/into these
