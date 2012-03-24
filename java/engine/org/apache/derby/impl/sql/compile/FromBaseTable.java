@@ -2324,6 +2324,14 @@ public class FromBaseTable extends FromTable
 					tableDescriptor.getHeapConglomerateId()
 					);
 
+            // Bail out if the descriptor couldn't be found. The conglomerate
+            // probably doesn't exist anymore.
+            if (baseConglomerateDescriptor == null) {
+                throw StandardException.newException(
+                        SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
+                        new Long(tableDescriptor.getHeapConglomerateId()));
+            }
+
 			/* Build the 0-based array of base column names. */
 			columnNames = resultColumns.getColumnNames();
 
