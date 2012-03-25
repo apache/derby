@@ -397,7 +397,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			sd = getAndCheckSchemaDescriptor(dd, schemaId, "ALTER TABLE");
 		}
 		
-		/* Prepare all dependents to invalidate.  (This is there chance
+		/* Prepare all dependents to invalidate.  (This is their chance
 		 * to say that they can't be invalidated.  For example, an open
 		 * cursor referencing a table/view that the user is attempting to
 		 * alter.) If no one objects, then invalidate any dependent objects.
@@ -2090,14 +2090,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 TransactionController.MODE_TABLE,
                 TransactionController.ISOLATION_SERIALIZABLE);
 
-		// invalidate any prepared statements that depended on this table 
-        // (including this one), this fixes problem with threads that start up 
-        // and block on our lock, but do not see they have to recompile their 
-        // plan.  We now invalidate earlier however they still might recompile
-        // using the old conglomerate id before we commit our DD changes.
-		//
-		dm.invalidateFor(td, DependencyManager.COMPRESS_TABLE, lcc);
-
 		rl = compressHeapCC.newRowLocationTemplate();
 
 		// Get the properties on the old heap
@@ -2221,6 +2213,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Update sys.sysconglomerates with new conglomerate #
 		dd.updateConglomerateDescriptor(cd, newHeapConglom, tc);
 
+        // Now that the updated information is available in the system tables,
+        // we should invalidate all statements that use the old conglomerates
+        dm.invalidateFor(td, DependencyManager.COMPRESS_TABLE, lcc);
+
 		// Drop the old conglomerate
 		tc.dropConglomerate(oldHeapConglom);
 		cleanUp();
@@ -2310,15 +2306,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                                 TransactionController.MODE_TABLE,
                                 TransactionController.ISOLATION_SERIALIZABLE);
 
-		// invalidate any prepared statements that
-		// depended on this table (including this one)
-		// bug 3653 has threads that start up and block on our lock, but do
-		// not see they have to recompile their plan.    We now invalidate earlier
-		// however they still might recompile using the old conglomerate id before we
-		// commit our DD changes.
-		//
-		dm.invalidateFor(td, DependencyManager.TRUNCATE_TABLE, lcc);
-
 		rl = compressHeapCC.newRowLocationTemplate();
 		// Get the properties on the old heap
 		compressHeapCC.getInternalTablePropertySet(properties);
@@ -2404,6 +2391,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		// Update sys.sysconglomerates with new conglomerate #
 		dd.updateConglomerateDescriptor(cd, newHeapConglom, tc);
+
+        // Now that the updated information is available in the system tables,
+        // we should invalidate all statements that use the old conglomerates
+        dm.invalidateFor(td, DependencyManager.TRUNCATE_TABLE, lcc);
+
 		// Drop the old conglomerate
 		tc.dropConglomerate(oldHeapConglom);
 		cleanUp();
