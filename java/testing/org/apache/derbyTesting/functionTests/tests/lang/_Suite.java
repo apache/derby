@@ -61,6 +61,7 @@ public class _Suite extends BaseTestCase  {
 
         suite.addTest(org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.suite());
         suite.addTest(AnsiTrimTest.suite());
+        suite.addTest(CompressTableTest.suite());
         suite.addTest(CreateTableFromQueryTest.suite());
         suite.addTest(DatabaseClassLoadingTest.suite());
         suite.addTest(DynamicLikeOptimizationTest.suite());

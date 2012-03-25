@@ -568,11 +568,11 @@ public abstract class BaseTestCase
      *
      * @exception AssertionFailedError
      */
-    public static void fail(String msg, Exception e)
+    public static void fail(String msg, Throwable t)
             throws AssertionFailedError {
 
         AssertionFailedError ae = new AssertionFailedError(msg);
-        ae.initCause(e);
+        ae.initCause(t);
         throw ae;
     }
 } // End class BaseTestCase
