@@ -2389,14 +2389,6 @@
       <formatter type="xml"/>
 <test name="org.apache.derbyTesting.junit.EnvTest"
     todir="junit_${derby.junit.timestamp}"/>  	 	
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"
-  	todir="junit_${derby.junit.timestamp}"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"
-	todir="junit_${derby.junit.timestamp}"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"
-	todir="junit_${derby.junit.timestamp}"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"
-	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"
 	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.tools._Suite"
