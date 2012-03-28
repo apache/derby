@@ -1756,7 +1756,7 @@ public final class AccessTest extends BaseJDBCTestCase {
         // Passing in null to prevent uninteresting failures.
         assertStatsOK(st, 
             indexOrConstraint, "FOO", indexName, 
-            "{0}", "1", "0", "1", "0", "0", "btree",
+            "{0}", "1", "0", null, "0", "0", "btree",
             ">= on first 1 column(s).","> on first 1 column(s).","None", null);
 
         st.execute("drop table foo");
