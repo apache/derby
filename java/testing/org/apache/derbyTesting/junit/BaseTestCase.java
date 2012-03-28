@@ -527,7 +527,7 @@ public abstract class BaseTestCase
      * Fail; attaching an exception for more detail on cause.
      *
      * @param msg message explaining the failure
-     * @param e exception related to the cause
+     * @param t exception related to the cause
      *
      * @exception AssertionFailedError
      */
