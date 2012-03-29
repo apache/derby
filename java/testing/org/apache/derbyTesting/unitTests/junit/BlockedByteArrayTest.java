@@ -149,14 +149,15 @@ public class BlockedByteArrayTest
         src.setLength(5*1024*1024); // 5 MB
         src.setLength(7*1024*1024); // 7 MB
         assertEquals(7*1024*1024L, src.length());
-        src.setLength(75*1024*1024); // 75 MB
         src.setLength(0); // 0 bytes
         assertEquals(0L, src.length());
         src.setLength(39*1024*1024); // 39 MB
         src.setLength(39*1024*1024+1); // 39 MB +1 B
         assertEquals(39*1024*1024+1L, src.length());
         src.setLength(39*1024*1024); // 39 MB
+        assertEquals(39*1024*1024L, src.length());
         src.setLength(39*1024*1024); // 39 MB
+        assertEquals(39*1024*1024L, src.length());
         src.setLength(-1); // Invalid value - causes array to be truncated.
         assertEquals(0L, src.length());
     }
