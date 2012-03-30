@@ -855,7 +855,6 @@ public final class	DataDictionaryImpl
                     indexStatsUpdateLogging = Boolean.valueOf(
                             dbEnableIndexStatsLogging).booleanValue();
                 }
-                // TODO: This property may go away in production code.
                 String dbEnableIndexStatsTracing =
                         PropertyUtil.getDatabaseProperty(bootingTC,
                             Property.STORAGE_AUTO_INDEX_STATS_TRACING);

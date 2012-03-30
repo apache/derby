@@ -121,7 +121,6 @@ public class IndexStatisticsDaemonImpl
     private final HeaderPrintWriter logStream;
     /** Tells if logging is enabled. */
     private final boolean doLog;
-    // TODO: Consider removing the trace functionality after testing/tuning.
     /** Tells if tracing is enabled. */
     private final boolean doTrace;
     /** Tells if traces are written to the Derby log file. */

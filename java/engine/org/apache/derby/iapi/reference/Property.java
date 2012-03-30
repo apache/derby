@@ -685,7 +685,7 @@ public interface Property {
 
     /**
      * Tells if more detailed activities related to automatic index statistics
-     * update should be traced. Accepted values are: *none*, stdout, log, both
+     * update should be traced. Accepted values are: *off*, stdout, log, both
      */
     String STORAGE_AUTO_INDEX_STATS_TRACING = "derby.storage.indexStats.trace";
 
