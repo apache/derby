@@ -32,19 +32,24 @@ public class _Suite extends BaseJDBCTestCase {
     }
 
     /**
-     * Suite runs first the lite suite for both embedded and client with LobLimitsLiteTest
+     * Suite runs first the lite suite for both embedded and client with 
+     * LobLimitsLiteTest.
      * Then runs the full embeddded suite with LobLimitsTest 
      * Then runs the full client suite with LobLimitsClientTest.
      * The full suite may take a very long time.
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("largedata suite");
+
+        // DERBY-5624, currently this runs out of file descriptors on unix
+        // systems with 1024 limit per user.  Setting to run only on windows
+        // until solution for unix is found.
+        if (isWindowsPlatform())
+            suite.addTest(Derby5624Test.suite());
+
         suite.addTest(LobLimitsLiteTest.suite());
         suite.addTest(LobLimitsTest.suite());
         suite.addTest(LobLimitsClientTest.suite());
         return suite;
-        
     }
-    
-    
 }
