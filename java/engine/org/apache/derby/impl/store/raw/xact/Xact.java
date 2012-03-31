@@ -1960,20 +1960,25 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (savePoints != null)
 			savePoints.removeAllElements();
 
-		// notify any of our observers that we are completing.
-		notifyObservers(commitOrAbort);
-
-		checkObserverException();
-
-		if (SanityManager.DEBUG) 
+        do
         {
-			if (countObservers() != 0)
-            {
-                SanityManager.THROWASSERT(
-                    "There should be 0 observers, but we still have "
-					+ countObservers() + " observers.");
-            }
-		}
+            // notify any of our observers that we are completing.
+            notifyObservers(commitOrAbort);
+
+            checkObserverException();
+
+            // DERBY-3993
+            // make sure any observer that may have been added by either
+            // dropContainer() or dropStreamContainer() is also handled.
+            // The calling notifyObservers() call from Xact.doComplete()
+            // may not "see" new observers added during processing of the
+            // initial observer list.  So loop until notifyObservers()
+            // call causes countObservers() to go to 0.  This should only
+            // loop if one of the observers adds to the list as part of
+            // the notify.  Even then depending on ordering the added
+            // observer may be picked up in the first try.
+
+        } while (countObservers() > 0);
 	}
 
 	private void checkObserverException() throws StandardException {
