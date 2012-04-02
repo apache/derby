@@ -27,6 +27,7 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
@@ -49,8 +50,9 @@ public class ReplicationSuite extends BaseTestCase
 
         // The tests require both DriverManager and ClientDataSource. None
         // of those classes are available in JSR-169, so only run the test
-        // on platforms that support JDBC3 and higher.
-        if (JDBC.vmSupportsJDBC3()) {
+        // on platforms that support JDBC3 and higher. The tests also require
+        // a network server.
+        if (JDBC.vmSupportsJDBC3() && Derby.hasServer()) {
 
             suite.addTest(ReplicationRun_Local.suite());
             suite.addTest(ReplicationRun_Local.localAuthenticationSuite());

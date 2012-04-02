@@ -53,6 +53,7 @@ import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.junit.*;
 
 /**
  * Tests related to use of restrictive file permissions (DERBY-5363).
@@ -132,14 +133,15 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
         // For server started from command line, we should still get secure
         // permissions.
-
-        totalSuite.addTest(
-            new NetworkServerTestSetup(
-                new RestrictiveFilePermissionsTest(
-                    "doTestCliServerIsRestrictive"),
-                new String[]{}, // system properties
-                new String[]{}, // non-default start up arguments
-                true));
+        if (Derby.hasServer()) {
+            totalSuite.addTest(
+                new NetworkServerTestSetup(
+                    new RestrictiveFilePermissionsTest(
+                        "doTestCliServerIsRestrictive"),
+                    new String[]{}, // system properties
+                    new String[]{}, // non-default start up arguments
+                    true));
+        }
 
         // For server started from API, we should see lax permissions.
         //

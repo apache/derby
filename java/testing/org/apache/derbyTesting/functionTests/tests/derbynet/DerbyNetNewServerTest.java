@@ -31,6 +31,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -52,7 +53,7 @@ public class DerbyNetNewServerTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         // Test does not run on J2ME
-        if (JDBC.vmSupportsJDBC3()) {
+        if (JDBC.vmSupportsJDBC3() && Derby.hasServer()) {
             return new TestSuite(DerbyNetNewServerTest.class);
         } else {
             return new TestSuite("DerbyNetNewServerTest.empty");

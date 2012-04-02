@@ -353,17 +353,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private boolean setSecurityMechanism(String derby_security_mechanism) 
     throws Exception {
         try {
-            // getting a networkservercontrol to shutdown the currently running
+            // shut down the currently running
             // server, before setting the next security mechanism
-            final TestConfiguration config = TestConfiguration.getCurrent();
-            NetworkServerControl server = new NetworkServerControl(
-                InetAddress.getByName(config.getHostName()),
-                config.getPort(),
-                config.getUserName(),
-                config.getUserPassword());
-
-            // shut down the server
-            server.shutdown();
+            NetworkServerTestSetup.getNetworkServerControl().shutdown();
         } catch (Exception e) {
             if (!(e.getMessage().substring(0,17).equals("DRDA_InvalidValue")))
             {
@@ -381,16 +373,12 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             
             // if the security mechanism isn't supported or invalid, getting a
             // networkservercontrol will fail.
-            NetworkServerControl server2 = new NetworkServerControl(
-                InetAddress.getByName(
-                    TestConfiguration.getCurrent().getHostName()),
-                    TestConfiguration.getCurrent().getPort());
 
-            // For debugging, to make output come to console uncomment:
-            //server2.start(new PrintWriter(System.out, true));
-            // and comment out:
-            server2.start(null);
-            NetworkServerTestSetup.waitForServerStart(server2);
+            // For debugging, to make output come to console call start() with
+            // new PrintWriter(System.out, true) instead of null.
+            NetworkServerTestSetup.getNetworkServerControl().start(null);
+            NetworkServerTestSetup.waitForServerStart(
+                    NetworkServerTestSetup.getNetworkServerControl());
             
             if (derby_drda_securityMechanism.equals("") ||
                 derby_drda_securityMechanism.equals("INVALID_VALUE"))
