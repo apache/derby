@@ -154,8 +154,9 @@ public class NetServlet extends HttpServlet {
 		//prevent caching of the servlet since contents can change - beetle 4649
 		response.setHeader("Cache-Control", "no-cache,no-store");
 
-		String formHeader = "<form enctype='multipart/form-data; charset=UTF-8' action='" +
-			request.getRequestURI() +" '>";
+        String formTarget = request.getContextPath() + request.getServletPath();
+        String formHeader = "<form enctype='multipart/form-data; charset=UTF-8'"
+                + " action='" + formTarget + "'>";
 
         PrintWriter out = new PrintWriter
             ( new OutputStreamWriter(response.getOutputStream(), "UTF8"),true );
@@ -217,7 +218,7 @@ public class NetServlet extends HttpServlet {
 			setDefaults();
 					
 		}
-		else if (form.equals(returnMessage) || form.equals(returnMessage))
+        else if (form.equals(returnMessage))
 		{
 			// check if server is still running and use that to determine which form
 			if (serverStatus)
@@ -334,10 +335,10 @@ public class NetServlet extends HttpServlet {
 				if (doAction.equals(traceOnOffMessage))
 				{
 					String sessionid = request.getParameter("sessionid");
-					int session;
+                    Integer session;
 					try {
-					 	session = (new Integer(sessionid)).intValue();
-					} catch (Exception e) {
+                        session = Integer.valueOf(sessionid);
+                    } catch (NumberFormatException nfe) {
 						printErrorForm(langUtil,
 							langUtil.getTextMessage("SRV_InvalidVal",
 							sessionid, langUtil.getTextMessage("SRV_SessionID")),
@@ -357,12 +358,13 @@ public class NetServlet extends HttpServlet {
 						val = false;
 					else
 						val = true;
-					if (traceSession(langUtil, val, session, returnMessage, out))
+                    if (traceSession(langUtil, val, session.intValue(),
+                            returnMessage, out))
 					{
-						if (val)
-							out.println( "<h4>"+langUtil.getTextMessage("SRV_StatusTraceNoOn", sessionid)+"</h4>");
-						else
-							out.println( "<h4>"+langUtil.getTextMessage("SRV_StatusTraceNoOff", sessionid)+"</h4>");
+                        out.println( "<h4>" + langUtil.getTextMessage(
+                                val ? "SRV_StatusTraceNoOn"
+                                    : "SRV_StatusTraceNoOff",
+                                session.toString()) + "</h4>");
 					}
 					else
 						return;
@@ -398,7 +400,8 @@ public class NetServlet extends HttpServlet {
 			}
 			if (set)
 			{
-				out.println( "<h2>"+langUtil.getTextMessage("SRV_TraceDirDone", traceDirectory)+"</h2>");
+                out.println("<h2>" + langUtil.getTextMessage("SRV_TraceDirDone",
+                        escapeHTML(traceDirectory)) + "</h2>");
 				out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
 			}
 			else
@@ -406,7 +409,7 @@ public class NetServlet extends HttpServlet {
 				out.println( "<h4>" + getHtmlLabelledMessageInstance(langUtil,
 					"SRV_TraceDir", "tracedir") + "</h4>");
 				out.println( "<INPUT type=text name=tracedirectory size=60 maxlength=256 " +
-					"id='tracedir' value='"+tracingDirectory+"'>");
+                    "id='tracedir' value='"+escapeHTML(tracingDirectory)+"'>");
 				out.println( "<h4> </h4>");
 				out.println( "<INPUT type=submit name=doaction value='"+traceDirMessage+ "'>" );
 				out.println( "<INPUT type=submit name=form value='"+returnMessage+ "'>" );
@@ -467,9 +470,7 @@ public class NetServlet extends HttpServlet {
 		else
 		{
 			System.out.println("Internal Error: Unknown form, "+ form);
-			out.println("Internal Error: Unknown form, "+ form);
-
-
+            out.println("Internal Error: Unknown form");
 		}
 
         out.println( "</body>" ); 	
@@ -613,7 +614,9 @@ public class NetServlet extends HttpServlet {
          )
 	{
 		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
-		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", e.getMessage()) + "</h4>" );
+        out.println( "<h4>" +
+                localUtil.getTextMessage(
+                    "SRV_Message", escapeHTML(e.getMessage())) + "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
 		out.println( "</body>" );
 		out.println( "</html>" );
@@ -635,7 +638,10 @@ public class NetServlet extends HttpServlet {
          )
 	{
 		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
-		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", msg) + "</h4>" );
+        out.println(
+                "<h4>" +
+                localUtil.getTextMessage("SRV_Message", escapeHTML(msg)) +
+                "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
 		out.println( "</body>" ); 	
 		out.println( "</html>" ); 
@@ -1086,8 +1092,8 @@ public class NetServlet extends HttpServlet {
 
 		// Worst (and extremely unlikely) case is every 
 		// character is a single quote, which means the
-		// escaped string would need to be 4 times as long.
-		char [] result = new char[4*cA.length];
+        // escaped string would need to be 5 times as long.
+        char [] result = new char[5*cA.length];
 
 		int j = 0;
 		for (int i = 0; i < cA.length; i++) {
@@ -1097,6 +1103,7 @@ public class NetServlet extends HttpServlet {
 				result[j++] = '#';
 				result[j++] = '3';
 				result[j++] = '9';
+				result[j++] = ';';
 			}
 			else
 				result[j++] = cA[i];
@@ -1106,6 +1113,90 @@ public class NetServlet extends HttpServlet {
 		return new String(result, 0, j);
 
 	}
+
+    /**
+     * Escapes potentially dangerous characters in data written to the browser.
+     * <p>
+     * <em>NOTE</em>: This is a poor mans implementation - it doesn't protect
+     * against all kinds of attacks, and it cannot be used in all contexts.
+     *
+     * @param str the string to escape
+     * @return A sanitized string.
+     */
+    private String escapeHTML(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+        // Replaced characters: ; \ / < > " ' = &
+        char[] cA = str.toCharArray();
+        char[] result = new char[5 * cA.length];
+        int j = 0;
+        for (int i=0; i < cA.length; i++) {
+            boolean escaped = true; // controls addition of ;
+            char c = cA[i];
+            switch (c) {
+                case ';':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '5';
+                    result[j++] = '9';
+                    break;
+                case '\\':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '9';
+                    result[j++] = '2';
+                    break;
+                case '/':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '4';
+                    result[j++] = '7';
+                    break;
+                case '<':
+                    result[j++] = '&';
+                    result[j++] = 'l';
+                    result[j++] = 't';
+                    break;
+                case '>':
+                    result[j++] = '&';
+                    result[j++] = 'g';
+                    result[j++] = 't';
+                    break;
+                case '"':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '3';
+                    result[j++] = '4';
+                    break;
+                case '\'':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '3';
+                    result[j++] = '9';
+                    break;
+                case '=':
+                    result[j++] = '&';
+                    result[j++] = '#';
+                    result[j++] = '6';
+                    result[j++] = '1';
+                    break;
+                case '&':
+                    result[j++] = '&';
+                    result[j++] = 'a';
+                    result[j++] = 'm';
+                    result[j++] = 'p';
+                    break;
+                default:
+                    result[j++] = c;
+                    escaped = false;
+            }
+            if (escaped) {
+                result[j++] = ';';
+            }
+        }
+        return String.copyValueOf(result, 0, j);
+    }
 
 	private static boolean isServerStarted(NetworkServerControl server, int ntries)
 	{
