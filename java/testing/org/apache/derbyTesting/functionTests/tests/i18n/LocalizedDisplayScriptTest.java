@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
+import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -44,7 +45,10 @@ import junit.framework.TestSuite;
 public final class LocalizedDisplayScriptTest extends ScriptTestCase {
 
     private static TimeZone defaultTimeZone;
-    
+
+    /** The character encoding used in the script. */
+    private static final String ENCODING = "EUC_JP";
+
     /**
      * Run LocalizedDisplay.sql 
      * <code>
@@ -70,6 +74,16 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         // (See DERBY-470).
         if (JDBC.vmSupportsJSR169())
             return suite;
+
+        // DERBY-5678: This test uses EUC_JP encoding. Implementations of the
+        // Java platform are not required to support that encoding. Skip the
+        // test if the encoding is not supported.
+        if (!Charset.isSupported(ENCODING)) {
+            println("Skip LocalizedDisplayScriptTest because the encoding " +
+                    ENCODING + " is not supported");
+            return suite;
+        }
+
         TestSuite localizedEmbeddedTests = new TestSuite("LocalizedDisplay:embedded");
         localizedEmbeddedTests.addTest(getSuite());
         Test embeddedrun = TestConfiguration.singleUseDatabaseDecorator(localizedEmbeddedTests);
@@ -96,7 +110,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * A single JUnit test that runs a single Localized script.
      */
     private LocalizedDisplayScriptTest(String localizedTest){
-        super(localizedTest, "EUC_JP");
+        super(localizedTest, ENCODING);
     }
 
     /**
@@ -109,7 +123,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         TestSuite suite = new TestSuite("localized Display");
         Properties uiProps = new Properties();
         uiProps.put("derby.ui.locale","es_AR");
-        uiProps.put("derby.ui.codeset","EUC_JP");
+        uiProps.put("derby.ui.codeset", ENCODING);
         suite.addTest(new SystemPropertyTestSetup(
                 new LocalizedDisplayScriptTest("LocalizedDisplay"), uiProps));
         return getIJConfig(suite);
