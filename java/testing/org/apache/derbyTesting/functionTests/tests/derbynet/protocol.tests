@@ -1164,11 +1164,11 @@ endDss
 createDssObject 
 writeScalarString TYPDEFNAM "QTDSQLJVM"
 startDdm TYPDEFOVR
-writeScalar2Bytes  CCSIDMBC 1280		//MacGreek
+writeScalar2Bytes  CCSIDMBC 1200    // UnicodeBigUnmarked aka "UTF-16BE"
 endDdm
 startDdm SQLSTT
 writeByte 0	// null indicator
-writeEncodedLDString "create table macgreek (a int)" "MacGreek" 4
+writeEncodedLDString "create table utf16be (a int)" "UTF-16BE" 4
 writeByte 255 // null indicator
 endDdm
 endDss "0x40"
@@ -1196,7 +1196,7 @@ endDss
 createDssObject 
 startDdm SQLSTT
 writeByte 0	// null indicator
-writeEncodedLDString "drop table macgreek" "UTF-8" 4
+writeEncodedLDString "drop table utf16be" "UTF-8" 4
 writeByte 255 // null indicator
 endDdm
 endDss "0x40"
@@ -1230,7 +1230,7 @@ startDdm TYPDEFOVR
 endDdm
 startDdm SQLSTT
 writeByte 0	// null indicator
-writeEncodedLDString "create table macgreek (a int)" "MacGreek" 4
+writeEncodedLDString "create table utf16be (a int)" "UTF-16BE" 4
 writeByte 255 // null indicator
 endDdm
 endDss "0x40"
@@ -3557,7 +3557,7 @@ skipDss		// don't care about the ACCSECRD so just skip
 createDssRequest
 startDdm  SECCHK
 writeScalar2Bytes SECMEC 4 // userid password
-// %UTF8TestString% will be replaced on runtime by ProtocolTest.java/getString() and TestProto.java
+// %UTF8TestString% will be replaced on runtime by ProtocolTest.java/getString()
 writeScalarString RDBNAM "%UTF8TestString%;create=true" 
 writeScalarString USRID test
 endDdm
