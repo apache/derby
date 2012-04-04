@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -45,6 +46,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 /**
  * This test is part of the "largedata" suite because this test tests data for
@@ -132,6 +134,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     static Test baseSuite(final int biggestSize, final int bigSize) {
+    	//Run the suite with following properties in case we run into lock
+    	// time out issues. It will help debug the problem if timeouts occur.
+        Properties sysprops = new Properties();
+        sysprops.setProperty("derby.locks.deadlockTrace", "true");
+        sysprops.setProperty("derby.locks.monitor", "true");
         // Some of the test cases depend on certain other test cases to run
         // first, so force the test cases to run in lexicographical order.
         Test suite = new CleanDatabaseTestSetup(
@@ -141,6 +148,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 setupTables(s, biggestSize, bigSize);
             }
         };
+        suite = new SystemPropertyTestSetup(suite,sysprops);
 
         return new SupportFilesSetup(suite);
     }
