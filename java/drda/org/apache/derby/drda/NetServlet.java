@@ -130,7 +130,8 @@ public class NetServlet extends HttpServlet {
 		Get the form of NetServlet. Provides buttons and forms to control the
 		Network server.
 	*/
-	public void doGet (HttpServletRequest request, HttpServletResponse response)
+    public synchronized void doGet (HttpServletRequest request,
+                                    HttpServletResponse response)
 	        throws ServletException, IOException
 	{
 		String logOnMessage;
