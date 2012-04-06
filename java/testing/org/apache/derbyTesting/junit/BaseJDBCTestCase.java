@@ -155,6 +155,22 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Close a statement and remove it from the list of statements to close
+     * at tearDown(). Useful for test cases that create a large number of
+     * statements that are only used for a short time, as the memory footprint
+     * may become big if all the statements are held until tearDown().
+     *
+     * @param s the statement to close and forget
+     * @throws SQLException if closing the statement fails
+     */
+    public void closeStatement(Statement s) throws SQLException {
+        s.close();
+        if (statements != null) {
+            statements.remove(s);
+        }
+    }
+
+    /**
      * Utility method to create a Statement using the connection
      * returned by getConnection.
      * The returned statement object will be closed automatically
@@ -639,8 +655,13 @@ public abstract class BaseJDBCTestCase
         ResultSet rs = ps.executeQuery();
         
         rs.next();
-        
-        return rs.getString(1);
+
+        String val = rs.getString(1);
+
+        rs.close();
+        closeStatement(ps);
+
+        return val;
     }
 
     /**
