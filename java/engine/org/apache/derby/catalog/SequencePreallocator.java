@@ -25,15 +25,15 @@ import java.sql.SQLException;
 
 /**
  * <p>
- * Logic to determine how many values to pre-allocate for an identity column or sequence.
- * By default, Derby boosts concurrency by pre-allocating ranges of numbers for identity columns and sequences.
+ * Logic to determine how many values to pre-allocate for a sequence.
+ * By default, Derby boosts concurrency by pre-allocating ranges of numbers for sequences.
  * During orderly database shutdown, the unused numbers are reclaimed so that shutdown will
  * not create holes in the sequences.  However, holes may appear if the application fails to shut
  * down its databases before the JVM exits.
  * </p>
  *
  * <p>
- * Logic in this class is called every time Derby needs to pre-allocate a new range of identity/sequence
+ * Logic in this class is called every time Derby needs to pre-allocate a new range of sequence
  * values. Users can override Derby's default behavior by writing their own implementation of this
  * interface and then setting the following Derby property:
  * </p>
@@ -44,8 +44,7 @@ import java.sql.SQLException;
  *
  * <p>
  * Classes which implement this interface must also provide a public 0-arg constructor so
- * that Derby can instantiate them. Derby will instantiate a SequencePreallocator for each identity
- * column and sequence.
+ * that Derby can instantiate them. Derby will instantiate a SequencePreallocator for every sequence.
  * </p>
  *
  */
@@ -54,12 +53,12 @@ public  interface   SequencePreallocator
     /**
      * <p>
      * This method returns the size of the next pre-allocated range for the specified
-     * identity column or sequence. Names are case-sensitive, as specified in CREATE SEQUENCE
+     * sequence. Names are case-sensitive, as specified in CREATE SEQUENCE
      * and CREATE TABLE statements.
      * </p>
      *
-     * @param schemaName Name of schema holding the sequence or identity-laden table.
-     * @param sequenceName Specific name of the sequence or identity-laden table.
+     * @param schemaName Name of schema holding the sequence.
+     * @param sequenceName Specific name of the sequence.
      */
     public  int nextRangeSize
         (
