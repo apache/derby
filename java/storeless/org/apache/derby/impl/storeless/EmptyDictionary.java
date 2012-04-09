@@ -737,7 +737,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
     public void getCurrentValueAndAdvance
-        ( int catalogNumber, String uuidString, NumberDataValue returnValue )
+        ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException
     {
 		// Auto-generated method stub
@@ -746,6 +746,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
 			TableDescriptor td) throws StandardException {
 		// Auto-generated method stub
+		return null;
+	}
+
+	public NumberDataValue getSetAutoincrementValue(RowLocation rl,
+			TransactionController tc, boolean doUpdate,
+			NumberDataValue newValue, boolean wait) throws StandardException {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

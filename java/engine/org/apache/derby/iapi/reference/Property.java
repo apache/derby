@@ -627,15 +627,6 @@ public interface Property {
 	int		LANG_SEQGEN_CACHE_SIZE_DEFAULT =32;
 
 	/**
-	 * The size of the identity generator cache 
-	 * used by the data dictionary.  Database.  Static.
-	 * <p>
-	 * Externally visible.
-	 */
-	String	LANG_IDGEN_CACHE_SIZE = "derby.language.identityGeneratorCacheSize";
-	int		LANG_IDGEN_CACHE_SIZE_DEFAULT =32;
-
-	/**
 	 * Name of the implementation of SequencePreallocator which is used
      * to tune how many values Derby pre-allocates for identity columns
      * and sequences. Database.  Static.

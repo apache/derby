@@ -26,7 +26,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.TypeId;
@@ -84,9 +83,17 @@ public class CreateSequenceNode extends DDLStatementNode
 
         _stepValue = (stepValue != null ? (Long) stepValue : new Long(1));
 
-        Long[]  minMax = SequenceDescriptor.computeMinMax( _dataType, minValue, maxValue );
-        _minValue = minMax[ SequenceDescriptor.MIN_VALUE ];
-        _maxValue = minMax[ SequenceDescriptor.MAX_VALUE ];
+        if (_dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
+            _minValue = (minValue != null ? (Long) minValue : new Long(Short.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Short.MAX_VALUE));
+        } else if (_dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
+            _minValue = (minValue != null ? (Long) minValue : new Long(Integer.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Integer.MAX_VALUE));
+        } else {
+            // Could only be BIGINT
+            _minValue = (minValue != null ? (Long) minValue : new Long(Long.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Long.MAX_VALUE));
+        }
 
         if (initialValue != null) {
             _initialValue = (Long) initialValue;

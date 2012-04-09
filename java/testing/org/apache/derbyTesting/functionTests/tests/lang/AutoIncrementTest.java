@@ -33,13 +33,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 public class AutoIncrementTest extends BaseJDBCTestCase {
-
-    private static  final   String  SEQUENCE_OVERFLOW = "2200H";
-    private static  final   String  IMPORT_FILE_NAME = "t_4437_2.dat";
-    
 	public AutoIncrementTest(String name)
 	{
 		super (name);
@@ -226,7 +221,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		String[][]expectedRows=new String[][]{{"0","0"},{"1","2"},{"2","4"},{"33","6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'AIS'");
-		expectedRows=new String[][]{{"AIS","40","0","2"}};
+		expectedRows=new String[][]{{"AIS","8","0","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -383,7 +378,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1'");
-		expectedRows=new String[][]{{"TAB1","21","1","1"}};
+		expectedRows=new String[][]{{"TAB1","4","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("create table tab2 (lvl int, s1  bigint generated always as identity)");
 		s.executeUpdate("create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3");
@@ -495,7 +490,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into lockt1 (x) values (3)");
 		rs=s.executeQuery("select * from lock_table order by tabname, type desc, mode, cnt");
-		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","IX","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","2  ","X","SYSCOLUMNS  ","GRANT","ACTIVE"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		commit();
 		
@@ -601,10 +596,10 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		ResultSet rs;
 		Statement pst=createStatement();
 		Statement s=createStatement();
-		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
-		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over1 (x) values (1)");		
+		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
+		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1)");		
 		s.executeUpdate("insert into ai_over2 (x) values (1),(2),(3),(4),(5),(6),(7),(8)");
-		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over2 (x) values (9),(10)");
+		assertStatementError("22003", pst,"insert into ai_over2 (x) values (9),(10)");
 		String[][]expectedRows=new String[][]{{"1","-32760"},{"2","-32761"},{"3","-32762"},{"4","-32763"},{"5","-32764"},{"6","-32765"},{"7","-32766"},{"8","-32767"}};
 		rs=s.executeQuery("select * from ai_over2");
 		JDBC.assertFullResultSet(rs,expectedRows);		
@@ -613,12 +608,12 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("select * from ai_over3");
 		expectedRows=new String[][]{{"1","2147483646"},{"2","2147483647"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over3 (x) select x from ai_over3");			
+		assertStatementError("22003", pst,"insert into ai_over3 (x) select x from ai_over3");			
 		//bigint overflow check		
-		s.executeUpdate("insert into ai_over4 (x) values (1),(2),(3)");
-		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over4 (x) values (4)");
+		s.executeUpdate("insert into ai_over4 (x) values (1),(2)");
+		assertStatementError("22003", pst,"insert into ai_over4 (x) values (3)");
 		rs=s.executeQuery("select * from ai_over4");
-		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"},{"3","9223372036854775807"}};
+		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -944,7 +939,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"2","2"},{"2","9999"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'REC11'");
-		expectedRows=new String[][]{{"REC11","42","2","2"}};
+		expectedRows=new String[][]{{"REC11","4","2","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42837",s,"alter table restartt1 alter column c12 RESTART WITH 2");
 		assertStatementError("42X49",s,"alter table restartt1 alter column rec11 RESTART WITH 2.20");
@@ -979,7 +974,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("23505",s,"insert into t1lock(c12) values(3)");
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'LOCKC11'");
 		//Utilities.showResultSet(rs);
-		expectedRows=new String[][]{{"LOCKC11","21","1","1"}};
+		expectedRows=new String[][]{{"LOCKC11","2","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 		rs=s.executeQuery("select * from t1lock");
@@ -1086,227 +1081,9 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42XA7",s,"alter table d4006 alter column y default null");
 
 	}
-
-    /**
-     * <p>
-     * Test that alter table interacts well with the sequence-generator-based identity generators.
-     * </p>
-     */
-    public  void    test_4437_01_alterTable()   throws Exception
-    {
-		Statement s = createStatement();
-        String[][] expectedResults;
-        
-		s.execute("create table t_4437_1( a int, b int generated always as identity )");
-		s.execute("insert into t_4437_1( a ) values (100), (101), (102), (103), (104), (105)");
-        expectedResults = new String[][]
-        {
-            { "100",        "1", },
-            { "101",        "2", },
-            { "102",        "3", },
-            { "103",        "4", },
-            { "104",        "5", },
-            { "105",        "6", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_1 order by a" ), expectedResults );
-
-		s.execute("alter table t_4437_1 alter column b restart with 22");
-		s.execute("insert into t_4437_1( a ) values (110), (111), (112), (113), (114), (115)");
-        expectedResults = addResults
-            (
-             expectedResults,
-             new String[][]
-             {
-                 { "110",        "22", },
-                 { "111",        "23", },
-                 { "112",        "24", },
-                 { "113",        "25", },
-                 { "114",        "26", },
-                 { "115",        "27", },
-             }
-             );
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_1 order by a" ), expectedResults );
-
-		s.execute("alter table t_4437_1 alter column b set increment by 3");
-		s.execute("insert into t_4437_1( a ) values (120), (121), (122), (123), (124)");
-        expectedResults = addResults
-            (
-             expectedResults,
-             new String[][]
-             {
-                 { "120",        "30", },
-                 { "121",        "33", },
-                 { "122",        "36", },
-                 { "123",        "39", },
-                 { "124",        "42", },
-             }
-             );
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_1 order by a" ), expectedResults );
-
-		s.execute("alter table t_4437_1 alter column b set increment by 4");
-		s.execute("insert into t_4437_1( a ) values (130), (131), (132), (133), (134), (135)");
-        expectedResults = addResults
-            (
-             expectedResults,
-             new String[][]
-             {
-                 { "130",        "46", },
-                 { "131",        "50", },
-                 { "132",        "54", },
-                 { "133",        "58", },
-                 { "134",        "62", },
-                 { "135",        "66", },
-             }
-             );
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_1 order by a" ), expectedResults );
-
-        s.execute( "drop table t_4437_1" );
-    }
-    private String[][]  addResults( String[][] original, String[][] extras )
-    {
-        int originalLength = original.length;
-        int extrasLength = extras.length;
-        String[][]  result = new String[ originalLength + extrasLength ][];
-
-        int idx = 0;
-        for ( int i = 0; i < originalLength; i++ ) { result[ idx++ ] = original[ i ]; }
-        for ( int i = 0; i < extrasLength; i++ ) { result[ idx++ ] = extras[ i ]; }
-
-        return result;
-    }
 	
-    /**
-     * <p>
-     * Test that bulk import interacts well with the sequence-generator-based identity generators.
-     * </p>
-     */
-    public  void    test_4437_02_bulkImport()   throws Exception
-    {
-		Statement s = createStatement();
-        String[][] expectedResults;
-
-		s.execute( "create table t_4437_2( a int, b int generated always as identity (start with -10, increment by -3) )" );
-		s.execute( "insert into t_4437_2( a ) values (110), (111), (112), (113), (114), (115)" );
-        expectedResults = new String[][]
-        {
-            { "110",        "-10", },
-            { "111",        "-13", },
-            { "112",        "-16", },
-            { "113",        "-19", },
-            { "114",        "-22", },
-            { "115",        "-25", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_2 order by a" ), expectedResults );
-
-        // import running in replace mode resets the sequence counter
-		s.execute( "call syscs_util.syscs_import_data( null, 'T_4437_2', 'A', null, 'extin/" + IMPORT_FILE_NAME + "', null, null, null, 1 )" );
-        expectedResults = new String[][]
-        {
-            { "100",        "-10", },
-            { "101",        "-13", },
-            { "102",        "-16", },
-            { "103",        "-19", },
-            { "104",        "-22", },
-            { "105",        "-25", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_2 order by a" ), expectedResults );
-
-        // truncate does not reset the counter
-		s.execute( "truncate table t_4437_2" );
-		s.execute( "insert into t_4437_2( a ) values (110), (111), (112), (113), (114), (115)" );
-        expectedResults = new String[][]
-        {
-            { "110",        "-28", },
-            { "111",        "-31", },
-            { "112",        "-34", },
-            { "113",        "-37", },
-            { "114",        "-40", },
-            { "115",        "-43", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_2 order by a" ), expectedResults );
-
-        // delete does not reset the counter either
-		s.execute( "delete from t_4437_2" );
-		s.execute( "insert into t_4437_2( a ) values (110), (111), (112), (113), (114), (115)" );
-        expectedResults = new String[][]
-        {
-            { "110",        "-46", },
-            { "111",        "-49", },
-            { "112",        "-52", },
-            { "113",        "-55", },
-            { "114",        "-58", },
-            { "115",        "-61", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_2 order by a" ), expectedResults );
-
-        // import running in insert mode does not reset the sequence counter
-		s.execute( "call syscs_util.syscs_import_data( null, 'T_4437_2', 'A', null, 'extin/" + IMPORT_FILE_NAME + "', null, null, null, 0 )" );
-        expectedResults = new String[][]
-        {
-            { "100",        "-64", },
-            { "101",        "-67", },
-            { "102",        "-70", },
-            { "103",        "-73", },
-            { "104",        "-76", },
-            { "105",        "-79", },
-            { "110",        "-46", },
-            { "111",        "-49", },
-            { "112",        "-52", },
-            { "113",        "-55", },
-            { "114",        "-58", },
-            { "115",        "-61", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_2 order by a" ), expectedResults );
-
-        s.execute( "drop table t_4437_2" );
-    }
-        
-    /**
-     * <p>
-     * Test that deferred inserts work well with the sequence-generator-based identity generators.
-     * </p>
-     */
-    public  void    test_4437_03_deferredInsert()   throws Exception
-    {
-		Statement s = createStatement();
-        String[][] expectedResults;
-
-		s.execute( "create table t_4437_3( a int, b smallint generated always as identity (start with 9990, increment by -10) )" );
-		s.execute( "insert into t_4437_3( a ) values (100), (101), (102), (103), (104), (105)" );
-        expectedResults = new String[][]
-        {
-            { "100",        "9990", },
-            { "101",        "9980", },
-            { "102",        "9970", },
-            { "103",        "9960", },
-            { "104",        "9950", },
-            { "105",        "9940", },
-        };
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_3 order by a" ), expectedResults );
-
-        // deferred inserts should continue the sequence where it left off
-		s.execute( "insert into t_4437_3( a ) select a + 10 from ( select a from t_4437_3 order by a ) s" );
-        expectedResults = addResults
-            (
-             expectedResults,
-             new String[][]
-             {
-                 { "110",        "9930", },
-                 { "111",        "9920", },
-                 { "112",        "9910", },
-                 { "113",        "9900", },
-                 { "114",        "9890", },
-                 { "115",        "9880", },
-             }
-             );
-		JDBC.assertFullResultSet( s.executeQuery( "select * from t_4437_3 order by a" ), expectedResults );
-
-        s.execute( "drop table t_4437_3" );
-    }
-
-	public static Test suite()
-    {
-		Test    cleanDatabaseSuite = new CleanDatabaseTestSetup(
+	public static Test suite() {
+		return new CleanDatabaseTestSetup(
 				new TestSuite(AutoIncrementTest.class, "AutoIncrementTest")) {
 			protected void decorateSQL(Statement s)
 			throws SQLException
@@ -1314,16 +1091,5 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 				createSchemaObjects(s);
 			}
 		};
-        
-        //
-        // Copies the data file to a location which can be read.
-        //
-        Test        result = new SupportFilesSetup
-            (
-             cleanDatabaseSuite,
-             new String [] { "functionTests/tests/lang/" + IMPORT_FILE_NAME }
-             );
-
-        return result;
 	}
 }

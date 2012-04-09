@@ -555,69 +555,9 @@ public abstract class SequenceUpdater implements Cacheable
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // NESTED CLASSES
+    // INNER CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <p>
-     * Specific implementation of SequenceUpdater for the sequences managed by
-     * SYSCOLUMNS.
-     * </p>
-     */
-    public static final class SyscolumnsUpdater extends SequenceUpdater
-    {
-        private RowLocation _sequenceRowLocation;
-
-        public SyscolumnsUpdater() { super(); }
-        public SyscolumnsUpdater( DataDictionaryImpl dd ) { super( dd ); }
-    
-        //
-        // SequenceUpdater BEHAVIOR
-        //
-
-        protected SequenceGenerator createSequenceGenerator( TransactionController readOnlyTC )
-            throws StandardException
-        {
-            RowLocation[] rowLocation = new RowLocation[ 1 ];
-            SequenceDescriptor[] sequenceDescriptor = new SequenceDescriptor[ 1 ];
-            
-            _dd.computeIdentityRowLocation( readOnlyTC, _uuidString, rowLocation, sequenceDescriptor );
-            
-            _sequenceRowLocation = rowLocation[ 0 ];
-            
-            SequenceDescriptor isd = sequenceDescriptor[ 0 ];
-            
-            return new SequenceGenerator
-                (
-                 isd.getCurrentValue(),
-                 isd.canCycle(),
-                 isd.getIncrement(),
-                 isd.getMaximumValue(),
-                 isd.getMinimumValue(),
-                 isd.getStartValue(),
-                 isd.getSchemaDescriptor().getSchemaName(),
-                 isd.getSequenceName(),
-                 makePreallocator( readOnlyTC )
-                 );
-        }
-
-        protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
-        {
-            return _dd.updateCurrentIdentityValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
-        }
-
-        /**
-         * Wrap the "too much contention" exception in a "lock timeout" exception in
-         * order to preserve the old error behavior of identity columns. See DERBY-5426.
-         */
-        protected   StandardException   tooMuchContentionException()
-        {
-            StandardException   tooMuchContention = super.tooMuchContentionException();
-
-            return StandardException.newException( SQLState.LOCK_TIMEOUT, tooMuchContention );
-        }
-    }
 
     /**
      * <p>

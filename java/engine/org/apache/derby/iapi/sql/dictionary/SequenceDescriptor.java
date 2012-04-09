@@ -32,7 +32,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
@@ -45,9 +44,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 public class SequenceDescriptor extends TupleDescriptor
         implements Provider, Dependent, PrivilegedSQLObject
 {
-    // indexes into array of computed min/max values
-    public  static  final   int MIN_VALUE = 0;
-    public  static  final   int MAX_VALUE = MIN_VALUE + 1;
 
     private UUID sequenceUUID;
     private String sequenceName;
@@ -91,35 +87,6 @@ public class SequenceDescriptor extends TupleDescriptor
         this.maximumValue = maximumValue;
         this.increment = increment;
         this.canCycle = canCycle;
-    }
-
-    /**
-     * Compute the minimum and maximum values for a sequence range.
-     * Returns an array of two Longs. The first Long is the minimum value,
-     * The second is the maximum value.
-     */
-    public  static  Long[]  computeMinMax
-        (
-         DataTypeDescriptor dataType,
-         Object minValue,
-         Object maxValue
-         )
-    {
-        Long[]  retval = new Long[ 2 ];
-
-        if (dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
-            retval[ MIN_VALUE ] = (minValue != null ? (Long) minValue : new Long(Short.MIN_VALUE));
-            retval[ MAX_VALUE ] = (maxValue != null ? (Long) maxValue : new Long(Short.MAX_VALUE));
-        } else if (dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
-            retval[ MIN_VALUE ]  = (minValue != null ? (Long) minValue : new Long(Integer.MIN_VALUE));
-            retval[ MAX_VALUE ]  = (maxValue != null ? (Long) maxValue : new Long(Integer.MAX_VALUE));
-        } else {
-            // Could only be BIGINT
-            retval[ MIN_VALUE ]  = (minValue != null ? (Long) minValue : new Long(Long.MIN_VALUE));
-            retval[ MAX_VALUE ]  = (maxValue != null ? (Long) maxValue : new Long(Long.MAX_VALUE));
-        }
-
-        return retval;
     }
 
    /**
