@@ -24,7 +24,6 @@ package org.apache.derbyTesting.system.nstest.utils;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -198,9 +197,14 @@ public class DbUtil {
 			} catch (SQLException sqe) {
 				if (sqe.getSQLState().equalsIgnoreCase("40XL1")) {
 					System.out
-					.println("LOCK TIMEOUT obatained during insert - add_one_row() "
+					.println("LOCK TIMEOUT obtained during insert - add_one_row() "
 							+ sqe.getSQLState());
-					
+				}
+				else if (sqe.getSQLState().equalsIgnoreCase("23505")) {
+				    System.out
+				    .println("prevented duplicate row - add_one_row(): "
+				            + sqe.getSQLState() + "; " + sqe.getMessage());
+
 				} else {
 					throw sqe;
 				}
@@ -449,61 +453,20 @@ public class DbUtil {
 	// - should be less than the current value of the max(serialkey)
 	//
 	public long pick_one(Connection conn, String thread_id) throws Exception {
-		
-		PreparedStatement ps = null;
-		// ResultSet rs = null;
-		
+				
 		Random rand = new Random();
 		
-		try {
-			
-			ps = conn
-			.prepareStatement("select max(serialkey) from nstesttab where serialkey > ?");
-		} catch (Exception e) {
-			System.out
-			.println("Unexpected error creating the select prepared statement in pick_one()");
-			printException("failure to prepare select stmt in pick_one()", e);
-			return (0);
-		}
-		
-		long minVal = NsTest.NUM_UNTOUCHED_ROWS + 1;
-		// long maxVal = nstest.MAX_INITIAL_ROWS * nstest.INIT_THREADS; //the
-		// max we start with
+		long minVal = NsTest.NUM_UNTOUCHED_ROWS + 1;//the max we start with
 		long maxVal = NsTest.numInserts;// this is an almost accurate count of
-		// the max serialkey
-		// since it keeps a count of the num of inserts made so far
+		// the max serialkey since it keeps a count of the num of inserts made
+		// so far
 		
 		// Now choose a random value between minVal and maxVal. We use this
-		// value even if
-		// the row does not exist (i.e. in a situation where some other thread
-		// has deleted this row).
+		// value even if the row does not exist (i.e. in a situation where some
+		// other thread has deleted this row).
 		// The test should just complain and exit with a row not found exception
-		long rowToReturn = (minVal + 1)
-		+ (Math.abs(rand.nextLong()) % (maxVal - minVal));
-		try {
-			ps.setLong(1, rowToReturn);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				if (rs.getLong(1) > 0) {
-					rowToReturn = rs.getLong(1);
-					//System.out
-					//.println(getThreadName()
-					//		+ " dbutil.pick_one() -> Obtained row from the table "
-					//		+ rowToReturn);
-				} else {
-					System.out
-					.println(getThreadName()
-							+ " dbutil.pick_one() -> Returning random serialkey of "
-							+ rowToReturn);
-				}
-			}
-		} catch (SQLException sqe) {
-			System.out.println(sqe + " while selecting a random row");
-			sqe.printStackTrace();
-		}
-		
-	
-		
+		// now get a value between the original max, and the current max 
+		long rowToReturn = minVal + (long)(rand.nextDouble() * (maxVal - minVal));
 		return rowToReturn;
 		
 	}//of method pick_one(...)
