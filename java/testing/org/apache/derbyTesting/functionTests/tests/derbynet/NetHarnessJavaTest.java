@@ -80,15 +80,9 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
         //            for security mechanism exist in NSSecurityMechanismTest,
         //            that test does not currently check the correct order of
         //            responses of secmec and secchkcd for various error cases,
-        //            which is tested in testProtocol.
-        //            
-        //suite.addTest(TestConfiguration.clientServerDecorator(
-        //		         SecurityManagerSetup.noSecurityManager(
-        //		             decorate(new NetHarnessJavaTest("testProtocol")))));
-
+        //            which is tested in ProtocolTest.
         return new SupportFilesSetup(suite,
         	           new String[] {
-	                       "functionTests/tests/derbynet/protocol.tests",
 	                       "functionTests/tests/derbynet/excsat_accsecrd1.inc",
 	                       "functionTests/tests/derbynet/excsat_accsecrd2.inc",
 	                       "functionTests/tests/derbynet/excsat_secchk.inc",

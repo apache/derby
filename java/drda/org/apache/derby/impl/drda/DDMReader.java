@@ -98,7 +98,6 @@ class DDMReader
 	private final static boolean ADJUST_LENGTHS = true;
 	private final static boolean NO_ADJUST_LENGTHS = false;
 	private final static long MAX_EXTDTA_SIZE= Long.MAX_VALUE;
-	private static boolean internalTrace = true;
     
 
 	// magnitude represented in an int array, used in BigDecimal conversion
@@ -174,7 +173,7 @@ class DDMReader
 	}
 	/**
 	 * This constructor is used for testing the protocol
-	 * It is used by TestProto to read the protocol returned by the
+    * It is used by ProtocolTestAdapter to read the protocol returned by the
 	 * server 
 	 */
 	DDMReader(InputStream inputStream)
@@ -182,17 +181,6 @@ class DDMReader
 		buffer = new byte[DEFAULT_BUFFER_SIZE];
 		ddmCollectionLenStack = new long[MAX_MARKS_NESTING];
 		
-		this.inputStream = inputStream;
-		initialize(null, null);
-		// turn off tracing
-		internalTrace = false;
-	}
-	/**
-	 * This initializer is used for testing the protocol
-	 * It is used by TestProto for the reader it uses
-	 */
-	protected void initialize(InputStream inputStream)
-	{
 		this.inputStream = inputStream;
 		initialize(null, null);
 	}

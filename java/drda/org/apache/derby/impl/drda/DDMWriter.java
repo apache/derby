@@ -231,7 +231,7 @@ class DDMWriter
 	/**
 	 * Create DSS request object
 	 * NOTE: This is _ONLY_ used for testing the protocol
-	 * (via the TestProto.java file in this package)!
+    * (via the ProtocolTestAdapter.java file in this package)!
 	 * We should never create a DSS request in normal
 	 * DRDA processing (we should only create DSS replies
 	 * and DSS objects).
@@ -297,7 +297,7 @@ class DDMWriter
 	 * (which is set in beginDss) with the chaining byte that
 	 * is passed in.  NOTE: This method is only used in
 	 * association with createDssRequest, and thus is for
-	 * TESTING purposes only (via TestProto.java).  No calls
+    * TESTING purposes only (via ProtocolTestAdpater.java).  No calls
 	 * should be made to this method in normal DRDA processing
 	 * (because for normal processing, chaining must be
 	 * determined automatically based on DSS requests).
