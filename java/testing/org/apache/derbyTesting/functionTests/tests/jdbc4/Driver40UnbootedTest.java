@@ -156,7 +156,7 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
         SpawnedProcess spawned = new SpawnedProcess( process, "UnbootedTest" );
         
         // Ensure it completes without failures.
-        assertEquals(0, spawned.complete(false));
+        assertEquals(0, spawned.complete());
 
         assertEquals( SUCCESS, spawned.getFullServerOutput() );
     }
