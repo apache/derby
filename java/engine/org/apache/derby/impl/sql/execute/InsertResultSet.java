@@ -786,7 +786,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 											 cd.getColumnName());
 			aiCache[columnPosition - 1].setValue(ret);
 		}	
-
 		else
 		{
 			NumberDataValue newValue;
@@ -797,7 +796,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				nestedTC = tc.startNestedUserTransaction(false);
 				tcToUse = nestedTC;
 			}
-
 			catch (StandardException se)
 			{
 				// If I cannot start a Nested User Transaction use the parent
@@ -815,7 +813,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						   constants.autoincRowLocation[index],
 						   tcToUse, true, aiCache[index], (tcToUse == tc));
 			}
-
 			catch (StandardException se)
 			{
 				if (tcToUse == tc)
@@ -851,9 +848,21 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				// no matter what, commit the nested transaction; if something
 				// bad happened in the child xaction lets not abort the parent
 				// here.
+                
 				if (nestedTC != null)
 				{
-					nestedTC.commit();
+                    // DERBY-5493 - prior to fix all nested user update 
+                    // transactions did a nosync commit when commit() was 
+                    // called, this default has been changed to do synced 
+                    // commit.  Changed this commit to be commitNoSync to
+                    // not introduce performce degredation for autoincrement
+                    // keys.  As before, if server crashes the changes 
+                    // made in the nested transaction may be lost.  If any
+                    // subsequent user transaction is commited, including any
+                    // inserts that would depend on the autoincrement value
+                    // change then the nested tranaction is guaranteed on
+                    // system crash.
+					nestedTC.commitNoSync(TransactionController.RELEASE_LOCKS);
 					nestedTC.destroy();
 				}
 			}

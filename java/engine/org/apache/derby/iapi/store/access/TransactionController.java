@@ -719,6 +719,33 @@ public interface TransactionController
      * Once the first write of a non-readOnly nested transaction is done,
      * then the nested user transaction must be committed or aborted before
      * any write operation is attempted in the parent transaction.  
+     * (p>
+     * fix for DERBY-5493 introduced a behavior change for commits executed
+     * against an updatable nested user transaction.  Prior to this change
+     * commits would execute a "lazy" commit where commit log record would only
+     * be written to the stream, not guaranteed to disk.  After this change
+     * commits on these transactions will always be forced to disk.  To get
+     * the previous behavior one must call commitNoSync() instead.
+     * <p>
+     * examples of current usage of nested updatable transactions in Derby
+     * include:
+     * o recompile and saving of stored prepared statements, changed with
+     *   DERBY-5493 to do synchronous commit.  Code in SPSDescriptor.java.
+     * o sequence updater reserves new "range" of values in sequence 
+     *   catalog, changed with DERBY-5493 to do synchronous commit.  Without
+     *   this change crash of system might lose the updat of the range and
+     *   then return same value on reboot.  Code in SequenceUpdater.java
+     * o in place compress defragment phase committing units of work in
+     *   moving tuples around in heap and indexes.  changed with DERBY-5493 
+     *   to do synchronous commit. code in AlterTableConstantAction.java.
+     * o used for creation of users initial default schema in SYSSCHEMAS.
+     *   moving tuples around in heap and indexes.  changed with DERBY-5493 
+     *   to do synchronous commit. code in DDLConstantAction.java.
+     * o autoincrement/generated key case.  Kept behavior previous to 
+     *   DERBY-5493 by changing to use commitNoSync.  Changing every 
+     *   key allocation to be a synchronous commit would be a huge performance
+     *   problem for existing applications depending on current performance.
+     *   code in InsertResultSet.java
      *
      * @param readOnly  Is transaction readonly?  Only 1 non-readonly nested
      *                  transaction is allowed per transaction.

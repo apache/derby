@@ -943,12 +943,18 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	public boolean flushLogOnCommit(String contextName)
 	{
 		//
-		// if this is a user transaction, flush the log
+		// if this is a user transaction, flush the log by default.
+        // if this is a nested user update transaction, flush log by default.
 		// if this is an internal or nested top transaction, do not
 		// flush, let it age out.
+        //
+        // In all cases log will not be flushsed by Xact.prepareCommit() 
+        // if commitNoSync() has been called rather than commit.
 		//
-		return (contextName == USER_CONTEXT_ID || 
-				contextName.equals(USER_CONTEXT_ID));
+		return (contextName == USER_CONTEXT_ID               || 
+				contextName.equals(USER_CONTEXT_ID)          ||
+                contextName == NESTED_UPDATE_USER_CONTEXT_ID ||
+                contextName.equals(NESTED_UPDATE_USER_CONTEXT_ID));
 	}
 
 

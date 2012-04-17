@@ -477,6 +477,10 @@ public abstract class SequenceUpdater implements Cacheable
             }
             finally
             {
+                // DERBY-5494, if this commit does not flush log then an
+                // unorderly shutdown could lose the update.  Do not use
+                // commitNoSync(), and store needs to flush user nested update
+                // transaction commits by default.
                 nestedTransaction.commit();
                 nestedTransaction.destroy();
             }

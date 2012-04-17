@@ -680,6 +680,56 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         seq_10_upperBound = seq_10_value + ALLOCATION_COUNT;
         vetBumping( conn, TEST_DBO, "SEQ_10", seq_10_value++, seq_10_upperBound );
     }
+
+    /**
+     * <p>
+     * Verify that system crash does not rollback changes to SYSSEQUENCES.CURRENTVALUE.
+     * See DERBY-5494.
+     * </p>
+     */
+    public void test_13_5494() throws Exception
+    {
+        String  dbName = "DB_5494";
+        
+        // create a sequence and get the first value from it, then crash
+        assertLaunchedJUnitTestMethod( getClass().getName() + ".preCrashActions", dbName );
+
+        // now check that the sequence state was correctly recovered
+        assertLaunchedJUnitTestMethod( getClass().getName() + ".postCrashActions", dbName );
+    }
+    // actions to perform just before a crash
+    public void    preCrashActions()   throws Exception
+    {
+        Connection  dboConn = openUserConnection( TEST_DBO );
+        Connection  ruthConn = openUserConnection( "RUTH" );
+        int initialValue = Integer.MIN_VALUE;
+
+        goodStatement( dboConn, "create sequence s_5494\n" );
+        
+        assertNextValue( dboConn, TEST_DBO, "S_5494", initialValue );
+
+        assertEquals( (long) (initialValue + ALLOCATION_COUNT), getCurrentValue( ruthConn, TEST_DBO, "S_5494" ) );
+    }
+    // actions to perform after the crash
+    public void    postCrashActions()   throws Exception
+    {
+        int initialValue = (int) (Integer.MIN_VALUE + ALLOCATION_COUNT);
+        
+        // now verify that, after the crash, SYSSEQUENCES has still been advanced
+        Connection  dboConn = openUserConnection( TEST_DBO );
+        assertEquals( (long) initialValue, getCurrentValue( dboConn, TEST_DBO, "S_5494" ) );
+
+        assertNextValue( dboConn, TEST_DBO, "S_5494", initialValue );
+
+        goodStatement( dboConn, "drop sequence s_5494 restrict\n" );
+    }
+    private void    assertNextValue( Connection conn, String schema, String sequenceName, int expectedValue )
+        throws Exception
+    {
+        PreparedStatement ps = chattyPrepare( conn, "values( next value for " + schema + "." + sequenceName + " )\n" );
+
+        assertEquals( expectedValue, getScalarInteger( ps ) );
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -693,6 +743,26 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     {
         Connection  conn = openUserConnection( TEST_DBO );
         
+        PreparedStatement ps = chattyPrepare
+            ( conn,
+              "select currentvalue from sys.syssequences seq, sys.sysschemas s where s.schemaname = ? and seq.sequencename = ? and s.schemaid = seq.schemaid" );
+        ps.setString( 1, schemaName );
+        ps.setString( 2, sequenceName );
+
+        long retval = getScalarLong( ps );
+
+        conn.commit();
+        
+        return retval;
+    }
+
+    /** Get the current value from a sequence */
+    private long getCurrentValue(
+    Connection  conn, 
+    String      schemaName, 
+    String      sequenceName )
+        throws Exception
+    {
         PreparedStatement ps = chattyPrepare
             ( conn,
               "select currentvalue from sys.syssequences seq, sys.sysschemas s where s.schemaname = ? and seq.sequencename = ? and s.schemaid = seq.schemaid" );

@@ -1886,8 +1886,19 @@ public class GenericLanguageConnectionContext
         // method support read-write nested transactions as well
         // instead of callers using the startNestedUserTransaction
         // directly on tran.
+        if (SanityManager.DEBUG)
+        {
+            // if called for update transactions, compile would start using
+            // non-readonly xacts for compile.  For now, throw an error if
+            // someone tries to use this call to make non readonly transaction.
+            SanityManager.ASSERT(
+                readOnly, 
+                "Routine not yet coded to support non-readonly transactions.");
+        }
+
         if (readOnlyNestedTransaction == null)
             readOnlyNestedTransaction = tran.startNestedUserTransaction(readOnly);
+
         queryNestingDepth++;
     }
 
