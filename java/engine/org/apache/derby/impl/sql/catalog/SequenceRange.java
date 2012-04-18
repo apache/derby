@@ -38,10 +38,11 @@ public  class   SequenceRange   implements  SequencePreallocator
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Default number of values to pre-allocate. This is the size of the preallocation range
-     * used by other databases. See DERBY-4437.
+     * Default number of values to pre-allocate. Other databases use a preallocation size
+     * of 20 (see DERBY-4437). We boosted this to 100 in order to get better concurrency,
+     * after fixing correctness problems in pre-allocation (see DERBY-5493).
      */
-    private static final int DEFAULT_PREALLOCATION_COUNT = 20;
+    private static final int DEFAULT_PREALLOCATION_COUNT = 100;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

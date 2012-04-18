@@ -61,7 +61,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     // number of pre-allocated values in a sequence generator
-    private static final long ALLOCATION_COUNT = 20L;
+    private static final long ALLOCATION_COUNT = 100L;
     private static final int TWEAKED_ALLOCATION_COUNT = 7;
 
     private static  final   String      TEST_DBO = "TEST_DBO";
@@ -217,13 +217,20 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
          )
         throws Exception
     {
-        long biggestStep = 2 * ALLOCATION_COUNT;
-        
-        for ( long i = 1L; i <= biggestStep; i++ )
-        {
-            vetUpperBoundary( maxValue, minValue, i );
-            vetLowerBoundary( maxValue, minValue, i );
-        }
+        vetBoundaries( maxValue, minValue, 1L );
+        vetBoundaries( maxValue, minValue, ALLOCATION_COUNT );
+        vetBoundaries( maxValue, minValue, 2 * ALLOCATION_COUNT );
+    }
+    private void vetBoundaries
+        (
+         long maxValue,
+         long minValue,
+         long stepSize
+         )
+        throws Exception
+    {
+        vetUpperBoundary( maxValue, minValue, stepSize );
+        vetLowerBoundary( maxValue, minValue, stepSize );
     }
     private void vetUpperBoundary
         (
@@ -237,12 +244,12 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         long firstValue;
 
         long initValue = maxValue - (ALLOCATION_COUNT * stepSize);
+        long finalValue = maxValue;
+        long midpoint = (finalValue - initValue) / 2;
 
-        for ( long i = initValue; (i > 0) && (i <= maxValue); i++ )
-        {
-            firstValue = i;
-            vetBoundaries( maxValue, minValue, stepSize, firstValue, restartValue );
-        }
+        if ( initValue > 0 ) { vetBoundaries( maxValue, minValue, stepSize, initValue, restartValue ); }
+        if ( midpoint > 0 ) { vetBoundaries( maxValue, minValue, stepSize, midpoint, restartValue ); }
+        if ( finalValue > 0 ) { vetBoundaries( maxValue, minValue, stepSize, finalValue, restartValue ); }
     }
     private void vetLowerBoundary
         (
@@ -256,12 +263,12 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         long firstValue;
 
         long initValue = minValue + (ALLOCATION_COUNT * stepSize);
+        long finalValue = minValue;
+        long midpoint = (finalValue - initValue) / 2;
 
-        for ( long i = initValue; (i < 0) && (i >= minValue); i-- )
-        {
-            firstValue = i;
-            vetBoundaries( maxValue, minValue, -stepSize, firstValue, restartValue );
-        }
+        if ( initValue < 0 ) { vetBoundaries( maxValue, minValue, -stepSize, initValue, restartValue ); }
+        if ( midpoint < 0 ) { vetBoundaries( maxValue, minValue, -stepSize, midpoint, restartValue ); }
+        if ( finalValue < 0 ) { vetBoundaries( maxValue, minValue, -stepSize, finalValue, restartValue ); }
     }
     private void vetBoundaries
         (
