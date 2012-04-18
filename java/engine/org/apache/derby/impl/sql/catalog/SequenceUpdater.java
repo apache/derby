@@ -61,9 +61,15 @@ import org.apache.derby.iapi.types.RowLocation;
  * <ul>
  * <li>It pre-allocates a range of values from a sequence so that we don't have to change
  *  the on-disk value every time we get the next value for a sequence.</li>
- * <li>When updating the on-disk value, we first try to do the writing in
- *  a nested subtransaction. This is so that we can immediately release the write-lock afterwards.
- *  If that fails, we then try to do the writing in the user's execution transaction.</li>
+ * <li>When updating the on-disk value, we use a subtransaction of the user's
+ * execution transaction. If the
+ * special transaction cannot do its work immediately, without waiting for a lock, then
+ * a TOO MUCH CONTENTION error is raised. It is believed that this can only happen
+ * if someone holds locks on SYSSEQUENCES, either via sequence DDL or a scan
+ * of the catalog. The TOO MUCH CONTENTION error tells
+ * the user to not scan SYSSEQUENCES directly, but to instead use the
+ * SYSCS_UTIL.SYSCS_PEEK_AT_SEQUENCE() if the user needs the current value of the
+ * sequence generator.</li>
  * </ul>
  *
  * <p>
@@ -76,34 +82,8 @@ import org.apache.derby.iapi.types.RowLocation;
  * (last number in the pre-allocated range) was previously recorded in the catalog row which
  * describes this sequence. If we are successful in getting the next number, we
  * return it and all is well.</li>
- * <li>Otherwise, we must allocate a new range by updating the catalog row. At this
- * point we may find ourselves racing another session, which also needs the next number
- * in the sequence.</li>
- * <li>When we try to update the catalog row, we check to see whether the current value
- * there is what we expect it to be. If it is, then all is well: we update the catalog row
- * then return to the first step to try to get the next number from the new cache of
- * pre-allocated numbers.</li>
- * <li>If, however, the value in the catalog row is not what we expect, then another
- * session has won the race to update the catalog. We accept this fact gracefully and
- * do not touch the catalog. Instead, we return to the first step and try to get the
- * next number from the new cache of numbers which the other session has just
- * pre-allocated.</li>
- * <li>We only allow ourselves to retry this loop a small number of times. If we still
- * can't get the next number in the sequence, we raise an exception complaining that
- * there is too much contention on the generator.</li>
- * </ul>
- *
- * <p>
- * If applications start seeing exceptions complaining that there is too much contention
- * on a sequence generator, then we should improve this algorithm. Here are some options
- * based on the idea that contention should go down if we increase the number of
- * pre-allocated numbers:
- * </p>
- *
- * <ul>
- * <li>We can let the user change the size of the pre-allocated range.</li>
- * <li>Derby can increase the size of the pre-allocated range when Derby detects
- * too much contention.</li>
+ * <li>Otherwise, we must allocate a new range by updating the catalog row. We should not
+ * be in contention with another connection because the update method is synchronized.</li>
  * </ul>
  *
  */
@@ -130,9 +110,6 @@ public abstract class SequenceUpdater implements Cacheable
     // This is the object which allocates ranges of sequence values
     protected SequenceGenerator _sequenceGenerator;
 
-    // This is the lock timeout in milliseconds; a negative number means no timeout
-    private long _lockTimeoutInMillis;
-
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTRUCTOR
@@ -142,7 +119,6 @@ public abstract class SequenceUpdater implements Cacheable
     /** No-arg constructor to satisfy the Cacheable contract */
     public SequenceUpdater()
     {
-        _lockTimeoutInMillis = getLockTimeout();
     }
 
     /** Normal constructor */
@@ -170,9 +146,8 @@ public abstract class SequenceUpdater implements Cacheable
 
     /**
      * <p>
-     * Update the sequence value on disk. This method is first called with a read/write subtransaction
-     * of the session's execution transaction. If work can't be done there immediately, this method
-     * is called with the session's execution transaction.
+     * Update the sequence value on disk. This method does its work in a subtransaction of
+     * the user's execution transaction.
      * </p>
      *
      * @param tc The transaction to use
@@ -325,24 +300,28 @@ public abstract class SequenceUpdater implements Cacheable
      * <p>
      * Get the next sequence number managed by this generator and advance the number. Could raise an
      * exception if the legal range is exhausted and wrap-around is not allowed.
-     * Only one thread at a time is allowed through here. That synchronization is performed by
-     * the sequence generator itself.
+     * Only one thread at a time is allowed through here. We do not want a race between the
+     * two calls to the sequence generator: getCurrentValueAndAdvance() and allocateNewRange().
      * </p>
      *
      * @param returnValue This value is stuffed with the new sequence number.
      */
-    public void getCurrentValueAndAdvance
+    public synchronized void getCurrentValueAndAdvance
         ( NumberDataValue returnValue ) throws StandardException
     {
-        Long startTime = null;
-
         //
-        // We try to get a sequence number. We try until we've exceeded the lock timeout
-        // in case we find ourselves in a race with another session which is draining numbers from
-        // the same sequence generator.
+        // We may have to try to get a value from the Sequence Generator twice.
+        // The first attempt may fail because we need to pre-allocate a new chunk
+        // of values.
         //
-        while ( true )
+        for ( int i = 0; i < 2; i++ )
         {
+            //
+            // We try to get a sequence number. The SequenceGenerator method is synchronized
+            // so only one writer should be in there at a time. Lock contention is possible if
+            // someone has selected from SYSSEQUENCES contrary to our advice. In that case,
+            // we raise a TOO MUCH CONTENTION exception.
+            //
             long[] cvaa = _sequenceGenerator.getCurrentValueAndAdvance();
             
             int status = (int) cvaa[ SequenceGenerator.CVAA_STATUS ];
@@ -368,38 +347,16 @@ public abstract class SequenceUpdater implements Cacheable
                     _sequenceGenerator.allocateNewRange( currentValue, numberOfValuesAllocated );
                 }
                 break;
-                
+            
             default:
                 throw unimplementedFeature();
             }
+        }
 
-            //
-            // If we get here, then we failed to get a sequence number. Along the way,
-            // we or another session may have allocated more sequence numbers on disk. We go back
-            // in to try to grab one of those numbers.
-            //
-            if ( startTime == null )
-            {
-                // get the system time only if we have to
-                startTime = new Long( System.currentTimeMillis() );
-                continue;
-            }
-            
-            if (
-                (_lockTimeoutInMillis >= 0L) &&
-                ( (System.currentTimeMillis() - startTime.longValue()) > _lockTimeoutInMillis )
-                )
-            {
-                //
-                // If we get here, then we exhausted our retry attempts. This might be a sign
-                // that we need to increase the number of sequence numbers which we
-                // allocate. There's an opportunity for Derby to tune itself here.
-                //
-                throw tooMuchContentionException();
-            }
-            
-        } // end of retry loop
-
+        //
+        // If we get here, then we failed to allocate a new sequence number range.
+        //
+        throw tooMuchContentionException();
     }
 
     /**
@@ -408,7 +365,7 @@ public abstract class SequenceUpdater implements Cacheable
      * May return null if the generator is exhausted.
      * </p>
      */
-    private Long peekAtCurrentValue() throws StandardException
+    public Long peekAtCurrentValue() throws StandardException
     {
         return _sequenceGenerator.peekAtCurrentValue();
     }
@@ -421,15 +378,14 @@ public abstract class SequenceUpdater implements Cacheable
 
     /**
      * <p>
-     * Update the value on disk. First tries to update the value in a
-     * subtransaction. If that fails, falls back on the execution transaction.
-     * This is a callback method invoked by the sequence generator.
+     * Update the value on disk. Does its work in a subtransaction of the user's
+     * execution transaction. If that fails, raises a TOO MUCH CONTENTION exception.
      * </p>
 	 * 
 	 * @return Returns true if the value was successfully updated, false if we lost a race with another session.
      *
      */
-    public boolean updateCurrentValueOnDisk( Long oldValue, Long newValue ) throws StandardException
+    public synchronized boolean updateCurrentValueOnDisk( Long oldValue, Long newValue ) throws StandardException
     {
         LanguageConnectionContext   lcc = getLCC();
 
@@ -458,17 +414,12 @@ public abstract class SequenceUpdater implements Cacheable
 		}
 
         TransactionController executionTransaction = lcc.getTransactionExecute();
-        TransactionController nestedTransaction = null;
+        TransactionController nestedTransaction = executionTransaction.startNestedUserTransaction( false );
 
-        try {
-            nestedTransaction = executionTransaction.startNestedUserTransaction( false );
-        } catch (StandardException se) {}
-        
-        // First try to do the work in the nested transaction. Fail if we can't
-        // get a lock immediately.
         if ( nestedTransaction != null )
         {
-            try {
+            try
+            {
                 return updateCurrentValueOnDisk( nestedTransaction, oldValue, newValue, false );
             }
             catch (StandardException se)
@@ -487,9 +438,10 @@ public abstract class SequenceUpdater implements Cacheable
         }
         
         // If we get here, we failed to do the work in the nested transaction.
-        // Fall back on the execution transaction
-        
-        return updateCurrentValueOnDisk( executionTransaction, oldValue, newValue, true );
+        // We might be self-deadlocking if the user has selected from SYSSEQUENCES
+        // contrary to our advice.
+
+        throw tooMuchContentionException();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -537,12 +489,6 @@ public abstract class SequenceUpdater implements Cacheable
         }
 
         return true;
-    }
-    
-    /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */
-    protected int getLockTimeout()
-    {
-        return getLCC().getTransactionExecute().getAccessManager().getLockFactory().getWaitTimeout();
     }
     
 	private static LanguageConnectionContext getLCC()

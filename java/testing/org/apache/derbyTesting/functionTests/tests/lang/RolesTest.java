@@ -599,9 +599,9 @@ public class RolesTest extends BaseJDBCTestCase
 
         assertSysColPermsRowCount(0, 2, 2);
 
-        assertSysRoutinePermsRowCount(7, // 7 pre-existing grants to PUBLIC
-                                      8,
-                                      8);
+        assertSysRoutinePermsRowCount(8, // 8 pre-existing grants to PUBLIC
+                                      9,
+                                      9);
 
         /*
          * DROP ROLE
@@ -629,12 +629,12 @@ public class RolesTest extends BaseJDBCTestCase
                                   // to admin is de facto to a user
                                   // named admin:
                                   2);
-        assertSysRoutinePermsRowCount(7, 7,
+        assertSysRoutinePermsRowCount(8, 8,
                                       //  nonDbo run: role admin
                                       // has been dropped, so this
                                       // run's grant to admin is de
                                       // facto to a user named admin:
-                                      8);
+                                      9);
 
         doStmt("drop role \"NONE\"",
                sqlAuthorizationRequired, null , roleDboOnly);
@@ -656,7 +656,7 @@ public class RolesTest extends BaseJDBCTestCase
                                     1,
                                     0);
         assertSysColPermsRowCount(0,0,0);
-        assertSysRoutinePermsRowCount(7,7,7);
+        assertSysRoutinePermsRowCount(8,8,8);
 
         // roles foo and bar survive to nonDbo run and beyond:
         assertSysRolesRowCount(0, 5, 5);
@@ -1162,7 +1162,10 @@ public class RolesTest extends BaseJDBCTestCase
         ResultSet rs = _stm.executeQuery(
                 "SELECT COUNT(*) FROM " + table);
         rs.next();
-        assertEquals(table + " row count:",
+        assertEquals(table +
+                     " (_authLevel == NO_SQLAUTHORIZATION) = " + (_authLevel == NO_SQLAUTHORIZATION) +
+                     ", isDbo() = " + isDbo() +
+                     ", row count:",
                      _authLevel == NO_SQLAUTHORIZATION ? rcNoAuth :
                      (isDbo() ? rcDbo : rcMereMortal),
                      rs.getInt(1));

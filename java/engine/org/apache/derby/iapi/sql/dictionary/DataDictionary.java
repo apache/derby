@@ -1827,6 +1827,14 @@ public interface DataDictionary
         ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException;
 
+    /**
+     * <p>
+     * Peek at the next value which will be returned by a sequence generator.
+     * </p>
+     */
+    public Long peekAtSequence( String schemaName, String sequenceName )
+        throws StandardException;
+
 	/**
 	 * Gets all statistics Descriptors for a given table.
 	 */

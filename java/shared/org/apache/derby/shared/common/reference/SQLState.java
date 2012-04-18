@@ -1382,7 +1382,7 @@ public interface SQLState {
 	String LANG_INVALID_CALL_TO_EXECUTE_UPDATE		                   = "X0Y79.S";
 	String LANG_NULL_DATA_IN_NON_NULL_COLUMN               	   	   	   = "X0Y80.S";
     String LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE                 = "X0Y83.S";
-    String LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE                 = "X0Y84.S";
+    String LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE                 = "X0Y84.T";
 	String LANG_UNKNOWN_SEQUENCE_PREALLOCATOR                                = "X0Y85.S";
 	String LANG_CANT_FLUSH_PREALLOCATOR                                = "X0Y86.S";
 

@@ -418,7 +418,8 @@ public final class	DataDictionaryImpl
 	/* Number of readers that start in DDL_MODE */
 	volatile int	readersInDDLMode;
 
-
+    private HashMap sequenceIDs;
+    
 	/**
 		True if the database is read only and requires
 		some form of upgrade, that makes the stored prepared
@@ -472,6 +473,7 @@ public final class	DataDictionaryImpl
 	 */
 	private static final String[] sysUtilFunctionsWithPublicAccess = { 
 												"SYSCS_GET_RUNTIMESTATISTICS", 
+												"SYSCS_PEEK_AT_SEQUENCE",
 												};
 	
 	/**
@@ -699,6 +701,8 @@ public final class	DataDictionaryImpl
 
 		sequenceGeneratorCache = cf.newCacheManager
             ( this, "SequenceGeneratorCache", seqgenCacheSize, seqgenCacheSize );
+
+        sequenceIDs = new HashMap();
 
 		/* Get the object to coordinate cache transitions */
 		cacheCoordinator = new ShExLockable();
@@ -10479,6 +10483,20 @@ public final class	DataDictionaryImpl
         }
     }
     
+    public Long peekAtSequence( String schemaName, String sequenceName )
+        throws StandardException
+    {
+        String  uuid = getSequenceID( schemaName, sequenceName );
+
+        if ( uuid == null )
+        {
+            throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND_DURING_EXECUTION, "SEQUENCE",
+                    ( schemaName + "." + sequenceName) );
+        }
+        
+        return ((SequenceUpdater) sequenceGeneratorCache.find( uuid )).peekAtCurrentValue();
+    }
+    
     public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
                                               TableDescriptor td)
           throws StandardException
@@ -13243,6 +13261,34 @@ public final class	DataDictionaryImpl
                  tc
                  );
         }
+        
+        // BIGINT
+        // SYSCS_UTIL.SYSCS_PEEK_AT_SEQUENCE( VARCHAR(128), VARCHAR(128) )
+
+        {
+            // procedure argument names
+            String[] arg_names = { "schemaName", "sequenceName" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+                };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_PEEK_AT_SEQUENCE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+                RoutineAliasInfo.READS_SQL_DATA,
+                false,
+                DataTypeDescriptor.getCatalogType( Types.BIGINT ),
+                newlyCreatedRoutines,
+                tc);
+        }
     }
 
 
@@ -13992,6 +14038,8 @@ public final class	DataDictionaryImpl
         keyRow.setColumn(1, sequenceIdOrderable);
 
         ti.deleteRow(tc, keyRow, SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID);
+
+        dropSequenceID( descriptor );
     }
 
     public SequenceDescriptor getSequenceDescriptor(UUID uuid) throws StandardException {
@@ -14008,7 +14056,7 @@ public final class	DataDictionaryImpl
         ExecIndexRow keyRow = exFactory.getIndexableRow(1);
         keyRow.setColumn(1, UUIDStringOrderable);
 
-        return (SequenceDescriptor)
+        SequenceDescriptor  sequenceDescriptor = (SequenceDescriptor)
                 getDescriptorViaIndex(
                         SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID,
                         keyRow,
@@ -14017,6 +14065,10 @@ public final class	DataDictionaryImpl
                         (TupleDescriptor) null,
                         (List) null,
                         false);
+
+        putSequenceID( sequenceDescriptor );
+        
+        return sequenceDescriptor;
     }
 
     /**
@@ -14044,7 +14096,7 @@ public final class	DataDictionaryImpl
         keyRow.setColumn(1, schemaIDOrderable);
         keyRow.setColumn(2, sequenceNameOrderable);
 
-        return (SequenceDescriptor)
+        SequenceDescriptor  sequenceDescriptor = (SequenceDescriptor)
                 getDescriptorViaIndex(
                         SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX2_ID,
                         keyRow,
@@ -14053,6 +14105,78 @@ public final class	DataDictionaryImpl
                         (TupleDescriptor) null,
                         (List) null,
                         false);
+
+        putSequenceID( sequenceDescriptor );
+        
+        return sequenceDescriptor;
+    }
+
+    /** Map ( schemaName, sequenceName ) to sequenceID */
+    private void    putSequenceID( SequenceDescriptor sd )
+        throws StandardException
+    {
+        if ( sd == null ) { return; }
+        
+        SchemaDescriptor    schema = sd.getSchemaDescriptor();
+        String  schemaName = schema.getSchemaName();
+        String  sequenceName = sd.getSequenceName();
+        String  uuid = sd.getUUID().toString();
+        
+        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        if ( sequencesInSchema == null )
+        {
+            sequencesInSchema = new HashMap();
+            sequenceIDs.put( schemaName, sequencesInSchema );
+        }
+
+        if ( sequencesInSchema.get( sequenceName ) == null )
+        {
+            sequencesInSchema.put( sequenceName, uuid );
+        }
+    }
+
+    /** Drop a sequenceID from the ( schemaName, sequenceName ) map */
+    private void    dropSequenceID( SequenceDescriptor sd )
+        throws StandardException
+    {
+        if ( sd == null ) { return; }
+        
+        SchemaDescriptor    schema = sd.getSchemaDescriptor();
+        String  schemaName = schema.getSchemaName();
+        String  sequenceName = sd.getSequenceName();
+        
+        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        if ( sequencesInSchema == null ) { return; }
+
+        if ( sequencesInSchema.get( sequenceName ) == null ) { return; }
+        {
+            sequencesInSchema.remove( sequenceName );
+        }
+    }
+
+    /**
+     * <p>
+     * Get the uuid string of a sequence given its schema and sequence name.
+     * </p>
+     */
+    private String  getSequenceID( String schemaName, String sequenceName )
+        throws StandardException
+    {
+        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        if ( sequencesInSchema != null )
+        {
+            String  uuid = (String) sequencesInSchema.get( sequenceName );
+
+            if ( uuid !=  null ) { return uuid; }
+        }
+
+        // oops, not saved in the sequenceID map yet. lookup the sequence.
+        // this will save the uuid in the sequenceID map.
+        SequenceDescriptor    desc = getSequenceDescriptor
+            ( getSchemaDescriptor( schemaName, getTransactionCompile(), true ), sequenceName );
+
+        if ( desc == null ) { return null; }
+        else { return desc.getUUID().toString(); }
     }
 
     /**

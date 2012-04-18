@@ -743,6 +743,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// Auto-generated method stub
     }
     
+    public Long peekAtSequence( String schemaName, String sequenceName )
+        throws StandardException
+    {
+		return null;
+    }
+    
 	public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
 			TableDescriptor td) throws StandardException {
 		// Auto-generated method stub

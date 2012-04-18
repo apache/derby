@@ -93,6 +93,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  TRIGGER_DROPPED_WARNING = "01502";
     protected static  final   String  LANG_INVALID_USE_OF_DEFAULT = "42Y85";
     protected static  final   String  GRANT_REVOKE_NOT_ALLOWED = "42509";
+    protected static  final   String  MISSING_OBJECT = "X0X81";
     protected static  final   String  ROUTINE_DEPENDS_ON_TYPE = "X0Y30";
     protected static  final   String  TABLE_DEPENDS_ON_TYPE = "X0Y29";
     protected static  final   String  VIEW_DEPENDENCY = "X0Y23";
@@ -106,6 +107,8 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  BAD_CAST = "42846";
     protected static  final   String  DUPLICATE_CLAUSE = "42XAJ";
     protected static  final   String  FORBIDDEN_DROP_TRIGGER = "X0Y24";
+    protected static  final   String  LOCK_TIMEOUT = "40XL1";
+    protected static  final   String  TOO_MUCH_CONTENTION = "X0Y84";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

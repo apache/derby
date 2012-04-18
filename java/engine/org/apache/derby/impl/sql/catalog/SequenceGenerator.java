@@ -100,7 +100,9 @@ import org.apache.derby.iapi.types.RowLocation;
  * <p>
  * The peekAtCurrentValue() method is provided so that unused, pre-allocated values can
  * be flushed when the sequence generator is being discarded. The caller updates the
- * catalog with the value returned by peekAtCurrentValue().
+ * catalog with the value returned by peekAtCurrentValue(). The peekAtCurrentValue() method
+ * is also called by the syscs_peek_at_sequence() function which users should call rather
+ * than try to scan the underlying catalog themselves.
  * </p>
  *
  */

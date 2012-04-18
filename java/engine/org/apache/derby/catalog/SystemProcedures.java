@@ -2237,4 +2237,20 @@ public class SystemProcedures  {
         }
     }
   
+    /**
+     * Peek at the current value of a sequence generator without advancing it.
+     *
+     * @param schemaName    The name of the schema holding the sequence.
+     * @param sequenceName    The name of the sequence in that schema.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public static Long SYSCS_PEEK_AT_SEQUENCE( String schemaName, String sequenceName )
+        throws SQLException
+    {
+        try {
+            return ConnectionUtil.getCurrentLCC().getDataDictionary().peekAtSequence( schemaName, sequenceName );
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+
 }

@@ -109,8 +109,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     {
         TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(SequenceGeneratorTest.class);
         Test        cleanTest = new CleanDatabaseTestSetup( suite );
+        Test        timeoutTest = DatabasePropertyTestSetup.setLockTimeouts( cleanTest, 5, 5 );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
-            ( cleanTest, LEGAL_USERS, "sequenceGenerator" );
+            ( timeoutTest, LEGAL_USERS, "sequenceGenerator" );
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
 
         return authorizedTest;
@@ -683,6 +684,89 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
     /**
      * <p>
+     * Test that sequence values don't repeat via transaction trickery. See DERBY-5493.
+     * </p>
+     */
+    public void test_11_5493_correctness() throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+
+        goodStatement( conn, "create table t_5493 (x int)\n" );
+        goodStatement( conn, "create sequence s_5493\n" );
+
+        boolean oldAutoCommit = conn.getAutoCommit();
+        conn.setAutoCommit( false );
+
+        PreparedStatement   ps = chattyPrepare( conn, "select count(*) from sys.syssequences with rs\n" );
+        getScalarInteger( ps );
+        ps.close();
+
+        int     expectedValue = -2147483648;
+        expectExecutionError( conn, TOO_MUCH_CONTENTION, "values next value for s_5493" );
+
+        goodStatement( conn, "drop table t_5493\n" );
+        conn.rollback();
+
+        ps = chattyPrepare( conn, "values next value for s_5493" );
+        assertEquals( expectedValue++, getScalarInteger( ps ) );
+        ps.close();
+
+        goodStatement( conn, "drop sequence s_5493 restrict\n" );
+        conn.commit();
+
+        conn.setAutoCommit( oldAutoCommit );
+    }
+
+    /**
+     * <p>
+     * Verify the syscs_peek_at_sequence function introduced by DERBY-5493.
+     * </p>
+     */
+    public void test_12_5493_function() throws Exception
+    {
+        Connection  dboConn = openUserConnection( TEST_DBO );
+        Connection  ruthConn = openUserConnection( "RUTH" );
+        PreparedStatement   ps;
+        int                 expectedValue;
+
+        goodStatement( dboConn, "create sequence s_5493\n" );
+        goodStatement( dboConn, "grant usage on sequence s_5493 to public\n" );
+
+        expectedValue = -2147483648;
+        ps = chattyPrepare( dboConn, "values next value for s_5493" );
+        assertEquals( expectedValue++, getScalarInteger( ps ) );
+        ps.close();
+
+        // test the syscs_peek_at_sequence() function
+        ps = chattyPrepare
+            (
+             dboConn,
+             "values syscs_util.syscs_peek_at_sequence( '" + TEST_DBO + "', 'S_5493' )\n"
+             );
+        assertEquals( expectedValue++, getScalarInteger( ps ) );
+        ps.close();
+
+        // error if sequence doesn't exist
+        expectExecutionError
+            ( dboConn, MISSING_OBJECT, "values syscs_util.syscs_peek_at_sequence( '" + TEST_DBO + "', 'S_5493_1' )\n" );
+
+        // drop the sequence but don't commit
+
+        dboConn.setAutoCommit( false );
+        goodStatement( dboConn, "drop sequence s_5493 restrict\n" );
+        
+        expectExecutionError( dboConn, MISSING_OBJECT, "values syscs_util.syscs_peek_at_sequence( '" + TEST_DBO + "', 'S_5493' )\n" );
+        expectCompilationError( dboConn, OBJECT_DOES_NOT_EXIST, "values next value for s_5493" );
+
+        expectExecutionError( ruthConn, LOCK_TIMEOUT, "values syscs_util.syscs_peek_at_sequence( '" + TEST_DBO + "', 'S_5493' )\n" );
+        expectCompilationError( ruthConn, LOCK_TIMEOUT, "values next value for " + TEST_DBO + ".s_5493" );
+
+        dboConn.commit();
+        dboConn.setAutoCommit( true );
+    }
+
+    /**
+     * <p>
      * Verify that system crash does not rollback changes to SYSSEQUENCES.CURRENTVALUE.
      * See DERBY-5494.
      * </p>
@@ -741,26 +825,11 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     private long getCurrentValue( String schemaName, String sequenceName )
         throws Exception
     {
-        Connection  conn = openUserConnection( TEST_DBO );
-        
-        PreparedStatement ps = chattyPrepare
-            ( conn,
-              "select currentvalue from sys.syssequences seq, sys.sysschemas s where s.schemaname = ? and seq.sequencename = ? and s.schemaid = seq.schemaid" );
-        ps.setString( 1, schemaName );
-        ps.setString( 2, sequenceName );
-
-        long retval = getScalarLong( ps );
-
-        conn.commit();
-        
-        return retval;
+        return getCurrentValue( openUserConnection( TEST_DBO ), schemaName, sequenceName );
     }
-
+    
     /** Get the current value from a sequence */
-    private long getCurrentValue(
-    Connection  conn, 
-    String      schemaName, 
-    String      sequenceName )
+    private long getCurrentValue( Connection conn, String schemaName, String sequenceName )
         throws Exception
     {
         PreparedStatement ps = chattyPrepare
@@ -775,7 +844,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         
         return retval;
     }
-    
+
     /** Get a scalar integer result from a query */
     private int getScalarInteger( PreparedStatement ps ) throws Exception
     {
@@ -869,9 +938,6 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         {
             return updateCurrentValueOnDisk( null, oldValue, newValue, false );
         }
-        
-        // overridden to avoid a null pointer exception when we don't have a language context
-        protected int getLockTimeout() { return 1000; }
     
     }
 

@@ -764,4 +764,52 @@ public class Changes10_9 extends UpgradeChange
             return c == this.c;
         }
     }
+    
+    
+    /**
+     * Test the changes introduced to fix correctness problems with sequences.
+     */
+    public  void    test_5493()  throws Exception
+    {
+        Connection  conn = getConnection();
+        Statement s = createStatement();
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+            assertNull( getNewFunctionID( s ) );
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            assertNull( getNewFunctionID( s ) );
+            break;
+            
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            assertNull( getNewFunctionID( s ) );
+            break;
+
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            assertNotNull( getNewFunctionID( s ) );
+            break;
+        }
+        
+        s.close();
+    }
+    private String    getNewFunctionID( Statement s )
+        throws Exception
+    {
+        ResultSet   rs = null;
+
+        try {
+            rs = s.executeQuery
+            ( "select aliasid from sys.sysaliases where alias = 'SYSCS_PEEK_AT_SEQUENCE'" );
+            if ( !rs.next() ) { return null; }
+            else { return rs.getString( 1 ); }
+        }
+        finally
+        {
+            if ( rs != null ) { rs.close(); }
+        }
+    }
+
 }

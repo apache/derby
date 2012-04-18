@@ -3491,8 +3491,8 @@ Guide.
             </msg>
 
             <msg>
-                <name>X0Y84.S</name>
-                <text>Too much contention on sequence {0}. To avoid this error, try adjusting derby.locks.waitTimeout and/or derby.language.sequence.preallocator. See the Derby Reference Manual for more information on these properties.</text>
+                <name>X0Y84.T</name>
+                <text>Too much contention on sequence {0}. This is probably caused by an uncommitted scan of the SYS.SYSSEQUENCES catalog. Do not query this catalog directly. Instead, use the SYSCS_UTIL.SYSCS_PEEK_AT_SEQUENCE function to view the current value of a query generator.</text>
                 <arg>sequenceName</arg>
             </msg>
 
