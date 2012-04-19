@@ -195,9 +195,9 @@ public final class BasicAuthenticationServiceImpl
         {
             if (secMec != SECMEC_USRSSBPWD)
             {
-                // encrypt passed-in password
+                // hash passed-in password
                 try {
-                    passedUserPassword = encryptPasswordUsingStoredAlgorithm(
+                    passedUserPassword = hashPasswordUsingStoredAlgorithm(
                             userName, userPassword, definedUserPassword);
                 } catch (StandardException se) {
                     // The UserAuthenticator interface does not allow us to
@@ -235,7 +235,7 @@ public final class BasicAuthenticationServiceImpl
             try {
                 Properties props = getDatabaseProperties();
                 if (props != null) {
-                    encryptUsingDefaultAlgorithm(
+                    hashUsingDefaultAlgorithm(
                             userName, userPassword, props);
                 }
             } catch (StandardException se) {
@@ -277,23 +277,23 @@ public final class BasicAuthenticationServiceImpl
 	}
 
     /**
-     * Encrypt a password using the same algorithm as we used to generate the
+     * Hash a password using the same algorithm as we used to generate the
      * stored password token.
      *
-     * @param user the user whose password to encrypt
+     * @param user the user whose password to hash
      * @param password the plaintext password
      * @param storedPassword the password token that's stored in the database
      * @return a digest of the password created the same way as the stored
      *         password
-     * @throws StandardException if the password cannot be encrypted with the
+     * @throws StandardException if the password cannot be hashed with the
      *         requested algorithm
      */
-    private String encryptPasswordUsingStoredAlgorithm(
+    private String hashPasswordUsingStoredAlgorithm(
                 String user, String password, String storedPassword)
             throws StandardException
     {
         if (storedPassword.startsWith( PasswordHasher.ID_PATTERN_SHA1_SCHEME )) {
-            return encryptPasswordSHA1Scheme(password);
+            return hashPasswordSHA1Scheme(password);
         }
         else
         {

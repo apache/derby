@@ -81,13 +81,13 @@ import org.apache.derby.iapi.reference.SQLState;
  * <p><strong>IMPORTANT NOTE:</strong></p>
  *
  * <p>
- * User passwords are encrypted using a message digest algorithm
- * if they're stored in the database; otherwise they are not encrypted
+ * User passwords are hashed using a message digest algorithm
+ * if they're stored in the database. They are not hashed
  * if they were defined at the system level.
  * </p>
  *
  * <p>
- * The passwords can be encrypted using two different schemes:
+ * The passwords can be hashed using two different schemes:
  * </p>
  *
  * <ul>
@@ -493,7 +493,7 @@ public abstract class AuthenticationServiceBase
 		// We only care for "derby.user." property changes
 		// at the moment.
 		if (!key.startsWith(org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX)) return null;
-		// We do not encrypt 'derby.user.<userName>' password if
+		// We do not hash 'derby.user.<userName>' password if
 		// the configured authentication service is LDAP as the
 		// same property could be used to store LDAP user full DN (X500).
 		// In performing this check we only consider database properties
@@ -506,16 +506,16 @@ public abstract class AuthenticationServiceBase
 			 (StringUtil.SQLEqualsIgnoreCase(authService, org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP)))
 			return null;
 
-		// Ok, we can encrypt this password in the db
+		// Ok, we can hash this password in the db
 		String userPassword = (String) value;
 
 		if (userPassword != null) {
-			// encrypt (digest) the password
+			// hash (digest) the password
 			// the caller will retrieve the new value
             String userName =
                     key.substring(Property.USER_PROPERTY_PREFIX.length());
             userPassword =
-                    encryptUsingDefaultAlgorithm(userName, userPassword, p);
+                    hashUsingDefaultAlgorithm(userName, userPassword, p);
 		}
 
 		return userPassword;
@@ -545,7 +545,7 @@ public abstract class AuthenticationServiceBase
 
 	/**
      * <p>
-	 * This method encrypts a clear user password using a
+	 * This method hashes a clear user password using a
 	 * Single Hash algorithm such as SHA-1 (SHA equivalent)
 	 * (it is a 160 bits digest)
      * </p>
@@ -560,10 +560,10 @@ public abstract class AuthenticationServiceBase
 	 *
 	 * @param plainTxtUserPassword Plain text user password
 	 *
-	 * @return encrypted user password (digest) as a String object
+	 * @return hashed user password (digest) as a String object
      *         or {@code null} if the plaintext password is {@code null}
 	 */
-	protected String encryptPasswordSHA1Scheme(String plainTxtUserPassword)
+	protected String hashPasswordSHA1Scheme(String plainTxtUserPassword)
 	{
 		if (plainTxtUserPassword == null)
 			return null;
@@ -581,9 +581,9 @@ public abstract class AuthenticationServiceBase
 		byte[] bytePasswd = null;
         bytePasswd = toHexByte(plainTxtUserPassword);
 		algorithm.update(bytePasswd);
-		byte[] encryptVal = algorithm.digest();
+		byte[] hashedVal = algorithm.digest();
         String hexString = PasswordHasher.ID_PATTERN_SHA1_SCHEME +
-                StringUtil.toHexString(encryptVal,0,encryptVal.length);
+                StringUtil.toHexString(hashedVal, 0, hashedVal.length);
 		return (hexString);
 
 	}
@@ -631,28 +631,28 @@ public abstract class AuthenticationServiceBase
 
     /**
      * <p>
-     * Encrypt a password using the default hash algorithm for this system
-     * before it's stored in the database.
+     * Hash a password using the default message digest algorithm for this
+     * system before it's stored in the database.
      * </p>
      *
      * <p>
      * If the data dictionary supports the configurable hash authentication
      * scheme, and the property {@code derby.authentication.builtin.algorithm}
-     * is a non-empty string, the password will be encrypted using the
+     * is a non-empty string, the password will be hashed using the
      * algorithm specified by that property. Otherwise, we fall back to the new
      * authentication scheme based on SHA-1. The algorithm used is encoded in
      * the returned token so that the code that validates a user's credentials
      * knows which algorithm to use.
      * </p>
      *
-     * @param user the user whose password to encrypt
+     * @param user the user whose password to hash
      * @param password the plain text password
      * @param props database properties
      * @return a digest of the user name and password formatted as a string,
      *         or {@code null} if {@code password} is {@code null}
      * @throws StandardException if the specified algorithm is not supported
      */
-    String encryptUsingDefaultAlgorithm(String user,
+    String hashUsingDefaultAlgorithm(String user,
                                                 String password,
                                                 Dictionary props)
             throws StandardException
@@ -662,7 +662,7 @@ public abstract class AuthenticationServiceBase
         PasswordHasher  hasher = getDataDictionary().makePasswordHasher( props );
 
         if ( hasher != null ) { return hasher.hashAndEncode( user, password ); }
-        else { return encryptPasswordSHA1Scheme(password); }
+        else { return hashPasswordSHA1Scheme(password); }
     }
 
     /**
@@ -777,22 +777,22 @@ public abstract class AuthenticationServiceBase
             StringUtil.fromHexString(targetSeedstr, 0, targetSeedstr.length());
 
         String hexString = null;
-        // If user is at the database level, we don't encrypt the password
-        // as it is already encrypted (BUILTIN scheme) - we only do the
-        // BUILTIN encryption if the user is defined at the system level
+        // If user is at the database level, we don't hash the password
+        // as it is already hashed (BUILTIN scheme) - we only do the
+        // BUILTIN hashing if the user is defined at the system level
         // only - this is required beforehands so that we can do the password
         // substitute generation right afterwards.
         if (!databaseUser)
         {
             bytePasswd = toHexByte(password);
             messageDigest.update(bytePasswd);
-            byte[] encryptVal = messageDigest.digest();
+            byte[] hashedVal = messageDigest.digest();
             hexString = PasswordHasher.ID_PATTERN_SHA1_SCHEME +
-                StringUtil.toHexString(encryptVal, 0, encryptVal.length);
+                StringUtil.toHexString(hashedVal, 0, hashedVal.length);
         }
         else
         {
-            // Already encrypted from the database store
+            // Already hashed from the database store
             // NOTE: If the password was stored with the configurable hash
             // authentication scheme, the stored password will have been hashed
             // with a different algorithm than the hashed password sent from
