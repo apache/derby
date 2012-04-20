@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -14,8 +13,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-<project xmlns="http://www.netbeans.org/ns/project/1">
+--><project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
@@ -254,7 +252,11 @@
                 <node name="text">
                     <node name="x-java">
                         <node name="CodeStyle">
-                            <node name="project"/>
+                            <node name="project">
+                                <property name="allowConvertToStarImport" value="false"/>
+                                <property name="allowConvertToStaticStarImport" value="false"/>
+                                <property name="importGroupsOrder" value="*"/>
+                            </node>
                         </node>
                     </node>
                 </node>
