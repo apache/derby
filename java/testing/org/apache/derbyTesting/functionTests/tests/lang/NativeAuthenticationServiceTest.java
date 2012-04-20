@@ -82,6 +82,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  ORANGE_USER = "ORANGE";   
     private static  final   String  BANANA_USER = "BANANA";   
     private static  final   String  GRAPE_USER = "GRAPE";   
+    private static  final   String  PINEAPPLE_USER = "PINEAPPLE";   
 
     private static  final   String  WALNUT_USER = "WALNUT";
 
@@ -674,9 +675,13 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // null password should not generate NPE
         getConnection( _nativeAuthentication, true, CREDENTIALS_DB, DBO, null, INVALID_AUTHENTICATION );
 
-        // add the dbo as a user if he wasn't created when the database was created
+        // add the dbo as a user if she wasn't created when the database was created
         if ( !_nativeAuthentication )
         {
+            // verify that only the DBO can create credentials for the DBO
+            Connection  pineappleConn = openConnection( CREDENTIALS_DB, PINEAPPLE_USER, true, null );
+            addUser( pineappleConn, DBO, DBO_ONLY_OPERATION );  // this should fail
+            
             addUser( sysadminConn, DBO );
         }
         
@@ -1494,10 +1499,30 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     private void    addUser( Connection conn, String user ) throws Exception
     {
+        addUser( conn, user, null );
+    }
+
+    private void    addUser( Connection conn, String user, String expectedSQLState ) throws Exception
+    {
+        boolean shouldFail = (expectedSQLState != null);
         String  password = getPassword( user );
         String  statement = "call syscs_util.syscs_create_user( '" + user + "', '" + password + "' )";
+
+        if ( shouldFail )
+        {
+            println( "Expecting " + expectedSQLState + " when executing '" + statement + "'" );
+        }
         
-        goodStatement( conn, statement );
+        try {
+            goodStatement( conn, statement );
+
+            if ( shouldFail )   { fail( tagError( "Should not have been allowed to create user " + user ) ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
+            else    { fail( tagError( "Unexpectedly failed to create user " + user ) );}
+        }
     }
 
     private void  setDatabaseProperty( boolean shouldFail, Connection conn, String key, String value, String expectedSQLState )

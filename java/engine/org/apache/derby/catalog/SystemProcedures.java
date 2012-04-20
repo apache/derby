@@ -2054,7 +2054,8 @@ public class SystemProcedures  {
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
         TransactionController tc = lcc.getTransactionExecute();
 
-        // the first credentials must be those of the DBO
+        // the first credentials must be those of the DBO and only the DBO
+        // can add them
         try {
             DataDictionary dd = lcc.getDataDictionary();
             String  dbo = dd.getAuthorizationDatabaseOwner();
@@ -2064,6 +2065,15 @@ public class SystemProcedures  {
                 if ( dd.getUser( dbo ) == null )
                 {
                     throw StandardException.newException( SQLState.DBO_FIRST );
+                }
+            }
+            else    // we are trying to create credentials for the DBO
+            {
+                String  currentUser = lcc.getStatementContext().getSQLSessionContext().getCurrentUser();
+
+                if ( !dbo.equals( currentUser ) )
+                {
+                    throw StandardException.newException( SQLState.DBO_ONLY );
                 }
             }
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }

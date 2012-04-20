@@ -1236,7 +1236,7 @@ Guide.
 
             <msg>
                 <name>4251D</name>
-                <text>Only the database owner can view this data.</text>
+                <text>Only the database owner can perform this operation.</text>
             </msg>
 
             <msg>
