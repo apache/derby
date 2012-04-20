@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -71,7 +73,6 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             new TestSuite(OrderByAndSortAvoidance.class)) {
                 protected void decorateSQL(Statement st)
                         throws SQLException {
-                    getConnection().setAutoCommit(false);
                     st.executeUpdate("create table a(col1 int, col2 int)");
                     st.executeUpdate("insert into a values(1,1),(1,1)");
                     st.executeUpdate("create table b(col1 int, col2 int)");
@@ -95,9934 +96,9 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         
                     st.executeUpdate(
                         "CREATE INDEX key3 ON table2(value)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483649)");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "+
-                        "'AddressG4', 'BELGIQUE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
 
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "+
-                        "'AddressG3', '1180, Bruxelles')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'DocumentSortingValues', '______21855__1__1')");
+                    populateTestTables(getConnection());
 
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SC3', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'has_address', "+
-                        "'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'logo', 'false')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'InternalAddress', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'InternalAddressBringer', 'false')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddresseeSeq', '1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SC1', 'Country=BE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "+
-                        "'CommunicationOrderId', '21865')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'BatchTypeId', 'Paper')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'location', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SortPlan', "
-                        + "'B-W3-S2')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'PostComponentId', '21855')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'BatchTypeLabel', "+
-                        "'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'city', 'Bruxelles')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'CopyMention', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'StapleNbr', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'TLEBundle', "+
-                        "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG5', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier001-0001___________Bla bla bla bla "
-                        + "bla bla 99____')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "+
-                        "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Pliable', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'TLEBinder', "+
-                        "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'country', 'BE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'AddressG1', "+
-                        "'testOlivier001-0001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'MentionCode', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'SC5', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483650)");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SC2', "+
-                        "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG4', "
-                        + "'BELGIQUE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'DocumentSortingValues', '______21855__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'ItemSeq', '1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Plex', 'S')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'has_address', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, " +
-                        "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Language', 'FR')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SC4', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG6', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddresseeSeq', '1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'CommunicationOrderId', '21865')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Enveloping', 'C')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'PostComponentId', "+
-                        "'21855')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'BatchTypeLabel', 'Paper')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG7', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG8', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'TLEBundle', "
-                        + "'Niveau2')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'header', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "+
-                        "'EnvelopSortingValue', 'BE1180___testOlivier001-0001"+
-                        "___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'GroupedWith', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG2', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'DiversionReason', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'TLEBinder', "
-                        + "'Niveau1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'AddressG1', "
-                        + "'testOlivier001-0001')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'postCode', '1180')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Branding', '1C')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483651)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG4', "+
-                        "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG3', "+
-                        "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'DocumentSortingValues', '______21856__1__1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'BatchTypeInstructions', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SC3', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'logo', 'false')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'InternalAddress', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'InternalAddressBringer', 'false')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SC1', 'Country=BE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "+
-                        "'CommunicationOrderId', '21866')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'BatchTypeId', 'Paper')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'location', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SortPlan', "
-                        + "'B-W3-S2')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'PostComponentId', '21856')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'city', 'Bruxelles')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'CopyMention', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'StapleNbr', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG5', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier001-0002___________Bla bla bla bla "
-                        + "bla bla 99____')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Pliable', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'country', 'BE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'AddressG1', "+
-                        "'testOlivier001-0002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'MentionCode', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'SC5', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483652)");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG4', "
-                        + "'BELGIQUE')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "+
-                        "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "+
-                        "'DocumentSortingValues', '______21856__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'ItemSeq', '1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Plex', 'S')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'has_address', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Language', 'FR')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SC4', '=')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG6', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddresseeSeq', '1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'CommunicationOrderId', '21866')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Enveloping', 'C')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'PostComponentId', '21856')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'BatchTypeLabel', 'Paper')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG7', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG8', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'TLEBundle', "
-                        + "'Niveau2')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'header', 'true')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'EnvelopSortingValue',"
-                        + "'BE1180___testOlivier001-0002___________Bla bla bla bla bl,"
-                        + "a bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'GroupedWith', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'DiversionReason', '')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'TLEBinder', "
-                        + "'Niveau1')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'AddressG1', "
-                        + "'testOlivier001-0002')");
-        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483653)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'DocumentSortingValues', '______21857__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "+
-                        "'CommunicationOrderId', '21867')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'location', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'PostComponentId', '21857')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "+
-                        "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'TLEBundle', "+
-                        "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier002-0003___________Bla bla bla bla "
-                        + "bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "+
-                        "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'TLEBinder', "+
-                        "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'AddressG1', "+
-                        "'testOlivier002-0003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483654)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SC2', 'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'DocumentSortingValues', '______21857__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'InternalAddress',"+
-                        "'233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SC1', 'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'CommunicationOrderId', '21867')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'PostComponentId', '21857')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "+
-                        "'EnvelopSortingValue', "+
-                        "'BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG2', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'AddressG1', "
-                        + "'testOlivier002-0003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483655)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'DocumentSortingValues', '______21858__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "+
-                        "'CommunicationOrderId', '21868')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'location', "+
-                        "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'PostComponentId', '21858')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "+
-                        "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'AddressG1', "+
-                        "'testOlivier002-0004')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483656)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SC2', 'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "+
-                        "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'DocumentSorting"+
-                        "Values', '______21858__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'BatchTypeIn"+
-                        "structions', 'Ne pas jeter ces documents.  Ils ont "+
-                        "\u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SubBatchSortin"+
-                        "gValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'InternalAddres"+
-                        "s', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'InternalAddressB"+
-                        "ringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SC1', 'Request"+
-                        "er=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'CommunicationOrderId', '21868')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'BatchTypeId', "+
-                        "'233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'PostComponentI"+
-                        "d', '21858')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'city', 'Bruxel"+
-                        "les')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier002-0004___________Boulev"+
-                        "ard du Souverain, 23____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG2', 'B"+
-                        "oulevard du Souverain, 23')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'AddressG1', "
-                        + "'testOlivier002-0004')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483657)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG3', 'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'DocumentSortingValues', '______21859__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'CommunicationOrderId', '21869')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'location', 'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'PostComponentId', '21859')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier003-0005___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'AddressG1', 'testOlivier003-0005')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483658)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'DocumentSortingValues', '______21859__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SC1', 'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'CommunicationOrderId', '21869')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'PostComponentId', '21859')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'city', 'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'EnvelopSorting"+
-                        "Value', 'BE1000___testOlivier003-0005___________rue du"+
-                        "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG2', 'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'AddressG1', "
-                        + "'testOlivier003-0005')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483659)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG3', 'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'DocumentSortingValues', '______21860__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'CommunicationOrderId', '21870')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'location', 'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'PostComponentId', '21860')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier003-0006___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'AddressG1', 'testOlivier003-0006')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483660)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'DocumentSortingValues', '______21860__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SC1', 'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'CommunicationOrderId', '21870')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'PostComponentId', '21860')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'city', 'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'EnvelopSorting"+
-                        "Value', 'BE1000___testOlivier003-0006___________rue du"+
-                        "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG2', 'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'AddressG1', "
-                        + "'testOlivier003-0006')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483661)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG3', '1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'DocumentSortingValues', '______21861__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'CommunicationOrderId', '21871')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'PostComponentId', '21861')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'BatchTypeLabel', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier004-0007___________Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'AddressG1', 'testOlivier004-0007')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483662)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'DocumentSortingValues', '______21861__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'CommunicationOrderId', '21871')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'BatchTypeId', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'PostComponentId', '21861')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier004-0007___________Boulev"+
-                        "ard du Souverain, 23____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'AddressG1', "
-                        + "'testOlivier004-0007')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483663)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG3', '1180, Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'DocumentSortingValues', '______21862__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'InternalAddress', '')");
-                        
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'CommunicationOrderId', '21872')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'PostComponentId', '21862')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'AddressG1', 'testOlivier004-0008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483664)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'DocumentSortingValues', '______21862__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'has_address', 'true')");
-            
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'CommunicationOrderId', '21872')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'PostComponentId', '21862')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'EnvelopSortingValue', 'BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'AddressG1', "
-                        + "'testOlivier004-0008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483665)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'DocumentSortingValues', '______21863__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'CommunicationOrderId', '21873')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Enveloping', 'N')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'PostComponentId', '21863')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'BatchTypeLabel', 'Diversion pour test')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'DiversionReason', '001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'AddressG1', 'testOlivier005-0009')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483666)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SC2', 'PostCode=1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'IsIdenticalToD"+
-                        "ocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'DocumentSortin"+
-                        "gValues', '______21863__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'BatchTypeInstr"+
-                        "uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fait"+
-                        "s pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SubBatchSortingValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'CommunicationOrderId', '21873')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'PostComponentId', '21863')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier005-0009___________Boulev"+
-                        "ard du Souverain, 23____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'AddressG1', "
-                        + "'testOlivier005-0009')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483667)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'DocumentSortingValues', '______21864__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'CommunicationOrderId', '21874')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Enveloping', 'N')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'PostComponentId', '21864')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'BatchTypeLabel', 'Diversion pour test')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'DiversionReason', '001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'AddressG1', 'testOlivier005-0010')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483668)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SC2', 'PostCode=1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'DocumentSortin"+
-                        "gValues', '______21864__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'BatchTypeInstr"+
-                        "uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fa"+
-                        "its pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SubBatchSortin"+
-                        "gValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'CommunicationOrderId', '21874')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'PostComponentId', '21864')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier005-0010___________Boulev"+
-                        "ard du Souverain, 23____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG2', 'B"+
-                        "oulevard du Souverain, 23')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'AddressG1', "
-                        + "'testOlivier005-0010')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483669)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'DocumentSortingValues', '______21865__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'CommunicationOrderId', '21875')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'PostComponentId', '21865')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier006-0011___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'AddressG1', 'testOlivier006-0011')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483670)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'DocumentSortingValues', '______21865__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'CommunicationOrderId', '21875')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'PostComponentId', '21865')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'EnvelopSorting"+
-                        "Value', 'BE1000___testOlivier006-0011___________rue du"+
-                        "broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'AddressG1', "
-                        + "'testOlivier006-0011')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483671)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'DocumentSortingValues', '______21866__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'CommunicationOrderId', '21876')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'PostComponentId', '21866')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier006-0012___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'AddressG1', 'testOlivier006-0012')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483672)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'DocumentSortingValues', '______21866__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'CommunicationOrderId', '21876')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'PostComponentId', '21866')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'EnvelopSorting"+
-                        "Value', 'BE1000___testOlivier006-0012___________rue du"+
-                        "broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'AddressG1', "
-                        + "'testOlivier006-0012')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483673)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG3', '1180, Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'DocumentSortingValues', '______21867__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'CommunicationOrderId', '21877')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'PostComponentId', '21867')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'BatchTypeLabel', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier007-0013___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'AddressG1', 'testOlivier007-0013')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483674)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'DocumentSortingValues', '______21867__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SC1', 'Country=BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'CommunicationOrderId', '21877')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'BatchTypeId', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SortPlan', 'B-W3-S2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'PostComponentId', '21867')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier007-0013___________Boulev"+
-                        "ard du Souverain, 23____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'AddressG1', "
-                        + "'testOlivier007-0013')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483675)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG3', '1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'DocumentSortingValues', '______21868__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'CommunicationOrderId', '21878')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'PostComponentId', '21868')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier007-0014___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'AddressG1', 'testOlivier007-0014')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483676)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'DocumentSortingValues', '______21868__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'CommunicationOrderId', '21878')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'PostComponentId', '21868')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier007-0014___________Boulev"+
-                        "ard du Souverain, 23____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG2', 'B"+
-                        "oulevard du Souverain, 23')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'AddressG1', "
-                        + "'testOlivier007-0014')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483677)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'DocumentSortingValues', '______21869__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'CommunicationOrderId', '21879')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Enveloping', 'N')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'PostComponentId', '21869')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'BatchTypeLabel', 'Diversion pour test')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'DiversionReason', '001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'AddressG1', 'testOlivier008-0015')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483678)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SC2', 'PostCode=1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'DocumentSortingValues', '______21869__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SubBatchSortingValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'CommunicationOrderId', '21879')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'PostComponentId', '21869')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'AddressG1', "
-                        + "'testOlivier008-0015')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483679)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'DocumentSortingValues', '______21870__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'CommunicationOrderId', '21880')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Enveloping', 'N')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'PostComponentId', '21870')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'BatchTypeLabel', 'Diversion pour test')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'DiversionReason', '001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'AddressG1', 'testOlivier008-0016')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483680)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SC2', 'PostCode=1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'DocumentSortingValues', '______21870__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'BatchTypeInstr"+
-                        "uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fai"+
-                        "ts pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SubBatchSortingValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'CommunicationOrderId', '21880')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'PostComponentId', '21870')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'EnvelopSorting"+
-                        "Value', 'BE1180___testOlivier008-0016___________Boulev"+
-                        "ard du Souverain, 23____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'AddressG1', "
-                        + "'testOlivier008-0016')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483681)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'DocumentSortingValues', '______21871__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'CommunicationOrderId', '21881')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'PostComponentId', '21871')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier009-0017___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'AddressG1', 'testOlivier009-0017')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483682)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'DocumentSortingValues', '______21871__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'CommunicationOrderId', '21881')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'PostComponentId', '21871')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'EnvelopSorting"+
-                        "Value', 'BE1000___testOlivier009-0017___________rue du"+
-                        "broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'AddressG1', "
-                        + "'testOlivier009-0017')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483683)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'DocumentSortingValues', '______21872__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'CommunicationOrderId', '21882')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'PostComponentId', '21872')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier009-0018___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'AddressG1', 'testOlivier009-0018')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483684)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'DocumentSortingValues', '______21872__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'CommunicationOrderId', '21882')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'PostComponentId', '21872')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'EnvelopSortingValue', 'BE1000___testOlivier009-0018___________rue du broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'AddressG1', "
-                        + "'testOlivier009-0018')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483685)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG3', '1180, Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'DocumentSortingValues', '______21873__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'CommunicationOrderId', '21883')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'PostComponentId', '21873')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'BatchTypeLabel', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'AddressG1', 'testOlivier010-0019')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483686)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'DocumentSortingValues', '______21873__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SC1', 'Country=BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'CommunicationOrderId', '21883')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'BatchTypeId', 'Paper')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SortPlan', 'B-W3-S2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'PostComponentId', '21873')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'EnvelopSortingValue', 'BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'AddressG1', "
-                        + "'testOlivier010-0019')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483687)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SC2', "
-                        + "'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG3', '1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'DocumentSortingValues', '______21874__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'CommunicationOrderId', '21884')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SortPlan', "
-                        + "'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'PostComponentId', '21874')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'AddressG1', 'testOlivier010-0020')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483688)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SC2', 'LaPosteSortPlan=B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG3', "
-                        + "'1180, Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'DocumentSortingValues', '______21874__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SubBatchSortingValue', 'BE_B-W3-S2___')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SC1', 'Country=BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'CommunicationOrderId', '21884')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'BatchTypeId', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SortPlan', 'B-W3-S2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'PostComponentId', '21874')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'BatchTypeLabel', 'Paper')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'EnvelopSortingValue', 'BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'AddressG1', "
-                        + "'testOlivier010-0020')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483689)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'DocumentSortingValues', '______21875__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'CommunicationOrderId', '21885')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'PostComponentId', '21875')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'AddressG1', 'testOlivier011-0021')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483690)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SC2', 'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'DocumentSortingValues', '______21875__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SC1', 'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'CommunicationOrderId', '21885')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'PostComponentId', '21875')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'AddressG1', "
-                        + "'testOlivier011-0021')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483691)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'DocumentSortingValues', '______21876__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'CommunicationOrderId', '21886')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'PostComponentId', '21876')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'TLEBundle', 'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'TLEBinder', 'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'AddressG1', 'testOlivier011-0022')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483692)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SC2', 'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'DocumentSortingValues', '______21876__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SubBatchSortingValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'CommunicationOrderId', '21886')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'PostComponentId', '21876')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'EnvelopSortingValue', 'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'AddressG1', "
-                        + "'testOlivier011-0022')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483693)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'DocumentSortingValues', '______21877__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'CommunicationOrderId', '21887')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'PostComponentId', '21877')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier012-0023___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'AddressG1', 'testOlivier012-0023')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483694)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'DocumentSortingValues', '______21877__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'CommunicationOrderId', '21887')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'PostComponentId', '21877')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'EnvelopSortingValue', 'BE1000___testOlivier012-0023___________rue du broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'AddressG1', "
-                        + "'testOlivier012-0023')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483695)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SC2', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'IsIdenticalToDocumentAddress', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG3', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'DocumentSortingValues', '______21878__1__1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'ItemSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'BatchTypeInstructions', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'SubBatchSortingValue', 'Une info b')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'logo', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'InternalAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'InternalAddressBringer', 'false')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddresseeSeq', '1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SC1', "
-                        + "'DeliveryInformation=Une info bidon')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'CommunicationOrderId', '21888')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'BatchTypeId', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'location', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Enveloping', 'C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'PostComponentId', '21878')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'BatchTypeLabel', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'city', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'StapleNbr', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'TLEBundle', 'Niveau2')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'header', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1000___testOlivier012-0024___________rue du "
-                        + "broker_________________')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG2', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'DiversionReason', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'TLEBinder', 'Niveau1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'AddressG1', 'testOlivier012-0024')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'postCode', '1000')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (2147483696)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SC2', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'IsIdenticalToDocumentAddress', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG3', "
-                        + "'Broker ville')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'DocumentSortingValues', '______21878__1__1')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'ItemSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'BatchTypeInstructions', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SubBatchSortingValue', 'Une info b')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'logo', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'InternalAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'InternalAddressBringer', 'false')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddresseeSeq', '1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SC1', 'DeliveryInformation=Une info bidon')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'CommunicationOrderId', '21888')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'BatchTypeId', 'BROKER NET')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'location', "
-                        + "'rue du broker')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Enveloping', 'C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'PostComponentId', '21878')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'BatchTypeLabel', 'BROKER NET')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'city', 'Broker ville')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'StapleNbr', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'TLEBundle', "
-                        + "'Niveau2')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'header', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'EnvelopSortingValue', 'BE1000___testOlivier012-0024___________rue du broker_________________')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG2', 'rue du broker')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'DiversionReason', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'TLEBinder', "
-                        + "'Niveau1')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'AddressG1', "
-                        + "'testOlivier012-0024')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'postCode', '1000')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'DocumentID', '21865/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483649, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483649 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, "
-                        + "'DocumentID', '21865/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483650, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483650 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'DocumentID', '21866/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483651, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483651 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, "
-                        + "'DocumentID', '21866/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483652, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483652 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (4294967297)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'ItemSeq', '0')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'CommunicationOrderId', '21867')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'PostComponentId', '21857')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'EnvelopSortingValue', 'BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'AddressG1', 'testOlivier002-0003')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'env_type', 'I')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'PaperLayout', 'ADDINT')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'DocumentID', '21867/0/0//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (4294967297, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=4294967297 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'DocumentID', '21867/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483653, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483653 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'GenerationTime', 'Wed Oct 22 14:12:10 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, "
-                        + "'DocumentID', '21867/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'PageSequenceId', '000003')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483654, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483654 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (6442450945)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'ItemSeq', '0')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'CommunicationOrderId', '21868')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'PostComponentId', '21858')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'EnvelopSortingValue', 'BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'AddressG1', 'testOlivier002-0004')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'env_type', 'I')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'PaperLayout', 'ADDINT')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'DocumentID', '21868/0/0//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (6442450945, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=6442450945 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'DocumentID', '21868/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483655, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483655 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, "
-                        + "'DocumentID', '21868/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'PageSequenceId', '000003')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483656, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483656 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'DocumentID', '21869/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483657, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483657 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (8589934593)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SC2', 'PostCode=1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG4', "
-                        + "'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'IsIdenticalToDocumentAddress', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG3', "
-                        + "'1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'DocumentSortingValues', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'ItemSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SC3', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SubBatchSortingValue', 'ddch257___1180______')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SC4', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG6', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddresseeSeq', '0')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'CommunicationOrderId', '21873')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'location', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Enveloping', 'N')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'PostComponentId', '21863')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'BatchTypeLabel', 'Diversion pour test')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG7', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'StapleNbr', 'NO')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG5', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'GroupedWith', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG2', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'DiversionReason', '001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'country', 'BE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'AddressG1', "
-                        + "'testOlivier005-0009')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'MentionCode', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'SC5', '=')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'env_type', 'I')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Branding', '1C')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, "
-                        + "'DocumentID', '21869/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483658, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483658 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'DocumentID', '21870/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483659, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483659 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, "
-                        + "'DocumentID', '21870/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483660, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483660 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'DocumentID', '21871/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483661, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483661 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, "
-                        + "'DocumentID', '21871/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483662, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483662 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'DocumentID', '21872/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483663, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483663 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, "
-                        + "'DocumentID', '21872/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'PageSequenceId', '000002')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483664, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483664 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (10737418241)");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG4', 'BELGIQUE')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG3', '1180 Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'ItemSeq', '0')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Plex', 'S')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'has_address', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Language', 'FR')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'InternalAddress', '233/621')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'InternalAddressBringer', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SC1', 'Requester=ddch257')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'CommunicationOrderId', '21874')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'BatchTypeId', '233-621-001')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SortPlan', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'PostComponentId', '21864')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'city', 'Bruxelles')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'CopyMention', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG8', '')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'EnvelopSortingValue', 'BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Pliable', 'true')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'AddressG1', 'testOlivier005-0010')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'postCode', '1180')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'env_type', 'I')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'PaperLayout', 'ADDINT')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'DocumentID', '21873/0/0//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (8589934593, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=8589934593 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'DocumentID', '21873/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483665, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483665 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, "
-                        + "'DocumentID', '21873/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'PageSequenceId', '000003')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483666, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483666 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'PaperLayout', 'ADDINT')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'DocumentID', '21874/0/0//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, "
-                        + "'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (10737418241, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=10737418241 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'DocumentID', '21874/1/1//')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'PhysicalID', 'No')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483667, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483667 AND name='has_address'");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, "
-                        + "'DocumentID', '21874/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'PageSequenceId', '000003')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483668, 'Staple', 'No')");
-
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483668 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'PaperLayout', 'LETTER')");
-
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'DocumentID', '21875/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483669, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483669 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, "
-                        + "'DocumentID', '21875/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483670, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483670 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (12884901889)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'ItemSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SC1', 'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'CommunicationOrderId', '21879')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'PostComponentId', '21869')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'AddressG1', 'testOlivier008-0015')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'env_type', 'I')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'DocumentID', '21876/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483671, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483671 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, "
-                        + "'DocumentID', '21876/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483672, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483672 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'DocumentID', '21877/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483673, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483673 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, "
-                        + "'DocumentID', '21877/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483674, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483674 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'DocumentID', '21878/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483675, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483675 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'GenerationTime', 'Wed Oct 22 14:12:11 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, "
-                        + "'DocumentID', '21878/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483676, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483676 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (15032385537)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'ItemSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SC1', 'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'CommunicationOrderId', '21880')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'PostComponentId', '21870')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'EnvelopSortingValue', 'BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'AddressG1', 'testOlivier008-0016')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'env_type', 'I')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'PaperLayout', 'ADDINT')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'DocumentID', '21879/0/0//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, "
-                        + "'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (12884901889, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=12884901889 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'DocumentID', '21879/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483677, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483677 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, "
-                        + "'DocumentID', '21879/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'PageSequenceId', '000003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483678, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483678 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'PaperLayout', 'ADDINT')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'DocumentID', '21880/0/0//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, "
-                        + "'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (15032385537, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=15032385537 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'DocumentID', '21880/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483679, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483679 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, "
-                        + "'DocumentID', '21880/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'PageSequenceId', '000003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483680, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483680 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (17179869185)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SC2', "
-                        + "'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'ItemSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                        + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SC1', 'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'CommunicationOrderId', '21885')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'location', "
-                        + "'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'PostComponentId', '21875')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'AddressG1', 'testOlivier011-0021')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'env_type', 'I')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'DocumentID', '21881/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483681, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483681 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, "
-                        + "'DocumentID', '21881/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483682, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483682 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'DocumentID', '21882/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483683, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483683 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, "
-                        + "'DocumentID', '21882/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483684, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483684 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'DocumentID', '21883/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483685, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483685 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, "
-                        + "'DocumentID', '21883/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483686, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483686 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'DocumentID', '21884/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483687, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483687 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table1 VALUES (19327352833)");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SC2', 'PostCode=1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'AddressG4', 'BELGIQUE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'IsIdenticalToDocumentAddress', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'AddressG3', '1180 Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'DocumentSortingValues', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'ItemSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Plex', 'S')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SC3', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'has_address', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SubBatchSortingValue', 'ddch257___1180______')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Language', 'FR')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SC4', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'InternalAddress', '233/621')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'AddressG6', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'InternalAddressBringer', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'AddresseeSeq', '0')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SC1', "
-                        + "'Requester=ddch257')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'CommunicationOrderId', '21886')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'BatchTypeId', '233-621-001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'location', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SortPlan', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Enveloping', 'N')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'PostComponentId', '21876')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'BatchTypeLabel', 'Diversion pour test')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'city', 'Bruxelles')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'AddressG7', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'CopyMention', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'StapleNbr', 'NO')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'AddressG8', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'AddressG5', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'EnvelopSortingValue', "
-                        + "'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'GroupedWith', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'AddressG2', 'Bla bla bla bla bla bla 99')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'DiversionReason', '001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Pliable', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'country', 'BE')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'AddressG1', 'testOlivier011-0022')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'MentionCode', '')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'postCode', '1180')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'SC5', '=')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'env_type', 'I')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Branding', '1C')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, "
-                        + "'DocumentID', '21884/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483688, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483688 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'PaperLayout', 'ADDINT')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'DocumentID', '21885/0/0//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, "
-                        + "'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (17179869185, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=17179869185 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'DocumentID', '21885/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483689, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483689 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'GenerationTime', 'Wed Oct 22 14:12:12 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, "
-                        + "'DocumentID', '21885/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'PageSequenceId', '000003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483690, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483690 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'PaperLayout', 'ADDINT')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'DocumentID', '21886/0/0//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, "
-                        + "'cover_page', 'true')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (19327352833, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=19327352833 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'DocumentID', '21886/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, "
-                        + "'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483691, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483691 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, "
-                        + "'DocumentID', '21886/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'PageSequenceId', '000003')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483692, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483692 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'DocumentID', '21887/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483693, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483693 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, "
-                        + "'DocumentID', '21887/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483694, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483694 "
-                        + "AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'DocumentID', '21888/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, "
-                        + "'PageSequenceId', '000001')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483695, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483695 AND name='has_address'");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'PaperLayout', 'LETTER')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'GenerationTime', 'Wed Oct 22 14:12:13 CEST 2008')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, "
-                        + "'DocumentID', '21888/1/1//')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'PageSequenceId', '000002')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'PhysicalID', 'No')");
-            
-                    st.executeUpdate(
-                        "INSERT INTO table2 VALUES (2147483696, 'Staple', 'No')");
-            
-                    st.executeUpdate(
-                        "UPDATE table2 SET value='true' WHERE id=2147483696 "
-                        + "AND name='has_address'");
-            
                     //Start of tables creation for DERBY-4240 repro
                     st.executeUpdate(
                         "CREATE TABLE test1 (id BIGINT NOT NULL, name VARCHAR(255), "+
@@ -10115,10 +191,3072 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                         "(4,1),(1,2),(3,2),(2,2),(1,3),(2,3)");
                     //End of tables creation for DERBY-4331 repro
 
-                    getConnection().commit();
-                    st.close();
                 }
             };
+    }
+
+    /**
+     * Helper method that inserts a row into table1.
+     * @param ps parameterized statement that inserts a row into table1
+     * @param id the value of the id column
+     */
+    private static void insertTable1(PreparedStatement ps, long id)
+            throws SQLException {
+        ps.setLong(1, id);
+        ps.executeUpdate();
+    }
+
+    /**
+     * Helper method that inserts a row into table2.
+     * @param ps parameterized statement that inserts a row into table2
+     * @param id the value of the id column
+     * @param name the value of the name column
+     * @param value the value of the value column
+     */
+    private static void insertTable2(PreparedStatement ps, long id,
+                                     String name, String value)
+            throws SQLException {
+        ps.setLong(1, id);
+        ps.setString(2, name);
+        ps.setString(3, value);
+        ps.executeUpdate();
+    }
+
+    /**
+     * Helper method that updates a row in table2
+     * @param ps parameterized statement that updates a row in table2
+     * @param id the id of the row to update
+     */
+    private static void updateTable2(PreparedStatement ps, long id) throws SQLException {
+        ps.setLong(1, id);
+        ps.executeUpdate();
+    }
+
+    /**
+     * Populate table1 and table2 with the rows needed for reproducing
+     * DERBY-3926.
+     */
+    private static void populateTestTables(Connection conn) throws SQLException {
+
+        PreparedStatement it1 = conn.prepareStatement(
+            "INSERT INTO table1 VALUES (?)");
+        PreparedStatement it2 = conn.prepareStatement(
+            "INSERT INTO table2 VALUES (?,?,?)");
+        PreparedStatement ut2 = conn.prepareStatement(
+            "UPDATE table2 SET value='true' WHERE id=? AND name='has_address'");
+
+        insertTable1(it1, 2147483649L);
+        insertTable2(it2, 2147483649L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483649L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483649L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483649L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483649L, "DocumentSortingValues", "______21855__1__1");
+        insertTable2(it2, 2147483649L, "ItemSeq", "1");
+        insertTable2(it2, 2147483649L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483649L, "Plex", "S");
+        insertTable2(it2, 2147483649L, "SC3", "=");
+        insertTable2(it2, 2147483649L, "has_address", "true");
+        insertTable2(it2, 2147483649L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483649L, "Language", "FR");
+        insertTable2(it2, 2147483649L, "logo", "false");
+        insertTable2(it2, 2147483649L, "SC4", "=");
+        insertTable2(it2, 2147483649L, "InternalAddress", "");
+        insertTable2(it2, 2147483649L, "AddressG6", "");
+        insertTable2(it2, 2147483649L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483649L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483649L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483649L, "CommunicationOrderId", "21865");
+        insertTable2(it2, 2147483649L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483649L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483649L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483649L, "Enveloping", "C");
+        insertTable2(it2, 2147483649L, "PostComponentId", "21855");
+        insertTable2(it2, 2147483649L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483649L, "city", "Bruxelles");
+        insertTable2(it2, 2147483649L, "AddressG7", "");
+        insertTable2(it2, 2147483649L, "CopyMention", "");
+        insertTable2(it2, 2147483649L, "AddressG8", "");
+        insertTable2(it2, 2147483649L, "StapleNbr", "");
+        insertTable2(it2, 2147483649L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483649L, "AddressG5", "");
+        insertTable2(it2, 2147483649L, "header", "true");
+        insertTable2(it2, 2147483649L, "EnvelopSortingValue", "BE1180___testOlivier001-0001___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483649L, "GroupedWith", "");
+        insertTable2(it2, 2147483649L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483649L, "DiversionReason", "");
+        insertTable2(it2, 2147483649L, "Pliable", "true");
+        insertTable2(it2, 2147483649L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483649L, "country", "BE");
+        insertTable2(it2, 2147483649L, "AddressG1", "testOlivier001-0001");
+        insertTable2(it2, 2147483649L, "MentionCode", "");
+        insertTable2(it2, 2147483649L, "postCode", "1180");
+        insertTable2(it2, 2147483649L, "SC5", "=");
+        insertTable2(it2, 2147483649L, "Branding", "1C");
+        insertTable1(it1, 2147483650L);
+        insertTable2(it2, 2147483650L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483650L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483650L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483650L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483650L, "DocumentSortingValues", "______21855__1__1");
+        insertTable2(it2, 2147483650L, "ItemSeq", "1");
+        insertTable2(it2, 2147483650L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483650L, "Plex", "S");
+        insertTable2(it2, 2147483650L, "SC3", "=");
+        insertTable2(it2, 2147483650L, "has_address", "true");
+        insertTable2(it2, 2147483650L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483650L, "Language", "FR");
+        insertTable2(it2, 2147483650L, "logo", "false");
+        insertTable2(it2, 2147483650L, "SC4", "=");
+        insertTable2(it2, 2147483650L, "InternalAddress", "");
+        insertTable2(it2, 2147483650L, "AddressG6", "");
+        insertTable2(it2, 2147483650L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483650L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483650L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483650L, "CommunicationOrderId", "21865");
+        insertTable2(it2, 2147483650L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483650L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483650L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483650L, "Enveloping", "C");
+        insertTable2(it2, 2147483650L, "PostComponentId", "21855");
+        insertTable2(it2, 2147483650L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483650L, "city", "Bruxelles");
+        insertTable2(it2, 2147483650L, "AddressG7", "");
+        insertTable2(it2, 2147483650L, "CopyMention", "");
+        insertTable2(it2, 2147483650L, "AddressG8", "");
+        insertTable2(it2, 2147483650L, "StapleNbr", "");
+        insertTable2(it2, 2147483650L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483650L, "AddressG5", "");
+        insertTable2(it2, 2147483650L, "header", "true");
+        insertTable2(it2, 2147483650L, "EnvelopSortingValue", "BE1180___testOlivier001-0001___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483650L, "GroupedWith", "");
+        insertTable2(it2, 2147483650L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483650L, "DiversionReason", "");
+        insertTable2(it2, 2147483650L, "Pliable", "true");
+        insertTable2(it2, 2147483650L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483650L, "country", "BE");
+        insertTable2(it2, 2147483650L, "AddressG1", "testOlivier001-0001");
+        insertTable2(it2, 2147483650L, "MentionCode", "");
+        insertTable2(it2, 2147483650L, "postCode", "1180");
+        insertTable2(it2, 2147483650L, "SC5", "=");
+        insertTable2(it2, 2147483650L, "Branding", "1C");
+        insertTable1(it1, 2147483651L);
+        insertTable2(it2, 2147483651L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483651L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483651L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483651L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483651L, "DocumentSortingValues", "______21856__1__1");
+        insertTable2(it2, 2147483651L, "ItemSeq", "1");
+        insertTable2(it2, 2147483651L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483651L, "Plex", "S");
+        insertTable2(it2, 2147483651L, "SC3", "=");
+        insertTable2(it2, 2147483651L, "has_address", "true");
+        insertTable2(it2, 2147483651L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483651L, "Language", "FR");
+        insertTable2(it2, 2147483651L, "logo", "false");
+        insertTable2(it2, 2147483651L, "SC4", "=");
+        insertTable2(it2, 2147483651L, "InternalAddress", "");
+        insertTable2(it2, 2147483651L, "AddressG6", "");
+        insertTable2(it2, 2147483651L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483651L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483651L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483651L, "CommunicationOrderId", "21866");
+        insertTable2(it2, 2147483651L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483651L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483651L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483651L, "Enveloping", "C");
+        insertTable2(it2, 2147483651L, "PostComponentId", "21856");
+        insertTable2(it2, 2147483651L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483651L, "city", "Bruxelles");
+        insertTable2(it2, 2147483651L, "AddressG7", "");
+        insertTable2(it2, 2147483651L, "CopyMention", "");
+        insertTable2(it2, 2147483651L, "AddressG8", "");
+        insertTable2(it2, 2147483651L, "StapleNbr", "");
+        insertTable2(it2, 2147483651L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483651L, "AddressG5", "");
+        insertTable2(it2, 2147483651L, "header", "true");
+        insertTable2(it2, 2147483651L, "EnvelopSortingValue", "BE1180___testOlivier001-0002___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483651L, "GroupedWith", "");
+        insertTable2(it2, 2147483651L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483651L, "DiversionReason", "");
+        insertTable2(it2, 2147483651L, "Pliable", "true");
+        insertTable2(it2, 2147483651L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483651L, "country", "BE");
+        insertTable2(it2, 2147483651L, "AddressG1", "testOlivier001-0002");
+        insertTable2(it2, 2147483651L, "MentionCode", "");
+        insertTable2(it2, 2147483651L, "postCode", "1180");
+        insertTable2(it2, 2147483651L, "SC5", "=");
+        insertTable2(it2, 2147483651L, "Branding", "1C");
+        insertTable1(it1, 2147483652L);
+        insertTable2(it2, 2147483652L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483652L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483652L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483652L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483652L, "DocumentSortingValues", "______21856__1__1");
+        insertTable2(it2, 2147483652L, "ItemSeq", "1");
+        insertTable2(it2, 2147483652L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483652L, "Plex", "S");
+        insertTable2(it2, 2147483652L, "SC3", "=");
+        insertTable2(it2, 2147483652L, "has_address", "true");
+        insertTable2(it2, 2147483652L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483652L, "Language", "FR");
+        insertTable2(it2, 2147483652L, "logo", "false");
+        insertTable2(it2, 2147483652L, "SC4", "=");
+        insertTable2(it2, 2147483652L, "InternalAddress", "");
+        insertTable2(it2, 2147483652L, "AddressG6", "");
+        insertTable2(it2, 2147483652L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483652L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483652L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483652L, "CommunicationOrderId", "21866");
+        insertTable2(it2, 2147483652L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483652L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483652L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483652L, "Enveloping", "C");
+        insertTable2(it2, 2147483652L, "PostComponentId", "21856");
+        insertTable2(it2, 2147483652L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483652L, "city", "Bruxelles");
+        insertTable2(it2, 2147483652L, "AddressG7", "");
+        insertTable2(it2, 2147483652L, "CopyMention", "");
+        insertTable2(it2, 2147483652L, "AddressG8", "");
+        insertTable2(it2, 2147483652L, "StapleNbr", "");
+        insertTable2(it2, 2147483652L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483652L, "AddressG5", "");
+        insertTable2(it2, 2147483652L, "header", "true");
+        insertTable2(it2, 2147483652L, "EnvelopSortingValue","BE1180___testOlivier001-0002___________Bla bla bla bla bl,a bla 99____");
+        insertTable2(it2, 2147483652L, "GroupedWith", "");
+        insertTable2(it2, 2147483652L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483652L, "DiversionReason", "");
+        insertTable2(it2, 2147483652L, "Pliable", "true");
+        insertTable2(it2, 2147483652L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483652L, "country", "BE");
+        insertTable2(it2, 2147483652L, "AddressG1", "testOlivier001-0002");
+        insertTable2(it2, 2147483652L, "MentionCode", "");
+        insertTable2(it2, 2147483652L, "postCode", "1180");
+        insertTable2(it2, 2147483652L, "SC5", "=");
+        insertTable2(it2, 2147483652L, "Branding", "1C");
+        insertTable1(it1, 2147483653L);
+        insertTable2(it2, 2147483653L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483653L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483653L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483653L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483653L, "DocumentSortingValues", "______21857__1__1");
+        insertTable2(it2, 2147483653L, "ItemSeq", "1");
+        insertTable2(it2, 2147483653L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483653L, "Plex", "S");
+        insertTable2(it2, 2147483653L, "SC3", "=");
+        insertTable2(it2, 2147483653L, "has_address", "true");
+        insertTable2(it2, 2147483653L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483653L, "Language", "FR");
+        insertTable2(it2, 2147483653L, "logo", "false");
+        insertTable2(it2, 2147483653L, "SC4", "=");
+        insertTable2(it2, 2147483653L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483653L, "AddressG6", "");
+        insertTable2(it2, 2147483653L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483653L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483653L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483653L, "CommunicationOrderId", "21867");
+        insertTable2(it2, 2147483653L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483653L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483653L, "SortPlan", "");
+        insertTable2(it2, 2147483653L, "Enveloping", "N");
+        insertTable2(it2, 2147483653L, "PostComponentId", "21857");
+        insertTable2(it2, 2147483653L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483653L, "city", "Bruxelles");
+        insertTable2(it2, 2147483653L, "AddressG7", "");
+        insertTable2(it2, 2147483653L, "CopyMention", "");
+        insertTable2(it2, 2147483653L, "AddressG8", "");
+        insertTable2(it2, 2147483653L, "StapleNbr", "");
+        insertTable2(it2, 2147483653L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483653L, "AddressG5", "");
+        insertTable2(it2, 2147483653L, "header", "true");
+        insertTable2(it2, 2147483653L, "EnvelopSortingValue", "BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483653L, "GroupedWith", "");
+        insertTable2(it2, 2147483653L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483653L, "DiversionReason", "001");
+        insertTable2(it2, 2147483653L, "Pliable", "true");
+        insertTable2(it2, 2147483653L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483653L, "country", "BE");
+        insertTable2(it2, 2147483653L, "AddressG1", "testOlivier002-0003");
+        insertTable2(it2, 2147483653L, "MentionCode", "");
+        insertTable2(it2, 2147483653L, "postCode", "1180");
+        insertTable2(it2, 2147483653L, "SC5", "=");
+        insertTable2(it2, 2147483653L, "Branding", "1C");
+        insertTable1(it1, 2147483654L);
+        insertTable2(it2, 2147483654L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483654L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483654L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483654L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483654L, "DocumentSortingValues", "______21857__1__1");
+        insertTable2(it2, 2147483654L, "ItemSeq", "1");
+        insertTable2(it2, 2147483654L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483654L, "Plex", "S");
+        insertTable2(it2, 2147483654L, "SC3", "=");
+        insertTable2(it2, 2147483654L, "has_address", "true");
+        insertTable2(it2, 2147483654L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483654L, "Language", "FR");
+        insertTable2(it2, 2147483654L, "logo", "false");
+        insertTable2(it2, 2147483654L, "SC4", "=");
+        insertTable2(it2, 2147483654L, "InternalAddress","233/621");
+        insertTable2(it2, 2147483654L, "AddressG6", "");
+        insertTable2(it2, 2147483654L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483654L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483654L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483654L, "CommunicationOrderId", "21867");
+        insertTable2(it2, 2147483654L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483654L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483654L, "SortPlan", "");
+        insertTable2(it2, 2147483654L, "Enveloping", "N");
+        insertTable2(it2, 2147483654L, "PostComponentId", "21857");
+        insertTable2(it2, 2147483654L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483654L, "city", "Bruxelles");
+        insertTable2(it2, 2147483654L, "AddressG7", "");
+        insertTable2(it2, 2147483654L, "CopyMention", "");
+        insertTable2(it2, 2147483654L, "AddressG8", "");
+        insertTable2(it2, 2147483654L, "StapleNbr", "");
+        insertTable2(it2, 2147483654L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483654L, "AddressG5", "");
+        insertTable2(it2, 2147483654L, "header", "true");
+        insertTable2(it2, 2147483654L, "EnvelopSortingValue", "BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483654L, "GroupedWith", "");
+        insertTable2(it2, 2147483654L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483654L, "DiversionReason", "001");
+        insertTable2(it2, 2147483654L, "Pliable", "true");
+        insertTable2(it2, 2147483654L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483654L, "country", "BE");
+        insertTable2(it2, 2147483654L, "AddressG1", "testOlivier002-0003");
+        insertTable2(it2, 2147483654L, "MentionCode", "");
+        insertTable2(it2, 2147483654L, "postCode", "1180");
+        insertTable2(it2, 2147483654L, "SC5", "=");
+        insertTable2(it2, 2147483654L, "Branding", "1C");
+        insertTable1(it1, 2147483655L);
+        insertTable2(it2, 2147483655L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483655L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483655L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483655L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483655L, "DocumentSortingValues", "______21858__1__1");
+        insertTable2(it2, 2147483655L, "ItemSeq", "1");
+        insertTable2(it2, 2147483655L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483655L, "Plex", "S");
+        insertTable2(it2, 2147483655L, "SC3", "=");
+        insertTable2(it2, 2147483655L, "has_address", "true");
+        insertTable2(it2, 2147483655L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483655L, "Language", "FR");
+        insertTable2(it2, 2147483655L, "logo", "false");
+        insertTable2(it2, 2147483655L, "SC4", "=");
+        insertTable2(it2, 2147483655L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483655L, "AddressG6", "");
+        insertTable2(it2, 2147483655L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483655L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483655L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483655L, "CommunicationOrderId", "21868");
+        insertTable2(it2, 2147483655L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483655L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483655L, "SortPlan", "");
+        insertTable2(it2, 2147483655L, "Enveloping", "N");
+        insertTable2(it2, 2147483655L, "PostComponentId", "21858");
+        insertTable2(it2, 2147483655L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483655L, "city", "Bruxelles");
+        insertTable2(it2, 2147483655L, "AddressG7", "");
+        insertTable2(it2, 2147483655L, "CopyMention", "");
+        insertTable2(it2, 2147483655L, "AddressG8", "");
+        insertTable2(it2, 2147483655L, "StapleNbr", "");
+        insertTable2(it2, 2147483655L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483655L, "AddressG5", "");
+        insertTable2(it2, 2147483655L, "header", "true");
+        insertTable2(it2, 2147483655L, "EnvelopSortingValue", "BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483655L, "GroupedWith", "");
+        insertTable2(it2, 2147483655L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483655L, "DiversionReason", "001");
+        insertTable2(it2, 2147483655L, "Pliable", "true");
+        insertTable2(it2, 2147483655L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483655L, "country", "BE");
+        insertTable2(it2, 2147483655L, "AddressG1", "testOlivier002-0004");
+        insertTable2(it2, 2147483655L, "MentionCode", "");
+        insertTable2(it2, 2147483655L, "postCode", "1180");
+        insertTable2(it2, 2147483655L, "SC5", "=");
+        insertTable2(it2, 2147483655L, "Branding", "1C");
+        insertTable1(it1, 2147483656L);
+        insertTable2(it2, 2147483656L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483656L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483656L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483656L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483656L, "DocumentSortingValues", "______21858__1__1");
+        insertTable2(it2, 2147483656L, "ItemSeq", "1");
+        insertTable2(it2, 2147483656L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483656L, "Plex", "S");
+        insertTable2(it2, 2147483656L, "SC3", "=");
+        insertTable2(it2, 2147483656L, "has_address", "true");
+        insertTable2(it2, 2147483656L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483656L, "Language", "FR");
+        insertTable2(it2, 2147483656L, "logo", "false");
+        insertTable2(it2, 2147483656L, "SC4", "=");
+        insertTable2(it2, 2147483656L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483656L, "AddressG6", "");
+        insertTable2(it2, 2147483656L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483656L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483656L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483656L, "CommunicationOrderId", "21868");
+        insertTable2(it2, 2147483656L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483656L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483656L, "SortPlan", "");
+        insertTable2(it2, 2147483656L, "Enveloping", "N");
+        insertTable2(it2, 2147483656L, "PostComponentId", "21858");
+        insertTable2(it2, 2147483656L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483656L, "city", "Bruxelles");
+        insertTable2(it2, 2147483656L, "AddressG7", "");
+        insertTable2(it2, 2147483656L, "CopyMention", "");
+        insertTable2(it2, 2147483656L, "AddressG8", "");
+        insertTable2(it2, 2147483656L, "StapleNbr", "");
+        insertTable2(it2, 2147483656L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483656L, "AddressG5", "");
+        insertTable2(it2, 2147483656L, "header", "true");
+        insertTable2(it2, 2147483656L, "EnvelopSortingValue", "BE1180___testOlivier002-0004___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483656L, "GroupedWith", "");
+        insertTable2(it2, 2147483656L, "AddressG2", "Boulevard du Souverain, 23");
+        insertTable2(it2, 2147483656L, "DiversionReason", "001");
+        insertTable2(it2, 2147483656L, "Pliable", "true");
+        insertTable2(it2, 2147483656L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483656L, "country", "BE");
+        insertTable2(it2, 2147483656L, "AddressG1", "testOlivier002-0004");
+        insertTable2(it2, 2147483656L, "MentionCode", "");
+        insertTable2(it2, 2147483656L, "postCode", "1180");
+        insertTable2(it2, 2147483656L, "SC5", "=");
+        insertTable2(it2, 2147483656L, "Branding", "1C");
+        insertTable1(it1, 2147483657L);
+        insertTable2(it2, 2147483657L, "SC2", "=");
+        insertTable2(it2, 2147483657L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483657L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483657L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483657L, "DocumentSortingValues", "______21859__1__1");
+        insertTable2(it2, 2147483657L, "ItemSeq", "1");
+        insertTable2(it2, 2147483657L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483657L, "Plex", "S");
+        insertTable2(it2, 2147483657L, "SC3", "=");
+        insertTable2(it2, 2147483657L, "has_address", "true");
+        insertTable2(it2, 2147483657L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483657L, "Language", "FR");
+        insertTable2(it2, 2147483657L, "logo", "false");
+        insertTable2(it2, 2147483657L, "SC4", "=");
+        insertTable2(it2, 2147483657L, "InternalAddress", "");
+        insertTable2(it2, 2147483657L, "AddressG6", "");
+        insertTable2(it2, 2147483657L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483657L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483657L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483657L, "CommunicationOrderId", "21869");
+        insertTable2(it2, 2147483657L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483657L, "location", "rue du broker");
+        insertTable2(it2, 2147483657L, "SortPlan", "");
+        insertTable2(it2, 2147483657L, "Enveloping", "C");
+        insertTable2(it2, 2147483657L, "PostComponentId", "21859");
+        insertTable2(it2, 2147483657L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483657L, "city", "Broker ville");
+        insertTable2(it2, 2147483657L, "AddressG7", "");
+        insertTable2(it2, 2147483657L, "CopyMention", "");
+        insertTable2(it2, 2147483657L, "AddressG8", "");
+        insertTable2(it2, 2147483657L, "StapleNbr", "");
+        insertTable2(it2, 2147483657L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483657L, "AddressG5", "");
+        insertTable2(it2, 2147483657L, "header", "true");
+        insertTable2(it2, 2147483657L, "EnvelopSortingValue", "BE1000___testOlivier003-0005___________rue du broker_________________");
+        insertTable2(it2, 2147483657L, "GroupedWith", "");
+        insertTable2(it2, 2147483657L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483657L, "DiversionReason", "");
+        insertTable2(it2, 2147483657L, "Pliable", "true");
+        insertTable2(it2, 2147483657L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483657L, "country", "BE");
+        insertTable2(it2, 2147483657L, "AddressG1", "testOlivier003-0005");
+        insertTable2(it2, 2147483657L, "MentionCode", "");
+        insertTable2(it2, 2147483657L, "postCode", "1000");
+        insertTable2(it2, 2147483657L, "SC5", "=");
+        insertTable2(it2, 2147483657L, "Branding", "1C");
+        insertTable1(it1, 2147483658L);
+        insertTable2(it2, 2147483658L, "SC2", "=");
+        insertTable2(it2, 2147483658L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483658L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483658L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483658L, "DocumentSortingValues", "______21859__1__1");
+        insertTable2(it2, 2147483658L, "ItemSeq", "1");
+        insertTable2(it2, 2147483658L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483658L, "Plex", "S");
+        insertTable2(it2, 2147483658L, "SC3", "=");
+        insertTable2(it2, 2147483658L, "has_address", "true");
+        insertTable2(it2, 2147483658L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483658L, "Language", "FR");
+        insertTable2(it2, 2147483658L, "logo", "false");
+        insertTable2(it2, 2147483658L, "SC4", "=");
+        insertTable2(it2, 2147483658L, "InternalAddress", "");
+        insertTable2(it2, 2147483658L, "AddressG6", "");
+        insertTable2(it2, 2147483658L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483658L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483658L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483658L, "CommunicationOrderId", "21869");
+        insertTable2(it2, 2147483658L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483658L, "location", "rue du broker");
+        insertTable2(it2, 2147483658L, "SortPlan", "");
+        insertTable2(it2, 2147483658L, "Enveloping", "C");
+        insertTable2(it2, 2147483658L, "PostComponentId", "21859");
+        insertTable2(it2, 2147483658L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483658L, "city", "Broker ville");
+        insertTable2(it2, 2147483658L, "AddressG7", "");
+        insertTable2(it2, 2147483658L, "CopyMention", "");
+        insertTable2(it2, 2147483658L, "AddressG8", "");
+        insertTable2(it2, 2147483658L, "StapleNbr", "");
+        insertTable2(it2, 2147483658L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483658L, "AddressG5", "");
+        insertTable2(it2, 2147483658L, "header", "true");
+        insertTable2(it2, 2147483658L, "EnvelopSortingValue", "BE1000___testOlivier003-0005___________rue dubroker_________________");
+        insertTable2(it2, 2147483658L, "GroupedWith", "");
+        insertTable2(it2, 2147483658L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483658L, "DiversionReason", "");
+        insertTable2(it2, 2147483658L, "Pliable", "true");
+        insertTable2(it2, 2147483658L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483658L, "country", "BE");
+        insertTable2(it2, 2147483658L, "AddressG1", "testOlivier003-0005");
+        insertTable2(it2, 2147483658L, "MentionCode", "");
+        insertTable2(it2, 2147483658L, "postCode", "1000");
+        insertTable2(it2, 2147483658L, "SC5", "=");
+        insertTable2(it2, 2147483658L, "Branding", "1C");
+        insertTable1(it1, 2147483659L);
+        insertTable2(it2, 2147483659L, "SC2", "=");
+        insertTable2(it2, 2147483659L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483659L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483659L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483659L, "DocumentSortingValues", "______21860__1__1");
+        insertTable2(it2, 2147483659L, "ItemSeq", "1");
+        insertTable2(it2, 2147483659L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483659L, "Plex", "S");
+        insertTable2(it2, 2147483659L, "SC3", "=");
+        insertTable2(it2, 2147483659L, "has_address", "true");
+        insertTable2(it2, 2147483659L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483659L, "Language", "FR");
+        insertTable2(it2, 2147483659L, "logo", "false");
+        insertTable2(it2, 2147483659L, "SC4", "=");
+        insertTable2(it2, 2147483659L, "InternalAddress", "");
+        insertTable2(it2, 2147483659L, "AddressG6", "");
+        insertTable2(it2, 2147483659L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483659L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483659L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483659L, "CommunicationOrderId", "21870");
+        insertTable2(it2, 2147483659L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483659L, "location", "rue du broker");
+        insertTable2(it2, 2147483659L, "SortPlan", "");
+        insertTable2(it2, 2147483659L, "Enveloping", "C");
+        insertTable2(it2, 2147483659L, "PostComponentId", "21860");
+        insertTable2(it2, 2147483659L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483659L, "city", "Broker ville");
+        insertTable2(it2, 2147483659L, "AddressG7", "");
+        insertTable2(it2, 2147483659L, "CopyMention", "");
+        insertTable2(it2, 2147483659L, "AddressG8", "");
+        insertTable2(it2, 2147483659L, "StapleNbr", "");
+        insertTable2(it2, 2147483659L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483659L, "AddressG5", "");
+        insertTable2(it2, 2147483659L, "header", "true");
+        insertTable2(it2, 2147483659L, "EnvelopSortingValue", "BE1000___testOlivier003-0006___________rue du broker_________________");
+        insertTable2(it2, 2147483659L, "GroupedWith", "");
+        insertTable2(it2, 2147483659L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483659L, "DiversionReason", "");
+        insertTable2(it2, 2147483659L, "Pliable", "true");
+        insertTable2(it2, 2147483659L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483659L, "country", "BE");
+        insertTable2(it2, 2147483659L, "AddressG1", "testOlivier003-0006");
+        insertTable2(it2, 2147483659L, "MentionCode", "");
+        insertTable2(it2, 2147483659L, "postCode", "1000");
+        insertTable2(it2, 2147483659L, "SC5", "=");
+        insertTable2(it2, 2147483659L, "Branding", "1C");
+        insertTable1(it1, 2147483660L);
+        insertTable2(it2, 2147483660L, "SC2", "=");
+        insertTable2(it2, 2147483660L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483660L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483660L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483660L, "DocumentSortingValues", "______21860__1__1");
+        insertTable2(it2, 2147483660L, "ItemSeq", "1");
+        insertTable2(it2, 2147483660L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483660L, "Plex", "S");
+        insertTable2(it2, 2147483660L, "SC3", "=");
+        insertTable2(it2, 2147483660L, "has_address", "true");
+        insertTable2(it2, 2147483660L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483660L, "Language", "FR");
+        insertTable2(it2, 2147483660L, "logo", "false");
+        insertTable2(it2, 2147483660L, "SC4", "=");
+        insertTable2(it2, 2147483660L, "InternalAddress", "");
+        insertTable2(it2, 2147483660L, "AddressG6", "");
+        insertTable2(it2, 2147483660L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483660L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483660L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483660L, "CommunicationOrderId", "21870");
+        insertTable2(it2, 2147483660L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483660L, "location", "rue du broker");
+        insertTable2(it2, 2147483660L, "SortPlan", "");
+        insertTable2(it2, 2147483660L, "Enveloping", "C");
+        insertTable2(it2, 2147483660L, "PostComponentId", "21860");
+        insertTable2(it2, 2147483660L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483660L, "city", "Broker ville");
+        insertTable2(it2, 2147483660L, "AddressG7", "");
+        insertTable2(it2, 2147483660L, "CopyMention", "");
+        insertTable2(it2, 2147483660L, "AddressG8", "");
+        insertTable2(it2, 2147483660L, "StapleNbr", "");
+        insertTable2(it2, 2147483660L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483660L, "AddressG5", "");
+        insertTable2(it2, 2147483660L, "header", "true");
+        insertTable2(it2, 2147483660L, "EnvelopSortingValue", "BE1000___testOlivier003-0006___________rue dubroker_________________");
+        insertTable2(it2, 2147483660L, "GroupedWith", "");
+        insertTable2(it2, 2147483660L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483660L, "DiversionReason", "");
+        insertTable2(it2, 2147483660L, "Pliable", "true");
+        insertTable2(it2, 2147483660L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483660L, "country", "BE");
+        insertTable2(it2, 2147483660L, "AddressG1", "testOlivier003-0006");
+        insertTable2(it2, 2147483660L, "MentionCode", "");
+        insertTable2(it2, 2147483660L, "postCode", "1000");
+        insertTable2(it2, 2147483660L, "SC5", "=");
+        insertTable2(it2, 2147483660L, "Branding", "1C");
+        insertTable1(it1, 2147483661L);
+        insertTable2(it2, 2147483661L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483661L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483661L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483661L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483661L, "DocumentSortingValues", "______21861__1__1");
+        insertTable2(it2, 2147483661L, "ItemSeq", "1");
+        insertTable2(it2, 2147483661L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483661L, "Plex", "S");
+        insertTable2(it2, 2147483661L, "SC3", "=");
+        insertTable2(it2, 2147483661L, "has_address", "true");
+        insertTable2(it2, 2147483661L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483661L, "Language", "FR");
+        insertTable2(it2, 2147483661L, "logo", "false");
+        insertTable2(it2, 2147483661L, "SC4", "=");
+        insertTable2(it2, 2147483661L, "InternalAddress", "");
+        insertTable2(it2, 2147483661L, "AddressG6", "");
+        insertTable2(it2, 2147483661L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483661L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483661L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483661L, "CommunicationOrderId", "21871");
+        insertTable2(it2, 2147483661L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483661L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483661L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483661L, "Enveloping", "C");
+        insertTable2(it2, 2147483661L, "PostComponentId", "21861");
+        insertTable2(it2, 2147483661L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483661L, "city", "Bruxelles");
+        insertTable2(it2, 2147483661L, "AddressG7", "");
+        insertTable2(it2, 2147483661L, "CopyMention", "");
+        insertTable2(it2, 2147483661L, "AddressG8", "");
+        insertTable2(it2, 2147483661L, "StapleNbr", "");
+        insertTable2(it2, 2147483661L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483661L, "AddressG5", "");
+        insertTable2(it2, 2147483661L, "header", "true");
+        insertTable2(it2, 2147483661L, "EnvelopSortingValue", "BE1180___testOlivier004-0007___________Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483661L, "GroupedWith", "");
+        insertTable2(it2, 2147483661L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483661L, "DiversionReason", "");
+        insertTable2(it2, 2147483661L, "Pliable", "true");
+        insertTable2(it2, 2147483661L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483661L, "country", "BE");
+        insertTable2(it2, 2147483661L, "AddressG1", "testOlivier004-0007");
+        insertTable2(it2, 2147483661L, "MentionCode", "");
+        insertTable2(it2, 2147483661L, "postCode", "1180");
+        insertTable2(it2, 2147483661L, "SC5", "=");
+        insertTable2(it2, 2147483661L, "Branding", "1C");
+        insertTable1(it1, 2147483662L);
+        insertTable2(it2, 2147483662L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483662L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483662L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483662L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483662L, "DocumentSortingValues", "______21861__1__1");
+        insertTable2(it2, 2147483662L, "ItemSeq", "1");
+        insertTable2(it2, 2147483662L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483662L, "Plex", "S");
+        insertTable2(it2, 2147483662L, "SC3", "=");
+        insertTable2(it2, 2147483662L, "has_address", "true");
+        insertTable2(it2, 2147483662L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483662L, "Language", "FR");
+        insertTable2(it2, 2147483662L, "logo", "false");
+        insertTable2(it2, 2147483662L, "SC4", "=");
+        insertTable2(it2, 2147483662L, "InternalAddress", "");
+        insertTable2(it2, 2147483662L, "AddressG6", "");
+        insertTable2(it2, 2147483662L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483662L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483662L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483662L, "CommunicationOrderId", "21871");
+        insertTable2(it2, 2147483662L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483662L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483662L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483662L, "Enveloping", "C");
+        insertTable2(it2, 2147483662L, "PostComponentId", "21861");
+        insertTable2(it2, 2147483662L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483662L, "city", "Bruxelles");
+        insertTable2(it2, 2147483662L, "AddressG7", "");
+        insertTable2(it2, 2147483662L, "CopyMention", "");
+        insertTable2(it2, 2147483662L, "AddressG8", "");
+        insertTable2(it2, 2147483662L, "StapleNbr", "");
+        insertTable2(it2, 2147483662L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483662L, "AddressG5", "");
+        insertTable2(it2, 2147483662L, "header", "true");
+        insertTable2(it2, 2147483662L, "EnvelopSortingValue", "BE1180___testOlivier004-0007___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483662L, "GroupedWith", "");
+        insertTable2(it2, 2147483662L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483662L, "DiversionReason", "");
+        insertTable2(it2, 2147483662L, "Pliable", "true");
+        insertTable2(it2, 2147483662L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483662L, "country", "BE");
+        insertTable2(it2, 2147483662L, "AddressG1", "testOlivier004-0007");
+        insertTable2(it2, 2147483662L, "MentionCode", "");
+        insertTable2(it2, 2147483662L, "postCode", "1180");
+        insertTable2(it2, 2147483662L, "SC5", "=");
+        insertTable2(it2, 2147483662L, "Branding", "1C");
+        insertTable1(it1, 2147483663L);
+        insertTable2(it2, 2147483663L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483663L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483663L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483663L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483663L, "DocumentSortingValues", "______21862__1__1");
+        insertTable2(it2, 2147483663L, "ItemSeq", "1");
+        insertTable2(it2, 2147483663L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483663L, "Plex", "S");
+        insertTable2(it2, 2147483663L, "SC3", "=");
+        insertTable2(it2, 2147483663L, "has_address", "true");
+        insertTable2(it2, 2147483663L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483663L, "Language", "FR");
+        insertTable2(it2, 2147483663L, "logo", "false");
+        insertTable2(it2, 2147483663L, "SC4", "=");
+        insertTable2(it2, 2147483663L, "InternalAddress", "");
+        insertTable2(it2, 2147483663L, "AddressG6", "");
+        insertTable2(it2, 2147483663L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483663L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483663L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483663L, "CommunicationOrderId", "21872");
+        insertTable2(it2, 2147483663L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483663L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483663L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483663L, "Enveloping", "C");
+        insertTable2(it2, 2147483663L, "PostComponentId", "21862");
+        insertTable2(it2, 2147483663L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483663L, "city", "Bruxelles");
+        insertTable2(it2, 2147483663L, "AddressG7", "");
+        insertTable2(it2, 2147483663L, "CopyMention", "");
+        insertTable2(it2, 2147483663L, "AddressG8", "");
+        insertTable2(it2, 2147483663L, "StapleNbr", "");
+        insertTable2(it2, 2147483663L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483663L, "AddressG5", "");
+        insertTable2(it2, 2147483663L, "header", "true");
+        insertTable2(it2, 2147483663L, "EnvelopSortingValue", "BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483663L, "GroupedWith", "");
+        insertTable2(it2, 2147483663L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483663L, "DiversionReason", "");
+        insertTable2(it2, 2147483663L, "Pliable", "true");
+        insertTable2(it2, 2147483663L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483663L, "country", "BE");
+        insertTable2(it2, 2147483663L, "AddressG1", "testOlivier004-0008");
+        insertTable2(it2, 2147483663L, "MentionCode", "");
+        insertTable2(it2, 2147483663L, "postCode", "1180");
+        insertTable2(it2, 2147483663L, "SC5", "=");
+        insertTable2(it2, 2147483663L, "Branding", "1C");
+        insertTable1(it1, 2147483664L);
+        insertTable2(it2, 2147483664L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483664L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483664L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483664L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483664L, "DocumentSortingValues", "______21862__1__1");
+        insertTable2(it2, 2147483664L, "ItemSeq", "1");
+        insertTable2(it2, 2147483664L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483664L, "Plex", "S");
+        insertTable2(it2, 2147483664L, "SC3", "=");
+        insertTable2(it2, 2147483664L, "has_address", "true");
+        insertTable2(it2, 2147483664L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483664L, "Language", "FR");
+        insertTable2(it2, 2147483664L, "logo", "false");
+        insertTable2(it2, 2147483664L, "SC4", "=");
+        insertTable2(it2, 2147483664L, "InternalAddress", "");
+        insertTable2(it2, 2147483664L, "AddressG6", "");
+        insertTable2(it2, 2147483664L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483664L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483664L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483664L, "CommunicationOrderId", "21872");
+        insertTable2(it2, 2147483664L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483664L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483664L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483664L, "Enveloping", "C");
+        insertTable2(it2, 2147483664L, "PostComponentId", "21862");
+        insertTable2(it2, 2147483664L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483664L, "city", "Bruxelles");
+        insertTable2(it2, 2147483664L, "AddressG7", "");
+        insertTable2(it2, 2147483664L, "CopyMention", "");
+        insertTable2(it2, 2147483664L, "AddressG8", "");
+        insertTable2(it2, 2147483664L, "StapleNbr", "");
+        insertTable2(it2, 2147483664L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483664L, "AddressG5", "");
+        insertTable2(it2, 2147483664L, "header", "true");
+        insertTable2(it2, 2147483664L, "EnvelopSortingValue", "BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483664L, "GroupedWith", "");
+        insertTable2(it2, 2147483664L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483664L, "DiversionReason", "");
+        insertTable2(it2, 2147483664L, "Pliable", "true");
+        insertTable2(it2, 2147483664L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483664L, "country", "BE");
+        insertTable2(it2, 2147483664L, "AddressG1", "testOlivier004-0008");
+        insertTable2(it2, 2147483664L, "MentionCode", "");
+        insertTable2(it2, 2147483664L, "postCode", "1180");
+        insertTable2(it2, 2147483664L, "SC5", "=");
+        insertTable2(it2, 2147483664L, "Branding", "1C");
+        insertTable1(it1, 2147483665L);
+        insertTable2(it2, 2147483665L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483665L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483665L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483665L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483665L, "DocumentSortingValues", "______21863__1__1");
+        insertTable2(it2, 2147483665L, "ItemSeq", "1");
+        insertTable2(it2, 2147483665L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483665L, "Plex", "S");
+        insertTable2(it2, 2147483665L, "SC3", "=");
+        insertTable2(it2, 2147483665L, "has_address", "true");
+        insertTable2(it2, 2147483665L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483665L, "Language", "FR");
+        insertTable2(it2, 2147483665L, "logo", "false");
+        insertTable2(it2, 2147483665L, "SC4", "=");
+        insertTable2(it2, 2147483665L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483665L, "AddressG6", "");
+        insertTable2(it2, 2147483665L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483665L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483665L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483665L, "CommunicationOrderId", "21873");
+        insertTable2(it2, 2147483665L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483665L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483665L, "SortPlan", "");
+        insertTable2(it2, 2147483665L, "Enveloping", "N");
+        insertTable2(it2, 2147483665L, "PostComponentId", "21863");
+        insertTable2(it2, 2147483665L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483665L, "city", "Bruxelles");
+        insertTable2(it2, 2147483665L, "AddressG7", "");
+        insertTable2(it2, 2147483665L, "CopyMention", "");
+        insertTable2(it2, 2147483665L, "AddressG8", "");
+        insertTable2(it2, 2147483665L, "StapleNbr", "");
+        insertTable2(it2, 2147483665L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483665L, "AddressG5", "");
+        insertTable2(it2, 2147483665L, "header", "true");
+        insertTable2(it2, 2147483665L, "EnvelopSortingValue", "BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483665L, "GroupedWith", "");
+        insertTable2(it2, 2147483665L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483665L, "DiversionReason", "001");
+        insertTable2(it2, 2147483665L, "Pliable", "true");
+        insertTable2(it2, 2147483665L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483665L, "country", "BE");
+        insertTable2(it2, 2147483665L, "AddressG1", "testOlivier005-0009");
+        insertTable2(it2, 2147483665L, "MentionCode", "");
+        insertTable2(it2, 2147483665L, "postCode", "1180");
+        insertTable2(it2, 2147483665L, "SC5", "=");
+        insertTable2(it2, 2147483665L, "Branding", "1C");
+        insertTable1(it1, 2147483666L);
+        insertTable2(it2, 2147483666L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483666L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483666L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483666L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483666L, "DocumentSortingValues", "______21863__1__1");
+        insertTable2(it2, 2147483666L, "ItemSeq", "1");
+        insertTable2(it2, 2147483666L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483666L, "Plex", "S");
+        insertTable2(it2, 2147483666L, "SC3", "=");
+        insertTable2(it2, 2147483666L, "has_address", "true");
+        insertTable2(it2, 2147483666L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483666L, "Language", "FR");
+        insertTable2(it2, 2147483666L, "logo", "false");
+        insertTable2(it2, 2147483666L, "SC4", "=");
+        insertTable2(it2, 2147483666L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483666L, "AddressG6", "");
+        insertTable2(it2, 2147483666L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483666L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483666L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483666L, "CommunicationOrderId", "21873");
+        insertTable2(it2, 2147483666L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483666L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483666L, "SortPlan", "");
+        insertTable2(it2, 2147483666L, "Enveloping", "N");
+        insertTable2(it2, 2147483666L, "PostComponentId", "21863");
+        insertTable2(it2, 2147483666L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483666L, "city", "Bruxelles");
+        insertTable2(it2, 2147483666L, "AddressG7", "");
+        insertTable2(it2, 2147483666L, "CopyMention", "");
+        insertTable2(it2, 2147483666L, "AddressG8", "");
+        insertTable2(it2, 2147483666L, "StapleNbr", "");
+        insertTable2(it2, 2147483666L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483666L, "AddressG5", "");
+        insertTable2(it2, 2147483666L, "header", "true");
+        insertTable2(it2, 2147483666L, "EnvelopSortingValue", "BE1180___testOlivier005-0009___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483666L, "GroupedWith", "");
+        insertTable2(it2, 2147483666L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483666L, "DiversionReason", "001");
+        insertTable2(it2, 2147483666L, "Pliable", "true");
+        insertTable2(it2, 2147483666L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483666L, "country", "BE");
+        insertTable2(it2, 2147483666L, "AddressG1", "testOlivier005-0009");
+        insertTable2(it2, 2147483666L, "MentionCode", "");
+        insertTable2(it2, 2147483666L, "postCode", "1180");
+        insertTable2(it2, 2147483666L, "SC5", "=");
+        insertTable2(it2, 2147483666L, "Branding", "1C");
+        insertTable1(it1, 2147483667L);
+        insertTable2(it2, 2147483667L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483667L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483667L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483667L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483667L, "DocumentSortingValues", "______21864__1__1");
+        insertTable2(it2, 2147483667L, "ItemSeq", "1");
+        insertTable2(it2, 2147483667L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483667L, "Plex", "S");
+        insertTable2(it2, 2147483667L, "SC3", "=");
+        insertTable2(it2, 2147483667L, "has_address", "true");
+        insertTable2(it2, 2147483667L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483667L, "Language", "FR");
+        insertTable2(it2, 2147483667L, "logo", "false");
+        insertTable2(it2, 2147483667L, "SC4", "=");
+        insertTable2(it2, 2147483667L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483667L, "AddressG6", "");
+        insertTable2(it2, 2147483667L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483667L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483667L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483667L, "CommunicationOrderId", "21874");
+        insertTable2(it2, 2147483667L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483667L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483667L, "SortPlan", "");
+        insertTable2(it2, 2147483667L, "Enveloping", "N");
+        insertTable2(it2, 2147483667L, "PostComponentId", "21864");
+        insertTable2(it2, 2147483667L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483667L, "city", "Bruxelles");
+        insertTable2(it2, 2147483667L, "AddressG7", "");
+        insertTable2(it2, 2147483667L, "CopyMention", "");
+        insertTable2(it2, 2147483667L, "AddressG8", "");
+        insertTable2(it2, 2147483667L, "StapleNbr", "");
+        insertTable2(it2, 2147483667L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483667L, "AddressG5", "");
+        insertTable2(it2, 2147483667L, "header", "true");
+        insertTable2(it2, 2147483667L, "EnvelopSortingValue", "BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483667L, "GroupedWith", "");
+        insertTable2(it2, 2147483667L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483667L, "DiversionReason", "001");
+        insertTable2(it2, 2147483667L, "Pliable", "true");
+        insertTable2(it2, 2147483667L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483667L, "country", "BE");
+        insertTable2(it2, 2147483667L, "AddressG1", "testOlivier005-0010");
+        insertTable2(it2, 2147483667L, "MentionCode", "");
+        insertTable2(it2, 2147483667L, "postCode", "1180");
+        insertTable2(it2, 2147483667L, "SC5", "=");
+        insertTable2(it2, 2147483667L, "Branding", "1C");
+        insertTable1(it1, 2147483668L);
+        insertTable2(it2, 2147483668L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483668L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483668L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483668L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483668L, "DocumentSortingValues", "______21864__1__1");
+        insertTable2(it2, 2147483668L, "ItemSeq", "1");
+        insertTable2(it2, 2147483668L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483668L, "Plex", "S");
+        insertTable2(it2, 2147483668L, "SC3", "=");
+        insertTable2(it2, 2147483668L, "has_address", "true");
+        insertTable2(it2, 2147483668L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483668L, "Language", "FR");
+        insertTable2(it2, 2147483668L, "logo", "false");
+        insertTable2(it2, 2147483668L, "SC4", "=");
+        insertTable2(it2, 2147483668L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483668L, "AddressG6", "");
+        insertTable2(it2, 2147483668L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483668L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483668L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483668L, "CommunicationOrderId", "21874");
+        insertTable2(it2, 2147483668L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483668L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483668L, "SortPlan", "");
+        insertTable2(it2, 2147483668L, "Enveloping", "N");
+        insertTable2(it2, 2147483668L, "PostComponentId", "21864");
+        insertTable2(it2, 2147483668L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483668L, "city", "Bruxelles");
+        insertTable2(it2, 2147483668L, "AddressG7", "");
+        insertTable2(it2, 2147483668L, "CopyMention", "");
+        insertTable2(it2, 2147483668L, "AddressG8", "");
+        insertTable2(it2, 2147483668L, "StapleNbr", "");
+        insertTable2(it2, 2147483668L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483668L, "AddressG5", "");
+        insertTable2(it2, 2147483668L, "header", "true");
+        insertTable2(it2, 2147483668L, "EnvelopSortingValue", "BE1180___testOlivier005-0010___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483668L, "GroupedWith", "");
+        insertTable2(it2, 2147483668L, "AddressG2", "Boulevard du Souverain, 23");
+        insertTable2(it2, 2147483668L, "DiversionReason", "001");
+        insertTable2(it2, 2147483668L, "Pliable", "true");
+        insertTable2(it2, 2147483668L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483668L, "country", "BE");
+        insertTable2(it2, 2147483668L, "AddressG1", "testOlivier005-0010");
+        insertTable2(it2, 2147483668L, "MentionCode", "");
+        insertTable2(it2, 2147483668L, "postCode", "1180");
+        insertTable2(it2, 2147483668L, "SC5", "=");
+        insertTable2(it2, 2147483668L, "Branding", "1C");
+        insertTable1(it1, 2147483669L);
+        insertTable2(it2, 2147483669L, "SC2", "=");
+        insertTable2(it2, 2147483669L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483669L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483669L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483669L, "DocumentSortingValues", "______21865__1__1");
+        insertTable2(it2, 2147483669L, "ItemSeq", "1");
+        insertTable2(it2, 2147483669L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483669L, "Plex", "S");
+        insertTable2(it2, 2147483669L, "SC3", "=");
+        insertTable2(it2, 2147483669L, "has_address", "true");
+        insertTable2(it2, 2147483669L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483669L, "Language", "FR");
+        insertTable2(it2, 2147483669L, "logo", "false");
+        insertTable2(it2, 2147483669L, "SC4", "=");
+        insertTable2(it2, 2147483669L, "InternalAddress", "");
+        insertTable2(it2, 2147483669L, "AddressG6", "");
+        insertTable2(it2, 2147483669L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483669L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483669L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483669L, "CommunicationOrderId", "21875");
+        insertTable2(it2, 2147483669L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483669L, "location", "rue du broker");
+        insertTable2(it2, 2147483669L, "SortPlan", "");
+        insertTable2(it2, 2147483669L, "Enveloping", "C");
+        insertTable2(it2, 2147483669L, "PostComponentId", "21865");
+        insertTable2(it2, 2147483669L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483669L, "city", "Broker ville");
+        insertTable2(it2, 2147483669L, "AddressG7", "");
+        insertTable2(it2, 2147483669L, "CopyMention", "");
+        insertTable2(it2, 2147483669L, "AddressG8", "");
+        insertTable2(it2, 2147483669L, "StapleNbr", "");
+        insertTable2(it2, 2147483669L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483669L, "AddressG5", "");
+        insertTable2(it2, 2147483669L, "header", "true");
+        insertTable2(it2, 2147483669L, "EnvelopSortingValue", "BE1000___testOlivier006-0011___________rue du broker_________________");
+        insertTable2(it2, 2147483669L, "GroupedWith", "");
+        insertTable2(it2, 2147483669L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483669L, "DiversionReason", "");
+        insertTable2(it2, 2147483669L, "Pliable", "true");
+        insertTable2(it2, 2147483669L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483669L, "country", "BE");
+        insertTable2(it2, 2147483669L, "AddressG1", "testOlivier006-0011");
+        insertTable2(it2, 2147483669L, "MentionCode", "");
+        insertTable2(it2, 2147483669L, "postCode", "1000");
+        insertTable2(it2, 2147483669L, "SC5", "=");
+        insertTable2(it2, 2147483669L, "Branding", "1C");
+        insertTable1(it1, 2147483670L);
+        insertTable2(it2, 2147483670L, "SC2", "=");
+        insertTable2(it2, 2147483670L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483670L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483670L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483670L, "DocumentSortingValues", "______21865__1__1");
+        insertTable2(it2, 2147483670L, "ItemSeq", "1");
+        insertTable2(it2, 2147483670L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483670L, "Plex", "S");
+        insertTable2(it2, 2147483670L, "SC3", "=");
+        insertTable2(it2, 2147483670L, "has_address", "true");
+        insertTable2(it2, 2147483670L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483670L, "Language", "FR");
+        insertTable2(it2, 2147483670L, "logo", "false");
+        insertTable2(it2, 2147483670L, "SC4", "=");
+        insertTable2(it2, 2147483670L, "InternalAddress", "");
+        insertTable2(it2, 2147483670L, "AddressG6", "");
+        insertTable2(it2, 2147483670L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483670L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483670L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483670L, "CommunicationOrderId", "21875");
+        insertTable2(it2, 2147483670L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483670L, "location", "rue du broker");
+        insertTable2(it2, 2147483670L, "SortPlan", "");
+        insertTable2(it2, 2147483670L, "Enveloping", "C");
+        insertTable2(it2, 2147483670L, "PostComponentId", "21865");
+        insertTable2(it2, 2147483670L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483670L, "city", "Broker ville");
+        insertTable2(it2, 2147483670L, "AddressG7", "");
+        insertTable2(it2, 2147483670L, "CopyMention", "");
+        insertTable2(it2, 2147483670L, "AddressG8", "");
+        insertTable2(it2, 2147483670L, "StapleNbr", "");
+        insertTable2(it2, 2147483670L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483670L, "AddressG5", "");
+        insertTable2(it2, 2147483670L, "header", "true");
+        insertTable2(it2, 2147483670L, "EnvelopSortingValue", "BE1000___testOlivier006-0011___________rue dubroker_________________");
+        insertTable2(it2, 2147483670L, "GroupedWith", "");
+        insertTable2(it2, 2147483670L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483670L, "DiversionReason", "");
+        insertTable2(it2, 2147483670L, "Pliable", "true");
+        insertTable2(it2, 2147483670L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483670L, "country", "BE");
+        insertTable2(it2, 2147483670L, "AddressG1", "testOlivier006-0011");
+        insertTable2(it2, 2147483670L, "MentionCode", "");
+        insertTable2(it2, 2147483670L, "postCode", "1000");
+        insertTable2(it2, 2147483670L, "SC5", "=");
+        insertTable2(it2, 2147483670L, "Branding", "1C");
+        insertTable1(it1, 2147483671L);
+        insertTable2(it2, 2147483671L, "SC2", "=");
+        insertTable2(it2, 2147483671L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483671L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483671L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483671L, "DocumentSortingValues", "______21866__1__1");
+        insertTable2(it2, 2147483671L, "ItemSeq", "1");
+        insertTable2(it2, 2147483671L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483671L, "Plex", "S");
+        insertTable2(it2, 2147483671L, "SC3", "=");
+        insertTable2(it2, 2147483671L, "has_address", "true");
+        insertTable2(it2, 2147483671L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483671L, "Language", "FR");
+        insertTable2(it2, 2147483671L, "logo", "false");
+        insertTable2(it2, 2147483671L, "SC4", "=");
+        insertTable2(it2, 2147483671L, "InternalAddress", "");
+        insertTable2(it2, 2147483671L, "AddressG6", "");
+        insertTable2(it2, 2147483671L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483671L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483671L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483671L, "CommunicationOrderId", "21876");
+        insertTable2(it2, 2147483671L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483671L, "location", "rue du broker");
+        insertTable2(it2, 2147483671L, "SortPlan", "");
+        insertTable2(it2, 2147483671L, "Enveloping", "C");
+        insertTable2(it2, 2147483671L, "PostComponentId", "21866");
+        insertTable2(it2, 2147483671L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483671L, "city", "Broker ville");
+        insertTable2(it2, 2147483671L, "AddressG7", "");
+        insertTable2(it2, 2147483671L, "CopyMention", "");
+        insertTable2(it2, 2147483671L, "AddressG8", "");
+        insertTable2(it2, 2147483671L, "StapleNbr", "");
+        insertTable2(it2, 2147483671L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483671L, "AddressG5", "");
+        insertTable2(it2, 2147483671L, "header", "true");
+        insertTable2(it2, 2147483671L, "EnvelopSortingValue", "BE1000___testOlivier006-0012___________rue du broker_________________");
+        insertTable2(it2, 2147483671L, "GroupedWith", "");
+        insertTable2(it2, 2147483671L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483671L, "DiversionReason", "");
+        insertTable2(it2, 2147483671L, "Pliable", "true");
+        insertTable2(it2, 2147483671L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483671L, "country", "BE");
+        insertTable2(it2, 2147483671L, "AddressG1", "testOlivier006-0012");
+        insertTable2(it2, 2147483671L, "MentionCode", "");
+        insertTable2(it2, 2147483671L, "postCode", "1000");
+        insertTable2(it2, 2147483671L, "SC5", "=");
+        insertTable2(it2, 2147483671L, "Branding", "1C");
+        insertTable1(it1, 2147483672L);
+        insertTable2(it2, 2147483672L, "SC2", "=");
+        insertTable2(it2, 2147483672L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483672L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483672L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483672L, "DocumentSortingValues", "______21866__1__1");
+        insertTable2(it2, 2147483672L, "ItemSeq", "1");
+        insertTable2(it2, 2147483672L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483672L, "Plex", "S");
+        insertTable2(it2, 2147483672L, "SC3", "=");
+        insertTable2(it2, 2147483672L, "has_address", "true");
+        insertTable2(it2, 2147483672L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483672L, "Language", "FR");
+        insertTable2(it2, 2147483672L, "logo", "false");
+        insertTable2(it2, 2147483672L, "SC4", "=");
+        insertTable2(it2, 2147483672L, "InternalAddress", "");
+        insertTable2(it2, 2147483672L, "AddressG6", "");
+        insertTable2(it2, 2147483672L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483672L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483672L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483672L, "CommunicationOrderId", "21876");
+        insertTable2(it2, 2147483672L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483672L, "location", "rue du broker");
+        insertTable2(it2, 2147483672L, "SortPlan", "");
+        insertTable2(it2, 2147483672L, "Enveloping", "C");
+        insertTable2(it2, 2147483672L, "PostComponentId", "21866");
+        insertTable2(it2, 2147483672L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483672L, "city", "Broker ville");
+        insertTable2(it2, 2147483672L, "AddressG7", "");
+        insertTable2(it2, 2147483672L, "CopyMention", "");
+        insertTable2(it2, 2147483672L, "AddressG8", "");
+        insertTable2(it2, 2147483672L, "StapleNbr", "");
+        insertTable2(it2, 2147483672L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483672L, "AddressG5", "");
+        insertTable2(it2, 2147483672L, "header", "true");
+        insertTable2(it2, 2147483672L, "EnvelopSortingValue", "BE1000___testOlivier006-0012___________rue dubroker_________________");
+        insertTable2(it2, 2147483672L, "GroupedWith", "");
+        insertTable2(it2, 2147483672L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483672L, "DiversionReason", "");
+        insertTable2(it2, 2147483672L, "Pliable", "true");
+        insertTable2(it2, 2147483672L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483672L, "country", "BE");
+        insertTable2(it2, 2147483672L, "AddressG1", "testOlivier006-0012");
+        insertTable2(it2, 2147483672L, "MentionCode", "");
+        insertTable2(it2, 2147483672L, "postCode", "1000");
+        insertTable2(it2, 2147483672L, "SC5", "=");
+        insertTable2(it2, 2147483672L, "Branding", "1C");
+        insertTable1(it1, 2147483673L);
+        insertTable2(it2, 2147483673L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483673L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483673L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483673L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483673L, "DocumentSortingValues", "______21867__1__1");
+        insertTable2(it2, 2147483673L, "ItemSeq", "1");
+        insertTable2(it2, 2147483673L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483673L, "Plex", "S");
+        insertTable2(it2, 2147483673L, "SC3", "=");
+        insertTable2(it2, 2147483673L, "has_address", "true");
+        insertTable2(it2, 2147483673L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483673L, "Language", "FR");
+        insertTable2(it2, 2147483673L, "logo", "false");
+        insertTable2(it2, 2147483673L, "SC4", "=");
+        insertTable2(it2, 2147483673L, "InternalAddress", "");
+        insertTable2(it2, 2147483673L, "AddressG6", "");
+        insertTable2(it2, 2147483673L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483673L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483673L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483673L, "CommunicationOrderId", "21877");
+        insertTable2(it2, 2147483673L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483673L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483673L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483673L, "Enveloping", "C");
+        insertTable2(it2, 2147483673L, "PostComponentId", "21867");
+        insertTable2(it2, 2147483673L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483673L, "city", "Bruxelles");
+        insertTable2(it2, 2147483673L, "AddressG7", "");
+        insertTable2(it2, 2147483673L, "CopyMention", "");
+        insertTable2(it2, 2147483673L, "AddressG8", "");
+        insertTable2(it2, 2147483673L, "StapleNbr", "");
+        insertTable2(it2, 2147483673L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483673L, "AddressG5", "");
+        insertTable2(it2, 2147483673L, "header", "true");
+        insertTable2(it2, 2147483673L, "EnvelopSortingValue", "BE1180___testOlivier007-0013___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483673L, "GroupedWith", "");
+        insertTable2(it2, 2147483673L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483673L, "DiversionReason", "");
+        insertTable2(it2, 2147483673L, "Pliable", "true");
+        insertTable2(it2, 2147483673L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483673L, "country", "BE");
+        insertTable2(it2, 2147483673L, "AddressG1", "testOlivier007-0013");
+        insertTable2(it2, 2147483673L, "MentionCode", "");
+        insertTable2(it2, 2147483673L, "postCode", "1180");
+        insertTable2(it2, 2147483673L, "SC5", "=");
+        insertTable2(it2, 2147483673L, "Branding", "1C");
+        insertTable1(it1, 2147483674L);
+        insertTable2(it2, 2147483674L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483674L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483674L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483674L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483674L, "DocumentSortingValues", "______21867__1__1");
+        insertTable2(it2, 2147483674L, "ItemSeq", "1");
+        insertTable2(it2, 2147483674L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483674L, "Plex", "S");
+        insertTable2(it2, 2147483674L, "SC3", "=");
+        insertTable2(it2, 2147483674L, "has_address", "true");
+        insertTable2(it2, 2147483674L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483674L, "Language", "FR");
+        insertTable2(it2, 2147483674L, "logo", "false");
+        insertTable2(it2, 2147483674L, "SC4", "=");
+        insertTable2(it2, 2147483674L, "InternalAddress", "");
+        insertTable2(it2, 2147483674L, "AddressG6", "");
+        insertTable2(it2, 2147483674L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483674L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483674L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483674L, "CommunicationOrderId", "21877");
+        insertTable2(it2, 2147483674L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483674L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483674L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483674L, "Enveloping", "C");
+        insertTable2(it2, 2147483674L, "PostComponentId", "21867");
+        insertTable2(it2, 2147483674L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483674L, "city", "Bruxelles");
+        insertTable2(it2, 2147483674L, "AddressG7", "");
+        insertTable2(it2, 2147483674L, "CopyMention", "");
+        insertTable2(it2, 2147483674L, "AddressG8", "");
+        insertTable2(it2, 2147483674L, "StapleNbr", "");
+        insertTable2(it2, 2147483674L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483674L, "AddressG5", "");
+        insertTable2(it2, 2147483674L, "header", "true");
+        insertTable2(it2, 2147483674L, "EnvelopSortingValue", "BE1180___testOlivier007-0013___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483674L, "GroupedWith", "");
+        insertTable2(it2, 2147483674L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483674L, "DiversionReason", "");
+        insertTable2(it2, 2147483674L, "Pliable", "true");
+        insertTable2(it2, 2147483674L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483674L, "country", "BE");
+        insertTable2(it2, 2147483674L, "AddressG1", "testOlivier007-0013");
+        insertTable2(it2, 2147483674L, "MentionCode", "");
+        insertTable2(it2, 2147483674L, "postCode", "1180");
+        insertTable2(it2, 2147483674L, "SC5", "=");
+        insertTable2(it2, 2147483674L, "Branding", "1C");
+        insertTable1(it1, 2147483675L);
+        insertTable2(it2, 2147483675L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483675L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483675L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483675L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483675L, "DocumentSortingValues", "______21868__1__1");
+        insertTable2(it2, 2147483675L, "ItemSeq", "1");
+        insertTable2(it2, 2147483675L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483675L, "Plex", "S");
+        insertTable2(it2, 2147483675L, "SC3", "=");
+        insertTable2(it2, 2147483675L, "has_address", "true");
+        insertTable2(it2, 2147483675L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483675L, "Language", "FR");
+        insertTable2(it2, 2147483675L, "logo", "false");
+        insertTable2(it2, 2147483675L, "SC4", "=");
+        insertTable2(it2, 2147483675L, "InternalAddress", "");
+        insertTable2(it2, 2147483675L, "AddressG6", "");
+        insertTable2(it2, 2147483675L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483675L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483675L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483675L, "CommunicationOrderId", "21878");
+        insertTable2(it2, 2147483675L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483675L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483675L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483675L, "Enveloping", "C");
+        insertTable2(it2, 2147483675L, "PostComponentId", "21868");
+        insertTable2(it2, 2147483675L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483675L, "city", "Bruxelles");
+        insertTable2(it2, 2147483675L, "AddressG7", "");
+        insertTable2(it2, 2147483675L, "CopyMention", "");
+        insertTable2(it2, 2147483675L, "AddressG8", "");
+        insertTable2(it2, 2147483675L, "StapleNbr", "");
+        insertTable2(it2, 2147483675L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483675L, "AddressG5", "");
+        insertTable2(it2, 2147483675L, "header", "true");
+        insertTable2(it2, 2147483675L, "EnvelopSortingValue", "BE1180___testOlivier007-0014___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483675L, "GroupedWith", "");
+        insertTable2(it2, 2147483675L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483675L, "DiversionReason", "");
+        insertTable2(it2, 2147483675L, "Pliable", "true");
+        insertTable2(it2, 2147483675L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483675L, "country", "BE");
+        insertTable2(it2, 2147483675L, "AddressG1", "testOlivier007-0014");
+        insertTable2(it2, 2147483675L, "MentionCode", "");
+        insertTable2(it2, 2147483675L, "postCode", "1180");
+        insertTable2(it2, 2147483675L, "SC5", "=");
+        insertTable2(it2, 2147483675L, "Branding", "1C");
+        insertTable1(it1, 2147483676L);
+        insertTable2(it2, 2147483676L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483676L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483676L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483676L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483676L, "DocumentSortingValues", "______21868__1__1");
+        insertTable2(it2, 2147483676L, "ItemSeq", "1");
+        insertTable2(it2, 2147483676L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483676L, "Plex", "S");
+        insertTable2(it2, 2147483676L, "SC3", "=");
+        insertTable2(it2, 2147483676L, "has_address", "true");
+        insertTable2(it2, 2147483676L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483676L, "Language", "FR");
+        insertTable2(it2, 2147483676L, "logo", "false");
+        insertTable2(it2, 2147483676L, "SC4", "=");
+        insertTable2(it2, 2147483676L, "InternalAddress", "");
+        insertTable2(it2, 2147483676L, "AddressG6", "");
+        insertTable2(it2, 2147483676L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483676L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483676L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483676L, "CommunicationOrderId", "21878");
+        insertTable2(it2, 2147483676L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483676L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483676L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483676L, "Enveloping", "C");
+        insertTable2(it2, 2147483676L, "PostComponentId", "21868");
+        insertTable2(it2, 2147483676L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483676L, "city", "Bruxelles");
+        insertTable2(it2, 2147483676L, "AddressG7", "");
+        insertTable2(it2, 2147483676L, "CopyMention", "");
+        insertTable2(it2, 2147483676L, "AddressG8", "");
+        insertTable2(it2, 2147483676L, "StapleNbr", "");
+        insertTable2(it2, 2147483676L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483676L, "AddressG5", "");
+        insertTable2(it2, 2147483676L, "header", "true");
+        insertTable2(it2, 2147483676L, "EnvelopSortingValue", "BE1180___testOlivier007-0014___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483676L, "GroupedWith", "");
+        insertTable2(it2, 2147483676L, "AddressG2", "Boulevard du Souverain, 23");
+        insertTable2(it2, 2147483676L, "DiversionReason", "");
+        insertTable2(it2, 2147483676L, "Pliable", "true");
+        insertTable2(it2, 2147483676L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483676L, "country", "BE");
+        insertTable2(it2, 2147483676L, "AddressG1", "testOlivier007-0014");
+        insertTable2(it2, 2147483676L, "MentionCode", "");
+        insertTable2(it2, 2147483676L, "postCode", "1180");
+        insertTable2(it2, 2147483676L, "SC5", "=");
+        insertTable2(it2, 2147483676L, "Branding", "1C");
+        insertTable1(it1, 2147483677L);
+        insertTable2(it2, 2147483677L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483677L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483677L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483677L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483677L, "DocumentSortingValues", "______21869__1__1");
+        insertTable2(it2, 2147483677L, "ItemSeq", "1");
+        insertTable2(it2, 2147483677L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483677L, "Plex", "S");
+        insertTable2(it2, 2147483677L, "SC3", "=");
+        insertTable2(it2, 2147483677L, "has_address", "true");
+        insertTable2(it2, 2147483677L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483677L, "Language", "FR");
+        insertTable2(it2, 2147483677L, "logo", "false");
+        insertTable2(it2, 2147483677L, "SC4", "=");
+        insertTable2(it2, 2147483677L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483677L, "AddressG6", "");
+        insertTable2(it2, 2147483677L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483677L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483677L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483677L, "CommunicationOrderId", "21879");
+        insertTable2(it2, 2147483677L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483677L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483677L, "SortPlan", "");
+        insertTable2(it2, 2147483677L, "Enveloping", "N");
+        insertTable2(it2, 2147483677L, "PostComponentId", "21869");
+        insertTable2(it2, 2147483677L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483677L, "city", "Bruxelles");
+        insertTable2(it2, 2147483677L, "AddressG7", "");
+        insertTable2(it2, 2147483677L, "CopyMention", "");
+        insertTable2(it2, 2147483677L, "AddressG8", "");
+        insertTable2(it2, 2147483677L, "StapleNbr", "");
+        insertTable2(it2, 2147483677L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483677L, "AddressG5", "");
+        insertTable2(it2, 2147483677L, "header", "true");
+        insertTable2(it2, 2147483677L, "EnvelopSortingValue", "BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483677L, "GroupedWith", "");
+        insertTable2(it2, 2147483677L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483677L, "DiversionReason", "001");
+        insertTable2(it2, 2147483677L, "Pliable", "true");
+        insertTable2(it2, 2147483677L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483677L, "country", "BE");
+        insertTable2(it2, 2147483677L, "AddressG1", "testOlivier008-0015");
+        insertTable2(it2, 2147483677L, "MentionCode", "");
+        insertTable2(it2, 2147483677L, "postCode", "1180");
+        insertTable2(it2, 2147483677L, "SC5", "=");
+        insertTable2(it2, 2147483677L, "Branding", "1C");
+        insertTable1(it1, 2147483678L);
+        insertTable2(it2, 2147483678L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483678L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483678L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483678L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483678L, "DocumentSortingValues", "______21869__1__1");
+        insertTable2(it2, 2147483678L, "ItemSeq", "1");
+        insertTable2(it2, 2147483678L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483678L, "Plex", "S");
+        insertTable2(it2, 2147483678L, "SC3", "=");
+        insertTable2(it2, 2147483678L, "has_address", "true");
+        insertTable2(it2, 2147483678L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483678L, "Language", "FR");
+        insertTable2(it2, 2147483678L, "logo", "false");
+        insertTable2(it2, 2147483678L, "SC4", "=");
+        insertTable2(it2, 2147483678L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483678L, "AddressG6", "");
+        insertTable2(it2, 2147483678L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483678L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483678L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483678L, "CommunicationOrderId", "21879");
+        insertTable2(it2, 2147483678L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483678L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483678L, "SortPlan", "");
+        insertTable2(it2, 2147483678L, "Enveloping", "N");
+        insertTable2(it2, 2147483678L, "PostComponentId", "21869");
+        insertTable2(it2, 2147483678L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483678L, "city", "Bruxelles");
+        insertTable2(it2, 2147483678L, "AddressG7", "");
+        insertTable2(it2, 2147483678L, "CopyMention", "");
+        insertTable2(it2, 2147483678L, "AddressG8", "");
+        insertTable2(it2, 2147483678L, "StapleNbr", "");
+        insertTable2(it2, 2147483678L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483678L, "AddressG5", "");
+        insertTable2(it2, 2147483678L, "header", "true");
+        insertTable2(it2, 2147483678L, "EnvelopSortingValue", "BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483678L, "GroupedWith", "");
+        insertTable2(it2, 2147483678L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483678L, "DiversionReason", "001");
+        insertTable2(it2, 2147483678L, "Pliable", "true");
+        insertTable2(it2, 2147483678L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483678L, "country", "BE");
+        insertTable2(it2, 2147483678L, "AddressG1", "testOlivier008-0015");
+        insertTable2(it2, 2147483678L, "MentionCode", "");
+        insertTable2(it2, 2147483678L, "postCode", "1180");
+        insertTable2(it2, 2147483678L, "SC5", "=");
+        insertTable2(it2, 2147483678L, "Branding", "1C");
+        insertTable1(it1, 2147483679L);
+        insertTable2(it2, 2147483679L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483679L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483679L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483679L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483679L, "DocumentSortingValues", "______21870__1__1");
+        insertTable2(it2, 2147483679L, "ItemSeq", "1");
+        insertTable2(it2, 2147483679L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483679L, "Plex", "S");
+        insertTable2(it2, 2147483679L, "SC3", "=");
+        insertTable2(it2, 2147483679L, "has_address", "true");
+        insertTable2(it2, 2147483679L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483679L, "Language", "FR");
+        insertTable2(it2, 2147483679L, "logo", "false");
+        insertTable2(it2, 2147483679L, "SC4", "=");
+        insertTable2(it2, 2147483679L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483679L, "AddressG6", "");
+        insertTable2(it2, 2147483679L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483679L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483679L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483679L, "CommunicationOrderId", "21880");
+        insertTable2(it2, 2147483679L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483679L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483679L, "SortPlan", "");
+        insertTable2(it2, 2147483679L, "Enveloping", "N");
+        insertTable2(it2, 2147483679L, "PostComponentId", "21870");
+        insertTable2(it2, 2147483679L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483679L, "city", "Bruxelles");
+        insertTable2(it2, 2147483679L, "AddressG7", "");
+        insertTable2(it2, 2147483679L, "CopyMention", "");
+        insertTable2(it2, 2147483679L, "AddressG8", "");
+        insertTable2(it2, 2147483679L, "StapleNbr", "");
+        insertTable2(it2, 2147483679L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483679L, "AddressG5", "");
+        insertTable2(it2, 2147483679L, "header", "true");
+        insertTable2(it2, 2147483679L, "EnvelopSortingValue", "BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483679L, "GroupedWith", "");
+        insertTable2(it2, 2147483679L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483679L, "DiversionReason", "001");
+        insertTable2(it2, 2147483679L, "Pliable", "true");
+        insertTable2(it2, 2147483679L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483679L, "country", "BE");
+        insertTable2(it2, 2147483679L, "AddressG1", "testOlivier008-0016");
+        insertTable2(it2, 2147483679L, "MentionCode", "");
+        insertTable2(it2, 2147483679L, "postCode", "1180");
+        insertTable2(it2, 2147483679L, "SC5", "=");
+        insertTable2(it2, 2147483679L, "Branding", "1C");
+        insertTable1(it1, 2147483680L);
+        insertTable2(it2, 2147483680L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483680L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483680L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483680L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483680L, "DocumentSortingValues", "______21870__1__1");
+        insertTable2(it2, 2147483680L, "ItemSeq", "1");
+        insertTable2(it2, 2147483680L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483680L, "Plex", "S");
+        insertTable2(it2, 2147483680L, "SC3", "=");
+        insertTable2(it2, 2147483680L, "has_address", "true");
+        insertTable2(it2, 2147483680L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483680L, "Language", "FR");
+        insertTable2(it2, 2147483680L, "logo", "false");
+        insertTable2(it2, 2147483680L, "SC4", "=");
+        insertTable2(it2, 2147483680L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483680L, "AddressG6", "");
+        insertTable2(it2, 2147483680L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483680L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483680L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483680L, "CommunicationOrderId", "21880");
+        insertTable2(it2, 2147483680L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483680L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483680L, "SortPlan", "");
+        insertTable2(it2, 2147483680L, "Enveloping", "N");
+        insertTable2(it2, 2147483680L, "PostComponentId", "21870");
+        insertTable2(it2, 2147483680L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483680L, "city", "Bruxelles");
+        insertTable2(it2, 2147483680L, "AddressG7", "");
+        insertTable2(it2, 2147483680L, "CopyMention", "");
+        insertTable2(it2, 2147483680L, "AddressG8", "");
+        insertTable2(it2, 2147483680L, "StapleNbr", "");
+        insertTable2(it2, 2147483680L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483680L, "AddressG5", "");
+        insertTable2(it2, 2147483680L, "header", "true");
+        insertTable2(it2, 2147483680L, "EnvelopSortingValue", "BE1180___testOlivier008-0016___________Boulevard du Souverain, 23____");
+        insertTable2(it2, 2147483680L, "GroupedWith", "");
+        insertTable2(it2, 2147483680L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483680L, "DiversionReason", "001");
+        insertTable2(it2, 2147483680L, "Pliable", "true");
+        insertTable2(it2, 2147483680L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483680L, "country", "BE");
+        insertTable2(it2, 2147483680L, "AddressG1", "testOlivier008-0016");
+        insertTable2(it2, 2147483680L, "MentionCode", "");
+        insertTable2(it2, 2147483680L, "postCode", "1180");
+        insertTable2(it2, 2147483680L, "SC5", "=");
+        insertTable2(it2, 2147483680L, "Branding", "1C");
+        insertTable1(it1, 2147483681L);
+        insertTable2(it2, 2147483681L, "SC2", "=");
+        insertTable2(it2, 2147483681L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483681L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483681L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483681L, "DocumentSortingValues", "______21871__1__1");
+        insertTable2(it2, 2147483681L, "ItemSeq", "1");
+        insertTable2(it2, 2147483681L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483681L, "Plex", "S");
+        insertTable2(it2, 2147483681L, "SC3", "=");
+        insertTable2(it2, 2147483681L, "has_address", "true");
+        insertTable2(it2, 2147483681L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483681L, "Language", "FR");
+        insertTable2(it2, 2147483681L, "logo", "false");
+        insertTable2(it2, 2147483681L, "SC4", "=");
+        insertTable2(it2, 2147483681L, "InternalAddress", "");
+        insertTable2(it2, 2147483681L, "AddressG6", "");
+        insertTable2(it2, 2147483681L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483681L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483681L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483681L, "CommunicationOrderId", "21881");
+        insertTable2(it2, 2147483681L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483681L, "location", "rue du broker");
+        insertTable2(it2, 2147483681L, "SortPlan", "");
+        insertTable2(it2, 2147483681L, "Enveloping", "C");
+        insertTable2(it2, 2147483681L, "PostComponentId", "21871");
+        insertTable2(it2, 2147483681L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483681L, "city", "Broker ville");
+        insertTable2(it2, 2147483681L, "AddressG7", "");
+        insertTable2(it2, 2147483681L, "CopyMention", "");
+        insertTable2(it2, 2147483681L, "AddressG8", "");
+        insertTable2(it2, 2147483681L, "StapleNbr", "");
+        insertTable2(it2, 2147483681L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483681L, "AddressG5", "");
+        insertTable2(it2, 2147483681L, "header", "true");
+        insertTable2(it2, 2147483681L, "EnvelopSortingValue", "BE1000___testOlivier009-0017___________rue du broker_________________");
+        insertTable2(it2, 2147483681L, "GroupedWith", "");
+        insertTable2(it2, 2147483681L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483681L, "DiversionReason", "");
+        insertTable2(it2, 2147483681L, "Pliable", "true");
+        insertTable2(it2, 2147483681L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483681L, "country", "BE");
+        insertTable2(it2, 2147483681L, "AddressG1", "testOlivier009-0017");
+        insertTable2(it2, 2147483681L, "MentionCode", "");
+        insertTable2(it2, 2147483681L, "postCode", "1000");
+        insertTable2(it2, 2147483681L, "SC5", "=");
+        insertTable2(it2, 2147483681L, "Branding", "1C");
+        insertTable1(it1, 2147483682L);
+        insertTable2(it2, 2147483682L, "SC2", "=");
+        insertTable2(it2, 2147483682L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483682L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483682L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483682L, "DocumentSortingValues", "______21871__1__1");
+        insertTable2(it2, 2147483682L, "ItemSeq", "1");
+        insertTable2(it2, 2147483682L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483682L, "Plex", "S");
+        insertTable2(it2, 2147483682L, "SC3", "=");
+        insertTable2(it2, 2147483682L, "has_address", "true");
+        insertTable2(it2, 2147483682L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483682L, "Language", "FR");
+        insertTable2(it2, 2147483682L, "logo", "false");
+        insertTable2(it2, 2147483682L, "SC4", "=");
+        insertTable2(it2, 2147483682L, "InternalAddress", "");
+        insertTable2(it2, 2147483682L, "AddressG6", "");
+        insertTable2(it2, 2147483682L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483682L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483682L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483682L, "CommunicationOrderId", "21881");
+        insertTable2(it2, 2147483682L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483682L, "location", "rue du broker");
+        insertTable2(it2, 2147483682L, "SortPlan", "");
+        insertTable2(it2, 2147483682L, "Enveloping", "C");
+        insertTable2(it2, 2147483682L, "PostComponentId", "21871");
+        insertTable2(it2, 2147483682L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483682L, "city", "Broker ville");
+        insertTable2(it2, 2147483682L, "AddressG7", "");
+        insertTable2(it2, 2147483682L, "CopyMention", "");
+        insertTable2(it2, 2147483682L, "AddressG8", "");
+        insertTable2(it2, 2147483682L, "StapleNbr", "");
+        insertTable2(it2, 2147483682L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483682L, "AddressG5", "");
+        insertTable2(it2, 2147483682L, "header", "true");
+        insertTable2(it2, 2147483682L, "EnvelopSortingValue", "BE1000___testOlivier009-0017___________rue dubroker_________________");
+        insertTable2(it2, 2147483682L, "GroupedWith", "");
+        insertTable2(it2, 2147483682L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483682L, "DiversionReason", "");
+        insertTable2(it2, 2147483682L, "Pliable", "true");
+        insertTable2(it2, 2147483682L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483682L, "country", "BE");
+        insertTable2(it2, 2147483682L, "AddressG1", "testOlivier009-0017");
+        insertTable2(it2, 2147483682L, "MentionCode", "");
+        insertTable2(it2, 2147483682L, "postCode", "1000");
+        insertTable2(it2, 2147483682L, "SC5", "=");
+        insertTable2(it2, 2147483682L, "Branding", "1C");
+        insertTable1(it1, 2147483683L);
+        insertTable2(it2, 2147483683L, "SC2", "=");
+        insertTable2(it2, 2147483683L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483683L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483683L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483683L, "DocumentSortingValues", "______21872__1__1");
+        insertTable2(it2, 2147483683L, "ItemSeq", "1");
+        insertTable2(it2, 2147483683L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483683L, "Plex", "S");
+        insertTable2(it2, 2147483683L, "SC3", "=");
+        insertTable2(it2, 2147483683L, "has_address", "true");
+        insertTable2(it2, 2147483683L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483683L, "Language", "FR");
+        insertTable2(it2, 2147483683L, "logo", "false");
+        insertTable2(it2, 2147483683L, "SC4", "=");
+        insertTable2(it2, 2147483683L, "InternalAddress", "");
+        insertTable2(it2, 2147483683L, "AddressG6", "");
+        insertTable2(it2, 2147483683L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483683L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483683L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483683L, "CommunicationOrderId", "21882");
+        insertTable2(it2, 2147483683L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483683L, "location", "rue du broker");
+        insertTable2(it2, 2147483683L, "SortPlan", "");
+        insertTable2(it2, 2147483683L, "Enveloping", "C");
+        insertTable2(it2, 2147483683L, "PostComponentId", "21872");
+        insertTable2(it2, 2147483683L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483683L, "city", "Broker ville");
+        insertTable2(it2, 2147483683L, "AddressG7", "");
+        insertTable2(it2, 2147483683L, "CopyMention", "");
+        insertTable2(it2, 2147483683L, "AddressG8", "");
+        insertTable2(it2, 2147483683L, "StapleNbr", "");
+        insertTable2(it2, 2147483683L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483683L, "AddressG5", "");
+        insertTable2(it2, 2147483683L, "header", "true");
+        insertTable2(it2, 2147483683L, "EnvelopSortingValue", "BE1000___testOlivier009-0018___________rue du broker_________________");
+        insertTable2(it2, 2147483683L, "GroupedWith", "");
+        insertTable2(it2, 2147483683L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483683L, "DiversionReason", "");
+        insertTable2(it2, 2147483683L, "Pliable", "true");
+        insertTable2(it2, 2147483683L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483683L, "country", "BE");
+        insertTable2(it2, 2147483683L, "AddressG1", "testOlivier009-0018");
+        insertTable2(it2, 2147483683L, "MentionCode", "");
+        insertTable2(it2, 2147483683L, "postCode", "1000");
+        insertTable2(it2, 2147483683L, "SC5", "=");
+        insertTable2(it2, 2147483683L, "Branding", "1C");
+        insertTable1(it1, 2147483684L);
+        insertTable2(it2, 2147483684L, "SC2", "=");
+        insertTable2(it2, 2147483684L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483684L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483684L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483684L, "DocumentSortingValues", "______21872__1__1");
+        insertTable2(it2, 2147483684L, "ItemSeq", "1");
+        insertTable2(it2, 2147483684L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483684L, "Plex", "S");
+        insertTable2(it2, 2147483684L, "SC3", "=");
+        insertTable2(it2, 2147483684L, "has_address", "true");
+        insertTable2(it2, 2147483684L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483684L, "Language", "FR");
+        insertTable2(it2, 2147483684L, "logo", "false");
+        insertTable2(it2, 2147483684L, "SC4", "=");
+        insertTable2(it2, 2147483684L, "InternalAddress", "");
+        insertTable2(it2, 2147483684L, "AddressG6", "");
+        insertTable2(it2, 2147483684L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483684L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483684L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483684L, "CommunicationOrderId", "21882");
+        insertTable2(it2, 2147483684L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483684L, "location", "rue du broker");
+        insertTable2(it2, 2147483684L, "SortPlan", "");
+        insertTable2(it2, 2147483684L, "Enveloping", "C");
+        insertTable2(it2, 2147483684L, "PostComponentId", "21872");
+        insertTable2(it2, 2147483684L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483684L, "city", "Broker ville");
+        insertTable2(it2, 2147483684L, "AddressG7", "");
+        insertTable2(it2, 2147483684L, "CopyMention", "");
+        insertTable2(it2, 2147483684L, "AddressG8", "");
+        insertTable2(it2, 2147483684L, "StapleNbr", "");
+        insertTable2(it2, 2147483684L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483684L, "AddressG5", "");
+        insertTable2(it2, 2147483684L, "header", "true");
+        insertTable2(it2, 2147483684L, "EnvelopSortingValue", "BE1000___testOlivier009-0018___________rue du broker_________________");
+        insertTable2(it2, 2147483684L, "GroupedWith", "");
+        insertTable2(it2, 2147483684L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483684L, "DiversionReason", "");
+        insertTable2(it2, 2147483684L, "Pliable", "true");
+        insertTable2(it2, 2147483684L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483684L, "country", "BE");
+        insertTable2(it2, 2147483684L, "AddressG1", "testOlivier009-0018");
+        insertTable2(it2, 2147483684L, "MentionCode", "");
+        insertTable2(it2, 2147483684L, "postCode", "1000");
+        insertTable2(it2, 2147483684L, "SC5", "=");
+        insertTable2(it2, 2147483684L, "Branding", "1C");
+        insertTable1(it1, 2147483685L);
+        insertTable2(it2, 2147483685L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483685L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483685L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483685L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483685L, "DocumentSortingValues", "______21873__1__1");
+        insertTable2(it2, 2147483685L, "ItemSeq", "1");
+        insertTable2(it2, 2147483685L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483685L, "Plex", "S");
+        insertTable2(it2, 2147483685L, "SC3", "=");
+        insertTable2(it2, 2147483685L, "has_address", "true");
+        insertTable2(it2, 2147483685L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483685L, "Language", "FR");
+        insertTable2(it2, 2147483685L, "logo", "false");
+        insertTable2(it2, 2147483685L, "SC4", "=");
+        insertTable2(it2, 2147483685L, "InternalAddress", "");
+        insertTable2(it2, 2147483685L, "AddressG6", "");
+        insertTable2(it2, 2147483685L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483685L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483685L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483685L, "CommunicationOrderId", "21883");
+        insertTable2(it2, 2147483685L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483685L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483685L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483685L, "Enveloping", "C");
+        insertTable2(it2, 2147483685L, "PostComponentId", "21873");
+        insertTable2(it2, 2147483685L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483685L, "city", "Bruxelles");
+        insertTable2(it2, 2147483685L, "AddressG7", "");
+        insertTable2(it2, 2147483685L, "CopyMention", "");
+        insertTable2(it2, 2147483685L, "AddressG8", "");
+        insertTable2(it2, 2147483685L, "StapleNbr", "");
+        insertTable2(it2, 2147483685L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483685L, "AddressG5", "");
+        insertTable2(it2, 2147483685L, "header", "true");
+        insertTable2(it2, 2147483685L, "EnvelopSortingValue", "BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483685L, "GroupedWith", "");
+        insertTable2(it2, 2147483685L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483685L, "DiversionReason", "");
+        insertTable2(it2, 2147483685L, "Pliable", "true");
+        insertTable2(it2, 2147483685L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483685L, "country", "BE");
+        insertTable2(it2, 2147483685L, "AddressG1", "testOlivier010-0019");
+        insertTable2(it2, 2147483685L, "MentionCode", "");
+        insertTable2(it2, 2147483685L, "postCode", "1180");
+        insertTable2(it2, 2147483685L, "SC5", "=");
+        insertTable2(it2, 2147483685L, "Branding", "1C");
+        insertTable1(it1, 2147483686L);
+        insertTable2(it2, 2147483686L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483686L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483686L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483686L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483686L, "DocumentSortingValues", "______21873__1__1");
+        insertTable2(it2, 2147483686L, "ItemSeq", "1");
+        insertTable2(it2, 2147483686L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483686L, "Plex", "S");
+        insertTable2(it2, 2147483686L, "SC3", "=");
+        insertTable2(it2, 2147483686L, "has_address", "true");
+        insertTable2(it2, 2147483686L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483686L, "Language", "FR");
+        insertTable2(it2, 2147483686L, "logo", "false");
+        insertTable2(it2, 2147483686L, "SC4", "=");
+        insertTable2(it2, 2147483686L, "InternalAddress", "");
+        insertTable2(it2, 2147483686L, "AddressG6", "");
+        insertTable2(it2, 2147483686L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483686L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483686L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483686L, "CommunicationOrderId", "21883");
+        insertTable2(it2, 2147483686L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483686L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483686L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483686L, "Enveloping", "C");
+        insertTable2(it2, 2147483686L, "PostComponentId", "21873");
+        insertTable2(it2, 2147483686L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483686L, "city", "Bruxelles");
+        insertTable2(it2, 2147483686L, "AddressG7", "");
+        insertTable2(it2, 2147483686L, "CopyMention", "");
+        insertTable2(it2, 2147483686L, "AddressG8", "");
+        insertTable2(it2, 2147483686L, "StapleNbr", "");
+        insertTable2(it2, 2147483686L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483686L, "AddressG5", "");
+        insertTable2(it2, 2147483686L, "header", "true");
+        insertTable2(it2, 2147483686L, "EnvelopSortingValue", "BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483686L, "GroupedWith", "");
+        insertTable2(it2, 2147483686L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483686L, "DiversionReason", "");
+        insertTable2(it2, 2147483686L, "Pliable", "true");
+        insertTable2(it2, 2147483686L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483686L, "country", "BE");
+        insertTable2(it2, 2147483686L, "AddressG1", "testOlivier010-0019");
+        insertTable2(it2, 2147483686L, "MentionCode", "");
+        insertTable2(it2, 2147483686L, "postCode", "1180");
+        insertTable2(it2, 2147483686L, "SC5", "=");
+        insertTable2(it2, 2147483686L, "Branding", "1C");
+        insertTable1(it1, 2147483687L);
+        insertTable2(it2, 2147483687L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483687L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483687L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483687L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483687L, "DocumentSortingValues", "______21874__1__1");
+        insertTable2(it2, 2147483687L, "ItemSeq", "1");
+        insertTable2(it2, 2147483687L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483687L, "Plex", "S");
+        insertTable2(it2, 2147483687L, "SC3", "=");
+        insertTable2(it2, 2147483687L, "has_address", "true");
+        insertTable2(it2, 2147483687L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483687L, "Language", "FR");
+        insertTable2(it2, 2147483687L, "logo", "false");
+        insertTable2(it2, 2147483687L, "SC4", "=");
+        insertTable2(it2, 2147483687L, "InternalAddress", "");
+        insertTable2(it2, 2147483687L, "AddressG6", "");
+        insertTable2(it2, 2147483687L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483687L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483687L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483687L, "CommunicationOrderId", "21884");
+        insertTable2(it2, 2147483687L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483687L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483687L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483687L, "Enveloping", "C");
+        insertTable2(it2, 2147483687L, "PostComponentId", "21874");
+        insertTable2(it2, 2147483687L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483687L, "city", "Bruxelles");
+        insertTable2(it2, 2147483687L, "AddressG7", "");
+        insertTable2(it2, 2147483687L, "CopyMention", "");
+        insertTable2(it2, 2147483687L, "AddressG8", "");
+        insertTable2(it2, 2147483687L, "StapleNbr", "");
+        insertTable2(it2, 2147483687L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483687L, "AddressG5", "");
+        insertTable2(it2, 2147483687L, "header", "true");
+        insertTable2(it2, 2147483687L, "EnvelopSortingValue", "BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483687L, "GroupedWith", "");
+        insertTable2(it2, 2147483687L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483687L, "DiversionReason", "");
+        insertTable2(it2, 2147483687L, "Pliable", "true");
+        insertTable2(it2, 2147483687L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483687L, "country", "BE");
+        insertTable2(it2, 2147483687L, "AddressG1", "testOlivier010-0020");
+        insertTable2(it2, 2147483687L, "MentionCode", "");
+        insertTable2(it2, 2147483687L, "postCode", "1180");
+        insertTable2(it2, 2147483687L, "SC5", "=");
+        insertTable2(it2, 2147483687L, "Branding", "1C");
+        insertTable1(it1, 2147483688L);
+        insertTable2(it2, 2147483688L, "SC2", "LaPosteSortPlan=B-W3-S2");
+        insertTable2(it2, 2147483688L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483688L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483688L, "AddressG3", "1180, Bruxelles");
+        insertTable2(it2, 2147483688L, "DocumentSortingValues", "______21874__1__1");
+        insertTable2(it2, 2147483688L, "ItemSeq", "1");
+        insertTable2(it2, 2147483688L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483688L, "Plex", "S");
+        insertTable2(it2, 2147483688L, "SC3", "=");
+        insertTable2(it2, 2147483688L, "has_address", "true");
+        insertTable2(it2, 2147483688L, "SubBatchSortingValue", "BE_B-W3-S2___");
+        insertTable2(it2, 2147483688L, "Language", "FR");
+        insertTable2(it2, 2147483688L, "logo", "false");
+        insertTable2(it2, 2147483688L, "SC4", "=");
+        insertTable2(it2, 2147483688L, "InternalAddress", "");
+        insertTable2(it2, 2147483688L, "AddressG6", "");
+        insertTable2(it2, 2147483688L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483688L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483688L, "SC1", "Country=BE");
+        insertTable2(it2, 2147483688L, "CommunicationOrderId", "21884");
+        insertTable2(it2, 2147483688L, "BatchTypeId", "Paper");
+        insertTable2(it2, 2147483688L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483688L, "SortPlan", "B-W3-S2");
+        insertTable2(it2, 2147483688L, "Enveloping", "C");
+        insertTable2(it2, 2147483688L, "PostComponentId", "21874");
+        insertTable2(it2, 2147483688L, "BatchTypeLabel", "Paper");
+        insertTable2(it2, 2147483688L, "city", "Bruxelles");
+        insertTable2(it2, 2147483688L, "AddressG7", "");
+        insertTable2(it2, 2147483688L, "CopyMention", "");
+        insertTable2(it2, 2147483688L, "AddressG8", "");
+        insertTable2(it2, 2147483688L, "StapleNbr", "");
+        insertTable2(it2, 2147483688L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483688L, "AddressG5", "");
+        insertTable2(it2, 2147483688L, "header", "true");
+        insertTable2(it2, 2147483688L, "EnvelopSortingValue", "BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483688L, "GroupedWith", "");
+        insertTable2(it2, 2147483688L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483688L, "DiversionReason", "");
+        insertTable2(it2, 2147483688L, "Pliable", "true");
+        insertTable2(it2, 2147483688L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483688L, "country", "BE");
+        insertTable2(it2, 2147483688L, "AddressG1", "testOlivier010-0020");
+        insertTable2(it2, 2147483688L, "MentionCode", "");
+        insertTable2(it2, 2147483688L, "postCode", "1180");
+        insertTable2(it2, 2147483688L, "SC5", "=");
+        insertTable2(it2, 2147483688L, "Branding", "1C");
+        insertTable1(it1, 2147483689L);
+        insertTable2(it2, 2147483689L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483689L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483689L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483689L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483689L, "DocumentSortingValues", "______21875__1__1");
+        insertTable2(it2, 2147483689L, "ItemSeq", "1");
+        insertTable2(it2, 2147483689L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483689L, "Plex", "S");
+        insertTable2(it2, 2147483689L, "SC3", "=");
+        insertTable2(it2, 2147483689L, "has_address", "true");
+        insertTable2(it2, 2147483689L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483689L, "Language", "FR");
+        insertTable2(it2, 2147483689L, "logo", "false");
+        insertTable2(it2, 2147483689L, "SC4", "=");
+        insertTable2(it2, 2147483689L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483689L, "AddressG6", "");
+        insertTable2(it2, 2147483689L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483689L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483689L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483689L, "CommunicationOrderId", "21885");
+        insertTable2(it2, 2147483689L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483689L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483689L, "SortPlan", "");
+        insertTable2(it2, 2147483689L, "Enveloping", "N");
+        insertTable2(it2, 2147483689L, "PostComponentId", "21875");
+        insertTable2(it2, 2147483689L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483689L, "city", "Bruxelles");
+        insertTable2(it2, 2147483689L, "AddressG7", "");
+        insertTable2(it2, 2147483689L, "CopyMention", "");
+        insertTable2(it2, 2147483689L, "AddressG8", "");
+        insertTable2(it2, 2147483689L, "StapleNbr", "");
+        insertTable2(it2, 2147483689L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483689L, "AddressG5", "");
+        insertTable2(it2, 2147483689L, "header", "true");
+        insertTable2(it2, 2147483689L, "EnvelopSortingValue", "BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483689L, "GroupedWith", "");
+        insertTable2(it2, 2147483689L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483689L, "DiversionReason", "001");
+        insertTable2(it2, 2147483689L, "Pliable", "true");
+        insertTable2(it2, 2147483689L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483689L, "country", "BE");
+        insertTable2(it2, 2147483689L, "AddressG1", "testOlivier011-0021");
+        insertTable2(it2, 2147483689L, "MentionCode", "");
+        insertTable2(it2, 2147483689L, "postCode", "1180");
+        insertTable2(it2, 2147483689L, "SC5", "=");
+        insertTable2(it2, 2147483689L, "Branding", "1C");
+        insertTable1(it1, 2147483690L);
+        insertTable2(it2, 2147483690L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483690L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483690L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483690L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483690L, "DocumentSortingValues", "______21875__1__1");
+        insertTable2(it2, 2147483690L, "ItemSeq", "1");
+        insertTable2(it2, 2147483690L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483690L, "Plex", "S");
+        insertTable2(it2, 2147483690L, "SC3", "=");
+        insertTable2(it2, 2147483690L, "has_address", "true");
+        insertTable2(it2, 2147483690L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483690L, "Language", "FR");
+        insertTable2(it2, 2147483690L, "logo", "false");
+        insertTable2(it2, 2147483690L, "SC4", "=");
+        insertTable2(it2, 2147483690L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483690L, "AddressG6", "");
+        insertTable2(it2, 2147483690L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483690L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483690L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483690L, "CommunicationOrderId", "21885");
+        insertTable2(it2, 2147483690L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483690L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483690L, "SortPlan", "");
+        insertTable2(it2, 2147483690L, "Enveloping", "N");
+        insertTable2(it2, 2147483690L, "PostComponentId", "21875");
+        insertTable2(it2, 2147483690L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483690L, "city", "Bruxelles");
+        insertTable2(it2, 2147483690L, "AddressG7", "");
+        insertTable2(it2, 2147483690L, "CopyMention", "");
+        insertTable2(it2, 2147483690L, "AddressG8", "");
+        insertTable2(it2, 2147483690L, "StapleNbr", "");
+        insertTable2(it2, 2147483690L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483690L, "AddressG5", "");
+        insertTable2(it2, 2147483690L, "header", "true");
+        insertTable2(it2, 2147483690L, "EnvelopSortingValue", "BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483690L, "GroupedWith", "");
+        insertTable2(it2, 2147483690L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483690L, "DiversionReason", "001");
+        insertTable2(it2, 2147483690L, "Pliable", "true");
+        insertTable2(it2, 2147483690L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483690L, "country", "BE");
+        insertTable2(it2, 2147483690L, "AddressG1", "testOlivier011-0021");
+        insertTable2(it2, 2147483690L, "MentionCode", "");
+        insertTable2(it2, 2147483690L, "postCode", "1180");
+        insertTable2(it2, 2147483690L, "SC5", "=");
+        insertTable2(it2, 2147483690L, "Branding", "1C");
+        insertTable1(it1, 2147483691L);
+        insertTable2(it2, 2147483691L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483691L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483691L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483691L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483691L, "DocumentSortingValues", "______21876__1__1");
+        insertTable2(it2, 2147483691L, "ItemSeq", "1");
+        insertTable2(it2, 2147483691L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483691L, "Plex", "S");
+        insertTable2(it2, 2147483691L, "SC3", "=");
+        insertTable2(it2, 2147483691L, "has_address", "true");
+        insertTable2(it2, 2147483691L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483691L, "Language", "FR");
+        insertTable2(it2, 2147483691L, "logo", "false");
+        insertTable2(it2, 2147483691L, "SC4", "=");
+        insertTable2(it2, 2147483691L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483691L, "AddressG6", "");
+        insertTable2(it2, 2147483691L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483691L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483691L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483691L, "CommunicationOrderId", "21886");
+        insertTable2(it2, 2147483691L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483691L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483691L, "SortPlan", "");
+        insertTable2(it2, 2147483691L, "Enveloping", "N");
+        insertTable2(it2, 2147483691L, "PostComponentId", "21876");
+        insertTable2(it2, 2147483691L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483691L, "city", "Bruxelles");
+        insertTable2(it2, 2147483691L, "AddressG7", "");
+        insertTable2(it2, 2147483691L, "CopyMention", "");
+        insertTable2(it2, 2147483691L, "AddressG8", "");
+        insertTable2(it2, 2147483691L, "StapleNbr", "");
+        insertTable2(it2, 2147483691L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483691L, "AddressG5", "");
+        insertTable2(it2, 2147483691L, "header", "true");
+        insertTable2(it2, 2147483691L, "EnvelopSortingValue", "BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483691L, "GroupedWith", "");
+        insertTable2(it2, 2147483691L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483691L, "DiversionReason", "001");
+        insertTable2(it2, 2147483691L, "Pliable", "true");
+        insertTable2(it2, 2147483691L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483691L, "country", "BE");
+        insertTable2(it2, 2147483691L, "AddressG1", "testOlivier011-0022");
+        insertTable2(it2, 2147483691L, "MentionCode", "");
+        insertTable2(it2, 2147483691L, "postCode", "1180");
+        insertTable2(it2, 2147483691L, "SC5", "=");
+        insertTable2(it2, 2147483691L, "Branding", "1C");
+        insertTable1(it1, 2147483692L);
+        insertTable2(it2, 2147483692L, "SC2", "PostCode=1180");
+        insertTable2(it2, 2147483692L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483692L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483692L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 2147483692L, "DocumentSortingValues", "______21876__1__1");
+        insertTable2(it2, 2147483692L, "ItemSeq", "1");
+        insertTable2(it2, 2147483692L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483692L, "Plex", "S");
+        insertTable2(it2, 2147483692L, "SC3", "=");
+        insertTable2(it2, 2147483692L, "has_address", "true");
+        insertTable2(it2, 2147483692L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 2147483692L, "Language", "FR");
+        insertTable2(it2, 2147483692L, "logo", "false");
+        insertTable2(it2, 2147483692L, "SC4", "=");
+        insertTable2(it2, 2147483692L, "InternalAddress", "233/621");
+        insertTable2(it2, 2147483692L, "AddressG6", "");
+        insertTable2(it2, 2147483692L, "InternalAddressBringer", "true");
+        insertTable2(it2, 2147483692L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483692L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 2147483692L, "CommunicationOrderId", "21886");
+        insertTable2(it2, 2147483692L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 2147483692L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483692L, "SortPlan", "");
+        insertTable2(it2, 2147483692L, "Enveloping", "N");
+        insertTable2(it2, 2147483692L, "PostComponentId", "21876");
+        insertTable2(it2, 2147483692L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 2147483692L, "city", "Bruxelles");
+        insertTable2(it2, 2147483692L, "AddressG7", "");
+        insertTable2(it2, 2147483692L, "CopyMention", "");
+        insertTable2(it2, 2147483692L, "AddressG8", "");
+        insertTable2(it2, 2147483692L, "StapleNbr", "");
+        insertTable2(it2, 2147483692L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483692L, "AddressG5", "");
+        insertTable2(it2, 2147483692L, "header", "true");
+        insertTable2(it2, 2147483692L, "EnvelopSortingValue", "BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 2147483692L, "GroupedWith", "");
+        insertTable2(it2, 2147483692L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 2147483692L, "DiversionReason", "001");
+        insertTable2(it2, 2147483692L, "Pliable", "true");
+        insertTable2(it2, 2147483692L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483692L, "country", "BE");
+        insertTable2(it2, 2147483692L, "AddressG1", "testOlivier011-0022");
+        insertTable2(it2, 2147483692L, "MentionCode", "");
+        insertTable2(it2, 2147483692L, "postCode", "1180");
+        insertTable2(it2, 2147483692L, "SC5", "=");
+        insertTable2(it2, 2147483692L, "Branding", "1C");
+        insertTable1(it1, 2147483693L);
+        insertTable2(it2, 2147483693L, "SC2", "=");
+        insertTable2(it2, 2147483693L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483693L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483693L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483693L, "DocumentSortingValues", "______21877__1__1");
+        insertTable2(it2, 2147483693L, "ItemSeq", "1");
+        insertTable2(it2, 2147483693L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483693L, "Plex", "S");
+        insertTable2(it2, 2147483693L, "SC3", "=");
+        insertTable2(it2, 2147483693L, "has_address", "true");
+        insertTable2(it2, 2147483693L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483693L, "Language", "FR");
+        insertTable2(it2, 2147483693L, "logo", "false");
+        insertTable2(it2, 2147483693L, "SC4", "=");
+        insertTable2(it2, 2147483693L, "InternalAddress", "");
+        insertTable2(it2, 2147483693L, "AddressG6", "");
+        insertTable2(it2, 2147483693L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483693L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483693L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483693L, "CommunicationOrderId", "21887");
+        insertTable2(it2, 2147483693L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483693L, "location", "rue du broker");
+        insertTable2(it2, 2147483693L, "SortPlan", "");
+        insertTable2(it2, 2147483693L, "Enveloping", "C");
+        insertTable2(it2, 2147483693L, "PostComponentId", "21877");
+        insertTable2(it2, 2147483693L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483693L, "city", "Broker ville");
+        insertTable2(it2, 2147483693L, "AddressG7", "");
+        insertTable2(it2, 2147483693L, "CopyMention", "");
+        insertTable2(it2, 2147483693L, "AddressG8", "");
+        insertTable2(it2, 2147483693L, "StapleNbr", "");
+        insertTable2(it2, 2147483693L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483693L, "AddressG5", "");
+        insertTable2(it2, 2147483693L, "header", "true");
+        insertTable2(it2, 2147483693L, "EnvelopSortingValue", "BE1000___testOlivier012-0023___________rue du broker_________________");
+        insertTable2(it2, 2147483693L, "GroupedWith", "");
+        insertTable2(it2, 2147483693L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483693L, "DiversionReason", "");
+        insertTable2(it2, 2147483693L, "Pliable", "true");
+        insertTable2(it2, 2147483693L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483693L, "country", "BE");
+        insertTable2(it2, 2147483693L, "AddressG1", "testOlivier012-0023");
+        insertTable2(it2, 2147483693L, "MentionCode", "");
+        insertTable2(it2, 2147483693L, "postCode", "1000");
+        insertTable2(it2, 2147483693L, "SC5", "=");
+        insertTable2(it2, 2147483693L, "Branding", "1C");
+        insertTable1(it1, 2147483694L);
+        insertTable2(it2, 2147483694L, "SC2", "=");
+        insertTable2(it2, 2147483694L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483694L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483694L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483694L, "DocumentSortingValues", "______21877__1__1");
+        insertTable2(it2, 2147483694L, "ItemSeq", "1");
+        insertTable2(it2, 2147483694L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483694L, "Plex", "S");
+        insertTable2(it2, 2147483694L, "SC3", "=");
+        insertTable2(it2, 2147483694L, "has_address", "true");
+        insertTable2(it2, 2147483694L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483694L, "Language", "FR");
+        insertTable2(it2, 2147483694L, "logo", "false");
+        insertTable2(it2, 2147483694L, "SC4", "=");
+        insertTable2(it2, 2147483694L, "InternalAddress", "");
+        insertTable2(it2, 2147483694L, "AddressG6", "");
+        insertTable2(it2, 2147483694L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483694L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483694L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483694L, "CommunicationOrderId", "21887");
+        insertTable2(it2, 2147483694L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483694L, "location", "rue du broker");
+        insertTable2(it2, 2147483694L, "SortPlan", "");
+        insertTable2(it2, 2147483694L, "Enveloping", "C");
+        insertTable2(it2, 2147483694L, "PostComponentId", "21877");
+        insertTable2(it2, 2147483694L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483694L, "city", "Broker ville");
+        insertTable2(it2, 2147483694L, "AddressG7", "");
+        insertTable2(it2, 2147483694L, "CopyMention", "");
+        insertTable2(it2, 2147483694L, "AddressG8", "");
+        insertTable2(it2, 2147483694L, "StapleNbr", "");
+        insertTable2(it2, 2147483694L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483694L, "AddressG5", "");
+        insertTable2(it2, 2147483694L, "header", "true");
+        insertTable2(it2, 2147483694L, "EnvelopSortingValue", "BE1000___testOlivier012-0023___________rue du broker_________________");
+        insertTable2(it2, 2147483694L, "GroupedWith", "");
+        insertTable2(it2, 2147483694L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483694L, "DiversionReason", "");
+        insertTable2(it2, 2147483694L, "Pliable", "true");
+        insertTable2(it2, 2147483694L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483694L, "country", "BE");
+        insertTable2(it2, 2147483694L, "AddressG1", "testOlivier012-0023");
+        insertTable2(it2, 2147483694L, "MentionCode", "");
+        insertTable2(it2, 2147483694L, "postCode", "1000");
+        insertTable2(it2, 2147483694L, "SC5", "=");
+        insertTable2(it2, 2147483694L, "Branding", "1C");
+        insertTable1(it1, 2147483695L);
+        insertTable2(it2, 2147483695L, "SC2", "=");
+        insertTable2(it2, 2147483695L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483695L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483695L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483695L, "DocumentSortingValues", "______21878__1__1");
+        insertTable2(it2, 2147483695L, "ItemSeq", "1");
+        insertTable2(it2, 2147483695L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483695L, "Plex", "S");
+        insertTable2(it2, 2147483695L, "SC3", "=");
+        insertTable2(it2, 2147483695L, "has_address", "true");
+        insertTable2(it2, 2147483695L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483695L, "Language", "FR");
+        insertTable2(it2, 2147483695L, "logo", "false");
+        insertTable2(it2, 2147483695L, "SC4", "=");
+        insertTable2(it2, 2147483695L, "InternalAddress", "");
+        insertTable2(it2, 2147483695L, "AddressG6", "");
+        insertTable2(it2, 2147483695L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483695L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483695L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483695L, "CommunicationOrderId", "21888");
+        insertTable2(it2, 2147483695L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483695L, "location", "rue du broker");
+        insertTable2(it2, 2147483695L, "SortPlan", "");
+        insertTable2(it2, 2147483695L, "Enveloping", "C");
+        insertTable2(it2, 2147483695L, "PostComponentId", "21878");
+        insertTable2(it2, 2147483695L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483695L, "city", "Broker ville");
+        insertTable2(it2, 2147483695L, "AddressG7", "");
+        insertTable2(it2, 2147483695L, "CopyMention", "");
+        insertTable2(it2, 2147483695L, "AddressG8", "");
+        insertTable2(it2, 2147483695L, "StapleNbr", "");
+        insertTable2(it2, 2147483695L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483695L, "AddressG5", "");
+        insertTable2(it2, 2147483695L, "header", "true");
+        insertTable2(it2, 2147483695L, "EnvelopSortingValue", "BE1000___testOlivier012-0024___________rue du broker_________________");
+        insertTable2(it2, 2147483695L, "GroupedWith", "");
+        insertTable2(it2, 2147483695L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483695L, "DiversionReason", "");
+        insertTable2(it2, 2147483695L, "Pliable", "true");
+        insertTable2(it2, 2147483695L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483695L, "country", "BE");
+        insertTable2(it2, 2147483695L, "AddressG1", "testOlivier012-0024");
+        insertTable2(it2, 2147483695L, "MentionCode", "");
+        insertTable2(it2, 2147483695L, "postCode", "1000");
+        insertTable2(it2, 2147483695L, "SC5", "=");
+        insertTable2(it2, 2147483695L, "Branding", "1C");
+        insertTable1(it1, 2147483696L);
+        insertTable2(it2, 2147483696L, "SC2", "=");
+        insertTable2(it2, 2147483696L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 2147483696L, "IsIdenticalToDocumentAddress", "true");
+        insertTable2(it2, 2147483696L, "AddressG3", "Broker ville");
+        insertTable2(it2, 2147483696L, "DocumentSortingValues", "______21878__1__1");
+        insertTable2(it2, 2147483696L, "ItemSeq", "1");
+        insertTable2(it2, 2147483696L, "BatchTypeInstructions", "");
+        insertTable2(it2, 2147483696L, "Plex", "S");
+        insertTable2(it2, 2147483696L, "SC3", "=");
+        insertTable2(it2, 2147483696L, "has_address", "true");
+        insertTable2(it2, 2147483696L, "SubBatchSortingValue", "Une info b");
+        insertTable2(it2, 2147483696L, "Language", "FR");
+        insertTable2(it2, 2147483696L, "logo", "false");
+        insertTable2(it2, 2147483696L, "SC4", "=");
+        insertTable2(it2, 2147483696L, "InternalAddress", "");
+        insertTable2(it2, 2147483696L, "AddressG6", "");
+        insertTable2(it2, 2147483696L, "InternalAddressBringer", "false");
+        insertTable2(it2, 2147483696L, "AddresseeSeq", "1");
+        insertTable2(it2, 2147483696L, "SC1", "DeliveryInformation=Une info bidon");
+        insertTable2(it2, 2147483696L, "CommunicationOrderId", "21888");
+        insertTable2(it2, 2147483696L, "BatchTypeId", "BROKER NET");
+        insertTable2(it2, 2147483696L, "location", "rue du broker");
+        insertTable2(it2, 2147483696L, "SortPlan", "");
+        insertTable2(it2, 2147483696L, "Enveloping", "C");
+        insertTable2(it2, 2147483696L, "PostComponentId", "21878");
+        insertTable2(it2, 2147483696L, "BatchTypeLabel", "BROKER NET");
+        insertTable2(it2, 2147483696L, "city", "Broker ville");
+        insertTable2(it2, 2147483696L, "AddressG7", "");
+        insertTable2(it2, 2147483696L, "CopyMention", "");
+        insertTable2(it2, 2147483696L, "AddressG8", "");
+        insertTable2(it2, 2147483696L, "StapleNbr", "");
+        insertTable2(it2, 2147483696L, "TLEBundle", "Niveau2");
+        insertTable2(it2, 2147483696L, "AddressG5", "");
+        insertTable2(it2, 2147483696L, "header", "true");
+        insertTable2(it2, 2147483696L, "EnvelopSortingValue", "BE1000___testOlivier012-0024___________rue du broker_________________");
+        insertTable2(it2, 2147483696L, "GroupedWith", "");
+        insertTable2(it2, 2147483696L, "AddressG2", "rue du broker");
+        insertTable2(it2, 2147483696L, "DiversionReason", "");
+        insertTable2(it2, 2147483696L, "Pliable", "true");
+        insertTable2(it2, 2147483696L, "TLEBinder", "Niveau1");
+        insertTable2(it2, 2147483696L, "country", "BE");
+        insertTable2(it2, 2147483696L, "AddressG1", "testOlivier012-0024");
+        insertTable2(it2, 2147483696L, "MentionCode", "");
+        insertTable2(it2, 2147483696L, "postCode", "1000");
+        insertTable2(it2, 2147483696L, "SC5", "=");
+        insertTable2(it2, 2147483696L, "Branding", "1C");
+        insertTable2(it2, 2147483649L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483649L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483649L, "DocumentID", "21865/1/1//");
+        insertTable2(it2, 2147483649L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483649L, "PhysicalID", "No");
+        insertTable2(it2, 2147483649L, "Staple", "No");
+        updateTable2(ut2, 2147483649L);
+        insertTable2(it2, 2147483650L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483650L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483650L, "DocumentID", "21865/1/1//");
+        insertTable2(it2, 2147483650L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483650L, "PhysicalID", "No");
+        insertTable2(it2, 2147483650L, "Staple", "No");
+        updateTable2(ut2, 2147483650L);
+        insertTable2(it2, 2147483651L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483651L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483651L, "DocumentID", "21866/1/1//");
+        insertTable2(it2, 2147483651L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483651L, "PhysicalID", "No");
+        insertTable2(it2, 2147483651L, "Staple", "No");
+        updateTable2(ut2, 2147483651L);
+        insertTable2(it2, 2147483652L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483652L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483652L, "DocumentID", "21866/1/1//");
+        insertTable2(it2, 2147483652L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483652L, "PhysicalID", "No");
+        insertTable2(it2, 2147483652L, "Staple", "No");
+        updateTable2(ut2, 2147483652L);
+        insertTable1(it1, 4294967297L);
+        insertTable2(it2, 4294967297L, "SC2", "PostCode=1180");
+        insertTable2(it2, 4294967297L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 4294967297L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 4294967297L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 4294967297L, "DocumentSortingValues", "");
+        insertTable2(it2, 4294967297L, "ItemSeq", "0");
+        insertTable2(it2, 4294967297L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 4294967297L, "Plex", "S");
+        insertTable2(it2, 4294967297L, "SC3", "=");
+        insertTable2(it2, 4294967297L, "has_address", "true");
+        insertTable2(it2, 4294967297L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 4294967297L, "Language", "FR");
+        insertTable2(it2, 4294967297L, "SC4", "=");
+        insertTable2(it2, 4294967297L, "InternalAddress", "233/621");
+        insertTable2(it2, 4294967297L, "AddressG6", "");
+        insertTable2(it2, 4294967297L, "InternalAddressBringer", "true");
+        insertTable2(it2, 4294967297L, "AddresseeSeq", "0");
+        insertTable2(it2, 4294967297L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 4294967297L, "CommunicationOrderId", "21867");
+        insertTable2(it2, 4294967297L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 4294967297L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 4294967297L, "SortPlan", "");
+        insertTable2(it2, 4294967297L, "Enveloping", "N");
+        insertTable2(it2, 4294967297L, "PostComponentId", "21857");
+        insertTable2(it2, 4294967297L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 4294967297L, "city", "Bruxelles");
+        insertTable2(it2, 4294967297L, "AddressG7", "");
+        insertTable2(it2, 4294967297L, "CopyMention", "");
+        insertTable2(it2, 4294967297L, "StapleNbr", "NO");
+        insertTable2(it2, 4294967297L, "AddressG8", "");
+        insertTable2(it2, 4294967297L, "AddressG5", "");
+        insertTable2(it2, 4294967297L, "EnvelopSortingValue", "BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 4294967297L, "GroupedWith", "");
+        insertTable2(it2, 4294967297L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 4294967297L, "DiversionReason", "001");
+        insertTable2(it2, 4294967297L, "Pliable", "true");
+        insertTable2(it2, 4294967297L, "country", "BE");
+        insertTable2(it2, 4294967297L, "AddressG1", "testOlivier002-0003");
+        insertTable2(it2, 4294967297L, "MentionCode", "");
+        insertTable2(it2, 4294967297L, "postCode", "1180");
+        insertTable2(it2, 4294967297L, "SC5", "=");
+        insertTable2(it2, 4294967297L, "env_type", "I");
+        insertTable2(it2, 4294967297L, "Branding", "1C");
+        insertTable2(it2, 4294967297L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 4294967297L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 4294967297L, "DocumentID", "21867/0/0//");
+        insertTable2(it2, 4294967297L, "PageSequenceId", "000001");
+        insertTable2(it2, 4294967297L, "PhysicalID", "No");
+        insertTable2(it2, 4294967297L, "cover_page", "true");
+        insertTable2(it2, 4294967297L, "Staple", "No");
+        updateTable2(ut2, 4294967297L);
+        insertTable2(it2, 2147483653L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483653L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483653L, "DocumentID", "21867/1/1//");
+        insertTable2(it2, 2147483653L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483653L, "PhysicalID", "No");
+        insertTable2(it2, 2147483653L, "Staple", "No");
+        updateTable2(ut2, 2147483653L);
+        insertTable2(it2, 2147483654L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483654L, "GenerationTime", "Wed Oct 22 14:12:10 CEST 2008");
+        insertTable2(it2, 2147483654L, "DocumentID", "21867/1/1//");
+        insertTable2(it2, 2147483654L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483654L, "PhysicalID", "No");
+        insertTable2(it2, 2147483654L, "Staple", "No");
+        updateTable2(ut2, 2147483654L);
+        insertTable1(it1, 6442450945L);
+        insertTable2(it2, 6442450945L, "SC2", "PostCode=1180");
+        insertTable2(it2, 6442450945L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 6442450945L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 6442450945L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 6442450945L, "DocumentSortingValues", "");
+        insertTable2(it2, 6442450945L, "ItemSeq", "0");
+        insertTable2(it2, 6442450945L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 6442450945L, "Plex", "S");
+        insertTable2(it2, 6442450945L, "SC3", "=");
+        insertTable2(it2, 6442450945L, "has_address", "true");
+        insertTable2(it2, 6442450945L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 6442450945L, "Language", "FR");
+        insertTable2(it2, 6442450945L, "SC4", "=");
+        insertTable2(it2, 6442450945L, "InternalAddress", "233/621");
+        insertTable2(it2, 6442450945L, "AddressG6", "");
+        insertTable2(it2, 6442450945L, "InternalAddressBringer", "true");
+        insertTable2(it2, 6442450945L, "AddresseeSeq", "0");
+        insertTable2(it2, 6442450945L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 6442450945L, "CommunicationOrderId", "21868");
+        insertTable2(it2, 6442450945L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 6442450945L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 6442450945L, "SortPlan", "");
+        insertTable2(it2, 6442450945L, "Enveloping", "N");
+        insertTable2(it2, 6442450945L, "PostComponentId", "21858");
+        insertTable2(it2, 6442450945L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 6442450945L, "city", "Bruxelles");
+        insertTable2(it2, 6442450945L, "AddressG7", "");
+        insertTable2(it2, 6442450945L, "CopyMention", "");
+        insertTable2(it2, 6442450945L, "StapleNbr", "NO");
+        insertTable2(it2, 6442450945L, "AddressG8", "");
+        insertTable2(it2, 6442450945L, "AddressG5", "");
+        insertTable2(it2, 6442450945L, "EnvelopSortingValue", "BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 6442450945L, "GroupedWith", "");
+        insertTable2(it2, 6442450945L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 6442450945L, "DiversionReason", "001");
+        insertTable2(it2, 6442450945L, "Pliable", "true");
+        insertTable2(it2, 6442450945L, "country", "BE");
+        insertTable2(it2, 6442450945L, "AddressG1", "testOlivier002-0004");
+        insertTable2(it2, 6442450945L, "MentionCode", "");
+        insertTable2(it2, 6442450945L, "postCode", "1180");
+        insertTable2(it2, 6442450945L, "SC5", "=");
+        insertTable2(it2, 6442450945L, "env_type", "I");
+        insertTable2(it2, 6442450945L, "Branding", "1C");
+        insertTable2(it2, 6442450945L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 6442450945L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 6442450945L, "DocumentID", "21868/0/0//");
+        insertTable2(it2, 6442450945L, "PageSequenceId", "000001");
+        insertTable2(it2, 6442450945L, "PhysicalID", "No");
+        insertTable2(it2, 6442450945L, "cover_page", "true");
+        insertTable2(it2, 6442450945L, "Staple", "No");
+        updateTable2(ut2, 6442450945L);
+        insertTable2(it2, 2147483655L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483655L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483655L, "DocumentID", "21868/1/1//");
+        insertTable2(it2, 2147483655L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483655L, "PhysicalID", "No");
+        insertTable2(it2, 2147483655L, "Staple", "No");
+        updateTable2(ut2, 2147483655L);
+        insertTable2(it2, 2147483656L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483656L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483656L, "DocumentID", "21868/1/1//");
+        insertTable2(it2, 2147483656L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483656L, "PhysicalID", "No");
+        insertTable2(it2, 2147483656L, "Staple", "No");
+        updateTable2(ut2, 2147483656L);
+        insertTable2(it2, 2147483657L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483657L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483657L, "DocumentID", "21869/1/1//");
+        insertTable2(it2, 2147483657L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483657L, "PhysicalID", "No");
+        insertTable2(it2, 2147483657L, "Staple", "No");
+        updateTable2(ut2, 2147483657L);
+        insertTable1(it1, 8589934593L);
+        insertTable2(it2, 8589934593L, "SC2", "PostCode=1180");
+        insertTable2(it2, 8589934593L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 8589934593L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 8589934593L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 8589934593L, "DocumentSortingValues", "");
+        insertTable2(it2, 8589934593L, "ItemSeq", "0");
+        insertTable2(it2, 8589934593L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 8589934593L, "Plex", "S");
+        insertTable2(it2, 8589934593L, "SC3", "=");
+        insertTable2(it2, 8589934593L, "has_address", "true");
+        insertTable2(it2, 8589934593L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 8589934593L, "Language", "FR");
+        insertTable2(it2, 8589934593L, "SC4", "=");
+        insertTable2(it2, 8589934593L, "InternalAddress", "233/621");
+        insertTable2(it2, 8589934593L, "AddressG6", "");
+        insertTable2(it2, 8589934593L, "InternalAddressBringer", "true");
+        insertTable2(it2, 8589934593L, "AddresseeSeq", "0");
+        insertTable2(it2, 8589934593L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 8589934593L, "CommunicationOrderId", "21873");
+        insertTable2(it2, 8589934593L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 8589934593L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 8589934593L, "SortPlan", "");
+        insertTable2(it2, 8589934593L, "Enveloping", "N");
+        insertTable2(it2, 8589934593L, "PostComponentId", "21863");
+        insertTable2(it2, 8589934593L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 8589934593L, "city", "Bruxelles");
+        insertTable2(it2, 8589934593L, "AddressG7", "");
+        insertTable2(it2, 8589934593L, "CopyMention", "");
+        insertTable2(it2, 8589934593L, "StapleNbr", "NO");
+        insertTable2(it2, 8589934593L, "AddressG8", "");
+        insertTable2(it2, 8589934593L, "AddressG5", "");
+        insertTable2(it2, 8589934593L, "EnvelopSortingValue", "BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 8589934593L, "GroupedWith", "");
+        insertTable2(it2, 8589934593L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 8589934593L, "DiversionReason", "001");
+        insertTable2(it2, 8589934593L, "Pliable", "true");
+        insertTable2(it2, 8589934593L, "country", "BE");
+        insertTable2(it2, 8589934593L, "AddressG1", "testOlivier005-0009");
+        insertTable2(it2, 8589934593L, "MentionCode", "");
+        insertTable2(it2, 8589934593L, "postCode", "1180");
+        insertTable2(it2, 8589934593L, "SC5", "=");
+        insertTable2(it2, 8589934593L, "env_type", "I");
+        insertTable2(it2, 8589934593L, "Branding", "1C");
+        insertTable2(it2, 2147483658L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483658L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483658L, "DocumentID", "21869/1/1//");
+        insertTable2(it2, 2147483658L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483658L, "PhysicalID", "No");
+        insertTable2(it2, 2147483658L, "Staple", "No");
+        updateTable2(ut2, 2147483658L);
+        insertTable2(it2, 2147483659L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483659L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483659L, "DocumentID", "21870/1/1//");
+        insertTable2(it2, 2147483659L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483659L, "PhysicalID", "No");
+        insertTable2(it2, 2147483659L, "Staple", "No");
+        updateTable2(ut2, 2147483659L);
+        insertTable2(it2, 2147483660L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483660L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483660L, "DocumentID", "21870/1/1//");
+        insertTable2(it2, 2147483660L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483660L, "PhysicalID", "No");
+        insertTable2(it2, 2147483660L, "Staple", "No");
+        updateTable2(ut2, 2147483660L);
+        insertTable2(it2, 2147483661L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483661L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483661L, "DocumentID", "21871/1/1//");
+        insertTable2(it2, 2147483661L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483661L, "PhysicalID", "No");
+        insertTable2(it2, 2147483661L, "Staple", "No");
+        updateTable2(ut2, 2147483661L);
+        insertTable2(it2, 2147483662L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483662L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483662L, "DocumentID", "21871/1/1//");
+        insertTable2(it2, 2147483662L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483662L, "PhysicalID", "No");
+        insertTable2(it2, 2147483662L, "Staple", "No");
+        updateTable2(ut2, 2147483662L);
+        insertTable2(it2, 2147483663L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483663L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483663L, "DocumentID", "21872/1/1//");
+        insertTable2(it2, 2147483663L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483663L, "PhysicalID", "No");
+        insertTable2(it2, 2147483663L, "Staple", "No");
+        updateTable2(ut2, 2147483663L);
+        insertTable2(it2, 2147483664L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483664L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483664L, "DocumentID", "21872/1/1//");
+        insertTable2(it2, 2147483664L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483664L, "PhysicalID", "No");
+        insertTable2(it2, 2147483664L, "Staple", "No");
+        updateTable2(ut2, 2147483664L);
+        insertTable1(it1, 10737418241L);
+        insertTable2(it2, 10737418241L, "SC2", "PostCode=1180");
+        insertTable2(it2, 10737418241L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 10737418241L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 10737418241L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 10737418241L, "DocumentSortingValues", "");
+        insertTable2(it2, 10737418241L, "ItemSeq", "0");
+        insertTable2(it2, 10737418241L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 10737418241L, "Plex", "S");
+        insertTable2(it2, 10737418241L, "SC3", "=");
+        insertTable2(it2, 10737418241L, "has_address", "true");
+        insertTable2(it2, 10737418241L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 10737418241L, "Language", "FR");
+        insertTable2(it2, 10737418241L, "SC4", "=");
+        insertTable2(it2, 10737418241L, "InternalAddress", "233/621");
+        insertTable2(it2, 10737418241L, "AddressG6", "");
+        insertTable2(it2, 10737418241L, "InternalAddressBringer", "true");
+        insertTable2(it2, 10737418241L, "AddresseeSeq", "0");
+        insertTable2(it2, 10737418241L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 10737418241L, "CommunicationOrderId", "21874");
+        insertTable2(it2, 10737418241L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 10737418241L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 10737418241L, "SortPlan", "");
+        insertTable2(it2, 10737418241L, "Enveloping", "N");
+        insertTable2(it2, 10737418241L, "PostComponentId", "21864");
+        insertTable2(it2, 10737418241L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 10737418241L, "city", "Bruxelles");
+        insertTable2(it2, 10737418241L, "AddressG7", "");
+        insertTable2(it2, 10737418241L, "CopyMention", "");
+        insertTable2(it2, 10737418241L, "StapleNbr", "NO");
+        insertTable2(it2, 10737418241L, "AddressG8", "");
+        insertTable2(it2, 10737418241L, "AddressG5", "");
+        insertTable2(it2, 10737418241L, "EnvelopSortingValue", "BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 10737418241L, "GroupedWith", "");
+        insertTable2(it2, 10737418241L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 10737418241L, "DiversionReason", "001");
+        insertTable2(it2, 10737418241L, "Pliable", "true");
+        insertTable2(it2, 10737418241L, "country", "BE");
+        insertTable2(it2, 10737418241L, "AddressG1", "testOlivier005-0010");
+        insertTable2(it2, 10737418241L, "MentionCode", "");
+        insertTable2(it2, 10737418241L, "postCode", "1180");
+        insertTable2(it2, 10737418241L, "SC5", "=");
+        insertTable2(it2, 10737418241L, "env_type", "I");
+        insertTable2(it2, 10737418241L, "Branding", "1C");
+        insertTable2(it2, 8589934593L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 8589934593L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 8589934593L, "DocumentID", "21873/0/0//");
+        insertTable2(it2, 8589934593L, "PageSequenceId", "000001");
+        insertTable2(it2, 8589934593L, "PhysicalID", "No");
+        insertTable2(it2, 8589934593L, "cover_page", "true");
+        insertTable2(it2, 8589934593L, "Staple", "No");
+        updateTable2(ut2, 8589934593L);
+        insertTable2(it2, 2147483665L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483665L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483665L, "DocumentID", "21873/1/1//");
+        insertTable2(it2, 2147483665L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483665L, "PhysicalID", "No");
+        insertTable2(it2, 2147483665L, "Staple", "No");
+        updateTable2(ut2, 2147483665L);
+        insertTable2(it2, 2147483666L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483666L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483666L, "DocumentID", "21873/1/1//");
+        insertTable2(it2, 2147483666L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483666L, "PhysicalID", "No");
+        insertTable2(it2, 2147483666L, "Staple", "No");
+        updateTable2(ut2, 2147483666L);
+        insertTable2(it2, 10737418241L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 10737418241L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 10737418241L, "DocumentID", "21874/0/0//");
+        insertTable2(it2, 10737418241L, "PageSequenceId", "000001");
+        insertTable2(it2, 10737418241L, "PhysicalID", "No");
+        insertTable2(it2, 10737418241L, "cover_page", "true");
+        insertTable2(it2, 10737418241L, "Staple", "No");
+        updateTable2(ut2, 10737418241L);
+        insertTable2(it2, 2147483667L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483667L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483667L, "DocumentID", "21874/1/1//");
+        insertTable2(it2, 2147483667L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483667L, "PhysicalID", "No");
+        insertTable2(it2, 2147483667L, "Staple", "No");
+        updateTable2(ut2, 2147483667L);
+        insertTable2(it2, 2147483668L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483668L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483668L, "DocumentID", "21874/1/1//");
+        insertTable2(it2, 2147483668L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483668L, "PhysicalID", "No");
+        insertTable2(it2, 2147483668L, "Staple", "No");
+        updateTable2(ut2, 2147483668L);
+        insertTable2(it2, 2147483669L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483669L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483669L, "DocumentID", "21875/1/1//");
+        insertTable2(it2, 2147483669L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483669L, "PhysicalID", "No");
+        insertTable2(it2, 2147483669L, "Staple", "No");
+        updateTable2(ut2, 2147483669L);
+        insertTable2(it2, 2147483670L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483670L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483670L, "DocumentID", "21875/1/1//");
+        insertTable2(it2, 2147483670L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483670L, "PhysicalID", "No");
+        insertTable2(it2, 2147483670L, "Staple", "No");
+        updateTable2(ut2, 2147483670L);
+        insertTable1(it1, 12884901889L);
+        insertTable2(it2, 12884901889L, "SC2", "PostCode=1180");
+        insertTable2(it2, 12884901889L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 12884901889L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 12884901889L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 12884901889L, "DocumentSortingValues", "");
+        insertTable2(it2, 12884901889L, "ItemSeq", "0");
+        insertTable2(it2, 12884901889L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 12884901889L, "Plex", "S");
+        insertTable2(it2, 12884901889L, "SC3", "=");
+        insertTable2(it2, 12884901889L, "has_address", "true");
+        insertTable2(it2, 12884901889L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 12884901889L, "Language", "FR");
+        insertTable2(it2, 12884901889L, "SC4", "=");
+        insertTable2(it2, 12884901889L, "InternalAddress", "233/621");
+        insertTable2(it2, 12884901889L, "AddressG6", "");
+        insertTable2(it2, 12884901889L, "InternalAddressBringer", "true");
+        insertTable2(it2, 12884901889L, "AddresseeSeq", "0");
+        insertTable2(it2, 12884901889L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 12884901889L, "CommunicationOrderId", "21879");
+        insertTable2(it2, 12884901889L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 12884901889L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 12884901889L, "SortPlan", "");
+        insertTable2(it2, 12884901889L, "Enveloping", "N");
+        insertTable2(it2, 12884901889L, "PostComponentId", "21869");
+        insertTable2(it2, 12884901889L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 12884901889L, "city", "Bruxelles");
+        insertTable2(it2, 12884901889L, "AddressG7", "");
+        insertTable2(it2, 12884901889L, "CopyMention", "");
+        insertTable2(it2, 12884901889L, "StapleNbr", "NO");
+        insertTable2(it2, 12884901889L, "AddressG8", "");
+        insertTable2(it2, 12884901889L, "AddressG5", "");
+        insertTable2(it2, 12884901889L, "EnvelopSortingValue", "BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 12884901889L, "GroupedWith", "");
+        insertTable2(it2, 12884901889L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 12884901889L, "DiversionReason", "001");
+        insertTable2(it2, 12884901889L, "Pliable", "true");
+        insertTable2(it2, 12884901889L, "country", "BE");
+        insertTable2(it2, 12884901889L, "AddressG1", "testOlivier008-0015");
+        insertTable2(it2, 12884901889L, "MentionCode", "");
+        insertTable2(it2, 12884901889L, "postCode", "1180");
+        insertTable2(it2, 12884901889L, "SC5", "=");
+        insertTable2(it2, 12884901889L, "env_type", "I");
+        insertTable2(it2, 12884901889L, "Branding", "1C");
+        insertTable2(it2, 2147483671L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483671L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483671L, "DocumentID", "21876/1/1//");
+        insertTable2(it2, 2147483671L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483671L, "PhysicalID", "No");
+        insertTable2(it2, 2147483671L, "Staple", "No");
+        updateTable2(ut2, 2147483671L);
+        insertTable2(it2, 2147483672L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483672L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483672L, "DocumentID", "21876/1/1//");
+        insertTable2(it2, 2147483672L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483672L, "PhysicalID", "No");
+        insertTable2(it2, 2147483672L, "Staple", "No");
+        updateTable2(ut2, 2147483672L);
+        insertTable2(it2, 2147483673L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483673L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483673L, "DocumentID", "21877/1/1//");
+        insertTable2(it2, 2147483673L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483673L, "PhysicalID", "No");
+        insertTable2(it2, 2147483673L, "Staple", "No");
+        updateTable2(ut2, 2147483673L);
+        insertTable2(it2, 2147483674L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483674L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483674L, "DocumentID", "21877/1/1//");
+        insertTable2(it2, 2147483674L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483674L, "PhysicalID", "No");
+        insertTable2(it2, 2147483674L, "Staple", "No");
+        updateTable2(ut2, 2147483674L);
+        insertTable2(it2, 2147483675L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483675L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483675L, "DocumentID", "21878/1/1//");
+        insertTable2(it2, 2147483675L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483675L, "PhysicalID", "No");
+        insertTable2(it2, 2147483675L, "Staple", "No");
+        updateTable2(ut2, 2147483675L);
+        insertTable2(it2, 2147483676L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483676L, "GenerationTime", "Wed Oct 22 14:12:11 CEST 2008");
+        insertTable2(it2, 2147483676L, "DocumentID", "21878/1/1//");
+        insertTable2(it2, 2147483676L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483676L, "PhysicalID", "No");
+        insertTable2(it2, 2147483676L, "Staple", "No");
+        updateTable2(ut2, 2147483676L);
+        insertTable1(it1, 15032385537L);
+        insertTable2(it2, 15032385537L, "SC2", "PostCode=1180");
+        insertTable2(it2, 15032385537L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 15032385537L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 15032385537L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 15032385537L, "DocumentSortingValues", "");
+        insertTable2(it2, 15032385537L, "ItemSeq", "0");
+        insertTable2(it2, 15032385537L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 15032385537L, "Plex", "S");
+        insertTable2(it2, 15032385537L, "SC3", "=");
+        insertTable2(it2, 15032385537L, "has_address", "true");
+        insertTable2(it2, 15032385537L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 15032385537L, "Language", "FR");
+        insertTable2(it2, 15032385537L, "SC4", "=");
+        insertTable2(it2, 15032385537L, "InternalAddress", "233/621");
+        insertTable2(it2, 15032385537L, "AddressG6", "");
+        insertTable2(it2, 15032385537L, "InternalAddressBringer", "true");
+        insertTable2(it2, 15032385537L, "AddresseeSeq", "0");
+        insertTable2(it2, 15032385537L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 15032385537L, "CommunicationOrderId", "21880");
+        insertTable2(it2, 15032385537L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 15032385537L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 15032385537L, "SortPlan", "");
+        insertTable2(it2, 15032385537L, "Enveloping", "N");
+        insertTable2(it2, 15032385537L, "PostComponentId", "21870");
+        insertTable2(it2, 15032385537L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 15032385537L, "city", "Bruxelles");
+        insertTable2(it2, 15032385537L, "AddressG7", "");
+        insertTable2(it2, 15032385537L, "CopyMention", "");
+        insertTable2(it2, 15032385537L, "StapleNbr", "NO");
+        insertTable2(it2, 15032385537L, "AddressG8", "");
+        insertTable2(it2, 15032385537L, "AddressG5", "");
+        insertTable2(it2, 15032385537L, "EnvelopSortingValue", "BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 15032385537L, "GroupedWith", "");
+        insertTable2(it2, 15032385537L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 15032385537L, "DiversionReason", "001");
+        insertTable2(it2, 15032385537L, "Pliable", "true");
+        insertTable2(it2, 15032385537L, "country", "BE");
+        insertTable2(it2, 15032385537L, "AddressG1", "testOlivier008-0016");
+        insertTable2(it2, 15032385537L, "MentionCode", "");
+        insertTable2(it2, 15032385537L, "postCode", "1180");
+        insertTable2(it2, 15032385537L, "SC5", "=");
+        insertTable2(it2, 15032385537L, "env_type", "I");
+        insertTable2(it2, 15032385537L, "Branding", "1C");
+        insertTable2(it2, 12884901889L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 12884901889L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 12884901889L, "DocumentID", "21879/0/0//");
+        insertTable2(it2, 12884901889L, "PageSequenceId", "000001");
+        insertTable2(it2, 12884901889L, "PhysicalID", "No");
+        insertTable2(it2, 12884901889L, "cover_page", "true");
+        insertTable2(it2, 12884901889L, "Staple", "No");
+        updateTable2(ut2, 12884901889L);
+        insertTable2(it2, 2147483677L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483677L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483677L, "DocumentID", "21879/1/1//");
+        insertTable2(it2, 2147483677L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483677L, "PhysicalID", "No");
+        insertTable2(it2, 2147483677L, "Staple", "No");
+        updateTable2(ut2, 2147483677L);
+        insertTable2(it2, 2147483678L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483678L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483678L, "DocumentID", "21879/1/1//");
+        insertTable2(it2, 2147483678L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483678L, "PhysicalID", "No");
+        insertTable2(it2, 2147483678L, "Staple", "No");
+        updateTable2(ut2, 2147483678L);
+        insertTable2(it2, 15032385537L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 15032385537L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 15032385537L, "DocumentID", "21880/0/0//");
+        insertTable2(it2, 15032385537L, "PageSequenceId", "000001");
+        insertTable2(it2, 15032385537L, "PhysicalID", "No");
+        insertTable2(it2, 15032385537L, "cover_page", "true");
+        insertTable2(it2, 15032385537L, "Staple", "No");
+        updateTable2(ut2, 15032385537L);
+        insertTable2(it2, 2147483679L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483679L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483679L, "DocumentID", "21880/1/1//");
+        insertTable2(it2, 2147483679L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483679L, "PhysicalID", "No");
+        insertTable2(it2, 2147483679L, "Staple", "No");
+        updateTable2(ut2, 2147483679L);
+        insertTable2(it2, 2147483680L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483680L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483680L, "DocumentID", "21880/1/1//");
+        insertTable2(it2, 2147483680L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483680L, "PhysicalID", "No");
+        insertTable2(it2, 2147483680L, "Staple", "No");
+        updateTable2(ut2, 2147483680L);
+        insertTable1(it1, 17179869185L);
+        insertTable2(it2, 17179869185L, "SC2", "PostCode=1180");
+        insertTable2(it2, 17179869185L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 17179869185L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 17179869185L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 17179869185L, "DocumentSortingValues", "");
+        insertTable2(it2, 17179869185L, "ItemSeq", "0");
+        insertTable2(it2, 17179869185L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 17179869185L, "Plex", "S");
+        insertTable2(it2, 17179869185L, "SC3", "=");
+        insertTable2(it2, 17179869185L, "has_address", "true");
+        insertTable2(it2, 17179869185L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 17179869185L, "Language", "FR");
+        insertTable2(it2, 17179869185L, "SC4", "=");
+        insertTable2(it2, 17179869185L, "InternalAddress", "233/621");
+        insertTable2(it2, 17179869185L, "AddressG6", "");
+        insertTable2(it2, 17179869185L, "InternalAddressBringer", "true");
+        insertTable2(it2, 17179869185L, "AddresseeSeq", "0");
+        insertTable2(it2, 17179869185L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 17179869185L, "CommunicationOrderId", "21885");
+        insertTable2(it2, 17179869185L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 17179869185L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 17179869185L, "SortPlan", "");
+        insertTable2(it2, 17179869185L, "Enveloping", "N");
+        insertTable2(it2, 17179869185L, "PostComponentId", "21875");
+        insertTable2(it2, 17179869185L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 17179869185L, "city", "Bruxelles");
+        insertTable2(it2, 17179869185L, "AddressG7", "");
+        insertTable2(it2, 17179869185L, "CopyMention", "");
+        insertTable2(it2, 17179869185L, "StapleNbr", "NO");
+        insertTable2(it2, 17179869185L, "AddressG8", "");
+        insertTable2(it2, 17179869185L, "AddressG5", "");
+        insertTable2(it2, 17179869185L, "EnvelopSortingValue", "BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 17179869185L, "GroupedWith", "");
+        insertTable2(it2, 17179869185L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 17179869185L, "DiversionReason", "001");
+        insertTable2(it2, 17179869185L, "Pliable", "true");
+        insertTable2(it2, 17179869185L, "country", "BE");
+        insertTable2(it2, 17179869185L, "AddressG1", "testOlivier011-0021");
+        insertTable2(it2, 17179869185L, "MentionCode", "");
+        insertTable2(it2, 17179869185L, "postCode", "1180");
+        insertTable2(it2, 17179869185L, "SC5", "=");
+        insertTable2(it2, 17179869185L, "env_type", "I");
+        insertTable2(it2, 17179869185L, "Branding", "1C");
+        insertTable2(it2, 2147483681L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483681L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483681L, "DocumentID", "21881/1/1//");
+        insertTable2(it2, 2147483681L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483681L, "PhysicalID", "No");
+        insertTable2(it2, 2147483681L, "Staple", "No");
+        updateTable2(ut2, 2147483681L);
+        insertTable2(it2, 2147483682L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483682L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483682L, "DocumentID", "21881/1/1//");
+        insertTable2(it2, 2147483682L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483682L, "PhysicalID", "No");
+        insertTable2(it2, 2147483682L, "Staple", "No");
+        updateTable2(ut2, 2147483682L);
+        insertTable2(it2, 2147483683L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483683L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483683L, "DocumentID", "21882/1/1//");
+        insertTable2(it2, 2147483683L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483683L, "PhysicalID", "No");
+        insertTable2(it2, 2147483683L, "Staple", "No");
+        updateTable2(ut2, 2147483683L);
+        insertTable2(it2, 2147483684L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483684L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483684L, "DocumentID", "21882/1/1//");
+        insertTable2(it2, 2147483684L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483684L, "PhysicalID", "No");
+        insertTable2(it2, 2147483684L, "Staple", "No");
+        updateTable2(ut2, 2147483684L);
+        insertTable2(it2, 2147483685L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483685L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483685L, "DocumentID", "21883/1/1//");
+        insertTable2(it2, 2147483685L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483685L, "PhysicalID", "No");
+        insertTable2(it2, 2147483685L, "Staple", "No");
+        updateTable2(ut2, 2147483685L);
+        insertTable2(it2, 2147483686L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483686L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483686L, "DocumentID", "21883/1/1//");
+        insertTable2(it2, 2147483686L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483686L, "PhysicalID", "No");
+        insertTable2(it2, 2147483686L, "Staple", "No");
+        updateTable2(ut2, 2147483686L);
+        insertTable2(it2, 2147483687L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483687L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483687L, "DocumentID", "21884/1/1//");
+        insertTable2(it2, 2147483687L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483687L, "PhysicalID", "No");
+        insertTable2(it2, 2147483687L, "Staple", "No");
+        updateTable2(ut2, 2147483687L);
+        insertTable1(it1, 19327352833L);
+        insertTable2(it2, 19327352833L, "SC2", "PostCode=1180");
+        insertTable2(it2, 19327352833L, "AddressG4", "BELGIQUE");
+        insertTable2(it2, 19327352833L, "IsIdenticalToDocumentAddress", "");
+        insertTable2(it2, 19327352833L, "AddressG3", "1180 Bruxelles");
+        insertTable2(it2, 19327352833L, "DocumentSortingValues", "");
+        insertTable2(it2, 19327352833L, "ItemSeq", "0");
+        insertTable2(it2, 19327352833L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 19327352833L, "Plex", "S");
+        insertTable2(it2, 19327352833L, "SC3", "=");
+        insertTable2(it2, 19327352833L, "has_address", "true");
+        insertTable2(it2, 19327352833L, "SubBatchSortingValue", "ddch257___1180______");
+        insertTable2(it2, 19327352833L, "Language", "FR");
+        insertTable2(it2, 19327352833L, "SC4", "=");
+        insertTable2(it2, 19327352833L, "InternalAddress", "233/621");
+        insertTable2(it2, 19327352833L, "AddressG6", "");
+        insertTable2(it2, 19327352833L, "InternalAddressBringer", "true");
+        insertTable2(it2, 19327352833L, "AddresseeSeq", "0");
+        insertTable2(it2, 19327352833L, "SC1", "Requester=ddch257");
+        insertTable2(it2, 19327352833L, "CommunicationOrderId", "21886");
+        insertTable2(it2, 19327352833L, "BatchTypeId", "233-621-001");
+        insertTable2(it2, 19327352833L, "location", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 19327352833L, "SortPlan", "");
+        insertTable2(it2, 19327352833L, "Enveloping", "N");
+        insertTable2(it2, 19327352833L, "PostComponentId", "21876");
+        insertTable2(it2, 19327352833L, "BatchTypeLabel", "Diversion pour test");
+        insertTable2(it2, 19327352833L, "city", "Bruxelles");
+        insertTable2(it2, 19327352833L, "AddressG7", "");
+        insertTable2(it2, 19327352833L, "CopyMention", "");
+        insertTable2(it2, 19327352833L, "StapleNbr", "NO");
+        insertTable2(it2, 19327352833L, "AddressG8", "");
+        insertTable2(it2, 19327352833L, "AddressG5", "");
+        insertTable2(it2, 19327352833L, "EnvelopSortingValue", "BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____");
+        insertTable2(it2, 19327352833L, "GroupedWith", "");
+        insertTable2(it2, 19327352833L, "AddressG2", "Bla bla bla bla bla bla 99");
+        insertTable2(it2, 19327352833L, "DiversionReason", "001");
+        insertTable2(it2, 19327352833L, "Pliable", "true");
+        insertTable2(it2, 19327352833L, "country", "BE");
+        insertTable2(it2, 19327352833L, "AddressG1", "testOlivier011-0022");
+        insertTable2(it2, 19327352833L, "MentionCode", "");
+        insertTable2(it2, 19327352833L, "postCode", "1180");
+        insertTable2(it2, 19327352833L, "SC5", "=");
+        insertTable2(it2, 19327352833L, "env_type", "I");
+        insertTable2(it2, 19327352833L, "Branding", "1C");
+        insertTable2(it2, 2147483688L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483688L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483688L, "DocumentID", "21884/1/1//");
+        insertTable2(it2, 2147483688L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483688L, "PhysicalID", "No");
+        insertTable2(it2, 2147483688L, "Staple", "No");
+        updateTable2(ut2, 2147483688L);
+        insertTable2(it2, 17179869185L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 17179869185L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 17179869185L, "DocumentID", "21885/0/0//");
+        insertTable2(it2, 17179869185L, "PageSequenceId", "000001");
+        insertTable2(it2, 17179869185L, "PhysicalID", "No");
+        insertTable2(it2, 17179869185L, "cover_page", "true");
+        insertTable2(it2, 17179869185L, "Staple", "No");
+        updateTable2(ut2, 17179869185L);
+        insertTable2(it2, 2147483689L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483689L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483689L, "DocumentID", "21885/1/1//");
+        insertTable2(it2, 2147483689L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483689L, "PhysicalID", "No");
+        insertTable2(it2, 2147483689L, "Staple", "No");
+        updateTable2(ut2, 2147483689L);
+        insertTable2(it2, 2147483690L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483690L, "GenerationTime", "Wed Oct 22 14:12:12 CEST 2008");
+        insertTable2(it2, 2147483690L, "DocumentID", "21885/1/1//");
+        insertTable2(it2, 2147483690L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483690L, "PhysicalID", "No");
+        insertTable2(it2, 2147483690L, "Staple", "No");
+        updateTable2(ut2, 2147483690L);
+        insertTable2(it2, 19327352833L, "PaperLayout", "ADDINT");
+        insertTable2(it2, 19327352833L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 19327352833L, "DocumentID", "21886/0/0//");
+        insertTable2(it2, 19327352833L, "PageSequenceId", "000001");
+        insertTable2(it2, 19327352833L, "PhysicalID", "No");
+        insertTable2(it2, 19327352833L, "cover_page", "true");
+        insertTable2(it2, 19327352833L, "Staple", "No");
+        updateTable2(ut2, 19327352833L);
+        insertTable2(it2, 2147483691L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483691L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483691L, "DocumentID", "21886/1/1//");
+        insertTable2(it2, 2147483691L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483691L, "PhysicalID", "No");
+        insertTable2(it2, 2147483691L, "Staple", "No");
+        updateTable2(ut2, 2147483691L);
+        insertTable2(it2, 2147483692L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483692L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483692L, "DocumentID", "21886/1/1//");
+        insertTable2(it2, 2147483692L, "PageSequenceId", "000003");
+        insertTable2(it2, 2147483692L, "PhysicalID", "No");
+        insertTable2(it2, 2147483692L, "Staple", "No");
+        updateTable2(ut2, 2147483692L);
+        insertTable2(it2, 2147483693L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483693L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483693L, "DocumentID", "21887/1/1//");
+        insertTable2(it2, 2147483693L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483693L, "PhysicalID", "No");
+        insertTable2(it2, 2147483693L, "Staple", "No");
+        updateTable2(ut2, 2147483693L);
+        insertTable2(it2, 2147483694L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483694L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483694L, "DocumentID", "21887/1/1//");
+        insertTable2(it2, 2147483694L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483694L, "PhysicalID", "No");
+        insertTable2(it2, 2147483694L, "Staple", "No");
+        updateTable2(ut2, 2147483694L);
+        insertTable2(it2, 2147483695L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483695L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483695L, "DocumentID", "21888/1/1//");
+        insertTable2(it2, 2147483695L, "PageSequenceId", "000001");
+        insertTable2(it2, 2147483695L, "PhysicalID", "No");
+        insertTable2(it2, 2147483695L, "Staple", "No");
+        updateTable2(ut2, 2147483695L);
+        insertTable2(it2, 2147483696L, "PaperLayout", "LETTER");
+        insertTable2(it2, 2147483696L, "GenerationTime", "Wed Oct 22 14:12:13 CEST 2008");
+        insertTable2(it2, 2147483696L, "DocumentID", "21888/1/1//");
+        insertTable2(it2, 2147483696L, "PageSequenceId", "000002");
+        insertTable2(it2, 2147483696L, "PhysicalID", "No");
+        insertTable2(it2, 2147483696L, "Staple", "No");
+        updateTable2(ut2, 2147483696L);
+
+        it1.close();
+        it2.close();
+        ut2.close();
     }
 
     /**
