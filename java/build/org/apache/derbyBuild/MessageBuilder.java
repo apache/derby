@@ -513,6 +513,7 @@ public class MessageBuilder extends Task
         ditaWriter.beginTag( "table" );
         {
             ditaWriter.writeTextElement( "title", title );
+            ditaWriter.writeTextElement( "desc", "This table lists the SQLStates and message text for the " + title + " exceptions." );
             
             ditaWriter.beginTag( "tgroup", "cols=\"2\"" );
             {
