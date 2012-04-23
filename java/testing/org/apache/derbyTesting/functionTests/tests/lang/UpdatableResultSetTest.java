@@ -4039,6 +4039,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             int sqlType,
             int updateXXXName) throws SQLException, UnsupportedEncodingException 
     {
+        Statement s = createStatement();
         ResultSet rs, rs1;
         int checkAgainstColumn = updateXXXName;
         for (int indexOrName = 1; indexOrName <= 2; indexOrName++) {
@@ -4254,8 +4255,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                 }
                 verifyData(sqlType, checkAgainstColumn);
                 
-                createStatement().executeUpdate(
-                        "DELETE FROM AllDataTypesForTestingTable");
+                s.executeUpdate("DELETE FROM AllDataTypesForTestingTable");
                 
             } catch (SQLException se) {
                 if (usingEmbedded()) {
@@ -4275,7 +4275,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             }
             rs.close();
             rs1.close();       
-         }
+        }
+        closeStatement(s);
     }
     
     private void createTableT1() throws SQLException {
@@ -4445,19 +4446,14 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
                     rs.getBoolean(sqlType), rs1.getBoolean(1));
-            return;
-        }
-        if (updateXXXName == 19) { //verifying updateNull
+        } else if (updateXXXName == 19) { //verifying updateNull
             assertNull("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
                     rs.getObject(sqlType));
             assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
                     rs.wasNull());
-            return;
-        }
-        
-        if (sqlType == 1) {
+        } else if (sqlType == 1) {
             // verify update made to SMALLINT column with updateXXX methods
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1], 
@@ -4557,8 +4553,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         
         rs.close();
         rs1.close();
-        pstmt.close();
-        pstmt1.close();
+        closeStatement(pstmt);
+        closeStatement(pstmt1);
     }
     
     private void resetData() throws SQLException {
@@ -4572,6 +4568,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         insertSQL.append("cast("+SQLData[allSQLTypes.length - 1][0]
                 + " as BLOB(1K)))");
         stmt.executeUpdate(insertSQL.toString());
+        closeStatement(stmt);
     }
 }
 
