@@ -75,8 +75,10 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	}
 	
 	protected void tearDown() throws Exception {
-		psSet.close();
-		psGet.close();
+        // Forget the statements to allow them to be gc'ed. They will be
+        // closed in super.tearDown().
+        psSet = null;
+        psGet = null;
 		super.tearDown();
 	}
 	
@@ -89,8 +91,6 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void testUTF8() throws SQLException {
-		int off = 0;
-		
 		for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
 			StringBuffer buff = new StringBuffer();
 			buff.append((char) i);
@@ -110,7 +110,7 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	}
 	
 	/**
-	 * Checks if an ampty UTF8 string is correctly handled.
+	 * Checks if an empty UTF8 string is correctly handled.
 	 * 
 	 * @throws SQLException
 	 */
