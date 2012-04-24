@@ -117,6 +117,16 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     "on l.xid = t.xid " +
                     "where l.tableType <> 'S' and " +
                     "      t.type='UserTransaction'");
+                
+                // Create a procedure to be called before checking on contents
+                // to ensure that the background worker thread has completed 
+                // all the post-commit work.
+                s.execute(
+                    "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
+                    "LANGUAGE JAVA EXTERNAL NAME " +
+                    "'org.apache.derbyTesting.functionTests.util." +
+                    "T_Access.waitForPostCommitToFinish' " +
+                    "PARAMETER STYLE JAVA");
             }
         };
     }
@@ -6761,6 +6771,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             "delete from a where a = 2 or a = 4 or a = 6");
         ltrs = getLocks();
 
+        s.execute("call wait_for_post_commit()");
         JDBC.assertUnorderedResultSet(
             ltrs,
             isolation == Connection.TRANSACTION_SERIALIZABLE ?
@@ -6864,6 +6875,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
+        s.execute("call wait_for_post_commit()");
         JDBC.assertUnorderedResultSet(
             s.executeQuery("select * from a"),
             unPadded ?
@@ -7125,6 +7137,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             "delete from a  where a = 2");
         ltrs = getLocks();
 
+        s.execute("call wait_for_post_commit()");
         JDBC.assertUnorderedResultSet(
             ltrs,
             isolation == Connection.TRANSACTION_SERIALIZABLE ?
@@ -7324,6 +7337,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
             "delete from a  where a = 1 or a = 7");
         ltrs = getLocks();
 
+        s.execute("call wait_for_post_commit()");
         JDBC.assertUnorderedResultSet(
             ltrs,
             isolation == Connection.TRANSACTION_SERIALIZABLE ?
