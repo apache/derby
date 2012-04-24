@@ -21,7 +21,6 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,18 +28,15 @@ import java.sql.Statement;
 
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test for creating tables using a query expression.
  */
 public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
-    private Statement stmt;
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -192,7 +188,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testBaseTableDoesNotExist() throws Exception
     {
-        assertStatementError("42X05", stmt,
+        assertStatementError("42X05", createStatement(),
             "create table t3 as select * from t4 with no data");
     }
 
@@ -202,7 +198,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testParametersNotAllowed() throws Exception
     {
-        assertStatementError("42X99", stmt,
+        assertStatementError("42X99", createStatement(),
             "create table t3 as select * from t1 where i = ? with no data");
     }
 
@@ -212,7 +208,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testDuplicateColumnName() throws Exception
     {
-        assertStatementError("42X12", stmt,
+        assertStatementError("42X12", createStatement(),
             "create table t3 (c1,c2,c1) "
                 + "as select i, s, f from t1 with no data");
     }
@@ -224,7 +220,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testColumnCountMismatch() throws Exception
     {
-        assertStatementError("42X70", stmt,
+        assertStatementError("42X70", createStatement(),
             "create table t3 (c1,c2,c3) as select i,s from t1 with no data");
     }
 
@@ -235,7 +231,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testSystemGeneratedColumnName() throws Exception
     {
-        assertStatementError("42909", stmt,
+        assertStatementError("42909", createStatement(),
             "create table t3 as select i, 2*i from t1 with no data");
     }
 
@@ -245,7 +241,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testNullValues() throws Exception
     {
-        assertStatementError("42X07", stmt,
+        assertStatementError("42X07", createStatement(),
             "create table t3 (x) as values null with no data");
     }
 
@@ -255,7 +251,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testUnimplementedWithDataClause() throws Exception
     {
-        assertStatementError("0A000", stmt,
+        assertStatementError("0A000", createStatement(),
             "create table t3 as select * from t1 with data");
     }
     
@@ -264,6 +260,8 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testInvalidDataType() throws Exception
     {
+        Statement stmt = createStatement();
+
         // BOOLEAN
         assertStatementError("42X71", stmt,
             "create table t as select systemalias from sys.sysaliases with no data");
@@ -280,6 +278,8 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
     private void positiveTest(String sql, String [] columnNames,
             String [] nullability, String [] types) throws Exception
     {
+        Statement stmt = createStatement();
+
         // create table
         stmt.executeUpdate(sql);
 
@@ -296,6 +296,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
                     types[col], rs.getString("TYPE_NAME"));
             col++;
         }
+        rs.close();
         Assert.assertEquals("Unexpected column count:",
                 columnNames.length, col);
         stmt.executeUpdate("drop table t3");
@@ -305,22 +306,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      * Set the fixture up with base tables t1 and t2.
      */
     protected void setUp() throws SQLException
-    {    
-       getConnection().setAutoCommit(false);
-
-        stmt = createStatement();
-
-    }
-    
-    /**
-     * Tear-down the fixture by removing the tables
-     * (if they still exist).
-     */
-    protected void tearDown() throws Exception
     {
-        stmt.close();
-        getConnection().commit();
-
-        super.tearDown();
+        setAutoCommit(false);
     }
 }
