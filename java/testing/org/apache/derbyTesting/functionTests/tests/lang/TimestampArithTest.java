@@ -52,7 +52,7 @@ import org.apache.derbyTesting.junit.JDBC;
 public class TimestampArithTest extends BaseJDBCTestCase {
 	
 	/** Abstract class that factors out all the common code for the timestamps tests. */
-	private abstract class OneTest {
+	private static abstract class OneTest {
 		final int interval; // FRAC_SECOND_INTERVAL, SECOND_INTERVAL, ... or
 		final String expectedSQLState; // Null if no SQLException is expected
 		final String expectedMsg; // Null if no SQLException is expected
@@ -116,7 +116,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		abstract ResultSet executePS() throws SQLException;
 	}
 	
-	private class OneDiffTest extends OneTest {
+	private static class OneDiffTest extends OneTest {
 		private final java.util.Date ts1;
 		private final java.util.Date ts2;
 		private final int expectedDiff;
@@ -150,7 +150,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		}		
 	}
 	
-	private class OneStringDiffTest extends OneDiffTest {
+	private static class OneStringDiffTest extends OneDiffTest {
 		private final String ts1;
 		private final String ts2;
 		
@@ -175,7 +175,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		}		
 	}
 	
-	private class OneAddTest extends OneTest {
+	private static class OneAddTest extends OneTest {
 		private final java.util.Date ts;
 		final int count;
 		final java.sql.Timestamp expected;
@@ -208,7 +208,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		}		
 	}
 	
-	private class OneStringAddTest extends OneAddTest {
+	private static class OneStringAddTest extends OneAddTest {
 		private final String ts;
 
 		OneStringAddTest(int interval, int count, String ts,
@@ -231,8 +231,18 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		}		
 	}
 	
+    private static final int FRAC_SECOND_INTERVAL = 0;
+    private static final int SECOND_INTERVAL = 1;
+    private static final int MINUTE_INTERVAL = 2;
+    private static final int HOUR_INTERVAL = 3;
+    private static final int DAY_INTERVAL = 4;
+    private static final int WEEK_INTERVAL = 5;
+    private static final int MONTH_INTERVAL = 6;
+    private static final int QUARTER_INTERVAL = 7;
+    private static final int YEAR_INTERVAL = 8;
+
 	/** timestamp - timestamp */
-	private final OneDiffTest[] diffBetweenTsTests = {
+	private static final OneDiffTest[] diffBetweenTsTests = {
 			new OneDiffTest(FRAC_SECOND_INTERVAL, ts("2005-05-10 08:25:00"), ts("2005-05-10 08:25:00.000001"), 1000, null, null),
 			new OneDiffTest(SECOND_INTERVAL, ts("2005-05-10 08:25:01"), ts("2005-05-10 08:25:00"), -1, null, null),
 			new OneDiffTest(SECOND_INTERVAL, ts("2005-05-10 08:25:00.1"), ts("2005-05-10 08:25:00"), 0, null, null),
@@ -251,7 +261,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	};
 	
 	/** timestamp - date */
-	private final OneDiffTest[] diffBetweenTsAndDateTests = {
+	private static final OneDiffTest[] diffBetweenTsAndDateTests = {
 			new OneDiffTest(FRAC_SECOND_INTERVAL, ts("2004-05-10 00:00:00.123456"), dt("2004-05-10"), -123456000, null, null),
 			new OneDiffTest(SECOND_INTERVAL, ts("2004-05-10 08:25:01"), dt("2004-05-10"), -(1 + 60 * (25 + 60 * 8)), null, null),
 			new OneDiffTest(MINUTE_INTERVAL, ts("2004-05-11 08:25:00"), dt("2004-05-10"), -(24 * 60 + 8 * 60 + 25), null, null),
@@ -264,7 +274,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	};
 	
 	/** date - timestamp */
-	private final OneDiffTest[] diffBetweenDateAndTsTests = {
+	private static final OneDiffTest[] diffBetweenDateAndTsTests = {
 			new OneDiffTest(FRAC_SECOND_INTERVAL, dt("2004-05-10"), ts("2004-05-10 00:00:00.123456"), 123456000, null, null),
 			new OneDiffTest(SECOND_INTERVAL, dt("2004-05-10"), ts("2004-05-09 23:59:00"), -60, null, null),
 			new OneDiffTest(MINUTE_INTERVAL, dt("2004-05-10"), ts("2004-05-11 08:25:00"), 24 * 60 + 8 * 60 + 25, null, null),
@@ -277,7 +287,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	};
 	
 	/** timestamp + timestamp */
-	private final OneAddTest[] addBetweenTsTests = {
+	private static final OneAddTest[] addBetweenTsTests = {
 			new OneAddTest(FRAC_SECOND_INTERVAL, 1000, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:55:00.000001"), null, null),
 			new OneAddTest(SECOND_INTERVAL, 60, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:56:00"), null, null),
 			new OneAddTest(MINUTE_INTERVAL, -1, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:54:00"), null, null),
@@ -290,7 +300,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}; 
 	
 	/** date + timestamp */
-	private final OneAddTest[] addBetweenDateAndTsTests = {
+	private static final OneAddTest[] addBetweenDateAndTsTests = {
 			// following gives an error with J2ME j9_foundation 1.1 (DERBY-2225):
 			new OneAddTest(FRAC_SECOND_INTERVAL, -1000, dt("2005-05-11"), ts("2005-05-10 23:59:59.999999"), null, null),
 			new OneAddTest(SECOND_INTERVAL, 60, dt("2005-05-11"), ts("2005-05-11 00:01:00"), null, null),
@@ -303,16 +313,16 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 			new OneAddTest(YEAR_INTERVAL, 2, dt("2005-05-05"), ts("2007-05-05 00:00:00"), null, null)			
 	};
 	
-	private final OneStringDiffTest[] diffBetweenStringTests = {
+	private static final OneStringDiffTest[] diffBetweenStringTests = {
 			new OneStringDiffTest(SECOND_INTERVAL, "2005-05-10 08:25:00", "2005-05-10 08:26:00", 60, null, null)
 	};
 	
-	private final OneStringAddTest[] addBetweenStringTests = {
+	private static final OneStringAddTest[] addBetweenStringTests = {
 			new OneStringAddTest(DAY_INTERVAL, 1, "2005-05-11 15:55:00", ts("2005-05-12 15:55:00"), null, null)		
 	};
 	
 	/** check overflow conditions */
-	private final OneTest[] overflowTests = {
+	private static final OneTest[] overflowTests = {
 			new OneDiffTest(FRAC_SECOND_INTERVAL, ts("2004-05-10 00:00:00.123456"), ts("2004-05-10 00:00:10.123456"), 0, "22003",
 					"The resulting value is outside the range for the data type INTEGER."),
 			new OneDiffTest(FRAC_SECOND_INTERVAL, ts("2004-05-10 00:00:00.123456"), ts("2005-05-10 00:00:00.123456"), 0, "22003",
@@ -323,7 +333,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 					"The resulting value is outside the range for the data type TIMESTAMP.") 			
 	};
 	
-    private final String[][] invalid = {
+    private static final String[][] invalid = {
         {"values( {fn TIMESTAMPDIFF( SECOND, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)})", "42X01",
          "Syntax error: Encountered \"SECOND\" at line 1, column 28."},
         {"values( {fn TIMESTAMPDIFF( , CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)})", "42X01",
@@ -364,16 +374,6 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	private static PreparedStatement[] tsAddPS = new PreparedStatement[intervalJdbcNames.length];
 	private static PreparedStatement[] tsDiffPS = new PreparedStatement[intervalJdbcNames.length];
 
-    private static final int FRAC_SECOND_INTERVAL = 0;
-	private static final int SECOND_INTERVAL = 1;
-	private static final int MINUTE_INTERVAL = 2;
-	private static final int HOUR_INTERVAL = 3;
-	private static final int DAY_INTERVAL = 4;
-	private static final int WEEK_INTERVAL = 5;
-	private static final int MONTH_INTERVAL = 6;
-	private static final int QUARTER_INTERVAL = 7;
-	private static final int YEAR_INTERVAL = 8;
-	
 	/**
 	 * Basic constructor.
 	 */
@@ -401,8 +401,25 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 
 				stmt = getConnection().createStatement();
 			}
+
+            protected void tearDown() throws Exception {
+                closeAll(tsAddPS);
+                tsAddPS = null;
+                closeAll(tsDiffPS);
+                tsDiffPS = null;
+                stmt.close();
+                stmt = null;
+                super.tearDown();
+            }
 		};
 	}
+
+    /** Close all statements in an array. */
+    private static void closeAll(Statement[] statements) throws SQLException {
+        for (int i = 0; i < statements.length; i++) {
+            statements[i].close();
+        }
+    }
 	
 	public void testDiffBetweenTimestamp() throws SQLException {
 		getConnection();
