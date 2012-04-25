@@ -45,9 +45,6 @@ import org.apache.derbyTesting.junit.JDBC;
  */
 public class CoalesceTest extends BaseJDBCTestCase
 {
-    public Statement s = null;
-    public PreparedStatement ps = null;
-
     private static String VALID_DATE_STRING = "'2000-01-01'";
     private static String VALID_TIME_STRING = "'15:30:20'";
     private static String VALID_TIMESTAMP_STRING = "'2000-01-01 15:30:20'";
@@ -178,19 +175,6 @@ public class CoalesceTest extends BaseJDBCTestCase
         super(name);
     }
 
-    /* Set up fixture */ 
-    protected void setUp() throws SQLException {
-        s = createStatement();
-        ps = null;
-    }
-
-    /* Tear down the fixture */
-    protected void tearDown() throws Exception {
-        s.close();
-        if ( ps != null ) ps.close();
-        super.tearDown();
-    }
-
     /**
      * Create a suite of tests, run only in embedded since
      * this is testing server-side behaviour.
@@ -231,6 +215,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testCoalesceSyntax() throws Throwable
     {
+        Statement s = createStatement();
         s.executeUpdate("insert into tA (c1) values(1)");
 
         assertStatementError("42X04", s, "select coalesce from tA");
@@ -250,22 +235,8 @@ public class CoalesceTest extends BaseJDBCTestCase
         s.executeUpdate("insert into value values(null,1)");
         dumpRS(s.executeQuery("select coalesce(value,c12) from value"), "COL1(datatype : INTEGER, precision : 10, scale : 0) null 1 ");  
 
-
-        try {
-            ps = prepareStatement("select coalesce(?,?) from tA");
-        }
-        catch (SQLException sqle) {
-            assertSQLState("42610", sqle);				
-        }
-
-
-        try {
-            ps = prepareStatement("select value(?,?) from tA");	
-        }
-        catch (SQLException sqle) {
-            assertSQLState("42610", sqle);	
-
-        }                   		
+        assertCompileError("42610", "select coalesce(?,?) from tA");
+        assertCompileError("42610", "select value(?,?) from tA");
     }
 
     public void testCompatibleDatatypesCombinations() throws Throwable
@@ -344,24 +315,28 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
         };
 
+        Statement s = createStatement();
+
         int index = 0;
         for (int firstColumnType = 0; firstColumnType < SQLTypes.length; firstColumnType++) {
             StringBuffer coalesceString = new StringBuffer("SELECT COALESCE(" + ColumnNames[firstColumnType]);
             for (int secondColumnType = 0; secondColumnType < SQLTypes.length; secondColumnType++) {
+                boolean shouldFail = expectedValues[index].equals("");
                 try {
                     if (resultDataTypeRulesTable[firstColumnType][secondColumnType].equals("ERROR"))
                         continue; //the datatypes are incompatible, don't try them in COALESCE/VALUE
                     coalesceString.append("," + ColumnNames[secondColumnType]);
                     dumpRS(s.executeQuery(coalesceString + ") from AllDataTypesTable"),expectedValues[index]);
+                    assertFalse("Statement should have failed", shouldFail);
                 } catch (SQLException sqle) {
-                    if (sqle.getSQLState().equals("22007"))
-                        assertSQLState("22007", sqle);
+                    if (!shouldFail)
+                        fail("Expected to succeed", sqle);
                     else if (isClobWithCharAndDateTypeArguments(coalesceString.toString())  && sqle.getSQLState().equals("42815"))
                         assertSQLState("42815", sqle);
                     else if (!isSupportedCoalesce(firstColumnType,secondColumnType)  && sqle.getSQLState().equals("42815"))
                         assertSQLState("42815", sqle);
                     else
-                        fail("CoalesceTest: expected SQLException was not thrown.");				
+                        assertSQLState("22007", sqle);
                 }
                 index++;
             }
@@ -535,32 +510,36 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
         };
 
+        Statement s = createStatement();
         int index = 0;
 
         for (int firstColumnType = 0; firstColumnType < SQLTypes.length; firstColumnType++ ) {
             for (int secondColumnType = 0; secondColumnType < SQLTypes.length; secondColumnType++) {
+                boolean shouldFail = expectedValues[index].equals("");
                 try {
                     String coalesceString = "SELECT COALESCE(" + ColumnNames[firstColumnType] + "," + ColumnNames[secondColumnType] + ") from AllDataTypesTable";
                     dumpRS(s.executeQuery(coalesceString), expectedValues[index]);
+                    assertFalse("Statement should have failed", shouldFail);
                 } catch (SQLException sqle) {     
-                    if (sqle.getSQLState().equals("22007"))
-                        assertSQLState("22007", sqle);
+                    if (!shouldFail)
+                        fail("Expected to succeed", sqle);
                     else if (!isSupportedCoalesce(firstColumnType,secondColumnType)  && sqle.getSQLState().equals("42815"))
                         assertSQLState("42815", sqle);
                     else
-                        fail("CoalesceTest: expected SQLException was not thrown.");
+                        assertSQLState("22007", sqle);
                 } 
                 index++;          
                 try {
                     String valueString = "SELECT VALUE(" + ColumnNames[firstColumnType] + "," + ColumnNames[secondColumnType] + ") from AllDataTypesTable";
                     dumpRS(s.executeQuery(valueString), expectedValues[index]);
+                    assertFalse("Statement should have failed", shouldFail);
                 } catch (SQLException sqle) {
-                    if (sqle.getSQLState().equals("22007"))
-                        assertSQLState("22007", sqle);
+                    if (!shouldFail)
+                        fail("Expected to succeed", sqle);
                     else if (!isSupportedCoalesce(firstColumnType,secondColumnType)  && sqle.getSQLState().equals("42815"))
                         assertSQLState("42815", sqle);
                     else
-                        fail("CoalesceTest: expected SQLException was not thrown.");
+                        assertSQLState("22007", sqle);
                 }
                 index++;
             }
@@ -568,7 +547,8 @@ public class CoalesceTest extends BaseJDBCTestCase
     }
 
     public void testDateCoalesce() throws Throwable
-    {	
+    {
+        Statement s = createStatement();
         s.executeUpdate("insert into tF values(null, null, null)");
         s.executeUpdate("insert into tF values(date('1992-01-02'), '1992-01-03', '1992-01-04')");
 
@@ -593,34 +573,16 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tF values(date('1992-01-01'), 'I am char', 'I am varchar')");
 
-        try {
-            dumpRS(s.executeQuery("select coalesce(charCol,dateCol) from tF"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(charCol,dateCol) from tF"), "");	
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(varcharCol,dateCol) from tF"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(varcharCol,dateCol) from tF"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
+        assertStatementError("22007", s, "select coalesce(charCol,dateCol) from tF");
+        assertStatementError("22007", s, "select value(charCol,dateCol) from tF");
+        assertStatementError("22007", s, "select coalesce(varcharCol,dateCol) from tF");
+        assertStatementError("22007", s, "select value(varcharCol,dateCol) from tF");
 
     }
 
     public void testTimeCoalesce() throws Throwable
     {
+        Statement s = createStatement();
         s.executeUpdate("insert into tG values(null, null, null)");
         s.executeUpdate("insert into tG values(time('12:30:30'), '12:30:31', '12:30:32')");
 
@@ -645,29 +607,10 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tG values(time('12:30:33'), 'I am char', 'I am varchar')");
 
-        try {
-            dumpRS(s.executeQuery("select coalesce(charCol,timeCol) from tG"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);	
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(charCol,timeCol) from tG"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);			
-        }
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(charCol,timeCol) from tG"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);		
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(charCol,timeCol) from tG"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);	
-        }
+        assertStatementError("22007", s, "select coalesce(charCol,timeCol) from tG");
+        assertStatementError("22007", s, "select value(charCol,timeCol) from tG");
+        assertStatementError("22007", s, "select coalesce(charCol,timeCol) from tG");
+        assertStatementError("22007", s, "select value(charCol,timeCol) from tG");
 
         expectedValue = "COL1(datatype : TIME, precision : 8, scale : 0) null 12:30:30 12:30:33 ";
         dumpRS(s.executeQuery("select coalesce(timeCol,charCol) from tG"), expectedValue);			
@@ -678,6 +621,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
     public void testTimeStampCoalesce() throws Throwable
     {
+        Statement s = createStatement();
         s.executeUpdate("insert into tH values(null, null, null)");
         s.executeUpdate("insert into tH values(timestamp('1992-01-01 12:30:30'), '1992-01-01 12:30:31', '1992-01-01 12:30:32')");
 
@@ -702,33 +646,15 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         s.executeUpdate("insert into tH values(timestamp('1992-01-01 12:30:33'), 'I am char', 'I am varchar')");
 
-        try {
-            dumpRS(s.executeQuery("select coalesce(charCol,timestampCol) from tH"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(charCol,timestampCol) from tH"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(charCol,timestampCol) from tH"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
-
-        try {
-            dumpRS(s.executeQuery("select value(charCol,timestampCol) from tH"), "");
-        } catch (SQLException sqle) {
-            assertSQLState("22007", sqle);
-        }
+        assertStatementError("22007", s, "select coalesce(charCol,timestampCol) from tH");
+        assertStatementError("22007", s, "select value(charCol,timestampCol) from tH");
+        assertStatementError("22007", s, "select coalesce(charCol,timestampCol) from tH");
+        assertStatementError("22007", s, "select value(charCol,timestampCol) from tH");
     }
 
     public void testNumericCoalesce() throws Throwable
     {
+        Statement s = createStatement();
         s.executeUpdate("insert into tE values(1, 2, 3, 4, 5.5, 6.6, 7.7, 3.4028235E38)");
         s.executeUpdate("insert into tE values(null,null,null,null,null,null,null,null)");
 
@@ -828,6 +754,9 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         };
 
+        Statement s = createStatement();
+        PreparedStatement ps;
+
         s.executeUpdate("insert into tD (c1,c2) values(1,'abcdefgh')");
         s.executeUpdate("insert into tD (c1) values(2)");
 
@@ -856,6 +785,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         try {
             ps.setString(1,"abc");
             dumpRS(ps.executeQuery(), "");
+            fail("Expected statement to fail");
         }
         catch (SQLException sqle) {
             assertSQLState("22018", sqle);
@@ -905,6 +835,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         };
 
+        Statement s = createStatement();
         s.executeUpdate("insert into tB values('c1 not null', 'c2 not null', 'vc1 not null', 'vc2 not null', 'lvc1 not null', 'lvc2 not null', 'clob1 not null', 'clob2 not null')");
         s.executeUpdate("insert into tB values('c1 not null but c2 is', null, 'vc1 is not null but vc2 is', null, null, null,null,null)");
         s.executeUpdate("insert into tB values(null,'c2 not null but c1 is', null, 'vc2 is not null but vc1 is', 'lvc1 not null again', 'lvc2 not null again', 'clob1 not null again', 'clob2 not null again')");
@@ -978,12 +909,12 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : LONG VARCHAR FOR BIT DATA, precision : 32700, scale : 0) 6c7663626431206e6f74206e756c6c 7663626431206e6f74206e756c6c20627574207663626432206973 6c7663626431206e6f74206e756c6c20616761696e null ",
                 "COL1(datatype : LONG VARCHAR FOR BIT DATA, precision : 32700, scale : 0) 6c7663626431206e6f74206e756c6c null 6c7663626431206e6f74206e756c6c20616761696e null ",
                 "COL1(datatype : LONG VARCHAR FOR BIT DATA, precision : 32700, scale : 0) 6c7663626431206e6f74206e756c6c null 6c7663626431206e6f74206e756c6c20616761696e null ",
-                "","","","","","","","","","","","",
                 "COL1(datatype : BLOB, precision : 33792, scale : 0) 626c6f6231206e6f74206e756c6c null 626c6f6231206e6f74206e756c6c20616761696e null ",
                 "COL1(datatype : BLOB, precision : 33792, scale : 0) 626c6f6231206e6f74206e756c6c null 626c6f6231206e6f74206e756c6c20616761696e null "
         };
 
-        ps = prepareStatement("insert into tC values (?,?,?,?,?,?,?,?)");
+        PreparedStatement ps =
+                prepareStatement("insert into tC values (?,?,?,?,?,?,?,?)");
         ps.setBytes(1, "cbd1 not null".getBytes("US-ASCII"));
         ps.setBytes(2, "cbd2 not null".getBytes("US-ASCII"));
         ps.setBytes(3, "vcbd1 not null".getBytes("US-ASCII"));
@@ -1023,6 +954,7 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         int index = 0;
 
+        Statement s = createStatement();
         dumpRS(s.executeQuery("select coalesce(cbd1,cbd2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(cbd1,cbd2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select coalesce(cbd2,cbd1) from tC"), expectedValues[index++]);	
@@ -1046,89 +978,18 @@ public class CoalesceTest extends BaseJDBCTestCase
         dumpRS(s.executeQuery("select coalesce(lvcbd1,lvcbd2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(lvcbd1,lvcbd2) from tC"), expectedValues[index++]);		
 
-        try {		
-            dumpRS(s.executeQuery("select coalesce(blob1,cbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {		
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(blob1,cbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(cbd1,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(cbd1,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(blob1,vcbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(blob1,vcbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(vcbd2,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(vcbd2,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(blob1,lvcbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(blob1,lvcbd1) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select coalesce(lvcbd2,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
-
-        try {
-            dumpRS(s.executeQuery("select value(lvcbd2,blob2) from tC"), expectedValues[index]);
-        } catch (SQLException sqle) {	
-            assertSQLState("42815", sqle);
-        }
-        index++;
+        assertStatementError("42815", s, "select coalesce(blob1,cbd1) from tC");
+        assertStatementError("42815", s, "select value(blob1,cbd1) from tC");
+        assertStatementError("42815", s, "select coalesce(cbd1,blob2) from tC");
+        assertStatementError("42815", s, "select value(cbd1,blob2) from tC");
+        assertStatementError("42815", s, "select coalesce(blob1,vcbd1) from tC");
+        assertStatementError("42815", s, "select value(blob1,vcbd1) from tC");
+        assertStatementError("42815", s, "select coalesce(vcbd2,blob2) from tC");
+        assertStatementError("42815", s, "select value(vcbd2,blob2) from tC");
+        assertStatementError("42815", s, "select coalesce(blob1,lvcbd1) from tC");
+        assertStatementError("42815", s, "select value(blob1,lvcbd1) from tC");
+        assertStatementError("42815", s, "select coalesce(lvcbd2,blob2) from tC");
+        assertStatementError("42815", s, "select value(lvcbd2,blob2) from tC");
 
         dumpRS(s.executeQuery("select coalesce(blob1,blob2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(blob1,blob2) from tC"), expectedValues[index++]);	
@@ -1143,10 +1004,11 @@ public class CoalesceTest extends BaseJDBCTestCase
             "COL1(datatype : INTEGER, precision : 10, scale : 0) 1 ",
         };
 
+        Statement s = createStatement();
         int index = 0;
 
         // let aggregate max return a non-null: should give 2
-        ps = prepareStatement("insert into tAggr values ?");
+        PreparedStatement ps = prepareStatement("insert into tAggr values ?");
         for (int i=0; i<3; i++) {
             ps.setInt(1, i);
             ps.executeUpdate();
@@ -1176,7 +1038,7 @@ public class CoalesceTest extends BaseJDBCTestCase
      * CoalesceFunctionNode didn't remap column references correctly.
      */
     public void testColumnRemappingDerby4342() throws SQLException {
-        JDBC.assertSingleValueResultSet(s.executeQuery(
+        JDBC.assertSingleValueResultSet(createStatement().executeQuery(
                 "select t1.smallintcol from " +
                 "AllDataTypesTable t1 join AllDataTypesTable t2 " +
                 "on t1.smallintcol=t2.smallintcol where " +
@@ -1191,6 +1053,7 @@ public class CoalesceTest extends BaseJDBCTestCase
      * properly categorized in CoalesceFunctionNode.
      */
     public void testPredicateCategorizationDerby4594() throws SQLException {
+        Statement s = createStatement();
         s.execute("create table d4594_t1 (a1 int)");
         s.execute("create table d4594_t2 (a2 int)");
         s.execute("insert into d4594_t1 values 1");
