@@ -21,18 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Enumeration;
 
 import junit.framework.Test;
-import junit.framework.TestFailure;
-import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -67,19 +61,16 @@ public class UniqueConstraintSetNullTest extends BaseJDBCTestCase {
      * Create table for test cases to use.
      */
     protected void setUp() throws Exception {
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
+        Statement stmt = createStatement();
         stmt.executeUpdate("create table constraintest (" +
                 "val1 varchar (20) not null, " +
                 "val2 varchar (20))");
     }
     
     protected void tearDown() throws Exception {
+        dropTable("constraintest");
+        commit();
         super.tearDown();
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
-        stmt.executeUpdate("drop table constraintest");
-        con.commit();
     }
     /**
      * Test the behaviour of unique constraint after making
