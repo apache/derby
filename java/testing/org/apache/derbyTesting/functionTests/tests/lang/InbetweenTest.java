@@ -23,11 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 
 
 import java.sql.Timestamp;
@@ -60,20 +58,9 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         return suite;
     }
 
-    ResultSet rs = null;
-    ResultSetMetaData rsmd;
-    SQLWarning sqlWarn = null;
-    PreparedStatement pSt;
-    CallableStatement cSt;
-    Statement st;
-    Connection conn;
-    String[][] expRS;
-    String[] expColNames;
-    
     private void createTestObjects(Statement st) throws SQLException {
-        conn = getConnection();
-        conn.setAutoCommit(false);
-        CleanDatabaseTestSetup.cleanDatabase(conn, false);
+        setAutoCommit(false);
+        CleanDatabaseTestSetup.cleanDatabase(getConnection(), false);
         
         st.executeUpdate("set isolation to rr");
         
@@ -210,7 +197,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     
     public void testBetween() throws Exception {
         
-        st = createStatement();        
+        Statement st = createStatement();
         createTestObjects(st);
                 
         // BETWEEN negative tests type mismatches
@@ -252,10 +239,10 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         // positive tests type comparisons
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             "select i from t where i between s and r");
         
-        expColNames = new String [] {"I"};
+        String[] expColNames = {"I"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -271,13 +258,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]
-        {
-            {"0"}
-        };
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "0");
         
         rs = st.executeQuery(
             " select i from t where s between r and d");
@@ -333,13 +314,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]
-        {
-            {"-1"}
-        };
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "-1");
         
         rs = st.executeQuery(
             " select i from t where "
@@ -348,13 +323,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]
-        {
-            {"-1"}
-        };
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "-1");
         
         //between 2 and 1
         
@@ -363,20 +332,14 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"I","S","C","V","D","R","E","T","P"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]{};
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertEmpty(rs);
         
         rs = st.executeQuery(
             "select * from t where not i not between 2 and 1");
         
         expColNames = new String [] {"I","S","C","V","D","R","E","T","P"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]{};
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertEmpty(rs);
         
         rs = st.executeQuery(
             "select * from t where not i between 2 and 1");
@@ -384,8 +347,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         expColNames = new String [] {"I","S","C","V","D","R","E","T","P"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"0","100","hello","everyone is here","200.0","300.0",
                      "1992-01-01","12:30:30","1992-01-01 12:30:30.0"},
             {"-1","-100","goodbye","everyone is there","-200.0","-300.0",
@@ -641,7 +603,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         rs = st.executeQuery("values (2)");
         rs.next();
-        rsmd = rs.getMetaData();
+        ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1;
                 i <= rsmd.getColumnCount(); i++) {
             q1.setObject(i, rs.getObject(i));
@@ -780,7 +742,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public void testInList() throws SQLException {
 
-        st = createStatement();
+        Statement st = createStatement();
         createTestObjects(st);     
         
         //recreate s as ss
@@ -822,14 +784,13 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         //positive tests
         //type comparisons
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             "select i from t where i in (s, r, i, d, 40e1)");
         
-        expColNames = new String [] {"I"};
+        String[] expColNames = {"I"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"0"},
             {"-1"}
         };
@@ -1306,7 +1267,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public void testInBetween() throws SQLException {
 
-        st = createStatement();
+        Statement st = createStatement();
         createTestObjects(st);
         
         st.executeUpdate("create table u (c1 integer)");      
@@ -1315,18 +1276,12 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(" insert into u values null");     
         st.executeUpdate(" insert into u values 2");
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " select * from u where c1 between 2 and 3");
         
-        expColNames = new String [] {"C1"};
+        String[] expColNames = {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]
-        {
-            {"2"}
-        };
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "2");
         
         rs = st.executeQuery(
             " select * from u where c1 in (2, 3, 0, 1)");
@@ -1334,8 +1289,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         expColNames = new String [] {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1"},
             {"2"}
         };
@@ -1642,7 +1596,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        cSt = prepareCall(
+        CallableStatement cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         assertUpdateCount(cSt, 0);
         
@@ -1667,18 +1621,17 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     public void testBigInList() throws SQLException {
         // big in lists (test binary search)
         
-        st = createStatement();
+        Statement st = createStatement();
         createTestObjects(st);                
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " select * from big where i in (1, 3, 5, 7, 9, 11, "
             + "13, 15, 17, 19, 21, 23, 25, 27, 29, 31)");
         
-        expColNames = new String [] {"I", "C"};
+        String[] expColNames = {"I", "C"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1", "1"},
             {"3", "3"},
             {"5", "5"},
@@ -1915,19 +1868,18 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         // Check various queries for which left column is part of 
         // an index.
         
-        st=createStatement();
+        Statement st = createStatement();
         createTestObjects(st);      
                 
         // Simple cases, small table with index on IN col.
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             "select * from bt1 where i in (9, 2, 8)");
         
-        expColNames = new String [] {"I", "C", "DE"};
+        String[] expColNames = {"I", "C", "DE"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"2", "two", "22.2"},
             {"8", "eight", "2.8"},
             {"9", "nine", null}
@@ -2601,14 +2553,14 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         // Prepared statement checks. Mix of constants and params.
         
-        pSt = prepareStatement(
+        PreparedStatement pSt = prepareStatement(
             "select * from bt1 where i in (1, 8, 3, ?) order by i, c");
         
         rs = st.executeQuery(
             "values 3");
         
         rs.next();
-        rsmd = rs.getMetaData();
+        ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++)
             pSt.setObject(i, rs.getObject(i));
         
@@ -3399,7 +3351,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
     public void testNestedQueries() throws SQLException{
         // Nested queries with unions and top-level IN list.
         
-        st=createStatement();
+        Statement st = createStatement();
         createTestObjects(st);        
         
         st.executeUpdate(
@@ -3409,15 +3361,14 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             " create view v3 as select de d from bt1 union "
             + "select d from bt2");
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " select * from V2, V3 where V2.i in (2,4) and V3.d "
             + "in (4.3, 7.1, 22.2)");
         
-        expColNames = new String [] {"I", "D"};
+        String[] expColNames = {"I", "D"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"2", "7.1"},
             {"2", "22.2"}
         };
@@ -3532,7 +3483,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         // beetle 4316, check "in" with self-reference and 
         // correlation, etc.
         
-        st=createStatement();
+        Statement st = createStatement();
         createTestObjects(st);
         
         st.executeUpdate(
@@ -3551,14 +3502,13 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t2 values (4, 8), (8, 8), (7, 6), (5, 6)");
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " select c1 from t1 where c1 in (2, sqrt(c2))");
         
-        expColNames = new String [] {"C1"};
+        String[] expColNames = {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"2.0"},
             {"3.0"},
             {"5.0"}
@@ -3571,7 +3521,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             " select c1 from t1 where c1 in ('10', '5', '20') and c1 > 3"
             + "and c1 < 19");
         
-        cSt = prepareCall(
+        CallableStatement cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         assertUpdateCount(cSt, 0);
             
@@ -3740,14 +3690,14 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             "select c1 from t1 where c1 in ('9', '4', '8.0', '7.7',"
             + "	5.2, 6, '7.7', '4.9', '6.1')");
         
-        pSt = prepareStatement(
+        PreparedStatement pSt = prepareStatement(
             "select c1 from t1 where c1 in (3, ?)");
         
         rs = st.executeQuery(
             "values 8");
         
         rs.next();
-        rsmd = rs.getMetaData();
+        ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++)
             pSt.setObject(i, rs.getObject(i));
         
@@ -3846,7 +3796,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         //reproduction for beetle 5135 ( long list of constants in 
         // IN clause)
             
-        st= createStatement();
+        Statement st = createStatement();
         createTestObjects(st);
         
         st.executeUpdate("create table t1(id int)");
@@ -3864,7 +3814,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         st.executeUpdate(" insert into t1 values(13037)");       
         st.executeUpdate(" insert into t1 values(9999)");
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " SELECT id FROM t1 WHERE id IN "
             + "(2,3,5,7,6,8,11,13,14,15,16,18,19"
             + ",22,25,30,32,33,5712,34,39,42,43,46,51,54"
@@ -4445,11 +4395,10 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             + ",4436,5162,5165,5170,5171,5173,5345,5174,5765,5177,5"
             + "750,5793,0) ORDER BY id");
         
-        expColNames = new String [] {"ID"};
+        String[] expColNames = {"ID"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"0"},
             {"2"},
             {"723"},
@@ -4490,15 +4439,9 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         
         expColNames = new String [] {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
-        
-        expRS = new String [][]
-        {
-            {"0"}
-        };
-        
-        JDBC.assertFullResultSet(rs, expRS, true);
-         
-        conn.rollback();
+        JDBC.assertSingleValueResultSet(rs, "0");
+
+        rollback();
         st.close();
     }
 
