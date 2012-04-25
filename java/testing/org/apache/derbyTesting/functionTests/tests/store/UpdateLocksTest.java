@@ -117,6 +117,16 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     "on l.xid = t.xid " +
                     "where l.tableType <> 'S' and " +
                     "      t.type='UserTransaction'");
+                
+                // Create a procedure to be called before checking on contents
+                // to ensure that the background worker thread has completed 
+                // all the post-commit work.
+                s.execute(
+                    "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
+                    "LANGUAGE JAVA EXTERNAL NAME " +
+                    "'org.apache.derbyTesting.functionTests.util." +
+                    "T_Access.waitForPostCommitToFinish' " +
+                    "PARAMETER STYLE JAVA");
             }
         };
     }
@@ -1209,6 +1219,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         commit();
@@ -2076,6 +2088,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
 
@@ -2368,6 +2382,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
 
@@ -2448,6 +2464,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -2584,6 +2602,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -2621,6 +2641,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -2812,6 +2834,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -2967,6 +2991,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -4480,6 +4506,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -5958,6 +5986,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
              )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -6095,6 +6125,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -6532,6 +6564,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 )
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -6730,6 +6764,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "2", _X, _A, "(4,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -6753,6 +6789,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 {"7", "70", pad2("seven", pad), pad2("index pad 7", idxPad)}});
 
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         /* ------------------------------------------------------------
          * Test full cursor scan which deletes "even" rows.
          * ------------------------------------------------------------
@@ -6818,6 +6856,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "2", _X, _A, "(6,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -6861,6 +6901,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate(
             "delete from a where (a = 2 or a = 4 or a = 6) and (b < 8)");
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -7164,6 +7206,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "1", _X, _A, "(2,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         s.executeUpdate(
             "update a  set b = -b where a = 2");
         ltrs = getLocks();
@@ -7292,6 +7336,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "1", _X, _A, "(7,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         JDBC.assertUnorderedResultSet(
@@ -7372,6 +7418,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "2", _X, _A, "(7,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
@@ -7527,6 +7575,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                     {_app, _ut, _r, "3", _X, _A, "(3,6)", _g, _a}}
             ));
         c.commit();
+        // wait for post-commit tasks before going on
+        s.execute("call wait_for_post_commit()");
         ltrs = getLocks();
         JDBC.assertEmpty(ltrs);
         c.commit();
