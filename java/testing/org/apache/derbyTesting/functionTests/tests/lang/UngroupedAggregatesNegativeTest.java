@@ -55,9 +55,10 @@ public class UngroupedAggregatesNegativeTest extends BaseJDBCTestCase {
         st.close();
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDown() throws Exception {
         dropTable("t1");
         dropTable("t2");
+        super.tearDown();
     }
 
     /**
