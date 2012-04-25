@@ -469,6 +469,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             }
         } catch (SQLException e) {
         }
+        c3 = null;
 
         try { s.executeUpdate(
                 "drop table APP.FILECHANGES"); } catch (SQLException e) {}
