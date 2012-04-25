@@ -23,12 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLWarning;
-import java.sql.Connection;
-
 
 import java.sql.SQLException;
 import junit.framework.Test;
@@ -54,24 +50,11 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         return suite;
     }
     
-        ResultSet rs = null;
-        ResultSetMetaData rsmd;
-        SQLWarning sqlWarn = null;
-
-        PreparedStatement pSt;
-        CallableStatement cSt;
-        Statement st;
-
-        String [][] expRS;
-        String [] expColNames;
-        Connection conn;
-
     public void testNotAllowedInCheckConstraints() throws Exception
     {
         
-        st = createStatement();
-        conn=getConnection();       
-        conn.setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         // negative The following are not allowed in check 
         // constraints:	?, subquery, datetime functions
@@ -122,7 +105,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         // alter table t1 drop constraint asdf
         
-        conn.rollback();
+        rollback();
         
         // alter table t1 drop constraint asdf forward references 
         // should fail
@@ -134,13 +117,12 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             " create table neg2(c1 int constraint asdf check(c2 "
             + "= 1), c2 int)");
         
-        conn.rollback();
+        rollback();
     }
     public void testCheckConstraints() throws SQLException{
         
-        st = createStatement();
-        conn=getConnection();       
-        conn.setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         // positive multiple check constraints on same table
         
@@ -162,14 +144,12 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             " insert into pos1 values 10");
         
-        rs = st.executeQuery(
-            " select * from pos1");
+        ResultSet rs = st.executeQuery("select * from pos1");
         
-        expColNames = new String [] {"C1"};
+        String[] expColNames = {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1"},
             {"9"}
         };
@@ -212,7 +192,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        conn.rollback();
+        rollback();
         
         // conflicting constraints, should fail
         
@@ -236,7 +216,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             "insert into negcks values (2, 3, 3)");
         
-        conn.rollback();
+        rollback();
         
         // same source and target tables
         
@@ -247,7 +227,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into pos1 values (1, 2), (2, 3), (3, 4)");
         
-        conn.commit();
+        commit();
         // these should work
         
         st.executeUpdate(
@@ -288,7 +268,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        conn.rollback();
+        rollback();
         
         // these should fail
         
@@ -330,7 +310,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " drop table pos1");
         
-        conn.commit();
+        commit();
         // union under insert
         
         st.executeUpdate(
@@ -403,14 +383,13 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        conn.rollback();
+        rollback();
     }
     
     public void testPositionalUpdate() throws SQLException{
         
-        st = createStatement();
-        conn=getConnection();       
-        conn.setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         // positioned update
         
@@ -424,7 +403,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " create index i1 on t1(c1)");
         
-        Statement st1 = conn.createStatement();
+        Statement st1 = createStatement();
         st1.setCursorName("c1");
         ResultSet rs1 = st1.executeQuery(
                 "select * from t1 where c2=2 for update of C1");
@@ -441,7 +420,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st1.close();
         rs1.close();
         
-        Statement st2 = conn.createStatement();
+        Statement st2 = createStatement();
         st2.setCursorName("c2");
         ResultSet rs2 = st2.executeQuery(
                 "select * from t1 where c1 = 2 for update of c2");
@@ -457,7 +436,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st2.close();
         rs2.close();
         
-        Statement st3 = conn.createStatement();
+        Statement st3 = createStatement();
         st3.setCursorName("c3");
         ResultSet rs3 = st3.executeQuery(
                 "select * from t1 where c1 = 2 for update of c1, c2");
@@ -478,14 +457,12 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st3.close();
         rs3.close();
         
-        rs = st.executeQuery(
-            " select * from t1");
+        ResultSet rs = st.executeQuery("select * from t1");
         
-        expColNames = new String [] {"C1", "C2"};
+        String[] expColNames = {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1", "1"},
             {"5", "5"},
             {"3", "3"},
@@ -494,7 +471,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        conn.rollback();
+        rollback();
         
         // complex expressions
         
@@ -537,14 +514,13 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        conn.rollback();
+        rollback();
     }
     
     public void testBuiltInFunctions() throws SQLException{
         
-        st = createStatement();
-        conn=getConnection();       
-        conn.setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         // built-in functions in a check constraint
         
@@ -582,7 +558,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", st,
             "insert into maxIntTab values 2147483647");
         
-        conn.rollback();
+        rollback();
         
         // verify that inserts, updates and statements with forced 
         // constraints are indeed dependent on the constraints
@@ -593,7 +569,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t1 values 1, 2, 3, 4, 5");
         
-        conn.commit();
+        commit();
         
         PreparedStatement pSt1 = prepareStatement(
             "insert into t1 values 1");
@@ -611,13 +587,12 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23505", pSt2);
 
         
-        rs = pSt3.executeQuery();
+        ResultSet rs = pSt3.executeQuery();
         
-        expColNames = new String [] {"C1"};
+        String[] expColNames = {"C1"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1"},
             {"2"},
             {"3"},
@@ -633,7 +608,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         // rollback and verify that constraints are enforced and 
         // select succeeds
         
-        conn.rollback();
+        rollback();
         
         assertStatementError("23505", pSt1);
         
@@ -665,14 +640,14 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             "create table t1(c1 int constraint asdf check(c1 = 1))");
         
-        pSt = prepareStatement(
+        PreparedStatement pSt = prepareStatement(
             "insert into t1 values (?)");
         
         rs = st.executeQuery(
             "values (1)");
         
         rs.next();
-        rsmd = rs.getMetaData();
+        ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); i++)
             pSt.setObject(i, rs.getObject(i));
         
@@ -838,15 +813,14 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate("drop table t3");
         st.executeUpdate("drop table t2");
         st.executeUpdate("drop table t1");
-        conn.commit();
+        commit();
         
         // DERBY-2989
     }
     public void testJira2989() throws SQLException{
         
-        st = createStatement();
-        conn=getConnection();       
-        conn.setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate(
             "CREATE TABLE \"indicator\" (c CHAR(1) DEFAULT 'N')");
@@ -879,7 +853,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         if (usingEmbedded())
             return;
 
-        st = createStatement();
+        Statement st = createStatement();
 
         st.executeUpdate(
             "create table t4282(c1 int, c2 int, constraint ck1 "
@@ -913,7 +887,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
     public void testPrimaryKeyPageSizeDerby3947()
         throws SQLException
     {
-        st = createStatement();
+        Statement st = createStatement();
         st.executeUpdate("create table d3947 (x varchar(1000) primary key)");
         char[] chars = new char[994];
         PreparedStatement ps = prepareStatement("insert into d3947 values (?)");
