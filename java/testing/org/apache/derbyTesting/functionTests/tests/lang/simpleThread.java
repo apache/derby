@@ -31,7 +31,7 @@ import org.apache.derby.tools.ij;
 /*
 	This is from a bug found by a beta customer.
  */
-public class simpleThread implements Runnable {
+public class simpleThread extends Thread {
 
         private static Connection _connection = null;
         private static boolean _inUse = false;
@@ -47,7 +47,7 @@ public class simpleThread implements Runnable {
                 _wait = waitTime;
                 _myCount = getCount();
                 _query = query;
-                new Thread(this).start();
+                start();
         }
 
         public void run() {
@@ -107,15 +107,19 @@ public class simpleThread implements Runnable {
 
             String query = "SELECT * from people ORDER by name";
 
-            try {
-                String[] retval = new String[4];
-                new simpleThread(query,0);
-                new simpleThread(query,10000);
-                new simpleThread(query,10100);
-                new simpleThread(query,20000);
-            } catch (Exception ex) {
-                System.err.println(ex.toString() );
+            Thread[] threads = {
+                new simpleThread(query,0),
+                new simpleThread(query,10000),
+                new simpleThread(query,10100),
+                new simpleThread(query,20000),
+            };
+
+            for (int i = 0; i < threads.length; i++) {
+                threads[i].join();
             }
+
+            _connection.close();
+            _connection = null;
         }
 
         public static Connection GetConnection() {
