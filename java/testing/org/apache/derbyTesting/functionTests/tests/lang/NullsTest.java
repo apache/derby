@@ -48,10 +48,6 @@ public class NullsTest extends BaseJDBCTestCase {
         getConnection().setAutoCommit(false);
     }
 
-    public void tearDown() throws SQLException{
-        getConnection().setAutoCommit(true);
-    }
-
     public void testCreate() throws SQLException{
         Statement st = createStatement();
 
