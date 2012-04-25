@@ -24,16 +24,13 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     
-    private DataSource ds;
     public UniqueConstraintMultiThreadedTest() {
         super ("Multi Threaded Unique Constraint Test");
     }
@@ -41,18 +38,18 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     /**
      * Deletes a record in a transaction and tries to insert the same 
      * from a different transaction. Once second transaction goes on wait
-     * first trasnaction is commited or rolled back based on third 
+     * first transaction is committed or rolled back based on third
      * param (boolean commit).
      * 
      * @param isolation1 isolation level for 1st thread
      * @param isolation2 isolation level for 2nd thread
-     * @param commit wether to commit or commit
+     * @param commit whether or not to commit
      */
     private void executeThreads (int isolation1, int isolation2, 
             boolean commit) throws Exception {
-        Connection con1 = ds.getConnection();
+        Connection con1 = openDefaultConnection();
         con1.setTransactionIsolation(isolation1);
-        Connection con2 = ds.getConnection();
+        Connection con2 = openDefaultConnection();
         try {
             con2.setTransactionIsolation(isolation2);
             DBOperations dbo1 = new DBOperations (con1, 5);
@@ -88,10 +85,9 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     
     /**
      * Test inserting a duplicate record while original is deleted in
-     * a transaction and latter commited.
+     * a transaction and later committed.
      */
     public void testLockingWithcommit () throws Exception {
-        ds = JDBCDataSource.getDataSource();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 executeThreads((int) Math.pow(2,i),
@@ -102,10 +98,9 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     
     /**
      * Test inserting a duplicate record while original is deleted in
-     * a transaction and latter rolled back.
+     * a transaction and later rolled back.
      */
     public void testLockingWithRollback () throws Exception {
-        ds = JDBCDataSource.getDataSource();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 executeThreads((int) Math.pow (2,i),
@@ -121,21 +116,20 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     }
     
     protected void setUp() throws Exception {
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
+        Statement stmt = createStatement();
         stmt.execute("create table tab1 (i integer)");
         stmt.executeUpdate("alter table tab1 add constraint con1 unique (i)");
-        PreparedStatement ps = con.prepareStatement("insert into tab1 " +
+        PreparedStatement ps = prepareStatement("insert into tab1 " +
                 "values (?)");
         for (int i = 0; i < 10; i++) {
             ps.setInt(1, i);
             ps.executeUpdate();
         }
-        con.commit ();
+        commit();
     }
 
     protected void tearDown() throws java.lang.Exception {
-        Connection con = getConnection();
-        con.createStatement().executeUpdate("drop table tab1");
+        dropTable("tab1");
+        super.tearDown();
     }
 }
