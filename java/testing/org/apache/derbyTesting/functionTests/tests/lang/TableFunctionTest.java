@@ -948,6 +948,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         dropSchema();
 
+        _databaseMetaData = null;
+
         super.tearDown();
     }
 
