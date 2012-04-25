@@ -254,8 +254,9 @@ public class BigDataTest extends BaseJDBCTestCase {
         }
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDown() throws Exception {
         dropTable(BIG_TABLE_NAME);
+        super.tearDown();
     }
 
     public static Test suite() {
