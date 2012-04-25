@@ -192,12 +192,16 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         return test;
     }
 
-    private static DatabasePropertyTestSetup getNoTeardownInstance(
+    static DatabasePropertyTestSetup getNoTeardownInstance(
         Test test, Properties p, boolean staticp)
     {
         return new DatabasePropertyTestSetup(test, p, staticp) {
                 protected void tearDown()
                         throws java.lang.Exception {
+                    // We don't want to reset the properties, but we should
+                    // still clear the reference to the default connection to
+                    // allow it to be garbage collected.
+                    clearConnection();
                 }
             };
     }

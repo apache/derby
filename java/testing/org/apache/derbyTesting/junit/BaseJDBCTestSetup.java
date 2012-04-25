@@ -90,7 +90,15 @@ public abstract class BaseJDBCTestSetup
     protected void tearDown()
     throws java.lang.Exception
     {
-    	JDBC.cleanup(conn);
+        clearConnection();
+    }
+
+    /**
+     * Close the default connection and null out the reference to it.
+     * Typically only called from {@code tearDown()}.
+     */
+    void clearConnection() throws SQLException {
+        JDBC.cleanup(conn);
         conn = null;
     }
 }

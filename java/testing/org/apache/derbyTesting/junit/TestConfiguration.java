@@ -911,11 +911,8 @@ public final class TestConfiguration {
         // reset it.
         final Properties sqlAuth = new Properties();
         sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
-        Test setSQLAuthMode = new DatabasePropertyTestSetup(test,
-                sqlAuth, true) {
-            protected void tearDown() {
-            }
-        };
+        Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
+                test, sqlAuth, true);
         
         return changeUserDecorator(
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
@@ -939,11 +936,8 @@ public final class TestConfiguration {
         // reset it.
         final Properties sqlAuth = new Properties();
         sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
-        Test setSQLAuthMode = new DatabasePropertyTestSetup(test,
-                                                            sqlAuth, true) {
-                protected void tearDown() { }
-            };
-
+        Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
+                test, sqlAuth, true);
 
         setSQLAuthMode = new DatabaseChangeSetup(
             new DropDatabaseSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL) {
