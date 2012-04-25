@@ -19,13 +19,9 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLWarning;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -50,18 +46,9 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         return suite;
     }
 
-    ResultSet rs = null;
-    ResultSetMetaData rsmd;
-    SQLWarning sqlWarn = null;
-    PreparedStatement pSt;
-    CallableStatement cSt;
-    Statement st;
-    String[][] expRS;
-    String[] expColNames;   
-    
     public void testNegativeTestsForColumnDefaults() throws Exception
     {
-        st = createStatement();
+        Statement st = createStatement();
         
         //? in default
         assertStatementError("42X01", st,
@@ -161,7 +148,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
         st.executeUpdate( "drop function asdf");
         
-        getConnection().rollback();
+        rollback();
         st.close();
     }
     
@@ -170,7 +157,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
     {
         
         // positive 
-        st = createStatement();
+        Statement st = createStatement();
         
         //create tables
         
@@ -184,13 +171,12 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
         st.executeUpdate( " insert into t1 (c4) values 4");
         
-        rs = st.executeQuery( " select c1, c2, c4 from t1");
+        ResultSet rs = st.executeQuery("select c1, c2, c4 from t1");
         
-        expColNames = new String [] {"C1", "C2", "C4"};
+        String[] expColNames = {"C1", "C2", "C4"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"1", "5", null},
             {null, "5", "4"}
         };
@@ -439,7 +425,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
         st.executeUpdate( " drop schema \"otherschema\" restrict");
         
-        getConnection().rollback();
+        rollback();
         st.close();
         
     }
@@ -447,7 +433,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         throws SQLException
     {
         // JIRA issue Derby-331
-        st = createStatement();
+        Statement st = createStatement();
         
         st.executeUpdate(
             "create table t_331 (a int not null, b int default "
@@ -458,13 +444,12 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         assertStatementError("23505", st,
             " insert into t_331 values (4, default)");
         
-        rs = st.executeQuery( " select * from t_331");
+        ResultSet rs = st.executeQuery( " select * from t_331");
         
-        expColNames = new String [] {"A", "B"};
+        String[] expColNames = {"A", "B"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"4", "0"}
         };
         
@@ -472,7 +457,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
          st.executeUpdate( " drop table t_331");
          
-        getConnection().rollback();
+        rollback();
         st.close();
     }
     
@@ -480,7 +465,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         throws SQLException
     {
         // begin DERBY-3013
-        st = createStatement();
+        Statement st = createStatement();
         
         st.executeUpdate(
             "create table tabWithUserAndSchemaDefaults("
@@ -496,15 +481,14 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
             "insert into tabWithUserAndSchemaDefaults values "
             + "(default, default, default, default)");
         
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             " select * from tabWithUserAndSchemaDefaults");
         
-        expColNames = new String [] {"CUSER", "CCURRENT_USER", 
+        String[] expColNames = {"CUSER", "CCURRENT_USER",
             "CSESSION_USER", "CCURRENT_SCHEMA"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS = new String [][]
-        {
+        String[][] expRS = {
             {"APP", "APP", "APP", "APP"}
         };
         
@@ -525,7 +509,7 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " drop table tabWithUserAndSchemaDefaults");
                
-        getConnection().rollback();
+        rollback();
         st.close();
     }
 }
