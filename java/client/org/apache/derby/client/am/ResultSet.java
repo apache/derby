@@ -1050,11 +1050,18 @@ public abstract class ResultSet implements java.sql.ResultSet,
         try
         {
             closeOpenStreams();
-
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getString", column);
             }
             checkGetterPreconditions(column, "getString");
+            int type = resultSetMetaData_.types_[column - 1];
+            if (type == Types.BLOB || type == Types.CLOB) {
+                checkLOBMultiCall(column);
+                // If the above didn't fail, this is the first getter
+                // invocation, or only getBytes and/or getString have been
+                // invoked previously. The special treatment of these getters
+                // is allowed for backwards compatibility.
+            }
             String result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]);
@@ -1083,6 +1090,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getBytes", column);
             }
             checkGetterPreconditions(column, "getBytes");
+            int type = resultSetMetaData_.types_[column - 1];
+            if (type == Types.BLOB) {
+                checkLOBMultiCall(column);
+                // If the above didn't fail, this is the first getter
+                // invocation, or only getBytes has been invoked previously.
+                // The special treatment of this getter is allowed for
+                // backwards compatibility.
+            }
             byte[] result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]);
@@ -1354,6 +1369,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // used by DBMD
     Object getObjectX(int column) throws SqlException {
         checkGetterPreconditions(column, "getObject");
+        int type = resultSetMetaData_.types_[column - 1];
+        if (type == Types.BLOB || type == Types.CLOB) {
+            useStreamOrLOB(column);
+        }
         Object result = null;
         if (wasNonNullSensitiveUpdate(column)) {
             result = updatedColumns_[column - 1];
@@ -5481,6 +5500,26 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @throws SQLException if the column has already been accessed
      */
     void useStreamOrLOB(int columnIndex) throws SqlException {
+        checkLOBMultiCall(columnIndex);
+        columnUsedFlags_[columnIndex - 1] = true;
+    }
+
+    /**
+     * Checks if a stream or a LOB object has already been created for the
+     * specified LOB column.
+     * <p>
+     * Accessing a LOB column more than once is not forbidden by the JDBC
+     * specification, but the Java API states that for maximum portability,
+     * result set columns within each row should be read in left-to-right order,
+     * and each column should be read only once. The restriction was implemented
+     * in Derby due to complexities with the positioning of store streams when
+     * the user was given multiple handles to the stream.
+     *
+     * @param columnIndex 1-based index of the LOB column
+     * @throws SqlException if the column has already been accessed
+     */
+    private void checkLOBMultiCall(int columnIndex)
+            throws SqlException {
         if (columnUsedFlags_ == null) {
             columnUsedFlags_ = new boolean[resultSetMetaData_.columns_];
         }
@@ -5488,10 +5527,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.LANG_STREAM_RETRIEVED_ALREADY));
         }
-
-        columnUsedFlags_[columnIndex - 1] = true;
     }
-
 
     /**
      * Clears the flags for used columns, typically invoked when changing the

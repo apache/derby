@@ -676,7 +676,14 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public final String getString(int columnIndex) throws SQLException {
         checkIfClosed("getString");
-
+        int columnType = getColumnType(columnIndex);
+        if (columnType == Types.BLOB || columnType == Types.CLOB) {
+            checkLOBMultiCall(columnIndex);
+            // If the above didn't fail, this is the first getter invocation,
+            // or only getString and/or getBytes have been invoked previously.
+            // The special treatment of these getters is allowed for
+            // backwards compatibility.
+        }
 			try {
 
 				DataValueDescriptor dvd = getColumn(columnIndex);
@@ -687,7 +694,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				String value = dvd.getString();
 
 				// check for the max field size limit 
-                if (maxFieldSize > 0 && isMaxFieldSizeType(getColumnType(columnIndex)))
+                if (maxFieldSize > 0 && isMaxFieldSizeType(columnType))
                 {
                     if (value.length() > maxFieldSize )
                     {
@@ -875,6 +882,13 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     public final byte[] getBytes(int columnIndex) throws SQLException	{
 		checkIfClosed("getBytes");
+        int columnType = getColumnType(columnIndex);
+        if (columnType == Types.BLOB) {
+            checkLOBMultiCall(columnIndex);
+            // If the above didn't fail, this is the first getter invocation,
+            // or only getBytes has been invoked previously. The special
+            // treatment of this getter is allowed for backwards compatibility.
+        }
 		try {
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
@@ -885,7 +899,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			byte[] value = dvd.getBytes();
 
             // check for the max field size limit 
-            if (maxFieldSize > 0 && isMaxFieldSizeType(getColumnType(columnIndex)))
+            if (maxFieldSize > 0 && isMaxFieldSizeType(columnType))
             {
                  if (value.length > maxFieldSize)
                  {
@@ -4640,12 +4654,31 @@ public abstract class EmbedResultSet extends ConnectionChild
      * @throws SQLException if the column has already been accessed
      */
     final void useStreamOrLOB(int columnIndex) throws SQLException {
+        checkLOBMultiCall(columnIndex);
+        columnUsedFlags[columnIndex - 1] = true;
+    }
+
+    /**
+     * Checks if a stream or a LOB object has already been created for the
+     * specified LOB column.
+     * <p>
+     * Accessing a LOB column more than once is not forbidden by the JDBC
+     * specification, but the Java API states that for maximum portability,
+     * result set columns within each row should be read in left-to-right order,
+     * and each column should be read only once. The restriction was implemented
+     * in Derby due to complexities with the positioning of store streams when
+     * the user was given multiple handles to the stream.
+     *
+     * @param columnIndex 1-based index of the LOB column
+     * @throws SQLException if the column has already been accessed
+     */
+    private void checkLOBMultiCall(int columnIndex)
+            throws SQLException {
         if (columnUsedFlags == null) {
             columnUsedFlags = new boolean[getMetaData().getColumnCount()];
         } else if (columnUsedFlags[columnIndex - 1]) {
             throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
         }
-        columnUsedFlags[columnIndex - 1] = true;
     }
 
     /**

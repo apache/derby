@@ -96,7 +96,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ResultSetStreamTest.suite());
         suite.addTest(InternationalConnectSimpleDSTest.suite());
         suite.addTest(Derby2017LayerATest.suite());
-        
+        suite.addTest(LobRsGetterTest.suite());
+
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
         suite.addTest(JDBCHarnessJavaTest.suite());

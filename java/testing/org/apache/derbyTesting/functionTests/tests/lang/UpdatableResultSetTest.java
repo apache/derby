@@ -3177,18 +3177,20 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         if (usingEmbedded() && JDBC.vmSupportsJDBC3()) {
             println("  updateClob and then cancelRowUpdates");
             String clb1 = rs.getString(13);
+            String clb2 = rs1.getString(13);
             rs.updateClob(13, rs1.getClob(13));
             assertEquals("FAIL - wrong value returned by getXXX method",
-                    rs1.getString(13), rs.getString(13));
+                    clb2, rs.getString(13));
             rs.cancelRowUpdates();
             assertEquals("FAIL - wrong value returned by getXXX method",
                     clb1, rs.getString(13));
             
             println("  updateBlob and then cancelRowUpdates");
             bts = rs.getBytes(17);
+            byte[] bts2 = rs1.getBytes(17);
             rs.updateBlob(17,rs1.getBlob(17));
             assertTrue("FAIL - wrong value returned by getXXX method",
-                    java.util.Arrays.equals(rs.getBytes(17),rs1.getBytes(17)));
+                    java.util.Arrays.equals(rs.getBytes(17), bts2));
             rs.cancelRowUpdates();
             assertTrue("FAIL - wrong value returned by getXXX method",
                     java.util.Arrays.equals(rs.getBytes(17),bts));

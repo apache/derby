@@ -20,6 +20,9 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.IOException;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,6 +30,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
 
 import junit.framework.Test;
 
@@ -100,6 +104,12 @@ public class LobRsGetterTest
         /* getObject            */ { X, X },
     };
 
+    /**
+     * The names of the various getters used in this test.
+     * <p>
+     * The positions/indexes must correspond to those in
+     * {@linkplain #COMPATIBLE_GETTERS}.
+     */
     private static final String[] GETTER_NAMES = new String[] {
         "getBytes", "getString", "getAsciiStream", "getBinaryStream",
         "getCharacterStream", "getClob", "getBlob", "getObject"
@@ -157,7 +167,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersSimple()
             throws SQLException {
-        testGettersSimple("dBlob", BLOB);
+        _testGettersSimple("dBlob", BLOB);
     }
 
     /**
@@ -165,7 +175,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersSimple()
             throws SQLException {
-        testGettersSimple("dClob", CLOB);
+        _testGettersSimple("dClob", CLOB);
     }
 
     /**
@@ -173,7 +183,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersSimpleNegative()
             throws SQLException {
-        testGettersSimpleNegative("dBlob", BLOB);
+        _testGettersSimpleNegative("dBlob", BLOB);
     }
 
     /**
@@ -181,7 +191,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersSimpleNegative()
             throws SQLException {
-        testGettersSimpleNegative("dClob", CLOB);
+        _testGettersSimpleNegative("dClob", CLOB);
     }
 
     /**
@@ -193,7 +203,7 @@ public class LobRsGetterTest
      */
     public void testBlobGettersMultiInvocation()
             throws SQLException {
-        testGettersMultiInvocation("dBlob", BLOB);
+        _testGettersMultiInvocation("dBlob", BLOB);
     }
 
     /**
@@ -204,7 +214,7 @@ public class LobRsGetterTest
      */
     public void testClobGettersMultiInvocation()
             throws SQLException {
-        testGettersMultiInvocation("dClob", CLOB);
+        _testGettersMultiInvocation("dClob", CLOB);
     }
 
     /**
@@ -227,7 +237,6 @@ public class LobRsGetterTest
                 invokeGetter(rs, BLOB, GET_BYTES);
                 assertTrue("getBytes should have failed after: " +
                         debugInfo(1, rs, BLOB, getter),
-                        // TODO: Is GET_STRING to be considerd valid for BLOB?
                         getter == GET_BYTES || getter == GET_STRING);
             } catch (SQLException sqle) {
                 assertTrue(getter != GET_BYTES);
@@ -270,7 +279,179 @@ public class LobRsGetterTest
         }
     }
 
-    private void testGettersMultiInvocation(String columnName, int typeIdx)
+    /**
+     * Tests that data returned by the last BLOB getter invokation is correct.
+     */
+    public void testCorrectBlobDataWithMultiCall()
+            throws IOException, SQLException {
+        setAutoCommit(false);
+        PreparedStatement psId = prepareStatement("select id from " + TABLE);
+        String select = "select dBlob from " + TABLE + " where id = ?";
+        PreparedStatement ps1 = prepareStatement(select);
+        PreparedStatement ps2 = prepareStatement(select);
+        ResultSet rsId = psId.executeQuery();
+        ResultSet rs1;
+        ResultSet rs2;
+        while (rsId.next()) {
+            ps1.setInt(1, rsId.getInt(1));
+            ps2.setInt(1, rsId.getInt(1));
+
+            // getBytes - getString - getBinaryStream
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getBytes(1);
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getBinaryStream(1), rs1.getBinaryStream(1));
+            rs1.close();
+            rs2.close();
+
+            // getString - getBytes - getBlob
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs1.getBytes(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getBlob(1), rs1.getBlob(1));
+            rs1.close();
+            rs2.close();
+
+            // getBytes - getString - getCharacterStream
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getBytes(1);
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getCharacterStream(1), rs1.getCharacterStream(1));
+            rs1.close();
+            rs2.close();
+
+            // getBytes - getString - getBytes
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getBytes(1);
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertTrue(Arrays.equals(rs2.getBytes(1), rs1.getBytes(1)));
+            rs1.close();
+            rs2.close();
+
+            // getBytes - getString - getString
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getBytes(1);
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getString(1), rs1.getString(1));
+            rs1.close();
+            rs2.close();
+
+            // getString - getBytes - getObject
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs1.getBytes(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            Blob b1 = (Blob)rs1.getObject(1);
+            Blob b2 = (Blob)rs2.getObject(1);
+            assertEquals(b2, b1);
+            rs1.close();
+            rs2.close();
+
+            // getBytes - getString - getAsciiStream
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getBytes(1);
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getAsciiStream(1), rs1.getAsciiStream(1));
+            rs1.close();
+            rs2.close();
+        }
+        rollback();
+    }
+
+    /**
+     * Tests that data returned by the last CLOB getter invokation is correct.
+     */
+    public void testCorrectClobDataWithMultiCall()
+            throws IOException, SQLException {
+        setAutoCommit(false);
+        PreparedStatement psId = prepareStatement(
+                "select id, dClob from " + TABLE);
+        String select = "select dClob from " + TABLE + " where id = ?";
+        PreparedStatement ps1 = prepareStatement(select);
+        PreparedStatement ps2 = prepareStatement(select);
+        ResultSet rsId = psId.executeQuery();
+        ResultSet rs1;
+        ResultSet rs2;
+        while (rsId.next()) {
+            ps1.setInt(1, rsId.getInt(1));
+            ps2.setInt(1, rsId.getInt(1));
+
+            // getString - getString
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getString(1), rs1.getString(1));
+            rs1.close();
+            rs2.close();
+
+            // getString - getCharacterStream
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getCharacterStream(1), rs1.getCharacterStream(1));
+            rs1.close();
+            rs2.close();
+
+            // getString - getClob
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getClob(1), rs1.getClob(1));
+            rs1.close();
+            rs2.close();
+
+            // getString - getObject
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            Clob b1 = (Clob)rs1.getObject(1);
+            Clob b2 = (Clob)rs2.getObject(1);
+            assertEquals(b2, b1);
+            rs1.close();
+            rs2.close();
+
+            // getString - getAsciiStream
+            rs1 = ps1.executeQuery();
+            assertTrue(rs1.next());
+            rs1.getString(1);
+            rs2 = ps2.executeQuery();
+            assertTrue(rs2.next());
+            assertEquals(rs2.getAsciiStream(1), rs1.getAsciiStream(1));
+            rs1.close();
+            rs2.close();
+        }
+        rollback();
+    }
+
+    private void _testGettersMultiInvocation(String columnName, int typeIdx)
             throws SQLException {
         PreparedStatement ps = prepareStatement(
                 "select " + columnName + " from " + TABLE);
@@ -294,7 +475,7 @@ public class LobRsGetterTest
         }
     }
 
-    private void testGettersSimpleNegative(String columnName, int typeIdx)
+    private void _testGettersSimpleNegative(String columnName, int typeIdx)
             throws SQLException {
         PreparedStatement ps = prepareStatement(
                 "select " + columnName + " from " + TABLE);
@@ -319,7 +500,7 @@ public class LobRsGetterTest
         }
     }
 
-    private void testGettersSimple(String columnName, int typeIdx)
+    private void _testGettersSimple(String columnName, int typeIdx)
             throws SQLException {
         PreparedStatement ps = prepareStatement(
                 "select " + columnName + " from " + TABLE);
