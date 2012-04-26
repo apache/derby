@@ -3667,4 +3667,42 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         s.execute("alter table \"\"\"\".\"\"\"\" " +
                   "alter column \"\"\"\" set increment by 2");
     }
+    
+    /**
+     * Verify that rollback works properly if a column with a null default
+     * is added and then the table is updated. See DERBY-5679.
+     */
+    public void test_5679() throws Exception
+    {
+        Statement s = createStatement();
+        ResultSet   rs;
+
+        String[][]  rowBefore = new String[][]{ { "before", null, "before" }  };
+        String[][]  rowAfter = new String[][]{ { "after", "after", "after" }  };
+
+        // create a table, insert a row, add two columns, then update one of the columns
+        s.execute( "create table t_5679(name1 varchar(10))" );
+        s.execute( "insert into t_5679(name1) values('before')" );
+        s.execute( "alter table t_5679 add column str1 varchar(10)" );
+        s.execute( "alter table t_5679 add column str2 varchar(10)" );
+        s.execute( "update t_5679 set str2 = 'before'" );
+
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowBefore );
+
+        // now update the row and rollback
+        setAutoCommit( false );
+        s.execute( "update t_5679 set name1='after', str1='after', str2='after'" );
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowAfter );
+        rollback();
+        setAutoCommit( true );
+
+        // all columns of the row should have reverted
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowBefore );
+
+        s.execute( "drop table t_5679" );
+    }
+    
 }

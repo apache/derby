@@ -327,10 +327,15 @@ public class StoredPage extends CachedPage
      *     COLUMN_LONG   - this is a known long column, therefore we will 
      *                     store part of the column on the current page and 
      *                     overflow the rest if necessary.
+     *     COLUMN_CREATE_NULL   - the column was recently added.
+     *                  it doesn't actually exist in the on-disk row yet.
+     *                  we will need to put a null in it as soon as possible.
+     *                  see DERBY-5679.
      **/
     protected static final int COLUMN_NONE  = 0;
     protected static final int COLUMN_FIRST = 1;
     protected static final int COLUMN_LONG  = 2;
+    protected static final int COLUMN_CREATE_NULL  = 3;
 
 
     /**
@@ -3968,12 +3973,14 @@ public class StoredPage extends CachedPage
                     else 
                     {
                         // this is an update that is increasing the number of 
-                        // columns but not providing any value, strange ...
-
+                        // columns but not providing any value. this can happen
+                        // if you are updating a new column after using
+                        // ALTER TABLE to add a couple new columns.
+                        // see DERBY-5679.
                         spaceAvailable = 
                             logColumn(
                                 null, 0, out, spaceAvailable, 
-                                columnFlag, overflowThreshold);
+                                COLUMN_CREATE_NULL, overflowThreshold);
                     }
 
                 } 
@@ -6177,7 +6184,7 @@ public class StoredPage extends CachedPage
             }
         }
 
-        if (column == null)
+        if ( (column == null) && (columnFlag != COLUMN_CREATE_NULL))
         {
             fieldStatus  = StoredFieldHeader.setNonexistent(fieldStatus);
             headerLength =
@@ -6300,11 +6307,28 @@ public class StoredPage extends CachedPage
             }
         
         } 
+        else if ( columnFlag == COLUMN_CREATE_NULL )
+        {
+            //
+            // This block handles the case when a couple columns have been added
+            // recently and now one of the later columns is being updated. Newly added columns
+            // which appear in the row before the updated column don't actually have
+            // any values yet. We stuff NULLs into those newly added columns here.
+            // This fixes DERBY-5679.
+            //
+            fieldStatus = StoredFieldHeader.setNull(fieldStatus, true);
+
+            // header is written with 0 length here.
+            headerLength = 
+                StoredFieldHeader.write(
+                    logicalDataOut, fieldStatus, 
+                    fieldDataLength, slotFieldSize);
+        }
         else if (column instanceof DataValueDescriptor)
         {
             DataValueDescriptor sColumn = (DataValueDescriptor) column;
 
-            boolean isNull = sColumn.isNull();
+            boolean isNull = (columnFlag == COLUMN_CREATE_NULL) || sColumn.isNull();
             if (isNull) 
             {
                 fieldStatus = StoredFieldHeader.setNull(fieldStatus, true);
