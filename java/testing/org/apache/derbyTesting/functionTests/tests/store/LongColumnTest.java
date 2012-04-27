@@ -67,11 +67,12 @@ public class LongColumnTest extends BaseJDBCTestCase {
         }
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDown() throws Exception {
         Statement st = createStatement();
         st.executeUpdate("DROP FUNCTION PADSTRING");
         st.close();
         dropTable("testing");
+        super.tearDown();
     }
 
     /**
