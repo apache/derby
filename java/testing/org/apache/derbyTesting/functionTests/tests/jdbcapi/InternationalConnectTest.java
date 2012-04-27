@@ -188,18 +188,21 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         XAConnection xaconn = ds.getXAConnection();
         Connection conn = xaconn.getConnection();
         conn.close();
+        xaconn.close();
   
         // Chinese user
         J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
         xaconn = ds.getXAConnection();
         conn = xaconn.getConnection();
         conn.close();
+        xaconn.close();
 
         // Chinese password
         J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
         xaconn = ds.getXAConnection();
         conn = xaconn.getConnection();
         conn.close();
+        xaconn.close();
         
         /* Add the created database for cleanup by tearDown() */
         databasesForCleanup.add("\u4e10");
@@ -219,18 +222,21 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         PooledConnection poolConn = ds.getPooledConnection();
         Connection conn = poolConn.getConnection();
         conn.close();
+        poolConn.close();
  
         // Chinese user
         J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
         poolConn = ds.getPooledConnection();
         conn = poolConn.getConnection();
         conn.close();
+        poolConn.close();
 
         // Chinese password
         J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
         poolConn= ds.getPooledConnection();
         conn = poolConn.getConnection();
         conn.close();
+        poolConn.close();
         
         /* Add the created database for cleanup by tearDown() */
         databasesForCleanup.add("\u4e10");
@@ -261,7 +267,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         }
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDown() throws Exception {
         /* Iterate through the databases for cleanup and delete them */
         for (int i=0; i<databasesForCleanup.size(); i++) {
             String shutdownUrl = TestConfiguration.getCurrent()
@@ -278,7 +284,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         }
         
         /* Clear the array list as new fixtures will add other databases */
-        databasesForCleanup.clear();
+        databasesForCleanup = null;
+
+        super.tearDown();
     }
     
     public static Test suite() {        
