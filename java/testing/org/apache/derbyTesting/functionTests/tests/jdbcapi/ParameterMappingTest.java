@@ -1094,13 +1094,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      * @see org.apache.derbyTesting.junit.BaseJDBCTestCase#tearDown()
      */
     protected void tearDown() throws Exception {
-        Connection conn = getConnection();
         rollback();
-        Statement scb = conn.createStatement();
-        scb.execute("DROP TABLE PM.LOB_GET");
-        scb.close();
+        dropTable("PM.LOB_GET");
         commit();
-
+        super.tearDown();
     }
 
     private static void getXXX(PreparedStatement ps, int type, boolean isNull)
