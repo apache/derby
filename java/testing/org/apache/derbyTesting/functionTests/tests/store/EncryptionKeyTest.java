@@ -127,8 +127,8 @@ public abstract class EncryptionKeyTest
         if (con != null && !con.isClosed()) {
             con.rollback();
             con.close();
-            con = null;
         }
+        con = null;
         super.tearDown();
     }
 
