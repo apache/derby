@@ -106,6 +106,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         resetProps();
         deleteStreamFiles();
         nullFields();
+        super.tearDown();
     }
 
     /**
