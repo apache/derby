@@ -282,24 +282,41 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     throws java.lang.Exception
     {
         Connection conn = getConnection();
-        conn.setAutoCommit(false);
-        CallableStatement setDBP =  conn.prepareCall(
-            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, NULL)");
-    	// Clear all the system properties set by the new set
-    	// that will not be reset by the old set. Ignore any 
-        // invalid property values.
         try {
-        	for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
-        	{
-        		String key = (String) e.nextElement();
-        		if (oldValues.getProperty(key) == null)
-        		{
-        			setDBP.setString(1, key);
-        			setDBP.executeUpdate();
-        		}
-        	}
+            clearProperties(conn);
         } catch (SQLException sqle) {
-        	if(!sqle.getSQLState().equals(SQLStateConstants.PROPERTY_UNSUPPORTED_CHANGE))
+            // To try to prevent the error situation of DERBY-5686, which
+            // cascades to many test failures, catch ERROR 25502, and if it occurs
+            // try to gather some information, close the connection,
+            // and retry the clearing of the properties on a new connection
+            if (sqle.getSQLState().equals("25502")) {
+                // firstly, check on the state of the connection when we
+                // get this error
+                System.out.println("Apparently this is a read-only connection? Get some data:");
+                System.out.println("conn.isClosed: " + conn.isClosed());
+                System.out.println("conn.isReadOnly: " + conn.isReadOnly());
+                System.out.println("conn.getHoldability: " + conn.getHoldability());
+                System.out.println("conn.getTransactionIsolation: " + conn.getTransactionIsolation());
+                System.out.println("conn.getAutoCommit: " + conn.getAutoCommit());
+                // now try to close the connection, then try open a new one, 
+                // and try to executeUpdate again.
+                conn.close();
+                Connection conn2 = getConnection();
+                // check if this second connection is read-only
+                if (conn2.isReadOnly())
+                {
+                    System.out.println("Sorry, conn2 is also read-only, won't retry");
+                    // give up
+                    throw sqle;
+                }
+                else
+                {   
+                    // retry
+                    System.out.println("retrying clearing the Properties");
+                    clearProperties(conn2);
+                }
+            }
+            else if(!sqle.getSQLState().equals(SQLStateConstants.PROPERTY_UNSUPPORTED_CHANGE))
         		throw sqle;
         }
     	// and then reset nay old values which will cause the commit.
@@ -312,6 +329,25 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         }
     }
     
+    private void clearProperties(Connection conn) throws SQLException
+    {
+        conn.setAutoCommit(false);
+        CallableStatement setDBP =  conn.prepareCall(
+            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, NULL)");
+        // Clear all the system properties set by the new set
+        // that will not be reset by the old set. Ignore any 
+        // invalid property values.
+        for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
+        {
+            String key = (String) e.nextElement();
+            if (oldValues.getProperty(key) == null)
+            {
+                setDBP.setString(1, key);
+                setDBP.executeUpdate();
+            }
+        }
+    }
+
     private void setProperties(Properties values) throws SQLException
     {
         Connection conn = getConnection();
