@@ -97,7 +97,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                   false); // master server dead
 
         // Try to re-establish replication mode:
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
                 masterServerPort,

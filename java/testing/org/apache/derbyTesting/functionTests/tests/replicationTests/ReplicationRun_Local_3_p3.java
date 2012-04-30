@@ -86,13 +86,13 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         initMaster(masterServerHost,
                 replicatedDb);
         
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
                 masterDbSubPath); // Distinguishing master/slave
         
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+        startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,

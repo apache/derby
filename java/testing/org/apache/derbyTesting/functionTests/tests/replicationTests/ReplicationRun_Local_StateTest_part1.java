@@ -90,7 +90,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
@@ -99,7 +99,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         // State test. 
         _testPreStartedSlaveServer(); 
         
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+        startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,

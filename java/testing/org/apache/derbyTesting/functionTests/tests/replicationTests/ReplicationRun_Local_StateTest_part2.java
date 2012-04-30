@@ -80,13 +80,13 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
                 masterServerPort,
                 masterDbSubPath);
         
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+        startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES,
                 slaveServerPort,

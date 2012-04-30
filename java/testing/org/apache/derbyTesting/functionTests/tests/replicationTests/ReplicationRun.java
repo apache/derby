@@ -145,10 +145,6 @@ public class ReplicationRun extends BaseTestCase
     
     static String derbyProperties = null;
 
-    NetworkServerControl masterServer;
-
-    NetworkServerControl slaveServer;
-
     String classPath = null; // Used in "localhost" testing.
     
     /** A Connection to the master database*/
@@ -218,9 +214,26 @@ public class ReplicationRun extends BaseTestCase
         }
         helperThreads = null;
 
+        close(masterConn);
+        close(slaveConn);
+
+        masterConn = null;
+        slaveConn = null;
+        startSlaveException = null;
+        classPath = null;
+        util = null;
+        state = null;
+
         super.tearDown();
     }
     
+    /** Close a connection. */
+    private static void close(Connection conn) throws SQLException {
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+        }
+    }
+
     /**
      * Run the test. Extra logic in addition to BaseTestCase's similar logic,
      * to save derby.log and database files for replication directories if a
@@ -1285,11 +1298,6 @@ public class ReplicationRun extends BaseTestCase
     int xFindServerPID(String serverHost, int serverPort)
     throws InterruptedException
     {
-        if ( masterServer != null ) // If master (and assuming then also slave)
-            // is started via new NetworkServerContol() use 0 for "PID".
-        {
-            return 0;
-        }
         if ( serverHost.equalsIgnoreCase("localhost") ) 
         { // Assuming we do not need the PID.
             return 0;
@@ -1985,7 +1993,7 @@ public class ReplicationRun extends BaseTestCase
                     serverPort,
                     dbSubDirPath); // Distinguishing master/slave
     }
-    NetworkServerControl startServer(String serverVM, String serverVersion,
+    void startServer(String serverVM, String serverVersion,
             String serverHost,
             String interfacesToListenOn,
             int serverPort,
@@ -2127,7 +2135,6 @@ public class ReplicationRun extends BaseTestCase
         
         util.DEBUG(debugId+"--- StartServer ");
         util.DEBUG("");
-        return null;
     }
     /* 
     private NetworkServerControl startServer_direct(String serverHost, 
@@ -2515,13 +2522,13 @@ public class ReplicationRun extends BaseTestCase
         initMaster(masterServerHost,
                 replicatedDb);
         
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
                 masterServerPort,
                 masterDbSubPath);
         
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+        startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES,
                 slaveServerPort,

@@ -100,7 +100,7 @@ public class ReplicationRun_Full extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb); // Prototype V2: copy orig (possibly empty) db to db_master.
         
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+        startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
@@ -116,7 +116,7 @@ public class ReplicationRun_Full extends ReplicationRun
             if (state.testPreStartedSlaveServer()) return; // + stop master server!
         
         // Thread.sleep(5000L); // Just for testing....
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+        startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
@@ -282,7 +282,7 @@ public class ReplicationRun_Full extends ReplicationRun
         if ( slavePid == -1 )
         {
             util.DEBUG("WARNING: slave server not available. Starting.");
-            slaveServer = startServer(jvmVersion, derbyVersion,
+            startServer(jvmVersion, derbyVersion,
                     slaveServerHost,
                     ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     slaveServerPort,
@@ -321,7 +321,7 @@ public class ReplicationRun_Full extends ReplicationRun
         if ( masterPid == -1 )
         {
             util.DEBUG("WARNING: master server not available. Starting.");
-            masterServer = startServer(jvmVersion, derbyVersion,
+            startServer(jvmVersion, derbyVersion,
                     masterServerHost,
                     ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     masterServerPort,
