@@ -156,6 +156,15 @@ public class ProtocolTest
         }
     }
 
+    /** Cleans up test resources. */
+    public void tearDown()
+            throws Exception {
+        commandSequence = null;
+        adapter.close();
+        adapter = null;
+        super.tearDown();
+    }
+
     /**
      * Initializes a socket to the server.
      *
