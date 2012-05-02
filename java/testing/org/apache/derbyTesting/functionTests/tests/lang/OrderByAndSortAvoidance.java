@@ -440,7 +440,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483653L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483653L, "DocumentSortingValues", "______21857__1__1");
         insertTable2(it2, 2147483653L, "ItemSeq", "1");
-        insertTable2(it2, 2147483653L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483653L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483653L, "Plex", "S");
         insertTable2(it2, 2147483653L, "SC3", "=");
         insertTable2(it2, 2147483653L, "has_address", "true");
@@ -487,7 +487,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483654L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483654L, "DocumentSortingValues", "______21857__1__1");
         insertTable2(it2, 2147483654L, "ItemSeq", "1");
-        insertTable2(it2, 2147483654L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483654L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483654L, "Plex", "S");
         insertTable2(it2, 2147483654L, "SC3", "=");
         insertTable2(it2, 2147483654L, "has_address", "true");
@@ -534,7 +534,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483655L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483655L, "DocumentSortingValues", "______21858__1__1");
         insertTable2(it2, 2147483655L, "ItemSeq", "1");
-        insertTable2(it2, 2147483655L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483655L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483655L, "Plex", "S");
         insertTable2(it2, 2147483655L, "SC3", "=");
         insertTable2(it2, 2147483655L, "has_address", "true");
@@ -581,7 +581,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483656L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483656L, "DocumentSortingValues", "______21858__1__1");
         insertTable2(it2, 2147483656L, "ItemSeq", "1");
-        insertTable2(it2, 2147483656L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483656L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483656L, "Plex", "S");
         insertTable2(it2, 2147483656L, "SC3", "=");
         insertTable2(it2, 2147483656L, "has_address", "true");
@@ -1004,7 +1004,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483665L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483665L, "DocumentSortingValues", "______21863__1__1");
         insertTable2(it2, 2147483665L, "ItemSeq", "1");
-        insertTable2(it2, 2147483665L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483665L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483665L, "Plex", "S");
         insertTable2(it2, 2147483665L, "SC3", "=");
         insertTable2(it2, 2147483665L, "has_address", "true");
@@ -1051,7 +1051,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483666L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483666L, "DocumentSortingValues", "______21863__1__1");
         insertTable2(it2, 2147483666L, "ItemSeq", "1");
-        insertTable2(it2, 2147483666L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483666L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483666L, "Plex", "S");
         insertTable2(it2, 2147483666L, "SC3", "=");
         insertTable2(it2, 2147483666L, "has_address", "true");
@@ -1098,7 +1098,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483667L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483667L, "DocumentSortingValues", "______21864__1__1");
         insertTable2(it2, 2147483667L, "ItemSeq", "1");
-        insertTable2(it2, 2147483667L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483667L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483667L, "Plex", "S");
         insertTable2(it2, 2147483667L, "SC3", "=");
         insertTable2(it2, 2147483667L, "has_address", "true");
@@ -1145,7 +1145,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483668L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483668L, "DocumentSortingValues", "______21864__1__1");
         insertTable2(it2, 2147483668L, "ItemSeq", "1");
-        insertTable2(it2, 2147483668L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483668L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483668L, "Plex", "S");
         insertTable2(it2, 2147483668L, "SC3", "=");
         insertTable2(it2, 2147483668L, "has_address", "true");
@@ -1568,7 +1568,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483677L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483677L, "DocumentSortingValues", "______21869__1__1");
         insertTable2(it2, 2147483677L, "ItemSeq", "1");
-        insertTable2(it2, 2147483677L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483677L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483677L, "Plex", "S");
         insertTable2(it2, 2147483677L, "SC3", "=");
         insertTable2(it2, 2147483677L, "has_address", "true");
@@ -1615,7 +1615,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483678L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483678L, "DocumentSortingValues", "______21869__1__1");
         insertTable2(it2, 2147483678L, "ItemSeq", "1");
-        insertTable2(it2, 2147483678L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483678L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483678L, "Plex", "S");
         insertTable2(it2, 2147483678L, "SC3", "=");
         insertTable2(it2, 2147483678L, "has_address", "true");
@@ -1662,7 +1662,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483679L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483679L, "DocumentSortingValues", "______21870__1__1");
         insertTable2(it2, 2147483679L, "ItemSeq", "1");
-        insertTable2(it2, 2147483679L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483679L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483679L, "Plex", "S");
         insertTable2(it2, 2147483679L, "SC3", "=");
         insertTable2(it2, 2147483679L, "has_address", "true");
@@ -1709,7 +1709,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483680L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483680L, "DocumentSortingValues", "______21870__1__1");
         insertTable2(it2, 2147483680L, "ItemSeq", "1");
-        insertTable2(it2, 2147483680L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483680L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483680L, "Plex", "S");
         insertTable2(it2, 2147483680L, "SC3", "=");
         insertTable2(it2, 2147483680L, "has_address", "true");
@@ -2132,7 +2132,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483689L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483689L, "DocumentSortingValues", "______21875__1__1");
         insertTable2(it2, 2147483689L, "ItemSeq", "1");
-        insertTable2(it2, 2147483689L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483689L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483689L, "Plex", "S");
         insertTable2(it2, 2147483689L, "SC3", "=");
         insertTable2(it2, 2147483689L, "has_address", "true");
@@ -2179,7 +2179,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483690L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483690L, "DocumentSortingValues", "______21875__1__1");
         insertTable2(it2, 2147483690L, "ItemSeq", "1");
-        insertTable2(it2, 2147483690L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483690L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483690L, "Plex", "S");
         insertTable2(it2, 2147483690L, "SC3", "=");
         insertTable2(it2, 2147483690L, "has_address", "true");
@@ -2226,7 +2226,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483691L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483691L, "DocumentSortingValues", "______21876__1__1");
         insertTable2(it2, 2147483691L, "ItemSeq", "1");
-        insertTable2(it2, 2147483691L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483691L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483691L, "Plex", "S");
         insertTable2(it2, 2147483691L, "SC3", "=");
         insertTable2(it2, 2147483691L, "has_address", "true");
@@ -2273,7 +2273,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 2147483692L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 2147483692L, "DocumentSortingValues", "______21876__1__1");
         insertTable2(it2, 2147483692L, "ItemSeq", "1");
-        insertTable2(it2, 2147483692L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 2147483692L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 2147483692L, "Plex", "S");
         insertTable2(it2, 2147483692L, "SC3", "=");
         insertTable2(it2, 2147483692L, "has_address", "true");
@@ -2536,7 +2536,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 4294967297L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 4294967297L, "DocumentSortingValues", "");
         insertTable2(it2, 4294967297L, "ItemSeq", "0");
-        insertTable2(it2, 4294967297L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 4294967297L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 4294967297L, "Plex", "S");
         insertTable2(it2, 4294967297L, "SC3", "=");
         insertTable2(it2, 4294967297L, "has_address", "true");
@@ -2602,7 +2602,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 6442450945L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 6442450945L, "DocumentSortingValues", "");
         insertTable2(it2, 6442450945L, "ItemSeq", "0");
-        insertTable2(it2, 6442450945L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 6442450945L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 6442450945L, "Plex", "S");
         insertTable2(it2, 6442450945L, "SC3", "=");
         insertTable2(it2, 6442450945L, "has_address", "true");
@@ -2675,7 +2675,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 8589934593L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 8589934593L, "DocumentSortingValues", "");
         insertTable2(it2, 8589934593L, "ItemSeq", "0");
-        insertTable2(it2, 8589934593L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 8589934593L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 8589934593L, "Plex", "S");
         insertTable2(it2, 8589934593L, "SC3", "=");
         insertTable2(it2, 8589934593L, "has_address", "true");
@@ -2768,7 +2768,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 10737418241L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 10737418241L, "DocumentSortingValues", "");
         insertTable2(it2, 10737418241L, "ItemSeq", "0");
-        insertTable2(it2, 10737418241L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 10737418241L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 10737418241L, "Plex", "S");
         insertTable2(it2, 10737418241L, "SC3", "=");
         insertTable2(it2, 10737418241L, "has_address", "true");
@@ -2870,7 +2870,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 12884901889L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 12884901889L, "DocumentSortingValues", "");
         insertTable2(it2, 12884901889L, "ItemSeq", "0");
-        insertTable2(it2, 12884901889L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 12884901889L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 12884901889L, "Plex", "S");
         insertTable2(it2, 12884901889L, "SC3", "=");
         insertTable2(it2, 12884901889L, "has_address", "true");
@@ -2956,7 +2956,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 15032385537L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 15032385537L, "DocumentSortingValues", "");
         insertTable2(it2, 15032385537L, "ItemSeq", "0");
-        insertTable2(it2, 15032385537L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 15032385537L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 15032385537L, "Plex", "S");
         insertTable2(it2, 15032385537L, "SC3", "=");
         insertTable2(it2, 15032385537L, "has_address", "true");
@@ -3044,7 +3044,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 17179869185L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 17179869185L, "DocumentSortingValues", "");
         insertTable2(it2, 17179869185L, "ItemSeq", "0");
-        insertTable2(it2, 17179869185L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 17179869185L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 17179869185L, "Plex", "S");
         insertTable2(it2, 17179869185L, "SC3", "=");
         insertTable2(it2, 17179869185L, "has_address", "true");
@@ -3137,7 +3137,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         insertTable2(it2, 19327352833L, "AddressG3", "1180 Bruxelles");
         insertTable2(it2, 19327352833L, "DocumentSortingValues", "");
         insertTable2(it2, 19327352833L, "ItemSeq", "0");
-        insertTable2(it2, 19327352833L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.");
+        insertTable2(it2, 19327352833L, "BatchTypeInstructions", "Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.");
         insertTable2(it2, 19327352833L, "Plex", "S");
         insertTable2(it2, 19327352833L, "SC3", "=");
         insertTable2(it2, 19327352833L, "has_address", "true");
