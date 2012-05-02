@@ -142,12 +142,12 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
      * first testrun results and print the average elapsed time 
      * for the remaining runs.  
      */
-    public void runBare() throws Throwable
+    protected void runBareOverridable() throws Throwable
     {
         for (int i = 0; i < repeats; i++)
         {
             println("Repeat ="+i);
-            super.runBare();
+            super.runBareOverridable();
             testRunNum++;
         }
         

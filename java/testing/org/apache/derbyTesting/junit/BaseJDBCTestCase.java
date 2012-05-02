@@ -401,6 +401,50 @@ public abstract class BaseJDBCTestCase
     {
         getConnection().rollback();
     } 
+
+    /**
+     * <p>
+     * Run the bare test, including {@code setUp()} and {@code tearDown()}.
+     * </p>
+     *
+     * <p>
+     * Subclasses that want to override {@code runBare()}, should override
+     * this method instead. Overriding this method shouldn't be necessary
+     * except in very special cases. Override {@code setUp()} and
+     * {@code tearDown()} instead if possible.
+     * </p>
+     *
+     * <p>
+     * The overridden method would typically want to call
+     * {@code super.runBareOverridable()} to actually run the test.
+     * </p>
+     */
+    protected void runBareOverridable() throws Throwable {
+        super.runBare();
+    }
+
+    /**
+     * <p>
+     * Run the bare test, including {@code setUp()} and {@code tearDown()},
+     * and finally verify that the cached connection has been released.
+     * </p>
+     *
+     * <p>
+     * This method is final to prevent subclasses from accidentally bypassing
+     * the assert that checks if the cached connection has been released.
+     * Subclasses that want to override the method, should override
+     * {@link #runBareOverridable()} instead.
+     * </p>
+     */
+    public final void runBare() throws Throwable {
+        runBareOverridable();
+        // It's quite common to forget to call super.tearDown() when
+        // overriding tearDown() in sub-classes.
+        assertNull(
+            "Connection should be null by now. " +
+            "Missing call to super.tearDown()?", conn);
+    }
+
     /**
      * Tear down this fixture, sub-classes should call
      * super.tearDown(). This cleanups & closes the connection
