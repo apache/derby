@@ -29,10 +29,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
 import java.sql.Connection;
-
-
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestInputStream;
@@ -3729,4 +3728,217 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         s.execute("alter table \"\"\"\".\"\"\"\" " +
                   "alter column \"\"\"\" set increment by 2");
     }
+    
+    /**
+     * Verify that rollback works properly if a column with a null default
+     * is added and then the table is updated. See DERBY-5679.
+     */
+    public void test_5679() throws Exception
+    {
+        Statement s = createStatement();
+        ResultSet   rs;
+
+        String[][]  rowBefore = new String[][]{ { "before", null, "before" }  };
+        String[][]  rowAfter = new String[][]{ { "after", "after", "after" }  };
+
+        // create a table, insert a row, add two columns, then update one of the columns
+        s.execute( "create table t_5679(name1 varchar(10))" );
+        s.execute( "insert into t_5679(name1) values('before')" );
+        s.execute( "alter table t_5679 add column str1 varchar(10)" );
+        s.execute( "alter table t_5679 add column str2 varchar(10)" );
+        s.execute( "update t_5679 set str2 = 'before'" );
+
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowBefore );
+
+        // now update the row and rollback
+        setAutoCommit( false );
+        s.execute( "update t_5679 set name1='after', str1='after', str2='after'" );
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowAfter );
+        rollback();
+        setAutoCommit( true );
+
+        // all columns of the row should have reverted
+        rs = s.executeQuery( "select * from t_5679" );
+        JDBC.assertFullResultSet( rs, rowBefore );
+
+        s.execute( "drop table t_5679" );
+    }
+    
+    /**
+     * More tests for DERBY-5679. Verify with a lot of columns.
+     */
+    public void test_5679_manyColumns() throws Exception
+    {
+        Statement s = createStatement();
+        ResultSet   rs;
+
+        // create a table, insert a row, add two columns, then update one of the columns
+        s.execute( "create table t_5679_1( keyCol int )" );
+        s.execute( "insert into t_5679_1( keyCol ) values( 1 )" );
+
+        // now add a lot of columns
+        for ( int i = 1; i < 100; i++ )
+        {
+            s.execute( "alter table t_5679_1 add column a_" + i + " int" );
+        }
+        s.execute( "update t_5679_1 set a_50 = 50" );
+
+        String[]    rawBeforeRow = new String[ 100 ];
+        rawBeforeRow[ 0 ] = "1";
+        rawBeforeRow[ 50 ] = "50";
+        String[][]  beforeRow = new String[][] { rawBeforeRow };
+
+        String[]    rawAfterRow = new String[ 100 ];
+        rawAfterRow[ 0 ] = "1";
+        rawAfterRow[ 49 ] = "490";
+        rawAfterRow[ 50 ] = "500";
+        rawAfterRow[ 51 ] = "510";
+        String[][]  afterRow = new String[][] { rawAfterRow };
+
+        rs = s.executeQuery( "select * from t_5679_1" );
+        JDBC.assertFullResultSet( rs, beforeRow );
+
+        // now update the row and rollback
+        setAutoCommit( false );
+        s.execute( "update t_5679_1 set a_49 = 490, a_50 = 500, a_51 = 510" );
+        rs = s.executeQuery( "select * from t_5679_1" );
+        JDBC.assertFullResultSet( rs, afterRow );
+        rollback();
+        setAutoCommit( true );
+
+        // all columns of the row should have reverted
+        rs = s.executeQuery( "select * from t_5679_1" );
+        JDBC.assertFullResultSet( rs, beforeRow );
+
+        s.execute( "drop table t_5679_1" );
+    }
+    
+    /**
+     * More tests for DERBY-5679. Verify with long rows.
+     */
+    public void test_5679_longRows() throws Exception
+    {
+        Connection conn = getConnection();
+        PreparedStatement ps;
+        ResultSet   rs;
+
+        // verify that the default page size of 4096 bytes is in effect
+        ps = conn.prepareStatement( "values syscs_util.syscs_get_database_property( 'derby.storage.pageSize' )" );
+        rs = ps.executeQuery();
+        rs.next();
+        assertNull( rs.getString( 1 ) );
+        rs.close();
+        ps.close();
+
+        final   int LONG = 1050;
+        final   int SHORT = 500;
+        final   int PAGE_SIZE = 4096;
+
+        byte[]  a_0 = makeBytes( 0, LONG );
+        byte[]  a_1 = makeBytes( 1, LONG );
+        byte[]  a_2 = makeBytes( 2, LONG );
+        byte[]  a_4 = makeBytes( 4, LONG );
+
+        // create a table, insert a row, add two columns, then update one of the columns
+        conn.prepareStatement
+            (
+             "create table t_5679_2( a_0 varchar( " + LONG + " ) for bit data," +
+             " a_1 varchar( " + LONG + " ) for bit data," +
+             " a_2 varchar( " + LONG + " ) for bit data)" )
+            .execute();
+        ps = conn.prepareStatement( "insert into t_5679_2( a_0, a_1, a_2 ) values ( ?, ?, ? )" );
+        ps.setBytes( 1, a_0 );
+        ps.setBytes( 2, a_1 );
+        ps.setBytes( 3, a_2 );
+        ps.executeUpdate();
+        ps.close();
+
+        // now add 2 columns. the second column will spill onto the second page if it is
+        // stuffed with a long value
+        conn.prepareStatement( "alter table t_5679_2 add column a_3 varchar( " + SHORT + " ) for bit data" ).execute();
+        conn.prepareStatement( "alter table t_5679_2 add column a_4 varchar( " + LONG + " ) for bit data" ).execute();
+
+        assertTrue( LONG + LONG + LONG + SHORT < PAGE_SIZE );
+        assertTrue( LONG + LONG + LONG + LONG > PAGE_SIZE );
+        
+        // now stuff the second newly added column with a large value which
+        // spills onto the next page
+        ps = conn.prepareStatement( "update t_5679_2 set a_4 = ?" );
+        ps.setBytes( 1, a_4 );
+        ps.executeUpdate();
+        ps.close();
+
+
+        byte[]  after_0 = makeBytes( 100, LONG );
+        byte[]  after_1 = makeBytes( 101, LONG );
+        byte[]  after_2 = makeBytes( 102, LONG );
+        byte[]  after_3 = makeBytes( 103, SHORT );
+        byte[]  after_4 = makeBytes( 104, LONG );
+        
+        byte[][]    beforeRow = new byte[][] { a_0, a_1, a_2, null, a_4 };
+        byte[][]    afterRow = new byte[][] { after_0, after_1, after_2, after_3, after_4 };
+
+        vetBytes_5679( conn, beforeRow );
+
+        // now update the row and rollback. columns a_0 through a_3 should stay on
+        // the first page and a_4 should stay on the second page
+        conn.setAutoCommit( false );
+        ps = conn.prepareStatement( "update t_5679_2 set a_0 = ?, a_1 = ?, a_2 = ?, a_3 = ?, a_4 = ?" );
+        ps.setBytes( 1, after_0 );
+        ps.setBytes( 2, after_1 );
+        ps.setBytes( 3, after_2 );
+        ps.setBytes( 4, after_3 );
+        ps.setBytes( 5, after_4 );
+        ps.executeUpdate();
+        vetBytes_5679( conn, afterRow );
+        rollback();
+        conn.setAutoCommit( true );
+
+        // all columns of the row should have reverted
+        vetBytes_5679( conn, beforeRow );
+
+        conn.prepareStatement( "drop table t_5679_2" ).execute();
+    }
+    private byte[]  makeBytes( int seed, int length )
+    {
+        byte[]  result = new byte[ length ];
+
+        Arrays.fill( result, (byte) seed );
+
+        return result;
+    }
+    private void    vetBytes_5679( Connection conn, byte[][] expected ) throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select * from t_5679_2" );
+        ResultSet   rs = ps.executeQuery();
+
+        rs.next();
+
+        for ( int i = 0; i < expected.length; i++ )
+        {
+            assertBytes( expected[ i ] , rs.getBytes( i + 1 ) );
+        }
+
+        rs.close();
+        ps.close();
+    }
+    private void    assertBytes( byte[] expected, byte[] actual ) throws Exception
+    {
+        if ( expected == null )
+        {
+            assertNull( actual );
+            return;
+        }
+        else { assertNotNull( actual ); }
+
+        assertEquals( expected.length, actual.length );
+
+        for ( int i = 0; i < expected.length; i++ )
+        {
+            assertEquals( expected[ i ], actual[ i ] );
+        }
+    }
+    
 }
