@@ -140,6 +140,9 @@ public class PrivilegeNode extends QueryTreeNode
      */
 	public QueryTreeNode bind( HashMap dependencies, List grantees, boolean isGrant ) throws StandardException
 	{
+        // The below code handles the case where objectName.getSchemaName()
+        // returns null, in which case we'll fetch the schema descriptor for
+        // the current compilation schema (see getSchemaDescriptor).
         SchemaDescriptor sd = getSchemaDescriptor( objectName.getSchemaName(), true);
         objectName.setSchemaName( sd.getSchemaName() );
         
