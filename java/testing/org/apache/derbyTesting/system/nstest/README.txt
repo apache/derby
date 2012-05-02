@@ -118,6 +118,7 @@ EXPECTED ERRORS:
 The test expects and catches the following errors (so seeing them in derby.log is expected):
 - XBM06; see BackupRestoreReEncryptTester.java - trying to access restored db with old encryption pwd:
     ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.
+- 40XL1; there are time-outs expected on update and inserts. This is because of the high number of actions. Note that these are reported as a FAIL in the test output, but are likely ok.
 - XJ040; see BackupRestoreReEncryptTester.java - the sqlstate is not always available in derby.log, but
     you'll see the message:  
 java.sql.SQLException: Failed to start database 'restoredir\nstestdb' with class loader sun.misc.Launcher$AppClassLoader@40614061, see the next exception for details.
