@@ -72,9 +72,9 @@ import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 
-import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -979,10 +979,9 @@ public class DeleteNode extends DMLModStatementNode
 			needsDeferredProcessing[0] = true;
 			
 			boolean needToIncludeAllColumns = false;
-			Enumeration descs = relevantTriggers.elements();
-			while (descs.hasMoreElements())
-			{
-				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+            for (Iterator descIter = relevantTriggers.iterator();
+                    descIter.hasNext(); ) {
+                TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
 				//Does this trigger have REFERENCING clause defined on it.
 				//If yes, then read all the columns from the trigger table.
 				if (!trd.getReferencingNew() && !trd.getReferencingOld())

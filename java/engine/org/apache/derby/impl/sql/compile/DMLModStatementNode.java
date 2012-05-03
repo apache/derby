@@ -21,8 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.apache.derby.catalog.DefaultInfo;
@@ -1148,26 +1148,18 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	{
 		CompilerContext 			compilerContext = getCompilerContext();
 
-		Enumeration descs = tdl.elements();
-
-		while (descs.hasMoreElements())
-		{
-			TriggerDescriptor td = (TriggerDescriptor)descs.nextElement();
-
-			/*
-			** The dependent now depends on this trigger. 
-			** the default dependent is the statement 
-			** being compiled.
-			*/
-			if (dependent == null) 
-			{ 
-				compilerContext.createDependency(td); 
-			}
-			else 
-			{ 
-				compilerContext.createDependency(dependent, td); 
-			}
-		}
+        for (Iterator descIter = tdl.iterator(); descIter.hasNext() ; ) {
+            TriggerDescriptor td = (TriggerDescriptor)descIter.next();
+            /*
+            ** The dependent now depends on this trigger.
+            ** The default dependent is the statement being compiled.
+            */
+            if (dependent == null) {
+                compilerContext.createDependency(td);
+            } else {
+                compilerContext.createDependency(dependent, td);
+            }
+        }
 	}
 
 	/**

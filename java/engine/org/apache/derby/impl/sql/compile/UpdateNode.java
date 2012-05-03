@@ -66,8 +66,8 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
-import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -1101,10 +1101,9 @@ public final class UpdateNode extends DMLModStatementNode
 			// go back to the older release if that's what the user chooses
 			// after the soft-upgrade.
 			boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
-			Enumeration descs = relevantTriggers.elements();
-			while (descs.hasMoreElements())
-			{
-				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+            for (Iterator descIter = relevantTriggers.iterator();
+                    descIter.hasNext(); ) {
+                TriggerDescriptor trd = (TriggerDescriptor) descIter.next();
 				if (in10_9_orHigherVersion) {
 					// See if we can avoid reading all the columns from the
 					// trigger table.

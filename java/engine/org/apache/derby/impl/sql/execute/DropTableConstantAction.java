@@ -51,7 +51,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.catalog.UUID;
 
-import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  *	This class  describes actions that are ALWAYS performed for a
@@ -188,10 +188,8 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 
 		/* Drop the triggers */
 		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-		Enumeration descs = tdl.elements();
-		while (descs.hasMoreElements())
-		{
-			TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+        for (Iterator descIter = tdl.iterator(); descIter.hasNext(); ) {
+            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
             trd.drop(lcc);
 		}
 

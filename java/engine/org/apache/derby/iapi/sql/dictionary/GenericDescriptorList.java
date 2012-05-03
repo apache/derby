@@ -21,18 +21,6 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
@@ -85,9 +73,5 @@ public class GenericDescriptorList extends ArrayList
 			}
 		}
 		return null;
-	}
-
-	public java.util.Enumeration elements() {
-		return java.util.Collections.enumeration(this);
 	}
 }

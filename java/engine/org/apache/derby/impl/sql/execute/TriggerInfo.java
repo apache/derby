@@ -40,7 +40,7 @@ import org.apache.derby.catalog.UUID;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.Iterator;
 
 import java.util.Vector;
 
@@ -118,14 +118,14 @@ public final class TriggerInfo implements Formatable
 		/*
 		** Copy the trigger descriptors into an array of the right type
 		*/
-		Enumeration descs =  triggers.elements();
+        Iterator descIter = triggers.iterator();
 		
 		int size = triggers.size();
 		triggerArray = new TriggerDescriptor[size];
 
 		for (int i = 0; i < size; i++)
 		{
-			triggerArray[i] = (TriggerDescriptor) descs.nextElement();
+            triggerArray[i] = (TriggerDescriptor) descIter.next();
 		}
 	}
 

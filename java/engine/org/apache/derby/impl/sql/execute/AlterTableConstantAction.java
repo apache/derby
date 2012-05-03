@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -1374,10 +1373,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//being dropped is part of it's trigger columns or trigger action 
 		//columns which are used through REFERENCING clause
 		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-		Enumeration descs = tdl.elements();
-		while (descs.hasMoreElements())
-		{
-			TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+        for (Iterator descIter = tdl.iterator(); descIter.hasNext() ; ) {
+            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
 			//If we find that the trigger is dependent on the column being 
 			//dropped because column is part of trigger columns list, then
 			//we will give a warning or drop the trigger based on whether
@@ -2318,10 +2315,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		//truncate is not allowed when there are enabled DELETE triggers
 		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-		Enumeration descs = tdl.elements();
-		while (descs.hasMoreElements())
-		{
-			TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+        for (Iterator descIter = tdl.iterator(); descIter.hasNext(); ) {
+            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
 			if (trd.listensForEvent(TriggerDescriptor.TRIGGER_EVENT_DELETE) &&
 				trd.isEnabled())
 			{

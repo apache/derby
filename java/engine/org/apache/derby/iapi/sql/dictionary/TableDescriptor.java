@@ -687,17 +687,13 @@ public class TableDescriptor extends TupleDescriptor
 		}
 
 		DataDictionary				dd = getDataDictionary();
-		Enumeration descs = dd.getTriggerDescriptors(this).elements();
-
-		while (descs.hasMoreElements())
-		{
-			TriggerDescriptor tgr = (TriggerDescriptor)descs.nextElement();
-
-			if (tgr.needsToFire(statementType, changedColumnIds))
-			{
-				relevantTriggers.add(tgr);
-			}
-		}
+        for (Iterator descIter = dd.getTriggerDescriptors(this).iterator() ;
+                descIter.hasNext() ; ) {
+            TriggerDescriptor tgr = (TriggerDescriptor)descIter.next();
+            if (tgr.needsToFire(statementType, changedColumnIds)) {
+                relevantTriggers.add(tgr);
+            }
+        }
 	}
 
     /**
