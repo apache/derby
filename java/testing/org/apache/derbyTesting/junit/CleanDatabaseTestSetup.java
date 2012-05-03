@@ -109,11 +109,23 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         CleanDatabaseTestSetup.cleanDatabase(conn, true);  
         
         Statement s = conn.createStatement();
-        decorateSQL(s);
-
-        s.close();
-        conn.commit();
-        conn.close();
+        try {
+            decorateSQL(s);
+            s.close();
+            conn.commit();
+        } finally {
+            // Make sure we release any locks held by the connection at this
+            // point. Not doing so may cause subsequent tests to fail.
+            try {
+                clearConnection();
+            } catch (SQLException sqle) {
+                // Ignore, but print details in debug mode.
+                if (getTestConfiguration().isVerbose()) {
+                    println("clearing connection failed: " + sqle.getMessage());
+                    sqle.printStackTrace(System.err);
+                }
+            }
+        }
     }
     
     /**
