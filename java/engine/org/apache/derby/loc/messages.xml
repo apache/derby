@@ -4262,7 +4262,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCY05.S.3</name>
-                <text>Invalid setting of the derby.authentication.provider property. This property cannot be set to NATIVE::LOCAL unless credentials for the database owner have been stored in the database using the SYSCS_UTIL.SYSCS_CREATE_USER procedure.</text>
+                <text>Invalid setting of the derby.authentication.provider property. To enable NATIVE authentication, use the SYSCS_UTIL.SYSCS_CREATE_USER procedure to store credentials for the database owner.</text>
             </msg>
 
         </family>
