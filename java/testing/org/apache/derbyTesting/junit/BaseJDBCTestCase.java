@@ -1525,8 +1525,16 @@ public abstract class BaseJDBCTestCase
                 fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
                 attempts++;
             } catch (FileNotFoundException fnfe) {
-                fail("directory doesn't exist: " +
+                if (attempts == 0) {
+                    fail("directory doesn't exist: " +
                         PrivilegedFileOpsForTests.getAbsolutePath(dir));
+                } else {
+                    // In the previous iteration we saw remaining files, but
+                    // now the root directory is gone. Not what we expected...
+                    System.out.println("<assertDirectoryDeleted> root " +
+                            "directory unexpectedly gone - delayed, " +
+                            "external or concurrent delete?");
+                }
             }
             if (fl.length == 0) {
                 return;
