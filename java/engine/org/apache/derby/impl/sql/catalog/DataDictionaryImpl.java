@@ -1367,21 +1367,11 @@ public final class	DataDictionaryImpl
 		}
 	}
 
-	/*
-	** SYNCHRONIZATION: no synchronization
-	** necessary since integer reads/writes
-	** are atomic
-	*/
 	public int getCacheMode()
 	{
 		return cacheMode;
 	}
 
-	/*
-	** SYNCHRONIZATION: no synchronization
-	** necessary since integer reads/writes
-	** are atomic
-	*/
 	private void setCacheMode(int newMode)
 	{
 		cacheMode = newMode;
