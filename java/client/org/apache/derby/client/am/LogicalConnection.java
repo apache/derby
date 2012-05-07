@@ -24,17 +24,26 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
 
-
-// A simple delegation wrapper handle for a physical connection.
-// All methods are forwarded to the underlying physical connection except for close() and isClosed().
-// When a physical connection is wrapped, it is non-null, when the logical connection
-// is closed, the wrapped physical connection is always set to null.
-// Both the finalizer and close() methods will always set the physical connection to null.
-// After the physical conneciton is set to null,
-// only the Pooled Connection instance will maintain a handle to the physical connection.
-
+/**
+ * A simple delegation wrapper handle for a physical connection.
+ * <p>
+ * All methods of the {@code Connection} interface are forwarded to the
+ * underlying physical connection, except for {@link #close()} and
+ * {@link #isClosed()}. When a physical connection is wrapped, it is non-null,
+ * when the logical connection is closed, the wrapped physical connection is
+ * always set to {@code null}.
+ * Both the finalizer and the {@code close}-methods will always set the 
+ * physical connection to {@code null}. After the physical connection has been
+ * nulled out, only the {@code PooledConnection} instance will maintain a
+ * handle to the physical connection.
+ */
 public class LogicalConnection implements java.sql.Connection {
-    protected Connection physicalConnection_ = null; // reset to null when the logical connection is closed.
+    /**
+     * Underlying physical connection for this logical connection.
+     * <p>
+     * Set to {@code null} when this logical connection is closed.
+     */
+    Connection physicalConnection_;
     private org.apache.derby.client.ClientPooledConnection pooledConnection_ = null;
     /**
      * Logical database metadata object created on demand and then cached.
@@ -129,10 +138,17 @@ public class LogicalConnection implements java.sql.Connection {
 
     // --------------------------- helper methods --------------------------------
 
-    // this method doesn't wrap in the standard way, because it went out without a throws clause.
-    // Unlike all other LogicalConnection methods, if the physical connection is null, it won't throw an exception, but will return false.
-
-    protected void checkForNullPhysicalConnection() throws SQLException {
+    /**
+     * Verifies that there is an underlying physical connection for this
+     * logical connection.
+     * <p>
+     * If the physical connection has been nulled out it means that this
+     * logical connection has been closed.
+     *
+     * @throws SQLException if this logical connection has been closed
+     */
+    protected final void checkForNullPhysicalConnection()
+            throws SQLException {
         if (physicalConnection_ == null) {
             SqlException se = new SqlException(null, 
                 new ClientMessageId(SQLState.NO_CURRENT_CONNECTION));
@@ -141,14 +157,14 @@ public class LogicalConnection implements java.sql.Connection {
     }
 
     /**
-     * This method checks if the physcial connection underneath is null and
-     * if yes, then it simply returns.
-     * Otherwise, if the severity of exception is greater than equal to
-     * ExceptionSeverity.SESSION_SEVERITY, then we will send 
-     * connectionErrorOccurred event to all the registered listeners.
+     * Notifies listeners about exceptions of session level severity or higher.
+     * <p>
+     * The exception, even if the severity is sufficiently high, is ignored if
+     * the underlying physical connection has been nulled out. Otherwise a 
+     * {@code connectionErrorOccurred}-event is sent to all the registered
+     * listeners.
      * 
-     * @param sqle SQLException An event will be sent to the listeners if the
-     * exception's severity is >= ExceptionSeverity.SESSION_SEVERITY.
+     * @param sqle the cause of the notification
      */
 	final void notifyException(SQLException sqle) {
         if (physicalConnection_ != null) 
