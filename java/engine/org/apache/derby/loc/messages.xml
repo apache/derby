@@ -3826,8 +3826,9 @@ Guide.
 
             <msg>
                 <name>XBM0M.D</name>
-                <text>Error creating instance of authentication scheme class {0}.</text>
+                <text>Error creating an instance of a class named '{0}'. This class name was the value of the derby.authentication.provider property and was expected to be the name of an application-supplied implementation of org.apache.derby.authentication.UserAuthenticator. The underlying problem was: {1}</text>
                 <arg>className</arg>
+                <arg>detail</arg>
             </msg>
 
             <msg>

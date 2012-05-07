@@ -102,6 +102,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  TWELTH_DB = "twelthDB";
     private static  final   String  THIRTEENTH_DB = "thirteenthDB";
     private static  final   String  FOURTEENTH_DB = "fourteenthDB";
+    private static  final   String  FIFTEENTH_DB = "fifteenthDB";
 
     private static  final   String  NAST1_JAR_FILE = "nast1.jar";
     private static  final   String  NAST2_JAR_FILE = "nast2.jar";
@@ -135,6 +136,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  SQL_AUTHORIZATION_NOT_ON = "42Z60";
     private static  final   String  CANT_BOOT_DATABASE = "XJ040";
     private static  final   String  MISSING_USER = "XK001";
+    private static  final   String  BAD_USER_AUTHENTICATOR_CLASS = "XBM0M";
 
     private static  final   String      WEAK_AUTHENTICATION = "4251G";
     private static  final   String      HASHING_FORMAT_10_9 = "3b62";
@@ -160,6 +162,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private DatabaseChangeSetup _seventhDBSetup;
     private DatabaseChangeSetup _eighthDBSetup;
     private DatabaseChangeSetup _ninthDBSetup;
+    private DatabaseChangeSetup _fifteenthDBSetup;
 
     private String  _derbySystemHome;
     private String  _fullBackupDir;
@@ -562,6 +565,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TWELTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRTEENTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTEENTH_DB );
+        result = _fifteenthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FIFTEENTH_DB, true );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -1200,7 +1204,23 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // and from trying to view the credentials table
         expectExecutionError( pearConn, NO_COLUMN_PERMISSION, "select * from " + dbo + ".t" );
         expectCompilationError( pearConn, DBO_ONLY_OPERATION, "select username from sys.sysusers" );
+
+        // verify a sensible error if you try to set the authentication provider
+        // to the missing classname NATIVE. we only check this for the embedded
+        // case because the network scrunches exceptions together and we lose
+        // the structure which allows us to look for nested SQLStates.
+        if ( isEmbedded() )
+        {
+            Connection  fifteenthConn = openConnection( FIFTEENTH_DB, dbo, true, null );
         
+            goodStatement
+                ( fifteenthConn, "call syscs_util.syscs_set_database_property( 'derby.connection.requireAuthentication', 'true' )" );
+            goodStatement
+                ( fifteenthConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE' )" );
+            _fifteenthDBSetup.getTestConfiguration().shutdownDatabase();
+
+            getConnection( true, true, FIFTEENTH_DB, DBO, BAD_USER_AUTHENTICATOR_CLASS );
+        }
     }
     
     /**
@@ -1441,7 +1461,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         {
             if ( shouldFail && (t instanceof SQLException) )
             {
-                String          actualSQLState = ((SQLException) t).getSQLState();
+                SQLException se = (SQLException) t;
                 StringBuffer    buffer = new StringBuffer();
 
                 //  ok if the sqlstate is one of the expected ones
@@ -1449,9 +1469,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 {
                     String  expected = expectedSQLStates[ i ];
                     buffer.append( " " + expected );
-                    if ( expected.equals( actualSQLState ) ) { return null; }
+                    if ( vetSQLState( se, expected ) ) { return null; }
                 }
-                fail( tagError( "SQLState " + actualSQLState + " not in expected list: " + buffer.toString() ) );
+                fail( tagError( "SQLState not in expected list: " + buffer.toString() ) );
             }
             else
             {
@@ -1461,6 +1481,22 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         }
 
         return conn;
+    }
+    // look for a sql state in a SQLException and its chained exceptions. returns true if found
+    private boolean    vetSQLState( SQLException actual, String expectedSQLState )
+        throws Exception
+    {
+        if ( actual == null ) { return false; }
+
+        if ( expectedSQLState.equals( actual.getSQLState() ) ) { return true; }
+
+        Throwable   t = actual.getCause();
+        if ( t instanceof SQLException )
+        {
+            if ( vetSQLState( (SQLException) t, expectedSQLState ) ) { return true; }
+        }
+
+        return vetSQLState( actual.getNextException(), expectedSQLState );
     }
 
     // connect but expect a warning that the password is about to expire

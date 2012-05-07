@@ -138,7 +138,9 @@ public class SpecificAuthenticationServiceImpl
 		} catch (IllegalAccessException iae) {
 			t = iae;
 		}
-		throw StandardException.newException(SQLState.AUTHENTICATION_SCHEME_ERROR, t,
-					specificAuthenticationScheme);
+        
+        String  detail = t.getClass().getName() + ": " + t.getMessage();
+		throw StandardException.newException
+            ( SQLState.AUTHENTICATION_SCHEME_ERROR, specificAuthenticationScheme, detail );
 	}
 }

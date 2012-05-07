@@ -178,7 +178,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM0J","Directory {0} already exists.","45000"},
         		{"XBM0K","Unknown sub-protocol for database name {0}.","45000"},
         		{"XBM0L","Specified authentication scheme class {0} does implement the authentication interface {1}.","45000"},
-        		{"XBM0M","Error creating instance of authentication scheme class {0}.","45000"},
+        		{"XBM0M","Error creating an instance of a class named '{0}'. This class name was the value of the derby.authentication.provider property and was expected to be the name of an application-supplied implementation of org.apache.derby.authentication.UserAuthenticator. The underlying problem was: {1}","45000"},
         		{"XBM0N","JDBC Driver registration with java.sql.DriverManager failed. See next exception for details. ","45000"},
         		{"XBM0P","Service provider is read-only. Operation not permitted. ","45000"},
         		{"XBM0Q","File {0} not found. Please make sure that backup copy is the correct one and it is not corrupted.","45000"},
