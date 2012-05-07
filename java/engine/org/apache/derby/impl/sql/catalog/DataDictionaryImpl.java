@@ -181,10 +181,8 @@ import java.security.NoSuchAlgorithmException;
 
 import java.sql.Types;
 import java.util.Map;
-import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.impl.sql.execute.JarUtil;
-import org.apache.derby.io.StorageFile;
 
 /**
  * Standard database implementation of the data dictionary
@@ -2503,9 +2501,6 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		ConglomerateController	heapCC = null;
-		ExecIndexRow	  		indexRow1;
-		ExecIndexRow			indexTemplateRow;
-		ExecRow 				outRow;
 		ScanController			scanController = null;
 		boolean					foundRow;
 		FormatableBitSet					colToCheck = new FormatableBitSet(indexCol);
@@ -2527,8 +2522,6 @@ public final class	DataDictionaryImpl
 				 false,
 				 false,
 				 false);
-
-		outRow = rf.makeEmptyRow();
 
 		try
 		{
@@ -2584,7 +2577,6 @@ public final class	DataDictionaryImpl
 									TransactionController tc)
 		throws StandardException
 	{
-		ConglomerateController	heapCC;
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
@@ -2618,7 +2610,6 @@ public final class	DataDictionaryImpl
 									  char lockGranularity, TransactionController tc)
 		throws StandardException
 	{
-		ConglomerateController	heapCC;
 		ExecIndexRow			keyRow1 = null;
 		ExecRow    				row;
 		DataValueDescriptor		schemaIDOrderable;
@@ -4027,7 +4018,6 @@ public final class	DataDictionaryImpl
 	public void	dropFileInfoDescriptor(FileInfoDescriptor fid)
 						throws StandardException
 	{
-		ConglomerateController	heapCC;
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		idOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
@@ -5581,7 +5571,6 @@ public final class	DataDictionaryImpl
 		ExecIndexRow				keyRow1 = null;
 		ExecRow    					row;
 		DataValueDescriptor			IDOrderable;
-		DataValueDescriptor			columnNameOrderable;
 		TabInfoImpl						ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 		SYSTRIGGERSRowFactory  		rf = (SYSTRIGGERSRowFactory) ti.getCatalogRowFactory();
 
@@ -5986,7 +5975,6 @@ public final class	DataDictionaryImpl
 		ConglomerateController	heapCC;
 		ConstraintDescriptor	cd = null;
 		ExecIndexRow	  		indexRow1;
-		ExecIndexRow			indexTemplateRow;
 		ExecRow 				outRow;
 		RowLocation				baseRowLocation;
 		ScanController			scanController;
@@ -6125,9 +6113,7 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		SYSCONSTRAINTSRowFactory rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
-		ConglomerateController	heapCC;
 		ExecRow 				outRow;
-		ExecRow 				templateRow;
 		ScanController			scanController;
 		TransactionController	tc;
 		ConstraintDescriptor	cd = null;
@@ -6275,7 +6261,6 @@ public final class	DataDictionaryImpl
 		SubKeyConstraintDescriptor cd;
 		TableDescriptor td;
 		ConstraintDescriptorList cdl = new ConstraintDescriptorList();
-		ConstraintDescriptorList tmpCdl;
 
 		for (Iterator iterator = fkList.iterator(); iterator.hasNext(); )
 		{
@@ -6304,7 +6289,6 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		ExecIndexRow	  		indexRow1;
-		ExecIndexRow			indexTemplateRow;
 		ExecRow 				outRow;
 		RowLocation				baseRowLocation;
 		ConglomerateController	heapCC = null;
@@ -6423,11 +6407,7 @@ public final class	DataDictionaryImpl
 			TransactionController tc)
 		throws StandardException
 	{
-		ExecRow        			row = null;
 		int						type = descriptor.getConstraintType();
-		TabInfoImpl					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
-		SYSCONSTRAINTSRowFactory  rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
-		int						insertRetCode;
 
 		if (SanityManager.DEBUG)
 		{
@@ -6502,7 +6482,6 @@ public final class	DataDictionaryImpl
 		ExecIndexRow				keyRow1 = null;
 		ExecRow    					row;
 		DataValueDescriptor			IDOrderable;
-		DataValueDescriptor			columnNameOrderable;
 		TabInfoImpl						ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 		SYSCONSTRAINTSRowFactory  	rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
 
@@ -6861,7 +6840,6 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor			constraintIDOrderable = null;
 		TabInfoImpl						ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
-		SYSCHECKSRowFactory			rf = (SYSCHECKSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use constraintIDOrderable in both start and stop positions for scan */
 		constraintIDOrderable = getIDValueAsCHAR(constraintId);
@@ -6928,7 +6906,6 @@ public final class	DataDictionaryImpl
 		ConglomerateDescriptor	  cd = null;
 		ScanController			  scanController;
 		ExecRow 				  outRow;
-		// ExecIndexRow			  keyRow = null;
 		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
 
@@ -7060,7 +7037,6 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor		UUIDStringOrderable;
-		SYSCONGLOMERATESRowFactory rf;
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
@@ -7127,9 +7103,6 @@ public final class	DataDictionaryImpl
   									long conglomerateNumber)
   									throws StandardException
   	{
-  		ScanController			  scanController;
-  		TransactionController	  tc;
-  		ExecRow 				  outRow;
   		DataValueDescriptor		  conglomNumberOrderable = null;
   		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
   		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
@@ -7712,10 +7685,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor		UUIDStringOrderable;
-		SYSALIASESRowFactory	rf;
 		TabInfoImpl					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
-
-		rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
 		UUIDStringOrderable = getIDValueAsCHAR(uuid);
@@ -7753,7 +7723,6 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		  aliasNameOrderable;
 		DataValueDescriptor		  nameSpaceOrderable;
 		TabInfoImpl					  ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
-		SYSALIASESRowFactory	  rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use aliasNameOrderable and aliasTypeOrderable in both start 
 		 * and stop position for scan. 
@@ -8482,7 +8451,6 @@ public final class	DataDictionaryImpl
 	{
 		int					columnID;
 		SystemColumn		currentColumn;
-		ColumnDescriptor	cd;
 
 		SystemColumn[]		columns = rowFactory.buildColumnList();
 		ExecRow				templateRow = rowFactory.makeEmptyRow();
@@ -8655,7 +8623,6 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		ConglomerateController	heapCC;
-		ExecIndexRow	  		indexRow1;
 		ExecRow					row;
 		DataValueDescriptor	    schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
@@ -9049,7 +9016,6 @@ public final class	DataDictionaryImpl
 	{
 		int					numCols = ti.getIndexColumnCount(indexNumber);
 		int[]				baseColumnPositions = new int[numCols];
-		CatalogRowFactory	rf = ti.getCatalogRowFactory();
 
 		for (int colCtr = 0; colCtr < numCols; colCtr++)
 		{
@@ -9154,7 +9120,6 @@ public final class	DataDictionaryImpl
 		String				heapName = crf.getCanonicalHeapName();
 		TableDescriptor		td;
 		UUID				toid;
-		ColumnDescriptor	cd;
 		int					columnCount;
 		SystemColumn		column;
 
@@ -9750,7 +9715,6 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
-		ConglomerateController	heapCC;
 		ExecRow 				outRow;
 		ScanController			scanController;
 		TransactionController	tc;
@@ -10306,7 +10270,6 @@ public final class	DataDictionaryImpl
 					 bArray, 
 					 colsToUpdate,
 					 tc);
-		return;
 	}
 
 	/**
@@ -10326,7 +10289,6 @@ public final class	DataDictionaryImpl
 	{
 		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 		ExecIndexRow keyRow = null;
-		ExecRow row;
 		UUID tableUUID = td.getUUID();
 
 		keyRow = (ExecIndexRow)exFactory.getIndexableRow(2);
@@ -10889,7 +10851,6 @@ public final class	DataDictionaryImpl
 		** SYSCS_UTIL routines.
 		*/
 
-		UUID routine_uuid = null;
         // used to put procedure into the SYSCS_UTIL schema
 		UUID sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
 
@@ -10938,7 +10899,7 @@ public final class	DataDictionaryImpl
 
             };
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_COMPRESS_TABLE",
                 sysUtilUUID,
                 arg_names,
@@ -11082,7 +11043,7 @@ public final class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types = {TypeDescriptor.SMALLINT};
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_SET_RUNTIMESTATISTICS",
                 sysUtilUUID,
                 arg_names,
@@ -11104,7 +11065,7 @@ public final class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types = {TypeDescriptor.SMALLINT};
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_SET_STATISTICS_TIMING",
                 sysUtilUUID,
                 arg_names,
@@ -11178,7 +11139,7 @@ public final class	DataDictionaryImpl
         // CLOB SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
         {
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_GET_RUNTIMESTATISTICS",
                 sysUtilUUID,
                 null,
@@ -12110,8 +12071,6 @@ public final class	DataDictionaryImpl
     UUID                    sysUtilUUID)
 		throws StandardException
     { 
-		UUID routine_uuid = null;
-
         // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
         //     IN SCHEMANAME        VARCHAR(128), 
         //     IN TABLENAME         VARCHAR(128),
@@ -12137,7 +12096,7 @@ public final class	DataDictionaryImpl
                 TypeDescriptor.SMALLINT
             };
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_INPLACE_COMPRESS_TABLE",
                 sysUtilUUID,
                 arg_names,
@@ -12317,12 +12276,11 @@ public final class	DataDictionaryImpl
         //create 10.3 functions used by LOB methods.
         UUID schema_uuid = getSysIBMSchemaDescriptor().getUUID();
         {
-            UUID routine_uuid = null;
             String[] arg_names = null;
 
             TypeDescriptor[] arg_types = null;
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBCREATELOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12337,12 +12295,11 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
             TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBRELEASELOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12357,7 +12314,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","SEARCHSTR","POS"};
 
             // procedure argument types
@@ -12368,7 +12324,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBGETPOSITIONFROMSTRING",
                 schema_uuid,
                 arg_names,
@@ -12384,7 +12340,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","SEARCHLOCATOR","POS"};
 
             // procedure argument types
@@ -12394,7 +12349,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBGETPOSITIONFROMLOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12410,12 +12365,11 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
             // procedure argument types
             TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBGETLENGTH",
                 schema_uuid,
                 arg_names,
@@ -12431,7 +12385,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","POS","LEN"};
 
             // procedure argument types
@@ -12441,7 +12394,7 @@ public final class	DataDictionaryImpl
                     Types.BIGINT),
                     TypeDescriptor.INTEGER
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBGETSUBSTRING",
                 schema_uuid,
                 arg_names,
@@ -12458,7 +12411,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","POS","LEN","REPLACESTR"};
 
             // procedure argument types
@@ -12470,7 +12422,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBSETSTRING",
                 schema_uuid,
                 arg_names,
@@ -12485,7 +12437,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","LEN"};
 
             // procedure argument types
@@ -12494,7 +12445,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "CLOBTRUNCATE",
                 schema_uuid,
                 arg_names,
@@ -12511,12 +12462,11 @@ public final class	DataDictionaryImpl
 
         //Now create the Stored procedures required for BLOB
         {
-            UUID routine_uuid = null;
             String[] arg_names = null;
 
             TypeDescriptor[] arg_types = null;
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBCREATELOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12531,12 +12481,11 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
             TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
 
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBRELEASELOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12551,7 +12500,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","SEARCHBYTES","POS"};
 
             // procedure argument types
@@ -12562,7 +12510,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBGETPOSITIONFROMBYTES",
                 schema_uuid,
                 arg_names,
@@ -12578,7 +12526,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","SEARCHLOCATOR","POS"};
 
             // procedure argument types
@@ -12588,7 +12535,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBGETPOSITIONFROMLOCATOR",
                 schema_uuid,
                 arg_names,
@@ -12604,14 +12551,13 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
                     TypeDescriptor.INTEGER
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBGETLENGTH",
                 schema_uuid,
                 arg_names,
@@ -12627,7 +12573,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","POS","LEN"};
 
             // procedure argument types
@@ -12637,7 +12582,7 @@ public final class	DataDictionaryImpl
                     Types.BIGINT),
                     TypeDescriptor.INTEGER
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBGETBYTES",
                 schema_uuid,
                 arg_names,
@@ -12654,7 +12599,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","POS","LEN","REPLACEBYTES"};
 
             // procedure argument types
@@ -12666,7 +12610,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBSETBYTES",
                 schema_uuid,
                 arg_names,
@@ -12681,7 +12625,6 @@ public final class	DataDictionaryImpl
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
         {
-            UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR","LEN"};
 
             // procedure argument types
@@ -12690,7 +12633,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
-            routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "BLOBTRUNCATE",
                 schema_uuid,
                 arg_names,
@@ -12732,7 +12675,7 @@ public final class	DataDictionaryImpl
 
             };
 
-            UUID routine_uuid = createSystemProcedureOrFunction(
+            createSystemProcedureOrFunction(
                 "SYSCS_UPDATE_STATISTICS",
                 sysUtilUUID,
                 arg_names,
