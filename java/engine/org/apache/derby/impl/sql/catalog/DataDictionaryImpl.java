@@ -10160,10 +10160,6 @@ public final class	DataDictionaryImpl
 	  */
 	public String getSystemSQLName()
 	{
-		//note that we are using Date class to change the Calendar object time rather than Calendar.setTimeInMills.
-		//This is because of java bug 4243802. setTimeInMillis and getTimeInMillis were protected prior to jdk14
-		//But since we still support jdk13, we can't rely on these methods being public starting jdk14.
-		//Because of that, we are using Date to do all the time manipulations on the Calendar object 
 		StringBuffer generatedSystemSQLName = new StringBuffer("SQL");
 			synchronized (this) {
 				//get the current timestamp
