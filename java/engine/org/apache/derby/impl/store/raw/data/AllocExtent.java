@@ -207,7 +207,6 @@ public class AllocExtent implements Externalizable
 							"length " + length + " > maxlength " + maxlength);
 		}
 
-
 		this.extentOffset = offset;
 		this.extentStart = start;
 		this.extentEnd = start+maxlength-1;
@@ -575,7 +574,7 @@ public class AllocExtent implements Externalizable
             }
         }
 
-        if (new_highest_page >= 0)
+        if (new_highest_page + 1 >= 0)
         {
             freePages.shrink(new_highest_page + 1);
             unFilledPages.shrink(new_highest_page + 1);

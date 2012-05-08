@@ -81,6 +81,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(OCRecoveryTest.suite());
         suite.addTest(TableLockBasicTest.suite());
         suite.addTest(ServicePropertiesFileTest.suite());
+        suite.addTest(Derby5234Test.suite());
 
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {
