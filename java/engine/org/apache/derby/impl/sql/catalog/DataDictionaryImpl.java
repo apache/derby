@@ -287,7 +287,7 @@ public final class	DataDictionaryImpl
 	 * Runtime definition of the functions from SYSFUN_FUNCTIONS.
 	 * Populated dynamically as functions are called.
 	 */
-	private static final AliasDescriptor[] SYSFUN_AD =
+	private final AliasDescriptor[] sysfunDescriptors =
 		new AliasDescriptor[SYSFUN_FUNCTIONS.length];
 
 	// the structure that holds all the core table info
@@ -7773,7 +7773,7 @@ public final class	DataDictionaryImpl
 				if (!name.equals(routineName))
 					continue;
 				
-				AliasDescriptor ad = DataDictionaryImpl.SYSFUN_AD[f];
+				AliasDescriptor ad = sysfunDescriptors[f];
 				if (ad == null)
 				{
 					// details[1] Return type
@@ -7810,7 +7810,7 @@ public final class	DataDictionaryImpl
 							AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR,
 							true, ai, null);
 
-					DataDictionaryImpl.SYSFUN_AD[f] = ad;
+					sysfunDescriptors[f] = ad;
 				}
 				list.add(ad);
 			}
