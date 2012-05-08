@@ -206,6 +206,10 @@ public abstract class GenericTriggerExecutor
 				** trigger executor needs to ensure that the current active SC 
 				** is associated with the SPS, so that it is cleaning up the 
 				** right statement context in LCC. 
+                **
+                ** It is also possible that the error has already been handled
+                ** on a lower level, especially if the trigger re-enters the
+                ** JDBC layer. In that case, the current SC will be null.
 				**    
 				** When the active SC is cleaned up, the TEC will be removed
 				** from LCC and the SC object will be popped off from the LCC 
@@ -216,7 +220,7 @@ public abstract class GenericTriggerExecutor
 				StatementContext sc = lcc.getStatementContext();
 				
 				/* make sure that the cleanup is on the new SC */
-				if (active_sc != sc) 
+				if (sc != null && active_sc != sc)
 				{
 					sc.cleanupOnError(e);
 				}
