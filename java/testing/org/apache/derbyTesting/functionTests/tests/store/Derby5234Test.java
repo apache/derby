@@ -43,6 +43,9 @@ public class Derby5234Test extends BaseJDBCTestCase
     // this number of rows will force Derby to grab a second allocation page for the table
     private static  final   long    ITERATIONS = 12500;
 
+    // highest row count which does NOT trip the bug
+    private static  final   long    MAX_KEY_PER_FIRST_EXTENT = 10217L;
+
     private static  final   int     VARCHAR_LENGTH = 2000;
     private static  final   String  SEED = "0123456789";
 
@@ -75,6 +78,28 @@ public class Derby5234Test extends BaseJDBCTestCase
         return TestConfiguration.defaultSuite( Derby5234Test.class );
     }
 
+    // do this for each test case
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+        
+        goodStatement
+            (
+             getConnection(),
+             "create table t5234( a bigint, b varchar( " + VARCHAR_LENGTH + " ) )"
+             );
+    }
+    protected void tearDown() throws Exception
+    {
+        goodStatement
+            (
+             getConnection(),
+             "drop table t5234"
+             );
+        
+        super.tearDown();
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // TESTS
@@ -89,30 +114,28 @@ public class Derby5234Test extends BaseJDBCTestCase
      */
     public void test_01_basic() throws Exception
     {
+        vetBasic( ITERATIONS );
+    }
+    private void vetBasic( long rowCount ) throws Exception
+    {
         Connection  conn = getConnection();
-
-        goodStatement
-            (
-             conn,
-             "create table t5234( a bigint, b varchar( " + VARCHAR_LENGTH + " ) )"
-             );
 
         // this makes the test run faster
         boolean oldAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit( false );
 
-        insertRows( conn );
+        insertRows( conn, rowCount );
         deleteRows( conn );
         compressTable( conn );
 
         // the bug would cause the second round of insertions to write
         // beyond the end of the file
-        insertRows( conn );
+        insertRows( conn, rowCount );
         
         conn.setAutoCommit( oldAutoCommit );
     }
     /** Fill the table with enough rows to force Derby to grab a second allocation page */
-    private void    insertRows( Connection conn )
+    private void    insertRows( Connection conn, long iterations )
         throws Exception
     {
         PreparedStatement insert = chattyPrepare
@@ -123,9 +146,9 @@ public class Derby5234Test extends BaseJDBCTestCase
         String          varcharValue = makeVarcharValue();
 
         long    percent = 0L;
-        for ( long i = 0; i < ITERATIONS; i++)
+        for ( long i = 0; i < iterations; i++)
         {
-            if ( (i * 10) / ITERATIONS  > percent)
+            if ( (i * 10) / iterations  > percent)
             {
                 conn.commit();
                 percent++;
@@ -170,6 +193,26 @@ public class Derby5234Test extends BaseJDBCTestCase
         conn.commit();
     }
 
+    /**
+     * <p>
+     * Test with the highest row count which did NOT trip the bug.
+     * </p>
+     */
+    public void test_02_maxOK() throws Exception
+    {
+        vetBasic( MAX_KEY_PER_FIRST_EXTENT );
+    }
+    
+    /**
+     * <p>
+     * Test with one more than the highest good value.
+     * </p>
+     */
+    public void test_03_triggeringEdge() throws Exception
+    {
+        vetBasic( MAX_KEY_PER_FIRST_EXTENT + 1L );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // HELPER METHODS
