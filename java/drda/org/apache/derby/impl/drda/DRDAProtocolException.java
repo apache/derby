@@ -101,6 +101,7 @@ class DRDAProtocolException extends Exception
 	protected static String DRDA_Disconnect=	   "DRDA_Disconnect";
 	protected static String DRDA_AgentError=	   "DRDA_AgentError";
     protected static String DRDA_Timeout=          "DRDA_Timeout";
+    protected static String DRDA_InvalidClient =   "DRDA_InvalidClient";
 
 	static {
 	/* Create the errorInfoTable

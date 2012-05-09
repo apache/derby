@@ -35,8 +35,7 @@ class AppRequester
 	protected static final int MGR_LEVEL_UNKNOWN = -1;
 
 	protected static final int UNKNOWN_CLIENT = 0;
-	protected static final int JCC_CLIENT = 1;
-	protected static final int CCC_CLIENT = 2;		// not yet supported.
+
 	protected static final int DNC_CLIENT = 3;		// derby net client 
 
 	private static final int [] MIN_MGR_LEVELS = {
@@ -108,17 +107,11 @@ class AppRequester
 		versionLevel = Integer.parseInt(prdid.substring (3, 5));
 		releaseLevel = Integer.parseInt(prdid.substring (5, 7));
 		modifyLevel = Integer.parseInt(prdid.substring (7, 8));
-		if (srvrlslv == null)
-		{ clientType = UNKNOWN_CLIENT; }
-		else if (srvrlslv.indexOf("JCC") != -1)
-		{ clientType = JCC_CLIENT; }
-		else if
-			(
-			    (srvrlslv.indexOf(DRDAConstants.DERBY_DRDA_CLIENT_ID) != -1)
-			)
-		{ clientType = DNC_CLIENT; }
-		else
-		{ clientType = UNKNOWN_CLIENT; }
+        if ((prdid.indexOf(DRDAConstants.DERBY_DRDA_CLIENT_ID) != -1)) {
+            clientType = DNC_CLIENT;
+        } else {
+            clientType = UNKNOWN_CLIENT;
+        }
 	}
 
 	/**
@@ -258,20 +251,7 @@ class AppRequester
 	 */
 
 	protected int supportedMessageParamLength() {
-
-		switch (clientType) {
-
-			case JCC_CLIENT:
-			case DNC_CLIENT:
-				return Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
-			default:
-			// Default is the max for C clients, since that is more
-			// restricted than for JCC clients.  Note, though, that
-			// JCC clients are the only ones supported right now.
-				return Limits.DB2_CCC_MAX_EXCEPTION_PARAM_LENGTH;
-
-		}
-
+        return Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH;
 	}
 
 	/**

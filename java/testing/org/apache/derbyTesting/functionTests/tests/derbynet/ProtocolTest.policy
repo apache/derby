@@ -29,3 +29,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
 };
+
+// Give write permission for trace files if debugging with 
+// derby.drda.traceAll=true
+grant codeBase "${derbyTesting.codejar}derbynet.jar" {
+  permission java.io.FilePermission "${user.dir}${/}system${/}-", "read,write";
+};

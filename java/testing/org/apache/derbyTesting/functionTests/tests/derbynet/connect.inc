@@ -30,7 +30,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC10090"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -41,3 +41,4 @@ endDss
 flush
 skipDss // don't care about SECCHKRM so just skip
 skipDss // don't care about ACCRDBRM so just skip
+skipDss // Don't care about SQLDIAGGRP (sent with 10.2 and later) so just skip

@@ -47,8 +47,7 @@ public interface Limits
 	/* Maximum number of columns in an order by list */
 	public static final int DB2_MAX_ELEMENTS_IN_ORDER_BY = 1012;
 
-	// Max length for an exception parameter string over CCC server.
-	public static final int DB2_CCC_MAX_EXCEPTION_PARAM_LENGTH = 70;
+
 
 	// Warning. Changing this value will affect upgrade and the creation of the
 	// SQLCAMESSAGE procedure. See org.apache.derby.impl.sql.catalog.

@@ -431,7 +431,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDSBC 1208
@@ -513,7 +513,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 endDdm
 endDss
 flush
@@ -527,7 +527,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM  QTDSQLASC
 endDdm
 endDss
@@ -542,7 +542,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM UNKNOWN
 startDdm TYPDEFOVR
 endDdm
@@ -559,7 +559,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLASC
 startDdm TYPDEFOVR
 writeScalar2Bytes MGRLVLLS 2
@@ -577,7 +577,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDSBC
@@ -597,7 +597,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDSBC
@@ -619,7 +619,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDMBC
@@ -639,7 +639,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDMBC
@@ -661,7 +661,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDDBC
@@ -681,7 +681,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 startDdm CCSIDDBC
@@ -703,7 +703,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDSBC 5
@@ -721,7 +721,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDMBC 5
@@ -742,7 +742,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDDBC 5
@@ -763,7 +763,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDSBC 1208
@@ -826,7 +826,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDSBC 1208
@@ -852,7 +852,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM QTDSQLJVM
 startDdm TYPDEFOVR
 writeScalar2Bytes  CCSIDSBC 1208
@@ -870,7 +870,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000toobig"
+writeScalarString PRDID "DNC01000toobig"
 endDdm
 endDss
 flush
@@ -884,7 +884,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000toobig"
+writeScalarString PRDID "DNC01000toobig"
 writeScalarString TYPDEFNAM "testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
 endDdm
 endDss
@@ -899,7 +899,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000toobig"
+writeScalarString PRDID "DNC01000toobig"
 writeScalarString TYPDEFNAM "THISISNOTRIGHT"
 endDdm
 endDss
@@ -914,7 +914,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -933,7 +933,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -952,7 +952,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -972,7 +972,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -992,7 +992,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -1038,6 +1038,7 @@ endTest
 //
 //
 DISPLAY "Test for bad RDBNAM in PKGNAMCSN"
+// Requires newer client to test  DERBY-1434 fix
 include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
@@ -1076,7 +1077,8 @@ writeShort 8
 writePaddedString "rdbcolid" 8
 writeShort 5
 writePaddedString "pkgid"  5
-writeBytes "0x0101010101010101"
+//DERBY-5565 Need to make sure PRDID starts with DNC (hex)
+writeBytes "0x444E430101010101"
 writeShort 1
 endDdm
 endDdm
@@ -3316,7 +3318,7 @@ startDdm PKGNAMCSN
 writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
-writeBytes "0x0101010101010101"
+writeBytes "0x444E430101010101"
 writeShort 1
 endDdm
 endDdm
@@ -3566,7 +3568,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -3615,7 +3617,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208
@@ -3662,7 +3664,7 @@ createDssRequest
 startDdm ACCRDB
 writeScalar2Bytes RDBACCCL SQLAM
 writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
-writeScalarString PRDID "TST01000"
+writeScalarString PRDID "DNC01000"
 writeScalarString TYPDEFNAM "QTDSQLASC"
 startDdm TYPDEFOVR
 writeScalar2Bytes CCSIDSBC	1208

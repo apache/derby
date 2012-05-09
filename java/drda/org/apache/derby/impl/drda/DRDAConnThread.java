@@ -3424,16 +3424,12 @@ class DRDAConnThread extends Thread {
 						trace("prdId " + appRequester.prdid);
 					if (appRequester.prdid.length() > CodePoint.PRDID_MAX)
 						tooBig(CodePoint.PRDID);
-
-					/* If JCC version is 1.5 or later, send SQLWarning on CNTQRY */
-					if (((appRequester.getClientType() == appRequester.JCC_CLIENT) &&
-						(appRequester.greaterThanOrEqualTo(1, 5, 0))) ||
-					   (appRequester.getClientType() == appRequester.DNC_CLIENT))
-					{
-						sendWarningsOnCNTQRY = true;
-					}
-					else sendWarningsOnCNTQRY = false;
-
+                    if (appRequester.getClientType() != appRequester.DNC_CLIENT) {
+                        invalidClient(appRequester.prdid);
+                    }
+                    // All versions of DNC,the only client supported, handle
+                    // warnings on CNTQRY
+                    sendWarningsOnCNTQRY = true;
 					// The client can not request DIAGLVL because when run with
 					// an older server it will cause an exception. Older version
 					// of the server do not recognize requests for DIAGLVL.
@@ -5511,11 +5507,9 @@ class DRDAConnThread extends Thread {
             // if multiple connections to different databases
             // are created
                         
-            // This check was added because of DERBY-1434
-                        
+            // This check was added because of DERBY-1434  
             // check the client version first
-            if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
-                 || appRequester.greaterThanOrEqualTo(10,3,0) ) {
+            if (appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
                 if (!rdbnam.toString().equals(database.getDatabaseName()))
                     rdbnamMismatch(CodePoint.PKGNAMCSN);
@@ -8249,6 +8243,34 @@ class DRDAConnThread extends Thread {
 	{
 		throwSyntaxrm(CodePoint.SYNERRCD_TOO_BIG, codePoint);
 	}
+     
+	
+    /**
+     * Invalid non-derby client tried to connect.
+     * thrown a required Value not found error and log a message to derby.log
+     * 
+     * @param prdid product id that does not match DNC 
+     * @throws DRDAProtocolException
+     */
+    private void invalidClient(String prdid) throws DRDAProtocolException {
+        Monitor.logMessage(new Date()
+                + " : "
+                + server.localizeMessage("DRDA_InvalidClient.S",
+                        new String[] { prdid }));
+        requiredValueNotFound(CodePoint.PRDID);
+
+    }
+    
+    /*** Required value not found.
+     * 
+     * @param codePoint code point with invalid value
+     * 
+     */
+    private void requiredValueNotFound(int codePoint) throws DRDAProtocolException {
+        throwSyntaxrm(CodePoint.SYNERRCD_REQ_VAL_NOT_FOUND, codePoint);
+    }
+    
+	
 	/**
 	 * Object length not allowed
 	 *
