@@ -1,11 +1,10 @@
 GENERATING MAVEN 2 ARTIFACTS FOR APACHE DERBY
 =============================================
 
-The POMs in the maven2 directory enable you to generate Maven 2 artifacts
+The POMs in the 'maven2' directory enable you to generate Maven 2 artifacts
 for Apache Derby. The following software is required for deploying a release:
- 1. Maven 2
+ 1. Maven 2/3
  2. GnuPG (for signing the artifacts)
- 3. ssh/scp (for site deployment)
 
 Note that Maven 2 will pull down quite a few required plugins the first time
 you run it. They will be cached locally, so they are not downloaded again the
@@ -14,23 +13,16 @@ next time.
 All commands below are to be executed from the directory 'maven2' within the
 Derby source code repository.
 
-WARNING: The Maven repository is write-once. This means that you have only one
-         chance to deploy artifacts with a given version string. Once they are
-         deployed, you cannot overwrite them. The only way to deprecate a set
-         of deployed artifacts is to deploy a new set of artifacts with a
-         different version string.
+Overview of the required steps:
+ a) Generate the Derby jar files.
+ b) Specify required information
+ c) 'mvn clean install'
+ d) 'mvn deploy' or 'mvn clean deploy'
+ e) Close the staging repository in Nexus.
+ f) Release the artifacts in Nexus after a successful vote.
+ g) Verify that the artifacts appear in the central Maven repository.
 
-WARNING: The Apache server has been configured to ban IP addresses if too many
-         unsuccessful login attempts are made within a short time period. For
-         this reason it is important that you test the SSH configuration before
-         you run the Maven deploy step. The current Maven setup requires that
-         issuing "ssh people.apache.org" logs you into the server without
-         prompting for a password. See instructions below.
-         If your IP gets banned, send a message to infrastructure at apache dot
-         org. Include your IP address in the mail.
-
-Short description of the required steps:
-
+Description of the required steps:
  a) Generate the Derby jar files.
     For releases, generate the insane jars. You can override which jars to use
     with the property 'sanity' in the top-level POM.
@@ -48,11 +40,11 @@ Short description of the required steps:
            file into 'jars/insane'.
         7) follow the remaining instructions for generating Maven artifacts
 
- b) Specify required information for one or all of the following sub-steps.
+ b) Specify required information.
     To successfully generate and deploy release artifacts, all of these
     must be specified:
 
-      - The Derby release version.
+      o The Derby release version.
         The version must be specified in all POMs. Compile and execute the
         Java program SetDerbyVersion, found in the 'maven2' directory, i.e.:
             javac SetDerbyVersion && java -cp . SetDerbyVersion
@@ -62,29 +54,17 @@ Short description of the required steps:
         Make sure you diff the POMs to verify the changes.
         Note that the Java program performs some extra sanity checks.
 
-      - Passphrase for your GPG signing key.
+      o Passphrase for your GPG signing key.
         Required for step (c) and (d). See the top-level POM for details, brief
         instructions in (c).
 
-      - User credentials for deployment.
-        Required for step (d).  Several options for how to configure Maven seem
-        to exist, but only one of them has been reported to work for most
-        scenarios. If your system doesn't have executables called 'ssh' and
-        'scp', then please figure out how to successfully specify alternative
-        executables...
-
-        The local username will be used when accessing the Apache server using
-        the external SSH commands. If your local username isn't the same as
-        your Apache username, you must configure SSH to use the correct
-        username. On Unix systems, this is done by adding the following to
-        '~/.ssh/config' (the host name pattern must match the host specified
-        under the repository tag in the top-level POM):
-
-        Host people.apache.org
-            User your_apache_username
-
-        Again, configuring Maven to use a different username should be
-        possible, but attempts to do so have failed so far.
+      o User credentials for deployment/upload.
+        Required for step (d), usually you do this only once. If you change
+        your password or start using a different machine, you'll have to do it
+        again. You should encrypt your password(s), and to do that you have to
+        edit/create two files in USER_HOME/.m2 (i.e. ~/.m2 on *nix systems).
+        See http://maven.apache.org/guides/mini/guide-encryption.html
+        for how to do this the right way.
 
  c) 'mvn clean install'
     Generates the artifacts, uses GnuPG to generate signatures for the
@@ -115,50 +95,49 @@ Short description of the required steps:
 
  d) 'mvn deploy' or 'mvn clean deploy'
     Deploys the artifacts, including signatures and checksum files, to the
-    Apache Maven 2 repository. The files will then be distributed to
-    mirrors. Remember that you will need to specify your gpg
-    passphrase here too.
+    temporary Apache staging repository managed by Nexus.
+    Remember that you will need to specify your gpg passphrase here too.
 
     For instance:
 
         mvn -Dgpg.passphrase="my secret passphrase" deploy
 
+ e) Close the staging repository in Nexus.
+    Once you have deployed the artifacts you should close the staging
+    repository to allow others to test the artifacts. Log into
+    https://repository.apache.org/ using your LDAP credentials.
 
-    NOTE: This step has been reported to not work when using username and
-    password authentication. Unless you prefer to deploy manually, use a
-    public key to log into the remote host (people.apache.org).
+ f) Release the artifacts in Nexus after a successful vote.
+    Once the vote has passed, the artifacts can be released. To do this you
+    log in to Nexus using you LDAP credentials, select the correct staging
+    repository, and perform the release action on it.
 
-    If your umask is set to something else than 0002 (the default is 0022),
-    you should log into the Apache server and grant write permission to the
-    group owner (which should be 'committers'). Alternatively, use this SSH command:
+ g) Verify that the artifacts appear in the central Maven repository.
+    Some time after you have released the artifacts from the temporary Apache
+    staging repository in step (f), they should appear in the central Maven
+    repository:
+        http://repo1.maven.org/maven2/org/apache/derby/
+    After a few more days, the artifacts may also have propagated to other
+    repositories / services, for instance the one below:
+        http://mvnrepository.com/artifact/org.apache.derby
 
-    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ -user \$USER -exec chmod g+w {} \;"
+    Note that for the 10.6.1 release, within a day the artifacts turned up in
+    the central Maven repository (the first link). It took 6 days for the
+    artifacts to percolate to the external aggregator site (the second link).
 
-    To verify the group ownership and permissions, run the two following SSH
-    commands. If everything is set correctly, they should return no file names.
 
-    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -group committers"
-    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -perm -g+w"
+Other information:
+ o  For each project, the following files should be found in the various
+    'maven2/[project]/target' directories after 'verify' or 'install':
+      ARTIFACT-VERSION.jar
+      ARTIFACT-VERSION.jar.asc
+      ARTIFACT-VERSION.pom
+      ARTIFACT-VERSION.pom.asc
 
-For each project, the following files should be found in the
-various 'maven2/[project]/target' directories after 'verify' or 'install':
-    - ARTIFACT-VERSION.jar
-    - ARTIFACT-VERSION.jar.asc
-    - ARTIFACT-VERSION.pom
-    - ARTIFACT-VERSION.pom.asc
+    When these are deployed, or installed locally, checksum files (a .md5 and
+    a .sha1 file for each artifact) will be generated by Maven. Check your
+    local repository to confirm this (i.e. '~/.m2/repository').
+    The 'derbywar' project will have a war file instead of a jar file.
 
-When these are deployed, or installed locally, checksum files (a md5 and a sha1
-file for each artifact) will be generated by Maven. Check your local
-repository to confirm this (i.e. '~/.m2/repository').
-The 'derbywar' project will have a war file instead of a jar file.
-
-Some time after you have deployed the artifacts to the Apache staging
-repository (happens when you run 'mvn deploy'), they should appear in the
-central Maven repository.
-Try one of these to confirm that your artifacts are available:
-http://repo1.maven.org/maven2/org/apache/derby/
-http://mvnrepository.com/artifact/org.apache.derby
-
-Note that for the 10.6.1 release, within a day the artifacts turned up in the
-central Maven repository (the first link). It took 6 days for the artifacts
-to percolate to the external aggregator site (the second link).
+ o  More ASF generic information about the Maven artifact release process:
+    http://www.apache.org/dev/publishing-maven-artifacts.html
