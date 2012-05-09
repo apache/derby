@@ -1523,6 +1523,7 @@ public abstract class BaseJDBCTestCase
             }
             try {
                 fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
+                attempts++;
             } catch (FileNotFoundException fnfe) {
                 if (attempts == 0) {
                     fail("directory doesn't exist: " +
@@ -1533,9 +1534,9 @@ public abstract class BaseJDBCTestCase
                     System.out.println("<assertDirectoryDeleted> root " +
                             "directory unexpectedly gone - delayed, " +
                             "external or concurrent delete?");
+                    return;
                 }
             }
-            finally { attempts++; }
             if (fl.length == 0) {
                 return;
             } else {
