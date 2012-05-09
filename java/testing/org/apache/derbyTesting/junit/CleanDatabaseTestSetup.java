@@ -150,7 +150,17 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      */
     protected void tearDown() throws Exception {
         Connection conn = getConnection();
+        // See DERBY-5686 - perhaps there's a test that leaves a 
+        // connection in read-only state - let's check here and 
+        // if there's a conn that's read-only, unset it, and make
+        // the test fail so we find it.
         conn.setAutoCommit(false);
+        boolean ok=true;
+        if (conn.isReadOnly())
+        {
+            conn.setReadOnly(false);
+            ok=false;
+        }
         
         // Clean the database, ensures that any failure dropping
         // objects can easily be linked to test fixtures that
@@ -162,6 +172,8 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         // Compress is a somewhat expensive operation so avoid it if possible.
         CleanDatabaseTestSetup.cleanDatabase(conn, false);       
         super.tearDown();
+        if (!ok)
+            fail("the test that was just run left the conn read-only");
     }
 
     /**

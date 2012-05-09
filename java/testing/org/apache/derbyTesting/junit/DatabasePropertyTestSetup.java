@@ -300,7 +300,19 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
                 System.out.println("conn.getAutoCommit: " + conn.getAutoCommit());
                 // now try to close the connection, then try open a new one, 
                 // and try to executeUpdate again.
-                conn.close();
+                try {
+                    conn.close();
+                } catch (SQLException isqle) {
+                    if (sqle.getSQLState()=="25001")
+                    {
+                        // the transaction is still active. let's commit what we have.
+                        conn.commit();
+                        conn.close();
+                    } else {
+                        System.out.println("close failed - see SQLState.");
+                        throw sqle;
+                    }
+                }
                 Connection conn2 = getConnection();
                 // check if this second connection is read-only
                 if (conn2.isReadOnly())
@@ -369,8 +381,21 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
                 System.out.println("conn.getAutoCommit: " + conn.getAutoCommit());
                 // now try to close the connection, then try open a new one, 
                 // and try to executeUpdate again.
-                conn.close();
+                try {
+                    conn.close();
+                } catch (SQLException isqle) {
+                    if (sqle.getSQLState()=="25001")
+                    {
+                        // the transaction is still active. let's commit what we have.
+                        conn.commit();
+                        conn.close();
+                    } else {
+                        System.out.println("close failed - see SQLState.");
+                        throw sqle;
+                    }
+                }
                 Connection conn2 = getConnection();
+
                 // check if this second connection is read-only
                 if (conn2.isReadOnly())
                 {
