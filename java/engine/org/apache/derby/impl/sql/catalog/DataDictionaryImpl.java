@@ -14233,6 +14233,10 @@ public final class	DataDictionaryImpl
 
     /** {@inheritDoc} */
     public boolean doCreateIndexStatsRefresher() {
+        // Note that we are using the index refresher to serve explicit calls
+        // to SYSCS_UTIL.SYSCS_UPDATE_STATISTICS. This means that we must
+        // always create the daemon (unless the database is read-only) even if
+        // automatic updates of the cardinality statistics are disabled.
         return (indexRefresher == null);
     }
 
