@@ -107,7 +107,8 @@ public class Derby5730Test extends BaseTestCase {
      * between. Eventually runs out of memory if DERBY-5730 is not fixed.
      * Must run with capped memory size (-Xmx16M) to expose the memory leak.
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws Exception {
+        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         for (int i = 0; i < FUNCTIONS.length; i++) {
             Connection c = DriverManager.getConnection(
                     "jdbc:derby:memory:derby5730;create=true");
