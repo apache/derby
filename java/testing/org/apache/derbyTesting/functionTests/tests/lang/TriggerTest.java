@@ -20,12 +20,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -44,6 +40,10 @@ import java.util.StringTokenizer;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
+import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.functionTests.util.streams.ReadOnceByteArrayInputStream;
 import org.apache.derbyTesting.functionTests.util.streams.StringReaderWithLength;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -634,6 +634,10 @@ public class TriggerTest extends BaseJDBCTestCase {
      * @throws IOException
      */
     private void testClobInTriggerTable(int clobSize) throws SQLException, IOException {
+        // Alphabet used when inserting a CLOB.
+        CharAlphabet a1 = CharAlphabet.singleChar('a');
+        // Alphabet used when updating a CLOB.
+        CharAlphabet a2 = CharAlphabet.singleChar('b');
     	
     	// --- add a clob
     	String trig = " create trigger t_lob1 after update of str1 on lob1 ";
@@ -651,12 +655,11 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         ps.setString(1, clobSize +"");
 
-
-        char[] arr = makeArray(clobSize,'a');
-
         // - set the value of the input parameter to the input stream
-        ps.setCharacterStream(2, new CharArrayReader(arr) , clobSize);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
 
         // Now executing update to fire trigger
@@ -680,17 +683,19 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         ps.setString(1, clobSize +"");
 
-
         // - set the value of the input parameter to the input stream
-        ps.setCharacterStream(2, new CharArrayReader(arr) , clobSize);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
 
         // Now executing update to fire trigger
         ps = prepareStatement("update LOB1 set c_lob = ?");
-        char[] updArr = makeArray(clobSize,'b');
-        ps.setCharacterStream(1,new CharArrayReader(updArr) , clobSize);
+        ps.setCharacterStream(1,
+                new LoopingAlphabetReader(clobSize, a2), clobSize);
         ps.execute();
+        closeStatement(ps);
         commit();        
 
         s.executeUpdate("drop table lob1");
@@ -710,55 +715,44 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         ps.setString(1, clobSize +"");
 
-
-        
         // - set the value of the input parameter to the input stream
-        ps.setCharacterStream(2, new CharArrayReader(arr) , clobSize);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
 
         // Now executing update to fire trigger
         ps = prepareStatement("update LOB1 set c_lob = ?");
-        ps.setCharacterStream(1,new CharArrayReader(updArr) , clobSize);
+        ps.setCharacterStream(1,
+                new LoopingAlphabetReader(clobSize, a2), clobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
         
         // check log table.
         ResultSet rs = s.executeQuery("SELECT * from t_lob1_log");
         rs.next();
                
-        Reader r = rs.getCharacterStream(1);
-        assertReaderContents(r,clobSize,'a');
-        
-        r = rs.getCharacterStream(2);
-        assertReaderContents(r,clobSize,'b');
-        
-        r = rs.getCharacterStream(3);
-        assertReaderContents(r,clobSize,'a');
-        
-        r = rs.getCharacterStream(4);
-        assertReaderContents(r,clobSize,'b');
+        assertEquals(new LoopingAlphabetReader(clobSize, a1),
+                     rs.getCharacterStream(1));
+
+        assertEquals(new LoopingAlphabetReader(clobSize, a2),
+                     rs.getCharacterStream(2));
+
+        assertEquals(new LoopingAlphabetReader(clobSize, a1),
+                     rs.getCharacterStream(3));
+
+        assertEquals(new LoopingAlphabetReader(clobSize, a2),
+                     rs.getCharacterStream(4));
+
+        rs.close();
         
         s.executeUpdate("drop table lob1");
         s.executeUpdate("drop table t_lob1_log");
         
        }
 
-    private char[] makeArray(int size, char c) {
-        char[] arr = new char[size];
-        for (int i = 0; i < arr.length; i++)
-            arr[i] = c;
-        return arr;
-    }
-    
-    private byte[] makeArray(int size, byte b) {
-        byte[] arr = new byte[size];
-        for (int i = 0; i < arr.length; i++)
-            arr[i] = b;
-        return arr;
-    }
-   
-    
     /** 
      * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
      * 
@@ -791,7 +785,10 @@ public class TriggerTest extends BaseJDBCTestCase {
      * @throws IOException
      */
     private  void testBlobInTriggerTable(int blobSize) throws SQLException, IOException {
-    	
+        // Alphabet used when inserting a BLOB.
+        ByteAlphabet a1 = ByteAlphabet.singleByte((byte) 8);
+        // Alphabet used when updating a BLOB.
+        ByteAlphabet a2 = ByteAlphabet.singleByte((byte) 9);
 
         String trig = " create trigger t_lob1 after update of str1 on lob1 ";
         trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
@@ -809,13 +806,14 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         ps.setString(1, blobSize +"");
 
-        byte[] arr = makeArray(blobSize, (byte) 8);
-        
         // - set the value of the input parameter to the input stream
         // use a couple blobs so we are sure it works with multiple lobs
-        ps.setBinaryStream(2, new ByteArrayInputStream(arr) , blobSize);
-        ps.setBinaryStream(3, new ByteArrayInputStream(arr) , blobSize);
+        ps.setBinaryStream(2,
+                new LoopingAlphabetStream(blobSize, a1), blobSize);
+        ps.setBinaryStream(3,
+                new LoopingAlphabetStream(blobSize, a1), blobSize);
         ps.execute();
+        closeStatement(ps);
         
         commit();
         // Now executing update to fire trigger
@@ -839,15 +837,18 @@ public class TriggerTest extends BaseJDBCTestCase {
 
 
         // - set the value of the input parameter to the input stream
-        ps.setBinaryStream(2, new ByteArrayInputStream(arr) , blobSize);
+        ps.setBinaryStream(2,
+                new LoopingAlphabetStream(blobSize, a1), blobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
 
         // Now executing update to fire trigger
         ps = prepareStatement("update LOB1 set b_lob = ?");
-        byte[] updArr = makeArray(blobSize, (byte) 9);
-        ps.setBinaryStream(1,new ByteArrayInputStream(updArr) , blobSize);
+        ps.setBinaryStream(1,
+                new LoopingAlphabetStream(blobSize, a2), blobSize);
         ps.execute();
+        closeStatement(ps);
         commit();        
 
         s.executeUpdate("drop table lob1");
@@ -868,54 +869,42 @@ public class TriggerTest extends BaseJDBCTestCase {
         ps.setString(1, blobSize +"");
 
 
-        
         // - set the value of the input parameter to the input stream
-        ps.setBinaryStream(2, new ByteArrayInputStream(arr) , blobSize);
+        ps.setBinaryStream(2,
+                new LoopingAlphabetStream(blobSize, a1), blobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
 
         // Now executing update to fire trigger
         ps = prepareStatement("update LOB1 set b_lob = ?");
-        ps.setBinaryStream(1,new ByteArrayInputStream(updArr) , blobSize);
+        ps.setBinaryStream(1,
+                new LoopingAlphabetStream(blobSize, a2), blobSize);
         ps.execute();
+        closeStatement(ps);
         commit();
         
         // check log table.
         ResultSet rs = s.executeQuery("SELECT * from t_lob1_log");
         rs.next();
-               
-        InputStream is = rs.getBinaryStream(1);        
-        assertInputStreamContents(is,blobSize, (byte) 8);
+
+        assertEquals(new LoopingAlphabetStream(blobSize, a1),
+                     rs.getBinaryStream(1));
+
+        assertEquals(new LoopingAlphabetStream(blobSize, a2),
+                     rs.getBinaryStream(2));
+
+        assertEquals(new LoopingAlphabetStream(blobSize, a1),
+                     rs.getBinaryStream(3));
+
+        assertEquals(new LoopingAlphabetStream(blobSize, a2),
+                     rs.getBinaryStream(4));
         
-        is = rs.getBinaryStream(2);        
-        assertInputStreamContents(is,blobSize, (byte) 9);
-        
-        is = rs.getBinaryStream(3);        
-        assertInputStreamContents(is,blobSize, (byte) 8);
-        
-        is = rs.getBinaryStream(4);        
-        assertInputStreamContents(is,blobSize, (byte) 9);
-        
-        
+        rs.close();
+
         s.executeUpdate("drop table lob1");
         s.executeUpdate("drop table t_lob1_log");
 
-    }
-    
-    private void assertInputStreamContents(InputStream is, int size, byte expectedValue) throws IOException {
-        int count = 0;
-        int b;
-        do {
-            b = is.read();            
-            if (b!= -1)
-            {
-                count++;
-                assertEquals(expectedValue,b);
-            }   
-        } while (b != -1);
-          
-        assertEquals(size,count);
-        
     }
 
     /* 
@@ -924,6 +913,11 @@ public class TriggerTest extends BaseJDBCTestCase {
      */
     public void testUpdateTriggerOnClobColumn() throws SQLException, IOException
     {
+        // Alphabet used when inserting a CLOB.
+        CharAlphabet a1 = CharAlphabet.singleChar('a');
+        // Alphabet used when updating a CLOB.
+        CharAlphabet a2 = CharAlphabet.singleChar('b');
+
     	Connection conn = getConnection();
     	Statement s = createStatement();
     	String trig = " create trigger t_lob1 after update of str1 on lob1 ";
@@ -939,22 +933,23 @@ public class TriggerTest extends BaseJDBCTestCase {
 
 
         // - set the value of the input parameter to the input stream
-        ps.setCharacterStream(2, makeCharArrayReader('a', clobSize), clobSize);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(clobSize, a1), clobSize);
         ps.execute();
         conn.commit();
 
 
         PreparedStatement ps2 = prepareStatement("update LOB1 set c_lob = ? where str1 = '" + clobSize + "'");
-        ps2.setCharacterStream(1,makeCharArrayReader('b',clobSize), clobSize);
+        ps2.setCharacterStream(1,
+                new LoopingAlphabetReader(clobSize, a2), clobSize);
         ps2.executeUpdate();
         conn.commit();
         // 	--- reading the clob make sure it was updated
         ResultSet rs = s.executeQuery("SELECT * FROM LOB1 where str1 = '" + clobSize + "'");
         rs.next();
         
-        Reader r = rs.getCharacterStream(2);
-        char expectedCharValue = 'b';
-        assertReaderContents(r, clobSize, expectedCharValue);
+        assertEquals(new LoopingAlphabetReader(clobSize, a2),
+                     rs.getCharacterStream(2));
         rs.close();
         s.executeUpdate("drop table lob1");
         s.executeUpdate("drop table t_lob1_log");
@@ -962,37 +957,6 @@ public class TriggerTest extends BaseJDBCTestCase {
 	  
     }
 
-    private void assertReaderContents(Reader r, int size, char expectedCharValue) throws IOException {
-        int count = 0;
-        int c;
-        do {
-        	c = r.read();        	 
-        	if (c!= -1)
-        	{
-        		count++;
-        		assertEquals(expectedCharValue,c);
-        	}	
-        } while (c != -1);
-          
-        assertEquals(size,count);
-    }
-    
-    /**
-     * Make a CharArrayReader
-     * @param c character to repeat	 
-     * @param size size of array
-     * @return CharArrayReader of specified character  repeating the specified character   
-     */
-    private  CharArrayReader  makeCharArrayReader(char c, int size)
-    {
-   char[] arr = new char[size];
-   for (int i = 0; i < arr.length; i++)
-        	arr[i] = c;
-    return new CharArrayReader(arr);
-    }
-    
-    
-    
     /**
      * Test that the action statement of a trigger
      * can work with all datatypes.

@@ -114,6 +114,16 @@ public class ByteAlphabet {
     }
 
     /**
+     * Create an alphabet that consists of a single byte.
+     */
+    public static ByteAlphabet singleByte(byte b) {
+        return new ByteAlphabet(
+                "Single byte: " + b,
+                new char[] { (char) (b & 0xff) },
+                "US-ASCII");
+    }
+
+    /**
      * Create an alphabet with the given name, the given characters and using
      * the specified encoding to represent the characters as bytes.
      *
@@ -127,17 +137,14 @@ public class ByteAlphabet {
         this.charCount = chars.length;
         String tmpStr = new String(chars);
         byte[] tmpBytes;
-        int tmpByteCount;
         try {
             tmpBytes = tmpStr.getBytes(encoding);
-            tmpByteCount = tmpBytes.length;
         } catch (UnsupportedEncodingException uee) {
             // We are nasty and ignore this...
             tmpBytes = new byte[] {0};
-            tmpByteCount = 1;
         }
         this.bytes = tmpBytes;
-        this.byteCount = tmpByteCount;
+        this.byteCount = tmpBytes.length;
     }
 
     /**
