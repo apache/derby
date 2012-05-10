@@ -474,11 +474,11 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 				physicalCD = null;
 		}
 
+        /* DERBY-5681 Drop statistics */
+        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
+
 	    if (dropConglom)
 	    {
-	        /* Drop statistics */
-	        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
-	        
 	        /* Drop the physical conglomerate */
 	        tc.dropConglomerate(getConglomerateNumber());
 	    }
