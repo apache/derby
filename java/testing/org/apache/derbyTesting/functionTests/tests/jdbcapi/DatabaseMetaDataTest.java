@@ -534,7 +534,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals(0, dmd.getMaxStatements());
         assertEquals(128, dmd.getMaxTableNameLength());
         assertEquals(0, dmd.getMaxTablesInSelect());
-        assertEquals(30, dmd.getMaxUserNameLength());
+        assertEquals(128, dmd.getMaxUserNameLength());
     }
     
     public void testMiscellaneous() throws SQLException

@@ -1298,7 +1298,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return max name length  in bytes
      */
 	public int getMaxUserNameLength() {
-		return Limits.DB2_MAX_USERID_LENGTH;
+		return Limits.MAX_IDENTIFIER_LENGTH;
 	}
 
     //----------------------------------------------------------------------

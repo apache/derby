@@ -227,12 +227,7 @@ public abstract class AuthenticationServiceBase
 			return false;
 
 		String userName = userInfo.getProperty(Attribute.USERNAME_ATTR);
-		if ((userName != null) && userName.length() > Limits.DB2_MAX_USERID_LENGTH) {
-		// DB2 has limits on length of the user id, so we enforce the same.
-		// This used to be error 28000 "Invalid authorization ID", but with v82,
-		// DB2 changed the behavior to return a normal "authorization failure
-		// occurred" error; so that means just return "false" and the correct
-		// exception will be thrown as usual.
+		if ((userName != null) && userName.length() > Limits.MAX_IDENTIFIER_LENGTH) {
 			return false;
 		}
 

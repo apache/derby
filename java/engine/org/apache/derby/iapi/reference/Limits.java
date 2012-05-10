@@ -69,7 +69,6 @@ public interface Limits
 
 	public static final int DB2_MIN_COL_LENGTH_FOR_CURRENT_USER = 8;
 	public static final int DB2_MIN_COL_LENGTH_FOR_CURRENT_SCHEMA = 128;     
-	public static final int DB2_MAX_USERID_LENGTH = 30;
 
     /**
      * DB2 TABLESPACE page size limits
