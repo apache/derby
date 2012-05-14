@@ -410,9 +410,18 @@ public class IndexStatsUtil {
     }
 
     /**
-     * Releases resources.
+     * Releases resources and closes the associated connection.
      */
     public void release() {
+        release(true);
+    }
+
+    /**
+     * Releases resources.
+     *
+     * @param closeConnection whether to close the associated connection
+     */
+    public void release(boolean closeConnection) {
         PreparedStatement[] psToClose = new PreparedStatement[] {
             psGetStats, psGetIndexId, psGetStatsForIndex,
             psGetStatsForTable, psGetTableId,
@@ -431,7 +440,9 @@ public class IndexStatsUtil {
             if (!con.isClosed()) {
                 con.rollback();
             }
-            con.close();
+            if (closeConnection) {
+                con.close();
+            }
         } catch (SQLException sqle) {
             // Ignore
         }
