@@ -464,6 +464,7 @@ public final class	DataDictionaryImpl
 												"SYSCS_COMPRESS_TABLE",
 												"SYSCS_UPDATE_STATISTICS",
 												"SYSCS_MODIFY_PASSWORD",
+												"SYSCS_DROP_STATISTICS", 
 												};
 	
 	/**
@@ -13215,6 +13216,33 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 DataTypeDescriptor.getCatalogType( Types.BIGINT ),
+                newlyCreatedRoutines,
+                tc);
+        }
+
+        // void SYSCS_UTIL.SYSCS_DROP_STATISTICS(varchar(128), varchar(128), varchar(128))
+        {
+            // procedure argument names
+            String[] arg_names = {"SCHEMANAME", "TABLENAME", "INDEXNAME"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_DROP_STATISTICS",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
+                (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
         }

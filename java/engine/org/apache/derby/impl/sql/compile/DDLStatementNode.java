@@ -61,6 +61,8 @@ abstract class DDLStatementNode extends StatementNode
 	public	static	final	int	DROP_TYPE = 2;
 	public	static	final	int	MODIFY_TYPE = 3;
 	public	static	final	int	LOCKING_TYPE = 4;
+	public	static	final	int	UPDATE_STATISTICS = 5;
+	public	static	final	int DROP_STATISTICS = 6;
 
 
 	/////////////////////////////////////////////////////////////////////////

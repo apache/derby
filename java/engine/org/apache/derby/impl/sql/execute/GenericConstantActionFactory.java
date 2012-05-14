@@ -137,9 +137,15 @@ public class GenericConstantActionFactory
 	 *  @param updateStatisticsAll	TRUE means we are here to update statistics
 	 *  	of all the indexes. False means we are here to update statistics of
 	 *  	only one index.
-	 *  @param indexNameForUpdateStatistics	Will name the index whose statistics
-	 *  	will be updated. This param is looked at only if updateStatisticsAll
-	 *  	is set to false.
+	 *  @param dropStatistics		TRUE means we are here to drop statistics
+	 *  @param dropStatisticsAll	TRUE means we are here to drop statistics
+	 *  	of all the indexes. False means we are here to drop statistics of
+	 *  	only one index.
+	 *  @param indexNameForStatistics	Will name the index whose statistics
+	 *  	will be updated/dropped. This param is looked at only if 
+	 *  	updateStatisticsAll/dropStatisticsAll is set to false and
+	 *  	updateStatistics/dropStatistics is set to true.
+	 *  .
 	 */
 	public	ConstantAction	getAlterTableConstantAction
 	(
@@ -161,7 +167,9 @@ public class GenericConstantActionFactory
 		boolean						truncateEndOfTable,
 		boolean						updateStatistics,
 		boolean						updateStatisticsAll,
-		String						indexNameForUpdateStatistics
+		boolean						dropStatistics,
+		boolean						dropStatisticsAll,
+		String						indexNameForStatistics
     )
 	{
 		return new	AlterTableConstantAction( sd, tableName, tableId, tableConglomerateId, 
@@ -171,7 +179,9 @@ public class GenericConstantActionFactory
 											  purge, defragment, truncateEndOfTable,
 											  updateStatistics, 
 											  updateStatisticsAll,
-											  indexNameForUpdateStatistics);
+											  dropStatistics, 
+											  dropStatisticsAll,
+											  indexNameForStatistics);
 	}
 
 	/**

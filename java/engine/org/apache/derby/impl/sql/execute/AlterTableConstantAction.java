@@ -131,11 +131,23 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 */
     private	    boolean					    updateStatisticsAll;
 	/**
-	 * If statistic is getting updated for just one index, then 
-	 * indexNameForUpdateStatistics will tell the name of the specific index 
-	 * whose statistics need to be updated.
+	 * dropStatistics will indicate that we are here for dropping the
+	 * statistics. It could be statistics of just one index or all the
+	 * indexes on a given table. 
 	 */
-    private	    String						indexNameForUpdateStatistics;
+    private	    boolean					    dropStatistics;
+	/**
+	 * The flag dropStatisticsAll will tell if we are going to drop the 
+	 * statistics of all indexes or just one index on a table. 
+	 */
+    private	    boolean					    dropStatisticsAll;
+	/**
+	 * If statistic is getting updated/dropped for just one index, then 
+	 * indexNameForStatistics will tell the name of the specific index 
+	 * whose statistics need to be updated/dropped.
+	 */
+    private	    String						indexNameForStatistics;
+
     
     // Alter table compress and Drop column
     private     boolean					    doneScan;
@@ -196,8 +208,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *  @param updateStatisticsAll	TRUE means we are here to update statistics
 	 *  	of all the indexes. False means we are here to update statistics of
 	 *  	only one index.
-	 *  @param indexNameForUpdateStatistics	Will name the index whose statistics
-	 *  	will be updated
+	 *  @param dropStatistics		TRUE means we are here to drop statistics
+	 *  @param dropStatisticsAll	TRUE means we are here to drop statistics
+	 *  	of all the indexes. False means we are here to drop statistics of
+	 *  	only one index.
+	 *  @param indexNameForStatistics	Will name the index whose statistics
+	 *  	will be updated/dropped. This param is looked at only if 
+	 *  	updateStatisticsAll/dropStatisticsAll is set to false and
+	 *  	updateStatistics/dropStatistics is set to true.
 	 */
 	AlterTableConstantAction(
     SchemaDescriptor            sd,
@@ -217,7 +235,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     boolean                     truncateEndOfTable,
     boolean                     updateStatistics,
     boolean                     updateStatisticsAll,
-    String	                    indexNameForUpdateStatistics)
+    boolean                     dropStatistics,
+    boolean                     dropStatisticsAll,
+    String                      indexNameForStatistics)
 	{
 		super(tableId);
 		this.sd                     = sd;
@@ -236,7 +256,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		this.truncateEndOfTable     = truncateEndOfTable;
 		this.updateStatistics     	= updateStatistics;
 		this.updateStatisticsAll    = updateStatisticsAll;
-		this.indexNameForUpdateStatistics = indexNameForUpdateStatistics;
+		this.dropStatistics     	= dropStatistics;
+		this.dropStatisticsAll    = dropStatisticsAll;
+		this.indexNameForStatistics = indexNameForStatistics;
 
 		if (SanityManager.DEBUG)
 		{
@@ -328,6 +350,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
         if (updateStatistics) {
             updateStatistics();
+            return;
+		}
+
+        if (dropStatistics) {
+            dropStatistics();
             return;
 		}
 		/*
@@ -650,6 +677,29 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     }
 
 	/**
+	 * Drop statistics of either all the indexes on the table or only one
+	 * specific index depending on what user has requested.
+	 * 
+	 * @throws StandardException
+	 */
+    private void dropStatistics()
+            throws StandardException {
+        td = dd.getTableDescriptor(tableId);
+
+        dd.startWriting(lcc);
+        dm.invalidateFor(td, DependencyManager.UPDATE_STATISTICS, lcc);
+
+        if (dropStatisticsAll) {
+            dd.dropStatisticsDescriptors(td.getUUID(), null, tc);
+        } else {
+            ConglomerateDescriptor cd = 
+                dd.getConglomerateDescriptor(
+                    indexNameForStatistics, sd, false);
+            dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
+        }
+    }
+
+	/**
 	 * Update statistics of either all the indexes on the table or only one
 	 * specific index depending on what user has requested.
 	 * 
@@ -665,7 +715,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         } else {
             cds = new ConglomerateDescriptor[1];
             cds[0] = dd.getConglomerateDescriptor(
-                    indexNameForUpdateStatistics, sd, false);
+                    indexNameForStatistics, sd, false);
         }
         dd.getIndexStatsRefresher(false).runExplicitly(
                                                 lcc, td, cds, "ALTER TABLE");

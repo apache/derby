@@ -70,11 +70,22 @@ public class AlterTableNode extends DDLStatementNode
 	 */
 	private	boolean				updateStatisticsAll = false;
 	/**
-	 * If statistic is getting updated for just one index, then 
-	 * indexNameForUpdateStatistics will tell the name of the specific index 
-	 * whose statistics need to be updated.
+	 * dropStatistics will indicate that we are here for dropping the
+	 * statistics. It could be statistics of just one index or all the
+	 * indexes on a given table. 
 	 */
-	private	String				indexNameForUpdateStatistics;
+	private	    boolean					    dropStatistics;
+	/**
+	 * The flag dropStatisticsAll will tell if we are going to drop the 
+	 * statistics of all indexes or just one index on a table. 
+	 */
+	private	    boolean					    dropStatisticsAll;
+	/**
+	 * If statistic is getting updated/dropped for just one index, then 
+	 * indexNameForStatistics will tell the name of the specific index 
+	 * whose statistics need to be updated/dropped.
+	 */
+	private	String				indexNameForStatistics;
 	
 	public	boolean				compressTable = false;
 	public	boolean				sequential = false;
@@ -115,33 +126,6 @@ public class AlterTableNode extends DDLStatementNode
 		/* For now, this init() only called for truncate table */
 		truncateTable = true;
 		schemaDescriptor = getSchemaDescriptor();
-	}
-
-	/**
-	 * Initializer for a AlterTableNode for updating the statistics. The user
-	 * can ask for update statistic of all the indexes or only a specific index
-	 *
-	 * @param objectName		The name of the table whose index(es) will have
-	 *                          their statistics updated.
-	 * @param updateStatisticsAll	If true then update the statistics of all 
-	 *                          the indexes on the table. If false, then update
-	 *                          the statistics of only the index provided as
-	 *                          3rd parameter here
-	 * @param indexName			Only used if updateStatisticsAll is set to 
-	 *                          false. 
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object objectName,
-			Object updateStatisticsAll,
-			Object indexName)
-	throws StandardException
-	{
-		initAndCheck(objectName);
-		this.updateStatisticsAll = ((Boolean) updateStatisticsAll).booleanValue();
-		this.indexNameForUpdateStatistics = (String)indexName;
-		schemaDescriptor = getSchemaDescriptor();
-		updateStatistics = true;
 	}
 	
 	/**
@@ -194,39 +178,67 @@ public class AlterTableNode extends DDLStatementNode
 	}
 
 	/**
-	 * Initializer for a AlterTableNode
-	 *
+	 * Initializer for a AlterTableNode. The parameter values have different
+	 *  meanings based on what kind of ALTER TABLE is taking place. 
+	 *  
 	 * @param objectName		The name of the table being altered
-	 * @param tableElementList	The alter table action
-	 * @param lockGranularity	The new lock granularity, if any
-	 * @param changeType		ADD_TYPE or DROP_TYPE
-	 * @param behavior			If drop column is CASCADE or RESTRICTED
+	 * @param changeType		ADD_TYPE or DROP_TYPE or UPDATE_STATISTICS or
+	 *                          or DROP_STATISTICS
+	 * @param param1 			For ADD_TYPE or DROP_TYPE, param1 gives the
+	 *                          elements impacted by ALTER TABLE.
+	 *                          For UPDATE_STATISTICS or or DROP_STATISTICS,
+	 *                          param1 is boolean - true means update or drop
+	 *                          the statistics of all the indexes on the table.
+	 *                          False means, update or drop the statistics of
+	 *                          only the index name provided by next parameter.
+	 * @param param2 			For ADD_TYPE or DROP_TYPE, param2 gives the
+	 *                          new lock granularity, if any
+	 *                          For UPDATE_STATISTICS or DROP_STATISTICS,
+	 *                          param2 can be the name of the specific index
+	 *                          whose statistics will be dropped/updated. This
+	 *                          param is used only if param1 is set to false
+	 * @param param3			For DROP_TYPE, param3 can indicate if the drop
+	 *                          column is CASCADE or RESTRICTED. This param is
+	 *                          ignored for all the other changeType.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
 	public void init(
 							Object objectName,
-							Object tableElementList,
-							Object lockGranularity,
 							Object changeType,
-							Object behavior )
+							Object param1,
+							Object param2,
+							Object param3 )
 		throws StandardException
 	{
 		initAndCheck(objectName);
-		this.tableElementList = (TableElementList) tableElementList;
-		this.lockGranularity = ((Character) lockGranularity).charValue();
 
-		int[]	ct = (int[]) changeType, bh = (int[]) behavior;
+		
+		int[]	ct = (int[]) changeType;
 		this.changeType = ct[0];
-		this.behavior = bh[0];
+		
 		switch ( this.changeType )
 		{
 		    case ADD_TYPE:
 		    case DROP_TYPE:
 		    case MODIFY_TYPE:
 		    case LOCKING_TYPE:
+				this.tableElementList = (TableElementList) param1;
+				this.lockGranularity = ((Character) param2).charValue();
+				int[]	bh = (int[]) param3;
+				this.behavior = bh[0];
+				break;
 
+		    case UPDATE_STATISTICS:
+				this.updateStatisticsAll = ((Boolean) param1).booleanValue();
+				this.indexNameForStatistics = (String)param2;
+				updateStatistics = true;
+				break;
+
+		    case DROP_STATISTICS:
+				this.dropStatisticsAll = ((Boolean) param1).booleanValue();
+				this.indexNameForStatistics = (String)param2;
+				dropStatistics = true;
 				break;
 
 		    default:
@@ -259,8 +271,10 @@ public class AlterTableNode extends DDLStatementNode
 				"truncateEndOfTable: " + truncateEndOfTable + "\n" +
 				"updateStatistics: " + updateStatistics + "\n" +
 				"updateStatisticsAll: " + updateStatisticsAll + "\n" +
-				"indexNameForUpdateStatistics: " +
-				     indexNameForUpdateStatistics + "\n";
+				"dropStatistics: " + dropStatistics + "\n" +
+				"dropStatisticsAll: " + dropStatisticsAll + "\n" +
+				"indexNameForStatistics: " +
+				indexNameForStatistics + "\n";
 		}
 		else
 		{
@@ -433,20 +447,20 @@ public String statementToString()
         // must be done after resolving the datatypes of the generation clauses
         if (tableElementList != null) { tableElementList.validatePrimaryKeyNullability(); }
 
-		//Check if we are in alter table to update the statistics. If yes, then
-		//check if we are here to update the statistics of a specific index. If
-		//yes, then verify that the indexname provided is a valid one.
-		if (updateStatistics && !updateStatisticsAll)
+		//Check if we are in alter table to update/drop the statistics. If yes,
+		// then check if we are here to update/drop the statistics of a specific
+		// index. If yes, then verify that the indexname provided is a valid one.
+		if ((updateStatistics && !updateStatisticsAll) || (dropStatistics && !dropStatisticsAll))
 		{
 			ConglomerateDescriptor	cd = null;
 			if (schemaDescriptor.getUUID() != null) 
-				cd = dd.getConglomerateDescriptor(indexNameForUpdateStatistics, schemaDescriptor, false);
+				cd = dd.getConglomerateDescriptor(indexNameForStatistics, schemaDescriptor, false);
 
 			if (cd == null)
 			{
 				throw StandardException.newException(
 						SQLState.LANG_INDEX_NOT_FOUND, 
-						schemaDescriptor.getSchemaName() + "." + indexNameForUpdateStatistics);
+						schemaDescriptor.getSchemaName() + "." + indexNameForStatistics);
 			}			
 		}
 
@@ -500,7 +514,9 @@ public String statementToString()
  										     truncateEndOfTable,
  										     updateStatistics,
  										     updateStatisticsAll,
- 										     indexNameForUpdateStatistics);
+ 										     dropStatistics,
+ 										     dropStatisticsAll,
+ 										     indexNameForStatistics);
 	}
 
 	/**

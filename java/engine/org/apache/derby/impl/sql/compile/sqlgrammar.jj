@@ -13098,20 +13098,15 @@ alterTableBody(TableName tableName) throws StandardException :
 		return sn;
 	}
 |
-//This means update the statistics of all the indexes on the table
-	<ALL> <UPDATE> <STATISTICS>
+//This means update or drop the statistics of all the indexes on the table
+	<ALL>
+	(
+		sn = dropStatistics(tableName)
+		|
+		sn = updateStatistics(tableName)
+	)
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "SYSCS_UPDATE_STATISTICS");
-		//This will make sure that this ALTER TABLE...syntax can't be called directly.
-		//This sql can only be generated internally (right now it is done for
-		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
-		checkInternalFeature("UPDATE STATISTICS");
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
-							tableName,
-							Boolean.TRUE,
-							null,
-							getContextManager());
+		return sn;
 	}
 |
 //This means update the statistics of the index name supplied for the table
@@ -13125,23 +13120,125 @@ alterTableBody(TableName tableName) throws StandardException :
 		//This sql can only be generated internally (right now it is done for
 		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
 		checkInternalFeature("UPDATE STATISTICS");
+		changeType[0] = DDLStatementNode.UPDATE_STATISTICS;
 		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
 							tableName,
+							changeType,
 							Boolean.FALSE,
 							indexName,
+							null,
 							getContextManager());
 	}
+|
+	<STATISTICS> <DROP>
+        (
+		indexName =  identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+        )
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_9, "SYSCS_UPDATE_STATISTICS");
+		//This will make sure that this ALTER TABLE...syntax can't be called directly.
+		//This sql can only be generated internally (right now it is done for
+		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
+		checkInternalFeature("DROP STATISTICS");
+		changeType[0] = DDLStatementNode.DROP_STATISTICS;
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							changeType,
+							Boolean.FALSE,
+							indexName,
+							null,
+							getContextManager());
+	}
+|
+	<DROP> 
+        (
+		sn = dropColumnDefinition(tableName, tableElementList, changeType, behavior)
+		|
+		sn = dropTableConstraintDefinitionCore(tableName, tableElementList, changeType, behavior)
+        )
+	    {
+		     return sn;
+        }
 |
 	lockGranularity = alterTableAction( tableElementList, changeType, behavior )
 	{
 		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
 							tableName,
+							changeType,
 							tableElementList,
 							new Character(lockGranularity),
-							changeType,
 							behavior,
+							getContextManager());
+	}
+}
+
+/*
+ * Called for ALTER TABLE ALL DROP STATISTICS. This is an internal
+ *  syntax and can't be invoked by a user directly. DERBY-4115. This
+ *  will drop all the statistics for the given table name
+ *
+ * By the time we get here, we've parsed
+ *    ALTER TABLE tablename ALL 
+ * and here we parse DROP STATISTICS clause
+ */
+StatementNode
+dropStatistics(TableName tableName) throws StandardException :
+{
+}
+{
+	<DROP> <STATISTICS>
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_9, "SYSCS_DROP_STATISTICS");
+		//This will make sure that this ALTER TABLE...syntax can't be called directly.
+		//This sql can only be generated internally (right now it is done for
+		//syscs_util.SYSCS_DROP_STATISTICS procedure
+		checkInternalFeature("DROP STATISTICS");
+		int[] changeType = new int[1];
+		changeType[0] = DDLStatementNode.DROP_STATISTICS;
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							changeType,
+							Boolean.TRUE,
+							null,
+							null,
+							getContextManager());
+	}
+}
+
+/*
+ * Called for ALTER TABLE ALL UPDATE STATISTICS. This is an internal
+ *  syntax and can't be invoked by a user directly. DERBY-269. This
+ *  will update all the statistics for the given table name
+ *
+ * By the time we get here, we've parsed
+ *    ALTER TABLE tablename ALL 
+ * and here we parse UPDATE STATISTICS clause
+ */
+StatementNode
+updateStatistics(TableName tableName) throws StandardException :
+{
+}
+{
+	<UPDATE> <STATISTICS>
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "SYSCS_UPDATE_STATISTICS");
+		//This will make sure that this ALTER TABLE...syntax can't be called directly.
+		//This sql can only be generated internally (right now it is done for
+		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
+		checkInternalFeature("UPDATE STATISTICS");
+		int[] changeType = new int[1];
+		changeType[0] = DDLStatementNode.UPDATE_STATISTICS;
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							changeType,
+							Boolean.TRUE,
+							null,
+							null,
 							getContextManager());
 	}
 }
@@ -13278,18 +13375,6 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		return lockGranularity;
 	}
 |
-	<DROP>
-	(
-		tableElement = dropColumnDefinition(behavior)
-		|
-		tableElement = dropTableConstraintDefinition()
-	)
-	{
-		changeType[0] = DDLStatementNode.DROP_TYPE;
-		tableElementList.addTableElement(tableElement);
-		return lockGranularity;
-	}
-|
 	lockGranularity = DB2lockGranularityClause()
 	{
 		changeType[0] = DDLStatementNode.LOCKING_TYPE;
@@ -13302,8 +13387,8 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
  *
  *    ALTER TABLE tablename DROP [ COLUMN ] columnname [ CASCADE | RESTRICT ]
  */
-TableElementNode
-dropColumnDefinition(int []behavior) throws StandardException :
+StatementNode
+dropColumnDefinition(TableName tableName, TableElementList tableElementList, int[] changeType, int[] behavior) throws StandardException :
 {
 	String columnName;
 	TableElementNode tableElement;
@@ -13312,13 +13397,24 @@ dropColumnDefinition(int []behavior) throws StandardException :
 	[ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 				 dropColumnReferentialAction(behavior)
 	{
-		return (TableElementNode) nodeFactory.getNode(
+		tableElement = (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.DROP_COLUMN_NODE,
 						columnName, null,
 						null, null,
 						getContextManager());
+		changeType[0] = DDLStatementNode.DROP_TYPE;
+		tableElementList.addTableElement(tableElement);
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							changeType,
+							tableElementList,
+							new Character('\0'),
+							behavior,
+							getContextManager());
 	}
 }
+
 void
 dropColumnReferentialAction(int []behavior) :
 {
@@ -13348,7 +13444,7 @@ addColumnDefinition(TableElementList tableElementList) throws StandardException 
 /*
  * Various variants of the ALTER TABLE ALTER COLUMN statement.
  *
- * By the type we get here, we've parsed
+ * By the time we get here, we've parsed
  *    ALTER TABLE tablename ALTER [COLUMN] columnname
  * and here we parse the remainder of the ALTER COLUMN clause, one of:
  *		SET DATA TYPE data_type
@@ -13450,6 +13546,26 @@ columnAlterClause(String columnName) throws StandardException :
 	}
 }
 
+StatementNode
+dropTableConstraintDefinitionCore(TableName tableName, TableElementList tableElementList, int[] changeType, int[] behavior) throws StandardException :
+{
+	TableElementNode tableElement;
+}
+{
+		tableElement = dropTableConstraintDefinition()
+		{
+		changeType[0] = DDLStatementNode.DROP_TYPE;
+		tableElementList.addTableElement(tableElement);
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							changeType,
+							tableElementList,
+							new Character('\0'),
+							behavior,
+							getContextManager());
+		}
+}
 
 TableElementNode
 dropTableConstraintDefinition() throws StandardException :

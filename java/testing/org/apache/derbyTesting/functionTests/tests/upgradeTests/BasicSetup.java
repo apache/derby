@@ -32,6 +32,8 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
 
+import org.apache.derbyTesting.junit.IndexStatsUtil;
+
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -703,6 +705,117 @@ public class BasicSetup extends UpgradeChange {
            		new String[][]{{"1","11"}});
         //Clean data for next test
     	s.executeUpdate("delete from BKUP1_5044_5120");
+	}
+
+    /**
+     * DERBY-4115(Provide a way to drop statistics information) and 
+     *  DERBY-5681(When a foreign key constraint on a table is dropped, 
+     *  the associated statistics row for the conglomerate). Test that
+     *  the statisitcs row left behind by DERBY-5681 can be dropped
+     *  using DERBY-4115
+     *  
+     *  DERBY-5702(Creating a foreign key constraint does not automatically
+     *   create a statistics row if foreign key constraint will share a
+     *   backing index created for a primay key) is causing a problem for
+     *   us to test the hanging statistics row with 10.4 and prior releases.
+     *   Following test relies on having hanging statistics rows which should
+     *   have been dropped when the constraint owing it was dropped. The test
+     *   then goes ahead and uses the new drop statisitcs procedure to drop
+     *   the hanging statistics rows. But because of DERBY-5702, when a
+     *   constraint is added which will reuse an existing backing index,
+     *   no statistics row is created for that constraint unless a user were
+     *   to say use an update statistics stored procedure to create the
+     *   statistics for that constraint. And later when that constraint is
+     *   dropped, we will find that because of DERBY-5681, the statistics
+     *   row never gets dropped. But update statistics stored procedure was
+     *   not introduced up until 10.5 and because of that, we can't really
+     *   test for hanging index created through constraints sharing the same
+     *   backing index prior to 10.5
+     *  
+     */
+    public void testDERBY4115AndDERBY5681ForStatistics() throws Exception {
+    	// Update statisitcs procedure SYSCS_UPDATE_STATISTICS is not available
+    	//  prior to 10.5 and hence we can't cause the hanging statistics to 
+    	//  appear in order to test the drop statistics after hard upgrade
+    	if (!oldAtLeast(10, 5)) return;
+
+    	// Helper object to obtain information about index statistics.
+        IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
+        Statement s = createStatement();
+    	
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            s.executeUpdate("CREATE TABLE TEST_TAB_1 (c11 int not null,"+
+                    "c12 int not null, c13 int)");
+            s.executeUpdate("INSERT INTO TEST_TAB_1 VALUES(1,1,1),(2,2,2)");
+            s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
+                    "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
+            		"PRIMARY KEY (c11)");
+            //The statistics for primary key constraint has been added
+            stats.assertTableStats("TEST_TAB_1",1);
+            
+            s.executeUpdate("CREATE TABLE TEST_TAB_2 (c21 int not null)");
+            s.executeUpdate("INSERT INTO TEST_TAB_2 VALUES(1),(2)");
+            s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
+                    "ADD CONSTRAINT TEST_TAB_2_PK_1 "+
+            		"PRIMARY KEY (c21)");
+            stats.assertTableStats("TEST_TAB_2",1);
+            //DERBY-5702 Add a foreign key constraint and now we should find 2 rows
+            // of statistics for TEST_TAB_2 - 1 for primary key and other for
+            // foreign key constraint
+            s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
+                    "ADD CONSTRAINT TEST_TAB_2_FK_1 "+
+            		"FOREIGN KEY(c21) REFERENCES TEST_TAB_1(c11)");
+            //DERBY-5702 Like primary key earlier, adding foreign key constraint
+            // didn't automatically add a statistics row for it. Have to run update
+            // statistics manually to get a row added for it's stat
+            stats.assertTableStats("TEST_TAB_2",1);
+            //Need to do a compress table to create the statistics for foreign
+            // key constraint. Update statisitcs procedure is only available
+            // in 10.5 and upwards and hence can't use that procedure here
+            // since we are testing older releases too.
+            s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
+            //s.execute("CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP','TEST_TAB_2',1)");
+            stats.assertTableStats("TEST_TAB_2",2);
+            s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
+                    "DROP CONSTRAINT TEST_TAB_2_FK_1");
+            //Dropping the foreign key constraint does not remove it's 
+            // statistics row because of DERBY-5681. This jira is fixed
+            // in 10.9 and higher and there we will not see the behavior
+        	if (oldAtLeast(10, 9))
+        		stats.assertTableStats("TEST_TAB_2",1);
+        	else
+        		stats.assertTableStats("TEST_TAB_2",2);
+            assertStatementError("42Y03", s,
+               		"CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
+            break;
+
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            assertStatementError("42Y03", s,
+               		"CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
+            break;
+
+        case PH_HARD_UPGRADE:
+        	if (oldAtLeast(10, 9))
+        		stats.assertTableStats("TEST_TAB_2",1);
+        	else
+        		stats.assertTableStats("TEST_TAB_2",2);
+            s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
+            stats.assertNoStatsTable("TEST_TAB_2");
+            s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
+    		stats.assertTableStats("TEST_TAB_2",1);
+            break;
+
+        case PH_POST_HARD_UPGRADE:
+        	//Make sure that the new procedure is still available
+            s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
+            s.executeUpdate("DROP TABLE TEST_TAB_1");
+            s.executeUpdate("DROP TABLE TEST_TAB_2");
+            break;
+        }
+
 	}
     
     /**

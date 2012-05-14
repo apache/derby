@@ -733,7 +733,7 @@ public class SystemProcedures  {
      *                      index. If null, then update the statistics for all
      *                      the indexes for the given table name.
      *
-	 * @exception  StandardException  Standard exception policy.
+	 * @exception  SQLException
      **/
     public static void SYSCS_UPDATE_STATISTICS(
     	    String  schemaname,
@@ -748,6 +748,45 @@ public class SystemProcedures  {
         	query = query + " all update statistics ";
         else
         	query = query + " update statistics " + IdUtil.normalToDelimited(indexname);
+        Connection conn = getDefaultConn();
+
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.executeUpdate();
+        ps.close();
+
+        conn.close();
+    }
+    
+    /**
+     * Drop the statistics for 
+     * 1)all the indexes or
+     * 2)a specific index on a table.
+     * 
+     * @param schemaname    schema name of the table/index(es) whose 
+     *                      statistics will be dropped. Must be non-null, 
+     *                      no default is used.
+     * @param tablename     table name of the index(es) whose statistics will
+     *                      be dropped. Must be non-null.
+     * @param indexname     Can be null. If not null or emptry string then the
+     *                      user wants to drop the statistics for only this
+     *                      index. If null, then drop the statistics for all
+     *                      the indexes for the given table name.
+     *
+	 * @exception  SQLException
+     */
+    public static void SYSCS_DROP_STATISTICS(
+    String  schemaname,
+    String  tablename,
+    String  indexname)
+        throws SQLException
+    {
+        String escapedSchema = IdUtil.normalToDelimited(schemaname);
+        String escapedTableName = IdUtil.normalToDelimited(tablename);
+        String query = "alter table " + escapedSchema + "." + escapedTableName;
+        if (indexname == null)
+        	query = query + " all drop statistics ";
+        else
+        	query = query + " statistics drop " + IdUtil.normalToDelimited(indexname);
         Connection conn = getDefaultConn();
 
         PreparedStatement ps = conn.prepareStatement(query);

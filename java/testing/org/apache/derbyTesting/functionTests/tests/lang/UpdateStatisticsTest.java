@@ -39,6 +39,8 @@ import org.apache.derbyTesting.junit.SQLUtilities;
 /**
  * Tests for updating the statistics of one index or all the indexes on a
  * table DERBY-269, DERBY-3788.
+ * Tests for dropping the statistics of one index or all the indexes on a
+ * table DERBY-4115.
  */
 public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
@@ -61,23 +63,73 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Test for update statistics
+     * Test that parser can work with column and index named STATISTICS and
+     *  does not get confused with non-reserved keyword STATISTICS used by
+     *  UPDATE and DROP STATISTICS syntax generated internally for
+     *  SYSCS_DROP_STATISTICS and SYSCS_UPDATE_STATISTICS
      */
-    public void testUpdateStatistics() throws SQLException {
+    public void testIndexAndColumnNamedStatistics() throws SQLException {
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
-        //following should fail because table APP.T1 does not exist
+
+        //Notice the name of one of the columns is STATISTICS
+        s.executeUpdate("CREATE TABLE t1 (c11 int, statistics int not null)");
+        //Notice that the name of the index is STATISTICS which is same as 
+        // one of the column names
+        s.executeUpdate("CREATE INDEX statistIcs ON t1(c11)");
+        s.executeUpdate("INSERT INTO t1 VALUES(1,1)");
+        stats.assertNoStats();
+        //Drop the column named STATISTICS and make sure parser doesn't
+        // throw an error
+        s.executeUpdate("ALTER TABLE t1 DROP statistics");
+        //Should still be able to call update/drop statistics on index 
+        // STATISTICS
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','STATISTICS')");
+        stats.assertStats(1);
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','STATISTICS')");
+        stats.assertNoStats();
+        //Add the column named STATISTICS back
+        s.executeUpdate("ALTER TABLE t1 ADD COLUMN statistics int");
+        stats.assertNoStats();
+        //Update or drop statistics for index named STATISTICS. Note that there
+        // is also a column named STATISTICS in the table
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','STATISTICS')");
+        stats.assertNoStats();
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','STATISTICS')");
+        stats.assertStats(1);
+        s.executeUpdate("DROP TABLE t1");
+    }
+
+    /**
+     * Test for update statistics
+     */
+    public void testUpdateAndDropStatistics() throws SQLException {
+        // Helper object to obtain information about index statistics.
+        IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
+        Statement s = createStatement();
+
+        //Calls to update and drop statistics below should fail because 
+        // table APP.T1 does not exist
+        assertStatementError("42Y55", s, 
+            "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
         assertStatementError("42Y55", s, 
             "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
+
         s.executeUpdate("CREATE TABLE t1 (c11 int, c12 varchar(128))");
         //following will pass now because we have created APP.T1
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
+        
         //following should fail because index I1 does not exist on table APP.T1
         assertStatementError("42X65", s, 
-            "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
+                "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I1')");
+        assertStatementError("42X65", s, 
+                "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
+        
         s.executeUpdate("CREATE INDEX i1 on t1(c12)");
         //following will pass now because we have created index I1 on APP.T1
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I1')");
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
 
         //The following set of subtest will ensure that when an index is
@@ -98,29 +150,59 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("INSERT INTO T1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
         s.executeUpdate("CREATE INDEX i2 ON t1(c11)");
         stats.assertStats(1);
+        //Drop the statistics on index I2 and then add it back by calling 
+        // update statistics
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I2')");
+        //Since we dropped the only statistics that existed for table T1, there
+        // will no stats found at this point
+        stats.assertNoStats();
+        s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I2')");
+        //The statistics for index I2 has been added back
+        stats.assertStats(1);
         //Now update the statistics for the old index I1 using the new stored
         //procedure. Doing this should add a row for it in sysstatistics table
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
         stats.assertStats(2);
+        //Drop the statistics on index I1 and then add it back by calling 
+        // update statistics
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I1')");
+        stats.assertStats(1);
+        s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
+        stats.assertStats(2);
+        //Drop all the statistics on table T1 and then recreate all the 
+        // statisitcs back again
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
+        stats.assertNoStats();
+        s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
+        stats.assertStats(2);
+        //Dropping the index should get rid of it's statistics
+        s.executeUpdate("DROP INDEX I1");
+        stats.assertStats(1);
 
-        //calls to system procedure for update statistics is internally
-        //converted into ALTER TABLE ... sql but that generated sql format
-        //is not available to end user to issue directly. Write a test case
-        //for that sql syntax
+        //calls to system procedure for update and drop statistics are
+        // internally converted into ALTER TABLE ... sql but that generated
+        // sql format is not available to end user to issue directly. Write a 
+        // test case for these internal sql syntaxes
         assertStatementError("42X01", s, 
             "ALTER TABLE APP.T1 ALL UPDATE STATISTICS");
         assertStatementError("42X01", s, 
             "ALTER TABLE APP.T1 UPDATE STATISTICS I1");
+        assertStatementError("42X01", s, 
+                "ALTER TABLE APP.T1 ALL DROP STATISTICS");
+        assertStatementError("42X01", s, 
+                "ALTER TABLE APP.T1 STATISTICS DROP I1");
         //cleanup
         s.executeUpdate("DROP TABLE t1");
 
-        //Try update statistics on global temporary table
+        //Try update and drop statistics on global temporary table
 		s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit delete rows not logged");
 		s.executeUpdate("insert into session.t1 values(11, 1)");
-        //following should fail because update statistics can't be issued on
-		//global temporary tables
+        //following should fail because update/drop statistics can't be issued
+		// on global temporary tables
         assertStatementError("42995", s, 
-            "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('SESSION','T1',null)");
+                "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('SESSION','T1',null)");
+        assertStatementError("42995", s, 
+                "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('SESSION','T1',null)");
         
         //Following test will show that updating the statistics will make a
         //query pickup better index compare to prior to statistics availability.
@@ -175,10 +257,24 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
         //Rerunning the query "SELECT * FROM t2 WHERE c21=? AND c22=?" and
         //looking at it's plan will show that this time it picked up more
-        //efficient index which is T2I2. 
+        //efficient index which is T2I2.
         JDBC.assertDrainResults(ps.executeQuery());
 		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
 		assertTrue(rtsp.usedSpecificIndexForIndexScan("T2","T2I2"));
+
+		//Drop statistics for T2I2 and we should see that we go back to using
+		// T2I1 rather than T2I2
+		s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T2','T2I2')");
+        stats.assertIndexStats("T2I2", 0);
+
+        //Rerunning the query "SELECT * FROM t2 WHERE c21=? AND c22=?" and
+        // looking at it's plan will show that this time it picked up T2I1
+        // rather than more efficient index T2I2  because no stats exists
+        // for T2I2
+        JDBC.assertDrainResults(ps.executeQuery());
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.usedSpecificIndexForIndexScan("T2","T2I1"));
+
         //cleanup
         s.executeUpdate("DROP TABLE t2");
         //End of test case for better index selection after statistics
@@ -360,14 +456,14 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
                 "ADD CONSTRAINT TEST_TAB_2_PK_1 "+
         		"PRIMARY KEY (c21)");
         stats.assertTableStats("TEST_TAB_2",1);
-        //Add a foreign key constraint and now we should find 2 rows of 
-        // statistics for TEST_TAB_2 - 1 for primary key and other for
+        //DERBY-5702 Add a foreign key constraint and now we should find 2 rows
+        // of statistics for TEST_TAB_2 - 1 for primary key and other for
         // foreign key constraint
         s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
                 "ADD CONSTRAINT TEST_TAB_2_FK_1 "+
         		"FOREIGN KEY(c21) REFERENCES TEST_TAB_1(c11)");
-        //Like primary key earlier, adding foreign key constraint didn't
-        // automatically add a statistics row for it. Have to run update
+        //DERBY-5702 Like primary key earlier, adding foreign key constraint
+        // didn't automatically add a statistics row for it. Have to run update
         // statistics manually to get a row added for it's stat
         stats.assertTableStats("TEST_TAB_2",1);
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
@@ -382,6 +478,10 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         stats.assertTableStats("TEST_TAB_2",1);
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
         stats.assertTableStats("TEST_TAB_2",1);
+        s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
+        //After DERBY-4115 is implemented, we will see no statistics 
+        // for TEST_TAB_2 after calling SYSCS_DROP_STATISTICS on it.
+        stats.assertNoStatsTable("TEST_TAB_2");
         s.execute("drop table TEST_TAB_2");
         s.execute("drop table TEST_TAB_1");
         stats.release();

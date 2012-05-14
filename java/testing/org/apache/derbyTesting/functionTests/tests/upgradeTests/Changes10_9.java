@@ -111,6 +111,38 @@ public class Changes10_9 extends UpgradeChange
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Make sure that the drop statistics procedure only appears after 
+     * hard-upgrade.
+     */
+    public  void    testDropStatisticsProc()  throws Exception
+    {
+        Statement s = createStatement();
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+            s.execute("CREATE TABLE dropStatsT1 (c11 int, c12 int) ");
+            vetProcs(s, "call syscs_util.syscs_drop_statistics( 'APP', 'DROPSTATST1', null )", false);
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            vetProcs(s, "call syscs_util.syscs_drop_statistics( 'APP', 'DROPSTATST1', null )", false);
+            break;
+            
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            vetProcs(s, "call syscs_util.syscs_drop_statistics( 'APP', 'DROPSTATST1', null )", false);
+            break;
+
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            vetProcs(s, "call syscs_util.syscs_drop_statistics( 'APP', 'DROPSTATST1', null )", true);
+            s.execute("DROP TABLE dropStatsT1");
+            break;
+        }
+        
+        s.close();
+    	
+    }
+    /**
      * Make sure that the catalogs and procedures for NATIVE authentication
      * only appear after hard-upgrade.
      */
@@ -143,24 +175,10 @@ public class Changes10_9 extends UpgradeChange
         
         s.close();
     }
-    private void    vetSYSUSERS( Statement s, boolean shouldExist ) throws Exception
+    private void    vetProcs( Statement s, String procCall, boolean shouldExist ) throws Exception
     {
-        ResultSet   rs = s.executeQuery( "select count(*) from sys.systables where tablename = 'SYSUSERS'" );
-        rs.next();
-
-        int expectedValue = shouldExist ? 1 : 0;
-
-        assertEquals( expectedValue, rs.getInt( 1 ) );
-
-        rs.close();
-    }
-    private void    vetNativeProcs( Statement s, boolean shouldExist ) throws Exception
-    {
-        // make sure that an authentication algorithm has been set
-        String  defaultDigestAlgorithm = pushAuthenticationAlgorithm( s );
-
         try {
-            s.execute( "call syscs_util.syscs_create_user( 'FRED', 'fredpassword' )" );
+            s.execute( procCall );
             
             if ( !shouldExist )
             {
@@ -177,7 +195,23 @@ public class Changes10_9 extends UpgradeChange
                 assertSQLState( "42Y03", se );
             }
         }
+    }
+    private void    vetSYSUSERS( Statement s, boolean shouldExist ) throws Exception
+    {
+        ResultSet   rs = s.executeQuery( "select count(*) from sys.systables where tablename = 'SYSUSERS'" );
+        rs.next();
 
+        int expectedValue = shouldExist ? 1 : 0;
+
+        assertEquals( expectedValue, rs.getInt( 1 ) );
+
+        rs.close();
+    }
+    private void    vetNativeProcs( Statement s, boolean shouldExist ) throws Exception
+    {
+        // make sure that an authentication algorithm has been set
+        String  defaultDigestAlgorithm = pushAuthenticationAlgorithm( s );
+        vetProcs(s, "call syscs_util.syscs_create_user( 'FRED', 'fredpassword' )", shouldExist);
         // restore the authentication algorithm if we changed it
         popAuthenticationAlgorithm( s, defaultDigestAlgorithm );
     }
