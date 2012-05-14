@@ -7761,12 +7761,15 @@ public final class	DataDictionaryImpl
 	public java.util.List getRoutineList(String schemaID, String routineName, char nameSpace)
 		throws StandardException {
 
-		java.util.List list = new  java.util.ArrayList();
-		
 		// Special in-memory table lookup for SYSFUN
 		if (schemaID.equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID)
 				&& nameSpace == AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR)
 		{
+            // We expect to find just a single function, since we currently
+            // don't support multiple routines with the same name, but use a
+            // list to support future extension.
+            List list = new ArrayList(1);
+
 			for (int f = 0; f < DataDictionaryImpl.SYSFUN_FUNCTIONS.length; f++)
 			{
 				String[] details = DataDictionaryImpl.SYSFUN_FUNCTIONS[f];
@@ -7819,10 +7822,9 @@ public final class	DataDictionaryImpl
 		}
 		
 		AliasDescriptor ad = getAliasDescriptor(schemaID, routineName, nameSpace);
-		if (ad != null) {
-			list.add(ad);
-		}
-		return list;
+        return ad == null ?
+                Collections.EMPTY_LIST :
+                Collections.singletonList(ad);
 	}
 
 	/** 
