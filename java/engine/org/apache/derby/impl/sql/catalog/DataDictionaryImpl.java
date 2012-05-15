@@ -8843,9 +8843,6 @@ public final class	DataDictionaryImpl
 											boolean wait)
 	       throws StandardException
 	{
-
-		FormatableBitSet columnToUpdate = new 
-  			FormatableBitSet(SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMN_COUNT);
   		int columnNum = SYSCOLUMNSRowFactory.SYSCOLUMNS_AUTOINCREMENTVALUE;
 		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
   		ConglomerateController heapCC = null;
@@ -8875,10 +8872,8 @@ public final class	DataDictionaryImpl
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_REPEATABLE_READ);
 
-            boolean baseRowExists = 
-                heapCC.fetch(rl, row.getRowArray(), columnToRead, wait);
-
-            columnToUpdate.set(columnNum - 1); // current value.
+            // fetch the current value
+            heapCC.fetch(rl, row.getRowArray(), columnToRead, wait);
 
             // while the Row interface is 1 based.
             NumberDataValue currentAI = (NumberDataValue)row.getColumn(columnNum);
@@ -8886,10 +8881,15 @@ public final class	DataDictionaryImpl
             
             if (doUpdate)
             {
-                // we increment and store the new value in SYSCOLUMNS
+                // increment the value
                 NumberDataValue increment = (NumberDataValue)row.getColumn(columnNum + 2);
                 currentAI = currentAI.plus(currentAI, increment, currentAI);
                 row.setColumn(columnNum, currentAI);
+
+                // store the new value in SYSCOLUMNS
+                FormatableBitSet columnToUpdate = new FormatableBitSet(
+                    SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMN_COUNT);
+                columnToUpdate.set(columnNum - 1); // current value.
                 heapCC.replace(rl, row.getRowArray(), columnToUpdate);
             }
                 
