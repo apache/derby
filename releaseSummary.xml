@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.7.1.1</previousReleaseID>
+<previousReleaseID>10.8.2.2</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,7 +47,7 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Mac OS X 10.5.8.</machine>
+  <machine>Mac OSX 10.7.3.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
   <antVersion>Apache Ant version 1.7.1 compiled on June 27 2008.</antVersion>
@@ -56,7 +56,7 @@ with real information.
   <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_22-b02-329).</jdk1.4>
 
   <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6>Java(TM) SE Runtime Environment (build 1.6.0_17-b04-248-9M3125).</java6>
+  <java6>Java(TM) SE Runtime Environment (build 1.6.0_31-b04-414-11M3626).</java6>
 
   <!--
          Say which compilers you used.
@@ -65,7 +65,7 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.6.0_17-b04-248-9M3125 javac was used to compile all classes.</compilers>
+  <compilers>The 1.6.0_31-b04-414-11M3626 javac was used to compile all classes.</compilers>
 
   <!--
          Say here whether you built the Java ME support and, if so, which
@@ -116,18 +116,12 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on the <i>java.sql</i> and <i>javax.sql</i> interfaces. This support works with
-the pre-GA OpenJDK 7 build 131 available at http://download.java.net/jdk7/ on March 3, 2011. Derby's implementation of these interfaces may
-change in a future release in the highly unlikely event that the actual GA version of these interfaces changes.</li>
+<li><b>NATIVE authentication</b> - Derby now provides better credentials management to replace BUILTIN authentication.</li>
 	
-<li><b>Automatic calculation of index statistics</b> - Derby automatically refreshes statistics to help it pick better query plans.</li>
+<li><b>JDBC 4.1 escape syntax</b> - Most of Derby's JDBC 4.1 support was provided in release 10.8.1.2. This release supplies the remaining bits: object mapping and new escape syntax.</li>
 	
-<li><b>Improved interrupt handling</b> - Interrupting connection threads no longer crashes the Derby engine.</li>
+<li><b>Multi-column EXISTS subqueries</b> - Multi-column SELECT lists are now allowed in EXISTS subqueries.</li>
 	
-<li><b>MAX optimization</b> - On indexed tables, MAX queries run faster in more cases.</li>
-
-<li><b>XML operator portability</b> - The xmlparse and xmlserialize operators work out-of-the-box on more platforms.</li>
-
 </ul>
 
 </newFeatures>
