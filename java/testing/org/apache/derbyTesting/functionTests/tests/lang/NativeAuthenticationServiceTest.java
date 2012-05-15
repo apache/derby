@@ -79,10 +79,13 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  DBO = "KIWI";   
     private static  final   String  APPLE_USER = "APPLE";   
     private static  final   String  PEAR_USER = "PEAR";   
+    private static  final   String  PRICKLY_PEAR_USER = "PeAr";   
     private static  final   String  ORANGE_USER = "ORANGE";   
     private static  final   String  BANANA_USER = "BANANA";   
     private static  final   String  GRAPE_USER = "GRAPE";   
-    private static  final   String  PINEAPPLE_USER = "PINEAPPLE";   
+    private static  final   String  PINEAPPLE_USER = "PINEAPPLE";
+
+    private static  final   String  CAMEL_CASE_DBO = "kIwI";
 
     private static  final   String  WALNUT_USER = "WALNUT";
 
@@ -137,6 +140,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  CANT_BOOT_DATABASE = "XJ040";
     private static  final   String  MISSING_USER = "XK001";
     private static  final   String  BAD_USER_AUTHENTICATOR_CLASS = "XBM0M";
+    private static  final   String  USER_ALREADY_EXISTS = "X0Y68";
 
     private static  final   String      WEAK_AUTHENTICATION = "4251G";
     private static  final   String      HASHING_FORMAT_10_9 = "3b62";
@@ -600,6 +604,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         else
         {
             vetCoreBehavior();
+            vetCasing();
             vetSystemWideOperations();
 
             if ( !_nativeAuthentication ) { vetProviderChanges(); }
@@ -688,7 +693,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             
             addUser( sysadminConn, DBO );
         }
-        
+
         // add another legal user
         addUser( sysadminConn, APPLE_USER );
         addUser( sysadminConn, BANANA_USER );
@@ -998,6 +1003,121 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         vetStatement( true, grapeConn, "select * from " + DBO + ".t", NO_COLUMN_PERMISSION );
         
         getConnection( true, false, protocolDBName, WALNUT_USER, INVALID_AUTHENTICATION );
+    }
+
+    /**
+     * <p>
+     * Verify the casing behavior of user identifiers.
+     * </p>
+     */
+    private void    vetCasing()   throws Exception
+    {
+        // only run this if we are using NATIVE authentication and the DBO's creds are already
+        // in the credentials DB. this is just to make sure that we are in a database where
+        // the DBO's creds already exist.
+        if ( !_nativeAuthentication ) { return; }
+        if ( _localAuthentication ) { return; }
+
+        String  originalPricklyPearPassword = "prickly_pear_password";
+        
+        // connect to the credentials database
+        Connection  dboConn = openConnection( CREDENTIALS_DB, DBO, true, null );
+
+        // can't add redundant credentials for an authorization id by changing the casing
+        addUser( dboConn, CAMEL_CASE_DBO, USER_ALREADY_EXISTS );
+
+        // using double-quotes, however, you can create a camel-case user name
+        addUser( dboConn, PEAR_USER, null );
+        assertFalse( PEAR_USER.equals( PRICKLY_PEAR_USER ) );
+        assertTrue( PEAR_USER.toUpperCase().equals( PRICKLY_PEAR_USER.toUpperCase() ) );
+        goodStatement
+            (
+             dboConn,
+             "call syscs_util.syscs_create_user( '\"" + PRICKLY_PEAR_USER + "\"', '" + originalPricklyPearPassword + "' )"
+             );
+        String[][]  legalUsers = new String[][] { { PEAR_USER }, { PRICKLY_PEAR_USER } };
+        assertResults
+            (
+             dboConn,
+             "select username from sys.sysusers where username like 'P%' order by username",
+             legalUsers,
+             false
+             );
+
+        // schema name for an unquoted user name should be upper case
+        Connection  pearConn = openConnection( CREDENTIALS_DB, PEAR_USER, true, null );
+        assertResults
+            (
+             pearConn,
+             "values current schema",
+             new String[][] { { PEAR_USER.toUpperCase() } },
+             false
+             );
+
+        // schema name for a quoted user name should be camel case
+        Connection  pricklyPearConn = openConnection
+            ( CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), originalPricklyPearPassword, true, null );
+        assertResults
+            (
+             pricklyPearConn,
+             "values current schema",
+             new String[][] { { PRICKLY_PEAR_USER } },
+             false
+             );
+
+        //
+        // Verify the casing on the USERNAME argument to the NATIVE procedures
+        //
+
+        // modify password
+        String  rev2_password = "password_rev2";
+        goodStatement
+            (
+             pricklyPearConn,
+             "call syscs_util.syscs_modify_password( '" + rev2_password + "' )"
+             );
+        getConnection
+            ( true, true, CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), originalPricklyPearPassword, INVALID_AUTHENTICATION );
+        pricklyPearConn = openConnection
+            ( CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), rev2_password, true, null );
+
+        // reset password
+        String rev3_password = "password_rev3";
+        goodStatement
+            (
+             dboConn,
+             "call syscs_util.syscs_reset_password( '" + doubleQuote( PRICKLY_PEAR_USER ) + "', '" + rev3_password + "' )"
+             );
+        getConnection
+            ( true, true, CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), rev2_password, INVALID_AUTHENTICATION );
+        pricklyPearConn = openConnection
+            ( CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), rev3_password, true, null );
+
+        // drop user
+        int     userCount = countUsers( dboConn );
+        goodStatement
+            (
+             dboConn,
+             "call syscs_util.syscs_drop_user( '" + doubleQuote( PRICKLY_PEAR_USER ) + "' )"
+             );
+        assertEquals( userCount - 1, countUsers( dboConn ) );
+        getConnection
+            ( true, true, CREDENTIALS_DB, doubleQuote( PRICKLY_PEAR_USER ), rev3_password, INVALID_AUTHENTICATION );
+    }
+    private String  doubleQuote( String raw ) { return "\"" + raw + "\""; }
+    private int countUsers( Connection conn ) throws Exception
+    {
+        PreparedStatement   ps = chattyPrepare( conn, "select count(*) from sys.sysusers" );
+        ResultSet   rs = ps.executeQuery();
+
+        rs.next();
+
+        try { return rs.getInt( 1 ); }
+        finally
+        {
+            rs.close();
+            ps.close();
+        }
     }
 
     /**
@@ -1391,6 +1511,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         PreparedStatement   ps = conn.prepareStatement( "select userName, hashingScheme from sys.sysusers" );
         ResultSet   rs = ps.executeQuery();
+
+        // normalize the user name
+        userName = userName.toUpperCase();
 
         try {
             while ( rs.next() )

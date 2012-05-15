@@ -2090,6 +2090,8 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        userName = normalizeUserName( userName );
+            
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
         TransactionController tc = lcc.getTransactionExecute();
 
@@ -2197,6 +2199,19 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        resetAuthorizationIDPassword( normalizeUserName( userName ), password );
+    }
+
+    /**
+     * Reset the password for an already normalized authorization id.
+     */
+    private static  void    resetAuthorizationIDPassword
+        (
+         String userName,
+         String password
+         )
+        throws SQLException
+    {
         try {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
@@ -2221,7 +2236,7 @@ public class SystemProcedures  {
             
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
-  
+    
     /**
      * Change a user's password.
      */
@@ -2233,7 +2248,7 @@ public class SystemProcedures  {
     {
         String currentUser = ConnectionUtil.getCurrentLCC().getStatementContext().getSQLSessionContext().getCurrentUser();
 
-        SYSCS_RESET_PASSWORD( currentUser, password );
+        resetAuthorizationIDPassword( currentUser, password );
     }
   
     /**
@@ -2245,6 +2260,8 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        userName = normalizeUserName( userName );
+            
         try {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
@@ -2284,6 +2301,18 @@ public class SystemProcedures  {
         {
             throw StandardException.newException( SQLState.NO_SUCH_USER );
         }
+    }
+
+    /**
+     * Normalize the user name so that there is only one set of credentials
+     * for a given authorization id.
+     */
+    private static  String  normalizeUserName( String userName )
+        throws SQLException
+    {
+        try {
+            return IdUtil.getUserAuthorizationId( userName );
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
   
     /**
