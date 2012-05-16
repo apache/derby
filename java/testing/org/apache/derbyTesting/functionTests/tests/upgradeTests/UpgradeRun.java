@@ -20,17 +20,10 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
 import java.util.Properties;
 
 import junit.extensions.TestSetup;
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -77,7 +70,7 @@ class UpgradeRun extends UpgradeClassLoader
         new AdditionalDb("BUILTIN_10_9", false),
     };
     
-    public final static Test suite(final int[] version, boolean useCreateOnUpgrade) {
+    public static Test suite(final int[] version, boolean useCreateOnUpgrade) {
         
         ClassLoader oldLoader = makeClassLoader( version );
         
@@ -227,7 +220,7 @@ class UpgradeRun extends UpgradeClassLoader
             // of DatabaseMetaData should be available.
             case UpgradeChange.PH_SOFT_UPGRADE:
             case UpgradeChange.PH_HARD_UPGRADE:
-                RunDataBaseMetaDataTest(suite, oldMinor);
+                runDataBaseMetaDataTest(suite, oldMinor);
                 break;
             }
         }
@@ -291,11 +284,15 @@ class UpgradeRun extends UpgradeClassLoader
         return test;
     }
     
-    // We want to run DatabaseMetaDataTest, but it includes some
-    // features not supported in older versions, so we cannot just
-    // add the DatabaseMetaDataTest.class as is.
-    // Note also, that this does not execute fixture initialCompilationTest.
-    private static void RunDataBaseMetaDataTest (TestSuite suite, int oldMinor)
+    /**
+     * Adds a subset of the tests from DatabaseMetaDataTest to the test suite.
+     * <p>
+     * We want to run DatabaseMetaDataTest, but it includes some
+     * features not supported in older versions, so we cannot just
+     * add the DatabaseMetaDataTest.class as is.
+     * Note also, that this does not execute fixture initialCompilationTest.
+     */
+    private static void runDataBaseMetaDataTest (TestSuite suite, int oldMinor)
     {
         Method[] methods = DatabaseMetaDataTest.class.getMethods();
         for (int i = 0; i < methods.length; i++) {
