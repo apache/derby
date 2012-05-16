@@ -109,11 +109,10 @@ ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225<
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, '', null) ;
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
-ij> --more than one character passed to the delimiters get truncated to one
---following one should give error because eventually '\' delimiter 
+ij> --following one should give error because eventually '\' delimiter 
 --is used a both for char and col
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
-                                 '\a', '\', null) ;
+                                 '\', '\', null) ;
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> --DO A VALID EXPORT AND  IMPORT 
 set schema iep;

@@ -2406,10 +2406,10 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "create table t_cc_char\n" +
              "(\n" +
              "    a char( 10 ),\n" +
-             "    b char( 5 ) generated always as( upper( a ) ),\n" +
+             "    b char( 5 ) generated always as( cast(upper( a ) as char(5))),\n" +
              "    c char( 10 ) generated always as( upper( a ) ),\n" +
              "    d char( 15 ) generated always as( upper( a ) ),\n" +
-             "    e varchar( 5 ) generated always as( upper( a ) ),\n" +
+             "    e varchar( 5 ) generated always as( cast(upper( a ) as varchar(5))),\n" +
              "    f varchar( 10 ) generated always as( upper( a ) ),\n" +
              "    g varchar( 15 ) generated always as( upper( a ) )\n" +
              ")\n"
@@ -2420,10 +2420,10 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "create table t_cc_varchar\n" +
              "(\n" +
              "    a varchar( 10 ),\n" +
-             "    b char( 5 ) generated always as( upper( a ) ),\n" +
+             "    b char( 5 ) generated always as( cast(upper( a ) as char(5))),\n" +
              "    c char( 10 ) generated always as( upper( a ) ),\n" +
              "    d char( 15 ) generated always as( upper( a ) ),\n" +
-             "    e varchar( 5 ) generated always as( upper( a ) ),\n" +
+             "    e varchar( 5 ) generated always as( cast(upper( a ) as varchar(5))),\n" +
              "    f varchar( 10 ) generated always as( upper( a ) ),\n" +
              "    g varchar( 15 ) generated always as( upper( a ) )\n" +
              ")\n"
@@ -2526,12 +2526,12 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
-             "create table t_atac_3( a varchar( 5 ), b varchar( 5 ) generated always as ( upper( a )  ) )"
+             "create table t_atac_3( a varchar( 5 ), b varchar( 5 ) generated always as ( cast(upper( a ) as varchar(5)) ) )"
              );
         goodStatement
             (
              conn,
-             "create table t_atac_4( a varchar( 5 ) for bit data,  b varchar( 5 ) for bit data generated always as ( a )  )"
+             "create table t_atac_4( a varchar( 5 ) for bit data,  b varchar( 5 ) for bit data generated always as ( cast(a as varchar( 5 ) for bit data))  )"
              );
 
         //
@@ -5534,6 +5534,44 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
                       false
          
         );
+    }
+
+
+    // Derby 5749
+    public void test_derby_5749()
+        throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+        (
+            conn,
+            "create table t_5749\n" +
+            "(c varchar(5) generated always as ('--' || b), b varchar(5))\n"
+        );
+
+        // fails on truncation
+        expectExecutionError
+        (
+            conn,
+            STRING_TRUNCATION,
+            "insert into t_5749 values (default, '12345')"
+        );
+
+        // Try an update case:
+        goodStatement
+        (
+            conn,
+            "insert into t_5749 values (default, '123')"
+        );
+
+        expectExecutionError
+        (
+            conn,
+            STRING_TRUNCATION,
+            "update t_5749 set b='12345'"
+        );
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

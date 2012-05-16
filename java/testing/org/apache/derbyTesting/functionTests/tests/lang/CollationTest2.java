@@ -1534,7 +1534,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         // bulk insert with replace to empty table/one index from an empty file 
         // import empty_file.dat into EMPTY_TABLE 
         doImportTable(
-                "APP", "EMPTY_TABLE", emptyFileName, "|", "``", null, 1);
+                "APP", "EMPTY_TABLE", emptyFileName, "|", "`", null, 1);
 
         commit();
 

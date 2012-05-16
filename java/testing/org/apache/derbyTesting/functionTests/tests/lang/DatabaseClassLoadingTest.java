@@ -161,7 +161,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                   "language java parameter style java");
 
                 s.executeUpdate(
-                  "create function EMC.GETARTICLE(path VARCHAR(40)) " +
+                  "create function EMC.GETARTICLE(path VARCHAR(60)) " +
                   "RETURNS VARCHAR(256) " +
                   "NO SQL " +
                   "external name 'org.apache.derbyTesting.databaseclassloader.emc.getArticle' " +

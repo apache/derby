@@ -70,11 +70,10 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' ,
                                  null, '', null) ;
 
 
---more than one character passed to the delimiters get truncated to one
 --following one should give error because eventually '\' delimiter 
 --is used a both for char and col
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
-                                 '\a', '\', null) ;
+                                 '\', '\', null) ;
 
 
 --DO A VALID EXPORT AND  IMPORT 

@@ -92,6 +92,16 @@ public class CastNode extends ValueNode
 	** whether the case is possible or not.
 	*/
 
+    /**
+     * Method calls:
+     * Argument type has the same semantics as assignment:
+     * Section 9.2 (Store assignment). There, General Rule
+     * 2.b.v.2 says that the database should raise an exception
+     * if truncation occurs when stuffing a string value into a
+     * VARCHAR, so make sure CAST doesn't issue warning only.
+     */
+    private boolean assignmentSemantics = false;
+
 	/**
 	 * Initializer for a CastNode
 	 *
@@ -981,7 +991,9 @@ public class CastNode extends ValueNode
 			
 			mb.push(isNumber ? getTypeServices().getPrecision() : getTypeServices().getMaximumWidth());
 			mb.push(getTypeServices().getScale());
-			mb.push(!sourceCTI.variableLength() || isNumber);
+            mb.push(!sourceCTI.variableLength() ||
+                    isNumber ||
+                    assignmentSemantics);
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.VariableSizeDataValue,
 					"setWidth", "void", 3);
 
@@ -1028,6 +1040,16 @@ public class CastNode extends ValueNode
 		forDataTypeFunction = b;
 	}
 
+    /**
+     * Set assignmentSemantics to true. Used by method calls for casting actual
+     * arguments
+     */
+    void setAssignmentSemantics()
+    {
+        assignmentSemantics = true;
+    }
+
+    
 	/**
 	 * {@inheritDoc}
 	 * @throws StandardException 

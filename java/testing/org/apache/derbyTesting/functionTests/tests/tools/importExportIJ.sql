@@ -535,14 +535,14 @@ create table derby_2925_lob
 --
 
 CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
-('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\' ,'|','UTF-16','extout/derby-2925_lobs.dat');
 --
 -- Errors should should happen in the second
 -- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
 -- since extout/derby-2925_data.dat already exists.
 --
 CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
-('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\' ,'|','UTF-16','extout/derby-2925_lobs.dat');
 
 --
 -- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
@@ -554,7 +554,7 @@ CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
 --
 
 CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
-('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data1.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data1.dat', '\' ,'|','UTF-16','extout/derby-2925_lobs.dat');
 
 --
 -- end test case for derby-2925:

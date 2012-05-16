@@ -26,7 +26,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.JSQLType;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -34,7 +33,6 @@ import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
@@ -42,8 +40,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -54,9 +50,6 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.catalog.UUID;
 
 import java.util.Vector;
 import java.lang.reflect.Modifier;
@@ -618,6 +611,12 @@ public class StaticMethodCallNode extends MethodCallNode
 						paramdtd,
 						getContextManager());
 
+                    // Argument type has the same semantics as assignment:
+                    // Section 9.2 (Store assignment). There, General Rule 
+                    // 2.b.v.2 says that the database should raise an exception
+                    // if truncation occurs when stuffing a string value into a
+                    // VARCHAR, so make sure CAST doesn't issue warning only.
+                    ((CastNode)castNode).setAssignmentSemantics();
 
 					methodParms[p] = (JavaValueNode) getNodeFactory().getNode(
 							C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,

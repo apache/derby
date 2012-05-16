@@ -2044,7 +2044,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
-            + "'extinout/t1.dat' , '\\a', '\\', null) ");
+            + "'extinout/t1.dat' , '\\', '\\', null) ");
         assertStatementError("XIE0J", cSt);
                 
         //DO A VALID EXPORT AND  IMPORT

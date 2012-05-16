@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -640,7 +641,53 @@ public class RoutineTest extends BaseJDBCTestCase {
         assertStatementError( CANNOT_STUFF_NULL_INTO_PRIMITIVE, s, "values( negateInt( cast( null as int) ) )" );
         assertStatementError( CANNOT_STUFF_NULL_INTO_PRIMITIVE, s, "values( negateInt( getNullInt() ) )" );
     }
-    
+
+    /**
+     * DERBY-5749: Too long (non-blank) argument for VARCHAR parameter does not
+     * throw as expected.
+     */
+    public void test_5749() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("create table t5749(v varchar(5))");
+        s.executeUpdate(
+            "create procedure p5749 (a varchar(5)) modifies sql data " +
+            "external name '" + RoutineTest.class.getName() + ".p5749' " +
+            "language java parameter style java");
+        CallableStatement cs = prepareCall("call p5749(?)");
+        cs.setString(1, "123456");
+
+        // This silently truncates before fix of DERBY-5749
+        try {
+            cs.execute();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22001", e);
+        }
+
+        // This silently truncates also
+        try {
+            s.executeUpdate("call p5749('123456')");
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22001", e);
+        }
+
+
+        PreparedStatement ps = prepareStatement("insert into t5749 values(?)");
+        ps.setString(1, "123456");
+        // This does not truncate
+        try {
+            ps.execute();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22001", e);
+        }
+    }
+
+
+
+
     /*
     ** Routine implementations called from the tests but do
     *  not use DriverManager so that this test can be used on
@@ -688,6 +735,8 @@ public class RoutineTest extends BaseJDBCTestCase {
 
     public static int negateInt( int arg ) { return -arg; }
     public static Integer getNullInt() { return null; }
-    
+
+    public static void p5749 (String s) {
+    }
 }
 

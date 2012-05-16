@@ -109,6 +109,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  FORBIDDEN_DROP_TRIGGER = "X0Y24";
     protected static  final   String  LOCK_TIMEOUT = "40XL1";
     protected static  final   String  TOO_MUCH_CONTENTION = "X0Y84";
+    protected static  final   String  STRING_TRUNCATION = "22001";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

@@ -457,7 +457,14 @@ abstract class DMLModStatementNode extends DMLStatementNode
                      dtd,
                      getContextManager()
                      );
-
+                
+                // Assignment semantics of implicit cast here:
+                // Section 9.2 (Store assignment). There, General Rule 
+                // 2.b.v.2 says that the database should raise an exception
+                // if truncation occurs when stuffing a string value into a
+                // VARCHAR, so make sure CAST doesn't issue warning only.
+                ((CastNode)generationClause).setAssignmentSemantics();
+                
                 //
                 // Unqualified function references should resolve to the
                 // current schema at the time that the table was
