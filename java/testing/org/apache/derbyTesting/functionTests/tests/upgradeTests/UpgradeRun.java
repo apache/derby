@@ -294,6 +294,7 @@ class UpgradeRun extends UpgradeClassLoader
      */
     private static void runDataBaseMetaDataTest (TestSuite suite, int oldMinor)
     {
+        TestSuite dmdSuite = new TestSuite("DatabaseMetaData subsuite");
         Method[] methods = DatabaseMetaDataTest.class.getMethods();
         for (int i = 0; i < methods.length; i++) {
             Method m = methods[i];
@@ -309,9 +310,14 @@ class UpgradeRun extends UpgradeClassLoader
                    // because of missing support for grant/revoke/privileges
                    (!(name.equals("testGetTablePrivileges") && oldMinor <2)) &&
                    (!(name.equals("testGetColumnPrivileges") && oldMinor <2)))
-                    suite.addTest(new DatabaseMetaDataTest(name));
+                    dmdSuite.addTest(new DatabaseMetaDataTest(name));
             }
         }
+        // Run the test in its own schema to avoid interference from other
+        // tests. A typical example is additional matching rows when querying
+        // system tables like SYS.SYSFOREIGNKEYS.
+        suite.addTest(TestConfiguration.changeUserDecorator(
+                                                    dmdSuite, "DMDT", "DMDT"));
     }
 
 }

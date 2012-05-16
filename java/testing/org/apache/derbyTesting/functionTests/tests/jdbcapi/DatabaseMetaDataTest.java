@@ -173,11 +173,32 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Did the test modifiy the database.
      */
     private boolean modifiedDatabase;
+    /**
+     * The schema used by the test.
+     * <p>
+     * Added to avoid other tests interfering with our metadata queries.
+     * Configured by running the test with a specific user, i.e. use
+     * {@linkplain TestConfiguration#changeUserDecorator}.
+     */
+    private String schema;
 
     public DatabaseMetaDataTest(String name) {
         super(name);
     }
     
+    /** Set the schema name to be used by the test. */
+    protected void setUp()
+            throws Exception {
+        // Currently there are no tests that depend on data created outside
+        // of the test ficture itself. This means we can relax the retrictions 
+        // on the user name, and thus schema; we don't need to keep it the same
+        // over all test fixtures.
+        schema = TestConfiguration.getCurrent().getUserName();
+        // Only a prerequisite for one test, but enforce it here (fail-fast).
+        assertTrue("schema name must be at least three characters long",
+                schema.length() > 2);
+    }
+
     protected void tearDown() throws Exception
     {
         if (modifiedDatabase)
@@ -861,7 +882,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         String[][] expectedRows = new String[][]
         {
-            {  null, "APP", "PRICE", "org.apache.derbyTesting.functionTests.tests.lang.Price", "2000", null, null },
+            {  null, schema, "PRICE", "org.apache.derbyTesting.functionTests.tests.lang.Price", "2000", null, null },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
 
@@ -877,22 +898,24 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
 
         // try explicit schema and type name
-        rs = dmd.getUDTs( null, "APP", "PRICE", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        rs = dmd.getUDTs( null, schema, "PRICE",
+                new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
         JDBC.assertFullResultSet( rs, expectedRows );
 
-        rs = dmd.getUDTs( null, "AP%", "PRI%", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        rs = dmd.getUDTs( null, schema.substring(0, 2) + "%", "PRI%",
+                new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
         JDBC.assertFullResultSet( rs, expectedRows );
         
         rs = dmd.getUDTs( null, "FOO", "PRICE", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
         JDBC.assertEmpty(rs);
 
         // now make sure that getColumns() returns the right data
-        rs = dmd.getColumns( null, "APP", "ORDERS", null );
+        rs = dmd.getColumns( null, schema, "ORDERS", null );
         expectedRows = new String[][]
         {
             {
-                "", "APP", "ORDERS", "TOTALPRICE",
-                "2000", "\"APP\".\"PRICE\"", "-1", null,
+                "", schema, "ORDERS", "TOTALPRICE",
+                "2000", "\"" + schema + "\".\"PRICE\"", "-1", null,
                 null, null, "1", "",
                 null, null, null, null,
                 "1", "YES", null, null,
@@ -900,7 +923,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
-        rs = dmd.getColumns( null, "APP", "ORDERS", null );
+        rs = dmd.getColumns( null, schema, "ORDERS", null );
         crossCheckGetColumnsAndResultSetMetaData( rs, false, 0 );
 
         dropObjectsForUDTTests();
@@ -2977,42 +3000,42 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         /* Check for all arguments NULL; SQLFOREIGNKEYS allows this, though
          * there is no equivalent in JDBC.
          */
-        checkODBCKeys(null, null, null, null, null, null);
+        checkODBCKeys(null, schema, null, null, null, null);
 
         /* Run equivalent of getImportedKeys(), getExportedKeys(),
          * and getCrossReference for each of the primary/foreign
          * key pairs.
          */
 
-        checkODBCKeys(null, null, null, null, null, "FKT1");
-        checkODBCKeys(null, null, "PKT1", null, null, null);
-        checkODBCKeys(null, null, "PKT1", null, null, "FKT1");
+        checkODBCKeys(null, schema, null, null, null, "FKT1");
+        checkODBCKeys(null, schema, "PKT1", null, null, null);
+        checkODBCKeys(null, schema, "PKT1", null, null, "FKT1");
 
-        checkODBCKeys(null, null, null, null, null, "FKT2");
-        checkODBCKeys(null, null, "PKT2", null, null, null);
-        checkODBCKeys(null, null, "PKT2", null, null, "FKT2");
+        checkODBCKeys(null, schema, null, null, null, "FKT2");
+        checkODBCKeys(null, schema, "PKT2", null, null, null);
+        checkODBCKeys(null, schema, "PKT2", null, null, "FKT2");
 
-        checkODBCKeys(null, null, null, null, null, "FKT3");
-        checkODBCKeys(null, null, "PKT3", null, null, null);
-        checkODBCKeys(null, null, "PKT3", null, null, "FKT3");
+        checkODBCKeys(null, schema, null, null, null, "FKT3");
+        checkODBCKeys(null, schema, "PKT3", null, null, null);
+        checkODBCKeys(null, schema, "PKT3", null, null, "FKT3");
 
         // Reverse primary and foreign tables.
 
-        checkODBCKeys(null, null, "FKT1", null, null, null);
-        checkODBCKeys(null, null, null, null, null, "PKT3");
-        checkODBCKeys(null, null, "FKT1", null, null, "PKT1");
-        checkODBCKeys(null, null, "FKT2", null, null, "PKT2");
-        checkODBCKeys(null, null, "FKT3", null, null, "PKT3");
+        checkODBCKeys(null, schema, "FKT1", null, null, null);
+        checkODBCKeys(null, schema, null, null, null, "PKT3");
+        checkODBCKeys(null, schema, "FKT1", null, null, "PKT1");
+        checkODBCKeys(null, schema, "FKT2", null, null, "PKT2");
+        checkODBCKeys(null, schema, "FKT3", null, null, "PKT3");
 
         // Mix-and-match primary key tables and foreign key tables.
 
-        checkODBCKeys(null, null, "PKT1", null, null, "FKT2");
-        checkODBCKeys(null, null, "PKT1", null, null, "FKT3");
-        checkODBCKeys(null, null, "PKT2", null, null, "FKT3");
+        checkODBCKeys(null, schema, "PKT1", null, null, "FKT2");
+        checkODBCKeys(null, schema, "PKT1", null, null, "FKT3");
+        checkODBCKeys(null, schema, "PKT2", null, null, "FKT3");
 
-        checkODBCKeys(null, null, "FKT1", null, null, "PKT2");
-        checkODBCKeys(null, null, "FKT1", null, null, "PKT3");
-        checkODBCKeys(null, null, "FKT2", null, null, "PKT3");
+        checkODBCKeys(null, schema, "FKT1", null, null, "PKT2");
+        checkODBCKeys(null, schema, "FKT1", null, null, "PKT3");
+        checkODBCKeys(null, schema, "FKT2", null, null, "PKT3");
 
         // Cleanup.
 
@@ -3088,13 +3111,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
             JDBC.assertFullResultSet(odbcrs,
                 new String [][] {
-                    {"","APP","PKT1","I","","APP","FKT1","FI",
+                    {"",schema,"PKT1","I","",schema,"FKT1","FI",
                         "1","3","3","FK1","PK1","7"},
-                    {"","APP","PKT2","C","","APP","FKT1","FC",
+                    {"",schema,"PKT2","C","",schema,"FKT1","FC",
                         "1","3","3","FK2","PK2","7"},
-                    {"","APP","PKT3","I","","APP","FKT2","FI",
+                    {"",schema,"PKT3","I","",schema,"FKT2","FI",
                         "1","3","3","FK3","PK3","7"},
-                    {"","APP","PKT3","C","","APP","FKT2","FC",
+                    {"",schema,"PKT3","C","",schema,"FKT2","FC",
                         "2","3","3","FK3","PK3","7"}
                 });
 
@@ -3260,105 +3283,105 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
         
         // result: column i
-        ResultSet[] rs = getBestRowIdentifier(null,"APP","BRIT1",
+        ResultSet[] rs = getBestRowIdentifier(null,schema,"BRIT1",
         		DatabaseMetaData.bestRowTemporary, true);
         verifyBRIResults(rs, expRSI);
 
         // result: column i
-        rs = getBestRowIdentifier(null,"APP","BRIT2",
+        rs = getBestRowIdentifier(null,schema,"BRIT2",
         		DatabaseMetaData.bestRowTemporary, true);
         verifyBRIResults(rs, expRSI);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT3",
+        rs = getBestRowIdentifier(null,schema,"BRIT3",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSJ);
         
         // result: column i
-        rs = getBestRowIdentifier(null,"APP","BRIT4",
+        rs = getBestRowIdentifier(null,schema,"BRIT4",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSI);
         
         // result: columns i and j
-        rs = getBestRowIdentifier(null,"APP","BRIT5",
+        rs = getBestRowIdentifier(null,schema,"BRIT5",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT6",
+        rs = getBestRowIdentifier(null,schema,"BRIT6",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSJ);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT7",
+        rs = getBestRowIdentifier(null,schema,"BRIT7",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSJ);
         
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT8",
+        rs = getBestRowIdentifier(null,schema,"BRIT8",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT9",
+        rs = getBestRowIdentifier(null,schema,"BRIT9",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT10",
+        rs = getBestRowIdentifier(null,schema,"BRIT10",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT11",
+        rs = getBestRowIdentifier(null,schema,"BRIT11",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT12",
+        rs = getBestRowIdentifier(null,schema,"BRIT12",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
         
         // Verify nullOK flags makes a difference. See also DERBY-3182
         // result: column i, should've ignored null column
-        rs = getBestRowIdentifier(null,"APP","BRIT13",
+        rs = getBestRowIdentifier(null,schema,"BRIT13",
         		DatabaseMetaData.bestRowTemporary,false);
         verifyBRIResults(rs, expRSI);
         // result: columns i, j
-        rs = getBestRowIdentifier(null,"APP","BRIT13",
+        rs = getBestRowIdentifier(null,schema,"BRIT13",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSIJ);
         
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT14",
+        rs = getBestRowIdentifier(null,schema,"BRIT14",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSI);
         
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT15",
+        rs = getBestRowIdentifier(null,schema,"BRIT15",
         		DatabaseMetaData.bestRowTemporary,true);
         verifyBRIResults(rs, expRSI);
         
         // we don't do anything with SCOPE except detect bad values
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT16",
+        rs = getBestRowIdentifier(null,schema,"BRIT16",
         		DatabaseMetaData.bestRowTransaction,true);
         verifyBRIResults(rs, expRSI);
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT16",
+        rs = getBestRowIdentifier(null,schema,"BRIT16",
         		DatabaseMetaData.bestRowSession,true);
         verifyBRIResults(rs, expRSI);
         // result: no rows (invalid scope -1)
-        rs = getBestRowIdentifier(null,"APP","BRIT16",-1,true);
+        rs = getBestRowIdentifier(null,schema,"BRIT16",-1,true);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
         // result: no rows (invalid scope 3)
-        rs = getBestRowIdentifier(null,"APP","BRIT16",3,true);
+        rs = getBestRowIdentifier(null,schema,"BRIT16",3,true);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
-        rs = getBestRowIdentifier(null, "APP","BRIT17",
+        rs = getBestRowIdentifier(null, schema,"BRIT17",
         		DatabaseMetaData.bestRowTemporary,true);
         String [][] expRS = new String [][] {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
@@ -3373,7 +3396,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // test DERBY-2610 for fun; can't pass in null table name      
         try {
-            rs = getBestRowIdentifier(null,"APP",null,
+            rs = getBestRowIdentifier(null,schema,null,
             		DatabaseMetaData.bestRowTemporary,true);
         } catch (SQLException sqle) {
             assertSQLState( "XJ103", sqle);
@@ -3736,7 +3759,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.execute("create table iit (i int not null, j int)");
         st.execute("create unique index iii on iit(i asc, j desc)");
         DatabaseMetaData dmd = getDMD();
-        ResultSet rs = dmd.getIndexInfo("","APP","IIT",false,false);
+        ResultSet rs = dmd.getIndexInfo("",schema,"IIT",false,false);
         rs.next();
         if (rs != null)
             assertEquals("A",rs.getString(10));
@@ -3744,7 +3767,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if (rs != null)
             assertEquals("D",rs.getString(10));
 
-        rs = getIndexInfoODBC("","APP","IIT",false,false);
+        rs = getIndexInfoODBC("",schema,"IIT",false,false);
         rs.next();
         if (rs != null)
             assertEquals("A",rs.getString(10));
@@ -3906,8 +3929,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public void testGetPrimaryKeys() throws SQLException
     {
         String[][] expRS = new String[][] {
-                {"","APP","KT1","I","2","PRIMKEY"},
-                {"","APP","KT1","VC10","1","PRIMKEY"}};
+                {"",schema,"KT1","I","2","PRIMKEY"},
+                {"",schema,"KT1","VC10","1","PRIMKEY"}};
                        
         createObjectsForKeysTests();
         
@@ -3916,7 +3939,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ResultSet rs[] = getPrimaryKeys("", "%", "KT1");
         assertFullResultSet(rs, expRS, true);
         
-        rs = getPrimaryKeys(null, "APP", "KT1");
+        rs = getPrimaryKeys(null, schema, "KT1");
         assertFullResultSet(rs, expRS, true);
 
         rs = getPrimaryKeys(null, null, "KT1");
@@ -4000,16 +4023,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
 
         String[][] expRS1 = new String[][] {
-            {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
-            {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
-            {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
-            {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
-            {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
-            {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
-            {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+            {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+            {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+            {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+            {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+            {"",schema,"KT1","S","",schema,"REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+            {"",schema,"KT1","S","",schema,"REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+            {"",schema,"REFTAB","DPRIM","",schema,"REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
         String[][] expRS2 = new String[][] {
-            {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
-            {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};               
+            {"",schema,"KT1","VC10","",schema,"REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+            {"",schema,"KT1","I","",schema,"REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
 
         createObjectsForKeysTests();
         
@@ -4020,9 +4043,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getImportedKeys("", "%", "REFTAB2");
         assertFullResultSet(rs, expRS2, true);
         
-        rs = getImportedKeys(null, "APP", "REFTAB");
+        rs = getImportedKeys(null, schema, "REFTAB");
         assertFullResultSet(rs, expRS1, true);
-        rs = getImportedKeys(null, "APP", "REFTAB2");
+        rs = getImportedKeys(null, schema, "REFTAB2");
         assertFullResultSet(rs, expRS2, true);
 
         rs = getImportedKeys(null, null, "REFTAB");
@@ -4054,28 +4077,28 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // getExportedKeys
         expRS1 = new String[][] {
-                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
-                {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
+                {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+                {"",schema,"KT1","VC10","",schema,"REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","I","",schema,"REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
         expRS2 = new String[][] {
-                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+                {"",schema,"REFTAB","DPRIM","",schema,"REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
 
         rs = getExportedKeys("", "%", "KT1");
         assertFullResultSet(rs, expRS1, true);
         rs = getExportedKeys("", "%", "REFTAB");
         assertFullResultSet(rs, expRS2, true);
         
-        rs = getExportedKeys(null, "APP", "KT1");
+        rs = getExportedKeys(null, schema, "KT1");
         assertFullResultSet(rs, expRS1, true);
-        rs = getExportedKeys(null, "APP", "REFTAB");
+        rs = getExportedKeys(null, schema, "REFTAB");
        assertFullResultSet(rs, expRS2, true);
 
-        rs = getExportedKeys(null, null, "KT1");
+        rs = getExportedKeys(null, schema, "KT1");
         assertFullResultSet(rs, expRS1, true);
 
         rs = getExportedKeys(null, "", "KT1");
@@ -4084,13 +4107,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // tablename may not be null
         try {
-            rs[0] = dmd.getExportedKeys(null, null, null);
+            rs[0] = dmd.getExportedKeys(null, schema, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         try {
-            rs[1] = getExportedKeysODBC(null, null, null);
+            rs[1] = getExportedKeysODBC(null, schema, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
@@ -4103,53 +4126,53 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // getCrossReference
         expRS1 = new String[][] {
-                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"}};
+                {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"}};
         expRS2 = new String[][] {
-                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+                {"",schema,"REFTAB","DPRIM","",schema,"REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
 
         // try with valid search criteria
-        rs = getCrossReference("", null, "KT1", "", null, "REFTAB");
+        rs = getCrossReference("", schema, "KT1", "", schema, "REFTAB");
         assertFullResultSet(rs, expRS1, true);
         
-        rs = getCrossReference("", "APP", "REFTAB", "", null, "REFTAB");
+        rs = getCrossReference("", schema, "REFTAB", "", schema, "REFTAB");
         assertFullResultSet(rs, expRS2, true);
 
-        rs = getCrossReference("", null, "KT1", "", "APP", "REFTAB");
+        rs = getCrossReference("", schema, "KT1", "", schema, "REFTAB");
         assertFullResultSet(rs, expRS1, true);
 
-        rs = getCrossReference("", null, "REFTAB", "", "APP", "REFTAB");
+        rs = getCrossReference("", schema, "REFTAB", "", schema, "REFTAB");
         assertFullResultSet(rs, expRS2, true);
 
-        rs = getCrossReference(null, "APP", "KT1", null, null, "REFTAB");
+        rs = getCrossReference(null, schema, "KT1", null, schema, "REFTAB");
         assertFullResultSet(rs, expRS1, true);
 
-        rs = getCrossReference(null, "APP", "REFTAB", null, null, "REFTAB");
+        rs = getCrossReference(null, schema, "REFTAB", null, schema, "REFTAB");
         assertFullResultSet(rs, expRS2, true);
 
         // DERBY-2758; query should return a different value for odbc vs. jdbc
         // only experiment jdbc here, odbc is handled elsewhere.
-        rs = getCrossReference(null, "APP", "%", null, null, "%");
+        rs = getCrossReference(null, schema, "%", null, schema, "%");
         JDBC.assertEmpty(rs[0]);
         String[][] expRS = new String[][] {
-                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
-                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
-                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
-                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"},
-                {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
-                {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
+                {"",schema,"KT1","VC10","",schema,"REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","I","",schema,"REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"",schema,"KT1","C30","",schema,"REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"",schema,"KT1","S","",schema,"REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+                {"",schema,"REFTAB","DPRIM","",schema,"REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"},
+                {"",schema,"KT1","VC10","",schema,"REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+                {"",schema,"KT1","I","",schema,"REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
         JDBC.assertFullResultSet(rs[1], expRS, true);
         
         // tablename may not be null
         try {
-            rs[0] = dmd.getCrossReference(null, null, null, null, null, null);
+            rs[0] = dmd.getCrossReference(null, schema, null, null, schema, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -4160,7 +4183,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // Note: With ODBC, this does *not* give an error. 
         // If that changes, uncomment the fail.
         try {
-            rs[1] = getCrossReferenceODBC(null, null, null, null, null, null);
+            rs[1] = getCrossReferenceODBC(null, schema, null, null, schema, null);
         //    fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -4170,7 +4193,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         // tablename may not be null
         try {
-            rs[0] = dmd.getCrossReference(null, null, "", null, null, null);
+            rs[0] = dmd.getCrossReference(null, schema, "", null, schema, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -4179,7 +4202,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 assertSQLState("XJ103", sqle);
         }
         try {
-            rs[1] = getCrossReferenceODBC(null, null, "", null, null, null);
+            rs[1] = getCrossReferenceODBC(null, schema, "", null, schema, null);
             //fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -4189,7 +4212,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }        
         
         // DERBY-2610, tablename must be given as stored - % means no rows
-        rs = getCrossReference(null, null, "%", null, null, "%");
+        rs = getCrossReference(null, schema, "%", null, schema, "%");
         JDBC.assertEmpty(rs[0]);
         // But it *is* allowed with ODBC, see DERBY-2758
         JDBC.assertFullResultSet(rs[1], expRS, true);
@@ -4362,37 +4385,37 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         short setnull = DatabaseMetaData.importedKeySetNull;
         short setdefault = DatabaseMetaData.importedKeySetDefault;
         
-        ResultSet rs[] = getCrossReference("","APP","REFACTION1","","APP","REFACTNONE");
+        ResultSet rs[] = getCrossReference("",schema,"REFACTION1","",schema,"REFACTNONE");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTRESTRICT");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTRESTRICT");
         verifyReferentialAction(rs, new short[] {no_action, restrict});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTNOACTION");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTNOACTION");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTCASCADE");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTCASCADE");
         verifyReferentialAction(rs, new short[] {no_action, cascade});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTSETNULL");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTSETNULL");
         verifyReferentialAction(rs, new short[] {no_action, setnull});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTUPDRESTRICT");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTUPDRESTRICT");
         verifyReferentialAction(rs, new short[] {restrict, no_action});
-        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTUPDNOACTION");
+        rs = getCrossReference("",schema,"REFACTION1","",schema,"REFACTUPDNOACTION");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
 
-        rs = getImportedKeys(null, "APP", "REFACTNONE");
+        rs = getImportedKeys(null, schema, "REFACTNONE");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
-        rs = getImportedKeys(null, "APP", "REFACTRESTRICT");
+        rs = getImportedKeys(null, schema, "REFACTRESTRICT");
         verifyReferentialAction(rs, new short[] {restrict, restrict}); 
-        rs = getImportedKeys(null, "APP", "REFACTNOACTION");
+        rs = getImportedKeys(null, schema, "REFACTNOACTION");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
-        rs = getImportedKeys(null, "APP", "REFACTCASCADE");
+        rs = getImportedKeys(null, schema, "REFACTCASCADE");
         verifyReferentialAction(rs, new short[] {no_action, cascade});
-        rs = getImportedKeys(null, "APP", "REFACTSETNULL");
+        rs = getImportedKeys(null, schema, "REFACTSETNULL");
         verifyReferentialAction(rs, new short[] {no_action, setnull});
-        rs = getImportedKeys(null, "APP", "REFACTUPDRESTRICT");
+        rs = getImportedKeys(null, schema, "REFACTUPDRESTRICT");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
-        rs = getImportedKeys(null, "APP", "REFACTUPDNOACTION");
+        rs = getImportedKeys(null, schema, "REFACTUPDNOACTION");
         verifyReferentialAction(rs, new short[] {no_action, no_action});
 
-        rs = getExportedKeys(null, "APP", "REFACTION1");
+        rs = getExportedKeys(null, schema, "REFACTION1");
         short [][] expkeyresults = {
                 {no_action, cascade},
                 {no_action, no_action},
@@ -4516,13 +4539,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
         Object[][] expRS = new Object[][] {
-                {"","APP","GETPCTEST1",null,null,null,getpc,i(1),genid},
-                {"","APP","GETPCTEST2",null,null,null,getpc,i(1),genid},
-                {"","APP","GETPCTEST3A",null,null,null,getpc,i(1),genid},
-                {"","APP","GETPCTEST3B",null,null,null,getpc,i(1),genid},
-                {"","APP","GETPCTEST4A",null,null,null,getpc4a,i(1),genid},
-                {"","APP","GETPCTEST4B",null,null,null,getpc4b,i(1),genid},
-                {"","APP","GETPCTEST4BX",null,null,null,getpc4b,i(1),genid},
+                {"",schema,"GETPCTEST1",null,null,null,getpc,i(1),genid},
+                {"",schema,"GETPCTEST2",null,null,null,getpc,i(1),genid},
+                {"",schema,"GETPCTEST3A",null,null,null,getpc,i(1),genid},
+                {"",schema,"GETPCTEST3B",null,null,null,getpc,i(1),genid},
+                {"",schema,"GETPCTEST4A",null,null,null,getpc4a,i(1),genid},
+                {"",schema,"GETPCTEST4B",null,null,null,getpc4b,i(1),genid},
+                {"",schema,"GETPCTEST4BX",null,null,null,getpc4b,i(1),genid},
         };
 
         if ( supportsBoolean )
@@ -4532,7 +4555,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
-                     {"","APP","GETPCTEST5",null,null,null,foo,i(1),genid},
+                     {"",schema,"GETPCTEST5",null,null,null,foo,i(1),genid},
                  }
                  );
         }
@@ -4553,25 +4576,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getProcedureColumns(null, "%", "GETPCTEST%", "%");
 
         expRS = new Object[][] {
-                {null,"APP","GETPCTEST1","OUTB",i(4),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(1),"YES",genid,i(12),i(0)},
-                {null,"APP","GETPCTEST1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(2),"YES",genid,i(12),i(1)},
-                {null,"APP","GETPCTEST1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),null,null,i(3),"YES",genid,i(12),i(2)},
-                {null,"APP","GETPCTEST1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(4),"YES",genid,i(12),i(3)},
-                {null,"APP","GETPCTEST1","E",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(5),"YES",genid,i(12),i(4)},
-                {null,"APP","GETPCTEST1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(6),"YES",genid,i(12),i(5)},
-                {null,"APP","GETPCTEST1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(7),"YES",genid,i(12),i(6)},
-                {null,"APP","GETPCTEST1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(8),"YES",genid,i(12),i(7)},
-                {null,"APP","GETPCTEST1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(9),"YES",genid,i(12),i(8)},
-                {null,"APP","GETPCTEST1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),i(1),null,i(10),"YES",genid,i(12),i(9)},
-                {null,"APP","GETPCTEST1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(9),i(2),null,i(11),"YES",genid,i(12),i(10)},
-                {null,"APP","GETPCTEST1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(9),i(3),null,i(12),"YES",genid,i(12),i(11)},
-                {null,"APP","GETPCTEST2","PA",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(2),i(0)},
-                {null,"APP","GETPCTEST2","PB",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(2),"YES",genid,i(2),i(1)},
-                {null,"APP","GETPCTEST3A","STRING1",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
-                {null,"APP","GETPCTEST3A","STRING2",i(4),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
-                {null,"APP","GETPCTEST3B","STRING3",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
-                {null,"APP","GETPCTEST3B","STRING4",i(2),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
-                {null,"APP","GETPCTEST4BX","RETPARAM",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(1),i(0)},
+                {null,schema,"GETPCTEST1","OUTB",i(4),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(1),"YES",genid,i(12),i(0)},
+                {null,schema,"GETPCTEST1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(2),"YES",genid,i(12),i(1)},
+                {null,schema,"GETPCTEST1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),null,null,i(3),"YES",genid,i(12),i(2)},
+                {null,schema,"GETPCTEST1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(4),"YES",genid,i(12),i(3)},
+                {null,schema,"GETPCTEST1","E",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(5),"YES",genid,i(12),i(4)},
+                {null,schema,"GETPCTEST1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(6),"YES",genid,i(12),i(5)},
+                {null,schema,"GETPCTEST1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(7),"YES",genid,i(12),i(6)},
+                {null,schema,"GETPCTEST1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(8),"YES",genid,i(12),i(7)},
+                {null,schema,"GETPCTEST1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(9),"YES",genid,i(12),i(8)},
+                {null,schema,"GETPCTEST1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),i(1),null,i(10),"YES",genid,i(12),i(9)},
+                {null,schema,"GETPCTEST1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(9),i(2),null,i(11),"YES",genid,i(12),i(10)},
+                {null,schema,"GETPCTEST1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(9),i(3),null,i(12),"YES",genid,i(12),i(11)},
+                {null,schema,"GETPCTEST2","PA",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(2),i(0)},
+                {null,schema,"GETPCTEST2","PB",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(2),"YES",genid,i(2),i(1)},
+                {null,schema,"GETPCTEST3A","STRING1",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
+                {null,schema,"GETPCTEST3A","STRING2",i(4),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
+                {null,schema,"GETPCTEST3B","STRING3",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
+                {null,schema,"GETPCTEST3B","STRING4",i(2),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
+                {null,schema,"GETPCTEST4BX","RETPARAM",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(1),i(0)},
         };
         if ( supportsBoolean )
         {
@@ -4580,9 +4603,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
-                     {null,"APP","GETPCTEST5","INARG",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(1),"YES",genid,i(3),i(0)},
-                     {null,"APP","GETPCTEST5","OUTARG",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(2),"YES",genid,i(3),i(1)},
-                     {null,"APP","GETPCTEST5","INOUTARG",i(2),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(3),"YES",genid,i(3),i(2)},
+                     {null,schema,"GETPCTEST5","INARG",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(1),"YES",genid,i(3),i(0)},
+                     {null,schema,"GETPCTEST5","OUTARG",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(2),"YES",genid,i(3),i(1)},
+                     {null,schema,"GETPCTEST5","INOUTARG",i(2),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(3),"YES",genid,i(3),i(2)},
                  }
                  );
         }
@@ -4858,18 +4881,18 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.GeneratedId genid = new JDBC.GeneratedId();
 
         Object[][] expRS = new Object[][] {
-            {null,"APP","F_GFC_1","",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(0),"YES",genid,i(11),i(-1)},
-            {null,"APP","F_GFC_1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,i(6),i(1),"YES",genid,i(11),i(0)},
-            {null,"APP","F_GFC_1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),"YES",genid,i(11),i(1)},
-            {null,"APP","F_GFC_1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(3),"YES",genid,i(11),i(2)},
-            {null,"APP","F_GFC_1","E",i(1),i(1),"CHAR",i(3),i(6),null,null,i(1),null,i(6),i(4),"YES",genid,i(11),i(3)},
-            {null,"APP","F_GFC_1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(5),"YES",genid,i(11),i(4)},
-            {null,"APP","F_GFC_1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(6),"YES",genid,i(11),i(5)},
-            {null,"APP","F_GFC_1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(7),"YES",genid,i(11),i(6)},
-            {null,"APP","F_GFC_1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),"YES",genid,i(11),i(7)},
-            {null,"APP","F_GFC_1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),"YES",genid,i(11),i(8)},
-            {null,"APP","F_GFC_1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(10),"YES",genid,i(11),i(9)},
-            {null,"APP","F_GFC_1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(11),"YES",genid,i(11),i(10)},
+            {null,schema,"F_GFC_1","",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(0),"YES",genid,i(11),i(-1)},
+            {null,schema,"F_GFC_1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,i(6),i(1),"YES",genid,i(11),i(0)},
+            {null,schema,"F_GFC_1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),"YES",genid,i(11),i(1)},
+            {null,schema,"F_GFC_1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(3),"YES",genid,i(11),i(2)},
+            {null,schema,"F_GFC_1","E",i(1),i(1),"CHAR",i(3),i(6),null,null,i(1),null,i(6),i(4),"YES",genid,i(11),i(3)},
+            {null,schema,"F_GFC_1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(5),"YES",genid,i(11),i(4)},
+            {null,schema,"F_GFC_1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(6),"YES",genid,i(11),i(5)},
+            {null,schema,"F_GFC_1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(7),"YES",genid,i(11),i(6)},
+            {null,schema,"F_GFC_1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),"YES",genid,i(11),i(7)},
+            {null,schema,"F_GFC_1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),"YES",genid,i(11),i(8)},
+            {null,schema,"F_GFC_1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(10),"YES",genid,i(11),i(9)},
+            {null,schema,"F_GFC_1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(11),"YES",genid,i(11),i(10)},
         };
 
         if ( supportsBoolean )
@@ -4879,8 +4902,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  expRS,
                  new Object[][]
                  {
-                     {null,"APP","F_GFC_2","",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(0),"YES",genid,i(1),i(-1)},
-                     {null,"APP","F_GFC_2","A",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(1),"YES",genid,i(1),i(0)},
+                     {null,schema,"F_GFC_2","",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(0),"YES",genid,i(1),i(-1)},
+                     {null,schema,"F_GFC_2","A",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(1),"YES",genid,i(1),i(0)},
                  }
                  );
         }
@@ -4949,11 +4972,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // IS_GENERATEDCOLUMN added to ResultSet returned by getColumns()
         //
         s.execute( "create table t_jdbc41( a int, b int, c generated always as ( -a ) )" );
-        ResultSet   rs2 = dmd.getColumns( null, "APP", "T_JDBC41", null );
+        ResultSet   rs2 = dmd.getColumns( null, schema, "T_JDBC41", null );
         String[][] expectedRows = new String[][]
         {
             {
-                "", "APP", "T_JDBC41", "A",
+                "", schema, "T_JDBC41", "A",
                 "4", "INTEGER", "10", null,
                 "0", "10", "1", "",
                 null, null, null, null,
@@ -4962,7 +4985,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null
             },
             {
-                "", "APP", "T_JDBC41", "B",
+                "", schema, "T_JDBC41", "B",
                 "4", "INTEGER", "10", null,
                 "0", "10", "1", "",
                 null, null, null, null,
@@ -4971,7 +4994,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null
             },
             {
-                "", "APP", "T_JDBC41", "C",
+                "", schema, "T_JDBC41", "C",
                 "4", "INTEGER", "10", null,
                 "0", "10", "1", "",
                 "GENERATED ALWAYS AS ( -a )", null, null, null,
@@ -5004,7 +5027,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("CREATE TABLE Derby655t3(c31_ID BIGINT NOT NULL primary key)");
         s.execute("ALTER TABLE Derby655t2 ADD CONSTRAINT F_443 Foreign Key (c21_ID) REFERENCES Derby655t3(c31_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
 
-        ResultSet rs = dmd.getImportedKeys("", "APP", "DERBY655T1");
+        ResultSet rs = dmd.getImportedKeys("", schema, "DERBY655T1");
         JDBC.assertDrainResults(rs, 1);
         
         s.execute("drop table Derby655t1");
@@ -5049,7 +5072,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // Expected values for various columns in the meta-data.
         String[][] expected = {
-            {"TABLE_SCHEM", "APP"},
+            {"TABLE_SCHEM", schema},
             {"TABLE_NAME", "DERBY5274"},
             {"COLUMN_NAME", "X"},
             {"COLUMN_DEF",
