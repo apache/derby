@@ -1279,6 +1279,12 @@ Guide.
            </msg>
 
             <msg>
+                <name>4251L</name>
+                <text>The derby.authentication.provider property specifies '{0}' as the name of the credentials database. This is not a valid name for a database.</text>
+                 <arg>dbName</arg>
+           </msg>
+
+            <msg>
                 <name>42601</name>
                 <text>In an ALTER TABLE statement, the column '{0}' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.</text>
                 <arg>columnName</arg>

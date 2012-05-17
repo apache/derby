@@ -787,6 +787,7 @@ public interface SQLState {
 	String MISSING_CREDENTIALS_DB                                               = "4251I";
 	String BAD_PASSWORD_LIFETIME                                               = "4251J";
 	String DBO_FIRST                                                                    = "4251K";
+	String BAD_CREDENTIALS_DB_NAME                                          = "4251L";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";

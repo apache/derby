@@ -506,13 +506,6 @@ public abstract class InternalDriver implements ModuleControl {
 								   );
 		}
 
-		// We should have a Authentication Service (always)
-		//
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(this.authenticationService != null, 
-				"Unexpected - There is no valid authentication service!");
-		}
 		return this.authenticationService;
 	}
 

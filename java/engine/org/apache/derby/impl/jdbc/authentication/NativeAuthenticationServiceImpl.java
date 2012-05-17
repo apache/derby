@@ -197,11 +197,20 @@ public final class NativeAuthenticationServiceImpl
      * </p>
      */
     private boolean validAuthenticationProvider()
+        throws StandardException
     {
         // If there is no store, then we are booting a system-wide authentication service
         boolean     systemWideAuthentication = ( getServiceName() == null );
 
-        if ( _credentialsDB != null ) { return true; }
+        if ( _credentialsDB != null )
+        {
+            // make sure that it is a well-formed database name
+            if ( Monitor.getMonitor().getCanonicalServiceName( _credentialsDB ) == null )
+            {
+                throw StandardException.newException( SQLState.BAD_CREDENTIALS_DB_NAME, _credentialsDB );
+            }
+            else { return true; }
+        }
         
         // must have a global credentials db for system-wide authentication
         if ( systemWideAuthentication ) { return false; }
