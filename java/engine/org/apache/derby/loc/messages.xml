@@ -1258,7 +1258,7 @@ Guide.
 
             <msg>
                 <name>4251H</name>
-                <text>Invalid NATIVE authentication specification. Please set derby.authentication.provider to a value of the form NATIVE:$credentialsDB or NATIVE:$credentialsDB:LOCAL (at the system level) or NATIVE::LOCAL (at the database level).</text>
+                <text>Invalid NATIVE authentication specification. Please set derby.authentication.provider to a value of the form NATIVE:$credentialsDB or NATIVE:$credentialsDB:LOCAL (at the system level).</text>
            </msg>
 
             <msg>
@@ -4258,13 +4258,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XCY05.S.1</name>
-                <text>Invalid setting of the derby.authentication.provider property. NATIVE::LOCAL is the only NATIVE value accepted by derby.authentication.provider.</text>
-            </msg>
-
-            <msg>
                 <name>XCY05.S.2</name>
-                <text>Invalid setting of the derby.authentication.provider property. This property is already set to NATIVE::LOCAL and cannot be changed.</text>
+                <text>Invalid setting of the derby.authentication.provider property. This property is already set to enable NATIVE authentication and cannot be changed.</text>
             </msg>
 
             <msg>

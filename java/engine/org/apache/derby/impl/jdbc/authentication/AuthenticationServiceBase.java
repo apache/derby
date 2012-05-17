@@ -403,7 +403,7 @@ public abstract class AuthenticationServiceBase
                 !settingToNativeLocal
                 )
             {
-                throw  StandardException.newException( SQLState.PROPERTY_BAD_NATIVE_VALUE );
+                throw  StandardException.newException( SQLState.PROPERTY_DBO_LACKS_CREDENTIALS );
             }
 
             // once set to NATIVE authentication, you can't change it
