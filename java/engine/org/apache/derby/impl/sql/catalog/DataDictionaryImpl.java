@@ -8873,7 +8873,12 @@ public final class	DataDictionaryImpl
                     TransactionController.ISOLATION_REPEATABLE_READ);
 
             // fetch the current value
-            heapCC.fetch(rl, row.getRowArray(), columnToRead, wait);
+            boolean baseRowExists =
+                    heapCC.fetch(rl, row.getRowArray(), columnToRead, wait);
+            if (SanityManager.DEBUG) {
+                // We're not prepared for a non-existing base row.
+                SanityManager.ASSERT(baseRowExists, "base row not found");
+            }
 
             // while the Row interface is 1 based.
             NumberDataValue currentAI = (NumberDataValue)row.getColumn(columnNum);
@@ -10380,7 +10385,12 @@ public final class	DataDictionaryImpl
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_REPEATABLE_READ);
 
-            heapCC.fetch( rowLocation, row.getRowArray(), columnToUpdate, wait );
+            boolean baseRowExists = heapCC.fetch(
+                    rowLocation, row.getRowArray(), columnToUpdate, wait);
+            if (SanityManager.DEBUG) {
+                // We're not prepared for a non-existing base row.
+                SanityManager.ASSERT(baseRowExists, "base row not found");
+            }
 
 			NumberDataValue oldValueOnDisk = (NumberDataValue) row.getColumn( columnNum );
 
