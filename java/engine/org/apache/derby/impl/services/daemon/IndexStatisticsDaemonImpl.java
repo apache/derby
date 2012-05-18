@@ -556,13 +556,13 @@ public class IndexStatisticsDaemonImpl
 
         // Update the heap row count estimate.
         setHeapRowEstimate(tc, td.getHeapConglomerateId(), numRows);
-        // Invalidate statments accessing the given table.
-        // Note that due to retry logic, swithcing the data dictionary to
-        // write mode is done inside invalidateStatements.
-        invalidateStatements(lcc, td, asBackgroundTask);
         // Drop existing index statistics for this index.
+        if (!lcc.dataDictionaryInWriteMode()) {
+            dd.startWriting(lcc);
+        }
         dd.dropStatisticsDescriptors(table, index, tc);
 
+        boolean conglomerateGone = false; // invalidation control flag
         // Don't write statistics if the table is empty.
         if (numRows == 0) {
             trace(2, "empty table, no stats written");
@@ -596,8 +596,13 @@ public class IndexStatisticsDaemonImpl
                     "rolled back index stats because index has been dropped");
                 lcc.internalRollback();
             }
+            conglomerateGone = (cd == null);
         }
 
+        if (!conglomerateGone) {
+            // Invalidate statments accessing the given table.
+            invalidateStatements(lcc, td, asBackgroundTask);
+        }
         // Only commit tx as we go if running as background task.
         if (asBackgroundTask) {
             lcc.internalCommit(true);
@@ -621,13 +626,11 @@ public class IndexStatisticsDaemonImpl
         // Invalidate compiled statements accessing the table.
         DataDictionary dd = lcc.getDataDictionary();
         DependencyManager dm = dd.getDependencyManager();
-        boolean inWrite = false;
         int retries = 0;
         while (true) {
             try {
-                if (!inWrite) {
+                if (!lcc.dataDictionaryInWriteMode()) {
                     dd.startWriting(lcc);
-                    inWrite = true;
                 }
                 dm.invalidateFor(
                         td, DependencyManager.UPDATE_STATISTICS, lcc);
@@ -644,7 +647,6 @@ public class IndexStatisticsDaemonImpl
                     if (retries > 1) {
                         trace(2, "releasing locks");
                         lcc.internalRollback();
-                        inWrite = false;
                     }
                     trace(2, "lock timeout when invalidating");
                     sleep(100*(1+retries)); // adaptive sleeping...
