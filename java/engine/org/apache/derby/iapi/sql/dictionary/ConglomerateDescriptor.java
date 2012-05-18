@@ -364,13 +364,13 @@ public final class ConglomerateDescriptor extends TupleDescriptor
         // depended on the index (including this one)
         dm.invalidateFor(this, DependencyManager.DROP_INDEX, lcc);
 	    
+        /* DERBY-5681 Drop statistics */
+        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
+
         // only drop the conglomerate if no similar index but with different
-	    // name. Get from dd in case we drop other dup indexes with a cascade operation	    
+	    // name. Get from dd in case we drop other dup indexes with a cascade operation
 	    if (dd.getConglomerateDescriptors(getConglomerateNumber()).length == 1)
 	    {
-	        /* Drop statistics */
-	        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
-	        
 	        /* Drop the conglomerate */
 	        tc.dropConglomerate(getConglomerateNumber());
         }	    
