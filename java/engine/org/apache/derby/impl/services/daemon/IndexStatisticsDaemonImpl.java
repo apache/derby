@@ -23,6 +23,7 @@ package org.apache.derby.impl.services.daemon;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.StatisticsImpl;
@@ -118,6 +119,16 @@ public class IndexStatisticsDaemonImpl
                 Property.STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE_DEFAULT);
     }
 
+    /**
+     * Tells if the user want us to fall back to pre 10.9 behavior.
+     * <p>
+     * This means do not drop any disposable statistics, and do not skip
+     * statistics for single-column primary key indexes.
+     */
+    private static final boolean FORCE_OLD_BEHAVIOR =
+            PropertyUtil.getSystemBoolean(
+              Property.STORAGE_AUTO_INDEX_STATS_DEBUG_FORCE_OLD_BEHAVIOR);
+
     private final HeaderPrintWriter logStream;
     /** Tells if logging is enabled. */
     private final boolean doLog;
@@ -133,6 +144,8 @@ public class IndexStatisticsDaemonImpl
     private boolean daemonDisabled;
     /** The context manager for the worker thread. */
     private final ContextManager ctxMgr;
+    /** Tells if the database is older than 10.9 (for soft upgrade). */
+    private final boolean dbIsPre10_9;
     /** The language connection context for the worker thread. */
     private LanguageConnectionContext daemonLCC;
     /**
@@ -206,6 +219,7 @@ public class IndexStatisticsDaemonImpl
         this.traceToStdOut = (traceLevel.equalsIgnoreCase("both") ||
                 traceLevel.equalsIgnoreCase("stdout"));
         this.doTrace = traceToDerbyLog || traceToStdOut;
+        this.dbIsPre10_9 = checkIfDbIsPre10_9(db);
 
         this.db = db;
         this.dbOwner = userName;
@@ -222,6 +236,20 @@ public class IndexStatisticsDaemonImpl
                 TableDescriptor.ISTATS_LNDIFF_THRESHOLD +
                 ", queueLength=" + MAX_QUEUE_LENGTH +
                 "}) -> " + databaseName);
+    }
+
+    /** Tells if the database is older than 10.9. */
+    private boolean checkIfDbIsPre10_9(Database db) {
+        try {
+            // Note the negation.
+            return !db.getDataDictionary().checkVersion(
+                DataDictionary.DD_VERSION_DERBY_10_9, null);
+        } catch (StandardException se) {
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("dd version check failed", se);
+            }
+            return true;
+        }
     }
 
     /**
@@ -318,8 +346,7 @@ public class IndexStatisticsDaemonImpl
         boolean lockConflictSeen = false;
         while (true) {
             try {
-                ConglomerateDescriptor[] cds = td.getConglomerateDescriptors();
-                updateIndexStatsMinion(lcc, td, cds, AS_BACKGROUND_TASK);
+                updateIndexStatsMinion(lcc, td, null, AS_BACKGROUND_TASK);
                 break;
             } catch (StandardException se) {
 
@@ -364,11 +391,17 @@ public class IndexStatisticsDaemonImpl
     /**
      * Updates the index statistics for the given table and the specified
      * indexes.
+     * <p>
+     * <strong>API note</strong>: Using {@code null} to update the statistics
+     * for all conglomerates is preferred over explicitly passing an array with
+     * all the conglomerates for the table. Doing so allows for some
+     * optimizations, and will cause a disposable statistics check to be
+     * performed.
      *
      * @param lcc language connection context used to perform the work
      * @param td the table to update index stats for
      * @param cds the conglomerates to update statistics for (non-index
-     *      conglomerates will be ignored)
+     *      conglomerates will be ignored), {@code null} means all indexes
      * @param asBackgroundTask whether the updates are done automatically as
      *      part of a background task or if explicitly invoked by the user
      * @throws StandardException if something goes wrong
@@ -378,6 +411,12 @@ public class IndexStatisticsDaemonImpl
                                         ConglomerateDescriptor[] cds,
                                         boolean asBackgroundTask)
             throws StandardException {
+        final boolean identifyDisposableStats =
+                (cds == null && !FORCE_OLD_BEHAVIOR && !dbIsPre10_9);
+        // Fetch descriptors if we're updating statistics for all indexes.
+        if (cds == null) {
+            cds = td.getConglomerateDescriptors();
+        }
         // Extract/derive information from the table descriptor
         long[] conglomerateNumber = new long[cds.length];
         ExecIndexRow[] indexRow = new ExecIndexRow[cds.length];
@@ -415,6 +454,56 @@ public class IndexStatisticsDaemonImpl
         finally
         {
             heapCC.close();
+        }
+
+        // Check for disposable statistics if we have the required information.
+        // Note that the algorithm would drop valid statistics entries if
+        // working on a subset of the table conglomerates/indexes.
+        if (identifyDisposableStats) {
+            List existingStats = td.getStatistics();
+            StatisticsDescriptor[] stats = (StatisticsDescriptor[])
+                    existingStats.toArray(
+                        new StatisticsDescriptor[existingStats.size()]);
+            // For now we know that disposable stats only exist in two cases,
+            // and that we'll only get one match for both of them per table:
+            //  a) orphaned statistics entries (i.e. DERBY-5681)
+            //  b) single-column primary keys (TODO: after DERBY-3790 is done)
+            for (int si=0; si < stats.length; si++) {
+                UUID referencedIndex = stats[si].getReferenceID();
+                boolean isValid = false;
+                for (int ci=0; ci < conglomerateNumber.length; ci++) {
+                    if (conglomerateNumber[ci] == -1) {
+                        continue;
+                    }
+                    if (referencedIndex.equals(objectUUID[ci])) {
+                        isValid = true;
+                        break;
+                    }
+                }
+                // If the statistics entry is orphaned or not required, drop
+                // the statistics entries for this index. Those we really need
+                // will be rebuilt below. We expect this scenario to be rare,
+                // typically you would only see it on upgrades. On the other
+                // hand, this check is cheap enough such that it is feasible to
+                // do it as part of the stats update to get a "self healing"
+                // mechanism in case of another bug like DERBY-5681 in Derby.
+                if (!isValid) {
+                    String msg = "dropping disposable statistics entry " +
+                            stats[si].getUUID() + " for table " +
+                            stats[si].getTableUUID();
+                    logAlways(td, null, msg);
+                    trace(1, msg);
+                    DataDictionary dd = lcc.getDataDictionary();
+                    if (!lcc.dataDictionaryInWriteMode()) {
+                        dd.startWriting(lcc);
+                    }
+                    dd.dropStatisticsDescriptors(
+                            td.getUUID(), stats[si].getReferenceID(), tc); 
+                    if (asBackgroundTask) {
+                        lcc.internalCommit(true);
+                    }
+                }
+            }
         }
 
         // [x][0] = conglomerate number, [x][1] = start time, [x][2] = stop time
@@ -1087,18 +1176,29 @@ public class IndexStatisticsDaemonImpl
     private void log(boolean asBackgroundTask, TableDescriptor td, Throwable t,
             String msg) {
         if (asBackgroundTask && (doLog || t != null)) {
-            PrintWriter pw = null;
-            String hdrMsg = "{istat} " +
-                    (td == null ? "" : td.getQualifiedName() + ": ") + msg;
-            if (t != null) {
-                pw = new PrintWriter(logStream.getPrintWriter(), false);
-                pw.print(logStream.getHeader().getHeader());
-                pw.println(hdrMsg);
-                t.printStackTrace(pw);
-                pw.flush();
-            } else {
-                logStream.printlnWithHeader(hdrMsg);
-            }
+            logAlways(td, t, msg);
+        }
+    }
+
+    /**
+     * Logs the information given.
+     *
+     * @param td current table descriptor being worked on, may be {@code null}
+     * @param t raised error, may be {@code null}
+     * @param msg the message to log
+     */
+    private void logAlways(TableDescriptor td, Throwable t, String msg) {
+        PrintWriter pw;
+        String hdrMsg = "{istat} " +
+                (td == null ? "" : td.getQualifiedName() + ": ") + msg;
+        if (t != null) {
+            pw = new PrintWriter(logStream.getPrintWriter(), false);
+            pw.print(logStream.getHeader().getHeader());
+            pw.println(hdrMsg);
+            t.printStackTrace(pw);
+            pw.flush();
+        } else {
+            logStream.printlnWithHeader(hdrMsg);
         }
     }
 

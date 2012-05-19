@@ -1280,7 +1280,7 @@ public class TableDescriptor extends TupleDescriptor
 	
 	/** Returns a list of statistics for this table.
 	 */
-	private synchronized List getStatistics() throws StandardException
+	public synchronized List getStatistics() throws StandardException
 	{
 		// if table already has the statistics descriptors initialized
 		// no need to do anything

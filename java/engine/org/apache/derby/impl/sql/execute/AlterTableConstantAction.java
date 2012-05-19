@@ -711,7 +711,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         td = dd.getTableDescriptor(tableId);
 
         if (updateStatisticsAll) {
-            cds = td.getConglomerateDescriptors();
+            cds = null;
         } else {
             cds = new ConglomerateDescriptor[1];
             cds[0] = dd.getConglomerateDescriptor(

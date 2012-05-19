@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -58,7 +59,6 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         Test test = TestConfiguration.defaultSuite(UpdateStatisticsTest.class);
         Test statsDisabled = DatabasePropertyTestSetup.singleProperty
             ( test, "derby.storage.indexStats.auto", "false", true );
-
         return statsDisabled;
     }
 
@@ -485,6 +485,101 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.execute("drop table TEST_TAB_2");
         s.execute("drop table TEST_TAB_1");
         stats.release();
+    }
+
+    /**
+     * Tests that the functionality that drops disposable statistics leaves
+     * useful statistics intact.
+     */
+    public void testDisposableStatsEagerness()
+            throws SQLException {
+        setAutoCommit(false);
+        String tbl = "DISPOSABLE_STATS_EAGERNESS";
+        String tbl_fk = tbl + "_FK";
+        String nuIdx = "NU_" + tbl;
+        Statement stmt = createStatement();
+
+        // Create and populate the foreign key table.
+        stmt.executeUpdate("create table " + tbl_fk + "(" +
+                "pk1 int generated always as identity)");
+        PreparedStatement ps = prepareStatement(
+                "insert into " + tbl_fk + " values (DEFAULT)");
+        for (int i=1; i <= 1000; i++) {
+            ps.executeUpdate();
+        }
+
+        // Create and populate the main table.
+        stmt.executeUpdate("create table " + tbl + "(" +
+                "pk1 int generated always as identity," +
+                "pk2 int not null," +
+                "mynonunique int, " +
+                "fk int not null)");
+        ps = prepareStatement("insert into " + tbl +
+                " values (DEFAULT, ?, ?, ?)");
+        for (int i=1; i <= 1000; i++) {
+            ps.setInt(1, i);
+            ps.setInt(2, i % 35);
+            ps.setInt(3, i);
+            ps.executeUpdate();
+        }
+        
+        // Create the various indexes.
+        stmt.executeUpdate("alter table " + tbl_fk + " add constraint PK_" +
+                tbl_fk + " primary key (pk1)");
+        
+        stmt.executeUpdate("alter table " + tbl + " add constraint PK_" + tbl +
+                " primary key (pk1, pk2)");
+        stmt.executeUpdate("alter table " + tbl + " add constraint FK_" + tbl +
+                " foreign key (fk) references " + tbl_fk + "(pk1)");
+        stmt.executeUpdate("create index " + nuIdx + " on " + tbl +
+                "(mynonunique)");
+        commit();
+        setAutoCommit(true);
+        IndexStatsUtil stats = new IndexStatsUtil(getConnection());
+        // Expected FK table: 1 (PK only)
+        // Expected main table: 2xPK, 1 non-unique, 1 FK = 4
+        stats.assertTableStats(tbl_fk, 1);
+        IndexStatsUtil.IdxStats tbl_fk_pk_0 = stats.getStatsTable(tbl_fk)[0];
+        stats.assertTableStats(tbl, 4);
+        IndexStatsUtil.IdxStats[] tbl_stats_0 = stats.getStatsTable(tbl);
+        // Avoid timestamp comparison problems on super-fast machines...
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Run the update statistics procedure.
+        ps = prepareStatement(
+                "call syscs_util.syscs_update_statistics('APP', ?, ?)");
+        ps.setNull(2, Types.VARCHAR);
+        ps.setString(1, tbl);
+        ps.execute();
+        ps.setString(1, tbl_fk);
+        ps.execute();
+
+        // Check the counts.
+        stats.assertTableStats(tbl_fk, 1);
+        stats.assertTableStats(tbl, 4);
+        // Check the timestamps (i.e. were they actually updated?).
+        IndexStatsUtil.IdxStats tbl_fk_pk_1 = stats.getStatsTable(tbl_fk)[0];
+        assertTrue(tbl_fk_pk_1.after(tbl_fk_pk_0));
+        IndexStatsUtil.IdxStats[] tbl_stats_1 = stats.getStatsTable(tbl);
+        assertEquals(tbl_stats_0.length, tbl_stats_1.length);
+        for (int i=0; i < tbl_stats_1.length; i++) {
+            assertTrue(tbl_stats_1[i].after(tbl_stats_0[i]));
+        }
+
+        // Now make sure updating one index doesn't modify the others' stats.
+        ps.setString(1, tbl);
+        ps.setString(2, nuIdx);
+        ps.execute();
+        // Just use any of the previous stats as a reference point.
+        IndexStatsUtil.IdxStats nonUniqueIdx = stats.getStatsIndex(nuIdx)[0];
+        assertTrue(nonUniqueIdx.after(tbl_stats_1[0]));
+        // Check the counts again.
+        stats.assertTableStats(tbl_fk, 1);
+        stats.assertTableStats(tbl, 4);
     }
 
     /**
