@@ -69,7 +69,7 @@ ij(SCANNER)> --
 create view lock_table as
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -173,10 +173,11 @@ KEYCOL
 -----------
 0          
 ij(SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IS  |DATA        |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |1   |X   |JUST_TO_BLOC|Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IS  |DATA        |Tablelock |GRANT|ACTIVE  
+WARNING 01004: Data truncation
+APP     |UserTransaction|TABLE   |1   |X   |JUST_TO_BLOC|Tablelock |GRANT|ACTIVE  
 ij(SCANNER)> -- now delete all rows but the last one, space should be reclaimed before
 -- the scanner gets a chance to run.
 set connection deleter;
@@ -193,19 +194,20 @@ ij(DELETER)> commit;
 ij(DELETER)> delete from data where keycol < 80;
 8 rows inserted/updated/deleted
 ij(DELETER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IS  |DATA        |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |2   |IX  |DATA        |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(2,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(3,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(4,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(5,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(6,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(7,6)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |DATA        |(8,6)     |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |1   |X   |JUST_TO_BLOC|Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IS  |DATA        |Tablelock |GRANT|ACTIVE  
+WARNING 01004: Data truncation
+APP     |UserTransaction|TABLE   |2   |IX  |DATA        |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(2,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(3,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(4,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(5,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(6,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(7,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |DATA        |(8,6)     |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |1   |X   |JUST_TO_BLOC|Tablelock |GRANT|ACTIVE  
 ij(DELETER)> commit;
 ij(DELETER)> -- give post commit a chance to run, by hanging on a lock.
 drop table just_to_block_on;

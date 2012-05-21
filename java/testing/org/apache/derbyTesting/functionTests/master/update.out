@@ -325,18 +325,30 @@ ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1
 1    |2    |3    
 -----------------
 5th  |expan|5th  
+WARNING 01004: Data truncation
 5th  |expan|5th  
+WARNING 01004: Data truncation
 5th  |expan|5th  
+WARNING 01004: Data truncation
 5th  |expan|5th  
+WARNING 01004: Data truncation
 ij> update t1 set c3 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 4 rows inserted/updated/deleted
 ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1;
 1    |2    |3    
 -----------------
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 ij> update t1 set c2 = 'shrink';
 4 rows inserted/updated/deleted
 ij> update t1 set c3 = 'shrink';
@@ -345,9 +357,17 @@ ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1
 1    |2    |3    
 -----------------
 5th  |shrin|shrin
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |shrin|shrin
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |shrin|shrin
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |shrin|shrin
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 ij> update t1 set c2 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 			c3 = 'expandingxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 4 rows inserted/updated/deleted
@@ -355,9 +375,17 @@ ij> select cast(c1 as char(5)), cast(c2 as char(5)), cast(c3 as char(5)) from t1
 1    |2    |3    
 -----------------
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 5th  |expan|expan
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> create table t1 (c1 int, c2 int, c3 int, c4 int, c5 int, c6 int, c7 int, c8 int, c9 int);

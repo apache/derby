@@ -21,15 +21,14 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.sql.SQLWarning;
 import java.sql.Timestamp;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
@@ -45,7 +44,6 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -757,7 +755,14 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		return false;
 	}
 
-	public java.sql.SQLWarning getWarnings() {
+    public void addWarning(SQLWarning w) {
+        // We're not returning a (JDBC) ResultSet, so add the warning to
+        // the Activation so that it's included in the warning chain of the
+        // executing Statement.
+        getActivation().addWarning(w);
+    }
+
+	public SQLWarning getWarnings() {
 		return null;
 	}
 

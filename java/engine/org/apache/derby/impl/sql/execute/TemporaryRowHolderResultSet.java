@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.sql.SQLWarning;
 import java.sql.Timestamp;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -1306,7 +1307,12 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		catch (CloneNotSupportedException e) {}
 		return clo;
 	}
-	public java.sql.SQLWarning getWarnings() {
+
+    public void addWarning(SQLWarning w) {
+        getActivation().addWarning(w);
+    }
+
+	public SQLWarning getWarnings() {
 		return null;
 	}
 

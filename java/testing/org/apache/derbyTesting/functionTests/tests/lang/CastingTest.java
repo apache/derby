@@ -22,11 +22,13 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 
@@ -826,6 +828,150 @@ public static String[][]SQLData =
         }
     }
 
+    /**
+     * Test that a java.sql.DataTruncation warning is created when a cast
+     * results in truncation. DERBY-129.
+     */
+    public void testDataTruncationWarning() throws SQLException {
+        Statement s = createStatement();
+
+        // Test truncation of character data
+        checkDataTruncationResult(s,
+            "values (cast('abc' as char(2)), cast('de'   as char(2)))," +
+            "       (cast('fg'  as char(2)), cast('hi'   as char(2)))," +
+            "       (cast('jkl' as char(2)), cast('mnop' as char(2)))");
+        checkDataTruncationResult(s,
+            "values (cast('abc' as varchar(2)), cast('de'   as varchar(2)))," +
+            "       (cast('fg'  as varchar(2)), cast('hi'   as varchar(2)))," +
+            "       (cast('jkl' as varchar(2)), cast('mnop' as varchar(2)))");
+        checkDataTruncationResult(s,
+            "values (cast('abc' as clob(2)), cast('de'   as clob(2)))," +
+            "       (cast('fg'  as clob(2)), cast('hi'   as clob(2)))," +
+            "       (cast('jkl' as clob(2)), cast('mnop' as clob(2)))");
+
+        // Exact same test as above for binary data
+        checkDataTruncationResult(s,
+            "values (cast(x'abcdef' as char(2) for bit data),"+
+            "        cast(x'abcd' as char(2) for bit data))," +
+            "       (cast(x'abcd' as char(2) for bit data)," +
+            "        cast(x'cdef' as char(2) for bit data))," +
+            "       (cast(x'012345' as char(2) for bit data)," +
+            "        cast(x'6789ABCD' as char(2) for bit data))");
+        checkDataTruncationResult(s,
+            "values (cast(x'abcdef' as varchar(2) for bit data),"+
+            "        cast(x'abcd' as varchar(2) for bit data))," +
+            "       (cast(x'abcd' as varchar(2) for bit data)," +
+            "        cast(x'cdef' as varchar(2) for bit data))," +
+            "       (cast(x'012345' as varchar(2) for bit data)," +
+            "        cast(x'6789ABCD' as varchar(2) for bit data))");
+        checkDataTruncationResult(s,
+            "values" +
+            "    (cast(x'abcdef' as blob(2)), cast(x'abcd' as blob(2))), " +
+            "    (cast(x'abcd' as blob(2)),   cast(x'cdef' as blob(2))), " +
+            "    (cast(x'012345' as blob(2)), cast(x'6789ABCD' as blob(2)))");
+
+        // DataTruncation's javadoc says that getDataSize() and
+        // getTransferSize() should return number of bytes. Derby uses
+        // UTF-8. Test with some characters outside the US-ASCII range to
+        // verify that the returned values are in bytes and not in chars.
+        ResultSet rs = s.executeQuery(
+                "values cast('abc\u00E6\u00F8\u00E5' as varchar(4))");
+        assertTrue(rs.next());
+        assertEquals("abc\u00E6", rs.getString(1));
+        // The warning should say the string is truncated from 9 bytes to
+        // 5 bytes, not from 6 characters to 4 characters.
+        assertDataTruncation(rs.getWarnings(), -1, true, false, 9, 5);
+        assertFalse(rs.next());
+        rs.close();
+
+        // Test that there's a warning on the statement if truncation happens
+        // in an operation that doesn't return a ResultSet.
+        setAutoCommit(false);
+        s.execute("create table t1_d129 (x8 char(8) for bit data)");
+        s.execute("create table t2_d129 (x4 char(4) for bit data)");
+        s.execute("insert into t1_d129(x8) values x'0123456789ABCDEF'");
+        assertNull(s.getWarnings());
+        s.execute("insert into t2_d129(x4) " +
+                  "select cast(x8 as char(4) for bit data) from t1_d129");
+        assertDataTruncation(s.getWarnings(), -1, true, false, 8, 4);
+        rollback();
+    }
+
+    /**
+     * <p>
+     * Check the results for the queries in testDataTruncation().
+     * </p>
+     *
+     * <p>
+     * The method expects a query that returns three rows with columns of a
+     * character string or binary string data type, where some of the values
+     * are cast to a narrower data type.
+     * </p>
+     *
+     * <p>
+     * Expect the following truncations to have taken place:
+     * </p>
+     *
+     * <ol>
+     * <li>Row 1, column 1: truncated from 3 to 2 bytes</li>
+     * <li>Row 3, column 1: truncated from 3 to 2 bytes</li>
+     * <li>Row 3, column 2: truncated from 4 to 2 bytes</li>
+     * </ol>
+     */
+    private void checkDataTruncationResult(Statement s, String sql)
+            throws SQLException {
+        ResultSet rs = s.executeQuery(sql);
+
+        // First row should have one warning (column 1)
+        assertTrue(rs.next());
+        SQLWarning w = rs.getWarnings();
+        assertDataTruncation(w, -1, true, false, 3, 2);
+        w = w.getNextWarning();
+        assertNull(w);
+        rs.clearWarnings(); // workaround for DERBY-5765
+
+        // Second row should have no warnings
+        assertTrue(rs.next());
+        assertNull(rs.getWarnings());
+
+        // Third row should have two warnings (column 1 and 2)
+        assertTrue(rs.next());
+        w = rs.getWarnings();
+        assertDataTruncation(w, -1, true, false, 3, 2);
+        // Client driver doesn't support nested warnings
+        if (usingEmbedded()) {
+            w = w.getNextWarning();
+            assertDataTruncation(w, -1, true, false, 4, 2);
+        }
+        w = w.getNextWarning();
+        assertNull(w);
+        rs.clearWarnings(); // workaround for DERBY-5765
+
+        // No more rows
+        assertFalse(rs.next());
+        rs.close();
+
+        // There should be no warnings on the statement or the connection
+        assertNull(s.getWarnings());
+        assertNull(getConnection().getWarnings());
+    }
+
+    private void assertDataTruncation(
+            SQLWarning w, int index, boolean read, boolean parameter,
+            int dataSize, int transferSize) throws SQLException {
+        assertNotNull("No warning", w);
+        if (!(w instanceof DataTruncation)) {
+            fail("Not a DataTruncation warning", w);
+        }
+
+        DataTruncation dt = (DataTruncation) w;
+        assertEquals("Column index", index, dt.getIndex());
+        assertEquals("Read", read, dt.getRead());
+        assertEquals("Parameter", parameter, dt.getParameter());
+        assertEquals("Data size", dataSize, dt.getDataSize());
+        assertEquals("Transfer size", transferSize, dt.getTransferSize());
+    }
+
     protected void tearDown() throws SQLException, Exception {
         Statement scb = createStatement();
 
@@ -1035,11 +1181,11 @@ public static String[][]SQLData =
     }
 
     /**
-     * Testing server-side behaviour so run in embedded only.
+     * Create a test suite with all the tests in this class. Although we're
+     * testing embedded functionality, also run the test in client/server
+     * mode to ensure that warnings and errors travel across the wire.
      */
     public static Test suite() {
-
-        return TestConfiguration.embeddedSuite(CastingTest.class);
-
+        return TestConfiguration.defaultSuite(CastingTest.class);
     }
 }

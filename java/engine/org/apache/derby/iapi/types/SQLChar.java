@@ -29,14 +29,9 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
+import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.ConcatableDataValue;
+import org.apache.derby.iapi.reference.ContextId;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -44,17 +39,14 @@ import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
+import org.apache.derby.iapi.services.io.CounterOutputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.UTF8Util;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.db.DatabaseContext;
-
-import org.apache.derby.iapi.types.SQLInteger;
-import org.apache.derby.iapi.types.SQLDate;
-import org.apache.derby.iapi.types.SQLTime;
-import org.apache.derby.iapi.types.SQLTimestamp;
 
 import java.io.InputStream;
 import java.io.ObjectOutput;
@@ -64,6 +56,7 @@ import java.io.UTFDataFormatException;
 import java.io.EOFException;
 import java.io.Reader;
 import java.sql.Clob;
+import java.sql.DataTruncation;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -984,22 +977,33 @@ public class SQLChar
 
             if ( characterReader != null ) { c = characterReader.read(); }
             else { c = isRaw ? data[i] : lvalue.charAt(i); }
-            
-            if ((c >= 0x0001) && (c <= 0x007F))
-            {
-                out.write(c);
-            }
-            else if (c > 0x07FF)
-            {
-                out.write(0xE0 | ((c >> 12) & 0x0F));
-                out.write(0x80 | ((c >>  6) & 0x3F));
-                out.write(0x80 | ((c >>  0) & 0x3F));
-            }
-            else
-            {
-                out.write(0xC0 | ((c >>  6) & 0x1F));
-                out.write(0x80 | ((c >>  0) & 0x3F));
-            }
+
+            writeUTF(out, c);
+        }
+    }
+
+    /**
+     * Write a single character to a stream in the modified UTF-8 format.
+     *
+     * @param out the destination stream
+     * @param c the character to write
+     * @throws IOException if writing to the destination stream fails
+     */
+    private static void writeUTF(ObjectOutput out, int c) throws IOException {
+        if ((c >= 0x0001) && (c <= 0x007F))
+        {
+            out.write(c);
+        }
+        else if (c > 0x07FF)
+        {
+            out.write(0xE0 | ((c >> 12) & 0x0F));
+            out.write(0x80 | ((c >>  6) & 0x3F));
+            out.write(0x80 | ((c >>  0) & 0x3F));
+        }
+        else
+        {
+            out.write(0xC0 | ((c >>  6) & 0x1F));
+            out.write(0x80 | ((c >>  0) & 0x3F));
         }
     }
 
@@ -1914,9 +1918,38 @@ readingLoop:
             /*
             ** Check whether any non-blank characters will be truncated.
             */
-            if (errorOnTrunc)
+            try {
                 hasNonBlankChars(getString(), desiredWidth, sourceWidth);
-            //RESOLVE: should issue a warning instead
+            } catch (StandardException se) {
+                if (errorOnTrunc) {
+                    throw se;
+                }
+
+                // Generate a truncation warning, as specified in SQL:2003,
+                // part 2, 6.12 <cast specification>, general rules 10)c)2)
+                // and 11)c)2).
+
+                // Data size and transfer size need to be in bytes per
+                // DataTruncation javadoc.
+                String source = getString();
+                int transferSize = getUTF8Length(source, 0, desiredWidth);
+                int dataSize = transferSize +
+                        getUTF8Length(source, desiredWidth, source.length());
+
+                DataTruncation warning = new DataTruncation(
+                    -1,     // column index is unknown
+                    false,  // parameter
+                    true,   // read
+                    dataSize,
+                    transferSize);
+
+                warning.initCause(se);
+
+                StatementContext statementContext = (StatementContext)
+                    ContextService.getContext(ContextId.LANG_STATEMENT);
+                statementContext.getActivation().
+                        getResultSet().addWarning(warning);
+            }
 
             /*
             ** Truncate to the desired width.
@@ -1924,6 +1957,33 @@ readingLoop:
             setValue(getString().substring(0, desiredWidth));
         }
         return;
+    }
+
+    /**
+     * Get the number of bytes needed to represent a string in modified
+     * UTF-8, which is the encoding used by {@code writeExternal()} and
+     * {@code writeUTF()}.
+     *
+     * @param string the string whose length to calculate
+     * @param start start index (inclusive)
+     * @param end end index (exclusive)
+     */
+    private int getUTF8Length(String string, int start, int end)
+            throws StandardException {
+        CounterOutputStream cs = new CounterOutputStream();
+
+        try {
+            FormatIdOutputStream out = new FormatIdOutputStream(cs);
+            for (int i = start; i < end; i++) {
+                writeUTF(out, string.charAt(i));
+            }
+            out.close();
+        } catch (IOException ioe) {
+            throw StandardException.newException(
+                    SQLState.LANG_IO_EXCEPTION, ioe, ioe.toString());
+        }
+
+        return cs.getCount();
     }
 
     /*

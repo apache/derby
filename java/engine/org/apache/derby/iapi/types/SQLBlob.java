@@ -236,11 +236,7 @@ public class SQLBlob extends SQLBinary
                 /*
                  * Truncate to the desired width.
                  */
-				
-
-				byte[] shrunkData = new byte[desiredWidth];
-				System.arraycopy(getBytes(), 0, shrunkData, 0, desiredWidth);
-				dataValue = shrunkData;
+				truncate(sourceWidth, desiredWidth, true);
             }
         }
     }

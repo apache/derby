@@ -42,7 +42,7 @@ public class CounterOutputStream extends OutputStream implements Limit {
 		so that the count is intially zero.
 	*/
 	public CounterOutputStream() {
-		super();
+        limit = -1;
 	}
 
 	public void setOutputStream(OutputStream out) {
@@ -101,23 +101,8 @@ public class CounterOutputStream extends OutputStream implements Limit {
 			throw new EOFException();
 		}
 
-		out.write(b);
+		if (out != null) out.write(b);
 		count++;
-	}
-
-	/**
-		Add b.length to the count.
-
-		@see OutputStream#write
-	*/
-	public void write(byte b[]) throws IOException {
-		
-		if ((limit >= 0) && ((count + b.length) > limit)) {
-			throw new EOFException();
-		}
-
-		out.write(b);
-		count += b.length;
 	}
 
 	/**
@@ -131,7 +116,7 @@ public class CounterOutputStream extends OutputStream implements Limit {
 			throw new EOFException();
 		}
 
-		out.write(b, off, len);
+		if (out != null) out.write(b, off, len);
 		count += len;
 	}
 }

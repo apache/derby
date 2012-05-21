@@ -1018,7 +1018,7 @@ implements NoPutResultSet
         }
     }
 
-	protected final void addWarning(SQLWarning w) {
+	public final void addWarning(SQLWarning w) {
 
 		if (isTopResultSet) {
 			if (warnings == null)
@@ -1031,10 +1031,10 @@ implements NoPutResultSet
 		if (activation != null) {
 
 			ResultSet rs = activation.getResultSet();
-			if (rs instanceof BasicNoPutResultSetImpl) {
-				((BasicNoPutResultSetImpl) rs).addWarning(w);
-			}
 
+            if (rs != null) {
+                rs.addWarning(w);
+            }
 		}
 	}
 

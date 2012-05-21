@@ -7165,6 +7165,7 @@ Attached subqueries:
 											Number of opens = 3
 											Rows returned = 3
 												constructor time (m
+WARNING 01004: Data truncation
 ij> select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 C1         
 -----------
@@ -7746,6 +7747,7 @@ Attached subqueries:
 											Number of opens = 3
 											Rows returned = 3
 												constructor time (milli
+WARNING 01004: Data truncation
 ij> drop table colls;
 0 rows inserted/updated/deleted
 ij> drop table docs;

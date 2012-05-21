@@ -17,7 +17,7 @@
 create view lock_table as
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,

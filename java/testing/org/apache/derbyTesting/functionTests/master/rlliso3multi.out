@@ -419,7 +419,7 @@ ij(T6WRITER)> --
 create view lock_table as
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -486,8 +486,8 @@ ij(T6UPDATER)> create index test6_idx on test_6 (a);
 0 rows inserted/updated/deleted
 ij(T6UPDATER)> commit;
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
 ij(T6UPDATER)> --
 --==================================================
 -- t6updater gets an update lock on row where a=1
@@ -495,19 +495,19 @@ ij(T6UPDATER)> --
 get cursor update_cursor as
     'select b from test_6 where a=1 for update of b';
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
 ij(T6UPDATER)> next update_cursor;
 B          
 -----------
 1          
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6UPDATER)> set connection t6scanner;
 ij(T6SCANNER)> autocommit off;
 ij(T6SCANNER)> --
@@ -517,11 +517,11 @@ ij(T6SCANNER)> --
 select * from test_6;
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
 --------------------------------------------------
 -- try to update the table, should timeout
@@ -541,21 +541,21 @@ ij(T6SCANNER)> --
 update test_6 set b=99 where a = 8;
 1 row inserted/updated/deleted
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,9)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |3   |X   |TEST_6      |(1,9)     |GRANT|ACTIVE  
 ij(T6SCANNER)> commit;
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
 --------------------------------------------------
 -- try to get an update lock
@@ -563,12 +563,12 @@ ij(T6SCANNER)> --
 get cursor update_cursor2 as
     'select b from test_6 where a=1 for update of b';
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
 --------------------------------------------------
 -- should timeout (other transaction has a shared lock on this row)
@@ -576,11 +576,11 @@ ij(T6SCANNER)> --
 next update_cursor2;
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
 --------------------------------------------------
 -- should succeed (no other transaction has a shared lock on this row)
@@ -599,14 +599,14 @@ B
 -----------
 99         
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,8)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,9)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,9)     |GRANT|ACTIVE  
 ij(T6SCANNER)> commit;
 ij(T6SCANNER)> close update_cursor2;
 ij(T6SCANNER)> close update_cursor3;
@@ -615,8 +615,8 @@ ij(T6UPDATER)> commit;
 ij(T6UPDATER)> close update_cursor;
 ij(T6UPDATER)> set connection t6scanner;
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
 ij(T6SCANNER)> --
 --==================================================
 -- t6scanner gets a read lock
@@ -626,11 +626,11 @@ B
 -----------
 1          
 ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
 --------------------------------------------------
 -- should succeed (can get an update lock if there is already a shared lock)
@@ -643,14 +643,14 @@ B
 -----------
 1          
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6UPDATER)> commit;
 ij(T6UPDATER)> close update_cursor;
 ij(T6UPDATER)> set connection t6scanner;
@@ -664,21 +664,21 @@ ij(T6WRITER)> autocommit off;
 ij(T6WRITER)> update test_6 set b=77 where a=2;
 1 row inserted/updated/deleted
 ij(T6WRITER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
 ij(T6WRITER)> set connection t6updater;
 ij(T6UPDATER)> get cursor update_cursor as
     'select b from test_6 where a=2 for update of b';
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+APP     |UserTransaction|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |1   |X   |TEST_6      |(1,7)     |GRANT|ACTIVE  
+APP     |UserTransaction|ROW     |3   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
 ij(T6UPDATER)> --
 ----------------------------------------------------
 -- should timeout

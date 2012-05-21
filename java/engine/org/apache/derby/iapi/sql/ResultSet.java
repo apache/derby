@@ -335,6 +335,13 @@ public interface ResultSet
 	 */
 	public String	getCursorName();
 
+    /**
+     * Add a warning to this result set.
+     *
+     * @param w the warning to add
+     */
+    void addWarning(SQLWarning w);
+
 	/**
 		Return the set of warnings generated during the execution of
 		this result set. The warnings are cleared once this call returns.

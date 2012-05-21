@@ -2374,7 +2374,7 @@ class DRDAConnThread extends Thread {
 		writeRDBNAM(database.getDatabaseName());
 		writer.endDdm();
 		writer.startDdm(CodePoint.SQLCARD);
-		writeSQLCAGRP(e, getSqlCode(getExceptionSeverity(e)), 0, 0);
+		writeSQLCAGRP(e, 0, 0);
 		writer.endDdmAndDss();
 	}
 	/**
@@ -5910,7 +5910,7 @@ class DRDAConnThread extends Thread {
 	{
 		writer.createDssObject();
 		writer.startDdm(CodePoint.SQLCARD);
-		writeSQLCAGRP(e, getSqlCode(severity), updateCount, rowCount);
+		writeSQLCAGRP(e, updateCount, rowCount);
 		writer.endDdmAndDss();
 
 		// If we have a shutdown exception, restart the server.
@@ -6040,18 +6040,32 @@ class DRDAConnThread extends Thread {
 	 *   SQLDIAGGRP; DRDA TYPE N-GDA; ENVLID 0x56; Length Override 0
 	 *
 	 * @param e 	SQLException encountered
-	 * @param sqlcode	sqlcode
 	 * 
 	 * @exception DRDAProtocolException
 	 */
-	private void writeSQLCAGRP(SQLException e, int sqlcode, int updateCount,
-			long rowCount) throws DRDAProtocolException
+    private void writeSQLCAGRP(SQLException e, int updateCount, long rowCount)
+        throws DRDAProtocolException
 	{
+        int sqlcode = 0;
+
         if (e == null) {
             // Forwarding to the optimized version when there is no
             // exception object
             writeSQLCAGRP(nullSQLState, sqlcode, updateCount, rowCount);
             return;
+        }
+
+        // SQLWarnings should have warning severity, except if it's a
+        // DataTruncation warning for write operations (with SQLState 22001),
+        // which is supposed to be used as an exception even though it's a
+        // sub-class of SQLWarning.
+        if (e instanceof SQLWarning &&
+                !SQLState.LANG_STRING_TRUNCATION.equals(e.getSQLState())) {
+            sqlcode = ExceptionSeverity.WARNING_SEVERITY;
+        } else {
+            // Get the SQLCODE for exceptions. Note that this call will always
+            // return -1, so the real error code will be lost.
+            sqlcode = getSqlCode(getExceptionSeverity(e));
         }
 
 		if (rowCount < 0 && updateCount < 0)
@@ -6635,7 +6649,7 @@ class DRDAConnThread extends Thread {
 
 		// all went well we will just write a null SQLCA
 		writer.startDdm(CodePoint.SQLDARD);
-		writeSQLCAGRP(e, getSqlCode(getExceptionSeverity(e)), 0, 0);
+		writeSQLCAGRP(e, 0, 0);
 
 		if (sqlamLevel >= MGRLVL_7)
 			writeSQLDHROW(ps.getResultSetHoldability());
@@ -7123,7 +7137,7 @@ class DRDAConnThread extends Thread {
 			if (sqlw == null)
                 writeSQLCAGRP(nullSQLState, 0, -1, -1);
 			else
-				writeSQLCAGRP(sqlw, sqlw.getErrorCode(), 1, -1);
+				writeSQLCAGRP(sqlw, 1, -1);
 
             // Save the position right after the warnings so we know where to
             // insert more warnings later.
@@ -7274,7 +7288,7 @@ class DRDAConnThread extends Thread {
                 if (sqlw != null) {
                     truncated.setNextWarning(sqlw);
                 }
-                writeSQLCAGRP(truncated, CodePoint.SVRCOD_WARNING, 1, -1);
+                writeSQLCAGRP(truncated, 1, -1);
                 writer.writeBytes(data);
                 stmt.clearTruncationWarnings();
             }

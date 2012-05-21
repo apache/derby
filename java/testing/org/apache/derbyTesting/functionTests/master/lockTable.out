@@ -55,7 +55,7 @@ ij(C1)> --
 --
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -68,9 +68,9 @@ from
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-U1      |UserTran|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+U1      |UserTransaction|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
 ij(C1)> -- verify that we can insert into the table
 insert into t1 values 2;
 1 row inserted/updated/deleted
@@ -108,7 +108,7 @@ ij(C1)> --
 --
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -121,9 +121,9 @@ from
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-U1      |UserTran|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+U1      |UserTransaction|TABLE   |1   |X   |T1          |Tablelock |GRANT|ACTIVE  
 ij(C1)> -- verify that we can insert into the table
 insert into t1 values 3;
 1 row inserted/updated/deleted
@@ -162,7 +162,7 @@ ij(C1)> --
 --
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -175,9 +175,9 @@ from
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+U1      |UserTransaction|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
 ij(C1)> -- verify that we can insert into the table
 insert into t1 values 4;
 1 row inserted/updated/deleted
@@ -216,7 +216,7 @@ ij(C1)> --
 --
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -229,10 +229,10 @@ from
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-U2      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
-U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+U2      |UserTransaction|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+U1      |UserTransaction|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
 ij(C1)> -- verify that we cannot insert into the table
 insert into t1 values 5;
 ERROR 40XL1: A lock could not be obtained within the time requested
@@ -281,7 +281,7 @@ ij(C1)> --
 --
 select 
     cast(username as char(8)) as username,
-    cast(t.type as char(8)) as trantype,
+    cast(t.type as char(15)) as trantype,
     cast(l.type as char(8)) as type,
     cast(lockcount as char(3)) as cnt,
     mode,
@@ -294,10 +294,10 @@ from
 on l.xid = t.xid where l.tableType <> 'S' 
 order by 
     tabname, type desc, mode, cnt, lockname;
-USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
----------------------------------------------------------------------------
-U1      |UserTran|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
-U2      |UserTran|TABLE   |1   |S   |T2          |Tablelock |GRANT|ACTIVE  
+USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
+----------------------------------------------------------------------------------
+U1      |UserTransaction|TABLE   |1   |S   |T1          |Tablelock |GRANT|ACTIVE  
+U2      |UserTransaction|TABLE   |1   |S   |T2          |Tablelock |GRANT|ACTIVE  
 ij(C1)> commit;
 ij(C1)> disconnect;
 ij> set connection C2;

@@ -21,29 +21,27 @@
 
 package org.apache.derby.iapi.types;
 
+import org.apache.derby.iapi.sql.conn.StatementContext;
+
+import org.apache.derby.iapi.reference.ContextId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.ConcatableDataValue;
 import org.apache.derby.iapi.error.StandardException;
+
+import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.NumberDataValue;
-
 import org.apache.derby.iapi.services.cache.ClassSize;
-
-import org.apache.derby.iapi.types.SQLInteger;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -51,9 +49,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.sql.Blob;
+import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import org.apache.derby.iapi.services.io.InputStreamUtil;
 
 /**
  * SQLBinary is the abstract class for the binary datatypes.
@@ -1296,5 +1294,36 @@ abstract class SQLBinary
         }
         catch (SQLException se) { throw StandardException.plainWrapException( se ); }
     }
-    
+
+    /**
+     * Truncate this value to the desired width by removing bytes at the
+     * end of the byte sequence.
+     *
+     * @param sourceWidth the original width in bytes (only used for
+     *   diagnostics, ignored if {@code warn} is {@code false})
+     * @param desiredWidth the desired width in bytes
+     * @param warn whether or not to generate a truncation warning
+     */
+    void truncate(int sourceWidth, int desiredWidth, boolean warn)
+            throws StandardException {
+        if (warn) {
+            // SQL:2003, part 2, 6.12 <cast specification>,
+            // general rule 12 says we should warn about truncation.
+            DataTruncation warning = new DataTruncation(
+                    -1,    // column index is unknown
+                    false, // parameter
+                    true,  // read
+                    getLength(), desiredWidth);
+
+            StatementContext statementContext = (StatementContext)
+                ContextService.getContext(ContextId.LANG_STATEMENT);
+            statementContext.getActivation().
+                    getResultSet().addWarning(warning);
+        }
+
+        // Truncate to the desired width.
+        byte[] shrunkData = new byte[desiredWidth];
+        System.arraycopy(getValue(), 0, shrunkData, 0, desiredWidth);
+        setValue(shrunkData);
+    }
 }

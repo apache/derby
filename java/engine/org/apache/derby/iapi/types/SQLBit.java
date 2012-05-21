@@ -214,19 +214,11 @@ public class SQLBit
 									String.valueOf(desiredWidth));
 				}
 			}
-			//else
-			//{
-			// RESOLVE: when we have warnings, issue a warning if
-			// truncation of non-zero bits will occur
-			//}
 	
 			/*
 			** Truncate to the desired width.
 			*/
-			byte[] shrunkData = new byte[desiredWidth];
-			System.arraycopy(dataValue, 0, shrunkData, 0, desiredWidth);
-			dataValue = shrunkData;
-
+            truncate(sourceWidth, desiredWidth, !errorOnTrunc);
 		}
 	}
 

@@ -1327,7 +1327,7 @@ public interface SQLState {
 	String LANG_CURSOR_ALREADY_EXISTS                                  = "X0X60.S";
 	String LANG_INDEX_COLUMN_NOT_EQUAL                                 = "X0X61.S";
 	String LANG_INCONSISTENT_ROW_LOCATION                              = "X0X62.S";
-	String LANG_FILE_ERROR                                             = "X0X63.S";
+	String LANG_IO_EXCEPTION                                           = "X0X63.S";
 	String LANG_COLUMN_NOT_ORDERABLE_DURING_EXECUTION                  = "X0X67.S";
 	String LANG_OBJECT_NOT_FOUND_DURING_EXECUTION                      = "X0X81.S";
 	String LANG_NON_KEYED_INDEX                                        = "X0X85.S";

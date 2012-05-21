@@ -25,8 +25,7 @@
 
 -- shrink/grow bit and char
 -- no exceptions should be raised.
--- once we have warnings we'll expect
--- a warning when shrinking non space/zeros
+-- expect a warning when shrinking non-space
 
 -- shrink
 values (cast ('hell' as char(2)));
