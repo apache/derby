@@ -218,8 +218,6 @@ public class ResultColumn extends ValueNode
 	 * Returns TRUE if the ResultColumn is join column for a RIGHT OUTER 
 	 *  JOIN with USING/NATURAL. More comments at the top of this class
 	 *  where rightOuterJoinUsingClause is defined.
-	 *  
-	 * @param value True/False
 	 */
 	public boolean isRightOuterJoinUsingClause()
 	{
