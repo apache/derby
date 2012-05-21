@@ -69,9 +69,13 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      *  SYSCS_DROP_STATISTICS and SYSCS_UPDATE_STATISTICS
      */
     public void testIndexAndColumnNamedStatistics() throws SQLException {
+        String tbl = "T1";
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
+
+        // Get the initial count of statistics in the database.
+        int initialStatsCount = stats.getStats().length;
 
         //Notice the name of one of the columns is STATISTICS
         s.executeUpdate("CREATE TABLE t1 (c11 int, statistics int not null)");
@@ -79,26 +83,29 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         // one of the column names
         s.executeUpdate("CREATE INDEX statistIcs ON t1(c11)");
         s.executeUpdate("INSERT INTO t1 VALUES(1,1)");
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl);
         //Drop the column named STATISTICS and make sure parser doesn't
         // throw an error
         s.executeUpdate("ALTER TABLE t1 DROP statistics");
         //Should still be able to call update/drop statistics on index 
         // STATISTICS
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','STATISTICS')");
-        stats.assertStats(1);
+        stats.assertTableStats(tbl, 1);
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','STATISTICS')");
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl);
         //Add the column named STATISTICS back
         s.executeUpdate("ALTER TABLE t1 ADD COLUMN statistics int");
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl);
         //Update or drop statistics for index named STATISTICS. Note that there
         // is also a column named STATISTICS in the table
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','STATISTICS')");
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl);
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','STATISTICS')");
-        stats.assertStats(1);
+        stats.assertTableStats(tbl, 1);
         s.executeUpdate("DROP TABLE t1");
+
+        // Check that we haven't created some other statistics as a side-effect.
+        assertEquals(initialStatsCount, stats.getStats().length);
     }
 
     /**
@@ -111,6 +118,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
         //Calls to update and drop statistics below should fail because 
         // table APP.T1 does not exist
+        dropTable("T1");
         assertStatementError("42Y55", s, 
             "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
         assertStatementError("42Y55", s, 
