@@ -286,16 +286,21 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	}
 
 	/**
-	 * Bind the tables in this FromList.  This includes looking them up in
-	 * the DataDictionary, getting their TableDescriptors and assigning the
-	 * table numbers.
-	 *
-	 * @param dataDictionary	The DataDictionary to use for binding
-	 * @param fromListParam		FromList to use/append to.
-	 *
-	 * @exception StandardException		Thrown on error
+	 * Go through the list of the tables and see if the passed ResultColumn
+	 *  is a join column for a right outer join with USING/NATURAL clause.
+	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
 	 */
 
+	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+	{
+		FromTable	fromTable;
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			fromTable = (FromTable) elementAt(index);
+			fromTable.isJoinColumnForRightOuterJoin(rc);
+		}
+	}
 	public void bindTables(DataDictionary dataDictionary, 
 							FromList fromListParam) 
 			throws StandardException
