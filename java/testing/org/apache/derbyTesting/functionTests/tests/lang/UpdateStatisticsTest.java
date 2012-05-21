@@ -112,6 +112,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      * Test for update statistics
      */
     public void testUpdateAndDropStatistics() throws SQLException {
+        String tbl1 = "T1";
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
@@ -150,42 +151,42 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //So far the table t1 is empty and we have already created index I1 on 
         //it. Since three was no data in the table when index I1 was created,
         //there will be no row in sysstatistics table
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl1);
         //Now insert some data into t1 and then create a new index on the 
         //table. This will cause sysstatistics table to have one row for this
         //new index. Old index will still not have a row for it in
         //sysstatistics table
         s.executeUpdate("INSERT INTO T1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
         s.executeUpdate("CREATE INDEX i2 ON t1(c11)");
-        stats.assertStats(1);
+        stats.assertTableStats(tbl1, 1);
         //Drop the statistics on index I2 and then add it back by calling 
         // update statistics
         s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I2')");
         //Since we dropped the only statistics that existed for table T1, there
         // will no stats found at this point
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl1);
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I2')");
         //The statistics for index I2 has been added back
-        stats.assertStats(1);
+        stats.assertTableStats(tbl1, 1);
         //Now update the statistics for the old index I1 using the new stored
         //procedure. Doing this should add a row for it in sysstatistics table
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
-        stats.assertStats(2);
+        stats.assertTableStats(tbl1, 2);
         //Drop the statistics on index I1 and then add it back by calling 
         // update statistics
         s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1','I1')");
-        stats.assertStats(1);
+        stats.assertTableStats(tbl1, 1);
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
-        stats.assertStats(2);
+        stats.assertTableStats(tbl1, 2);
         //Drop all the statistics on table T1 and then recreate all the 
         // statisitcs back again
         s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','T1',null)");
-        stats.assertNoStats();
+        stats.assertNoStatsTable(tbl1);
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
-        stats.assertStats(2);
+        stats.assertTableStats(tbl1, 2);
         //Dropping the index should get rid of it's statistics
         s.executeUpdate("DROP INDEX I1");
-        stats.assertStats(1);
+        stats.assertTableStats(tbl1, 1);
 
         //calls to system procedure for update and drop statistics are
         // internally converted into ALTER TABLE ... sql but that generated
@@ -236,7 +237,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //empty
         s.executeUpdate("CREATE INDEX t2i1 ON t2(c21)");
         s.executeUpdate("CREATE INDEX t2i2 ON t2(c22)");
-        stats.assertNoStats();
+        stats.assertNoStatsTable("T2");
         
         PreparedStatement ps = prepareStatement("INSERT INTO T2 VALUES(?,?,?)");
         for (int i=0; i<1000; i++) {
@@ -588,6 +589,10 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         // Check the counts again.
         stats.assertTableStats(tbl_fk, 1);
         stats.assertTableStats(tbl, 4);
+
+        // Cleanup
+        dropTable(tbl);
+        dropTable(tbl_fk);
     }
 
     /**
