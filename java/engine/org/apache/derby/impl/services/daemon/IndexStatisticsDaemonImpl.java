@@ -221,7 +221,7 @@ public class IndexStatisticsDaemonImpl
         // For now allow users to override the new behavior through a debug
         // property. Will be removed or renamed in a future release.
         boolean keepDisposableStats = PropertyUtil.getSystemBoolean(
-              Property.STORAGE_AUTO_INDEX_STATS_DEBUG_FORCE_OLD_BEHAVIOR);
+              Property.STORAGE_AUTO_INDEX_STATS_DEBUG_KEEP_DISPOSABLE_STATS);
         this.skipDisposableStats = dbAtLeast10_9(db) && !keepDisposableStats;
 
         this.db = db;

@@ -147,7 +147,7 @@ public class KeepDisposableStatsPropertyTest
      * explicitly setting it to {@code false}.
      */
     public static Test suite() {
-        String property = "derby.storage.indexStats.debug.forceOldBehavior";
+        String property = "derby.storage.indexStats.debug.keepDisposableStats";
         TestSuite suite = new TestSuite("KeepDisposableStatsPropertyTestSuite");
         // Test the default (expected to be false).
         suite.addTest(
