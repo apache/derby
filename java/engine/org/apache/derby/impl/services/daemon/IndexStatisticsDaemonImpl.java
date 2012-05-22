@@ -484,9 +484,6 @@ public class IndexStatisticsDaemonImpl
                 UUID referencedIndex = stats[si].getReferenceID();
                 boolean isValid = false;
                 for (int ci=0; ci < conglomerateNumber.length; ci++) {
-                    if (conglomerateNumber[ci] == -1) {
-                        continue;
-                    }
                     if (referencedIndex.equals(objectUUID[ci])) {
                         isValid = true;
                         break;
