@@ -102,7 +102,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
      * @throws StandardException
      */
     protected EmbedClob(EmbedConnection con, StringDataValue dvd)
-        throws StandardException
+        throws StandardException, SQLException
     {
         super(con);
         // if the underlying column is null, ResultSet.getClob will return null,
@@ -144,12 +144,8 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 clob = new TemporaryClob(dvd.getString(),
                         this);
             }
-            catch (SQLException sqle) {
-                throw StandardException.newException (sqle.getSQLState(), sqle);
-            }
             catch (IOException e) {
-                throw StandardException.newException (
-                                        SQLState.SET_STREAM_FAILURE, e);
+                throw Util.setStreamFailure(e);
             }
         }
         con.addLOBReference (this);

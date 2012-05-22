@@ -154,7 +154,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
       This constructor should only be called by EmbedResultSet.getBlob
     */
     protected EmbedBlob(DataValueDescriptor dvd, EmbedConnection con)
-        throws StandardException
+        throws StandardException, SQLException
     {
         super(con);
         // if the underlying column is null, ResultSet.getBlob will return null,
@@ -189,8 +189,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 control = new LOBStreamControl (
                             getEmbedConnection(), dvdBytes);
             } catch (IOException e) {
-                throw StandardException.newException (
-                                        SQLState.SET_STREAM_FAILURE, e);
+                throw Util.setStreamFailure(e);
             }
         }
         //add entry in connection so it can be cleared 
@@ -210,7 +209,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      *      data to temporary storage fails
      */
     private int handleStreamValue(InputStream dvdStream, EmbedConnection con)
-            throws StandardException {
+            throws StandardException, SQLException {
         int offset = 0;
         // b) Resetable stream
         //    In this case the stream is coming from the Derby store.
@@ -283,8 +282,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 }
                 tmpStream.close();
             } catch (IOException ioe) {
-                throw StandardException.newException (
-                                        SQLState.SET_STREAM_FAILURE, ioe);
+                throw Util.setStreamFailure(ioe);
             }
         }
         return offset;

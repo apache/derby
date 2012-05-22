@@ -179,7 +179,7 @@ final class TemporaryClob implements InternalClob {
      * @param conChild connection object used to obtain synchronization object
      */
     TemporaryClob (String data, ConnectionChild conChild)
-                          throws IOException, SQLException, StandardException {
+                          throws IOException, StandardException {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
