@@ -167,7 +167,7 @@ public class IndexStatsUtil {
      * @param name the name of the table(s)/index(es) associated with the stats
      * @return A string representation of the statistics.
      */
-    private String buildStatString(IdxStats[] stats, String name) {
+    public static String buildStatString(IdxStats[] stats, String name) {
         StringBuffer sb = new StringBuffer(
                 "Index statistics for " + name + SEP);
         for (int i=0; i < stats.length; i++) {

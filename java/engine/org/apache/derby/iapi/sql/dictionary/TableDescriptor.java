@@ -642,22 +642,41 @@ public class TableDescriptor extends TupleDescriptor
 	 * Gets the number of indexes on the table, including the backing indexes.
 	 *
 	 * @return the number of columns in the table.
-	 *
+     * @see #getQualifiedNumberOfIndexes
 	 */
 	public int getTotalNumberOfIndexes()
 		throws StandardException
 	{
-		int totalNumberOfIndexes = 0;
-		ConglomerateDescriptor[]	cds = getConglomerateDescriptors();
-
-		for (int index = 0; index < cds.length; index++)
-		{
-			if (cds[index].isIndex()) { totalNumberOfIndexes++; }
-		}
-
-		return totalNumberOfIndexes;
+		return getQualifiedNumberOfIndexes(0, false);
 	}
 
+    /**
+     * Returns the number of indexes matching the criteria.
+     *
+     * @param minColCount the minimum number of ordered columns in the indexes
+     *      we want to count
+     * @param nonUniqeTrumpsColCount if {@code true} a non-unique index will be
+     *      included in the count even if it has less than {@code minColCount}
+     *      ordered columns
+     * @return Number of matching indexes.
+     * @see #getTotalNumberOfIndexes()
+     */
+    public int getQualifiedNumberOfIndexes(int minColCount,
+                                           boolean nonUniqeTrumpsColCount) {
+        int matches = 0;
+        for (Iterator congIter = conglomerateDescriptorList.iterator();
+                congIter.hasNext(); ) {
+            ConglomerateDescriptor cd = (ConglomerateDescriptor)congIter.next();
+            if (cd.isIndex()) {
+                IndexRowGenerator irg = cd.getIndexDescriptor();
+                if (irg.numberOfOrderedColumns() >= minColCount ||
+                        (nonUniqeTrumpsColCount && !irg.isUnique())) {
+                    matches++;
+                }
+            }
+        }
+        return matches;
+    }
 
     /**
 	  *	Builds a list of all triggers which are relevant to a

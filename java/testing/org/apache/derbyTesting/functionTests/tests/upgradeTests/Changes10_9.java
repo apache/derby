@@ -37,6 +37,7 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.upgradeTests.helpers.DisposableIndexStatistics;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -941,7 +942,7 @@ public class Changes10_9 extends UpgradeChange
             s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
             stats.assertNoStatsTable("TEST_TAB_2");
             s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
-            stats.assertTableStats("TEST_TAB_2", 1); // TODO: Adjust for DERBY-3790
+            stats.assertNoStatsTable("TEST_TAB_2");
             break;
 
         case PH_POST_HARD_UPGRADE:
@@ -952,4 +953,102 @@ public class Changes10_9 extends UpgradeChange
             break;
         }
     }
+
+    /**
+     * Verifies the behavior of the update statistics code when faced with
+     * "disposable statistics entries".
+     * <p>
+     * A disposable statistics entry is a row in SYS.SYSSTATISTICS that has
+     * been orphaned (see DERBY-5681) or it is on longer needed by the
+     * Derby optimizer (due to internal changes/improvements).
+     * <p>
+     * This test expects different things based on the phase:
+     * <dl> <dt>create</dt>
+     *      <dd>- run statements that will cause disposable statistics
+     *          entries to be created</dd>
+     *      <dt>soft upgrade</dt>
+     *      <dd>- run the new update statistics code, expecting it to leave the
+     *          disposable statistics intact</dd>
+     *      <dt>downgrade</dt>
+     *      <dd>- verify that the relevant statistics are present</dd>
+     *      <dt>hard upgrade</dt>
+     *      <dd>- run the new update statistics code, expecting it to get rid
+     *          of the disposable statistics</dd>
+     * </dl>
+     */
+    public void testDisposableStatisticsExplicit()
+            throws SQLException {
+        // Don't run this test with versions prior to 10.5, since the
+        // required SYSCS_UPDATE_STATISTICS don't exist in older versions.
+        if (!oldAtLeast(10, 5)) {
+            return;
+        }
+
+        final String TBL = "ISTAT_DISPOSABLE_STATS";
+        String updateStatsSQL = "call syscs_util.syscs_update_statistics(" +
+                "'APP', ?, null)";
+        DisposableIndexStatistics dis =
+                new DisposableIndexStatistics(getConnection(), TBL);
+
+        switch (getPhase()) {
+            // create with old version
+            case PH_CREATE:
+            {
+                dis.createAndPopulateTables();
+                // We expect that the maximum number of statistics have been
+                // created here, since we're using an older version of Derby
+                // that contained a bug and lacked the latest optimizations.
+                dis.assertStatsCount(
+                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                break;
+            }
+            // boot with new version and soft-upgrade
+            case PH_SOFT_UPGRADE:
+            {
+                PreparedStatement ps = prepareStatement(updateStatsSQL);
+                String[] tables = dis.getTableNames();
+                // Update statistics on all relevant tables.
+                for (int i=0; i < tables.length; i++) {
+                    ps.setString(1, tables[i]);
+                    ps.executeUpdate();
+                }
+                dis.assertStatsCount(
+                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                break;
+            }
+            // soft-downgrade: boot with old version after soft-upgrade
+            case PH_POST_SOFT_UPGRADE:
+            {
+                dis.assertStatsCount(
+                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                break;
+            }
+            // boot with new version and hard-upgrade
+            case PH_HARD_UPGRADE:
+            {
+                dis.assertStatsCount(
+                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                PreparedStatement ps = prepareStatement(updateStatsSQL);
+                String[] tables = dis.getTableNames();
+                for (int i=0; i < tables.length; i++) {
+                    ps.setString(1, tables[i]);
+                    ps.executeUpdate();
+                }
+                // Confirm that we disposed of the statistics that were added
+                // due to a bug or simply not needed by Derby.
+                try {
+                    dis.assertStatsCount(
+                        DisposableIndexStatistics.getNumTotalPossibleStats() -
+                        DisposableIndexStatistics.getNumDisposableStats());
+                } finally {
+                    for (int i=0; i < tables.length; i++) {
+                        dropTable(tables[i]);
+                    }
+                }
+                commit();
+                break;
+            }
+        }
+    }
+
 }

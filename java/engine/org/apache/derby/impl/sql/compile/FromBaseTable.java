@@ -77,6 +77,8 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
+// Temporary until user override for disposable stats has been removed.
+import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
 import org.apache.derby.impl.sql.catalog.SYSUSERSRowFactory;
 
 /**
@@ -928,9 +930,10 @@ public class FromBaseTable extends FromTable
                 hasCheckedIndexStats = true;
                 // Only mark if a base table and there are indexes. Skip VTIs,
                 // system tables, subqueries etc.
-                if (tableDescriptor.getTableType() ==
-                        TableDescriptor.BASE_TABLE_TYPE &&
-                        tableDescriptor.getTotalNumberOfIndexes() > 0) {
+                // The case where we have a table with a single-column unique
+                // index is pretty common, so avoid engaging the istat
+                // daemon if that's the only index on the table.
+                if (qualifiesForStatisticsUpdateCheck(tableDescriptor)) {
                     tableDescriptor.markForIndexStatsUpdate(baseRowCount());
                 }
             }
@@ -4752,4 +4755,32 @@ public class FromBaseTable extends FromTable
 		}
 	}
 
+    /**
+     * Tells if the given table qualifies for a statistics update check in the
+     * current configuration.
+     *
+     * @param td the table to check
+     * @return {@code true} if qualified, {@code false} if not
+     */
+    private boolean qualifiesForStatisticsUpdateCheck(TableDescriptor td)
+            throws StandardException {
+        int qualifiedIndexes = 0;
+        // Only base tables qualifies.
+        if (td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
+            IndexStatisticsDaemonImpl istatDaemon = (IndexStatisticsDaemonImpl)
+                    getDataDictionary().getIndexStatsRefresher(false);
+            // Usually only tables with at least one non-unique index or
+            // multi-column unique indexes qualify, but soft-upgrade mode is a
+            // special case (as is the temporary user override available).
+            // TODO: Rewrite if-logic when the temporary override is removed.
+            if (istatDaemon == null) { // Read-only database
+                qualifiedIndexes = 0;
+            } else if (istatDaemon.skipDisposableStats) {
+                qualifiedIndexes = td.getQualifiedNumberOfIndexes(2, true);
+            } else {
+                qualifiedIndexes = td.getTotalNumberOfIndexes();
+            }
+        }
+        return (qualifiedIndexes > 0);
+    }
 }

@@ -394,14 +394,12 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("INSERT INTO TEST_TAB_1 VALUES(1,1,1),(2,2,2)");
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_1', null)");
         stats.assertNoStatsTable("TEST_TAB_1");
-        //Add primary key constraint to the table and now we should find a 
-        // statistics row for it
+        // Add primary key constraint to the table. With DERBY-3790 this won't
+        // create a statistics entry, since the key consist of single column.
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
         		"PRIMARY KEY (c11)");
-        stats.assertTableStats("TEST_TAB_1",1);
-        //Dropping primary key constraint will drop the corresponding
-        // statistics
+        stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_PK_1");
         stats.assertNoStatsTable("TEST_TAB_1");
@@ -412,40 +410,52 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
         		"PRIMARY KEY (c11)");
-        //The statistics for primary key constraint has been added
-        stats.assertTableStats("TEST_TAB_1",1);
+        stats.assertNoStatsTable("TEST_TAB_1");
 
         //Test - unique key constraint
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_UNQ_1 "+
         		"UNIQUE (c12)");
-        stats.assertTableStats("TEST_TAB_1",2);
+        stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_UNQ_1");
-        stats.assertTableStats("TEST_TAB_1",1);
+        stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_PK_1");
         stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
         		"PRIMARY KEY (c11)");
+        stats.assertNoStatsTable("TEST_TAB_1");
+
+        //Test - non-unique index
+        s.executeUpdate("CREATE INDEX TEST_TAB_1_NUNQ_1 ON TEST_TAB_1(c12)");
         stats.assertTableStats("TEST_TAB_1",1);
+        s.executeUpdate("DROP INDEX TEST_TAB_1_NUNQ_1");
+        stats.assertNoStatsTable("TEST_TAB_1");
+        s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
+                "DROP CONSTRAINT TEST_TAB_1_PK_1");
+        stats.assertNoStatsTable("TEST_TAB_1");
+        s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
+                "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
+        		"PRIMARY KEY (c11)");
+        stats.assertNoStatsTable("TEST_TAB_1");
 
         //Test - unique key constraint on nullable column & non-nullable column
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_UNQ_2 "+
         		"UNIQUE (c12, c13)");
-        stats.assertTableStats("TEST_TAB_1",3);
+        stats.assertTableStats("TEST_TAB_1",2);
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_UNQ_2");
-        stats.assertTableStats("TEST_TAB_1",1);
+        stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "DROP CONSTRAINT TEST_TAB_1_PK_1");
         stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_1 "+
                 "ADD CONSTRAINT TEST_TAB_1_PK_1 "+
         		"PRIMARY KEY (c11)");
-        stats.assertTableStats("TEST_TAB_1",1);
+        stats.assertNoStatsTable("TEST_TAB_1");
         
         //Test - foreign key but no primary key constraint
         s.executeUpdate("CREATE TABLE TEST_TAB_3 (c31 int not null)");
@@ -464,29 +474,28 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
                 "ADD CONSTRAINT TEST_TAB_2_PK_1 "+
         		"PRIMARY KEY (c21)");
-        stats.assertTableStats("TEST_TAB_2",1);
-        //DERBY-5702 Add a foreign key constraint and now we should find 2 rows
-        // of statistics for TEST_TAB_2 - 1 for primary key and other for
-        // foreign key constraint
+        stats.assertNoStatsTable("TEST_TAB_2");
+        // DERBY-5702 Add a foreign key constraint and now we should find one
+        // row of statistics for TEST_TAB_2 (for the foreign key constraint).
         s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
                 "ADD CONSTRAINT TEST_TAB_2_FK_1 "+
         		"FOREIGN KEY(c21) REFERENCES TEST_TAB_1(c11)");
         //DERBY-5702 Like primary key earlier, adding foreign key constraint
         // didn't automatically add a statistics row for it. Have to run update
         // statistics manually to get a row added for it's stat
-        stats.assertTableStats("TEST_TAB_2",1);
+        stats.assertNoStatsTable("TEST_TAB_2");
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
-        stats.assertTableStats("TEST_TAB_2",2);
+        stats.assertTableStats("TEST_TAB_2",1);
         //Number of statistics row for TEST_TAB_1 will remain unchanged since
         // it has only primary key defined on it
-        stats.assertTableStats("TEST_TAB_1",1);
+        stats.assertNoStatsTable("TEST_TAB_1");
         s.executeUpdate("ALTER TABLE TEST_TAB_2 "+
                 "DROP CONSTRAINT TEST_TAB_2_FK_1");
-        //Dropping the foreign key constraint should remove one of the 
-        // statistics row for TEST_TAB_2. 
-        stats.assertTableStats("TEST_TAB_2",1);
+        //Dropping the foreign key constraint should cause the statistics row
+        // for TEST_TAB_2 to be dropped as well.
+        stats.assertNoStatsTable("TEST_TAB_2");
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
-        stats.assertTableStats("TEST_TAB_2",1);
+        stats.assertNoStatsTable("TEST_TAB_2");
         s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
         //After DERBY-4115 is implemented, we will see no statistics 
         // for TEST_TAB_2 after calling SYSCS_DROP_STATISTICS on it.
@@ -545,10 +554,9 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         commit();
         setAutoCommit(true);
         IndexStatsUtil stats = new IndexStatsUtil(getConnection());
-        // Expected FK table: 1 (PK only)
+        // Expected FK table: 0
         // Expected main table: 2xPK, 1 non-unique, 1 FK = 4
-        stats.assertTableStats(tbl_fk, 1);
-        IndexStatsUtil.IdxStats tbl_fk_pk_0 = stats.getStatsTable(tbl_fk)[0];
+        stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
         IndexStatsUtil.IdxStats[] tbl_stats_0 = stats.getStatsTable(tbl);
         // Avoid timestamp comparison problems on super-fast machines...
@@ -568,11 +576,9 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         ps.execute();
 
         // Check the counts.
-        stats.assertTableStats(tbl_fk, 1);
+        stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
         // Check the timestamps (i.e. were they actually updated?).
-        IndexStatsUtil.IdxStats tbl_fk_pk_1 = stats.getStatsTable(tbl_fk)[0];
-        assertTrue(tbl_fk_pk_1.after(tbl_fk_pk_0));
         IndexStatsUtil.IdxStats[] tbl_stats_1 = stats.getStatsTable(tbl);
         assertEquals(tbl_stats_0.length, tbl_stats_1.length);
         for (int i=0; i < tbl_stats_1.length; i++) {
@@ -587,7 +593,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         IndexStatsUtil.IdxStats nonUniqueIdx = stats.getStatsIndex(nuIdx)[0];
         assertTrue(nonUniqueIdx.after(tbl_stats_1[0]));
         // Check the counts again.
-        stats.assertTableStats(tbl_fk, 1);
+        stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
 
         // Cleanup

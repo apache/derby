@@ -104,7 +104,6 @@ public class SelectivityTest extends BaseJDBCTestCase {
                         {"TEMPLATE_102","numunique= 200 numrows= 4000","2"},
                         {"TEMPLATE_22","numunique= 20 numrows= 4000","1"},
                         {"TEMPLATE_22","numunique= 40 numrows= 4000","2"},
-                        {"TEMPLATE_ID","numunique= 4000 numrows= 4000","1"},
                         {"TEMPLATE_TWENTY","numunique= 20 numrows= 4000","1"},
                         {"TEMPLATE_TWO","numunique= 2 numrows= 4000","1"}});               
                 s
@@ -118,7 +117,6 @@ public class SelectivityTest extends BaseJDBCTestCase {
                         {"TEMPLATE_102","numunique= 200 numrows= 4000","2"},
                         {"TEMPLATE_22","numunique= 20 numrows= 4000","1"},
                         {"TEMPLATE_22","numunique= 40 numrows= 4000","2"},
-                        {"TEMPLATE_ID","numunique= 4000 numrows= 4000","1"},
                         {"TEMPLATE_TWENTY","numunique= 20 numrows= 4000","1"},
                         {"TEMPLATE_TWO","numunique= 2 numrows= 4000","1"},
                         {"TEST_ID","numunique= 4000 numrows= 4000","1"}}                                                               

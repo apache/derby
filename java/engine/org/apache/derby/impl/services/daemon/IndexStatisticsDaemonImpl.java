@@ -45,6 +45,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
@@ -119,16 +120,6 @@ public class IndexStatisticsDaemonImpl
                 Property.STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE_DEFAULT);
     }
 
-    /**
-     * Tells if the user want us to fall back to pre 10.9 behavior.
-     * <p>
-     * This means do not drop any disposable statistics, and do not skip
-     * statistics for single-column primary key indexes.
-     */
-    private static final boolean FORCE_OLD_BEHAVIOR =
-            PropertyUtil.getSystemBoolean(
-              Property.STORAGE_AUTO_INDEX_STATS_DEBUG_FORCE_OLD_BEHAVIOR);
-
     private final HeaderPrintWriter logStream;
     /** Tells if logging is enabled. */
     private final boolean doLog;
@@ -144,8 +135,15 @@ public class IndexStatisticsDaemonImpl
     private boolean daemonDisabled;
     /** The context manager for the worker thread. */
     private final ContextManager ctxMgr;
-    /** Tells if the database is older than 10.9 (for soft upgrade). */
-    private final boolean dbIsPre10_9;
+    /**
+     * Tells if disposable stats should be generated, which will happen in
+     * soft-upgrade mode or when the user asks us to revert to the old behavior.
+     * <p>
+     * Made public to allow access for CreateIndexConstantAction and
+     * FromBaseTable, but this is no longer necessary when the debug property
+     * to keep disposable statistics is removed.
+     */
+    public final boolean skipDisposableStats;
     /** The language connection context for the worker thread. */
     private LanguageConnectionContext daemonLCC;
     /**
@@ -219,7 +217,12 @@ public class IndexStatisticsDaemonImpl
         this.traceToStdOut = (traceLevel.equalsIgnoreCase("both") ||
                 traceLevel.equalsIgnoreCase("stdout"));
         this.doTrace = traceToDerbyLog || traceToStdOut;
-        this.dbIsPre10_9 = checkIfDbIsPre10_9(db);
+
+        // For now allow users to override the new behavior through a debug
+        // property. Will be removed or renamed in a future release.
+        boolean keepDisposableStats = PropertyUtil.getSystemBoolean(
+              Property.STORAGE_AUTO_INDEX_STATS_DEBUG_FORCE_OLD_BEHAVIOR);
+        this.skipDisposableStats = dbAtLeast10_9(db) && !keepDisposableStats;
 
         this.db = db;
         this.dbOwner = userName;
@@ -238,17 +241,17 @@ public class IndexStatisticsDaemonImpl
                 "}) -> " + databaseName);
     }
 
-    /** Tells if the database is older than 10.9. */
-    private boolean checkIfDbIsPre10_9(Database db) {
+    /** Tells if the database is 10.9 or newer. */
+    private boolean dbAtLeast10_9(Database db) {
         try {
-            // Note the negation.
-            return !db.getDataDictionary().checkVersion(
+            return db.getDataDictionary().checkVersion(
                 DataDictionary.DD_VERSION_DERBY_10_9, null);
         } catch (StandardException se) {
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("dd version check failed", se);
             }
-            return true;
+            // Not expected to happen, but if it does err on the safe-side.
+            return false;
         }
     }
 
@@ -412,7 +415,7 @@ public class IndexStatisticsDaemonImpl
                                         boolean asBackgroundTask)
             throws StandardException {
         final boolean identifyDisposableStats =
-                (cds == null && !FORCE_OLD_BEHAVIOR && !dbIsPre10_9);
+                (cds == null && skipDisposableStats);
         // Fetch descriptors if we're updating statistics for all indexes.
         if (cds == null) {
             cds = td.getConglomerateDescriptors();
@@ -435,18 +438,27 @@ public class IndexStatisticsDaemonImpl
         {
             for (int i = 0; i < cds.length; i++)
             {
+                // Skip non-index conglomerates
                 if (!cds[i].isIndex())
                 {
                     conglomerateNumber[i] = -1;
                     continue;
                 }
-
+                IndexRowGenerator irg = cds[i].getIndexDescriptor();
+                // Skip single-column unique indexes unless we're told not to,
+                // or we are running in soft-upgrade-mode on a pre 10.9 db.
+                if (skipDisposableStats) {
+                    if (irg.isUnique() && irg.numberOfOrderedColumns() == 1) {
+                        conglomerateNumber[i] = -1;
+                        continue;
+                    }
+                }
+           
                 conglomerateNumber[i] = cds[i].getConglomerateNumber();
 
                 objectUUID[i] = cds[i].getUUID();
 
-                indexRow[i] =
-                    cds[i].getIndexDescriptor().getNullIndexRow(
+                indexRow[i] = irg.getNullIndexRow(
                         td.getColumnDescriptorList(),
                         heapCC.newRowLocationTemplate());
             }

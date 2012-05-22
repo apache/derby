@@ -61,6 +61,9 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.TypeId;
 
+// Used only to access a debug flag, will be removed or replaced.
+import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
+
 /**
  * ConstantAction to create an index either through
  * a CREATE INDEX statement or as a backing index to
@@ -577,8 +580,7 @@ class CreateIndexConstantAction extends IndexConstantAction
         
 		if (uniqueWithDuplicateNulls) 
         {
-			if (lcc.getDataDictionary().checkVersion(
-				DataDictionary.DD_VERSION_DERBY_10_4, null)) 
+            if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
 				indexProperties.put(
                     "uniqueWithDuplicateNulls", Boolean.toString(true));
@@ -612,8 +614,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		// For now, assume that all index columns are ordered columns
 		if (! shareExisting)
 		{
-			if (lcc.getDataDictionary().checkVersion(
-					DataDictionary.DD_VERSION_DERBY_10_4, null)) 
+            if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
                 indexRowGenerator = new IndexRowGenerator(
                                             indexType, 
@@ -918,8 +919,9 @@ class CreateIndexConstantAction extends IndexConstantAction
 		}
 
 		CardinalityCounter cCount = (CardinalityCounter)rowSource;
-		long numRows;
-		if ((numRows = cCount.getRowCount()) > 0)
+
+        long numRows = cCount.getRowCount();
+        if (addStatistics(dd, indexRowGenerator, numRows))
 		{
 			long[] c = cCount.getCardinality();
 			for (int i = 0; i < c.length; i++)
@@ -936,6 +938,38 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 		}
 	}
+
+    /**
+     * Determines if a statistics entry is to be added for the index.
+     * <p>
+     * As an optimization, it may be better to not write a statistics entry to
+     * SYS.SYSSTATISTICS. If it isn't needed by Derby as part of query
+     * optimization there is no reason to spend resources keeping the
+     * statistics up to date.
+     *
+     * @param dd the data dictionary
+     * @param irg the index row generator
+     * @param numRows the number of rows in the index
+     * @return {@code true} if statistics should be written to
+     *      SYS.SYSSTATISTICS, {@code false} otherwise.
+     * @throws StandardException if accessing the data dictionary fails
+     */
+    private boolean addStatistics(DataDictionary dd,
+                                  IndexRowGenerator irg,
+                                  long numRows)
+            throws StandardException {
+        boolean add = (numRows > 0);
+        if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9, null) &&
+                // This horrible piece of code will hopefully go away soon!
+               ((IndexStatisticsDaemonImpl)dd.getIndexStatsRefresher(false)).
+                    skipDisposableStats) {
+            if (add && irg.isUnique() && irg.numberOfOrderedColumns() == 1) {
+                // Do not add statistics for single-column unique indexes.
+                add = false;
+            }
+        }
+        return add;
+    }
 
 	// CLASS METHODS
 	
@@ -992,28 +1026,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 	UUID getCreatedUUID()
 	{
 		return conglomerateUUID;
-	}
-
-	/**
-	 * Do necessary clean up (close down controllers, etc.) before throwing
-	 * a statement exception.
-	 *
-	 * @param scan				ScanController for the heap
-	 * @param indexController	ConglomerateController for the index
-	 */
-	private void statementExceptionCleanup(
-					ScanController scan, 
-					ConglomerateController indexController)
-        throws StandardException
-	{
-		if (indexController != null)
-		{
-			indexController.close();
-		}
-		if (scan != null)
-		{
-			scan.close();
-		}
 	}
 
 	/**
