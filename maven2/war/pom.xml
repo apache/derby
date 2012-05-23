@@ -30,8 +30,9 @@
   </parent>
   <artifactId>derbywar</artifactId>
   <packaging>war</packaging>
-  <name>Apache Derby Network Server admin servlet</name>
-  <description>A simple network servlet (WAR) allowing a Derby Network instance to be administrated remotely.</description>
+  <name>Apache Derby Network Server admin demonstration servlet</name>
+  <description>A demonstration network servlet (WAR) showcasing Derby Network
+      Server administration. Not for production use.</description>
 
   <build>
     <plugins>
