@@ -21,8 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -35,6 +33,7 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetAgent;
 import org.apache.derby.client.net.Utf8CcsidManager;
+import org.apache.derbyTesting.functionTests.util.TestNullOutputStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -51,11 +50,7 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
 
         // Set up a dummy Agent since many of the methods require one for
         // generating exceptions.
-        PrintWriter pw = new PrintWriter(new OutputStream() {
-            public void write(int b) throws IOException {
-                // Everything goes to /dev/null...
-            }
-        });
+        PrintWriter pw = new PrintWriter(new TestNullOutputStream());
         agent = new NetAgent(null, new LogWriter(pw, 0));
     }
 

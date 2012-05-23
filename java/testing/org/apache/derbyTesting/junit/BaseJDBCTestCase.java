@@ -44,6 +44,7 @@ import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.functionTests.util.TestNullOutputStream;
 
 
 /**
@@ -598,10 +599,7 @@ public abstract class BaseJDBCTestCase
         throws UnsupportedEncodingException, SQLException
     {
         // Sink output.
-        OutputStream sink = new OutputStream() {
-            public void write(byte[] b, int off, int len) {}
-            public void write(int b) {}
-        };
+        OutputStream sink = new TestNullOutputStream();
         
         // Use the same encoding as the input for the output.    
         return ij.runScript(getConnection(), script, encoding,
