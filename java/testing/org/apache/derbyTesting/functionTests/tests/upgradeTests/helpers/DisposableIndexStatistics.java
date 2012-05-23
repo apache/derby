@@ -39,6 +39,13 @@ import org.apache.derbyTesting.junit.IndexStatsUtil;
  */
 public class DisposableIndexStatistics {
 
+    /**
+     * A row count currently chosen at will.
+     * <p>
+     * Note that if being used for testing the automatic istat daemon, the
+     * number of rows must be sufficiently high to trigger statistics creation,
+     * and likewise for the deltas when adding more rows to trigger an update.
+     */
     private static final int ROW_COUNT = 2000;
 
     private final Connection con;
@@ -151,10 +158,10 @@ public class DisposableIndexStatistics {
         ps.close();
         con.commit();
 
+        // Populate primary key table (has a multi-column primary key)
         ps = con.prepareStatement(
                 "insert into " + pktbl + " values (DEFAULT, ?)");
-        int reducedRowNumber = ROW_COUNT / 3;
-        for (int row = 0; row < reducedRowNumber; row++) {
+        for (int row = 0; row < ROW_COUNT; row++) {
             ps.setInt(1, row);
             ps.executeUpdate();
         }
@@ -162,10 +169,12 @@ public class DisposableIndexStatistics {
         con.commit();
 
         // Populate the main table.
+        // The modulo operations are used to vary the number of unique values
+        // in the columns and have been chosen at will.
         ps = con.prepareStatement(
                 "insert into " + tbl + " values (DEFAULT,?,?,?,?)");
         for (int row = 0; row < ROW_COUNT; row++) {
-            ps.setInt(1, (row % reducedRowNumber) +1);
+            ps.setInt(1, (row % ROW_COUNT) +1);
             ps.setInt(2, (row % 2000) +1);
             ps.setInt(3, (row % 19) +1);
             ps.setInt(4, row % 10);

@@ -28,9 +28,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -242,6 +245,25 @@ public class IndexStatsUtil {
     }
 
     /**
+     * Waits for the current statistics to disappear and expects to fetch the
+     * same number of new statistics for the table.
+     *
+     * @param table the table to get statistics for
+     * @param currentStats the current statistics
+     * @return The new statistics.
+     * @throws SQLException if obtaining statistics fails
+     */
+    public IdxStats[] getNewStatsTable(String table, IdxStats[] currentStats)
+            throws SQLException {
+        if (timeout == 0) {
+            throw new IllegalStateException(
+                    "no timeout specified in the constructor");
+        }
+        awaitChange(currentStats, timeout);
+        return getStatsTable(table, currentStats.length);
+    }
+
+    /**
      * Obtains statistics for the specified index.
      *
      * @param index index name
@@ -446,6 +468,41 @@ public class IndexStatsUtil {
         } catch (SQLException sqle) {
             // Ignore
         }
+    }
+
+    /**
+     * Waits until all given statistics entries have been changed, or until
+     * the call times out.
+     * <p>
+     * <em>NOTE</em>: The method is built on the assumption that the UUIDs of
+     * statistics objects aren't reused. That is, when statistics are updated,
+     * the old row in SYS.SYSSTATISTICS will be dropped and a new row will be
+     * inserted.
+     *
+     * @param current the statistics that must change / be replaced
+     * @param timeout maximum number of milliseconds to wait before giving up
+     * @throws SQLException if obtaining statistics fails
+     */
+    private void awaitChange(IdxStats[] current, long timeout)
+            throws SQLException {
+        Set oldStats = new HashSet(Arrays.asList(current));
+        Set newStats = null;
+        long start = System.currentTimeMillis();
+        // Make sure we run at least once.
+        while (System.currentTimeMillis() - start < timeout ||
+                newStats == null) {
+            newStats = new HashSet(Arrays.asList(getStats()));
+            newStats.retainAll(oldStats);
+            if (newStats.isEmpty()) {
+                return;
+            }
+            Utilities.sleep(200);
+        }
+        IdxStats[] outstanding = new IdxStats[newStats.size()];
+        newStats.toArray(outstanding);
+        Assert.fail(outstanding.length + " missing statistics changes " +
+                "(timeout=" + timeout + "ms): " +
+                buildStatString(outstanding, "<unchanged statistics>"));
     }
 
     /**

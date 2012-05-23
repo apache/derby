@@ -31,9 +31,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * Tests that the debug property used to revert to the previous behavior for
@@ -67,7 +65,8 @@ public class KeepDisposableStatsPropertyTest
     /** Runs the real test case. */
     private void assertOnSCUI(boolean keepDisposable)
             throws SQLException {
-        IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
+        IndexStatsUtil stats = new IndexStatsUtil(
+                openDefaultConnection(), 20*1000); // 20 seconds timeout
         // Create table.
         String TAB = "STAT_SCUI";
         dropTable(TAB);
@@ -126,11 +125,10 @@ public class KeepDisposableStatsPropertyTest
         }
         commit();
         setAutoCommit(true);
-        JDBC.assertDrainResultsHasData(
-                stmt.executeQuery("select count(*) from " + TAB));
+        // Trigger the scheduling logic to get the istat daemon going
         prepareStatement("select * from " + TAB + " where id = ?"); 
-        Utilities.sleep(200);
-        IndexStatsUtil.IdxStats[] newStats = stats.getStatsTable(TAB);
+        IndexStatsUtil.IdxStats[] newStats =
+                stats.getNewStatsTable(TAB, oldStats);
         assertEquals(oldStats.length, newStats.length);
         for (int i=0; i < oldStats.length; i++) {
             assertEquals(keepDisposable, newStats[i].after(oldStats[i]));
