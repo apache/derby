@@ -621,9 +621,6 @@ public class RAMTransaction
         // new one.
 		if (is_temporary)
 		{
-            // remove old entry in the Conglomerate directory, and add new one
-			if (tempCongloms != null)
-				tempCongloms.remove(new Long(conglomId));
 			tempCongloms.put(new Long(conglomId), conglom);
 		}
 		else
