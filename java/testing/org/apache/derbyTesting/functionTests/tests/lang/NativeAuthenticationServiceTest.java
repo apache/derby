@@ -123,6 +123,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  PROVIDER_PROPERTY = "derby.authentication.provider";
     private static  final   String  REQUIRE_AUTHENTICATION_PROPERTY = "derby.connection.requireAuthentication";
     private static  final   String  SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
+    private static  final   String  UPGRADE_TO_BETA_PROPERTY = "derby.database.allowPreReleaseUpgrade";
 
     private static  final   String  CREDENTIALS_DB_DOES_NOT_EXIST = "4251I";
     private static  final   String  BAD_NETWORK_AUTHENTICATION = "08001";
@@ -250,6 +251,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             if ( _localAuthentication ) { authenticationProvider = authenticationProvider + ":LOCAL"; }
         }
 
+        result.put( UPGRADE_TO_BETA_PROPERTY, "true" );
         result.put( PROVIDER_PROPERTY, authenticationProvider );
 
         //
