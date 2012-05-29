@@ -2039,9 +2039,7 @@ public class JoinNode extends TableOperatorNode
 	public JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{
-		JBitSet map = new JBitSet(numTables);
-
-		map = (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+		JBitSet map = (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
 		if (map == null) return null;
 		else map.or((JBitSet) rightResultSet.LOJgetReferencedTables(numTables));
 
