@@ -479,7 +479,7 @@ public class IndexStatisticsDaemonImpl
             // For now we know that disposable stats only exist in two cases,
             // and that we'll only get one match for both of them per table:
             //  a) orphaned statistics entries (i.e. DERBY-5681)
-            //  b) single-column primary keys (TODO: after DERBY-3790 is done)
+            //  b) single-column primary keys
             for (int si=0; si < stats.length; si++) {
                 UUID referencedIndex = stats[si].getReferenceID();
                 boolean isValid = false;
@@ -498,10 +498,11 @@ public class IndexStatisticsDaemonImpl
                 // mechanism in case of another bug like DERBY-5681 in Derby.
                 if (!isValid) {
                     String msg = "dropping disposable statistics entry " +
-                            stats[si].getUUID() + " for table " +
-                            stats[si].getTableUUID();
+                            stats[si].getUUID() + " for index " +
+                            stats[si].getReferenceID() + " (cols=" +
+                            stats[si].getColumnCount() + ")";
                     logAlways(td, null, msg);
-                    trace(1, msg);
+                    trace(1, msg + " on table " + stats[si].getTableUUID());
                     DataDictionary dd = lcc.getDataDictionary();
                     if (!lcc.dataDictionaryInWriteMode()) {
                         dd.startWriting(lcc);
