@@ -20,8 +20,8 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import java.nio.channels.FileChannel;
 import java.io.*;
+import java.util.List;
 
 
 /**
@@ -94,16 +94,6 @@ class Utils
         src.close();
         dst.close();
     }
-    private void NIOcopy(File source, File dest) 
-    throws IOException
-    {
-        // DEBUG("NIO Copy file " + source.getAbsolutePath() + " to " + dest.getAbsolutePath());
-        FileChannel sourceCh = new FileInputStream(source).getChannel();
-        FileChannel targetCh = new FileOutputStream(dest).getChannel();
-        sourceCh.transferTo(0, sourceCh.size(), targetCh);
-        sourceCh.close();
-        targetCh.close();
-    }
     
     void writeToFile(String text, String outFile)
     throws IOException
@@ -142,4 +132,23 @@ class Utils
         Thread.sleep(sleepTime);
     }
 
+    /**
+     * Convert a list of strings to an array of strings.
+     */
+    String[] toStringArray(List list) {
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * Splice together strings. Separate the sub-strings by the specified
+     * separator character.
+     */
+    String splice(String[] strings, char sep) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strings.length; i++) {
+            if (i > 0) sb.append(sep);
+            sb.append(strings[i]);
+        }
+        return sb.toString();
+    }
 }

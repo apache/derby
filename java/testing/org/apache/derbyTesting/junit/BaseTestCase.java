@@ -534,10 +534,13 @@ public abstract class BaseTestCase
 	 * assertExecJavaCmdAsExpected
 	 * 
 	 * @param cmd array of java arguments for command
+     * @param dir working directory for the sub-process, or {@code null} to
+     *            run in the same directory as the main test process
 	 * @return the process that was started
 	 * @throws IOException
 	 */
-	public static Process execJavaCmd(String[] cmd) throws IOException {
+	public static Process execJavaCmd(String[] cmd, final File dir)
+            throws IOException {
 	    ArrayList cmdlist = new ArrayList();
 	    cmdlist.add(getJavaExecutableName());
 	    if (isJ9Platform())
@@ -566,21 +569,29 @@ public abstract class BaseTestCase
 	    for (int i = 0; i < command.length; i++) {
 	        println("command[" + i + "]" + command[i]);
 	    }
-	    Process pr = null;
 	    try {
-	        pr = (Process) AccessController
+	        return (Process) AccessController
 	        .doPrivileged(new PrivilegedExceptionAction() {
 	            public Object run() throws IOException {
 	                Process result = null;
-	                result = Runtime.getRuntime().exec(command);
+	                result = Runtime.getRuntime().exec(
+                            command, (String[]) null, dir);
 	                return result;
 	            }
 	        });
 	    } catch (PrivilegedActionException pe) {
             throw (IOException) pe.getException();
 	    }
-	    return pr;
 	}
+
+    /**
+     * Execute a java command and return the process. The process will run
+     * in the same directory as the main test process. This method is a
+     * shorthand for {@code execJavaCmd(cmd, null)}.
+     */
+    public static Process execJavaCmd(String[] cmd) throws IOException {
+        return execJavaCmd(cmd, null);
+    }
 
     /**
      * Return the executable name for spawning java commands.
