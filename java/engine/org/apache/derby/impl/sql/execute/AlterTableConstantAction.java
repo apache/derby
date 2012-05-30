@@ -793,7 +793,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		try {
 
             nested_tc = 
-                tc.startNestedUserTransaction(false);
+                tc.startNestedUserTransaction(false, true);
 
             switch (td.getTableType())
             {

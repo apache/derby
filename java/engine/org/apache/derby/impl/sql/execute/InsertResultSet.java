@@ -793,7 +793,15 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 			try
 			{
-				nestedTC = tc.startNestedUserTransaction(false);
+                // DERBY-5780, defaulting log syncing to false, which improves
+                // performance of identity value generation.  If system 
+                // crashes may reuse an identity value because commit did not
+                // sync, but only if no subsequent user transaction has 
+                // committed or aborted and thus no row can exist that used
+                // the previous value.  Without this identity values pay
+                // a synchronous I/O to the log file for each new value no
+                // matter how many are inserted in a single transaction.
+				nestedTC = tc.startNestedUserTransaction(false, false);
 				tcToUse = nestedTC;
 			}
 			catch (StandardException se)

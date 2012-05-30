@@ -742,19 +742,30 @@ public interface TransactionController
      *   moving tuples around in heap and indexes.  changed with DERBY-5493 
      *   to do synchronous commit. code in DDLConstantAction.java.
      * o autoincrement/generated key case.  Kept behavior previous to 
-     *   DERBY-5493 by changing to use commitNoSync.  Changing every 
+     *   DERBY-5493 by changing to use commitNoSync, and defaulting 
+     *   flush_log_on_xact_end to false.  Changing every 
      *   key allocation to be a synchronous commit would be a huge performance
      *   problem for existing applications depending on current performance.
      *   code in InsertResultSet.java
      *
-     * @param readOnly  Is transaction readonly?  Only 1 non-readonly nested
-     *                  transaction is allowed per transaction.
+     * @param readOnly                 Is transaction readonly?  Only 1 non-read
+     *                                 only nested transaction is allowed per 
+     *                                 transaction.
+     *
+     * @param flush_log_on_xact_end    By default should the transaction commit
+     *                                 and abort be synced to the log.  Normal
+     *                                 usage should pick true, unless there is
+     *                                 specific performance need and usage 
+     *                                 works correctly if a commit can be lost
+     *                                 on system crash.
      *
 	 * @return The new nested user transaction.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public TransactionController startNestedUserTransaction(boolean readOnly)
+    public TransactionController startNestedUserTransaction(
+    boolean readOnly,
+    boolean flush_log_on_xact_end)
         throws StandardException;
 
     /**

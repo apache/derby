@@ -57,7 +57,7 @@ public class InternalXact extends Xact
     {
 		super(
             xactFactory, logFactory, dataFactory, dataValueFactory, 
-            false, null);
+            false, null, false);
 
 		// always want to hold latches & containers open past the commit/abort
 		setPostComplete();

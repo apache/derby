@@ -2987,7 +2987,8 @@ public class T_AccessFactory extends T_Generic
                 ContextService.getFactory().getCurrentContextManager());
 
         // get a nested user transaction
-        TransactionController child_tc = tc.startNestedUserTransaction(true);
+        TransactionController child_tc = 
+            tc.startNestedUserTransaction(true, true);
 
         TransactionController current_xact_after_nest = 
             store.getTransaction(
@@ -3033,11 +3034,11 @@ public class T_AccessFactory extends T_Generic
         tc.dropConglomerate(orig_conglomid);
 
         // trying to double nest a nested transaction should not work.
-        child_tc = tc.startNestedUserTransaction(true);
+        child_tc = tc.startNestedUserTransaction(true, true);
 
         try
         {
-            child_tc.startNestedUserTransaction(true);
+            child_tc.startNestedUserTransaction(true, true);
 
 			throw T_Fail.testFailMsg(
                 "(nestedUserTransaction) double nest xact not allowed.");
@@ -3074,7 +3075,7 @@ public class T_AccessFactory extends T_Generic
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
-        child_tc = tc.startNestedUserTransaction(true);
+        child_tc = tc.startNestedUserTransaction(true, true);
 
         // add 20 pages worth of data, causing allocation
         
@@ -3132,7 +3133,7 @@ public class T_AccessFactory extends T_Generic
         tc.commit();
 
 
-        child_tc = tc.startNestedUserTransaction(true);
+        child_tc = tc.startNestedUserTransaction(true, true);
 
         // add 20 pages worth of data, causing allocation
         
@@ -3183,7 +3184,7 @@ public class T_AccessFactory extends T_Generic
         }
 
         // start an read only nested user transaction.
-        child_tc = tc.startNestedUserTransaction(true);
+        child_tc = tc.startNestedUserTransaction(true, true);
 
         ConglomerateController child_cc = 
             child_tc.openConglomerate(
@@ -3213,7 +3214,7 @@ public class T_AccessFactory extends T_Generic
         tc.commit();
 
         // start an update nested user transaction.
-        child_tc = tc.startNestedUserTransaction(false);
+        child_tc = tc.startNestedUserTransaction(false, true);
 
         child_cc = 
             child_tc.openConglomerate(
@@ -3253,7 +3254,7 @@ public class T_AccessFactory extends T_Generic
                 TransactionController.ISOLATION_SERIALIZABLE);
 
         // start an update nested user transaction.
-        child_tc = tc.startNestedUserTransaction(false);
+        child_tc = tc.startNestedUserTransaction(false, true);
 
         try 
         {

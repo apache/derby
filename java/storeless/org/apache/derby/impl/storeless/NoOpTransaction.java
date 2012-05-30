@@ -118,7 +118,9 @@ class NoOpTransaction implements TransactionController {
         return 0;
     }
 
-    public TransactionController startNestedUserTransaction(boolean readOnly)
+    public TransactionController startNestedUserTransaction(
+    boolean readOnly,
+    boolean flush_log_on_xact_end)
             throws StandardException {
         return this;
     }

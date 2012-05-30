@@ -444,12 +444,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	public Transaction startNestedUpdateUserTransaction(
     ContextManager  contextMgr,
-    String          transName)
+    String          transName,
+    boolean         flush_log_on_xact_end)
         throws StandardException
     {
 		return(
             xactFactory.startNestedUpdateUserTransaction(
-                this, contextMgr, transName));
+                this, contextMgr, transName, flush_log_on_xact_end));
 	}
 
 	public Transaction findUserTransaction(

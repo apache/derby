@@ -823,7 +823,7 @@ public class Heap
             // locks on the table, otherwise the purge will fail with a self
             // deadlock.
             nested_xact = (TransactionManager) 
-                xact_manager.startNestedUserTransaction(false);
+                xact_manager.startNestedUserTransaction(false, true);
 
             // now open the table in a nested user transaction so that each
             // page worth of work can be committed after it is done.

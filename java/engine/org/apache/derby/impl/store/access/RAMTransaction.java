@@ -2302,11 +2302,24 @@ public class RAMTransaction
      * read locks accumulated while compiling a plan, and auto-increment.
      * <p>
      *
+     * @param readOnly                 Is transaction readonly?  Only 1 non-read
+     *                                 only nested transaction is allowed per 
+     *                                 transaction.
+     *
+     * @param flush_log_on_xact_end    By default should the transaction commit
+     *                                 and abort be synced to the log.  Normal
+     *                                 usage should pick true, unless there is
+     *                                 specific performance need and usage 
+     *                                 works correctly if a commit can be lost
+     *                                 on system crash.
+     *
 	 * @return The new nested user transaction.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public TransactionController startNestedUserTransaction(boolean readOnly)
+    public TransactionController startNestedUserTransaction(
+    boolean readOnly,
+    boolean flush_log_on_xact_end)
         throws StandardException
     {
         // Get the context manager.
@@ -2327,10 +2340,13 @@ public class RAMTransaction
         Transaction child_rawtran = 
             ((readOnly) ?
                 accessmanager.getRawStore().startNestedReadOnlyUserTransaction(
-                    getLockSpace(), cm,
+                    getLockSpace(), 
+                    cm,
                     AccessFactoryGlobals.NESTED_READONLY_USER_TRANS) :
                 accessmanager.getRawStore().startNestedUpdateUserTransaction(
-                    cm, AccessFactoryGlobals.NESTED_UPDATE_USER_TRANS));
+                    cm, 
+                    AccessFactoryGlobals.NESTED_UPDATE_USER_TRANS,
+                    flush_log_on_xact_end));
 
         RAMTransaction rt   = 
             new RAMTransaction(accessmanager, child_rawtran, this);
@@ -2343,11 +2359,6 @@ public class RAMTransaction
 
         child_rawtran.setDefaultLockingPolicy(
                 accessmanager.getDefaultLockingPolicy());
-
-        /*
-        System.out.println("returning nested xact: " + rt + 
-                "child_rawtran = " + child_rawtran); 
-                */
 
         return(rt);
     }

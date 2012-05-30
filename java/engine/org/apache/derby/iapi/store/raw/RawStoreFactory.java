@@ -723,6 +723,10 @@ public interface RawStoreFactory extends Corruptable {
         thrown if context is not the current context.
         @param transName is the name of the transaction. This name will be 
         displayed by the transactiontable VTI.
+        @param flush_log_on_xact_end    By default should the transaction 
+        commit and abort be synced to the log.  Normal usage should pick true, 
+        unless there is specific performance need and usage works correctly if 
+        a commit can be lost on system crash.
 
         @exception StandardException Standard Derby error policy
 
@@ -733,7 +737,8 @@ public interface RawStoreFactory extends Corruptable {
 
     public Transaction startNestedUpdateUserTransaction(
     ContextManager contextMgr,
-    String         transName)
+    String         transName,
+    boolean        flush_log_on_xact_end)
         throws StandardException;
 
 

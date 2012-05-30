@@ -272,7 +272,9 @@ public abstract class SequenceUpdater implements Cacheable
             // contention. Since this is a read-only subtransaction, there should be
             // no conflict with the parent transaction.
             //
-            TransactionController subTransaction = executionTC.startNestedUserTransaction( true );
+            TransactionController subTransaction = 
+                executionTC.startNestedUserTransaction( true, true );
+
             try {
                 _sequenceGenerator = createSequenceGenerator( subTransaction );
             }
@@ -414,7 +416,8 @@ public abstract class SequenceUpdater implements Cacheable
 		}
 
         TransactionController executionTransaction = lcc.getTransactionExecute();
-        TransactionController nestedTransaction = executionTransaction.startNestedUserTransaction( false );
+        TransactionController nestedTransaction = 
+            executionTransaction.startNestedUserTransaction( false, true );
 
         if ( nestedTransaction != null )
         {

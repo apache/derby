@@ -164,7 +164,7 @@ abstract class DDLConstantAction implements ConstantAction
 		TransactionController nestedTc = null;
 
 		try {
-			nestedTc = tc.startNestedUserTransaction(false);
+			nestedTc = tc.startNestedUserTransaction(false, true);
 			useTc = nestedTc;
 		} catch (StandardException e) {
 			if (SanityManager.DEBUG) {

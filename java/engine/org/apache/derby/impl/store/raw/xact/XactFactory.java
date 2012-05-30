@@ -312,13 +312,14 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	 * @exception  StandardException  Standard exception policy.
      **/
 	private RawTransaction startCommonTransaction(
-    RawStoreFactory rsf,
-    ContextManager  cm,
-    boolean         readOnly,
-    CompatibilitySpace compatibilitySpace,
-    String          xact_context_id,
-    String          transName,
-    boolean         excludeMe)
+    RawStoreFactory     rsf, 
+    ContextManager      cm,
+    boolean             readOnly,
+    CompatibilitySpace  compatibilitySpace,
+    String              xact_context_id,
+    String              transName,
+    boolean             excludeMe,
+    boolean             flush_log_on_xact_end)
         throws StandardException
     {
 
@@ -335,7 +336,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		Xact xact = 
             new Xact(
                 this, logFactory, dataFactory, dataValueFactory, 
-                readOnly, compatibilitySpace);
+                readOnly, compatibilitySpace, flush_log_on_xact_end);
 
         xact.setTransName(transName);
 		pushTransactionContext(cm, xact_context_id, xact,
@@ -351,8 +352,16 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
     String transName)
         throws StandardException
     {
-        return(startCommonTransaction(
-                rsf, cm, false, null, USER_CONTEXT_ID, transName, true));
+        return(
+            startCommonTransaction(
+                rsf, 
+                cm, 
+                false,              // user xact always read/write 
+                null, 
+                USER_CONTEXT_ID, 
+                transName, 
+                true,               // user xact always excluded during quiesce
+                true));             // user xact default flush on xact end
 	}
 
 	public RawTransaction startNestedReadOnlyUserTransaction(
@@ -362,20 +371,39 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
     String          transName)
         throws StandardException
     {
-        return(startCommonTransaction(
-            rsf, cm, true, compatibilitySpace, 
-            NESTED_READONLY_USER_CONTEXT_ID, transName, false));
+        return(
+            startCommonTransaction(
+                rsf, 
+                cm, 
+                true, 
+                compatibilitySpace, 
+                NESTED_READONLY_USER_CONTEXT_ID, 
+                transName, 
+                false,
+                true));             // user readonly xact default flush on xact
+                                    // end, should never have anything to flush.
 	}
 
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
     ContextManager  cm,
-    String          transName)
+    String          transName,
+    boolean         flush_log_on_xact_end)
         throws StandardException
     {
-        return(startCommonTransaction(
-            rsf, cm, false, null, 
-            NESTED_UPDATE_USER_CONTEXT_ID, transName, true));
+        return(
+            startCommonTransaction(
+                rsf, 
+                cm, 
+                false, 
+                null, 
+                NESTED_UPDATE_USER_CONTEXT_ID, 
+                transName, 
+                true,
+                flush_log_on_xact_end));    // allow caller to choose default 
+                                            // log log flushing on commit/abort
+                                            // for internal operations used 
+                                            // nested user update transaction.
 	}
 
 	public RawTransaction startGlobalTransaction(
@@ -395,8 +423,14 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
         RawTransaction xact = 
             startCommonTransaction(
-                rsf, cm, false, null, 
-                USER_CONTEXT_ID, AccessFactoryGlobals.USER_TRANS_NAME, true);
+                rsf, 
+                cm, 
+                false, 
+                null, 
+                USER_CONTEXT_ID, 
+                AccessFactoryGlobals.USER_TRANS_NAME, 
+                true,
+                true);             // user xact default flush on xact end
 
         xact.setTransactionId(gid, xact.getId());
 
@@ -443,7 +477,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Xact xact = 
             new Xact(
-                this, logFactory, dataFactory, dataValueFactory, false, null);
+                this, logFactory, dataFactory, dataValueFactory, 
+                false, null, false);
 
 		// hold latches etc. past commit in NTT
 		xact.setPostComplete();
@@ -935,28 +970,6 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	{
 		return uuidFactory.createUUID();
 	}
-
-	/**
-		Decide if a transaction of this contextId needs to flush the log when
-		it commits
-	*/
-	public boolean flushLogOnCommit(String contextName)
-	{
-		//
-		// if this is a user transaction, flush the log by default.
-        // if this is a nested user update transaction, flush log by default.
-		// if this is an internal or nested top transaction, do not
-		// flush, let it age out.
-        //
-        // In all cases log will not be flushsed by Xact.prepareCommit() 
-        // if commitNoSync() has been called rather than commit.
-		//
-		return (contextName == USER_CONTEXT_ID               || 
-				contextName.equals(USER_CONTEXT_ID)          ||
-                contextName == NESTED_UPDATE_USER_CONTEXT_ID ||
-                contextName.equals(NESTED_UPDATE_USER_CONTEXT_ID));
-	}
-
 
 	/**
 		Get a locking policy for a transaction.

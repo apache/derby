@@ -243,6 +243,20 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
     // The transaction is only allowed read operations, no log writes.
     private boolean         readOnly;
 
+    // Whether or not to flush log on commit or abort.  
+    // Current usage:
+    // User transactions default to flush.  Internal and nested top
+    // transactions default to not flush.  
+    //
+    // Nested user update transactions are configured when they are created, 
+    // and most default to flush.  Nested user update transaction used for
+    // identity column maintenance defaults to not flush to maintain 
+    // backward performance compatibility with previous releases.
+    //
+    // In all cases log will not be flushsed by Xact.prepareCommit()
+    // if commitNoSync() has been called rather than commit.
+    private boolean         flush_log_on_xact_end;
+
 	// true, if the transaction executed some operations(like unlogged
 	// operations) that block the  online backup to prevent inconsistent
 	// backup copy.
@@ -264,16 +278,18 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
     DataFactory         dataFactory,
     DataValueFactory    dataValueFactory,
     boolean             readOnly,
-    CompatibilitySpace  compatibilitySpace)
+    CompatibilitySpace  compatibilitySpace,
+    boolean             flush_log_on_xact_end)
     {
 
 		super();
 
-		this.xactFactory        = xactFactory;
-		this.logFactory         = logFactory;
-		this.dataFactory        = dataFactory;
-		this.dataValueFactory   = dataValueFactory;
-		this.readOnly           = readOnly;
+		this.xactFactory            = xactFactory;
+		this.logFactory             = logFactory;
+		this.dataFactory            = dataFactory;
+		this.dataValueFactory       = dataValueFactory;
+		this.readOnly               = readOnly;
+		this.flush_log_on_xact_end  = flush_log_on_xact_end;
 
 		if (compatibilitySpace == null) {
 			this.compatibilitySpace =
@@ -298,11 +314,6 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		setIdleState();
 
 		backupBlocked = false; 
-
-        /*
-        System.out.println("Xact.constructor: readonly = " + this.readOnly +
-                ";this = " + this);
-                */
 	}
 
 
@@ -773,8 +784,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 			// flush the log.
 
-			if (seenUpdates) {
-
+			if (seenUpdates) 
+            {
 				EndXact ex = 
                     new EndXact(
                         getGlobalId(), 
@@ -784,7 +795,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 				flushTo = logger.logAndDo(this, ex);
 
-				if (xactFactory.flushLogOnCommit(xc.getIdName()))
+				if (flush_log_on_xact_end)
 				{
 					if ((commitflag & COMMIT_SYNC) == 0)
                     {

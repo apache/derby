@@ -117,10 +117,16 @@ public interface TransactionFactory extends Corruptable {
         will push a transaction context as described in
         RawStoreFactory.startNestedTransaction
 
-        @param contextMgr           is the context manager to use.  It must be 
-                                    the current context manager.
-        @param transName            is the transaction name. It will be 
-                                    displayed in the transactiontable VTI.
+        @param contextMgr               is the context manager to use.  It must
+                                        be the current context manager.
+        @param transName                is the transaction name. It will be 
+                                        displayed in the transactiontable VTI.
+        @param flush_log_on_xact_end    By default should the transaction commit
+                                        and abort be synced to the log.  Normal
+                                        usage should pick true, unless there
+                                        is specific performance need and usage
+                                        works correctly if a commit can be 
+                                        lost on system crash.
 
 		@see RawStoreFactory#startNestedUpdateUserTransaction
 
@@ -129,7 +135,8 @@ public interface TransactionFactory extends Corruptable {
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
     ContextManager  contextMgr,
-    String          transName)
+    String          transName,
+    boolean         flush_log_on_xact_end)
         throws StandardException;
 
 
