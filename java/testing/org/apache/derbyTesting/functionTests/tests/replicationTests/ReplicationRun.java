@@ -1315,11 +1315,12 @@ public class ReplicationRun extends BaseTestCase
         String p9 = " | head -1"; // For cases where we also get some error...
         
         String command = p1 + p2 + p3 + p4 + p5 + p6 + p7 /* + p8 */ + ";";
-        String result = runUserCommandRemotely(command,serverHost, testUser);
+        String result = runUserCommandRemotely(
+                command, serverHost, testUser, "ps");
         util.DEBUG("xFindServerPID: '" + result + "'");
         // result = result.split(" ")[1]; // Without ' + p8 ' should show full line. But fails with PID less than 10000!
         command = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + ";";
-        result = runUserCommandRemotely(command, serverHost, testUser);
+        result = runUserCommandRemotely(command, serverHost, testUser, "ps");
         if ( result == null )
         {util.DEBUG("xFindServerPID: Server process not found");return -1;} // Avoid error on parseInt below
         util.DEBUG("xFindServerPID: '" + result + "'");
@@ -1444,30 +1445,6 @@ public class ReplicationRun extends BaseTestCase
         }
     }
     
-    
-    
-    String runUserCommand(String command)
-    {
-        util.DEBUG("Execute '"+ command +"'");
-        String output = "";
-        
-        try
-        {
-            Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec(command);
-            
-            output = processOutput(proc);
-            
-            int exitVal = proc.waitFor();
-            util.DEBUG("ExitValue: " + exitVal);
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace();
-        }
-        
-        return output;
-    }
     private String runUserCommand(String command, String id)
     {
         final String ID= "runUserCommand "+id+" ";
@@ -1527,21 +1504,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("");
         
     }
-    private String runUserCommandRemotely(String command,
-            String host,
-            String testUser)
-            throws InterruptedException
-    {
-        util.DEBUG("Execute '"+ command +"' on '"+ host +"'" + " as " + testUser);
-        
-        String localCommand = remoteShell + " "
-                + "-l " + testUser + " " + host + " "
-                + command
-                // + "\"" + command + "\"" // make sure it's all run remotely
-                ;
-        return runUserCommand(localCommand);
-        
-    }
+
     private String runUserCommandRemotely(String command,
             String host,
             String testUser,
@@ -2323,43 +2286,6 @@ public class ReplicationRun extends BaseTestCase
         
     }
 
-    private String processOutput(Process proc)
-    throws Exception
-    {
-        InputStream serveInputStream = proc.getInputStream();
-        InputStream serveErrorStream = proc.getErrorStream();
-        
-        InputStreamReader isr = new InputStreamReader(serveInputStream);
-        InputStreamReader esr = new InputStreamReader(serveErrorStream);
-        BufferedReader bir = new BufferedReader(isr);
-        BufferedReader ber = new BufferedReader(esr);
-        String line=null;
-        String result = null;
-        util.DEBUG("---- out:");
-        // Would skip first line! if ( bir.readLine() != null ) {result = "";}
-        while ( (line = bir.readLine()) != null)
-        {
-            util.DEBUG(line);
-            if ( result == null )
-            {result = line;}
-            else
-            {result = result + LF + line;}
-        }
-        util.DEBUG("---- err:");
-        // Would skip first line! if ( ber.readLine() != null ) {result = result + LF;}
-        while ( (line = ber.readLine()) != null)
-        {
-            util.DEBUG(line);
-            // result = result + LF + line;
-            if ( result == null )
-            {result = line;}
-            else
-            {result = result + LF + line;}
-        }
-        util.DEBUG("----     ");
-        
-        return result;
-    }
     private String processOutput(String id, Process proc)
     throws Exception
     {
