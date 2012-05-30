@@ -1446,7 +1446,7 @@ public class ReplicationRun extends BaseTestCase
      * inherits the class path from the main test process.
      *
      * @param command the arguments to pass to the Java executable
-     * @param id an identifier used to prefix debug output
+     * @param ID an identifier used to prefix debug output
      * @param workingDir the directory in which the sub-process should run, or
      *    {@code null} to run in the same directory as the parent process
      */
