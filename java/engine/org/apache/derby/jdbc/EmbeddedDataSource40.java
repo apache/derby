@@ -32,16 +32,16 @@ import org.apache.derby.iapi.reference.SQLState;
 /** 
 	
 
-	EmbeddedDataSource40 is Derby's DataSource implementation for JDBC4.0.
+	EmbeddedDataSource40 is Derby's DataSource implementation for JDBC 4.0 (and higher).
 	
 
 	<P>A DataSource  is a factory for Connection objects. An object that
 	implements the DataSource interface will typically be registered with a
 	JNDI service provider.
 	<P>
-	EmbeddedDataSource40 supports the JDBC 4.0 specification
-	for the J2SE 6.0 Java Virtual Machine environment. Use EmbeddedDataSource
-	if your application is running in one of the following older
+	Use EmbeddedDataSource40 if your application runs at JDBC level 4.0 (or higher).
+	Use EmbeddedDataSource
+	if your application is runs in one of the following older
 	environments:
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0

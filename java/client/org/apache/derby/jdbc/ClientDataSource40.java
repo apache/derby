@@ -35,8 +35,8 @@ import org.apache.derby.shared.common.reference.SQLState;
  * non-pooling, non-distributed environment.
  * The class ClientConnectionPoolDataSource40 can be used in a connection pooling environment,
  * and the class ClientXADataSource40 can be used in a distributed, and pooling
- * environment. Use these DataSources if your application runs under
- * JDBC4.0. Use the corresponding ClientDataSource, ClientConnectionPoolDataSource, and
+ * environment. Use these DataSources if your application runs at
+ * JDBC level 4.0 (or higher). Use the corresponding ClientDataSource, ClientConnectionPoolDataSource, and
  * ClientXADataSource classes if 
  * your application runs in the following environments:
  * <p/>

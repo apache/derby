@@ -40,8 +40,8 @@ import org.apache.derby.shared.common.reference.SQLState;
  * RM in a DTP environment.  An object that implements the XADataSource
  * interface is typically registered with a JNDI service provider.   	
  * <P>
- * ClientXADataSource40 supports the JDBC 4.0 specification
- * for the J2SE 6.0 Java Virtual Machine environment. Use ClientXADataSource
+ * Use ClientXADataSource40 if your application runs at JDBC level 4.0 (or higher).
+ * Use ClientXADataSource
  * if your application runs in the following environments:
  * <UL>
  * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0

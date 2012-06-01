@@ -35,15 +35,15 @@ import org.apache.derby.iapi.reference.SQLState;
 
 /**
 
-	EmbeddedXADataSource40 is Derby's XADataSource implementation for JDBC4.0.
+	EmbeddedXADataSource40 is Derby's XADataSource implementation for JDBC 4.0 (and higher).
 	
 
 	<P>An XADataSource is a factory for XAConnection objects.  It represents a
 	RM in a DTP environment.  An object that implements the XADataSource
 	interface is typically registered with a JNDI service provider.   	
 	<P>
-	EmbeddedXADataSource40 supports the JDBC 4.0 specification
-	for the J2SE 6.0 Java Virtual Machine environment. Use EmbeddedXADataSource
+	Use EmbeddedXADataSource40 if your application runs at JDBC level 4.0 (or higher).
+	Use EmbeddedXADataSource
 	if your application runs in the following environments:
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0

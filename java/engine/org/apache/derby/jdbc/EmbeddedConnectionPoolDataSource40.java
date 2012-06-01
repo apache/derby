@@ -32,15 +32,15 @@ import org.apache.derby.iapi.reference.SQLState;
 
 /** 
 	EmbeddedConnectionPoolDataSource40 is Derby's ConnectionPoolDataSource
-	implementation for the JDBC4.0 environment.
+	implementation for JDBC 4.0 (and higher) environments.
 	
 
 	<P>A ConnectionPoolDataSource is a factory for PooledConnection
 	objects. An object that implements this interface will typically be
 	registered with a JNDI service.
 	<P>
-	EmbeddedConnectionPoolDataSource40 supports the JDBC 4.0 specification
-	for the J2SE 6.0 Java Virtual Machine environment. Use
+	Use EmbeddedConnectionPoolDataSource40 if your application runs at JDBC level 4.0 (or higher).
+	Use
 	EmbeddedConnectionPoolDataSource if your application runs in the
 	following environments:
 	<UL>

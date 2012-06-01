@@ -34,7 +34,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * An object that implements this interface
  * will typically be registered with a naming service that is based on the
  * Java Naming and Directory Interface (JNDI). Use this factory
- * if your application runs under JDBC4.0.
+ * if your application runs at JDBC level 4.0 (or higher).
  * Use
  * ClientConnectionPoolDataSource, instead, if your application runs under
  * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
