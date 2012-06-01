@@ -2199,7 +2199,6 @@
     <antcall target="insane"/>
     <antcall target="all"/>
     <antcall target="buildjars"/>
-    <antcall target="plugin"/>
     <antcall target="publishedapi"/>
 
     <java classname="org.apache.derbyBuild.maintversion2props">
@@ -2229,8 +2228,6 @@
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
-    <copy file="${jarsdist.dir}/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
-          tofile="${snapshot.dir}/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
   </target>
 
   <target name="snapshotError" if="is.sane">
@@ -2762,15 +2759,8 @@ you should not have to do this.
     >
       <ant antfile="${basedir}/tools/release/build.xml" target="release"/>
 
-      <!-- copy the eclipse plugins into the distribution directory -->
-      <property file="${release.base}/plugintmp.properties"/>
-      <property name="eclipse.plugin" value="${plugin.derby.core.zipfile}_${plugin.derby.version}.zip"/>
-      <copy file="${jarsdist.dir}/insane/${eclipse.plugin}" todir="${release.dir}"/>
-      <copy file="${eclipse.ui.doc.plugin}" tofile="${release.dir}/${eclipse.ui.doc.plugin.name}"/>
-
       <!-- sign all of the artifacts -->
       <ant antfile="${basedir}/tools/release/build.xml" target="sign"/>
-      <ant antfile="${basedir}/tools/release/build.xml" target="sign.eclipse.plugin"/>
 
       <!-- remove cruft -->
       <delete dir="${crlf.dir}"/>
@@ -2842,7 +2832,7 @@ you should not have to do this.
 
         Sneaky, very, very sneaky.
     -->
-    <target name="promptforreleaseproperties" depends="promptforsvncredentials,promptforpgpcredentials,promptforreleaseid,promptforeclipseplugin"/>
+    <target name="promptforreleaseproperties" depends="promptforsvncredentials,promptforpgpcredentials,promptforreleaseid"/>
 
     <!-- Define the task which prompts for missing properties -->
     <target name="defineprompt" depends="prebuild">
@@ -2896,16 +2886,6 @@ you should not have to do this.
         <promptForProperty
           propertyName="docs.root"
           prompt="Enter the root of the subversion docs client (e.g., /Users/me/derby/docs/trunk) >  "
-        />
-
-    </target>
-
-    <!-- Prompt for location of eclipse ui/doc plugin. This artifact does not generally change from one release to another -->
-    <target name="promptforeclipseplugin" depends="defineprompt">
-
-        <promptForProperty
-          propertyName="eclipse.ui.doc.plugin"
-          prompt="Enter the location of the eclipse ui/doc plugin (e.g., /Users/me/derby/derby_ui_doc_plugin_1.1.2.zip) >  "
         />
 
     </target>
