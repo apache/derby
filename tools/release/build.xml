@@ -250,7 +250,7 @@
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
 
       <!-- docs -->
-      <zipfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif"
+      <zipfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif,**/*.css"
                   prefix="${derby.bin}/docs/html"/>
       <zipfileset dir="${docs.root}/out" includes="**/*.pdf"
                   prefix="${derby.bin}/docs/pdf"/>
