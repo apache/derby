@@ -137,11 +137,23 @@ public class XADataSourceConnector implements Connector {
 
     public void shutDatabase() throws SQLException {
         singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) )
-            .getXAConnection().getConnection();     
+            .getXAConnection().getConnection();    
+        config.waitForShutdownComplete(getDatabaseName());
     }
 
     public void shutEngine() throws SQLException {
         Assert.fail("shutdown engine not implemened");
+    }
+    
+    public String getDatabaseName() {
+        String databaseName=null;
+        try {
+            // get the physical database name
+            databaseName = (String) JDBCDataSource.getBeanProperty(ds, "databaseName");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return databaseName;
     }
     
     /**

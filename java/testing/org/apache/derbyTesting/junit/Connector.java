@@ -87,6 +87,12 @@ interface Connector {
          throws SQLException;
 
     /**
+     * get the physical databasename in use at this time
+     * @return Name of database
+     */
+    abstract String getDatabaseName();
+    
+    /**
      * Shutdown the running default database using user and password
      * defined by the configuration passed to setConfiguration.
      * Return nothing, exception is expected to be thrown with SQLState 08006

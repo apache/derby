@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -132,9 +133,11 @@ public class DataSourceConnector implements Connector {
             return tmpDs.getConnection(user, password); 
        }
     }
+    
 
     public void shutDatabase() throws SQLException {
-        singleUseDS( makeShutdownDBAttributes( config ) ).getConnection();     
+        singleUseDS( makeShutdownDBAttributes( config ) ).getConnection();
+        config.waitForShutdownComplete(getDatabaseName());
     }
 
     public void shutEngine() throws SQLException {
@@ -167,6 +170,17 @@ public class DataSourceConnector implements Connector {
         hm.put( "shutdownDatabase", "shutdown" );
 
         return hm;
+    }
+    
+    public String getDatabaseName() {
+        String databaseName=null;
+        try {
+            // get the physical database name
+            databaseName = (String) JDBCDataSource.getBeanProperty(ds, "databaseName");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return databaseName;
     }
 
 }

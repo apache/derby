@@ -73,6 +73,8 @@ public final class TestConfiguration {
     private final static String DEFAULT_FRAMEWORK = "embedded";
     private final static String DEFAULT_HOSTNAME = "localhost";
 
+    private static final int LOCKFILETIMEOUT = 300000; // 5 mins
+
     /**
      * Maximum number of ports used by Suites.All 
      * If this changes, this constant and the Wiki
@@ -1746,6 +1748,37 @@ public final class TestConfiguration {
         }
     }    
 
+    public void waitForShutdownComplete(String physicalDatabaseName) {
+        String path = getDatabasePath(physicalDatabaseName);
+        boolean lockfilepresent = true;
+        int timeout = LOCKFILETIMEOUT; // 5 mins
+        int totalsleep = 0;
+        File lockfile = new File (path + File.separatorChar + "db.lck");
+        File exlockfile = new File (path + File.separatorChar + "dbex.lck");
+        while (lockfilepresent) {
+            if (totalsleep >= timeout)
+            {
+                System.out.println("TestConfigruation.waitForShutdownComplete: " +
+                        "been looping waiting for lock files to be deleted for at least 5 minutes, giving up");
+                break;
+            }
+            if (lockfile.exists() || exlockfile.exists())
+            {
+                // TODO: is it interesting to know whether db.lck or dbex.lck or both is still present?
+                try {
+                    System.out.println("TestConfiguration.waitForShutdownComplete: " +
+                            "db*.lck files not deleted after " + totalsleep + " ms.");
+                    Thread.sleep(1000);
+                    totalsleep=totalsleep+1000;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+                lockfilepresent=false;
+        }
+    }
+    
    /**
      * stops the Network server for this configuration.
      *
@@ -2047,5 +2080,17 @@ public final class TestConfiguration {
     public final String getPassword(String user)
     {
         return getPassword(user, passwordToken);
+    }
+    
+    public final String getDatabasePath(String physicalDatabaseName) 
+    {
+        String dbName = physicalDatabaseName.replace('/', File.separatorChar);
+        String dsh = BaseTestCase.getSystemProperty("derby.system.home");
+        if (dsh == null) {
+            Assert.fail("not implemented");
+        } else {
+            dbName = dsh + File.separator + dbName;
+        }
+        return dbName;
     }
 }

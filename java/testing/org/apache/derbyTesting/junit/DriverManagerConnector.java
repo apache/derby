@@ -126,6 +126,7 @@ public class DriverManagerConnector implements Connector {
     public void shutDatabase() throws SQLException {
         getConnectionByAttributes(config.getJDBCUrl(),
                 "shutdown", "true");
+        config.waitForShutdownComplete(getDatabaseName());
     }
 
     /**
@@ -161,6 +162,14 @@ public class DriverManagerConnector implements Connector {
         }
 
         return DriverManager.getConnection(url, attributes);
+    }
+    
+    public String getDatabaseName(){
+        // always use the default database name
+        // if this connector is used with other databases, we
+        // might need another method that takes the databasename
+        String databaseName = config.getDefaultDatabaseName();
+        return databaseName;
     }
 
     /**

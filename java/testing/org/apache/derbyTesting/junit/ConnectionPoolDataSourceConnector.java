@@ -153,7 +153,8 @@ public class ConnectionPoolDataSourceConnector implements Connector {
 
     public void shutDatabase() throws SQLException {
         singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) ).
-                getPooledConnection().getConnection();     
+                getPooledConnection().getConnection();
+        config.waitForShutdownComplete(getDatabaseName());
     }
 
     public void shutEngine() throws SQLException {
@@ -161,6 +162,17 @@ public class ConnectionPoolDataSourceConnector implements Connector {
                 singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) );
         JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
         tmpDs.getPooledConnection();
+    }
+    
+    public String getDatabaseName() {
+        String databaseName=null;
+        try {
+            // get the physical database name
+            databaseName = (String) JDBCDataSource.getBeanProperty(ds, "databaseName");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return databaseName;
     }
     
     /**
