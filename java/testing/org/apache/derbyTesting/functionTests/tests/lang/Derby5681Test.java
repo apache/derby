@@ -38,7 +38,6 @@ import org.apache.derbyTesting.junit.IndexStatsUtil;
 /**
  * DERBY-5681(When a foreign key constraint on a table is dropped,
  *  the associated statistics row for the conglomerate is not removed.)
- * @throws Exception
  */
 public class Derby5681Test extends BaseJDBCTestCase {
 
