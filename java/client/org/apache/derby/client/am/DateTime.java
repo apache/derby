@@ -20,7 +20,6 @@
 */
 package org.apache.derby.client.am;
 
-import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.reference.DRDAConstants;
 
@@ -644,92 +643,6 @@ public class DateTime {
     // *********************************************************
     // ******* CROSS input converters (class -> byte[]) ********
     // *********************************************************
-
-    /**
-     * java.sql.Timestamp is converted to character representation that is in JDBC date escape 
-     * format: <code>yyyy-mm-dd</code>, which is the same as JIS date format in DERBY string representation of a date.
-     * and then converted to bytes using UTF8 encoding.
-     * @param buffer  
-     * @param offset  write into the buffer from this offset 
-     * @param timestamp  timestamp value
-     * @return DateTime.dateRepresentationLength. This is the fixed length 
-     * in bytes, that is taken to represent the timestamp value as a date.
-     * @throws SqlException
-     * @throws UnsupportedEncodingException
-     */
-    public static final int timestampToDateBytes(byte[] buffer,
-                                                 int offset,
-                                                 java.sql.Timestamp timestamp)
-    throws SqlException,UnsupportedEncodingException {
-        int year = timestamp.getYear() + 1900;
-        if (year > 9999) {
-            throw new SqlException(null,
-                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
-                new Integer(year), "9999");
-        }
-        int month = timestamp.getMonth() + 1;
-        int day = timestamp.getDate();
-
-        char[] dateChars = new char[DateTime.dateRepresentationLength];
-        int zeroBase = (int) '0';
-        dateChars[0] = (char) (year / 1000 + zeroBase);
-        dateChars[1] = (char) ((year % 1000) / 100 + zeroBase);
-        dateChars[2] = (char) ((year % 100) / 10 + zeroBase);
-        dateChars[3] = (char) (year % 10 + +zeroBase);
-        dateChars[4] = '-';
-        dateChars[5] = (char) (month / 10 + zeroBase);
-        dateChars[6] = (char) (month % 10 + zeroBase);
-        dateChars[7] = '-';
-        dateChars[8] = (char) (day / 10 + zeroBase);
-        dateChars[9] = (char) (day % 10 + zeroBase);
-        // Network server expects to read the date parameter value bytes with
-        // UTF-8 encoding.  Reference - DERBY-1127
-        // see DRDAConnThread.readAndSetParams
-        byte[] dateBytes = (new String(dateChars)).getBytes(Typdef.UTF8ENCODING);
-        System.arraycopy(dateBytes, 0, buffer, offset, DateTime.dateRepresentationLength);
-
-        return DateTime.dateRepresentationLength;
-    }
-
-    /**
-     * java.sql.Timestamp is converted to character representation in JDBC time escape format:
-     *  <code>hh:mm:ss</code>, which is the same as
-     * JIS time format in DERBY string representation of a time. The char representation is 
-     * then converted to bytes using UTF8 encoding and written out into the buffer
-     * @param buffer
-     * @param offset  write into the buffer from this offset 
-     * @param timestamp timestamp value
-     * @return DateTime.timeRepresentationLength. This is the fixed length 
-     * in bytes taken to represent the timestamp value as Time.
-     * @throws UnsupportedEncodingException
-     */
-    public static final int timestampToTimeBytes(byte[] buffer,
-                                                 int offset,
-                                                 java.sql.Timestamp timestamp)
-        throws UnsupportedEncodingException {
-        int hour = timestamp.getHours();
-        int minute = timestamp.getMinutes();
-        int second = timestamp.getSeconds();
-
-        char[] timeChars = new char[DateTime.timeRepresentationLength];
-        int zeroBase = (int) '0';
-        timeChars[0] = (char) (hour / 10 + zeroBase);
-        timeChars[1] = (char) (hour % 10 + +zeroBase);
-        timeChars[2] = ':';
-        timeChars[3] = (char) (minute / 10 + zeroBase);
-        timeChars[4] = (char) (minute % 10 + zeroBase);
-        timeChars[5] = ':';
-        timeChars[6] = (char) (second / 10 + zeroBase);
-        timeChars[7] = (char) (second % 10 + zeroBase);
-        
-        // Network server expects to read the time parameter value bytes with
-        // UTF-8 encoding.  Reference - DERBY-1127
-        // see DRDAConnThread.readAndSetParams 
-        byte[] timeBytes = (new String(timeChars)).getBytes(Typdef.UTF8ENCODING);
-        System.arraycopy(timeBytes, 0, buffer, offset, DateTime.timeRepresentationLength);
-
-        return DateTime.timeRepresentationLength;
-    }
 
     /**
      * Return the length of a timestamp depending on whether timestamps
