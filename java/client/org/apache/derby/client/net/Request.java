@@ -1427,13 +1427,13 @@ public class Request {
         
         try
         {
-            DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream( dbaos );
+            PublicBufferOutputStream pbos = new PublicBufferOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream( pbos );
 
             oos.writeObject( val );
 
-            buffer = dbaos.getByteArray();
-            length = dbaos.getUsed();
+            buffer = pbos.getBuffer();
+            length = pbos.size();
         }
         catch (Exception e)
         {

@@ -23,7 +23,6 @@ package org.apache.derby.client.net;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.OutputStreamWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 
 import java.io.IOException;
@@ -210,17 +209,5 @@ public final class EncodedInputStream extends InputStream {
 		}
 	
     }
-    
-    
-    static class PublicBufferOutputStream extends ByteArrayOutputStream{
-	
-		PublicBufferOutputStream(int size){
-			super(size);
-		}
 
-		public byte[] getBuffer(){
-			return buf;
-		}
-	
-    }
 }
