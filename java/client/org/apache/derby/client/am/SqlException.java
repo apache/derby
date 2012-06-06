@@ -259,7 +259,7 @@ public class SqlException extends Exception implements Diagnosable {
         this(sqlca, 0, true);
         // only set the error code for the first exception in the chain (we
         // don't know the error code for the rest)
-        errorcode_ = sqlca.getSqlCode();
+        errorcode_ = sqlca.getErrorCode();
         if ( logWriter != null )
         {
             logWriter.traceDiagnosable(this);

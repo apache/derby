@@ -64,8 +64,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         SQLException ex = null;
         if (sqlState == null) {
             ex = new SQLException(message, sqlState, errCode); 
-        } else if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX) ||
-            errCode >= ExceptionSeverity.SESSION_SEVERITY) {
+        } else if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
             //TransientConnectionException. DERBY-3075
             ex = new SQLNonTransientConnectionException(message, sqlState, errCode);
@@ -77,8 +76,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     errCode);
-        } else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX) ||
-            errCode >= ExceptionSeverity.TRANSACTION_SEVERITY ) {
+        } else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX)) {
             ex = new SQLTransactionRollbackException(message, sqlState,
                     errCode);
         } else if (sqlState.startsWith(SQLState.LSE_COMPILATION_PREFIX)) {
@@ -95,7 +93,18 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
                     errCode);
         } else if (sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5))) {
             ex = new SQLTimeoutException(message, sqlState, errCode);
-        } else {
+        }
+        // If the sub-class cannot be determined based on the SQLState, use
+        // the severity instead.
+        else if (errCode >= ExceptionSeverity.SESSION_SEVERITY) {
+            ex = new SQLNonTransientConnectionException(
+                    message, sqlState, errCode);
+        } else if (errCode >= ExceptionSeverity.TRANSACTION_SEVERITY) {
+            ex = new SQLTransactionRollbackException(
+                    message, sqlState, errCode);
+        }
+        // If none of the above fit, return a plain SQLException.
+        else {
             ex = new SQLException(message, sqlState, errCode); 
         }
         return ex;

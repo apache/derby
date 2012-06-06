@@ -22,8 +22,9 @@
 package org.apache.derby.client.am;
 
 import java.sql.DataTruncation;
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.client.net.Typdef;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Sqlca {
     transient protected Connection connection_;
@@ -97,6 +98,44 @@ public abstract class Sqlca {
 
     synchronized public int getSqlCode() {
         return sqlCode_;
+    }
+
+    /**
+     * <p>
+     * Get the error code based on the SQL code received from the server.
+     * </p>
+     *
+     * <p>
+     * The conversion from SQL code to error code happens like this:
+     * </p>
+     *
+     * <ul>
+     * <li>If the SQL code is 0, there is no error code because the Sqlca
+     * doesn't represent an error. Return 0.</li>
+     * <li>If the SQL code is positive, the Sqlca represents a warning, and
+     * the SQL code represents the actual error code. Return the SQL code.</li>
+     * <li>If the SQL code is negative, the Sqlca represents an error, and
+     * the error code is {@code -(sqlCode+1)}.</li>
+     * </ul>
+     *
+     * @see org.apache.derby.impl.drda.DRDAConnThread#getSqlCode(java.sql.SQLException)
+     */
+    public synchronized int getErrorCode() {
+        // Warning or other non-error, return SQL code.
+        if (sqlCode_ >= 0) return sqlCode_;
+
+        // Negative SQL code means it is an error. Transform into a positive
+        // error code.
+        int errorCode = -(sqlCode_ + 1);
+
+        // In auto-commit mode, the embedded driver promotes statement
+        // severity to transaction severity. Do the same here to match.
+        if (errorCode == ExceptionSeverity.STATEMENT_SEVERITY &&
+                connection_ != null && connection_.autoCommit_) {
+            errorCode = ExceptionSeverity.TRANSACTION_SEVERITY;
+        }
+
+        return errorCode;
     }
 
     synchronized public String getSqlErrmc() {
@@ -320,22 +359,22 @@ public abstract class Sqlca {
      * @return string with details about the error
      */
     private String getUnformattedMessage(int messageNumber) {
-        int sqlCode;
+        int errorCode;
         String sqlState;
         String sqlErrmc;
         if (messageNumber == 0) {
             // if the first exception in the chain is requested, return all the
             // information we have
-            sqlCode = getSqlCode();
+            errorCode = getErrorCode();
             sqlState = getSqlState();
             sqlErrmc = getSqlErrmc();
         } else {
             // otherwise, return information about the specified error only
-            sqlCode = 0;
+            errorCode = 0;
             sqlState = sqlStates_[messageNumber];
             sqlErrmc = sqlErrmcMessages_[messageNumber];
         }
-        return "DERBY SQL error: SQLCODE: " + sqlCode + ", SQLSTATE: " +
+        return "DERBY SQL error: ERRORCODE: " + errorCode + ", SQLSTATE: " +
             sqlState + ", SQLERRMC: " + sqlErrmc;
     }
 

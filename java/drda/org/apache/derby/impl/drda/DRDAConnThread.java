@@ -720,7 +720,7 @@ class DRDAConnThread extends Thread {
                     }
                 }
                 writeABNUOWRM();
-                writeSQLCARD(sqle, CodePoint.SVRCOD_ERROR, 0, 0);
+                writeSQLCARD(sqle, 0, 0);
             }
         } else {
             writeSQLCARDs(sqle, 0);
@@ -812,7 +812,7 @@ class DRDAConnThread extends Thread {
 					}
 					catch (SQLWarning w)
 					{
-						writeSQLCARD(w, CodePoint.SVRCOD_WARNING, 0, 0);
+						writeSQLCARD(w, 0, 0);
 					}
 					catch (SQLException e)
 					{
@@ -1298,7 +1298,7 @@ class DRDAConnThread extends Thread {
     			writer.endDss();
     		case CodePoint.RDBNFNRM:
     		case CodePoint.RDBATHRM:
-    			writeSQLCARD(databaseAccessException,CodePoint.SVRCOD_ERROR,0,0);
+    			writeSQLCARD(databaseAccessException, 0, 0);
     		case CodePoint.RDBACCRM:
     			//Ignore anything that was chained to the ACCRDB.
     			skipRemainder(false);
@@ -5867,10 +5867,9 @@ class DRDAConnThread extends Thread {
 									throws DRDAProtocolException
 	{
 
-		int severity = CodePoint.SVRCOD_INFO;
 		if (e == null)
 		{
-			writeSQLCARD(e,severity, updateCount, 0);
+			writeSQLCARD(e, updateCount, 0);
 			return;
 		}
 
@@ -5878,7 +5877,7 @@ class DRDAConnThread extends Thread {
 		// jcc/db2 limitation, see beetle 4629
 
 		// If it is a real SQL Error write a SQLERRRM first
-		severity = getExceptionSeverity(e);
+		int severity = getExceptionSeverity(e);
 		if (severity > CodePoint.SVRCOD_ERROR)
 		{
 			// For a session ending error > CodePoint.SRVCOD_ERROR you cannot
@@ -5892,20 +5891,58 @@ class DRDAConnThread extends Thread {
 		{
 			writeSQLERRRM(severity);
 		}
-		writeSQLCARD(e,severity, updateCount, 0);
+		writeSQLCARD(e, updateCount, 0);
 	}
 
-	private int getSqlCode(int severity)
+    /**
+     * <p>
+     * Get the SQLCODE to send for an exception or a warning.
+     * </p>
+     *
+     * <p>
+     * The client expects a negative SQLCODE for exceptions and a positive
+     * SQLCODE for warnings. SQLCODE 0 means there is no error or warning
+     * condition. SQLCODE is also used to encode the severity of the condition
+     * (as returned by {@code SQLException.getErrorCode()}).
+     * </p>
+     *
+     * <p>
+     * For warnings, the SQLCODE is 10000, which is identical to
+     * {@link ExceptionSeverity#WARNING_SEVERITY}.
+     * </p>
+     *
+     * <p>
+     * For exceptions, the SQLCODE is set to {@code -severity-1}, which allows
+     * all non-negative severity values to be encoded. (Derby only uses
+     * non-negative severity values in the first place.)
+     * </p>
+     *
+     * @param e the exception or warning to get the SQLCODE for
+     * @return the value to send as SQLCODE
+     */
+    private int getSqlCode(SQLException e)
 	{
-		if (severity == CodePoint.SVRCOD_WARNING)		// warning
-			return 100;		//CLI likes it
-		else if (severity == CodePoint.SVRCOD_INFO)             
-			return 0;
-		else
-			return -1;
+        if (e == null) return 0;
+
+        // All SQLWarnings should have warning severity. However,
+        // DataTruncation conditions for write operations (with SQL state
+        // 22001) are thrown as exceptions, even though DataTruncation
+        // technically is a sub-class of SQLWarning.
+        if (e instanceof SQLWarning &&
+                !SQLState.LANG_STRING_TRUNCATION.equals(e.getSQLState())) {
+            return ExceptionSeverity.WARNING_SEVERITY;
+        }
+
+        // The exception represents an error condition, so encode the severity
+        // as a negative value in the SQLCODE. Negative severity values are
+        // changed to 0 (NO_APPLICABLE_SEVERITY).
+        int severity =
+                Math.max(ExceptionSeverity.NO_APPLICABLE_SEVERITY,
+                         e.getErrorCode());
+        return -severity - 1;
 	}
 
-	private void writeSQLCARD(SQLException e,int severity, 
+	private void writeSQLCARD(SQLException e,
 		int updateCount, long rowCount ) throws DRDAProtocolException
 	{
 		writer.createDssObject();
@@ -6046,26 +6083,13 @@ class DRDAConnThread extends Thread {
     private void writeSQLCAGRP(SQLException e, int updateCount, long rowCount)
         throws DRDAProtocolException
 	{
-        int sqlcode = 0;
+        int sqlcode = getSqlCode(e);
 
         if (e == null) {
             // Forwarding to the optimized version when there is no
             // exception object
             writeSQLCAGRP(nullSQLState, sqlcode, updateCount, rowCount);
             return;
-        }
-
-        // SQLWarnings should have warning severity, except if it's a
-        // DataTruncation warning for write operations (with SQLState 22001),
-        // which is supposed to be used as an exception even though it's a
-        // sub-class of SQLWarning.
-        if (e instanceof SQLWarning &&
-                !SQLState.LANG_STRING_TRUNCATION.equals(e.getSQLState())) {
-            sqlcode = ExceptionSeverity.WARNING_SEVERITY;
-        } else {
-            // Get the SQLCODE for exceptions. Note that this call will always
-            // return -1, so the real error code will be lost.
-            sqlcode = getSqlCode(getExceptionSeverity(e));
         }
 
 		if (rowCount < 0 && updateCount < 0)

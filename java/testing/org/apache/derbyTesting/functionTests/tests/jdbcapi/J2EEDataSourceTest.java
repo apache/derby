@@ -3425,7 +3425,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE Statement in global xact " 
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, 
             s.getResultSetHoldability());
-        assertEquals(10000, conn.getWarnings().getErrorCode());
+        assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
         shxa = conn.prepareStatement("select id from hold_30",
@@ -3434,7 +3434,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE PreparedStatement in global xact 
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,
             s.getResultSetHoldability());
-        assertEquals(10000, conn.getWarnings().getErrorCode());
+        assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
         shxa = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()",
@@ -3443,7 +3443,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // HOLDABLE CallableStatement in global xact:
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,
             s.getResultSetHoldability());
-        assertEquals(10000, conn.getWarnings().getErrorCode());
+        assertErrorCode(10000, conn.getWarnings());
         shxa.close();
 
         // check we can use a holdable statement set up in local mode.

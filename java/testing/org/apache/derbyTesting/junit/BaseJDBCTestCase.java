@@ -895,7 +895,23 @@ public abstract class BaseJDBCTestCase
     public static void assertSQLState(String expected, SQLException exception) {
         assertSQLState("Unexpected SQL state.", expected, exception);
     }
-    
+
+    /**
+     * Assert that the error code is as expected.
+     *
+     * @param expected the expected error code
+     * @param exception the exception to check
+     * @throws AssertionFailedError if the error code is wrong
+     */
+    public static void assertErrorCode(int expected, SQLException exception) {
+        assertNotNull("Exception should not be null", exception);
+        int actual = exception.getErrorCode();
+        if (actual != expected) {
+            fail("Expected error code " + expected + ", got " + actual,
+                 exception);
+        }
+    }
+
     /**
      * Assert that the SQL statement does not compile and throws
      * a SQLException with the expected state.
@@ -1144,7 +1160,7 @@ public abstract class BaseJDBCTestCase
                 "' but no error was thrown.");
         } catch (SQLException se) {
             assertSQLState(sqlState, se);
-            assertEquals(errorCode,se.getErrorCode());
+            assertErrorCode(errorCode, se);
         }
         
     }

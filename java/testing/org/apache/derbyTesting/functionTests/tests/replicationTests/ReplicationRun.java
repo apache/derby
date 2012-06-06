@@ -370,7 +370,7 @@ public class ReplicationRun extends BaseTestCase
                 lastmsg = errCode + " " + sState + " " + lastmsg 
                         + ". Expected: "+ expectedState;
                 util.DEBUG("Got SQLException: " + lastmsg);
-                if ( (errCode == -1)
+                if ( (errCode == 40000)
                 && (sState.equalsIgnoreCase(expectedState) ) )
                 {
                     if (count++ >= 600) {
@@ -1019,7 +1019,7 @@ public class ReplicationRun extends BaseTestCase
                     String expectedState = "XRE04";
                     util.DEBUG("startMaster Got SQLException: " 
                             + errCode + " " + sState + " " + msg + ". Expected " + expectedState);
-                    if ( (errCode == -1)
+                    if ( (errCode == 40000)
                     && (sState.equalsIgnoreCase(expectedState) ) )
                     {
                         if (count++ > 1200) {

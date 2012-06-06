@@ -168,8 +168,9 @@ public class ShutdownSlave extends BaseJDBCTestCase
                         String msg = se.getMessage();
                         String state = se.getSQLState();
                         String expectedState = (dbOnly)? "08004": "XJ015";
+                        int expectedCode = dbOnly ? 45000 : 50000;
                         System.out.println("shutdown Got SQLException: " + errCode + " " + state + " " + msg);
-                        if ( (errCode == -1)
+                        if ( (errCode == expectedCode)
                         && (state.equalsIgnoreCase(expectedState) ) )
                         {
                             System.out.println("As expected.");
