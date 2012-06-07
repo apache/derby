@@ -2739,7 +2739,7 @@ you should not have to do this.
                     <pathelement path="${derby.storeless.src.dir}" />
                     <pathelement path="${derby.tools.src.dir}" />
                 </sourcepath>
-                <infileset dir="junit_${derby.junit.timestamp}" includes="coverage.em,coverage.ec" />
+                <infileset dir="junit_${derby.junit.timestamp}" includes="coverage.em,coverage*.ec" />
                 <!-- Three reports: txt, xml and html -->
                 <txt outfile="junit_${derby.junit.timestamp}/coverage.txt"/>
                 <xml outfile="junit_${derby.junit.timestamp}/coverage.xml"/>

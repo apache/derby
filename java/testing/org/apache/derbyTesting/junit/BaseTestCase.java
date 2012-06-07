@@ -559,6 +559,13 @@ public abstract class BaseTestCase
             cmdlist.add("-Xmx32M");
         }
 
+        if (runsWithEmma()) {
+            // DERBY-5801: If many processes write to the same file, it may
+            // end up corrupted. Let each process have its own file to which
+            // it writes coverage data.
+            cmdlist.add("-Demma.coverage.out.file=" + getEmmaOutFile());
+        }
+
 	    cmdlist.add("-classpath");
 	    cmdlist.add(getSystemProperty("java.class.path"));
 	    for (int i =0; i < cmd.length;i++) {
@@ -724,6 +731,22 @@ public abstract class BaseTestCase
         return getSystemProperty("java.class.path").indexOf("emma.jar") != -1;
     }
 
+    /**
+     * Counter used by {@link #getEmmaOutFile()} to produce unique file names.
+     */
+    private static int emmaCount = 0;
+
+    /**
+     * Get a unique file object that can be used by sub-processes to store
+     * EMMA code coverage data. Each separate sub-process should have its
+     * own file in order to prevent corruption of the coverage data.
+     *
+     * @return a file to which a sub-process can write code coverage data
+     */
+    private static synchronized File getEmmaOutFile() {
+        return new File(currentDirectory(),
+                "coverage-" + (++emmaCount) + ".ec");
+    }
 
     /**
      * Returns the major version of the class specification version supported
