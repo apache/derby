@@ -201,7 +201,6 @@ public class DB_Jar {
 
         FileInputStream oldJarFile = new FileInputStream(oldJarFileName);
         FileOutputStream newJarFile = new FileOutputStream(newJarFileName);
-        int st = 0;
         while (true) {
             if (oldJarFile.available() == 0)
                 break;
