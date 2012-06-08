@@ -1,7 +1,5 @@
 I18NImportExport.sql
 I18NImportExport_app.properties
-JapanCodeConversion.sql
-JapanCodeConversion_app.properties
 LocalizedConnectionAttribute.sql
 LocalizedConnectionAttribute_app.properties
 LocalizedDisplay.sql

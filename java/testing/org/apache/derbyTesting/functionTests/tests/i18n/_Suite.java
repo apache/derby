@@ -51,12 +51,13 @@ public class _Suite extends BaseTestCase  {
 
 		TestSuite suite = new TestSuite("i18n");
 
-        // Also, both these tests won't run with JSR169.
+        // Also, none of these tests will run with JSR169.
         if (JDBC.vmSupportsJSR169())
             return suite;
         suite.addTest(LocalizedAttributeScriptTest.suite());
         suite.addTest(LocalizedDisplayScriptTest.suite());
-        
+        suite.addTest(JapanCodeConversionTest.suite());
+
         return suite;
 	}
 }
