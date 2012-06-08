@@ -82,8 +82,44 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         String [][] expRS;
         String [] expColNames;
         
+        // Invalidating all the stored statements by dbo will work
+        cSt = prepareCall(
+            "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertUpdateCount(cSt, 0);
+        cSt.close();
+        
         Connection satConnection = openUserConnection("satheesh");
         Statement st_satConnection = satConnection.createStatement();
+        
+        // Try invalidating all the stored statements by user other than the
+        //  dbo. That will fail because dbo has not granted execute permission
+        //  to any one yet on 
+        //  SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS
+        cSt = satConnection.prepareCall(
+            "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertStatementError("42504", cSt);
+        cSt.close();
+
+        //Have dbo grant execute permission on 
+        // SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
+        // to one user
+        st.executeUpdate(
+                " grant execute on procedure "
+                + "SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS to satheesh");
+        cSt = satConnection.prepareCall(
+                "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertUpdateCount(cSt, 0);
+        cSt.close();
+        //Have the dbo revoke the execute privilege on 
+        // SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
+        st.executeUpdate(
+                "revoke execute on procedure " +
+                "SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS " +
+                "from satheesh restrict");
+        cSt = satConnection.prepareCall(
+                "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertStatementError("42504", cSt);
+        cSt.close();
         
         // Test table privileges
         

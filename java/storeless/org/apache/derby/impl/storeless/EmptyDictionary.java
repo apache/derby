@@ -499,6 +499,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
+	public void invalidateAllSPSPlans(LanguageConnectionContext lcc) 
+			throws StandardException{
+		// Auto-generated method stub
+
+	}
+
 	public String getTriggerActionString(
 			Visitable actionStmt,
 			String oldReferencingName,

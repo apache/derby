@@ -1158,6 +1158,13 @@ public interface DataDictionary
 	) throws StandardException;
 
 	/**
+	 * Invalidate all the stored plans in SYS.SYSSTATEMENTS for
+	 *  the given language connection context.
+	 * @exception StandardException		Thrown on error
+	 */
+	public void invalidateAllSPSPlans(LanguageConnectionContext lcc) throws StandardException;
+
+	/**
 	 * Invalidate all the stored plans in SYS.SYSSTATEMENTS. 
 	 * @exception StandardException		Thrown on error
 	 */

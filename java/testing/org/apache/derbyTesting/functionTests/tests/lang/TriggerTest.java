@@ -21,8 +21,11 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.IOException;
+
 import java.io.InputStream;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,6 +107,134 @@ public class TriggerTest extends BaseJDBCTestCase {
                 getTestConfiguration().getUserName());
 
         super.tearDown();
+    }
+    
+    /**
+     * Test that invalidating stored statements marks the statement invalid
+     *  in SYS.SYSSTATEMENTS. And when one of those invalid statements is
+     *  executed next, it is recompiled and as part of that process, it gets
+     *  marked valid in SYS.SYSSTATEMENTS.
+     * 
+     * @throws SQLException 
+     * 
+     */
+    public void testDerby5578InvalidateAllStatementsProc() throws SQLException
+    {
+        Statement s = createStatement();
+        CallableStatement cSt;
+
+        //Invalidate all the statements in SYS.SYSSTATEMENTS.
+        cSt = prepareCall(
+                "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertUpdateCount(cSt, 0);
+        cSt.close();
+        int numOfRowsInSystatementsBeforeTestStart =
+        		numberOfRowsInSysstatements(s);
+        int numOfInvalidSystatementsBeforeTestStart =
+        		numberOfInvalidStatementsInSysstatements(s);
+        int numOfValidSystatementsBeforeTestStart =
+        		numberOfValidStatementsInSysstatements(s);
+
+        assertEquals("All statements should be invalid in SYS.SYSSTATEMENTS ",
+        		numOfInvalidSystatementsBeforeTestStart,
+        		numOfRowsInSystatementsBeforeTestStart);
+        assertEquals("No statement should be valid in SYS.SYSSTATEMENTS ",
+        		numOfValidSystatementsBeforeTestStart,
+        		0);
+
+        //Create the required tables with data. There will be no change to 
+        // SYS.SYSSTATEMENTS as of yet.
+        s.executeUpdate("create table atdc_16_tab1 (a1 integer, b1 integer, c1 integer)");
+        s.executeUpdate("create table atdc_16_tab2 (a2 integer, b2 integer, c2 integer)");
+        s.executeUpdate("insert into atdc_16_tab1 values(1,11,111)");
+        s.executeUpdate("insert into atdc_16_tab2 values(1,11,111)");
+        assertEquals("# of valid statements in SYS.SYSSTATEMENTS should not change",
+        		numberOfValidStatementsInSysstatements(s),
+        		numOfValidSystatementsBeforeTestStart);
+        assertEquals("# of invalid statements in SYS.SYSSTATEMENTS should not change",
+        		numberOfInvalidStatementsInSysstatements(s),
+        		numOfInvalidSystatementsBeforeTestStart);
+
+        //Create a trigger. Its trigger action plan will result into a new 
+        // stored statement in SYS.SYSSTATEMENTS. The stored statement for
+        // trigger action will have a valid status
+        s.executeUpdate("create trigger atdc_16_trigger_1 "+ 
+                "after update of b1 on atdc_16_tab1 " +
+                "REFERENCING NEW AS newt "+
+                "for each row "+
+                "update atdc_16_tab2 set c2 = newt.c1");
+        assertEquals("# of valid rows in SYS.SYSSTATEMENTS should be up by "+
+                "1 for trigger",
+        		numberOfValidStatementsInSysstatements(s),
+        		numOfValidSystatementsBeforeTestStart+1);
+        assertEquals("# of invalid statements in SYS.SYSSTATEMENTS should not change",
+        		numberOfInvalidStatementsInSysstatements(s),
+        		numOfInvalidSystatementsBeforeTestStart);
+
+        //Following procedure call will mark all the stored statements 
+        // including the one for trigger action plan invalid
+        cSt = prepareCall(
+                "call SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()");
+        assertUpdateCount(cSt, 0);
+        cSt.close();
+        assertEquals("All statements should be invalid in SYS.SYSSTATEMENTS ",
+        		numberOfInvalidStatementsInSysstatements(s),
+        		numOfRowsInSystatementsBeforeTestStart+1);
+
+        //Following will cause the trigger to fire. Since it is in invalid
+        // state, it will be compiled and marked valid again in 
+        // SYS.SYSSTATEMENTS table
+        s.executeUpdate("update atdc_16_tab1 set b1=22,c1=222");
+        assertEquals("# of valid rows in SYS.SYSSTATEMENTS should only be 1 ",
+        		numberOfValidStatementsInSysstatements(s),
+        		1);
+        assertEquals("# of invalid statements in SYS.SYSSTATEMENTS should not change",
+        		numberOfInvalidStatementsInSysstatements(s),
+        		numOfInvalidSystatementsBeforeTestStart);
+
+        //Now let's test metadata related stored statement. Executing it will
+        // cause the metadata's stored statement to compile and hence it will
+        // be marked valid in SYS.SYSSTATEMENTS table. Now, we will have two
+        // stored statements in valid state, one for getTables() metadata and
+        // other for trigger action plan
+        DatabaseMetaData dbmd = getConnection().getMetaData();
+        JDBC.assertDrainResults(dbmd.getTables(null, "APP", "ATDC_16_TAB1", null));
+        assertEquals("# of valid rows in SYS.SYSSTATEMENTS should only be 2 ",
+        		numberOfValidStatementsInSysstatements(s),
+        		2);
+        assertEquals("# of invalid statements in SYS.SYSSTATEMENTS should not change",
+        		numberOfInvalidStatementsInSysstatements(s),
+        		numOfInvalidSystatementsBeforeTestStart-1);
+        
+        s.executeUpdate("drop table ATDC_16_TAB1");
+    }
+
+    //Get a count of number of invalid statements in SYS.SYSSTATEMENTS
+    private int numberOfInvalidStatementsInSysstatements(Statement st)
+    		throws SQLException {
+    	ResultSet rs = st.executeQuery(
+    			"SELECT COUNT(*) FROM SYS.SYSSTATEMENTS "+
+        		"WHERE VALID = false");
+    	rs.next();
+    	return(rs.getInt(1));
+    }
+
+    //Get a count of number of valid statements in SYS.SYSSTATEMENTS
+    private int numberOfValidStatementsInSysstatements(Statement st)
+    		throws SQLException {
+    	ResultSet rs = st.executeQuery(
+    			"SELECT COUNT(*) FROM SYS.SYSSTATEMENTS "+
+        		"WHERE VALID = TRUE");
+    	rs.next();
+    	return(rs.getInt(1));
+    }
+
+    //Get a count of number of rows in SYS.SYSSTATEMENTS
+    private int numberOfRowsInSysstatements(Statement st)
+    		throws SQLException {
+    	ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM SYS.SYSSTATEMENTS");
+    	rs.next();
+    	return(rs.getInt(1));
     }
     
     /**

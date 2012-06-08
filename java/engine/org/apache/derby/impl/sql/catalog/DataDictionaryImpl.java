@@ -4573,6 +4573,15 @@ public final class	DataDictionaryImpl
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext) 
 			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+		invalidateAllSPSPlans(lcc);
+	}
+
+	/**
+	 * @see DataDictionary#invalidateAllSPSPlans
+	 * @exception StandardException		Thrown on error
+	 */
+	public void invalidateAllSPSPlans(LanguageConnectionContext lcc) throws StandardException
+	{
 		startWriting(lcc);
 
 		for (java.util.Iterator li = getAllSPSDescriptors().iterator(); li.hasNext(); )
@@ -13253,6 +13262,22 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+        
+        // void SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
+        {               
+            createSystemProcedureOrFunction(
+                "SYSCS_INVALIDATE_STORED_STATEMENTS",
+                sysUtilUUID,
+                (String[]) null,
+                (TypeDescriptor[]) null,
+                0,
+                0,
+                RoutineAliasInfo.NO_SQL,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
