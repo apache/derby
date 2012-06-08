@@ -332,15 +332,6 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     }
 
     /**
-     * A handy method for debugging.
-     */
-    public static void sleep( long numberOfSeconds )
-        throws Exception
-    {
-        Thread.currentThread().sleep( numberOfSeconds * (1000L) );
-    }
-
-    /**
      * Try to change the policy file.
      */
     private void changePolicyFile( Connection conn, String newPolicyFileName, boolean shouldSucceed, String expectedSQLState )

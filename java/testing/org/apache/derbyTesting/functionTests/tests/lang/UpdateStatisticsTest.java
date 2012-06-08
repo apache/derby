@@ -559,14 +559,10 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         stats.assertNoStatsTable(tbl_fk);
         stats.assertTableStats(tbl, 4);
         IndexStatsUtil.IdxStats[] tbl_stats_0 = stats.getStatsTable(tbl);
-        // Avoid timestamp comparison problems on super-fast machines...
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
 
         // Run the update statistics procedure.
+        // Sleep at least one tick to ensure the timestamps differ.
+        sleepAtLeastOneTick();
         ps = prepareStatement(
                 "call syscs_util.syscs_update_statistics('APP', ?, ?)");
         ps.setNull(2, Types.VARCHAR);
@@ -586,6 +582,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         }
 
         // Now make sure updating one index doesn't modify the others' stats.
+        sleepAtLeastOneTick();
         ps.setString(1, tbl);
         ps.setString(2, nuIdx);
         ps.execute();

@@ -103,21 +103,6 @@ public class DropWhileConnectingTest
         println(report.toString());
     }
 
-    /**
-     * Puts the current thread to sleep, but <em>does not</em> guarantee
-     * that the thread sleeps for the specified amount of time (interrupts are
-     * not handled).
-     *
-     * @param millis number of milliseconds to sleep
-     */
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ie) {
-            alarm("sleep call interrupted");
-        }
-    }
-
     public static Test suite() {
        return new TestSuite(DropWhileConnectingTest.class);
     }

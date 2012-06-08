@@ -949,6 +949,24 @@ public abstract class BaseTestCase
         assertExecJavaCmdAsExpected(new String[] { "OK (1 test)" }, cmd, 0);
     }
 
+    /** Returns once the system timer has advanced at least one tick. */
+    public static void sleepAtLeastOneTick() {
+        long currentTime = System.currentTimeMillis(); 
+        while (System.currentTimeMillis() == currentTime) {
+            sleep(1);
+        }
+    }
+
+    /** Makes the current thread sleep up to {@code ms} milliseconds. */
+    public static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ie) {
+            // For now we just print a warning if we are interrupted.
+            alarm("sleep interrupted");
+        }
+    }
+
     private static String traceClientType() {
        if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
             return "(emb)";
