@@ -212,29 +212,38 @@ public class TriggerTest extends BaseJDBCTestCase {
     //Get a count of number of invalid statements in SYS.SYSSTATEMENTS
     private int numberOfInvalidStatementsInSysstatements(Statement st)
     		throws SQLException {
+    	int num;
     	ResultSet rs = st.executeQuery(
     			"SELECT COUNT(*) FROM SYS.SYSSTATEMENTS "+
         		"WHERE VALID = false");
     	rs.next();
-    	return(rs.getInt(1));
+    	num = rs.getInt(1);
+    	rs.close();
+    	return(num);
     }
 
     //Get a count of number of valid statements in SYS.SYSSTATEMENTS
     private int numberOfValidStatementsInSysstatements(Statement st)
     		throws SQLException {
+    	int num;
     	ResultSet rs = st.executeQuery(
     			"SELECT COUNT(*) FROM SYS.SYSSTATEMENTS "+
         		"WHERE VALID = TRUE");
     	rs.next();
-    	return(rs.getInt(1));
+    	num = rs.getInt(1);
+    	rs.close();
+    	return(num);
     }
 
     //Get a count of number of rows in SYS.SYSSTATEMENTS
     private int numberOfRowsInSysstatements(Statement st)
     		throws SQLException {
+    	int num;
     	ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM SYS.SYSSTATEMENTS");
     	rs.next();
-    	return(rs.getInt(1));
+    	num = rs.getInt(1);
+    	rs.close();
+    	return(num);
     }
     
     /**
