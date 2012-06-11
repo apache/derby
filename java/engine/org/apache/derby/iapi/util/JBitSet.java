@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class com.ihost.cs.JBitSet
+   Derby - Class org.apache.derby.iapi.util.JBitSet
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
