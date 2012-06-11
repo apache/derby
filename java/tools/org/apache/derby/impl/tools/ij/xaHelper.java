@@ -30,14 +30,12 @@ import java.util.Locale;
 import java.util.Vector;
 
 import javax.transaction.xa.Xid;
-import javax.transaction.xa.XAResource;
 import javax.transaction.xa.XAException;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.sql.DataSource;
 import javax.sql.ConnectionPoolDataSource;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 /*
  * The real xa helper class.  Load this class only if we know the javax classes
@@ -166,7 +164,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch (Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}	
 	}
 
@@ -208,7 +206,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch (Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
@@ -228,9 +226,8 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
-		return null;
 	}
 
 	public void CommitStatement(ij parser, Token onePhase, Token twoPhase, 
@@ -243,7 +240,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
@@ -255,7 +252,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
@@ -267,7 +264,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
@@ -279,7 +276,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
@@ -293,7 +290,7 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 
 		Vector v = new Vector();
@@ -315,9 +312,8 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
-
 	}
 
 	public void StartStatement(ij parser, int flag, int xid) throws SQLException
@@ -328,16 +324,26 @@ class xaHelper implements xaAbstractHelper
 		}
 		catch(Throwable t)
 		{
-			handleException(t);
+            throw handleException(t);
 		}
 	}
 
-	private void handleException(Throwable t) throws SQLException
+    /**
+     * Handles the given throwable.
+     * <p>
+     * If possible, an {@code SQLException} is returned. Otherwise the
+     * appropriate actions are taken and a {@code RuntimeException} is thrown.
+     *
+     * @param t exception to handle
+     * @return An {@code SQLException}.
+     * @throws RuntimeException if the throwable isn't an {@code SQLException}
+     */
+	private SQLException handleException(Throwable t)
 	{
 		if (t instanceof SQLException)
 		{
 			// let ij handle it
-			throw (SQLException)t;
+            return (SQLException)t;
 		}
 		if (t instanceof XAException)
 		{
