@@ -533,16 +533,22 @@ public abstract class BaseTestCase
 	 * Note, that for verifying the output of a Java process, there is
 	 * assertExecJavaCmdAsExpected
 	 * 
+     * @param jvm the path to the java executable, or {@code null} to use
+     *            the default executable returned by
+     *            {@link #getJavaExecutableName()}
+     * @param cp  the classpath for the spawned process, or {@code null} to
+     *            inherit the classpath from the parent process
 	 * @param cmd array of java arguments for command
      * @param dir working directory for the sub-process, or {@code null} to
      *            run in the same directory as the main test process
 	 * @return the process that was started
 	 * @throws IOException
 	 */
-	public static Process execJavaCmd(String[] cmd, final File dir)
+    public static Process execJavaCmd(
+        String jvm, String cp, String[] cmd, final File dir)
             throws IOException {
 	    ArrayList cmdlist = new ArrayList();
-	    cmdlist.add(getJavaExecutableName());
+        cmdlist.add(jvm == null ? getJavaExecutableName() : jvm);
 	    if (isJ9Platform())
 	    {
 	        cmdlist.add("-jcl:foun11");
@@ -567,7 +573,8 @@ public abstract class BaseTestCase
         }
 
 	    cmdlist.add("-classpath");
-	    cmdlist.add(getSystemProperty("java.class.path"));
+        cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
+
 	    for (int i =0; i < cmd.length;i++) {
 	        cmdlist.add(cmd[i]);
 	    }
@@ -594,10 +601,10 @@ public abstract class BaseTestCase
     /**
      * Execute a java command and return the process. The process will run
      * in the same directory as the main test process. This method is a
-     * shorthand for {@code execJavaCmd(cmd, null)}.
+     * shorthand for {@code execJavaCmd(null, null, cmd, null)}.
      */
     public static Process execJavaCmd(String[] cmd) throws IOException {
-        return execJavaCmd(cmd, null);
+        return execJavaCmd(null, null, cmd, null);
     }
 
     /**

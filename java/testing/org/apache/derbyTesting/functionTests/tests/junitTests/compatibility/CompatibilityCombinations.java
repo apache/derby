@@ -696,42 +696,32 @@ public class CompatibilityCombinations extends BaseTestCase
         
         boolean testOK = false;
         
-        int port = serverPort;
-
-        if ( driverName == null ) driverName = ""; // Not null is used for embedded only!
-        final String[] commandElements = {clientJvm
-                , " -Ddrb.tests.debug=true" // Used by JDBCDriverTest.
-                // , " -Dderby.tests.debug=true" // Used by DerbyJUnitTest
-                , " -Dderby.tests.trace=true" // Used by DerbyJUnitTest
-                , " -cp ", clientClassPath
-                , " " + testName
-                , " " + databaseName
-                , " " + driverName // Specified for embedded only! Otherwise find default.
-            };
-        final String[] envElements = {"CLASS_PATH="+clientClassPath
-            };
+        ArrayList cmd = new ArrayList();
+        cmd.add("-Ddrb.tests.debug=true");      // Used by JDBCDriverTest
+        // cmd.add("-Dderby.tests.debug=true"); // Used by DerbyJUnitTest
+        cmd.add("-Dderby.tests.trace=true");    // Used by DerbyJUnitTest
+        cmd.add(testName);
+        cmd.add(databaseName);
+        if (driverName != null) {
+            // Specified for embedded only. Otherwise find default.
+            cmd.add(driverName);
+        }
         
         String workingDirName = System.getProperty("user.dir");
         DEBUG("user.dir: " + workingDirName);
-        String tmp ="";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        DEBUG("commandElements: " + tmp);
-        
-        final String fullCmd = tmp;
-        tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp);
+
+        String[] commandElements = toStringArray(cmd);
+        DEBUG("commandElements: " + cmd);
+
         final File workingDir = new File(workingDirName);
         
-        DEBUG(
-                "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
-                );
+        DEBUG("proc = execJavaCmd(clientJvm, clientClassPath, " +
+              "commandElements, workingDir);");
         
         try
         {
-            Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+            Process proc = execJavaCmd(
+                clientJvm, clientClassPath, commandElements, workingDir);
             PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName));
             String result = testOutput(proc, out); // Scans test report for OK and Time...
             proc.waitFor();
@@ -959,8 +949,11 @@ public class CompatibilityCombinations extends BaseTestCase
         System.out.println("--------------------------------------------------------");
         
     }
-  
-    
+
+    private static String[] toStringArray(List list) {
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
     private void startServer(int serverVM, int serverVersion)
     throws Exception
     { // See NetworkServerTestSetup.startSeparateProcess() for the default JUnit test setup...
@@ -976,49 +969,38 @@ public class CompatibilityCombinations extends BaseTestCase
       
         String command = "start";
         String allowedClients = "0.0.0.0"; // I.e. any
-        String securityOption = "";
+
+        ArrayList cmd = new ArrayList();
+        cmd.add("-Dderby.infolog.append=true");
+        cmd.add(networkServerControl);
+        cmd.add(command);
+        cmd.add("-h");
+        cmd.add(allowedClients);
+        cmd.add("-p");
+        cmd.add(String.valueOf(serverPort));
 
         // Is this server version security enabled? If so turn off running with SecurityManger!
         if ( (securityProperty.length() != 0) && derbySecurityEnabled[serverVersion] )
         {
-            securityOption = "-"+securityProperty;
+            cmd.add("-" + securityProperty);
         }
-        
-        final String[] commandElements = {serverJvm
-                , " -Dderby.infolog.append=true"
-                , " -cp ", serverClassPath
-                , " " + networkServerControl
-                , " " + command
-                , " -h ", allowedClients
-                , " -p ", serverPort+""
-                , " " + securityOption
-                };
-        final String[] envElements = {"CLASS_PATH="+serverClassPath
-                , "PATH="+VM_Ids[serverVM]+PS+".."+PS+"bin" // "/../bin"
-                };
-        
+
         String workingDirName = System.getProperty("user.dir");
         DEBUG("user.dir: " + workingDirName);
-        String tmp ="";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        DEBUG("commandElements: " + tmp);
-        final String fullCmd = tmp;
-        tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp);
+
+        String[] commandElements = toStringArray(cmd);
+        DEBUG("commandElements: " + cmd);
+
         final File workingDir = new File(workingDirName);
         
         
         if ( serverHost.equalsIgnoreCase("localhost") )
         {
-            DEBUG(
-                    "proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);"
-                 );
+            DEBUG("serverProc = execJavaCmd(serverJvm, serverClassPath, " +
+                  "commandElements, workingDir);");
 
-            serverProc = Runtime.getRuntime().
-                    exec(fullCmd, envElements, workingDir);
+            serverProc = execJavaCmd(
+                    serverJvm, serverClassPath, commandElements, workingDir);
             DEBUG("************** Done exec().");
 
             // Wait for the server to come up in a reasonable time.
@@ -1066,24 +1048,18 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("+++ recreateDB");
         
         String creator = compatibilityTestSuite + "$Creator";
+
+        ArrayList cmd = new ArrayList();
+        cmd.add("-Ddrb.tests.debug=true");      // Used by JDBCDriverTest.
+        // cmd.add("-Dderby.tests.debug=true"); // Used by DerbyJUnitTest
+        cmd.add("-Dderby.tests.trace=true");    // Used by DerbyJUnitTest
+        cmd.add(creator);
+        cmd.add(databaseName);
         
-        String securityOption = "";
         if ( (securityProperty.length() != 0) && derbySecurityEnabled[serverVersion] )
         {
-            securityOption = "-"+securityProperty;
+            cmd.add("-" + securityProperty);
         }
-        final String[] commandElements = {clientJvm
-                , " -Ddrb.tests.debug=true" // Used by JDBCDriverTest.
-                // , " -Dderby.tests.debug=true" // Used by DerbyJUnitTest
-                , " -Dderby.tests.trace=true" // Used by DerbyJUnitTest
-                , " -cp ", clientClassPath
-                , " " + creator
-                , " " + databaseName
-                , " " + securityOption
-                };
-        final String[] envElements = {"CLASS_PATH="+clientClassPath
-                // , "PATH="+VM_Ids[clientVM]+"/../bin"
-                };
         
         String workingDirName = System.getProperty("user.dir");
         DEBUG("user.dir: " + workingDirName);
@@ -1103,26 +1079,19 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             DEBUG("Keeping database dir '" + fullPath +"'");
         }
+
+        String[] commandElements = toStringArray(cmd);
+        DEBUG("commandElements: " + cmd);
         
-        String tmp = "";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        final String fullCmd = tmp;
-        DEBUG("commandElements: " + fullCmd);
-        
-        tmp = "";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp);
         final File workingDir = new File(workingDirName);
         
-        DEBUG(
-                "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
-              );
+        DEBUG("proc = execJavaCmd(clientJvm, clientClassPath, " +
+              "commandElements, workingDir);");
         
         try
         {
-            Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+            Process proc = execJavaCmd(
+                clientJvm, clientClassPath, commandElements, workingDir);
             processDEBUGOutput(proc);
             proc.waitFor();
         }
@@ -1169,44 +1138,28 @@ public class CompatibilityCombinations extends BaseTestCase
                 + ":" + derbyVerLibs[serverVersion] + PS+"derbynet.jar"
                 + ":" + test_jars // Do we need test_jars here for the server?
                 ;
-        
-        String command = "shutdown";
-        int port = serverPort;
-        
-        final String[] commandElements = {serverJvm
-                , " -Dderby.infolog.append=true"
-                , " -cp ", serverClassPath
-                , " " + networkServerControl
-                , " " + command
-                , " -p ", serverPort+""
-                // , " " + securityOption
-                };
-        final String[] envElements = {"CLASS_PATH="+serverClassPath
-                , "PATH="+VM_Ids[serverVM]+PS+".."+PS+"bin" // "/../bin"
+
+        final String[] commandElements = {
+                "-Dderby.infolog.append=true",
+                networkServerControl,
+                "shutdown",
+                "-p", String.valueOf(serverPort),
                 };
         
         String workingDirName = System.getProperty("user.dir");
         DEBUG("user.dir: " + workingDirName);
-        String tmp ="";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        DEBUG("commandElements: " + tmp);
-        final String fullCmd = tmp;
-        tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp);
+        DEBUG("commandElements: " + Arrays.toString(commandElements));
         final File workingDir = new File(workingDirName);
         
         if ( serverHost.equalsIgnoreCase("localhost") )
         {
-            DEBUG(
-                    "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
-                );
+            DEBUG("proc = execJavaCmd(serverJvm, serverClassPath, " +
+                  "commandElements, workingDir);");
             try
             {
                 // Tell the server to stop.
-                Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+                Process proc = execJavaCmd(
+                    serverJvm, serverClassPath, commandElements, workingDir);
                 processDEBUGOutput(proc);
                 proc.waitFor();
 
@@ -1245,43 +1198,27 @@ public class CompatibilityCombinations extends BaseTestCase
                 + ":" + derbyVerLibs[clientVersion] + PS+"derbynet.jar"
                 + ":" + test_jars; // Do we need test_jars here for the server?
         
-        String command = "sysinfo";
-        int port = serverPort;
-        
-        final String[] commandElements = {clientJvm
-                , " -Dderby.infolog.append=true"
-                , " -cp ", clientClassPath
-                , " " + networkServerControl
-                , " " + command
-                , " -h ", serverHost
-                , " -p ", serverPort+""
-                // , " " + securityOption
-                };
-        final String[] envElements = {"CLASS_PATH="+clientClassPath
-                , "PATH="+VM_Ids[clientVM]+PS+".."+PS+"bin" // "/../bin""
+        final String[] commandElements = {
+                "-Dderby.infolog.append=true",
+                networkServerControl,
+                "sysinfo",
+                "-h", serverHost,
+                "-p", String.valueOf(serverPort),
                 };
         
         String workingDirName = System.getProperty("user.dir");
         PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName+".sys"));
         DEBUG(combinationName+" sys:", out);
         DEBUG("user.dir: " + workingDirName, out);
-        String tmp ="";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        DEBUG("commandElements: " + tmp, out);
-        final String fullCmd = tmp;
-        tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp, out);
+        DEBUG("commandElements: " + Arrays.toString(commandElements), out);
         final File workingDir = new File(workingDirName);
         
-        DEBUG(
-              "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
-             );
+        DEBUG("proc = execJavaCmd(clientJvm, clientClassPath, " +
+              "commandElements, workingDir);");
         try
         {
-            Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+            Process proc = execJavaCmd(
+                clientJvm, clientClassPath, commandElements, workingDir);
             processOutput(proc, out);
             proc.waitFor();
         }
@@ -1312,36 +1249,24 @@ public class CompatibilityCombinations extends BaseTestCase
                 + ":" + derbyVerLibs[clientVersion] + PS+"derbynet.jar"
                 ;
         
-        final String[] commandElements = {clientJvm
-                , " -Dderby.infolog.append=true"
-                , " -cp ", clientClassPath
-                , " " + "org.apache.derby.tools.sysinfo"
-                };
-        final String[] envElements = {"CLASS_PATH="+clientClassPath
-                , "PATH="+VM_Ids[clientVM]+PS+".."+PS+"bin" // "/../bin""
+        final String[] commandElements = {
+                "-Dderby.infolog.append=true",
+                "org.apache.derby.tools.sysinfo",
                 };
         
         String workingDirName = System.getProperty("user.dir");
         PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName+".sys"));
         DEBUG(combinationName+" sys:", out);
         DEBUG("user.dir: " + workingDirName, out);
-        String tmp ="";
-        for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
-        DEBUG("commandElements: " + tmp, out);
-        final String fullCmd = tmp;
-        tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
-        DEBUG("envElements: " + tmp, out);
+        DEBUG("commandElements: " + Arrays.toString(commandElements), out);
         final File workingDir = new File(workingDirName);
         
-        DEBUG(
-                "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
-             );
+        DEBUG("proc = execJavaCmd(clientJvm, clientClassPath, " +
+              "commandElements, workingDir);");
         try
         {
-            Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+            Process proc = execJavaCmd(
+                clientJvm, clientClassPath, commandElements, workingDir);
             processOutput(proc, out);
             proc.waitFor();
         }

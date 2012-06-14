@@ -1461,7 +1461,7 @@ public class ReplicationRun extends BaseTestCase
             
             try
             {
-                Process proc = execJavaCmd(command, workingDir);
+                Process proc = execJavaCmd(null, null, command, workingDir);
                 processDEBUGOutput(debugId+"pDo ", proc);
             }
             catch (Exception ex)
