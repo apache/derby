@@ -1679,11 +1679,7 @@ public class SQLParser
 	 * @param targetName TableName for target, or the full path/method name
 	 * @param aliasSpecificInfo	 Information specific to the type of alias being created.
 	 * @param aliasType	The type of alias to create
-	 * @param delimitedIdentifier	Whether or not to treat the class name
-	 *								as a delimited identifier if trying to
-	 *								resolve it as a class alias.
-	 *
-	 * @return	A CreateAliasNode matching the given parameters
+         * @return      A CreateAliasNode matching the given parameters
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1692,8 +1688,7 @@ public class SQLParser
 		Object aliasName,
 		Object targetName,
 		Object aliasSpecificInfo,
-		char aliasType,
-		Boolean delimitedIdentifier)
+                char aliasType)
 		throws StandardException
 	{
         int nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
@@ -1729,7 +1724,6 @@ public class SQLParser
             methodName,
             aliasSpecificInfo,
             new Character(aliasType),
-            delimitedIdentifier,
             cm );
 	}
 
@@ -10656,8 +10650,7 @@ procedureDefinition() throws StandardException :
 							procedureName,
 							(String) procedureElements[ CreateAliasNode.EXTERNAL_NAME ],
 							procedureElements,
-							AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR,
-							Boolean.FALSE);
+                            AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR);
 		}
 }
 
@@ -10887,8 +10880,7 @@ functionDefinition() throws StandardException :
 							functionName,
 							(String) functionElements[CreateAliasNode.EXTERNAL_NAME],
 							functionElements,
-							AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR,
-							Boolean.FALSE);
+                            AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR);
 		}
 }
 
@@ -11037,8 +11029,7 @@ udtDefinition() throws StandardException :
 							udtName,
 							externalName,
 							null,
-							AliasInfo.ALIAS_TYPE_UDT_AS_CHAR,
-							Boolean.FALSE);
+                            AliasInfo.ALIAS_TYPE_UDT_AS_CHAR);
 		}
 }
 
@@ -11196,8 +11187,7 @@ synonymDefinition() throws StandardException :
 				synonymName,
 				targetName,
 				null,
-				AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR,
-				Boolean.FALSE
+                AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR
 			);
 	}
 }

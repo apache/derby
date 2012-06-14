@@ -21,27 +21,16 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.SQLInteger;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This is the base implementation of TypeCompiler
@@ -364,18 +353,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	{
 		return getTypeId().getTypeFormatId();
 	}
-
-    private static DataValueDescriptor gnn(DataValueFactory dvf)
-    {
-        return dvf.getNullInteger((NumberDataValue) null);
-    }
-    
-    private static DataValueDescriptor gnn2(DataValueFactory dvf)
-    {
-        return new SQLInteger();
-    }
-    
-
 }
 
 

@@ -21,17 +21,10 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.cache.CacheManager;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 
 /**
  * This class implements a Cacheable for a DataDictionary cache of
@@ -229,54 +222,54 @@ class SPSNameCacheable implements Cacheable
 		return spsd;
 	}
 
-	/**
-	 * Check the consistency of the table descriptor held by this TDCacheable
-	 * versus an uncached table descriptor.
-	 *
-	 * @param uncachedSpsd	The uncached descriptor to compare to
-	 * @param identity		The identity of the table descriptor
-	 * @param reportInconsistent	A HeaderPrintWriter to send complaints to
-	 *
-	 * @return	true if the descriptors are the same, false if they're different
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	private boolean checkConsistency(SPSDescriptor uncachedSpsd,
-										Object identity,
-										HeaderPrintWriter reportInconsistent)
-			throws StandardException
-	{
-		boolean	retval = true;
+    // /**
+    //  * Check the consistency of the table descriptor held by this TDCacheable
+    //  * versus an uncached table descriptor.
+    //  *
+    //  * @param uncachedSpsd  The uncached descriptor to compare to
+    //  * @param identity      The identity of the table descriptor
+    //  * @param reportInconsistent    A HeaderPrintWriter to send complaints to
+    //  *
+    //  * @return  true if the descriptors are the same, false if they're different
+    //  *
+    //  * @exception StandardException     Thrown on error
+    //  */
+    // private boolean checkConsistency(SPSDescriptor uncachedSpsd,
+    //                                     Object identity,
+    //                                     HeaderPrintWriter reportInconsistent)
+    //         throws StandardException
+    // {
+    //     boolean retval = true;
+    //
+    //     if (SanityManager.DEBUG)
+    //     {
+    //         if (uncachedSpsd == null)
+    //         {
+    //             reportInconsistent.println(
+    //                 "Inconsistent SPSNameCacheable: identity = " + identity +
+    //                 ", uncached table descriptor not found.");
+    //             retval = false;
+    //         }
+    //         else
+    //         {
+    //             if (
+    //                 (!uncachedSpsd.getText().equals(spsd.getText())) ||
+    //                 (!uncachedSpsd.getUsingText().equals(spsd.getUsingText())) ||
+    //                 (!uncachedSpsd.getQualifiedName().equals(spsd.getQualifiedName()))
+    //             )
+    //             {
+    //                 reportInconsistent.println(
+    //                     "Inconsistent SPSNameCacheable: identity = " + identity +
+    //                     ", cached  SPS = " +
+    //                     spsd +
+    //                     ", uncached SPS = " +
+    //                     uncachedSpsd);
 
-		if (SanityManager.DEBUG)
-		{
-			if (uncachedSpsd == null)
-			{
-				reportInconsistent.println(
-					"Inconsistent SPSNameCacheable: identity = " + identity +
-					", uncached table descriptor not found.");
-				retval = false;
-			}
-			else
-			{
-				if (
-					(!uncachedSpsd.getText().equals(spsd.getText())) ||
-					(!uncachedSpsd.getUsingText().equals(spsd.getUsingText())) ||
-					(!uncachedSpsd.getQualifiedName().equals(spsd.getQualifiedName()))
-			   	)
-				{
-					reportInconsistent.println(
-						"Inconsistent SPSNameCacheable: identity = " + identity +
-						", cached  SPS = " +
-						spsd +
-						", uncached SPS = " +
-						uncachedSpsd);
-
-					retval = false;
-				}
-			}
-		}
-
-		return retval;
-	}
+    //                 retval = false;
+    //             }
+    //         }
+    //     }
+    //
+    //     return retval;
+    // }
 }

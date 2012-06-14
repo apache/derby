@@ -21,34 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
 import org.apache.derby.iapi.reference.SQLState;
-
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.ResultDescription;
-
-import org.apache.derby.impl.sql.CursorInfo;
-
 import org.apache.derby.iapi.util.ByteArray;
 
-import java.util.Enumeration;
 
 /**
  * A ExecSPSNode is the root of a QueryTree 
@@ -313,11 +298,5 @@ public class ExecSPSNode extends StatementNode
 	public String statementToString()
 	{
 		return "EXECUTE STATEMENT";
-	}
-
-	// called after bind only
-	private final SPSDescriptor getSPSDescriptor()
-	{
-		return spsd;
 	}
 }

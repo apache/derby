@@ -23,16 +23,6 @@ package org.apache.derby.impl.sql.catalog;
 import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.cache.CacheManager;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.RowLocation;
 
 /**
  * <p>
@@ -516,24 +506,4 @@ public class SequenceGenerator
 
         return happyResult;
     }
-
-    
-    ///////////////////////////////////////////////////////////////////////////////////
-    //
-    // UTILITY MINIONS
-    //
-    ///////////////////////////////////////////////////////////////////////////////////
-
-	private static LanguageConnectionContext getLCC()
-    {
-		return (LanguageConnectionContext) 
-					ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
-	}
-
-    /** Report an unimplemented feature */
-    private StandardException unimplementedFeature()
-    {
-        return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
-    }
-
 }

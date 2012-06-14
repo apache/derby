@@ -21,80 +21,52 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.Activation;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
+import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.RestrictedVTI;
 import org.apache.derby.vti.Restriction;
 import org.apache.derby.vti.VTICosting;
 import org.apache.derby.vti.VTIEnvironment;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.info.JVMInfo;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
-
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Properties; 
-import java.util.Vector;
-import org.apache.derby.iapi.services.io.FormatableHashtable;
-
-import java.lang.reflect.Modifier;
 
 /**
  * A FromVTI represents a VTI in the FROM list of a DML statement.
@@ -123,19 +95,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 	private PredicateList restrictionList;
 
-
-	/**
-		Was a FOR UPDATE clause specified in a SELECT statement.
-	*/
-	private boolean forUpdatePresent;
-
-
-	/**
-		Was the FOR UPDATE clause empty (no columns specified).
-	*/
-	private boolean emptyForUpdate;
-
-
 	/*
 	** We don't know how expensive a virtual table will be.
 	** Let's say it has 10000 rows with a cost of 100000.
@@ -153,7 +112,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private JavaValueNode[] methodParms;
     
     private boolean controlsDeferral;
-    private boolean isInsensitive;
     private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
     private String[] projectedColumnNames; // for RestrictedVTIs
@@ -739,7 +697,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
                 catch( SQLException sqle){}
                 catch( java.lang.AbstractMethodError ame){}
                 catch( java.lang.NoSuchMethodError nsme){}
-                isInsensitive = (resultSetType == ResultSet.TYPE_SCROLL_INSENSITIVE);
 
 				if (!implementsVTICosting) {
 					ps.close();
@@ -906,8 +863,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	public void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
-		ResultColumnList	derivedRCL = resultColumns;
-
 		/* Figure out if the VTIs parameters are QUERY_INVARIANT.  If so,
 		 * then the VTI is a candidate for materialization at execution time
 		 * if it is the inner table of a join or in a subquery.
@@ -1045,7 +1000,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		ResultColumn	resultColumn = null;
 		TableName		columnsTableName;
-		TableName		exposedTableName;
 
 		columnsTableName = columnReference.getTableNameNode();
 
@@ -1808,10 +1762,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		ValueNode		 			valueNode;
 		ColumnDescriptor 			colDesc = null;
 
-
-		TableName tableName = makeTableName(td.getSchemaName(), 
-											td.getName());
-
 		/* Add all of the columns in the table */
 		rcList = (ResultColumnList) getNodeFactory().getNode(
 										C_NodeTypes.RESULT_COLUMN_LIST,
@@ -1850,35 +1800,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 	boolean isUpdatableCursor() throws StandardException {
 		return true;
-	}
-
-	protected void markUpdatableByCursor(Vector updateColumns) {
-		super.markUpdatableByCursor(updateColumns);
-		forUpdatePresent = true;
-		emptyForUpdate = ((updateColumns == null) || (updateColumns.size() == 0));
-	}
-
-	private int[] getForUpdateColumnList() {
-
-		int[] tempList = new int[getNumColumnsReturned()];
-		int offset = 0;
-
-		for (int col = 0; col < tempList.length; col++)
-		{
-			if (resultColumns.updatableByCursor(col))
-				tempList[offset++] = col + 1; // JDBC id
-		}
-
-		int[] list;
-
-		if (offset == tempList.length)
-			list = tempList;
-		else {
-			list = new int[offset];
-			System.arraycopy(tempList, 0, list, 0, offset);
-		}
-
-		return list;
 	}
 
 	/*

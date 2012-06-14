@@ -21,39 +21,29 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Vector;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.AccessPath;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.JoinStrategy;
-import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.sql.dictionary.*;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.execute.HashScanResultSet;
-
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.catalog.UUID;
-
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.HashMap;
+import org.apache.derby.impl.sql.execute.HashScanResultSet;
 
 /**
  * A FromTable represents a table in the FROM clause of a DML statement.
@@ -93,8 +83,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	protected String userSpecifiedJoinStrategy;
 
 	protected CostEstimate bestCostEstimate;
-
-	private FormatableBitSet refCols;
 
     private double perRowUsage = -1;
     
@@ -435,7 +423,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		 *		invalid value for hashLoadFactor
 		 *		invalid value for hashMaxCapacity
 		 */
-		boolean indexSpecified = false;
 		Enumeration e = tableProperties.keys();
 		while (e.hasMoreElements())
 		{
@@ -638,7 +625,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		/* also store the name of the access path; i.e index name/constraint
 		 * name if we're using an index to access the base table.
 		 */
-		ConglomerateDescriptor cd =	bestPath.getConglomerateDescriptor();
 
 		if (isBaseTable())
 		{
@@ -1001,15 +987,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	{
 		return -1.0;
 	}
-
-	private FormatableBitSet getRefCols()
-	{
-		if (refCols == null)
-			refCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable(), true, false);
-
-		return refCols;
-	}
-
 
 	/** 
 	 * Return the user specified join strategy, if any for this table.

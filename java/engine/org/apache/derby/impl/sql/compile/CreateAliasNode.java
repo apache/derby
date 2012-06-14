@@ -21,31 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.Vector;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
-import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UDTAliasInfo;
-
-import java.util.Vector;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * A CreateAliasNode represents a CREATE ALIAS statement.
@@ -76,7 +66,6 @@ public class CreateAliasNode extends DDLStatementNode
 	private String				javaClassName;
 	private String				methodName;
 	private char				aliasType; 
-	private boolean				delimitedIdentifier;
 
 	private AliasInfo aliasInfo;
 
@@ -88,10 +77,7 @@ public class CreateAliasNode extends DDLStatementNode
 	 * @param targetObject			Target name
 	 * @param methodName		    The method name
 	 * @param aliasType				The alias type
-	 * @param delimitedIdentifier	Whether or not to treat the class name
-	 *								as a delimited identifier if trying to
-	 *								resolve it as a class alias
-	 *
+     *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void init(
@@ -99,8 +85,7 @@ public class CreateAliasNode extends DDLStatementNode
 						Object targetObject,
 						Object methodName,
 						Object aliasSpecificInfo,
-						Object aliasType,
-						Object delimitedIdentifier)
+                        Object aliasType)
 		throws StandardException
 	{		
 		TableName qn = (TableName) aliasName;
@@ -122,8 +107,6 @@ public class CreateAliasNode extends DDLStatementNode
 			{
 				this.javaClassName = (String) targetObject;
 				this.methodName = (String) methodName;
-				this.delimitedIdentifier =
-								((Boolean) delimitedIdentifier).booleanValue();
 
 				//routineElements contains the description of the procedure.
 				// 
@@ -290,48 +273,6 @@ public class CreateAliasNode extends DDLStatementNode
 		}
 	}
 
-	/**
-	 * CreateAliasNode creates the RoutineAliasInfo for a user defined function
-	 * or procedure in it's init method, which is called by the parser. But at 
-	 * that time, we do not have the SchemaDescriptor ready to determine the 
-	 * collation type. Hence, at the bind time, when we do have the 
-	 * SchemaDescriptor available, we should go back and fix the 
-	 * RoutineAliasInfo to have correct collation for its character string 
-	 * parameters and also fix its return type (for functions) so as to have 
-	 * correct collation if it is returning character string type. 
-	 * 
-	 * This method here checks if the RoutineAliasInfo has any character string
-	 * types associated with it. If not, then the RoutineAliasInfo that got
-	 * created at parsing time is just fine. But if not, then we should take
-	 * care of the collation type of it's character string types. 
-	 * 
-	 * @return true if it has a parameter or return type of character string
-	 */
-	private boolean anyStringTypeDescriptor() {
-		RoutineAliasInfo rai = (RoutineAliasInfo)aliasInfo;
-		TypeDescriptor aType = rai.getReturnType();
-		TypeId compTypeId;
-		/*
-		** Try for a built in type matching the
-		** type name.  
-		*/
-		if (aType != null) //that means we are not dealing with a procedure
-		{
-			compTypeId = TypeId.getBuiltInTypeId(aType.getTypeName());
-			if (compTypeId != null && compTypeId.isStringTypeId()) 
-				return true;			
-		}
-		if (rai.getParameterCount() != 0) {
-			int paramCount = rai.getParameterCount();
-			TypeDescriptor[] paramTypes = rai.getParameterTypes();
-			for (int i = 0; i < paramCount; i++) {
-				compTypeId = TypeId.getBuiltInTypeId(paramTypes[i].getTypeName());
-				if (compTypeId != null && compTypeId.isStringTypeId()) 
-					return true;
-			}
-		}
-		return false;		
-	}
     
 	// We inherit the generate() method from DDLStatementNode.
 

@@ -21,28 +21,17 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.SQLBoolean;
-
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.sql.execute.TupleFilter;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.TupleFilter;
+import org.apache.derby.iapi.types.BooleanDataValue;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLBoolean;
 
 
 /**
@@ -154,25 +143,6 @@ public class DropDependencyFilter implements TupleFilter
 			uuidFactory = Monitor.getMonitor().getUUIDFactory();
 		}
 		return	uuidFactory;
-	}
-
-	/**
-	  *	Gets the DataValueFactory for this connection.
-	  *
-	  *	@return	the data value factory for this connection
-	  */
-	private DataValueFactory	getDataValueFactory()
-	{
-		if ( dataValueFactory == null )
-		{
-			LanguageConnectionContext	lcc = (LanguageConnectionContext) 
-					                          ContextService.getContext
-							                  (LanguageConnectionContext.CONTEXT_ID);
-
-			dataValueFactory = lcc.getDataValueFactory();
-		}
-
-		return	dataValueFactory;
 	}
 
 	/**
