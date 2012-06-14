@@ -2400,6 +2400,8 @@
 	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.engine._Suite"
 	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite"
+    todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.unitTests.junit._Suite"
     todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite"
