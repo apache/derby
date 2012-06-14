@@ -47,6 +47,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -359,8 +360,10 @@ final class StorageFactoryService implements PersistentService
                             properties.store(os, serviceName +
                                 MessageService.getTextMessage(
                                     MessageId.SERVICE_PROPERTIES_DONT_EDIT));
+                            // The eof token should match the ISO-8859-1 encoding 
+                            // of the rest of the properties file written with store.
                             BufferedWriter bOut = new BufferedWriter(
-                                    new OutputStreamWriter(os));
+                                    new OutputStreamWriter(os,"ISO-8859-1"));
                             bOut.write(SERVICE_PROPERTIES_EOF_TOKEN);
                             bOut.newLine();
                             storageFactory.sync( os, false);
@@ -520,7 +523,9 @@ final class StorageFactoryService implements PersistentService
             BufferedReader bin = null;
             String lastLine = null;
             try {
-                bin = new BufferedReader(new FileReader(spf.getPath()));
+                //service.properties always in ISO-8859-1 because written with Properties.store()
+                bin = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(spf.getPath()),"ISO-8859-1"));
                 String line;
                 while ((line = bin.readLine()) != null) {
                     if (line.trim().length() != 0) {

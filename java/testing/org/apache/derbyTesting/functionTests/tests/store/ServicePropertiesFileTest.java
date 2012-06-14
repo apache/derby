@@ -25,6 +25,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,6 +51,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class ServicePropertiesFileTest
         extends BaseJDBCTestCase {
     
+    //Service Properties File is always encoded in US-ASCII
+    // because it is written with Properties.store
+    private static final String SPF_ENCODING = "ISO-8859-1";
     private static final String LOG_A_MODE =
             "derby.storage.logArchiveMode";
     /**
@@ -175,7 +180,7 @@ public class ServicePropertiesFileTest
         // Recover and assert
         connectThenShutdown(db);
         assertNormalPresence();
-        assertEOFToken(spf);
+        assertEOFToken(spf,SPF_ENCODING);
     }
 
     /**
@@ -196,13 +201,13 @@ public class ServicePropertiesFileTest
         String db = "spfTestSPFCWB";
         copyDbAs(db);
         createSPFBackup(true);
-        removeEOFToken(spf);
+        removeEOFToken(spf, SPF_ENCODING);
         assertPresence(true, true);
 
         // Recover and assert
         connectThenShutdown(db);
         assertNormalPresence();
-        assertEOFToken(spf);
+        assertEOFToken(spf,SPF_ENCODING);
     }
 
     /**
@@ -261,10 +266,10 @@ public class ServicePropertiesFileTest
     /**
      * Asserts that the specified file ends with the end-of-file token.
      */
-    private void assertEOFToken(File file)
+    private void assertEOFToken(File file, String encoding)
             throws IOException {
-        BufferedReader in = new BufferedReader(
-                PrivilegedFileOpsForTests.getFileReader(file));
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                PrivilegedFileOpsForTests.getFileInputStream(file), encoding));
         String prev = null;
         String cur;
         while ((cur = in.readLine()) != null) {
@@ -272,23 +277,25 @@ public class ServicePropertiesFileTest
         }
         in.close();
         assertNotNull("last line is null - empty file?", prev);
-        assertTrue(prev.startsWith(END_TOKEN));
+        assertTrue("prev:" + prev +": does not equal " + END_TOKEN, 
+                prev.startsWith(END_TOKEN));
     }
 
     /**
      * Removes the end-of-file token from the specified file.
      */
-    private void removeEOFToken(File original)
+    private void removeEOFToken(File original, String encoding)
             throws IOException {
         // Move file, then rewrite by removing last line (the token).
         File renamed = new File(original.getAbsolutePath() + "-renamed");
         PrivilegedFileOpsForTests.copy(original, renamed);
         PrivilegedFileOpsForTests.delete(original);
-        BufferedReader in = new BufferedReader(
-                PrivilegedFileOpsForTests.getFileReader(renamed));
-        // Default charset should be 8859_1.
-        BufferedWriter out = new BufferedWriter(
-                PrivilegedFileOpsForTests.getFileWriter(original));
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                PrivilegedFileOpsForTests.getFileInputStream(renamed),
+                encoding));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                PrivilegedFileOpsForTests.getFileOutputStream(original),
+                encoding));
         String prev = null;
         String line;
         while ((line = in.readLine()) != null) {
@@ -316,8 +323,9 @@ public class ServicePropertiesFileTest
     private int grepForToken(String token, File file)
             throws IOException {
         int matchingLines = 0;
-        BufferedReader in = new BufferedReader(
-                PrivilegedFileOpsForTests.getFileReader(file));    
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                PrivilegedFileOpsForTests.getFileInputStream(file),
+                SPF_ENCODING));    
         String line;
         while ((line = in.readLine()) != null) {
             if (line.indexOf(token) != -1) {
@@ -350,6 +358,7 @@ public class ServicePropertiesFileTest
             PrivilegedFileOpsForTests.delete(spf);
         }
     }
+    
 
     /**
      * Connects to the specified database, then shuts it down.
