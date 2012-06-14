@@ -159,7 +159,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
     private static void runSysinfo() throws Exception {
         final String className = "org.apache.derby.tools.sysinfo";
         URL sysinfoURL = SecurityManagerSetup.getURL(className);
-        URL emmaURL = SecurityManagerSetup.getURL("com.vladium.emma.EMMAException");
+        URL emmaURL = getEmmaJar();
         URL[] urls = null;
         if(emmaURL != null) {
             urls = new URL[] { sysinfoURL, emmaURL };

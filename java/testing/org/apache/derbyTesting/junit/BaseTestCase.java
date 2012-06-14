@@ -570,6 +570,15 @@ public abstract class BaseTestCase
             // end up corrupted. Let each process have its own file to which
             // it writes coverage data.
             cmdlist.add("-Demma.coverage.out.file=" + getEmmaOutFile());
+
+            // DERBY-5810: Make sure that emma.jar is included on the
+            // classpath of the sub-process. (Only needed if a specific
+            // classpath has been specified. Otherwise, the sub-process
+            // inherits the classpath from the parent process, which
+            // already includes emma.jar.)
+            if (cp != null) {
+                cp += File.pathSeparator + getEmmaJar().getPath();
+            }
         }
 
 	    cmdlist.add("-classpath");
@@ -753,6 +762,15 @@ public abstract class BaseTestCase
     private static synchronized File getEmmaOutFile() {
         return new File(currentDirectory(),
                 "coverage-" + (++emmaCount) + ".ec");
+    }
+
+    /**
+     * Get a URL pointing to {@code emma.jar}, if the tests are running
+     * with EMMA code coverage. The method returns {@code null} if the
+     * tests are not running with EMMA.
+     */
+    public static URL getEmmaJar() {
+        return SecurityManagerSetup.getURL("com.vladium.emma.EMMAException");
     }
 
     /**
