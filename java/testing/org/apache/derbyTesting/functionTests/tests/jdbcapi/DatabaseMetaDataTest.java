@@ -4098,7 +4098,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getExportedKeys(null, schema, "REFTAB");
        assertFullResultSet(rs, expRS2, true);
 
-        rs = getExportedKeys(null, schema, "KT1");
+        rs = getExportedKeys(null, null, "KT1");
         assertFullResultSet(rs, expRS1, true);
 
         rs = getExportedKeys(null, "", "KT1");
@@ -4169,10 +4169,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"",schema,"KT1","VC10","",schema,"REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
                 {"",schema,"KT1","I","",schema,"REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
         JDBC.assertFullResultSet(rs[1], expRS, true);
+        // Test also with null for schema.
+        rs = getCrossReference(null, null, "%", null, null, "%");
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertResultSetContains(rs[1], expRS);
         
         // tablename may not be null
         try {
-            rs[0] = dmd.getCrossReference(null, schema, null, null, schema, null);
+            rs[0] = dmd.getCrossReference(null, null, null, null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -4193,7 +4197,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         // tablename may not be null
         try {
-            rs[0] = dmd.getCrossReference(null, schema, "", null, schema, null);
+            rs[0] = dmd.getCrossReference(null, null, "", null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())

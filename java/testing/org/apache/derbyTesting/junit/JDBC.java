@@ -1304,9 +1304,46 @@ public class JDBC {
     public static void assertUnorderedResultSet(
             ResultSet rs, Object[][] expectedRows, boolean asTrimmedStrings)
                 throws SQLException {
+        assertRSContains(rs, expectedRows, asTrimmedStrings, true);
+    }
 
+    /**
+     * Asserts that the {@code ResultSet} contains the rows specified by the
+     * two-dimensional array.
+     * <p>
+     * The order of the rows are ignored, and there may be more rows in the
+     * result set than in the array. All values are compared as trimmed strings.
+     *
+     * @param rs the result set to check
+     * @param expectedRows the rows that must exist in the result set
+     * @throws SQLException if accessing the result set fails
+     */
+    public static void assertResultSetContains(
+                ResultSet rs, Object[][] expectedRows)
+            throws SQLException {
+        assertRSContains(rs, expectedRows, true, false);
+    }
+
+    /**
+     * Asserts that the {@code ResultSet} contains the rows specified by the
+     * two-dimensional array.
+     *
+     * @param rs the result set to check
+     * @param expectedRows the rows that must exist in the result set
+     * @param asTrimmedStrings whether the objects should be compared as
+     *      trimmed strings
+     * @param rowCountsMustMatch whether the number of rows must be the same in
+     *      the result set and the array of expected rows
+     * @throws SQLException if accessing the result set fails
+     */
+    private static void assertRSContains(
+                ResultSet rs, Object[][] expectedRows, boolean asTrimmedStrings,
+                boolean rowCountsMustMatch)
+            throws SQLException {
         if (expectedRows.length == 0) {
-            assertEmpty(rs);
+            if (rowCountsMustMatch) {
+                assertEmpty(rs);
+            }
             return;
         }
 
@@ -1346,13 +1383,12 @@ public class JDBC {
         }
         rs.close();
 
-        Assert.assertEquals("Unexpected row count",
-                            expectedRows.length, actual.size());
+        if (rowCountsMustMatch) {
+            Assert.assertEquals("Unexpected row count",
+                                expectedRows.length, actual.size());
+        }
         Assert.assertTrue("Missing rows in ResultSet",
                           actual.containsAll(expected));
-
-        actual.removeAll(expected);
-        Assert.assertTrue("Extra rows in ResultSet", actual.isEmpty());
     }
 
     /**
