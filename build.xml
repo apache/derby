@@ -2708,10 +2708,7 @@ you should not have to do this.
 	<emma verbosity="verbose">
             <instr outfile="junit_${derby.junit.timestamp}/coverage.em" destdir="${emmabase}" merge="true" mode="fullcopy">
 	        <instrpath>
-                    <pathelement path="${derby.jar.dir}/derby.jar"/>
-                    <pathelement path="${derby.jar.dir}/derbyclient.jar"/>
-                    <pathelement path="${derby.jar.dir}/derbynet.jar"/>
-                    <pathelement path="${derby.jar.dir}/derbytools.jar"/>
+                    <pathelement path="${derby.jar.dir}/derbyrun.jar"/>
                 </instrpath>
             </instr>
 	</emma>
