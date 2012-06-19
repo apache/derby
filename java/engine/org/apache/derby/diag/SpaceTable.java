@@ -116,6 +116,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
     private SpaceInfo spaceInfo;
     private TransactionController tc;
 
+    public  SpaceTable() {}
 
     public SpaceTable(String schemaName, String tableName)
     {
@@ -134,26 +135,46 @@ public class SpaceTable extends VTITemplate implements VTICosting {
         DataDictionary dd = lcc.getDataDictionary();
 		
 		if (schemaName == null)
-			schemaName = lcc.getCurrentSchemaName();
+		{ schemaName = lcc.getCurrentSchemaName(); }
 
-        // if schemaName is null, it gets the default schema
-        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
-        TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
-        if (td == null)  // table does not exist
+        ConglomerateDescriptor[] cds;
+
+        if ( tableName != null )
         {
-            conglomTable = new ConglomInfo[0];   // make empty conglom table
-            return;
+            // if schemaName is null, it gets the default schema
+            SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+            TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
+            if (td == null)  // table does not exist
+            {
+                conglomTable = new ConglomInfo[0];   // make empty conglom table
+                return;
+            }
+            cds = td.getConglomerateDescriptors();
         }
-        ConglomerateDescriptor[] cds = td.getConglomerateDescriptors();
+        else // 0-arg constructor, no table name, get all conglomerates
+        {
+            cds = dd.getConglomerateDescriptors( null );
+        }
+        
         // initialize spaceTable
         conglomTable = new ConglomInfo[cds.length];
         for (int i = 0; i < cds.length; i++)
         {
+            String  conglomerateName;
+
+            if ( cds[i].isIndex() ) { conglomerateName = cds[i].getConglomerateName(); }
+            else if ( tableName != null ) { conglomerateName = tableName; }
+            else
+            {
+                // 0-arg constructor. need to ask data dictionary for name of table
+                conglomerateName = dd.getTableDescriptor( cds[i].getTableID() ).getName();
+            }
+            
             conglomTable[i] = new ConglomInfo
                 (
                  cds[i].getTableID().toString(),
                  cds[i].getConglomerateNumber(),
-                 cds[i].isIndex() ? cds[i].getConglomerateName() : tableName,
+                 conglomerateName,
                  cds[i].isIndex()
                  );
         }
