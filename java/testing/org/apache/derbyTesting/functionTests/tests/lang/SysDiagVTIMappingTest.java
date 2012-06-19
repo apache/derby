@@ -146,20 +146,33 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         
         st.executeUpdate("set schema APP");
 
+        // get table id
+        ResultSet   rs1 = st.executeQuery
+            (
+             "select t.tableid from sys.systables t, sys.sysschemas s\n" +
+             "where t.schemaid = s.schemaid\n" +
+             "and s.schemaname = 'APP'\n" +
+             "and t.tablename = 'T1'"
+             );
+        rs1.next();
+        String      tableID = rs1.getString( 1 );
+        rs1.close();
+
         // These should all return 1 row for APP.T1.
         
         // Two-argument direct call.
         ResultSet rs = st.executeQuery(
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP', 'T1')) x");
         
-        String [] expColNames = new String [] {
+        String [] allColNames = new String [] {
             "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
+            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING", "TABLEID" };
+        String [] expColNames = allColNames;
         JDBC.assertColumnNames(rs, expColNames);
         
         String [][] expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -168,14 +181,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             " select * from TABLE(SYSCS_DIAG.SPACE_TABLE('T1')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -188,14 +198,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(2, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-             "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -207,14 +214,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(1, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -225,9 +229,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -235,9 +236,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP', "
             + "'NOTTHERE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -245,9 +243,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from "
             + "TABLE(SYSCS_DIAG.SPACE_TABLE('SYSCS_DIAG', 'NOTTHERE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -258,9 +253,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from "
             + "TABLE(SYSCS_DIAG.SPACE_TABLE('SYSCS_DIAG', 'LOCK_TABLE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -278,14 +270,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(2, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -297,9 +286,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(1, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -309,9 +295,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "select * from TABLE(SPACE_TABLE('LOCK_TABLE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -343,14 +326,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "SELECT * FROM NEW org.apache.derby.diag.SpaceTable('T1') as x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
-        JDBC.assertColumnNames(rs, expColNames);
+        JDBC.assertColumnNames(rs, allColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -359,14 +339,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "SELECT * FROM NEW "
             + "org.apache.derby.diag.SpaceTable('APP', 'T1') as x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
-        JDBC.assertColumnNames(rs, expColNames);
+        JDBC.assertColumnNames(rs, allColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
