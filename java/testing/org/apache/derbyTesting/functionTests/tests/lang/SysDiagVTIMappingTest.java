@@ -44,6 +44,12 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
     // Name of the log file to use when testing VTIs that expect one.
     private static final String testLogFile = "sys_vti_test_derby.tstlog";
 
+    private static  final   String[]    ALL_SPACE_TABLE_COLUMNS =
+    {
+        "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
+        "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING", "TABLEID"
+    };
+
     /**
      * Public constructor required for running test as standalone JUnit.
      */
@@ -146,20 +152,30 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         
         st.executeUpdate("set schema APP");
 
+        // get table id
+        ResultSet   rs1 = st.executeQuery
+            (
+             "select t.tableid from sys.systables t, sys.sysschemas s\n" +
+             "where t.schemaid = s.schemaid\n" +
+             "and s.schemaname = 'APP'\n" +
+             "and t.tablename = 'T1'"
+             );
+        rs1.next();
+        String      tableID = rs1.getString( 1 );
+        rs1.close();
+
         // These should all return 1 row for APP.T1.
         
         // Two-argument direct call.
         ResultSet rs = st.executeQuery(
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP', 'T1')) x");
         
-        String [] expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
+        String [] expColNames = ALL_SPACE_TABLE_COLUMNS;
         JDBC.assertColumnNames(rs, expColNames);
         
         String [][] expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -168,14 +184,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             " select * from TABLE(SYSCS_DIAG.SPACE_TABLE('T1')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -188,14 +201,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(2, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-             "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -207,14 +217,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(1, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -225,9 +232,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -235,9 +239,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('APP', "
             + "'NOTTHERE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -245,9 +246,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from "
             + "TABLE(SYSCS_DIAG.SPACE_TABLE('SYSCS_DIAG', 'NOTTHERE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -258,9 +256,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "select * from "
             + "TABLE(SYSCS_DIAG.SPACE_TABLE('SYSCS_DIAG', 'LOCK_TABLE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -278,14 +273,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(2, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -297,9 +289,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         pSt.setString(1, "T1");
 
         rs = pSt.executeQuery();
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -309,9 +298,6 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "select * from TABLE(SPACE_TABLE('LOCK_TABLE')) x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
         
@@ -343,14 +329,11 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
             "SELECT * FROM NEW org.apache.derby.diag.SpaceTable('T1') as x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
-        JDBC.assertColumnNames(rs, expColNames);
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -359,16 +342,29 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "SELECT * FROM NEW "
             + "org.apache.derby.diag.SpaceTable('APP', 'T1') as x");
         
-        expColNames = new String [] {
-            "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
-            "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING"};
-        JDBC.assertColumnNames(rs, expColNames);
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
         
         expRS = new String [][]
         {
-            {"T1", "0", "1", "0", "1", "4096", "0"}
+            {"T1", "0", "1", "0", "1", "4096", "0", tableID}
         };
         
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // verify the syntax showcased in the Reference Guide section on SPACE_TABLE
+        // (after the changes introduced by DERBY-5554)
+
+        rs = st.executeQuery
+            (
+             "select t2.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        table (syscs_diag.space_table()) as t2\n" +
+             "    where systabs.tabletype = 'T'\n" +
+             "    and systabs.tableid = t2.tableid\n"
+             );
+        
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
         JDBC.assertFullResultSet(rs, expRS, true);
         
         // Now do some sanity checking to make sure SPACE_TABLE cannot be
@@ -382,6 +378,102 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         st.close();
     }
 
+    /**
+     * Test the 0-arg constructor of the SPACE_TABLE vti. See DERBY-5554.
+     */
+    public void testSpaceTable_0argConstructor() throws Exception
+    {
+        Statement st = createStatement();
+        ResultSet   rs = st.executeQuery
+            (
+             "select conglomeratename, isindex, pagesize, tableid\n" +
+             "from table(syscs_diag.space_table()) x\n" +
+             "where conglomeratename like 'SYS%'\n" +
+             "order by conglomeratename"
+             );
+
+        String[]  columnNames =
+        {
+            "CONGLOMERATENAME", "ISINDEX", "PAGESIZE", "TABLEID"
+        };
+        JDBC.assertColumnNames( rs, columnNames );
+        
+        String[][]  expRS = new String [][]
+        {
+            { "SYSALIASES", "0", "4096", "c013800d-00d7-ddbd-08ce-000a0a411400" },
+            { "SYSALIASES_INDEX1", "1", "4096", "c013800d-00d7-ddbd-08ce-000a0a411400" },
+            { "SYSALIASES_INDEX2", "1", "4096", "c013800d-00d7-ddbd-08ce-000a0a411400" },
+            { "SYSALIASES_INDEX3", "1", "4096", "c013800d-00d7-ddbd-08ce-000a0a411400" },
+            { "SYSCHECKS", "0", "4096", "80000056-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCHECKS_INDEX1", "1", "4096", "80000056-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCOLPERMS", "0", "4096", "286cc01e-0103-0e39-b8e7-00000010f010" },
+            { "SYSCOLPERMS_INDEX1", "1", "4096", "286cc01e-0103-0e39-b8e7-00000010f010" },
+            { "SYSCOLPERMS_INDEX2", "1", "4096", "286cc01e-0103-0e39-b8e7-00000010f010" },
+            { "SYSCOLPERMS_INDEX3", "1", "4096", "286cc01e-0103-0e39-b8e7-00000010f010" },
+            { "SYSCOLUMNS", "0", "4096", "8000001e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCOLUMNS_INDEX1", "1", "4096", "8000001e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCOLUMNS_INDEX2", "1", "4096", "8000001e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONGLOMERATES", "0", "4096", "80000010-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONGLOMERATES_INDEX1", "1", "4096", "80000010-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONGLOMERATES_INDEX2", "1", "4096", "80000010-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONGLOMERATES_INDEX3", "1", "4096", "80000010-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONSTRAINTS", "0", "4096", "8000002f-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONSTRAINTS_INDEX1", "1", "4096", "8000002f-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONSTRAINTS_INDEX2", "1", "4096", "8000002f-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSCONSTRAINTS_INDEX3", "1", "4096", "8000002f-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSDEPENDS", "0", "4096", "8000003e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSDEPENDS_INDEX1", "1", "4096", "8000003e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSDEPENDS_INDEX2", "1", "4096", "8000003e-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSDUMMY1", "0", "4096", "c013800d-00f8-5b70-bea3-00000019ed88" },
+            { "SYSFILES", "0", "4096", "80000000-00d3-e222-873f-000a0a0b1900" },
+            { "SYSFILES_INDEX1", "1", "4096", "80000000-00d3-e222-873f-000a0a0b1900" },
+            { "SYSFILES_INDEX2", "1", "4096", "80000000-00d3-e222-873f-000a0a0b1900" },
+            { "SYSFOREIGNKEYS", "0", "4096", "8000005b-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSFOREIGNKEYS_INDEX1", "1", "4096", "8000005b-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSFOREIGNKEYS_INDEX2", "1", "4096", "8000005b-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSKEYS", "0", "4096", "80000039-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSKEYS_INDEX1", "1", "4096", "80000039-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSPERMS", "0", "4096", "9810800c-0121-c5e1-a2f5-00000043e718" },
+            { "SYSPERMS_INDEX1", "1", "4096", "9810800c-0121-c5e1-a2f5-00000043e718" },
+            { "SYSPERMS_INDEX2", "1", "4096", "9810800c-0121-c5e1-a2f5-00000043e718" },
+            { "SYSPERMS_INDEX3", "1", "4096", "9810800c-0121-c5e1-a2f5-00000043e718" },
+            { "SYSROLES", "0", "4096", "e03f4017-0115-382c-08df-ffffe275b270" },
+            { "SYSROLES_INDEX1", "1", "4096", "e03f4017-0115-382c-08df-ffffe275b270" },
+            { "SYSROLES_INDEX2", "1", "4096", "e03f4017-0115-382c-08df-ffffe275b270" },
+            { "SYSROLES_INDEX3", "1", "4096", "e03f4017-0115-382c-08df-ffffe275b270" },
+            { "SYSROUTINEPERMS", "0", "4096", "2057c01b-0103-0e39-b8e7-00000010f010" },
+            { "SYSROUTINEPERMS_INDEX1", "1", "4096", "2057c01b-0103-0e39-b8e7-00000010f010" },
+            { "SYSROUTINEPERMS_INDEX2", "1", "4096", "2057c01b-0103-0e39-b8e7-00000010f010" },
+            { "SYSROUTINEPERMS_INDEX3", "1", "4096", "2057c01b-0103-0e39-b8e7-00000010f010" },
+            { "SYSSCHEMAS", "0", "4096", "80000022-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSSCHEMAS_INDEX1", "1", "4096", "80000022-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSSCHEMAS_INDEX2", "1", "4096", "80000022-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSSEQUENCES", "0", "4096", "9810800c-0121-c5e2-e794-00000043e718" },
+            { "SYSSEQUENCES_INDEX1", "1", "4096", "9810800c-0121-c5e2-e794-00000043e718" },
+            { "SYSSEQUENCES_INDEX2", "1", "4096", "9810800c-0121-c5e2-e794-00000043e718" },
+            { "SYSSTATEMENTS", "0", "4096", "80000000-00d1-15f7-ab70-000a0a0b1500" },
+            { "SYSSTATEMENTS_INDEX1", "1", "4096", "80000000-00d1-15f7-ab70-000a0a0b1500" },
+            { "SYSSTATEMENTS_INDEX2", "1", "4096", "80000000-00d1-15f7-ab70-000a0a0b1500" },
+            { "SYSSTATISTICS", "0", "4096", "f81e0010-00e3-6612-5a96-009e3a3b5e00" },
+            { "SYSSTATISTICS_INDEX1", "1", "4096", "f81e0010-00e3-6612-5a96-009e3a3b5e00" },
+            { "SYSTABLEPERMS", "0", "4096", "b8450018-0103-0e39-b8e7-00000010f010" },
+            { "SYSTABLEPERMS_INDEX1", "1", "4096", "b8450018-0103-0e39-b8e7-00000010f010" },
+            { "SYSTABLEPERMS_INDEX2", "1", "4096", "b8450018-0103-0e39-b8e7-00000010f010" },
+            { "SYSTABLEPERMS_INDEX3", "1", "4096", "b8450018-0103-0e39-b8e7-00000010f010" },
+            { "SYSTABLES", "0", "4096", "80000018-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSTABLES_INDEX1", "1", "4096", "80000018-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSTABLES_INDEX2", "1", "4096", "80000018-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSTRIGGERS", "0", "4096", "c013800d-00d7-c025-4809-000a0a411200" },
+            { "SYSTRIGGERS_INDEX1", "1", "4096", "c013800d-00d7-c025-4809-000a0a411200" },
+            { "SYSTRIGGERS_INDEX2", "1", "4096", "c013800d-00d7-c025-4809-000a0a411200" },
+            { "SYSTRIGGERS_INDEX3",  "1", "4096", "c013800d-00d7-c025-4809-000a0a411200" },
+            { "SYSVIEWS", "0", "4096", "8000004d-00d0-fd77-3ed8-000a0a0b1900" },
+            { "SYSVIEWS_INDEX1", "1", "4096", "8000004d-00d0-fd77-3ed8-000a0a0b1900" },
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+    }
+    
     /**
      * Just run a couple of sanity checks to makes sure the table
      * mapping for org.apache.derby.diag.StatementDuration() works

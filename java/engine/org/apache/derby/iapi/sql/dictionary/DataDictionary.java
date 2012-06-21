@@ -1399,7 +1399,8 @@ public interface DataDictionary
 	/**
 	 * Get an array of ConglomerateDescriptors given the UUID.  If it is a
 	 * heap conglomerate or an index conglomerate not shared by a duplicate
-	 * index, the size of the return array is 1.
+	 * index, the size of the return array is 1. If the uuid argument is null, then
+     * this method retrieves descriptors for all of the conglomerates in the database.
 	 *
 	 * @param uuid	The UUID
 	 *

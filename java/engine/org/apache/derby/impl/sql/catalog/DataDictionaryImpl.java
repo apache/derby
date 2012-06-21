@@ -6954,7 +6954,8 @@ public final class	DataDictionaryImpl
 	/**
 	 * Get an array of ConglomerateDescriptors given the UUID.  If it is a
 	 * heap conglomerate or an index conglomerate not shared by a duplicate
-	 * index, the size of the return array is 1.
+	 * index, the size of the return array is 1. If the uuid argument is null, then
+     * this method retrieves descriptors for all of the conglomerates in the database.
 	 *
 	 * @param uuid	The UUID
 	 *
@@ -6971,23 +6972,37 @@ public final class	DataDictionaryImpl
 		SYSCONGLOMERATESRowFactory rf;
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
-		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = getIDValueAsCHAR(uuid);
-
-		/* Set up the start/stop position for the scan */
-		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
-		keyRow.setColumn(1, UUIDStringOrderable);
-
 		List cdl = newSList();
 
-		getDescriptorViaIndex(
-						SYSCONGLOMERATESRowFactory.SYSCONGLOMERATES_INDEX1_ID,
-						keyRow,
-						(ScanQualifier [][]) null,
-						ti,
-						(TupleDescriptor) null,
-						cdl,
-						false);
+        if ( uuid != null )
+        {
+            /* Use UUIDStringOrderable in both start and stop positions for scan */
+            UUIDStringOrderable = getIDValueAsCHAR(uuid);
+
+            /* Set up the start/stop position for the scan */
+            ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+            keyRow.setColumn(1, UUIDStringOrderable);
+
+            getDescriptorViaIndex(
+                                  SYSCONGLOMERATESRowFactory.SYSCONGLOMERATES_INDEX1_ID,
+                                  keyRow,
+                                  (ScanQualifier [][]) null,
+                                  ti,
+                                  (TupleDescriptor) null,
+                                  cdl,
+                                  false);
+        }
+        else
+        {
+            getDescriptorViaHeap
+                (
+                 null,
+                 (ScanQualifier[][]) null,
+                 ti,
+                 (TupleDescriptor) null,
+                 cdl
+                 );
+        }
 
 		ConglomerateDescriptor[] cda = new ConglomerateDescriptor[cdl.size()];
 		cdl.toArray(cda);

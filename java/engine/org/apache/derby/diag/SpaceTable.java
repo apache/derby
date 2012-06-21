@@ -91,6 +91,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	</LI>
 	<LI>ESTIMSPACESAVING bigint - not nullable.  The estimated space which 
     could possibly be saved by compressing the conglomerate, in bytes.</LI>
+	<LI>TABLEID char(36) - not nullable.  The UUID of the table.</LI>
 	</UL>
 
 
@@ -115,6 +116,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
     private SpaceInfo spaceInfo;
     private TransactionController tc;
 
+    public  SpaceTable() {}
 
     public SpaceTable(String schemaName, String tableName)
     {
@@ -133,24 +135,49 @@ public class SpaceTable extends VTITemplate implements VTICosting {
         DataDictionary dd = lcc.getDataDictionary();
 		
 		if (schemaName == null)
-			schemaName = lcc.getCurrentSchemaName();
+		{ schemaName = lcc.getCurrentSchemaName(); }
 
-        // if schemaName is null, it gets the default schema
-        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
-        TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
-        if (td == null)  // table does not exist
+        ConglomerateDescriptor[] cds;
+
+        if ( tableName != null )
         {
-            conglomTable = new ConglomInfo[0];   // make empty conglom table
-            return;
+            // if schemaName is null, it gets the default schema
+            SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+            TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
+            if (td == null)  // table does not exist
+            {
+                conglomTable = new ConglomInfo[0];   // make empty conglom table
+                return;
+            }
+            cds = td.getConglomerateDescriptors();
         }
-        ConglomerateDescriptor[] cds = td.getConglomerateDescriptors();
+        else // 0-arg constructor, no table name, get all conglomerates
+        {
+            cds = dd.getConglomerateDescriptors( null );
+        }
+        
         // initialize spaceTable
         conglomTable = new ConglomInfo[cds.length];
         for (int i = 0; i < cds.length; i++)
-            conglomTable[i] = new ConglomInfo(
-                cds[i].getConglomerateNumber(),
-                cds[i].isIndex() ? cds[i].getConglomerateName() : tableName,
-                cds[i].isIndex());
+        {
+            String  conglomerateName;
+
+            if ( cds[i].isIndex() ) { conglomerateName = cds[i].getConglomerateName(); }
+            else if ( tableName != null ) { conglomerateName = tableName; }
+            else
+            {
+                // 0-arg constructor. need to ask data dictionary for name of table
+                conglomerateName = dd.getTableDescriptor( cds[i].getTableID() ).getName();
+            }
+            
+            conglomTable[i] = new ConglomInfo
+                (
+                 cds[i].getTableID().toString(),
+                 cds[i].getConglomerateNumber(),
+                 conglomerateName,
+                 cds[i].isIndex()
+                 );
+        }
     }
 
 
@@ -227,7 +254,19 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 	public String getString(int columnNumber)
 	{
 		ConglomInfo conglomInfo = conglomTable[currentRow];
-		String str = conglomInfo.getConglomName();
+        String          str = null;
+        
+		switch( columnNumber )
+		{
+		    case 1:
+			    str = conglomInfo.getConglomName();
+                break;
+    		case 8:
+			    str = conglomInfo.getTableID();
+                break;
+		    default:
+			    break;
+		}
    		wasNull = (str == null);
 		return str;
 	}
@@ -335,6 +374,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("NUMUNFILLEDPAGES",  Types.BIGINT, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("PAGESIZE",          Types.INTEGER, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("ESTIMSPACESAVING",  Types.BIGINT, false),
+		EmbedResultSetMetaData.getResultColumnDescriptor("TABLEID",  Types.CHAR, false, 36),
 	};
 	
 	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
@@ -343,16 +383,20 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 
 class ConglomInfo
 {
+    private String  tableID;
     private long conglomId;
     private String conglomName;
     private boolean isIndex;
 
-    public ConglomInfo(long conglomId, String conglomName, boolean isIndex)
+    public ConglomInfo(String tableID, long conglomId, String conglomName, boolean isIndex)
     {
+        this.tableID = tableID;
         this.conglomId = conglomId;
         this.conglomName = conglomName;
         this.isIndex = isIndex;
     }
+
+    public String getTableID()  { return tableID; }
 
     public long getConglomId()
     {
