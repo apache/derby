@@ -1124,6 +1124,7 @@ public interface SQLState {
     String LANG_NOT_TABLE_FUNCTION                                  = "42ZB4";
     String LANG_NO_COSTING_CONSTRUCTOR                              = "42ZB5";
     String LANG_TABLE_FUNCTION_NOT_ALLOWED                   = "42ZB6";
+    String LANG_BAD_TABLE_FUNCTION_PARAM_REF                 = "42ZB7";
 
 	String LANG_NO_SUCH_WINDOW                                         = "42ZC0";
 	String LANG_WINDOW_LIMIT_EXCEEDED                                  = "42ZC1";

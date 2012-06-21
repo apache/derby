@@ -1930,6 +1930,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         derby_4092();
+        derby_5779();
     }
     
     /**
@@ -1964,6 +1965,121 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "42ZB6",
              "select derby_4092(), tablename from sys.systables"
              );
+    }
+    
+    /**
+     * <p>
+     * Don't allow table functions to take arguments built out of references
+     * to other tables in the FROM list of their own query block.
+     * </p>
+     */
+    private void  derby_5779()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function lowerCaseRow( contents varchar( 32672 ) )\n" +
+             "returns table\n" +
+             "(\n" +
+             "    contents varchar( 32672 )\n" +
+             ")\n" +
+             "language java parameter style DERBY_JDBC_RESULT_SET no sql\n" +
+             "external name '" + getClass().getName() + ".lowerCaseRow'\n"
+             );
+        goodStatement
+            (
+             "create table t_5779( a int )\n"
+             );
+
+        // constant arguments are ok
+        assertResults
+            (
+             "select contents column0 from table( lowerCaseRow( 'FOO' ) ) t\n",
+             new String[][] { { "foo" } },
+             new int[] { Types.VARCHAR }
+             );
+
+        // ? parameters still ok as arguments
+        PreparedStatement   ps = prepareStatement
+            ( "select contents from table( lowerCaseRow( ? ) ) t\n" );
+        ps.setString( 1, "FOO" );
+        ResultSet   rs = ps.executeQuery();
+        assertResults
+            (
+             new int[] { Types.VARCHAR },
+             new String[] { "CONTENTS" },
+             rs,
+             new String[][] { { "foo" } }
+             );
+        rs.close();
+        ps.close();
+
+        // constant arguments in subquery are ok
+        assertResults
+            (
+             "select tablename column0\n" +
+             "from sys.systables t\n" +
+             "where lower( cast (tablename as varchar( 32672 )) ) in\n" +
+             "( select contents from table( lowerCaseRow( 'SYSCOLUMNS' ) ) s )\n",
+             new String[][] { { "SYSCOLUMNS" } },
+             new int[] { Types.VARCHAR }
+             );
+
+        // table function correlated to outer query block is ok
+        assertResults
+            (
+             "select tablename column0\n" +
+             "from sys.systables t\n" +
+             "where lower( cast (tablename as varchar( 32672 )) ) in\n" +
+             "( select contents from table( lowerCaseRow( cast (t.tablename as varchar(32672)) ) ) s )\n" +
+             "and length( tablename ) = 16\n",
+             new String[][] { { "SYSCONGLOMERATES" } },
+             new int[] { Types.VARCHAR }
+             );
+
+        // vti arguments can still reference tables in the same query block.
+        assertResults
+            (
+             "select t2.conglomeratename column0\n" +
+             "    from \n" +
+             "        sys.systables systabs,\n" +
+             "        table (syscs_diag.space_table(systabs.tablename)) as t2\n" +
+             "    where cast (systabs.tablename as varchar(10)) = 'T_5779'\n",
+             new String[][] { { "T_5779" } },
+             new int[] { Types.VARCHAR }
+             );
+
+        // uncorrelated inner query blocks still unaffected
+        assertResults
+            (
+             "select contents column0\n" +
+             "from table( lowerCaseRow( 'FOO' ) ) s\n" +
+             "where exists ( select tableid from sys.systables t )\n",
+             new String[][] { { "foo" } },
+             new int[] { Types.VARCHAR }
+             );
+
+        // should fail. table function correlated to table in FROM list
+        // of same query block. this is the new error condition introduced
+        // by DERBY-5779.
+        expectError
+            (
+             "42ZB7",
+             "select tablename, contents\n" +
+             "from sys.systables t, table( lowerCaseRow( cast (t.tablename as varchar(32672)) ) ) s\n"
+             );
+
+        // pre-existing error not affected: table function correlated
+        // to inner query block
+        expectError
+            (
+             "42X04",
+             "select contents\n" +
+             "from table( lowerCaseRow( cast( t.tablename as varchar(32672)) ) ) s\n" +
+             "where exists ( select tableid from sys.systables t )\n"
+             );
+
+        //???;
     }
     
     /**
@@ -2106,6 +2222,15 @@ public class TableFunctionTest extends BaseJDBCTestCase
     public  static  ResultSet coercionFunction()
     {
         return makeVTI( makeCoercionInputs() );
+    }
+
+    /**
+     * A table function which returns one row, containing one column, the lowercased
+     * content string.
+     */
+    public  static  ResultSet   lowerCaseRow( String contents )
+    {
+        return makeVTI( new String[][] { new String[] { contents.toLowerCase() } } );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

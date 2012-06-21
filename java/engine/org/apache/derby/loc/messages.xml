@@ -2929,6 +2929,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42ZB7</name>
+                <text>Illegal reference to column '{0}'. Table function parameters may not refer to other tables in the same query block.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42ZC0</name>
                 <text>Window '{0}' is not defined.</text>
                 <arg>windowName</arg>

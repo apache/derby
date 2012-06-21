@@ -879,6 +879,26 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		{
 			ColumnReference ref = (ColumnReference)e.nextElement();
 
+            //
+            // Table Function parameters may not reference columns from other tables in the
+            // FROM list of the current query block. See DERBY-5579.
+            //
+            if ( isDerbyStyleTableFunction )
+            {
+                int referencedTableNumber = ref.getTableNumber();
+                
+                for ( int i = 0; i < fromListParam.size(); i++ )
+                {
+                    FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
+
+                    if ( referencedTableNumber == fromTable.getTableNumber() )
+                    {
+                        throw StandardException.newException
+                            ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, ref.getSQLColumnName() );
+                    }
+                }
+            }
+
 			// Rebind the CR if the tableNumber is uninitialized
 			if (ref.getTableNumber() == -1)
 			{
