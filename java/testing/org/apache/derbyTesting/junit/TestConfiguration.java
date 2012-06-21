@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.*;
 import java.sql.Connection;
@@ -126,6 +127,8 @@ public final class TestConfiguration {
      */
     private static int uniqueDB;
 
+    /** Repository of old/previous Derby releases available on the local system. */
+    private static ReleaseRepository releaseRepository;
 
     /**
      * Default Derby test configuration object based
@@ -215,7 +218,30 @@ public final class TestConfiguration {
     public static TestConfiguration getCurrent() {
         return (TestConfiguration) CURRENT_CONFIG.get();
     }
-    
+
+    /**
+     * Returns the release repository containing old Derby releases available
+     * on the local system.
+     * <p>
+     * <strong>NOTE</strong>: It is your responsibility to keep the repository
+     * up to date. This usually involves syncing the local Subversion repository
+     * of previous Derby releases with the master repository at Apache.
+     *
+     * @see ReleaseRepository
+     */
+    public static synchronized ReleaseRepository getReleaseRepository() {
+        if (releaseRepository == null) {
+            try {
+                releaseRepository = ReleaseRepository.getInstance();
+            } catch (IOException ioe) {
+                BaseTestCase.printStackTrace(ioe);
+                Assert.fail("failed to initialize the release repository: " +
+                        ioe.getMessage());
+            }
+        }
+        return releaseRepository;
+    }
+
     /**
      * WORK IN PROGRESS
      * Set this Thread's current configuration for running tests.

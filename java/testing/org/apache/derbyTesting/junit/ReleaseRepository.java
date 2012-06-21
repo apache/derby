@@ -133,15 +133,13 @@ public class ReleaseRepository {
      *      distribution at index zero, or an empty list if there are no
      *      distributions in the repository.
      */
-    public DerbyDistribution[] getDistributions()
-            throws IOException {
+    public DerbyDistribution[] getDistributions() {
         DerbyDistribution[] clone = new DerbyDistribution[dists.size()];
         dists.toArray(clone);
         return clone;
     }
 
-    private void buildDistributionList()
-            throws IOException {
+    private void buildDistributionList() {
         if (dists != null) {
             throw new IllegalStateException("repository already initialized");
         }

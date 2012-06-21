@@ -75,13 +75,13 @@ public class DerbyDistribution
     private final String testingClasspath;
 
     /**
-     * @throws IOException if obtaining the canonical path of a file fails
+     * Derives the information for a Derby distribution.
+     *
      * @throws NullPointerException if version is {@code null}
      * @see #getInstance
      */
     private DerbyDistribution(DerbyVersion version,
-                              File[] productionJars, File[] testingJars)
-            throws IOException {
+                              File[] productionJars, File[] testingJars) {
         if (version == null) {
             throw new NullPointerException("version is null");
         }
@@ -273,13 +273,19 @@ public class DerbyDistribution
      *
      * @param jars JAR files to merge
      * @return A classpath string.
-     * @throws IOException if obtaining the canonical path of a file fails
      */
-    private static String constructJarClasspath(File[] jars)
-            throws IOException {
+    private static String constructJarClasspath(File[] jars) {
         StringBuffer sb = new StringBuffer(512);
         for (int i=0; i < jars.length; i++) {
-            sb.append(jars[i].getCanonicalPath());
+            try {
+                sb.append(jars[i].getCanonicalPath());
+            } catch (IOException ioe) {
+                // Do the next best thing; use absolute path.
+                String absPath = jars[i].getAbsolutePath();
+                sb.append(absPath);
+                BaseTestCase.println("obtaining canonical path for " +
+                        absPath + " failed: " + ioe.getMessage());
+            }
             sb.append(File.pathSeparatorChar);
         }
         if (jars.length > 0) {
@@ -299,12 +305,10 @@ public class DerbyDistribution
      * @param version the version of the distribution
      * @return A representation of the distribution, or {@code null} if
      *      the specified directory is determined to be invalid.
-     * @throws IOException if obtaining the required information fails
      * @throws IllegalArgumentException if {@code version} is {@code null}
      */
     public static DerbyDistribution getInstance(File dir,
-                                                DerbyVersion version)
-            throws IOException {
+                                                DerbyVersion version) {
         File[] productionJars = getProductionJars(dir);
         File[] testingJars = getTestingJars(dir);
         List tmpJars = new ArrayList();
