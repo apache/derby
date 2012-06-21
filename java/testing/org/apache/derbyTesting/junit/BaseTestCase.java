@@ -52,6 +52,8 @@ import java.util.ArrayList;
 public abstract class BaseTestCase
     extends TestCase {
 
+    private static final String JACOCO_AGENT_PROP = "derby.tests.jacoco.agent";
+
     protected final static String ERRORSTACKTRACEFILE = "error-stacktrace.out";
     protected final static String DEFAULT_DB_DIR      = "system";
     protected final static String DERBY_LOG           = "derby.log";
@@ -581,6 +583,14 @@ public abstract class BaseTestCase
             }
         }
 
+        if (runsWithJaCoCo()) {
+            // Property (http://www.eclemma.org/jacoco/trunk/doc/agent.html):
+            // -javaagent:[yourpath/]jacocoagent.jar=[opt1]=[val1],[opt2]=[val2]
+            String agent = getSystemProperty(JACOCO_AGENT_PROP);
+            cmdlist.add(agent + (agent.endsWith("=") ? "": ",") +
+                    "destfile=" + getJaCoCoOutFile());
+        }
+
 	    cmdlist.add("-classpath");
         cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
 
@@ -747,10 +757,31 @@ public abstract class BaseTestCase
         return getSystemProperty("java.class.path").indexOf("emma.jar") != -1;
     }
 
+    public static boolean runsWithJaCoCo() {
+        String agentProp = getSystemProperty(JACOCO_AGENT_PROP);
+        // Additional logic due to the use of a dummy property in build.xml
+        return agentProp != null && agentProp.startsWith("-javaagent");
+    }
+
     /**
-     * Counter used by {@link #getEmmaOutFile()} to produce unique file names.
+     * Counter used to produce unique file names based on process count.
+     *
+     * @see #getEmmaOutFile()
+     * @see #getJaCoCoOutFile()
      */
-    private static int emmaCount = 0;
+    private static int spawnedCount = 0;
+
+    /**
+     * Get a unique file object that can be used by sub-processes to store
+     * JaCoCo code coverage data. Each separate sub-process should have its
+     * own file in order to prevent corruption of the coverage data.
+     *
+     * @return a file to which a sub-process can write code coverage data
+     */
+    private static synchronized File getJaCoCoOutFile() {
+        return new File(currentDirectory(),
+                "jacoco.exec." + (++spawnedCount));
+    }
 
     /**
      * Get a unique file object that can be used by sub-processes to store
@@ -761,7 +792,7 @@ public abstract class BaseTestCase
      */
     private static synchronized File getEmmaOutFile() {
         return new File(currentDirectory(),
-                "coverage-" + (++emmaCount) + ".ec");
+                "coverage-" + (++spawnedCount) + ".ec");
     }
 
     /**

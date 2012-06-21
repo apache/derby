@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="buildsource" basedir=".">
+<project default="buildsource" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
 
 <!-- Set Properties -->
 
@@ -1420,19 +1420,6 @@
     <property name="derby.jar.topdir" value="${jarsdist.dir}"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
-    <loadfile srcFile="${out.base}/changenumber.properties"
-               failonerror="false"
-               property="changenumber">
-      <filterchain>
-        <striplinebreaks/>
-      </filterchain>
-    </loadfile>    
-    <condition property="changenumber" value="???">
-      <not>
-        <isset property="changenumber"/>
-      </not>
-    </condition>
-    <echo level="info" message="Revision number set to ${changenumber}."/>
   </target>
 
 
@@ -1942,13 +1929,26 @@
   </target>
 
 
-   <target name="getsvnversion">
+   <target name="getsvnversion" unless="changenumber">
      <exec executable="svnversion"
            failifexecutionfails="no"
            output="${out.base}/changenumber.properties">
        <arg value="${basedir}"/>
        <arg value="-n"/>
      </exec>
+     <loadfile srcFile="${out.base}/changenumber.properties"
+               failonerror="false"
+               property="changenumber">
+       <filterchain>
+         <striplinebreaks/>
+       </filterchain>
+     </loadfile>    
+     <condition property="changenumber" value="???">
+       <not>
+         <isset property="changenumber"/>
+       </not>
+     </condition>
+     <echo level="info" message="Revision number set to ${changenumber}."/>
    </target>
 
   <target name="cleanjars" depends="setsanityname">
@@ -2099,14 +2099,7 @@
 
      <property file="${properties.dir}/release.properties"/>
 
-      <antcall target="getsvnversion"/>
-      <loadfile srcFile="${out.base}/changenumber.properties"
-               failonerror="false"
-               property="changenumber">
-        <filterchain>
-          <striplinebreaks/>
-        </filterchain>
-      </loadfile>    
+     <antcall target="getsvnversion"/>
 
      <ant dir="${docs.root}" target="clobber"/>
 
@@ -2254,6 +2247,15 @@
     <property name="derby.junit.jvm" value="java"/>
     <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
     <mkdir dir="junit_${derby.junit.timestamp}/testout"/>
+
+    <!-- Set a dummy value for the JaCoCo agent option when running without
+         JaCoCo for code coverage. Required because ant doesn't (yet) handle
+         empty variables passed to jvmarg. See also target jacoco-enable. -->
+    <condition property="derby.tests.jacoco.agent" value="-Dderby.dummy.prop=X">
+      <not>
+        <isset property="derby.tests.jacoco.agent"/>            
+      </not>
+    </condition>
   </target>
 
   <target name="junit-init" depends="junit-init-nocp">
@@ -2378,6 +2380,8 @@
            tempdir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
+      <jvmarg value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
       <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
       <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
       <sysproperty key="emma.verbosity.level" value="silent"/>
@@ -2438,6 +2442,8 @@
                tempdir="junit_${derby.junit.timestamp}"
                errorproperty="tests.failed"
                failureproperty="tests.failed">
+          <jvmarg value="${derby.tests.jacoco.agent}"/>
+          <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
           <formatter type="xml"/>
 
     <test name="org.apache.derbyTesting.system.oe.test.OETest"
@@ -2466,6 +2472,8 @@
            tempdir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
+      <jvmarg value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
       <formatter type="xml"/>
   	 	
       <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
@@ -2478,7 +2486,6 @@
       </junit>	
   </target>
 
-	  
   <!-- low memory suite runs with 16MB heap  -->
   <target name="junit-lowmem"  depends="checkVMLevel,junit-init" if="vmLevelIsAtLeast1.5">
   	 <junit printsummary="on"
@@ -2489,6 +2496,8 @@
            tempdir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
+      <jvmarg value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
       <formatter type="xml"/>
   	 	
       <test name="org.apache.derbyTesting.functionTests.tests.memory._Suite"
@@ -2510,6 +2519,8 @@
             tempdir="junit_${derby.junit.timestamp}"
             errorproperty="tests.failed"
             failureproperty="tests.failed">
+        <jvmarg value="${derby.tests.jacoco.agent}"/>
+        <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
         <formatter type="xml"/>
 
         <test name="org.apache.derbyTesting.functionTests.tests.management._Suite"
@@ -2532,6 +2543,8 @@
             tempdir="junit_${derby.junit.timestamp}"
             errorproperty="tests.failed"
             failureproperty="tests.failed">
+        <jvmarg value="${derby.tests.jacoco.agent}"/>
+        <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
         <formatter type="xml"/>
 
         <test name="org.apache.derby.PackagePrivateTestSuite"
@@ -2561,6 +2574,8 @@
            tempdir="junit_${derby.junit.timestamp}"
            errorproperty="tests.failed"
            failureproperty="tests.failed">
+      <jvmarg value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
       <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
       <sysproperty key="emma.verbosity.level" value="silent"/>
       <formatter type="xml"/>
@@ -2578,7 +2593,7 @@
    
   <target
       name="junit-all"
-      depends="junit-core,junit-jdbc4,junit-jmx,junit-lowmem"
+      depends="junit-pptesting,junit-core,junit-jdbc4,junit-jmx,junit-lowmem"
       description="Run the JUnit tests."
   />
  
@@ -2650,7 +2665,31 @@
 	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
 	</target>
 	
-	
+<!-- =================================================================== -->
+<!--                        Old harness test targets                     -->
+<!-- =================================================================== -->
+<!-- The old harness tests are being phased out, so just borrow some     -->
+<!-- functionality from the JUnit setup.                                 -->
+
+  <target name="test-derbyall" depends="junit-init">
+    <path id="derbyall.classpath">
+      <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
+   	  <pathelement path="${derby.junit.classpath}"/>
+      <pathelement location="${javatools.dir}/junit.jar"/>
+      <pathelement location="${javatools.dir}/jakarta-oro-2.0.8.jar"/>
+    </path>
+    <echo message="Classpath used for derbyall: ${toString:derbyall.classpath}"/>
+    <mkdir dir="junit_${derby.junit.timestamp}/derbyall"/>
+    <java classname="org.apache.derbyTesting.functionTests.harness.RunSuite"
+        fork="yes" dir="junit_${derby.junit.timestamp}/derbyall">
+      <jvmarg value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="jvmflags" value="${derby.tests.jacoco.agent}"/>
+      <!-- Note the duplicate specification, don't know why it's needed. -->
+      <sysproperty key="testSpecialProps" value="noSecurityManager=true^noSecurityManager=true"/>
+      <arg value="derbyall"/>
+      <env key="CLASSPATH" value="${toString:derbyall.classpath}"/>
+    </java>
+  </target>
 
 <!-- =================================================================== -->
 <!--                         EMMA utility targets                        -->
@@ -2745,6 +2784,97 @@ you should not have to do this.
                 <html outfile="junit_${derby.junit.timestamp}/coverage.html"/>
             </report>
         </emma>
+    </target>
+
+<!-- ==================================================================== -->
+<!--                   JaCoCo code coverage targets -->
+<!-- ==================================================================== -->
+
+    <target name="jacoco-complete"
+            depends="clobber,sane,all,buildjars,jacoco-enable,test-derbyall,junit-all,jacoco-report"
+            description="Runs all the Derby tests with JaCoCo to obtain code coverage">
+    </target>
+
+    <target name="jacoco-derbyall"
+            depends="jacoco-enable,test-derbyall,jacoco-report"
+            description="Runs the derbyall test with JaCoCo to obtain code coverage">
+    </target>
+
+    <target name="jacoco-junit"
+            depends="jacoco-enable,junit-all,jacoco-report"
+            description="Runs all the Derby JUnit tests with JaCoCo to obtain code coverage">
+    </target>
+
+    <target name="jacoco-junit-single"
+            depends="jacoco-enable,junit-single,jacoco-report"
+            description="Runs the specified Derby JUnit test with JaCoCo to obtain code coverage">
+    </target>
+
+<!-- The below JaCoCo targets are helper targets and have not been written to
+     be invoked directly. -->
+
+    <target name="jacoco-report" depends="getsvnversion">
+      <jacoco:merge destfile="junit_${derby.junit.timestamp}/merged.exec">
+        <fileset dir="junit_${derby.junit.timestamp}" includes="**/jacoco.exec*"/>
+      </jacoco:merge>
+
+      <jacoco:report>
+        <executiondata>
+          <file file="junit_${derby.junit.timestamp}/merged.exec"/>
+        </executiondata>
+
+        <structure name="Apache Derby Code Coverage (revision ${changenumber}, JRE ${java.specification.version})">
+          <classfiles>
+            <fileset dir="classes">
+              <include name="org/apache/derby/**/*.class"/>
+                <!-- Ignore testing classes for now.
+                     Maybe in a separate report? -->
+                <!-- <include name="org/apache/derbyTesting/**/*.class"/> -->
+            </fileset>
+          </classfiles>
+          <sourcefiles encoding="UTF-8">
+            <fileset dir="java/client"/>
+            <fileset dir="java/drda"/>
+            <fileset dir="java/engine"/>
+            <fileset dir="java/shared"/>
+            <fileset dir="java/testing"/>
+            <fileset dir="java/tools"/>
+            <fileset dir="generated/java"/>
+          </sourcefiles>
+        </structure>
+
+        <html destdir="junit_${derby.junit.timestamp}/coverage-report"/>
+        <!-- Alternative report formats that are available.
+        <csv destfile="junit_${derby.junit.timestamp}/coverage-jacoco.csv"/>
+        <html destfile="junit_${derby.junit.timestamp}/coverage-jacoco.html.zip"/>
+        <xml destfile="junit_${derby.junit.timestamp}/coverage-jacoco.xml"/>
+        -->
+
+      </jacoco:report>
+    </target>
+
+    <target name="jacoco-enable">
+      <!-- Make sure we have the required JaCoCo files. -->
+      <fail message="missing jacocoant.jar and/or jacocoagent.jar in tools/java">
+        <condition>
+          <not>
+            <and>
+              <available file="${basedir}/tools/java/jacocoant.jar"/>
+              <available file="${basedir}/tools/java/jacocoagent.jar"/>
+            </and>
+          </not>
+        </condition>
+      </fail>
+      <!-- Add the JaCoCo targets/tasks. -->
+      <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        <classpath path="${basedir}/tools/java/jacocoant.jar"/> 
+      </taskdef>
+      <!-- Generate the property required to enable JaCoCo.
+           Exclude invalid class file loaded in DatabaseClassLoadingTest.
+      -->
+      <jacoco:agent property="derby.tests.jacoco.agent"
+        sessionid="derby-ant"
+        excludes="*/emc:org/apache/derby/exe/*"/>
     </target>
 
 <!-- ==================================================================== -->
@@ -2973,14 +3103,6 @@ you should not have to do this.
     >
       <antcall target="updatesvnclients"/>
       <antcall target="getsvnversion"/>
-
-      <loadfile srcFile="${out.base}/changenumber.properties"
-               failonerror="false"
-               property="changenumber">
-        <filterchain>
-          <striplinebreaks/>
-        </filterchain>
-      </loadfile>    
 
       <property file="${properties.dir}/release.properties"/>
 
