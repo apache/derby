@@ -122,17 +122,7 @@ public class ReleaseNotesTransformer extends Task
         "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz\">db-derby-{0}-lib-debug.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-lib-debug.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-10.6 .1.0-lib-debug.tar.gz.md5\">MD5</a>]</p>\n" +
         "\n" +
         "    <p><a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.zip\">db-derby-{0}-src.zip</a>  [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.zip.md5\">MD5  </a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz\">db-derby-{0}-src.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.md5\">MD5</a>] (Note that, due to long filenames, you will need gnu tar to unravel this tarball.)</p>\n" +
-        "\n" +
-        "    <p>There are two separate Eclipse plugins for Derby:</p>\n" +
-        "    <ul>\n" +
-        "      <li>derby_core_plugin - provides the Derby jar files to other plugins in Eclipse.</li>\n" +
-        "      <li>derby_ui_doc_plugin - provides an Apache Derby Nature in Eclipse for easy database application development.</li>\n" +
-        "    </ul>\n" +
-        "    <p> <a href=\"[preferred]/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip\">derby_core_plugin_{1}.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip.md5\">MD5</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip\">derby_ui_doc_plugin_1.1.3.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip.md5\">MD5</a>]</p>\n" +
-        "    <p>Please note: both plugins must be installed for full functionality. For information on installing and using\n" +
-        "       the Derby plugins for Eclipse, please see the <a href=\"http://db.apache.org/derby/integrate/plugin_howto.html\">Using the 10 Core and 1.1 UI Derby plug-ins</a> p  age.</p>\n";
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz\">db-derby-{0}-src.tar.gz</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/db-derby-{0}-src.tar.gz.md5\">MD5</a>] (Note that, due to long filenames, you will need gnu tar to unravel this tarball.)</p>\n";
     
 
 
