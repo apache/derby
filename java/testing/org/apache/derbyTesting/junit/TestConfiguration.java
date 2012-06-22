@@ -104,7 +104,7 @@ public final class TestConfiguration {
 
     private FileOutputStream serverOutput;
 		
-    /** Sleep for 500 ms before pinging the network server (again) */
+    /** Sleep for 1000 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 1000;
             
     /**
