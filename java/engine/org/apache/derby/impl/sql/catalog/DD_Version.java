@@ -495,7 +495,7 @@ public	class DD_Version implements	Formatable
             bootingDictionary.upgradeSYSROUTINEPERMS_10_6( tc );
         }
         
-        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_9)
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_8)
         {
             // On ugrade from versions before 10.9, create system procedures
             // added in 10.9.
@@ -511,6 +511,13 @@ public	class DD_Version implements	Formatable
             // path delimiters. ALso, we now use no schema subdirectories since
             // there is no chance of name collision with the UUID.
             bootingDictionary.upgradeJarStorage(tc);
+        }
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_9)
+        {
+            // On ugrade from versions before 10.10, create system procedures
+            // added in 10.10.
+            bootingDictionary.create_10_10_system_procedures( tc, newlyCreatedRoutines );
         }
 
         // Grant PUBLIC access to some system routines

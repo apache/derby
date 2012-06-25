@@ -11486,6 +11486,8 @@ public final class	DataDictionaryImpl
         create_10_6_system_procedures(tc, newlyCreatedRoutines );
         // add 10.9 specific system procedures
         create_10_9_system_procedures( tc, newlyCreatedRoutines );
+        // add 10.10 specific system procedures
+        create_10_10_system_procedures( tc, newlyCreatedRoutines );
     }
 
     /**
@@ -13283,6 +13285,21 @@ public final class	DataDictionaryImpl
                 tc);
         }
         
+    }
+
+    /**
+     * <p>
+     * Create system procedures that are part of the SYSCS_UTIL schema, added in version 10.10.
+     * </p>
+     *
+     * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
+     **/
+    void create_10_10_system_procedures( TransactionController   tc, HashSet newlyCreatedRoutines )
+        throws StandardException
+    {
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
         // void SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
         {               
             createSystemProcedureOrFunction(
@@ -13298,6 +13315,7 @@ public final class	DataDictionaryImpl
                 newlyCreatedRoutines,
                 tc);
         }
+        
     }
 
 
