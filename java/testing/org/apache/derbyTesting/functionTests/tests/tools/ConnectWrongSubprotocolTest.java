@@ -86,7 +86,7 @@ public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
     private String runIjScript(String ijScript, boolean useSystemProperties) 
             throws UnsupportedEncodingException, SQLException {
         ByteArrayInputStream bais = 
-        		new ByteArrayInputStream(ijScript.getBytes());
+        		new ByteArrayInputStream(ijScript.getBytes("US-ASCII"));
         ByteArrayOutputStream baos = new ByteArrayOutputStream(10 * 1024);
         Connection conn = getConnection();
         
@@ -101,6 +101,6 @@ public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
         if (!conn.isClosed() && !conn.getAutoCommit())
             conn.commit();
 
-        return new String(baos.toByteArray());
+        return new String(baos.toByteArray(), "US-ASCII");
     }
 }
