@@ -499,7 +499,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private boolean    parseArgs( String[] args )
         throws Exception
     {
-        if ( (args == null) || (args.length != 4) ) { return false; }
+        if ( (args == null) || (args.length != 3) ) { return false; }
 
         int     idx = 0;
 
