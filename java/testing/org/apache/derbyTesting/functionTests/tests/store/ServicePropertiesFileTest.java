@@ -51,7 +51,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class ServicePropertiesFileTest
         extends BaseJDBCTestCase {
     
-    //Service Properties File is always encoded in US-ASCII
+    //DERBY-5816
+    //Service Properties File is always encoded in ISO-8859-1
     // because it is written with Properties.store
     private static final String SPF_ENCODING = "ISO-8859-1";
     private static final String LOG_A_MODE =
