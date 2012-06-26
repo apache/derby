@@ -549,6 +549,10 @@ public abstract class BaseTestCase
     public static Process execJavaCmd(
         String jvm, String cp, String[] cmd, final File dir)
             throws IOException {
+
+        // Is this an invocation of a jar file with java -jar ...?
+        final boolean isJarInvocation = cmd.length > 0 && cmd[0].equals("-jar");
+
 	    ArrayList cmdlist = new ArrayList();
         cmdlist.add(jvm == null ? getJavaExecutableName() : jvm);
 	    if (isJ9Platform())
@@ -581,6 +585,13 @@ public abstract class BaseTestCase
             if (cp != null) {
                 cp += File.pathSeparator + getEmmaJar().getPath();
             }
+
+            // DERBY-5821: When starting a sub-process with java -jar, the
+            // classpath argument will be ignored, so we cannot add emma.jar
+            // that way. Add it to the boot classpath instead.
+            if (isJarInvocation) {
+                cmdlist.add("-Xbootclasspath/a:" + getEmmaJar().getPath());
+            }
         }
 
         if (runsWithJaCoCo()) {
@@ -591,8 +602,16 @@ public abstract class BaseTestCase
                     "destfile=" + getJaCoCoOutFile());
         }
 
-	    cmdlist.add("-classpath");
-        cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
+        if (isJarInvocation) {
+            // If -jar is specified, the Java command will ignore the user's
+            // classpath, so don't set it. Fail if an explicit classpath has
+            // been set in addition to -jar, as that's probably a mistake in
+            // the calling code.
+            assertNull("Both -jar and classpath specified", cp);
+        } else {
+            cmdlist.add("-classpath");
+            cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
+        }
 
 	    for (int i =0; i < cmd.length;i++) {
 	        cmdlist.add(cmd[i]);

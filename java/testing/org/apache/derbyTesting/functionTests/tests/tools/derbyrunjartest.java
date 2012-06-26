@@ -21,97 +21,128 @@
 
 package org.apache.derbyTesting.functionTests.tests.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.Process;
-import java.lang.Runtime;
-import java.lang.SecurityException;
 import java.net.URL;
-import java.security.CodeSource;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Arrays;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
-import org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver;
-import org.apache.derbyTesting.functionTests.harness.jvm;
+/**
+ * Basic tests for exercising the {@code org.apache.derby.iapi.tools.run}
+ * class found in {@code derbyrun.jar}.
+ */
+public class derbyrunjartest extends BaseTestCase {
 
-public class derbyrunjartest {
+    public derbyrunjartest(String name) {
+        super(name);
+    }
 
-    public static void main(String[] args) throws Exception
-    {
-        // get location of run class.
-        CodeSource cs = null;
-        try {
-            cs = org.apache.derby.iapi.tools.run.class.getProtectionDomain().getCodeSource();
-        } catch (SecurityException se) {
-            System.out.println("Security exception: " + se.getMessage());
-        }
- 
-        URL result = cs.getLocation();
-        jvm jvm = null;
+    public static Test suite() {
+        Class cl = derbyrunjartest.class;
+        return new SecurityManagerSetup(
+                new TestSuite(cl),
+                cl.getName().replace('.', '/') + ".policy",
+                true);
+    }
+
+    /**
+     * Invoke {@code org.apache.derby.iapi.tools.run} in a sub-process.
+     *
+     * @param toolArgs the arguments to pass to derbyrun.jar
+     * @param output expected lines of output
+     * @param exitCode expected exit code for the command
+     */
+    private void runtool(String[] toolArgs, String[] output, int exitCode)
+            throws Exception {
+        String runClassName = org.apache.derby.iapi.tools.run.class.getName();
+        URL result = SecurityManagerSetup.getURL(runClassName);
         String derbyrunloc = null;
 
         if (result.toString().endsWith(".jar")) {
             derbyrunloc = result.toString().substring(5);
             if (System.getProperty("os.name").startsWith("Windows"))
               derbyrunloc = derbyrunloc.substring(1);
-            jvm = jvm.getJvm("currentjvm"); // ensure compatibility
         }
 
-        String[][] testCommands = new String[][] {
-            {"ij", "--help"},
-            {"sysinfo", "-cp", "help"},
-            {"dblook"},
-            {"server"},
+        ArrayList cmdArgs = new ArrayList();
+
+        // Invoke java -jar derbyrun.jar if we are running from jars, or
+        // with fully qualified class name if we are running from classes.
+        if (derbyrunloc == null) {
+            cmdArgs.add(runClassName);
+        } else {
+            cmdArgs.add("-jar");
+            cmdArgs.add(derbyrunloc);
+        }
+
+        cmdArgs.addAll(Arrays.asList(toolArgs));
+
+        String[] cmd = (String[]) cmdArgs.toArray(new String[cmdArgs.size()]);
+        assertExecJavaCmdAsExpected(output, cmd, exitCode);
+    }
+
+    public void testIJ() throws Exception {
+        String[] cmd = { "ij", "--help" };
+        String[] output = {
+            "Usage: java org.apache.derby.tools.ij [-p propertyfile] [inputfile]"
         };
-
-        for (int i = 0; i < testCommands.length; i++) {
-            runtool(jvm, derbyrunloc, testCommands[i]);
-        }
+        runtool(cmd, output, 0);
     }
 
-    private static void runtool(jvm jvm, String loc, String[] args)
-        throws IOException
-    {
-        System.out.println(concatenate(args) + ':');
-
-        if (jvm == null) {
-            org.apache.derby.iapi.tools.run.main(args);
-            return;
-        }
-
-        Vector cmd = jvm.getCommandLine();
-        cmd.addElement("-jar");
-        cmd.addElement(loc);
-        for (int i=0; i < args.length; i++) {
-            cmd.addElement(args[i]);
-        }
-        String command = concatenate((String[]) cmd.toArray(new String[0]));
-
-        Process pr = null;
-
-        try
-        {
-            pr = Runtime.getRuntime().exec(command);
-            BackgroundStreamSaver saver = 
-                        new BackgroundStreamSaver(pr.getInputStream(), System.out);
-            saver.finish();
-            pr.waitFor();
-            pr.destroy();
-        } catch(Throwable t) {
-            System.out.println("Process exception: " + t.getMessage());
-            if (pr != null)
-            {
-                pr.destroy();
-                pr = null;
-            }
-        }
+    public void testSysinfo() throws Exception {
+        String[] cmd = { "sysinfo", "-cp", "help" };
+        String[] output = {
+            "USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [ anyClass.class ] ]"
+        };
+        runtool(cmd, output, 0);
     }
 
-    private static String concatenate(String[] args) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < args.length; i++) {
-            buf.append(args[i]);
-            if (i + 1 < args.length) buf.append(' ');
-        }
-        return buf.toString();
+    public void testDblook() throws Exception {
+        String[] cmd = { "dblook" };
+        String[] output = {
+            " USAGE:",
+            " java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]",
+            " 	where the source URL is the full URL, including the connection protocol",
+            " 	and any connection attributes that might apply.  For example, use",
+            " 	options include:",
+            " 	-z <schemaName> to specify a schema to which the DDL generation",
+            " 	 should be limited.  Only database objects with that schema will have",
+            " 	 their DDL generated.",
+            " 	-t <tableOne> <tableTwo> ... to specify a list of tables for which",
+            " 	 the DDL will be generated; any tables not in the list will be ignored.",
+            " 	-td <value> to specify what should be appended to the end",
+            " 	 of each DDL statement.",
+            "		This defaults to ';'.",
+            " 	-noview to prevent the generation of DDL for views.",
+            " 	-append to keep from overwriting the output files.",
+            " 	-verbose to have error messages printed to the console (in addition",
+            " 	 to the log file).  If not specified, errors will only be printed to the",
+            " 	 log file.",
+            " 	-o <filename> to specify the file name to which the generated DDL",
+            " 	 will be written.",
+            " 		If not specified, default is the console.",
+        };
+        runtool(cmd, output, 0);
+    }
+
+    public void testServer() throws Exception {
+        String[] cmd = { "server" };
+        String[] output = {
+            "Usage: NetworkServerControl <commands> ",
+            "Commands:",
+            "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
+            "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
+            "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+        };
+        runtool(cmd, output, 1);
     }
 }

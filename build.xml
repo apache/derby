@@ -2752,7 +2752,7 @@ you should not have to do this.
             </instr>
 	</emma>
         <!-- Change the classpath used for junit tests to use the jars instrumented by EMMA -->
-        <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derbyclient.jar:${instrumented.jars}/derbynet.jar:${instrumented.jars}/derbytools.jar" />
+        <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derbyrun.jar"/>
     </target>
     
     <target name="emma-all" depends="emma-instrumentation,junit-all,emma-report">

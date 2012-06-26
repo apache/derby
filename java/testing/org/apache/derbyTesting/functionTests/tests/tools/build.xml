@@ -135,7 +135,7 @@
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/tools">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools" 
-        includes="*.jar,*.sql,*.properties"/>  
+        includes="*.jar,*.sql,*.properties,*.policy"/>
     </copy>
   </target> 
 
