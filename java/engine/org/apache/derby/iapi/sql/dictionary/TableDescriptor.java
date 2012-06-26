@@ -142,7 +142,26 @@ public class TableDescriptor extends TupleDescriptor
 	String							tableName;
 	UUID							oid;
 	int								tableType;
-	long							heapConglomNumber = -1;
+
+    /**
+     * <p>
+     * The id of the heap conglomerate for the table described by this
+     * instance. The value -1 means it's uninitialized, in which case it
+     * will be initialized lazily when {@link #getHeapConglomerateId()} is
+     * called.
+     * </p>
+     *
+     * <p>
+     * It is declared volatile to ensure that concurrent callers of
+     * {@code getHeapConglomerateId()} while {@code heapConglomNumber} is
+     * uninitialized, will either see the value -1 or the fully initialized
+     * conglomerate number, and never see a partially initialized value
+     * (as was the case in DERBY-5358 because reads/writes of a long field are
+     * not guaranteed to be atomic unless the field is declared volatile).
+     * </p>
+     */
+    private volatile long           heapConglomNumber = -1;
+
     ColumnDescriptorList            columnDescriptorList;
 	ConglomerateDescriptorList		conglomerateDescriptorList;
 	ConstraintDescriptorList		constraintDescriptorList;
@@ -336,8 +355,6 @@ public class TableDescriptor extends TupleDescriptor
 	public long getHeapConglomerateId()
 			throws StandardException
 	{
-		DataDictionary dd = getDataDictionary();
-
 		ConglomerateDescriptor cd = null;
 
 		/* If we've already cached the heap conglomerate number, then
