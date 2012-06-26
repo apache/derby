@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -511,5 +512,61 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
                
         rollback();
         st.close();
+    }
+
+    public void testDerby118_and_5829 () throws SQLException {
+        Statement st = createStatement();
+
+        /*
+         * Lift restriction that even VARCHAR can max have 254 chars in
+         * DEFAULT, another DB2ism.
+         */
+        String sb = Formatters.repeatChar("-", 400);
+
+        st.executeUpdate(
+            "create table tabLongVarchar("
+            + "    c varchar(400) default " + "'" + sb + "')");
+        st.executeUpdate(
+            "insert into  tabLongVarchar" +
+            "    values default");
+
+        ResultSet rs = st.executeQuery("select c from tabLongVarchar");
+        JDBC.assertSingleValueResultSet(rs, sb);
+
+        // Negative test: Make sure we still flag too long string for CHAR
+        // (length > 254).  Note that the check will now only happen at insert
+        // time, as other truncation checks do.
+        st.executeUpdate(
+            "create table tabLongChar("
+            + "    c char(254) default " + "'" + sb + "')");
+        try {
+            st.executeUpdate(
+                "insert into tabLongChar values default");
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22001", e); // truncate
+        }
+
+        // Interestingly, a float literal for SMALLINT is not disabled for
+        // assignment to integer types.  This is asymmetric, as it is forbidden
+        // for the other integer types, as per the standard, btw.
+        // Remove this test if we forbid this, or add tests for the other
+        // integer types if we decide to allow it, cf discussions on
+        // DERBY-118. For now, we just document this weirdness in this test.
+        st.executeUpdate(
+            "create table tabSmallIntFloat(si smallint default 3.14)");
+        st.executeUpdate(
+            "insert into  tabSmallIntFloat values default");
+        rs = st.executeQuery("select si from tabSmallIntFloat");
+        JDBC.assertSingleValueResultSet(rs, "3");
+
+        // Compare with INT, which fails:
+        try {
+            st.executeUpdate(
+                "create table tabIntFloat(i int default 3.14)");
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("42894", e);
+        }
     }
 }

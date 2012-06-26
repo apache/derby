@@ -21,41 +21,27 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.reference.Limits;
+import java.sql.Types;
+import java.util.Vector;
+import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.ProviderList;
-import org.apache.derby.iapi.sql.depend.ProviderInfo;
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.impl.sql.execute.ColumnInfo;
-
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.DefaultInfo;
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.catalog.types.DefaultInfoImpl;
-
-import java.util.Vector;
-import java.sql.Types;
 
 /**
  * A ColumnDefinitionNode represents a column definition in a DDL statement.
@@ -706,9 +692,6 @@ public class ColumnDefinitionNode extends TableElementNode
 	throws StandardException
 	{
 
-		if (defaultText.length() > Limits.DB2_CHAR_MAXWIDTH)
-		// DB2 spec says this isn't allowed.
-			return false;
 
 		/* We can use info about the way the parser works
 		 * to guide this process a little (see the getNumericNode()

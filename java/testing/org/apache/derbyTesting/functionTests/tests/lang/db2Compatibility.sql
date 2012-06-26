@@ -455,8 +455,6 @@ create table deftest2 (i int default 3+4);
 create table deftest3 (i int default 1.234);
 -- decimal value with too much precision.
 create table deftest4 (d decimal(5,2) default 1.2234);
--- char constant longer than 254.
-create table deftest5 (vc varchar(300) default 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
 -- function calls (built-in and other) should fail with error 42894 (NOT with 42X01), to match DB2.
 create table t1 (i int default abs(0));
 create table t1 (i int default someFunc('hi'));
