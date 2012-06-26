@@ -21,8 +21,10 @@
 
 package org.apache.derby.iapi.util;
 
-import java.util.Properties;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Properties;
 
 /**
 	A properties object that links two independent
@@ -31,7 +33,7 @@ import java.util.Enumeration;
 	second. But any put() calls are always made directly to
 	the write object.
 
-    Only the put(), keys() and getProperty() methods are supported
+    Only the put(), propertyNames() and getProperty() methods are supported
 	by this class.
 */
 
@@ -60,23 +62,21 @@ public final class DoubleProperties extends Properties {
 	}
 
 	public Enumeration propertyNames() {
-
-		Properties p = new Properties();
-
-		if (write != null) {
-
-			for (Enumeration e = write.propertyNames(); e.hasMoreElements(); ) {
-				String key = (String) e.nextElement();
-				p.put(key, write.getProperty(key));
-			}
-		}
-
-		if (read != null) {
-			for (Enumeration e = read.propertyNames(); e.hasMoreElements(); ) {
-				String key = (String) e.nextElement();
-				p.put(key, read.getProperty(key));
-			}
-		}
-		return p.keys();
+        HashSet names = new HashSet();
+        addAllNames(write, names);
+        addAllNames(read, names);
+        return Collections.enumeration(names);
 	}
+
+    /**
+     * Add all property names in the Properties object {@code src} to the
+     * HashSet {@code dest}.
+     */
+    private static void addAllNames(Properties src, HashSet dest) {
+        if (src != null) {
+            for (Enumeration e = src.propertyNames(); e.hasMoreElements(); ) {
+                dest.add(e.nextElement());
+            }
+        }
+    }
 }
