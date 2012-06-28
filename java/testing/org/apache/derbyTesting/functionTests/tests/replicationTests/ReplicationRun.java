@@ -1773,13 +1773,13 @@ public class ReplicationRun extends BaseTestCase
         if ( host.equalsIgnoreCase("localhost") || localEnv )
         {
             if (PrivilegedFileOpsForTests.exists(masterHome)) {
-                BaseJDBCTestCase.assertDirectoryDeleted(masterHome);
+                BaseTestCase.assertDirectoryDeleted(masterHome);
             }
             util.mkDirs(masterHome.getPath()); // Create the directory
             
             // Ditto for slave:
             if (PrivilegedFileOpsForTests.exists(slaveHome)) {
-                BaseJDBCTestCase.assertDirectoryDeleted(slaveHome);
+                BaseTestCase.assertDirectoryDeleted(slaveHome);
             }
             util.mkDirs(slaveHome.getPath()); // Create the directory
             

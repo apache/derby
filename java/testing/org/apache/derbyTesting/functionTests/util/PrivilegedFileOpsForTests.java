@@ -372,7 +372,7 @@ public class PrivilegedFileOpsForTests {
      *
      * @param dir the directory to delete (including subdirectories)
      * @return A list of files which couldn't be deleted (may be empty).
-     * @see org.apache.derbyTesting.junit.BaseJDBCTestCase#assertDirectoryDeleted
+     * @see org.apache.derbyTesting.junit.BaseTestCase#assertDirectoryDeleted
      */
     public static File[] persistentRecursiveDelete(final File dir)
             throws FileNotFoundException {

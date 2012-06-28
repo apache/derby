@@ -57,6 +57,7 @@ public abstract class BaseTestCase
     protected final static String ERRORSTACKTRACEFILE = "error-stacktrace.out";
     protected final static String DEFAULT_DB_DIR      = "system";
     protected final static String DERBY_LOG           = "derby.log";
+
     /**
      * No argument constructor made private to enforce naming of test cases.
      * According to JUnit documentation, this constructor is provided for
@@ -947,6 +948,78 @@ public abstract class BaseTestCase
         output += "<STDERR>" + wrapper.getFullServerError() +
                 "<END STDERR>\n";
         return output;
+    }
+
+    /**
+     * Deletes the specified directory and all its files and subdirectories.
+     * <p>
+     * This method will attempt to delete all the files inside the root
+     * directory, even if one of the delete operations fails.
+     * <p>
+     * After having tried to delete all files once, any remaining files will be
+     * attempted deleted again after a pause. This is repeated, resulting
+     * in multiple failed delete attempts for any single file before the method
+     * gives up and raises a failure.
+     * <p>
+     * The approach above will mask any slowness involved in releasing file
+     * handles, but should fail if a file handle actually isn't released on a
+     * system that doesn't allow deletes on files with open handles (i.e.
+     * Windows). It will also mask slowness caused by the JVM, the file system,
+     * or the operation system.
+     *
+     * @param dir the root to start deleting from (root will also be deleted)
+     */
+    public static void assertDirectoryDeleted(File dir) {
+        File[] fl = null;
+        int attempts = 0;
+        while (attempts < 4) {
+            try {
+                Thread.sleep(attempts * 2000);
+            } catch (InterruptedException ie) {
+                // Ignore
+            }
+            try {
+                fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
+                attempts++;
+            } catch (FileNotFoundException fnfe) {
+                if (attempts == 0) {
+                    fail("directory doesn't exist: " +
+                            PrivilegedFileOpsForTests.getAbsolutePath(dir));
+                } else  {
+                    // In the previous iteration we saw remaining files, but
+                    // now the root directory is gone. Not what we expected...
+                    System.out.println("<assertDirectoryDeleted> root " +
+                            "directory unexpectedly gone - delayed, " +
+                            "external or concurrent delete?");
+                    return;
+                }
+            }
+            if (fl.length == 0) {
+                return;
+            } else {
+                // Print the list of remaining files to stdout for debugging.
+                StringBuffer sb = new StringBuffer();
+                sb.append("<assertDirectoryDeleted> attempt ").append(attempts).
+                    append(" left ").append(fl.length).
+                    append(" files/dirs behind:");
+                for (int i = 0; i < fl.length; i++) {
+                    sb.append(' ').append(i).append('=').append(fl[i]);
+                }
+                System.out.println(sb);
+            }
+        }
+        // If we failed to delete some of the files, list them and obtain some
+        // information about each file.
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < fl.length; i++) {
+            File f = fl[i];
+            sb.append(PrivilegedFileOpsForTests.getAbsolutePath(f)).append(' ').
+                append(PrivilegedFileOpsForTests.getFileInfo(f)).append(", ");
+        }
+        sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1);
+        fail("Failed to delete " + fl.length + " files (root=" +
+                PrivilegedFileOpsForTests.getAbsolutePath(dir) + "): " +
+                sb.toString());
     }
 
     /**

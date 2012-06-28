@@ -117,7 +117,7 @@ class DropDatabaseSetup extends BaseTestSetup {
         if (!dir.exists())
             return;
 
-        BaseJDBCTestCase.assertDirectoryDeleted(dir);
+        BaseTestCase.assertDirectoryDeleted(dir);
     }
 
     /**
