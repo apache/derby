@@ -1,0 +1,68 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to you under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Package documentation for
+            org.apache.derbyTesting.functionTests.tests.compatibility</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <p>Classes used to test the compatibility between different versions
+        of Derby clients and Derby servers. The main entry point is the
+        <tt>_Suite</tt> class, with the other suites as alternatives giving
+        more test coverage in terms of the number of combinations tested.</p>
+
+        <p>The MATS version of the compatibility test should be run as part of
+        <tt>suites.All</tt>. It is your responsibility to keep the local
+        release repository up to date (the default location is
+        <tt>$HOME/.derbyTestingReleases/</tt>, this can be overridden by using
+        <tt>derbyTesting.oldReleasePath</tt>).</p>
+
+        <p>For non-default runs, the following steps should be considered:</p>
+        <ol> <li>Update the release repository (typically a <tt>svn up</tt>)</li>
+             <li>If you want to run the LOB tests, set
+                <tt>derby.tests.compat.testLOBs</tt> to <tt>true</tt>. Note
+                that this will add around five minutes of runtime to each
+                combination</li>
+             <li>If you want to include only a specific set of releases, set
+               <tt>derby.tests.compat.includeReleases</tt>. The format is
+               <tt>M.m.f.p[,M.m.f.p]*</tt>, for instance
+               <tt>10.9.1.0,10.8.2.2</tt>.</li>
+
+             <li>If you want to exclude certain releases, set
+               <tt>derby.tests.compat.excludeReleases</tt>. The format is the
+               same as for the include option above.</li>
+             <li>Run the suite that best fits your needs; MATS, dev full, old,
+               or old full.</li>
+        </ol>
+
+        <p>Note that the set of combinations computed depends on the old Derby
+        releases that are available through the release repository. For this
+        reason it is important to keep the local repository updated. Once
+        initialized, i.e <tt>svn co  http://svn.apache.org/repos/asf/db/derby/jars
+        $HOME/.derbyTestingReleases</tt>, you only have to update it each time
+        a new Derby release comes out.</p>
+
+        <p>Testing the compatibility between a given client driver and a given
+        server is best done by running those two components in separate
+        processes. This simplifies handling multiple versions of the code base,
+        but introduces some challenges for properly handling the external
+        processes.</p>
+
+    </body>
+</html>

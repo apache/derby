@@ -1579,6 +1579,10 @@ public final class TestConfiguration {
         return hostName;
     }
 
+    public static int getBasePort() {
+        return basePort;
+    }
+
     /**
      * Get port number for network server.
      * 
