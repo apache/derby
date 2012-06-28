@@ -62,8 +62,8 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/compatibility"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/compatibility"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/compatibility"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/> 
