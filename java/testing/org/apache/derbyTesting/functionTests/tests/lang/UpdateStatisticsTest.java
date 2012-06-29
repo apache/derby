@@ -108,6 +108,100 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         assertEquals(initialStatsCount, stats.getStats().length);
     }
 
+    //DERBY-5750(Sending an empty string as table name to compress table 
+    // procedure or empty string as index name to update statistics procedure 
+    // makes the parser throw an exception.)
+    //
+    //No table name will result in exception since Derby doesn't know table
+    // whose statistics it needs to be update/drop
+    public void testStatisticsProcsWithEmptyParamsDerby5750() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table DERBY5750_t1 (c11 int)");
+        s.executeUpdate("CREATE INDEX DERBY5750_I1 ON DERBY5750_t1(c11)");
+        //Following statements will give exceptions since there is no schema
+        // named empty string
+        assertStatementError(
+                "42Y07", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'','DERBY5750_T1','DERBY5750_I1')");
+        assertStatementError(
+                "42Y07", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'','DERBY5750_T1','DERBY5750_I1')");
+        assertStatementError(
+                "42Y07", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'','','DERBY5750_I1')");
+        assertStatementError(
+                "42Y07", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'','','DERBY5750_I1')");
+
+        //null schema name will translate to current schema
+        s.execute("call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "null,'DERBY5750_T1','DERBY5750_I1')");
+        s.execute("call syscs_util.SYSCS_DROP_STATISTICS(" +
+                "null,'DERBY5750_T1','DERBY5750_I1')");
+        
+        //Following statements will give exceptions since there is no table  
+        // named empty string
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "null,'','DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "null,'','DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'APP','','DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'APP','','DERBY5750_I1')");
+
+        //Following statements will give exceptions since table name can't 
+        // be null
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "null,null,'DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "null,null,'DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'APP',null,'DERBY5750_I1')");
+        assertStatementError(
+                "42X05", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'APP',null,'DERBY5750_I1')");
+
+        //Provide all the 3 params, schema, table and index name
+        s.execute("call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'APP','DERBY5750_T1','DERBY5750_I1')");
+        s.execute("call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'APP','DERBY5750_T1','DERBY5750_I1')");
+        
+        
+        //Following statements will give exceptions since there is no index  
+        // named empty string
+        assertStatementError(
+                "42X65", s,
+                "call syscs_util.SYSCS_UPDATE_STATISTICS("+
+                "'APP','DERBY5750_T1','')");
+        assertStatementError(
+                "42X65", s,
+                "call syscs_util.SYSCS_DROP_STATISTICS("+
+                "'APP','DERBY5750_T1','')");
+        
+        s.execute("drop table DERBY5750_t1");    	
+    }
+
     /**
      * Test for update statistics
      */

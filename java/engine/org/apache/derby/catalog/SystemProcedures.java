@@ -724,14 +724,20 @@ public class SystemProcedures  {
      *     SYSCS_UTIL.SYSCS_UPDATE_STATISTICS
      * <p>
      *
-     * @param schemaname    schema name of the index(es) whose statistics will
-     *                      be updated. Must be non-null, no default is used.
+     * @param schemaname    schema name of the table/index(es) whose 
+     *                      statistics will be updated. null will mean use
+     *                      the current schema to resolve the table name.
+     *                      Empty string for schema name will raise an 
+     *                      exception.
      * @param tablename     table name of the index(es) whose statistics will
-     *                      be updated. Must be non-null.
-     * @param indexname     Can be null. If not null or emptry string then the
-     *                      user wants to update the statistics for only this
-     *                      index. If null, then update the statistics for all
-     *                      the indexes for the given table name.
+     *                      be updated. A null value or an empty string will
+     *                      throw table not found exception. Must be non-null.
+     * @param indexname    If null, then update the statistics for all the 
+     *                      indexes for the given table name. If not null and
+     *                      not empty string, then the user wants to update the
+     *                      statistics for only the give index name.
+     *                      Empty string for index name will raise an 
+     *                      exception.
      *
 	 * @exception  SQLException
      **/
@@ -741,16 +747,24 @@ public class SystemProcedures  {
     	    String  indexname)
     throws SQLException
     {
-        String escapedSchema = IdUtil.normalToDelimited(schemaname);
-        String escapedTableName = IdUtil.normalToDelimited(tablename);
-        String query = "alter table " + escapedSchema + "." + escapedTableName;
+        StringBuffer query = new StringBuffer();
+        query.append("alter table ");
+        query.append(basicSchemaTableValidation(schemaname,tablename));
+
+        //Index name can't be empty string
+        if (indexname != null && indexname.length()==0)
+			throw PublicAPI.wrapStandardException(
+					StandardException.newException(
+							SQLState.LANG_INDEX_NOT_FOUND, 
+							indexname));
+
         if (indexname == null)
-        	query = query + " all update statistics ";
+        	query.append(" all update statistics ");
         else
-        	query = query + " update statistics " + IdUtil.normalToDelimited(indexname);
+        	query.append(" update statistics " + IdUtil.normalToDelimited(indexname));
         Connection conn = getDefaultConn();
 
-        PreparedStatement ps = conn.prepareStatement(query);
+        PreparedStatement ps = conn.prepareStatement(query.toString());
         ps.executeUpdate();
         ps.close();
 
@@ -763,16 +777,21 @@ public class SystemProcedures  {
      * 2)a specific index on a table.
      * 
      * @param schemaname    schema name of the table/index(es) whose 
-     *                      statistics will be dropped. Must be non-null, 
-     *                      no default is used.
+     *                      statistics will be dropped. null will mean use
+     *                      the current schema to resolve the table name.
+     *                      Empty string for schema name will raise an 
+     *                      exception.
      * @param tablename     table name of the index(es) whose statistics will
-     *                      be dropped. Must be non-null.
-     * @param indexname     Can be null. If not null or emptry string then the
-     *                      user wants to drop the statistics for only this
-     *                      index. If null, then drop the statistics for all
-     *                      the indexes for the given table name.
+     *                      be dropped. A null value or an empty string will
+     *                      throw table not found exception. Must be non-null.
+     * @param indexname     If null, then drop the statistics for all the 
+     *                      indexes for the given table name. If not null and
+     *                      not empty string, then the user wants to drop the
+     *                      statistics for only the give index name.
+     *                      Empty string for index name will raise an 
+     *                      exception.
      *
-	 * @exception  SQLException
+	 * @exception  SQLException 
      */
     public static void SYSCS_DROP_STATISTICS(
     String  schemaname,
@@ -780,20 +799,66 @@ public class SystemProcedures  {
     String  indexname)
         throws SQLException
     {
-        String escapedSchema = IdUtil.normalToDelimited(schemaname);
-        String escapedTableName = IdUtil.normalToDelimited(tablename);
-        String query = "alter table " + escapedSchema + "." + escapedTableName;
+        StringBuffer query = new StringBuffer();
+        query.append("alter table ");
+        query.append(basicSchemaTableValidation(schemaname,tablename));
+
+        //Index name can't be empty string
+        if (indexname != null && indexname.length()==0)
+			throw PublicAPI.wrapStandardException(
+					StandardException.newException(
+							SQLState.LANG_INDEX_NOT_FOUND, 
+							indexname));
+        
         if (indexname == null)
-        	query = query + " all drop statistics ";
+        	query.append(" all drop statistics ");
         else
-        	query = query + " statistics drop " + IdUtil.normalToDelimited(indexname);
+        	query.append(" statistics drop " + IdUtil.normalToDelimited(indexname));
         Connection conn = getDefaultConn();
 
-        PreparedStatement ps = conn.prepareStatement(query);
+        PreparedStatement ps = conn.prepareStatement(query.toString());
         ps.executeUpdate();
         ps.close();
 
         conn.close();
+    }
+
+    /**
+     * Do following checks
+     * a)Schema name can't be empty string
+     * b)If schema name is null, then we use current schema
+     * c)Table name can't be null or empty string
+     * 
+     * @param schemaname    If schema name is null, then we will use the 
+     *                      current schema to resolve the table name. Empty
+     *                      string for schema name will raise an exception.
+     * @param tablename     If table name is null or an empty string, we will
+     *                      throw table not found exception.
+     * @return schemaname.tablename or tablename
+     * @throws SQLException 
+     *         a)if schema name is empty string
+     *         b)if table name is empty string
+     *         c)if table name is null
+     */
+    private static String basicSchemaTableValidation(
+    String schemaname, String tablename) 
+        throws SQLException
+    {
+        //Schema name can't be empty string
+        if (schemaname != null && schemaname.length()==0)
+			throw PublicAPI.wrapStandardException(
+					StandardException.newException(
+							SQLState.LANG_SCHEMA_DOES_NOT_EXIST, 
+							schemaname));
+
+        //Table name can't be null or empty string
+        if ((tablename==null) || tablename.length()==0)
+			throw PublicAPI.wrapStandardException(
+					StandardException.newException(
+							SQLState.LANG_TABLE_NOT_FOUND, 
+							tablename));
+        	        
+        return IdUtil.mkQualifiedName(schemaname, tablename);
     }
 
     /**
@@ -806,31 +871,32 @@ public class SystemProcedures  {
      *     SYSCS_UTIL.SYSCS_COMPRESS_TABLE
      * <p>
      *
-     * @param schema        schema name of the table to compress.  Must be
-     *                      non-null, no default is used.
-     * @param tablename     table name of the table to compress.  Must be
-     *                      non-null.
+     * @param schemaname    schema name of the table to compress. null will 
+     *                      mean use the current schema to resolve the table
+     *                      name. Empty string for schema name will raise an 
+     *                      exception.
+     * @param tablename     table name of the table to compress. A null value 
+     *                      or an empty string will throw table not found 
+     *                      exception. Must be non-null.
      * @param sequential    if non-zero then rebuild indexes sequentially,
      *                      if 0 then rebuild all indexes in parallel.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static void SYSCS_COMPRESS_TABLE(
-    String  schema,
+    String  schemaname,
     String  tablename,
     short     sequential)
         throws SQLException
     {
-
-        String escapedSchema = IdUtil.normalToDelimited(schema);
-        String escapedTableName = IdUtil.normalToDelimited(tablename);
-        String query = 
-            "alter table " + escapedSchema + "." + escapedTableName +
-			" compress" +  (sequential != 0 ? " sequential" : "");
+        StringBuffer query = new StringBuffer();
+        query.append("alter table ");
+        query.append(basicSchemaTableValidation(schemaname,tablename));
+        query.append(" compress" +  (sequential != 0 ? " sequential" : ""));
 
 		Connection conn = getDefaultConn();
         
-        PreparedStatement ps = conn.prepareStatement(query);
+        PreparedStatement ps = conn.prepareStatement(query.toString());
 		ps.executeUpdate();
         ps.close();
 

@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -49,6 +50,53 @@ public class CompressTableTest extends BaseJDBCTestCase {
                 TestConfiguration.embeddedSuite(CompressTableTest.class));
     }
 
+    //DERBY-5750(Sending an empty string as table name to compress table 
+    // procedure or empty string as index name to update statistics procedure 
+    // makes the parser throw an exception.)
+    //
+    //No table name will result in the same exception that a user would
+    // get when issuing the compress table sql directly without the table name
+    // eg alter table compress sequential
+    // Notice that the table name is missing in the compress sql above
+    public void testCompressTableWithEmptyParamsDerby5750() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table DERBY5750_t1 (c11 int)");
+        
+        //Following 2 statements will give exception since there is no schema
+        // named empty string
+        assertStatementError(
+        		"42Y07", s,
+        		"call syscs_util.syscs_compress_table('','DERBY5750_T1',1)");
+        assertStatementError(
+        		"42Y07", s,
+        		"call syscs_util.syscs_compress_table('','',1)");
+
+        //null schema name will translate to current schema
+        s.execute("call syscs_util.syscs_compress_table(null,'DERBY5750_T1',1)");
+
+        //Following 2 statements will give exception since there is no table  
+        // named empty string
+        assertStatementError(
+        		"42X05", s,
+        		"call syscs_util.syscs_compress_table(null,'',1)");
+        assertStatementError(
+        		"42X05", s,
+                "call syscs_util.syscs_compress_table('APP','',1)");
+
+        //Following 2 statements will give exception since table name can't 
+        // be null
+        assertStatementError(
+        		"42X05", s,
+        		"call syscs_util.syscs_compress_table(null,null,1)");
+        assertStatementError(
+        		"42X05", s,
+        		"call syscs_util.syscs_compress_table('APP',null,1)");
+
+        s.execute("call syscs_util.syscs_compress_table('APP','DERBY5750_T1',1)");
+        
+        s.execute("drop table DERBY5750_t1");    	
+    }
+    
     /**
      * Test that SYSCS_COMPRESS_TABLE and SYSCS_INPLACE_COMPRESS_TABLE work
      * when the table name contains a double quote. It used to raise a syntax
