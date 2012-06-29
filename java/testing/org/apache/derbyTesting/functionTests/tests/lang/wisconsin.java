@@ -23,6 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -31,7 +36,9 @@ import java.sql.Statement;
 import org.apache.derby.impl.tools.ij.utilMain;
 import org.apache.derby.tools.ij;
 
+
 public class wisconsin {
+
 
 	public static void main(String[] args) throws Throwable{
 		ij.getPropertyArg(args); 
@@ -43,22 +50,21 @@ public class wisconsin {
         createTables(conn, true);
         
         BufferedInputStream inStream;
-        
-		// set input stream
-		String filePath = "wisc_setup.sql";
+        String resource = "org/apache/derbyTesting/functionTests/tests/" +
+                "lang/wisc_setup.sql";  
+        // set input stream
+        URL sql = getTestResource(resource);
+        InputStream sqlIn = openTestResource(sql);
+        if (sqlIn == null ) {
+            throw new Exception("SQL Resource missing:" +
+                    resource);
+        }
 
-		try 
-		{
-			inStream = new BufferedInputStream(new FileInputStream(filePath), 
-							utilMain.BUFFEREDFILESIZE);		
-		} catch (FileNotFoundException e)
-		{
-			System.out.println("unable to find input file "+filePath);
-			throw e;
-		}
+        inStream = new BufferedInputStream(sqlIn, 
+                utilMain.BUFFEREDFILESIZE);		
 
 		ij.runScript(conn, inStream, "US-ASCII",
-				System.out, (String) null);
+			     System.out, (String) null );
 		conn.commit();
 	}
 	
@@ -204,4 +210,47 @@ public class wisconsin {
 		conn.commit();
 	}
 	
+	
+    /**
+     * Open the URL for a a test resource, e.g. a policy
+     * file or a SQL script.
+     * @param url URL obtained from getTestResource
+     * @return An open stream
+    */
+    protected static InputStream openTestResource(final URL url)
+        throws PrivilegedActionException
+    {
+        return (InputStream)AccessController.doPrivileged
+        (new java.security.PrivilegedExceptionAction(){
+
+            public Object run() throws IOException{
+            return url.openStream();
+
+            }
+
+        }
+         );     
+    }
+    
+    /**
+     * Obtain the URL for a test resource, e.g. a policy
+     * file or a SQL script.
+     * @param name Resource name, typically - org.apache.derbyTesing.something
+     * @return URL to the resource, null if it does not exist.
+     */
+    protected static URL getTestResource(final String name)
+    {
+
+    return (URL)AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+
+            public Object run(){
+            return this.getClass().getClassLoader().
+                getResource(name);
+
+            }
+
+        }
+         );
+    }  
 }
