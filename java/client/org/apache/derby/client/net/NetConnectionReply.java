@@ -57,47 +57,6 @@ public class NetConnectionReply extends Reply
         agent_.checkForChainBreakingException_();
     }
 
-    void verifyConnectReply(int codept) throws SqlException {
-        if (peekCodePoint() != codept) {
-            parseConnectError();
-            return;
-        }
-        readLengthAndCodePoint();
-        skipBytes();
-
-        if (codept == CodePoint.ACCRDBRM) {
-            int peekCP = peekCodePoint();
-            if (peekCP == Reply.END_OF_SAME_ID_CHAIN) {
-                return;
-            }
-
-            parseTypdefsOrMgrlvlovrs();
-            NetSqlca netSqlca = parseSQLCARD(null);
-            netAgent_.netConnection_.completeSqlca(netSqlca);
-        }
-    }
-
-    void parseConnectError() throws DisconnectException {
-        int peekCP = peekCodePoint();
-        switch (peekCP) {
-        case CodePoint.CMDCHKRM:
-            parseCMDCHKRM();
-            break;
-        case CodePoint.MGRLVLRM:
-            parseMGRLVLRM();
-            break;
-        default:
-            parseCommonError(peekCP);
-        }
-    }
-
-    void readDummyExchangeServerAttributes(Connection connection) throws SqlException {
-        startSameIdChainParse();
-        parseDummyEXCSATreply((NetConnection) connection);
-        endOfSameIdChainData();
-        agent_.checkForChainBreakingException_();
-    }
-
     // NET only entry point
     void readAccessSecurity(Connection connection,
                             int securityMechanism) throws SqlException {
@@ -2810,32 +2769,6 @@ public class NetConnectionReply extends Reply
                                         boolean receivedFlag3,
                                         boolean receivedFlag4) throws DisconnectException {
         if (!receivedFlag || !receivedFlag2 || !receivedFlag3 || !receivedFlag4) {
-            doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
-        }
-    }
-
-    protected void checkRequiredObjects(boolean receivedFlag,
-                                        boolean receivedFlag2,
-                                        boolean receivedFlag3,
-                                        boolean receivedFlag4,
-                                        boolean receivedFlag5,
-                                        boolean receivedFlag6) throws DisconnectException {
-        if (!receivedFlag || !receivedFlag2 || !receivedFlag3 || !receivedFlag4 ||
-                !receivedFlag5 || !receivedFlag6) {
-            doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
-        }
-
-    }
-
-    protected void checkRequiredObjects(boolean receivedFlag,
-                                        boolean receivedFlag2,
-                                        boolean receivedFlag3,
-                                        boolean receivedFlag4,
-                                        boolean receivedFlag5,
-                                        boolean receivedFlag6,
-                                        boolean receivedFlag7) throws DisconnectException {
-        if (!receivedFlag || !receivedFlag2 || !receivedFlag3 || !receivedFlag4 ||
-                !receivedFlag5 || !receivedFlag6 || !receivedFlag7) {
             doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
         }
     }
