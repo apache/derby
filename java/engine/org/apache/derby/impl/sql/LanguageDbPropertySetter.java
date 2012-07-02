@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
 import java.io.Serializable;
 import java.util.Dictionary;
@@ -50,6 +51,13 @@ public class LanguageDbPropertySetter implements PropertySetCallback
 		Dictionary		p
 	) throws StandardException 
 	{
+        // Can't change the dictionary version manually. That could make the database
+        // unbootable. See DERBY-5838.
+		if ( key.trim().equals( DataDictionary.CORE_DATA_DICTIONARY_VERSION ) )
+		{
+            throw StandardException.newException( SQLState.PROPERTY_UNSUPPORTED_CHANGE, key, value );
+        }
+        
 		// Disallow changing sqlAuthorization from true to false or null after
 		// switching to Standard authorization
 		if (key.trim().equals(Property.SQL_AUTHORIZATION_PROPERTY))
