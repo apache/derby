@@ -91,22 +91,5 @@ public class NetCallableStatement extends NetPreparedStatement
         resetNetCallableStatement(callableStatement_, netAgent, netConnection);
     }
 
-    void resetNetCallableStatement(NetAgent netAgent,
-                                   NetConnection netConnection,
-                                   String sql,
-                                   Section section) throws SqlException {
-        callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section);
-        resetNetCallableStatement(callableStatement_, netAgent, netConnection);
-    }
 
-
-    void resetNetCallableStatement(NetAgent netAgent,
-                                   NetConnection netConnection,
-                                   String sql,
-                                   Section section,
-                                   ColumnMetaData parameterMetaData,
-                                   ColumnMetaData resultSetMetaData) throws SqlException {
-        callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section, parameterMetaData, resultSetMetaData);
-        resetNetCallableStatement(callableStatement_, netAgent, netConnection);
-    }
 }
