@@ -57,7 +57,8 @@ public abstract class BaseTestCase
     protected final static String ERRORSTACKTRACEFILE = "error-stacktrace.out";
     protected final static String DEFAULT_DB_DIR      = "system";
     protected final static String DERBY_LOG           = "derby.log";
-
+    
+    private static int debugPort; // default 8800
     /**
      * No argument constructor made private to enforce naming of test cases.
      * According to JUnit documentation, this constructor is provided for
@@ -603,6 +604,12 @@ public abstract class BaseTestCase
                     "destfile=" + getJaCoCoOutFile());
         }
 
+        if (isSunJVM() && Boolean.valueOf(
+                    getSystemProperty("derby.test.debugSubprocesses")).
+                booleanValue()) {
+            setupForDebuggerAttach(cmdlist);
+        }
+        
         if (isJarInvocation) {
             // If -jar is specified, the Java command will ignore the user's
             // classpath, so don't set it. Fail if an explicit classpath has
@@ -1121,5 +1128,30 @@ public abstract class BaseTestCase
         } else {
             return "(net)";
         }
+    }
+    
+    private static void setupForDebuggerAttach(ArrayList cmdlist) {
+        if (debugPort == 0) {
+            // lazy initialization
+            String dbp = getSystemProperty("derby.test.debugPortBase");
+            debugPort = 8800; // default
+            if (dbp != null) {
+                try {
+                    debugPort = Integer.parseInt(dbp);
+                } catch (NumberFormatException e) {
+                    // never mind
+                }
+            }
+        }
+        
+        char suspend = 'y'; // default
+        String susp = getSystemProperty("derby.test.debugSuspend");
+        if (susp != null && "n".equals(susp.toLowerCase())) {
+            suspend = 'n';
+        }
+        
+        cmdlist.add("-Xdebug");
+        cmdlist.add("-Xrunjdwp:transport=dt_socket,address=" + (debugPort++) +
+                ",server=y,suspend=" + suspend);
     }
 } // End class BaseTestCase
