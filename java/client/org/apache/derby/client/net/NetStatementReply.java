@@ -1648,17 +1648,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         return section;
     }
 
-    // Query Protocol type specifies the type of query protocol
-    // the target SQLAM uses.
-    protected int parseQRYPRCTYP() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.QRYPRCTYP);
-        int qryprctyp = parseCODPNTDR();
-        if ((qryprctyp != CodePoint.FIXROWPRC) && (qryprctyp != CodePoint.LMTBLKPRC)) {
-            doValnsprmSemantics(CodePoint.QRYPRCTYP, qryprctyp);
-        }
-        return qryprctyp;
-    }
-
     protected int parseFastQRYPRCTYP() throws DisconnectException {
         matchCodePoint(CodePoint.QRYPRCTYP);
         int qryprctyp = readFastUnsignedShort();
@@ -1666,23 +1655,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             doValnsprmSemantics(CodePoint.QRYPRCTYP, qryprctyp);
         }
         return qryprctyp;
-    }
-
-    // hold cursor position state indicates whether the requester specified
-    // the HOLD option on the SQL DECLARE CURSOR statement.  When the HOLD
-    // option is specified, the cursor is not closed upon execution of a
-    // commit operation.
-    // The value TRUE indicates that the requester specifies the HOLD
-    // operation.  The value FALSSE indicates that the requeter is not
-    // specifying the HOLD option.
-    protected int parseSQLCSRHLD() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.SQLCSRHLD);
-        int sqlcsrhld = readUnsignedByte();
-        // 0xF0 is false (default), 0xF1 is true  // use constants in if
-        if ((sqlcsrhld != 0xF0) && (sqlcsrhld != 0xF1)) {
-            doValnsprmSemantics(CodePoint.SQLCSRHLD, sqlcsrhld);
-        }
-        return sqlcsrhld;
     }
 
     protected int parseFastSQLCSRHLD() throws DisconnectException {
@@ -1695,17 +1667,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         return sqlcsrhld;
     }
 
-    // Query Attribute for Scrollability indicates whether
-    // a cursor is scrollable or non-scrollable
-    protected int parseQRYATTSCR() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.QRYATTSCR);
-        int qryattscr = readUnsignedByte();  // use constants in if
-        if ((qryattscr != 0xF0) && (qryattscr != 0xF1)) {
-            doValnsprmSemantics(CodePoint.QRYATTSCR, qryattscr);
-        }
-        return qryattscr;
-    }
-
     protected int parseFastQRYATTSCR() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTSCR);
         int qryattscr = readFastUnsignedByte();  // use constants in if
@@ -1715,16 +1676,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         return qryattscr;
     }
 
-    // enabled for rowset positioning.
-    protected int parseQRYATTSET() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.QRYATTSET);
-        int qryattset = readUnsignedByte();  // use constants in if
-        if ((qryattset != 0xF0) && (qryattset != 0xF1)) {
-            doValnsprmSemantics(CodePoint.QRYATTSET, qryattset);
-        }
-        return qryattset;
-    }
-
     protected int parseFastQRYATTSET() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTSET);
         int qryattset = readFastUnsignedByte();  // use constants in if
@@ -1732,23 +1683,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             doValnsprmSemantics(CodePoint.QRYATTSET, qryattset);
         }
         return qryattset;
-    }
-
-    // Query attribute for Sensitivity indicats the sensitivity
-    // of an opened cursor to changes made to the underlying
-    // base table.
-    protected int parseQRYATTSNS() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.QRYATTSNS);
-        int qryattsns = readUnsignedByte();
-        switch (qryattsns) {
-        case CodePoint.QRYUNK:
-        case CodePoint.QRYINS:
-            break;
-        default:
-            doValnsprmSemantics(CodePoint.QRYATTSNS, qryattsns);
-            break;
-        }
-        return qryattsns;
     }
 
     protected int parseFastQRYATTSNS() throws DisconnectException {
@@ -1764,23 +1698,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             break;
         }
         return qryattsns;
-    }
-
-    // Query Attribute for Updatability indicates the updatability
-    // of an opened cursor.
-    protected int parseQRYATTUPD() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.QRYATTUPD);
-        int qryattupd = readUnsignedByte();
-        switch (qryattupd) {
-        case CodePoint.QRYUNK:
-        case CodePoint.QRYRDO:
-        case CodePoint.QRYUPD:
-            break;
-        default:
-            doValnsprmSemantics(CodePoint.QRYATTUPD, qryattupd);
-            break;
-        }
-        return qryattupd;
     }
 
     protected int parseFastQRYATTUPD() throws DisconnectException {
