@@ -219,10 +219,10 @@ public class JDBCDriverTest
     /////////////////////////////////////////////////////////////
 
     // map derby type name to type descriptor
-    private    static    HashMap        _types = new HashMap();    // maps Derby type names to TypeDescriptors
+    private    static    HashMap<String,TypeDescriptor>        _types = new HashMap<String,TypeDescriptor>();
 
     // map jdbc type to index into COERCIONS
-    private    static    HashMap        _coercionIndex = new HashMap();    // maps jdbc types to legal coercions
+    private    static    HashMap<Integer,Integer>        _coercionIndex = new HashMap<Integer,Integer>();
 
     /////////////////////////////////////////////////////////////
     //
@@ -783,7 +783,7 @@ public class JDBCDriverTest
     // Verify that we can select all legal datatypes in a table.
     //
     private void readTable(String tableName, TypeDescriptor[] types,
-                           Object[][] rows, List casts )
+                           Object[][] rows, List<Object> casts )
             throws SQLException {
         PreparedStatement    ps = readTableQuery(tableName, types);
         ResultSet            rs = ps.executeQuery();
@@ -884,7 +884,7 @@ public class JDBCDriverTest
      * @throws Exception
      */
     private void checkRows(PreparedStatement ps, TypeDescriptor[] types,
-                           Object[][] rows, List casts)
+                           Object[][] rows, List<Object> casts)
             throws SQLException {
         int typeCount = types.length;
 
@@ -943,7 +943,7 @@ public class JDBCDriverTest
      * @param casts
      */
     private void checkCoercions(PreparedStatement ps, TypeDescriptor type,
-                                List casts)
+                                List<Object> casts)
             throws SQLException {
         String columnName = type.getDerbyTypeName();
         T_CN coercionDesc = COERCIONS[ getCoercionIndex(type.getJdbcType()) ];

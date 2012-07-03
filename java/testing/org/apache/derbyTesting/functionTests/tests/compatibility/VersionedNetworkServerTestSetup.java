@@ -88,7 +88,7 @@ public class VersionedNetworkServerTestSetup
                 (appendToClasspath == null
                             ? ""
                             : File.pathSeparator + appendToClasspath);
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("org.apache.derby.drda.NetworkServerControl");
         cmd.add("start");
         cmd.add("-p");
@@ -170,7 +170,7 @@ public class VersionedNetworkServerTestSetup
     private String shutDownInSeparateProcess() {
         int port = TestConfiguration.getCurrent().getPort();
         // java -classpath ... org.apache.derby.drda...
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("org.apache.derby.drda.NetworkServerControl");
         cmd.add("shutdown");
         cmd.add("-p");
