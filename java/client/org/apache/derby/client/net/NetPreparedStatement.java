@@ -141,24 +141,6 @@ public class NetPreparedStatement extends NetStatement
                 netConnection);
     }
 
-    void resetNetPreparedStatement(NetAgent netAgent,
-                                   NetConnection netConnection,
-                                   String sql,
-                                   Section section) throws SqlException {
-        preparedStatement_.resetPreparedStatement(netAgent, netConnection, sql, section);
-        resetNetPreparedStatement(preparedStatement_, netAgent, netConnection);
-    }
-
-    void resetNetPreparedStatement(NetAgent netAgent,
-                                   NetConnection netConnection,
-                                   String sql,
-                                   Section section,
-                                   ColumnMetaData parameterMetaData,
-                                   ColumnMetaData resultSetMetaData) throws SqlException {
-        preparedStatement_.resetPreparedStatement(netAgent, netConnection, sql, section, parameterMetaData, resultSetMetaData);
-        this.resetNetPreparedStatement(preparedStatement_, netAgent, netConnection);
-    }
-
     public void writeExecute_(Section section,
                               ColumnMetaData parameterMetaData,
                               Object[] inputs,
