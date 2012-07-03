@@ -37,6 +37,8 @@ import org.apache.derby.jdbc.InternalDriver;
 
 import java.sql.SQLException;
 import java.util.Properties;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.impl.store.replication.ReplicationLogger;
 
 /**
  * SlaveDatabase is an instance of Database, and is booted instead of
@@ -321,11 +323,22 @@ public class SlaveDatabase extends BasicDatabase {
                         resetCurrentContextManager(bootThreadCm);
                     bootThreadCm = null;
                 }
-            } catch (StandardException se) {
-                // We get here when SlaveController#stopSlave has been
-                // called, or if a fatal exception has been thrown.
-                handleShutdown(se);
-            }
+            } catch (Exception e) {
+                // We get here when SlaveController#stopSlave has been called,
+                // a fatal Derby exception has been thrown, or if a run-time
+                // error is thrown.  Log the error unconditionally to make sure
+                // it can be observed, since if this happens during or after
+                // recovery on a failover, there will be no connection attempt
+                // failing with the error. New connection attempts will just
+                // hang...
+
+                ReplicationLogger rl = new ReplicationLogger(dbname);
+                rl.logError(MessageId.REPLICATION_FATAL_ERROR, e);
+                
+                if (e instanceof StandardException) {
+                    handleShutdown((StandardException)e);
+                }
+            } 
         }
     }
 
