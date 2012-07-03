@@ -197,18 +197,4 @@ public class NetPackageReply extends NetConnectionReply {
 
     //------------------------parse DDM Scalars-----------------------------
 
-    // RDB Package Name and Consistency token Scalar Object specifies the
-    // fully qualified name of a relational database package and its
-    // consistency token.
-    protected Object parsePKGNAMCT(boolean skip) throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.PKGNAMCT);
-        if (skip) {
-            skipBytes();
-            return null;
-        }
-        agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                new ClientMessageId(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED),
-                "parsePKGNAMCT"));
-        return null; // to make compiler happy
-    }
 }
