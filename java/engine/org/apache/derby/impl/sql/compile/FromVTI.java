@@ -881,17 +881,18 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
             //
             // Table Function parameters may not reference columns from other tables in the
-            // FROM list of the current query block. See DERBY-5579.
+            // FROM list of the current query block. See DERBY-5579. We also do not allow
+            // VTI parameters to refer to other VTIs.
             //
-            if ( isDerbyStyleTableFunction )
-            {
-                int referencedTableNumber = ref.getTableNumber();
+            int referencedTableNumber = ref.getTableNumber();
                 
-                for ( int i = 0; i < fromListParam.size(); i++ )
-                {
-                    FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
+            for ( int i = 0; i < fromListParam.size(); i++ )
+            {
+                FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
 
-                    if ( referencedTableNumber == fromTable.getTableNumber() )
+                if ( referencedTableNumber == fromTable.getTableNumber() )
+                {
+                    if ( isDerbyStyleTableFunction || (fromTable instanceof FromVTI) )
                     {
                         throw StandardException.newException
                             ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, ref.getSQLColumnName() );

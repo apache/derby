@@ -29,6 +29,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.CallableStatement;
@@ -49,6 +50,8 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         "CONGLOMERATENAME", "ISINDEX", "NUMALLOCATEDPAGES", "NUMFREEPAGES",
         "NUMUNFILLEDPAGES", "PAGESIZE", "ESTIMSPACESAVING", "TABLEID"
     };
+
+    private static  final   String  BAD_FROM_LIST_JOIN = "42ZB7";
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -474,6 +477,58 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
+    }
+    
+    /**
+     * Verify that you can't join diagnostic VTIs to one another in the FROM list. See DERBY-5554.
+     */
+    public void test_vti2vtiJoinInFromList() throws Exception
+    {
+        Connection  conn = getConnection();
+        Statement st = createStatement();
+
+        // joins to real tables are ok
+        conn.prepareStatement
+            (
+             "select t1.*\n" +
+             "from \n" +
+             "    sys.systables systabs,\n" +
+             "    table ( syscs_diag.space_table( systabs.tablename ) ) as t1\n" +
+             "where systabs.tabletype = 'T'\n"
+             );
+        conn.prepareStatement
+            (
+             "select t1.*\n" +
+             "from \n" +
+             "    table ( syscs_diag.space_table( systabs.tablename ) ) as t1,\n" +
+             "    sys.systables systabs\n" +
+             "where systabs.tabletype = 'T'\n"
+             );
+
+        // can't join VTIs to one another in the FROM list
+        assertStatementError
+            (
+             BAD_FROM_LIST_JOIN,
+             st,
+             "select t1.*, t2.*\n" +
+             "from \n" +
+             "    sys.systables systabs,\n" +
+             "    table ( syscs_diag.space_table( systabs.tablename ) ) as t1,\n" +
+             "    table ( syscs_diag.space_table( t1.conglomeratename ) ) as t2\n" +
+             "where systabs.tabletype = 'T'\n"
+             );
+        assertStatementError
+            (
+             "42X04",
+             st,
+             "select t1.*, t2.*\n" +
+             "from \n" +
+             "    sys.systables systabs,\n" +
+             "    table ( syscs_diag.space_table( t1.conglomeratename ) ) as t2,\n" +
+             "    table ( syscs_diag.space_table( systabs.tablename ) ) as t1\n" +
+             "where systabs.tabletype = 'T'\n"
+             );
+
     }
     
     /**
