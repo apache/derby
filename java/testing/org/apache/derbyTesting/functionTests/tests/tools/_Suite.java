@@ -59,7 +59,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(IjConnNameTest.suite());
         suite.addTest(RollBackWrappingWhenFailOnImportTest.suite());
         suite.addTest(ConnectWrongSubprotocolTest.suite());
-        
+        suite.addTest(derbyrunjartest.suite());
         suite.addTest(ij3Test.suite());
         
         // SysinfoAPITest currently fails when run against jars, so is

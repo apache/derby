@@ -27,6 +27,7 @@ import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
@@ -41,8 +42,18 @@ public class derbyrunjartest extends BaseTestCase {
 
     public static Test suite() {
         Class cl = derbyrunjartest.class;
+
+        TestSuite suite = new TestSuite(cl);
+
+        // The server command can only be used on platforms that support
+        // the network server. Specifically, it does not work in J2ME
+        // environments.
+        if (JDBC.vmSupportsJDBC3()) {
+            suite.addTest(new derbyrunjartest("xtestServer"));
+        }
+
         return new SecurityManagerSetup(
-                new TestSuite(cl),
+                suite,
                 cl.getName().replace('.', '/') + ".policy",
                 true);
     }
@@ -127,7 +138,7 @@ public class derbyrunjartest extends BaseTestCase {
         runtool(cmd, output, 0);
     }
 
-    public void testServer() throws Exception {
+    public void xtestServer() throws Exception {
         String[] cmd = { "server" };
         String[] output = {
             "Usage: NetworkServerControl <commands> ",
