@@ -1472,8 +1472,6 @@ class DRDAConnThread extends Thread {
 	 	try {
 			database.makeConnection(p);
 	  	} catch (SQLException se) {
-			String sqlState = se.getSQLState();
-
 			databaseAccessException = se;
 			for (; se != null; se = se.getNextException())
 			{
@@ -6444,10 +6442,9 @@ class DRDAConnThread extends Thread {
 		// as extended diagnostics
 		// move to first ROW_DELETED or ROW_UPDATED exception. These have been
 		// added to the end of the warning chain.
-		while (
-				nextException != null && 
-				nextException.getSQLState() != SQLState.ROW_UPDATED &&
-				nextException.getSQLState() != SQLState.ROW_DELETED) {
+        while (!(nextException == null ||
+                 SQLState.ROW_UPDATED.equals(nextException.getSQLState()) ||
+                 SQLState.ROW_DELETED.equals(nextException.getSQLState()))) {
 			nextException = nextException.getNextException();
 		}
 
