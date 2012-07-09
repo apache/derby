@@ -4278,8 +4278,6 @@ class DRDAConnThread extends Thread {
 		}
 
 		} while(hasResultSet && (++rsNum < numResults));
-		        
-		return;			// we are done
 	}
 
 
@@ -5439,8 +5437,6 @@ class DRDAConnThread extends Thread {
 				"not recognized.", "01000");
 			throw warn;
 		} // end if.
-
-		return;
 	}
 
 	private boolean canIgnoreStmt(String stmt)
@@ -5848,11 +5844,8 @@ class DRDAConnThread extends Thread {
 	private void parseMONITOR() 
 		throws DRDAProtocolException
 	{
-
 		// Just ignore it.
 		reader.skipBytes();
-		return;
-
 	}
 
 	private void writeSQLCARDs(SQLException e, int updateCount)
@@ -6467,7 +6460,6 @@ class DRDAConnThread extends Thread {
 		throws DRDAProtocolException
 	{
 		writer.writeByte(CodePoint.NULLDATA);
-		return;
 	}
 
 	/**
@@ -6522,8 +6514,6 @@ class DRDAConnThread extends Thread {
 
 			se = se.getNextException();
 		}
-			
-		return;
 	}
 
 	/**
@@ -6628,7 +6618,6 @@ class DRDAConnThread extends Thread {
 		throws DRDAProtocolException
 	{
 		writer.writeByte(CodePoint.NULLDATA);
-		return;
 	}
 
 	/** 
@@ -8924,10 +8913,7 @@ class DRDAConnThread extends Thread {
 	 * needed.
 	 */
 	private void finalizeChain() throws DRDAProtocolException {
-
 		writer.finalizeChain(reader.getCurrChainState(), getOutputStream());
-		return;
-
 	}
 
     /**
