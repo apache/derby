@@ -35,7 +35,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This tests updateable cursor using index, Beetle entry 3865.
@@ -43,15 +42,14 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Not done in ij since we need to do many "next" and "update" to be able to
  * excercise the code of creating temp conglomerate for virtual memory heap. We
  * need at minimum 200 rows in table, if "maxMemoryPerTable" property is set to
- * 1 (KB). This includes 100 rows to fill the hash table and another 100 rows to
- * fill the in-memory heap.
+ * 1 (KB). This includes 100 rows to fill the in-memory portion of the hash
+ * table, and another 100 rows to fill an in-memory heap that was used until
+ * DERBY-5425 removed it.
  */
 public class UpdateCursorTest extends BaseJDBCTestCase {
 
 	private static final int SIZE_OF_T1 = 250;
-	private static final int MAX_CAP_OF_HASH_TABLE = 100;
 	private static final String EXPECTED_SQL_CODE = "02000";
-	private static final String UNEXPECTED_MSG = "No row was found for FETCH, UPDATE or DELETE";
 
 	/**
 	 * Basic constructor.
@@ -156,31 +154,8 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 		/* scan the entire table except the last row. */
 		for (int i = 0; i < SIZE_OF_T1 - 1; i++) {	
-			
-			/*	Notice the order in the rows we get: from 2 to 102 asc order on second column (c3)
-			 *	then from 202 down to 103 on that column; then from 203 up to 250.  The reason is
-			 *	we are using asc index on c3, all the rows updated are in the future direction of the
-			 *	index scan, so they all get filled into a hash table.  The MAX_MEMORY_PER_TABLE
-			 *	property determines max cap of hash table 100.  So from row 103 it goes into virtual
-			 *	memory heap, whose in memory part is also 100 entries.  So row 103 to 202 goes into
-			 *	the in-memory part and gets dumped out in reverse order.  Finally Row 203 to 250"
-			 *	goes into file system.  Here we mean row ids.
-			 */
-			if (i < MAX_CAP_OF_HASH_TABLE + 1) {
-				expectedValue++;
-			} else if (i > MAX_CAP_OF_HASH_TABLE && i <= MAX_CAP_OF_HASH_TABLE * 2) {
-				if (i == MAX_CAP_OF_HASH_TABLE + 1) {
-					expectedValue = 202;
-				} else {
-					expectedValue--;
-				}
-			} else if (i > MAX_CAP_OF_HASH_TABLE * 2) {
-				if (i == MAX_CAP_OF_HASH_TABLE * 2 + 1) {
-					expectedValue = 203;
-				} else {
-					expectedValue++;
-				}
-			}
+            // Expect the values to be returned in index order.
+            expectedValue++;
 			
 			assertEquals(cursor.next(), true);
 			//System.out.println("Row " + i + ": "+cursor.getInt(1)+","+cursor.getInt(2)+": "+expectedValue);
@@ -342,4 +317,33 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 		rollback();
 	}
+
+    /**
+     * Regression test case for DERBY-5425. The scan used to lose rows that
+     * had spilt to disk from the data structure that keeps track of already
+     * seen rows, if the transaction was committed in the middle of the scan.
+     */
+    public void testDerby5425HoldOverCommit() throws SQLException {
+        Statement stmt = createStatement();
+
+        // Drop index and recreate it to be sure that it is ascending
+        // (other subtests may have changed it)
+        assertUpdateCount(stmt, 0, "drop index I11");
+        assertUpdateCount(stmt, 0, "create index I11 on T1 (c3, c1, c5)");
+
+        PreparedStatement sel = prepareStatement(
+                "select c3 from t1 --DERBY-PROPERTIES index=I11",
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+        ResultSet rs = sel.executeQuery();
+        for (int i = 1; i <= SIZE_OF_T1; i++) {
+            assertTrue("Too few rows", rs.next());
+            assertEquals(i, rs.getInt(1));
+            rs.updateInt(1, i);
+            rs.updateRow();
+            commit();
+        }
+        assertFalse("Too many rows", rs.next());
+        rs.close();
+    }
 }

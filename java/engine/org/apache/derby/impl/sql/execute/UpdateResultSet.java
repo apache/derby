@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.derby.iapi.db.TriggerExecutionContext;
@@ -34,12 +33,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -449,7 +448,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		//beetle 3865, update cursor use index.
 		TableScanResultSet tableScan = (TableScanResultSet) activation.getForUpdateIndexScan();
-		boolean notifyCursor = ((tableScan != null) && ! tableScan.sourceDrained);
+		boolean notifyCursor = (tableScan != null);
 		boolean checkStream = (deferred && rowsFound && ! constants.singleRowSource);
 		FormatableBitSet streamCols = (checkStream ? checkStreamCols() : null);
 		checkStream = (streamCols != null);
@@ -592,13 +591,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 	/* beetle 3865, updateable cursor use index. If the row we are updating has new value that
 	 * falls into the direction of the index scan of the cursor, we save this rid into a hash table
-	 * (for fast search), so that when the cursor hits it again, it knows to skip it.  When we get
-	 * to a point that the hash table is full, we scan forward the cursor until one of two things
-	 * happen: (1) we hit a record whose rid is in the hash table (we went through it already, so
-	 * skip it), we remove it from hash table, so that we can continue to use hash table. OR, (2) the scan
-	 * forward hit the end.  If (2) happens, we can de-reference the hash table to make it available
-	 * for garbage collection.  We save the future row id's in a virtual mem heap.  In any case,
-	 * next read will use a row id that we saved.
+	 * (for fast search), so that when the cursor hits it again, it knows to skip it.
 	 */
 	private void notifyForUpdateCursor(DataValueDescriptor[] row, DataValueDescriptor[] newBaseRow,
 										RowLocation rl, TableScanResultSet tableScan)
@@ -638,16 +631,7 @@ class UpdateResultSet extends DMLWriteResultSet
 					else
 						k =  map[basePos - 1];
 
-					DataValueDescriptor key;
-					/* We need to compare with saved most-forward cursor scan key if we
-					 * are reading records from the saved RowLocation temp table (instead
-					 * of the old column value) because we only care if new update value
-					 * jumps forward the most-forward scan key.
-					 */
-					if (tableScan.compareToLastKey)
-						key = tableScan.lastCursorKey.getColumn(i + 1);
-					else
-						key = row[k];
+					DataValueDescriptor key = row[k];
 
 					/* Starting from the first index key column forward, we see if the direction
 					 * of the update change is consistent with the direction of index scan.
@@ -700,82 +684,20 @@ class UpdateResultSet extends DMLWriteResultSet
 				if (maxCapacity < initCapacity)
 					initCapacity = maxCapacity;
 
-				tableScan.past2FutureTbl = new Hashtable(initCapacity);
+                tableScan.past2FutureTbl = new BackingStoreHashtable(
+                        tc, null, new int[]{0}, false, -1,
+                        maxCapacity, initCapacity, -1, false,
+                        tableScan.getActivation().getResultSetHoldability());
 			}
 
-			Hashtable past2FutureTbl = tableScan.past2FutureTbl;
-            /* If hash table is not full, we add it in.
-             * The key of the hash entry is the string value of the RowLocation.
-             * If the hash table is full, as the comments above this function
-             * say, we scan forward.
+            /* Add the row location to the hash table.
              *
              * Need to save a clone because when we get cached currentRow, "rl"
              * shares the same reference, so is changed at the same time.
              */
-            RowLocation updatedRL = (RowLocation) rl.cloneValue(false);
-
-			if (past2FutureTbl.size() < maxCapacity)
-				past2FutureTbl.put(updatedRL, updatedRL);
-			else
-			{
-				tableScan.skipFutureRowHolder = true;
-				ExecRow rlRow = new ValueRow(1);
-
-				for (;;)
-				{
-					ExecRow aRow = tableScan.getNextRowCore();
-					if (aRow == null)
-					{
-						tableScan.sourceDrained = true;
-						tableScan.past2FutureTbl = null;	// de-reference for garbage coll.
-						break;
-					}
-					RowLocation rowLoc = (RowLocation) aRow.getColumn(aRow.nColumns());
-
-					if (updatedRL.equals(rowLoc))  //this row we are updating jumped forward
-					{
-						saveLastCusorKey(tableScan, aRow);
-						break;	// don't need to worry about adding this row to hash any more
-					}
-
-					if (tableScan.futureForUpdateRows == null)
-					{
-						// virtual memory heap. In-memory part size 100. With the co-operation
-						// of hash table and in-memory part of heap (hash table shrinks while
-						// in-memory heap grows), hopefully we never spill temp table to disk.
-
-						tableScan.futureForUpdateRows = new TemporaryRowHolderImpl
-							(activation, null, null, 100, false, true);
-					}
-
-					rlRow.setColumn(1, rowLoc);
-					tableScan.futureForUpdateRows.insert(rlRow);
-					if (past2FutureTbl.size() < maxCapacity) //we got space in the hash table now, stop!
-					{
-						past2FutureTbl.put(updatedRL, updatedRL);
-						saveLastCusorKey(tableScan, aRow);
-						break;
-					}
-				}
-				tableScan.skipFutureRowHolder = false;
-			}
-		}
-	}
-
-	private void saveLastCusorKey(TableScanResultSet tableScan, ExecRow aRow) throws StandardException
-	{
-		/* We save the most-forward cursor scan key where we are stopping, so
-		 * that next time when we decide if we need to put an updated row id into
-		 * hash table, we can compare with this key.  This is an optimization on
-		 * memory usage of the hash table, otherwise it may be "leaking".
-		 */
-		if (tableScan.lastCursorKey == null)
-			tableScan.lastCursorKey = new ValueRow(aRow.nColumns() - 1);
-		for (int i = 1; i <= tableScan.lastCursorKey.nColumns(); i++)
-		{
-			DataValueDescriptor aCol = aRow.getColumn(i);
-			if (aCol != null)
-                tableScan.lastCursorKey.setColumn(i, aCol.cloneValue(false));
+            tableScan.past2FutureTbl.putRow(
+                false,
+                new DataValueDescriptor[] { rl.cloneValue(false) });
 		}
 	}
 

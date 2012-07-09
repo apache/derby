@@ -21,13 +21,11 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
@@ -35,7 +33,7 @@ import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -98,22 +96,14 @@ class TableScanResultSet extends ScanResultSet
 
 	private long estimatedRowCount;
 
-	/* Following fields are used by beetle 3865, updateable cursor using index. "past2FutureTbl"
-	 * is a hash table containing updated rows that are thrown into future direction of the
-	 * index scan and as a result we'll hit it again but should skip it.  If this hash table
-	 * is full, we scan forward and have a virtual memory style temp heap holding future row
-	 * id's.
-	 */
-	protected Hashtable past2FutureTbl;
-	protected TemporaryRowHolder futureForUpdateRows;  //tmp table for materialized rids
-	protected TemporaryRowHolderResultSet futureRowResultSet;	//result set for reading from above
-	protected boolean skipFutureRowHolder;		//skip reading rows from above
-	protected boolean sourceDrained;			//all row ids materialized
-	protected boolean currentRowPrescanned;	//got a row from above tmp table
-	protected boolean compareToLastKey;		//see comments in UpdateResultSet
-	protected ExecRow lastCursorKey;
-	private ExecRow sparseRow;				//sparse row in heap column order
-	private FormatableBitSet sparseRowMap;			//which columns to read
+    /**
+     * This field is used by beetle 3865, updateable cursor using index. It
+     * is a hash table containing updated rows that are thrown into future
+     * direction of the index scan, and as a result we'll hit it again but
+     * should skip it. The hash table will spill to disk if it grows too big
+     * to be kept in memory.
+     */
+    protected BackingStoreHashtable past2FutureTbl;
 
 	// For Scrollable insensitive updatable result sets, only qualify a row the 
 	// first time it's been read, since an update can change a row so that it 
@@ -463,35 +453,6 @@ class TableScanResultSet extends ScanResultSet
 	}
 
 	/**
-     * Check and make sure sparse heap row and accessed bit map are created.
-	 * beetle 3865, update cursor using index.
-	 *
-	 * @exception StandardException thrown on failure
-	 */
-	private void getSparseRowAndMap() throws StandardException
-	{
-		int numCols = 1, colPos;
-		for (int i = 0; i < indexCols.length; i++)
-		{
-			colPos = (indexCols[i] > 0) ? indexCols[i] : -indexCols[i];
-			if (colPos > numCols)
-				numCols = colPos;
-		}
-		sparseRow = new ValueRow(numCols);
-		sparseRowMap = new FormatableBitSet(numCols);
-		for (int i = 0; i < indexCols.length; i++)
-		{
-			if (accessedCols.get(i))
-			{
-				colPos = (indexCols[i] > 0) ? indexCols[i] : -indexCols[i];
-				sparseRow.setColumn(colPos, candidate.getColumn(i + 1));
-				sparseRowMap.set(colPos - 1);
-			}
-		}
-	}
-		
-
-	/**
      * Return the next row (if any) from the scan (if open).
 	 *
 	 * @exception StandardException thrown on failure to get next row
@@ -509,59 +470,6 @@ class TableScanResultSet extends ScanResultSet
 		beginTime = getCurrentTimeMillis();
 
 		ExecRow result = null;
-
-		/* beetle 3865, updateable cursor using index. We first saved updated rows with new value
-		 * falling into future direction of index scan in hash table, if it's full, we scanned
-		 * forward and saved future row ids in a virtual mem heap.
-		 */
-		if (futureForUpdateRows != null)
-		{
-			currentRowPrescanned = false;
-			if (! skipFutureRowHolder)
-			{
-				if (futureRowResultSet == null)
-				{
-					futureRowResultSet = (TemporaryRowHolderResultSet) futureForUpdateRows.getResultSet();
-					futureRowResultSet.openCore();
-				}
-
-				ExecRow ridRow = futureRowResultSet.getNextRowCore();
-
-				if (ridRow != null)
-				{
-					/* to boost performance, we used virtual mem heap, and we can insert after
-					 * we start retrieving results.  The assumption is to
-					 * delete current row right after we retrieve it.
-					 */
-					futureRowResultSet.deleteCurrentRow();
-					RowLocation rl = (RowLocation) ridRow.getColumn(1);
-					ConglomerateController baseCC = activation.getHeapConglomerateController();
-					if (sparseRow == null)
-						getSparseRowAndMap();
-            	   	baseCC.fetch(
-        	 	      	      rl, sparseRow.getRowArray(), sparseRowMap);
-                    RowLocation rl2 = (RowLocation) rl.cloneValue(false);
-					currentRow.setColumn(currentRow.nColumns(), rl2);
-					candidate.setColumn(candidate.nColumns(), rl2);		// have to be consistent!
-
-					result = currentRow;
-					currentRowPrescanned = true;
-				}
-				else if (sourceDrained)
-				{
-					currentRowPrescanned = true;
-					currentRow = null;
-				}
-
-				if (currentRowPrescanned)
-				{
-					setCurrentRow(result);
-
-					nextTime += getElapsedMillis(beginTime);
-	 		   		return result;
-				}
-			}
-		}
 
 	    if ( isOpen  && !nextDone)
 	    {
@@ -707,8 +615,11 @@ class TableScanResultSet extends ScanResultSet
 					activation.clearHeapConglomerateController();
 				}
 			}
-			if (futureRowResultSet != null)
-				futureRowResultSet.close();
+
+            if (past2FutureTbl != null)
+            {
+                past2FutureTbl.close();
+            }
 	    }
 		else
 			if (SanityManager.DEBUG)
@@ -827,9 +738,6 @@ class TableScanResultSet extends ScanResultSet
 
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(isOpen, "TSRS expected to be open");
-
-		if (currentRowPrescanned)
-			return currentRow;
 
 		/* Nothing to do if we're not currently on a row or
 		 * if the current row get deleted out from under us
