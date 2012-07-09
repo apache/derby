@@ -100,7 +100,7 @@ public class VersionedNetworkServerTestSetup
         Process proc = null;
         try {
             proc = BaseTestCase.execJavaCmd(null, classpath,
-                (String[])cmd.toArray(new String[cmd.size()]), null);
+                cmd.toArray(new String[cmd.size()]), null);
         } catch (IOException ioe) {
             fail("failed to start server: " + ioe.getMessage());
         }
@@ -181,7 +181,7 @@ public class VersionedNetworkServerTestSetup
         Process proc;
         try {
             proc = BaseTestCase.execJavaCmd(null, dist.getProductionClasspath(),
-                    (String[])cmd.toArray(new String[cmd.size()]), null);
+                    cmd.toArray(new String[cmd.size()]), null);
         } catch (IOException ioe) {
             return "shutdown process failed to start: " + ioe.getMessage();
         }

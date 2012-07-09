@@ -674,7 +674,7 @@ public class JDBCDriverTest
 
         checkDBMetadata(tableName);
         stuffTable(tableName, types, rows);
-        readTable(tableName, types, rows, null);
+        readTable(tableName, types, rows);
     }
 
     //
@@ -783,7 +783,7 @@ public class JDBCDriverTest
     // Verify that we can select all legal datatypes in a table.
     //
     private void readTable(String tableName, TypeDescriptor[] types,
-                           Object[][] rows, List<Object> casts )
+                           Object[][] rows)
             throws SQLException {
         PreparedStatement    ps = readTableQuery(tableName, types);
         ResultSet            rs = ps.executeQuery();
@@ -791,7 +791,7 @@ public class JDBCDriverTest
         checkRSMD( rs );
         rs.close();
         // Execute the statement again for each cast / coercion we check.
-        checkRows( ps, types, rows, casts );
+        checkRows( ps, types, rows );
 
         ps.close();
     }
@@ -879,12 +879,10 @@ public class JDBCDriverTest
      * @param ps the query used to obtain the results
      * @param types the type descriptions of the columns
      * @param rows the values expected to be returned
-     * @param casts a list to which objects retrieved from the result rows
-     *      are added, specify {@code null} if you don't need this
      * @throws Exception
      */
     private void checkRows(PreparedStatement ps, TypeDescriptor[] types,
-                           Object[][] rows, List<Object> casts)
+                           Object[][] rows)
             throws SQLException {
         int typeCount = types.length;
 
@@ -900,7 +898,7 @@ public class JDBCDriverTest
                 // Make sure we're using the correct type descriptor.
                 assertEquals(types[colIndex], type);
                 checkPlainGet(ps, colIndex, type, rows);
-                checkCoercions(ps, type, casts);
+                checkCoercions(ps, type);
             }
         }
     }
@@ -940,10 +938,8 @@ public class JDBCDriverTest
      *
      * @param ps the query used to obtain the rows
      * @param type the type description of the column
-     * @param casts
      */
-    private void checkCoercions(PreparedStatement ps, TypeDescriptor type,
-                                List<Object> casts)
+    private void checkCoercions(PreparedStatement ps, TypeDescriptor type)
             throws SQLException {
         String columnName = type.getDerbyTypeName();
         T_CN coercionDesc = COERCIONS[ getCoercionIndex(type.getJdbcType()) ];
@@ -961,11 +957,6 @@ public class JDBCDriverTest
                 while (rs.next()) {
                     int jdbcType = COERCIONS[i].getJdbcType();
                     Object retval = getColumn( rs, columnName, jdbcType );
-
-                    if (casts != null) {
-                        casts.add(retval);
-                    }
-
                     println( "\t" + jdbcType + ":\t" + retval );
                 }
                 rs.close();

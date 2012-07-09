@@ -85,16 +85,12 @@ public class _Suite
      * <strong>NOTE</strong>: If invalid versions are found a warning is simply
      * printed to the console.
      *
-     * We have to suppress warnings here until DerbyVersion can be compiled
-     * at Java 5 level.
-     *
      * @param versions list of Derby versions, i.e '10.8.1.2,10.7.1.1'
      * @return A list of parsed Derby versions.
      */
-    @SuppressWarnings("unchecked")
     private static List<DerbyVersion> parseVersionList(String versions) {
         if (versions == null || versions.length() == 0) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         String[] vlist = versions.split(",");
         List<DerbyVersion> ret = new ArrayList<DerbyVersion>(vlist.length);

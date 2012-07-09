@@ -312,10 +312,8 @@ public class VersionCombinationConfigurator {
      *      be obtained.
      */
     static URL getClassURL(final Class cl) {
-        return (URL)
-           AccessController.doPrivileged(new PrivilegedAction<Object>() {
-
-            public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+            public URL run() {
                 if (cl.getProtectionDomain().getCodeSource() == null) {
                     return null;
                 }
