@@ -22,11 +22,11 @@ package org.apache.derby.impl.drda;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
@@ -48,13 +48,15 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.Vector;
-
 import org.apache.derby.catalog.SystemProcedures;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -62,13 +64,9 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.jdbc.EngineLOB;
-import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
-import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 
 /**
  * This class translates DRDA protocol from an application requester to JDBC
@@ -1190,7 +1188,7 @@ class DRDAConnThread extends Thread {
 		parseEXCSAT();
 		writeEXCSATRD();
 		finalizeChain();
-		session.setState(session.ATTEXC);
+		session.setState(Session.ATTEXC);
 	}
 	
 
@@ -1728,8 +1726,10 @@ class DRDAConnThread extends Thread {
 				knownManagers.add(new Integer(manager));
 				//if the manager level hasn't been set, set it
 				currentLevel = appRequester.getManagerLevel(manager);
-				if (currentLevel == appRequester.MGR_LEVEL_UNKNOWN)
+				if (currentLevel == AppRequester.MGR_LEVEL_UNKNOWN)
+                {
 			    	appRequester.setManagerLevel(manager, managerLevel);
+                }
 				else
 				{
 					//if the level is still the same we'll ignore it
@@ -1779,13 +1779,17 @@ class DRDAConnThread extends Thread {
 	{
 		writer.createDssReply();
 		writer.startDdm(CodePoint.EXCSATRD);
-		writer.writeScalarString(CodePoint.EXTNAM, server.att_extnam);
+        writer.writeScalarString(CodePoint.EXTNAM,
+                                 NetworkServerControlImpl.att_extnam);
 		//only reply with manager levels if we got sent some
 		if (knownManagers != null && knownManagers.size() > 0)
 			writeMGRLEVELS();
-		writer.writeScalarString(CodePoint.SRVCLSNM, server.att_srvclsnm);
-		writer.writeScalarString(CodePoint.SRVNAM, server.ATT_SRVNAM);
-		writer.writeScalarString(CodePoint.SRVRLSLV, server.att_srvrlslv);
+        writer.writeScalarString(CodePoint.SRVCLSNM,
+                                 NetworkServerControlImpl.att_srvclsnm);
+        writer.writeScalarString(CodePoint.SRVNAM,
+                                 NetworkServerControlImpl.ATT_SRVNAM);
+        writer.writeScalarString(CodePoint.SRVRLSLV,
+                                 NetworkServerControlImpl.att_srvrlslv);
     	writer.endDdmAndDss();
 	}
 	/**
@@ -2053,10 +2057,8 @@ class DRDAConnThread extends Thread {
 		// If the security check was successful set the session state to
 		// security accesseed.  Otherwise go back to attributes exchanged so we
 		// require another ACCSEC
-		if (securityCheckCode == 0)
-			session.setState(session.SECACC);
-		else
-			session.setState(session.ATTEXC);
+        session.setState(
+            (securityCheckCode == 0) ? Session.SECACC : Session.ATTEXC);
 
 		return securityCheckCode;
 	}
@@ -3274,8 +3276,9 @@ class DRDAConnThread extends Thread {
 		}
 
 		// Security all checked 
-		if (securityCheckCode == 0)
-			session.setState(session.CHKSEC);
+        if (securityCheckCode == 0) {
+            session.setState(Session.CHKSEC);
+        }
 		
 		return securityCheckCode;
 
@@ -3422,7 +3425,7 @@ class DRDAConnThread extends Thread {
 						trace("prdId " + appRequester.prdid);
 					if (appRequester.prdid.length() > CodePoint.PRDID_MAX)
 						tooBig(CodePoint.PRDID);
-                    if (appRequester.getClientType() != appRequester.DNC_CLIENT) {
+                    if (appRequester.getClientType() != AppRequester.DNC_CLIENT) {
                         invalidClient(appRequester.prdid);
                     }
                     // All versions of DNC,the only client supported, handle
@@ -3431,7 +3434,7 @@ class DRDAConnThread extends Thread {
 					// The client can not request DIAGLVL because when run with
 					// an older server it will cause an exception. Older version
 					// of the server do not recognize requests for DIAGLVL.
-					if ((appRequester.getClientType() == appRequester.DNC_CLIENT) &&
+					if ((appRequester.getClientType() == AppRequester.DNC_CLIENT) &&
 							appRequester.greaterThanOrEqualTo(10, 2, 0)) {
 						diagnosticLevel = CodePoint.DIAGLVL1;
 					}
@@ -3550,7 +3553,8 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.ACCRDBRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, svrcod);
-		writer.writeScalarString(CodePoint.PRDID, server.prdId);
+        writer.writeScalarString(CodePoint.PRDID,
+                                 NetworkServerControlImpl.prdId);
 		//TYPDEFNAM -required - JCC doesn't support QTDSQLJVM so for now we
 		// just use ASCII, though we should eventually be able to use QTDSQLJVM
 		// at level 7
@@ -3564,7 +3568,7 @@ class DRDAConnThread extends Thread {
          // data caching.
          // Sending the session data on connection initialization was introduced
          // in Derby 10.7.
-         if ((appRequester.getClientType() == appRequester.DNC_CLIENT) &&
+         if ((appRequester.getClientType() == AppRequester.DNC_CLIENT) &&
                  appRequester.greaterThanOrEqualTo(10, 7, 0)) {
              try {
                  writePBSD();
@@ -3580,8 +3584,10 @@ class DRDAConnThread extends Thread {
 	{
 		//TYPDEFOVR - required - only single byte and mixed byte are specified
 		writer.startDdm(CodePoint.TYPDEFOVR);
-		writer.writeScalar2Bytes(CodePoint.CCSIDSBC, server.CCSIDSBC);
-		writer.writeScalar2Bytes(CodePoint.CCSIDMBC, server.CCSIDMBC);
+        writer.writeScalar2Bytes(CodePoint.CCSIDSBC,
+                                 NetworkServerControlImpl.CCSIDSBC);
+        writer.writeScalar2Bytes(CodePoint.CCSIDMBC,
+                                 NetworkServerControlImpl.CCSIDMBC);
 		// PKGDFTCST - Send character subtype and userid if requested
 		if (database.sendTRGDFTRT)
 		{
@@ -4585,7 +4591,7 @@ class DRDAConnThread extends Thread {
 								if (SanityManager.DEBUG)
 									trace("******param null");
 								if (pmeta.getParameterMode(i + 1) 
-									!= JDBC30Translation.PARAMETER_MODE_OUT )
+									!= ParameterMetaData.parameterModeOut)
 										ps.setNull(i+1, pmeta.getParameterType(i+1));
 								if (stmt.isOutputParam(i+1))
 									stmt.registerOutParam(i+1);
@@ -6110,7 +6116,7 @@ class DRDAConnThread extends Thread {
 
 		// SQLERRPROC
         // Write the byte[] constant rather than the string, for efficiency
-        writer.writeBytes(server.prdIdBytes_);
+        writer.writeBytes(NetworkServerControlImpl.prdIdBytes_);
 
 		// SQLCAXGRP
         writeSQLCAXGRP(updateCount, rowCount, buildSqlerrmc(e), e.getNextException());
@@ -6163,7 +6169,7 @@ class DRDAConnThread extends Thread {
         writer.writeBytes(sqlState);
 
         // SQLERRPROC
-        writer.writeBytes(server.prdIdBytes_);
+        writer.writeBytes(NetworkServerControlImpl.prdIdBytes_);
 
         // SQLCAXGRP (Uses null as sqlerrmc since there is no error)
         writeSQLCAXGRP(updateCount, rowCount, null, null);
@@ -6821,8 +6827,9 @@ class DRDAConnThread extends Thread {
 
 		for (int i = colStart; i <= colEnd; i++)
 		{
-			boolean nullable = (hasRs ? (rsmeta.isNullable(i) == rsmeta.columnNullable) :
-												 (pmeta.isNullable(i) == JDBC30Translation.PARAMETER_NULLABLE));
+            boolean nullable = hasRs ?
+                (rsmeta.isNullable(i) == ResultSetMetaData.columnNullable) :
+                (pmeta.isNullable(i) == ParameterMetaData.parameterNullable);
 			int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
 			int[] outlen = {-1};
 			int drdaType = FdocaConstants.mapJdbcTypeToDrdaType( colType, nullable, appRequester, outlen );
@@ -7694,9 +7701,9 @@ class DRDAConnThread extends Thread {
 		int scale = (rtnOutput ? rsmeta.getScale(jdbcElemNum) : pmeta.getScale(jdbcElemNum));
 		writer.writeShort(scale);
 
-		boolean nullable = rtnOutput ? (rsmeta.isNullable(jdbcElemNum) ==
-										ResultSetMetaData.columnNullable) : 
-			(pmeta.isNullable(jdbcElemNum) == JDBC30Translation.PARAMETER_NULLABLE);
+        boolean nullable = rtnOutput ?
+         (rsmeta.isNullable(jdbcElemNum) == ResultSetMetaData.columnNullable) :
+         (pmeta.isNullable(jdbcElemNum) == ParameterMetaData.parameterNullable);
 		
 		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(elemType,
 													   nullable, appRequester,
@@ -7917,14 +7924,15 @@ class DRDAConnThread extends Thread {
 		if (pmeta != null && !rtnOutput)
 		{
 			int mode = pmeta.getParameterMode(jdbcElemNum);
-			if (mode ==  JDBC30Translation.PARAMETER_MODE_UNKNOWN)
+			if (mode ==  ParameterMetaData.parameterModeUnknown)
 			{
 				// For old style callable statements. We assume in/out if it
 				// is an output parameter.
 				int type =  DRDAStatement.getOutputParameterTypeFromClassName(
 																			  pmeta.getParameterClassName(jdbcElemNum));
-				if (type != DRDAStatement.NOT_OUTPUT_PARAM)
-					mode = JDBC30Translation.PARAMETER_MODE_IN_OUT;
+                if (type != DRDAStatement.NOT_OUTPUT_PARAM) {
+                    mode = ParameterMetaData.parameterModeInOut;
+                }
 			}
 			writer.writeShort(mode);
 		}
