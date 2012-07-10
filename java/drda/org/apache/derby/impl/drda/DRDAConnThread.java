@@ -64,6 +64,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
@@ -3376,8 +3377,8 @@ class DRDAConnThread extends Thread {
 					if (l < 9 || l > 23)
 						invalidValue(CodePoint.CRRTKN);
 					byte[] part1 = new byte[l - 6];
-					for (int i = 0; i < part1.length; i++)
-						part1[i] = database.crrtkn[i];
+                    System.arraycopy(database.crrtkn, 0,
+                                     part1, 0, part1.length);
 					long time = SignedBinary.getLong(database.crrtkn, 
 							l-8, SignedBinary.BIG_ENDIAN); // as "long" as unique
 					session.drdaID = reader.convertBytes(part1) + 
@@ -4524,7 +4525,7 @@ class DRDAConnThread extends Thread {
 						trace("numVars = " + numVars);
 					if (ps == null)		// it is a CallableStatement under construction
 					{
-						StringBuffer marks = new StringBuffer();	// construct parameter marks
+						StringBuilder marks = new StringBuilder();	// construct parameter marks
                         marks.append("(?");
 						for (int i = 1; i < numVars; i++)
 							marks.append(", ?");
@@ -6248,15 +6249,14 @@ class DRDAConnThread extends Thread {
 		if (se == null)
 			return "";
 		
-		StringBuffer sb = new StringBuffer(); 
 		 // String buffer to build up message
-		do {
-			sb.append(se.getLocalizedMessage());
-			se = se.getNextException();
-			if (se != null)
-				sb.append(SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER + 
-						"SQLSTATE: " + se.getSQLState());
-		} while (se != null);			
+        StringBuilder sb = new StringBuilder();
+        sb.append(se.getLocalizedMessage());
+        while ((se = se.getNextException()) != null) {
+            sb.append(SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER);
+            sb.append("SQLSTATE: ");
+            sb.append(se.getSQLState());
+        }
 		return sb.toString();		
 	}
 
@@ -6288,12 +6288,13 @@ class DRDAConnThread extends Thread {
 			{   
 				// this could happen for instance if an SQLException was thrown
 				// from a stored procedure.
-				StringBuffer sb = new StringBuffer(); 
+				StringBuilder sb = new StringBuilder();
 				sb.append(se.getLocalizedMessage());
 				se = se.getNextException();
-				if (se != null)
-				sb.append(SQLERRMC_TOKEN_DELIMITER + 
-					"SQLSTATE: " + se.getSQLState());
+                if (se != null) {
+                    sb.append(SQLERRMC_TOKEN_DELIMITER);
+                    sb.append("SQLSTATE: ").append(se.getSQLState());
+                }
 				sqlerrmc += sb.toString();
 			}
 			if (se != null)
@@ -8203,8 +8204,7 @@ class DRDAConnThread extends Thread {
 		currentRequiredLength = req.length;
 		if (currentRequiredLength > required.length)
 			required = new int[currentRequiredLength];
-		for (int i = 0; i < req.length; i++)
-			required[i] = req[i];
+        System.arraycopy(req, 0, required, 0, req.length);
 	}
 	/**
 	 * Remove codepoint from required list
@@ -8582,7 +8582,7 @@ class DRDAConnThread extends Thread {
                                  EXTDTAReaderInputStream stream,
                                  boolean streamLOB, String encoding) {
         if (SanityManager.DEBUG && server.debugOutput == true) {
-            StringBuffer sb = new StringBuffer("Reading/setting EXTDTA: ");
+            StringBuilder sb = new StringBuilder("Reading/setting EXTDTA: ");
             // Data: t<type>/i<ob_index>/<streamLOB>/<encoding>/
             //       <statusByteExpected>/b<byteLength>
             sb.append("t").append(drdaType).append("/i").append(index).
@@ -8625,19 +8625,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private String convertToHexString(byte [] buf)
 	{
-		StringBuffer str = new StringBuffer();
-		str.append("0x");
-		String val;
-		int byteVal;
-		for (int i = 0; i < buf.length; i++)
-		{
-			byteVal = buf[i] & 0xff;
-			val = Integer.toHexString(byteVal);
-			if (val.length() < 2)
-				str.append("0");
-			str.append(val);
-		}
-		return str.toString();
+        return "0x" + StringUtil.toHexString(buf, 0, buf.length);
 	}
 	/**
 	 * check that the given typdefnam is acceptable
