@@ -735,7 +735,6 @@ class DRDAConnThread extends Thread {
 	private void processCommands() throws DRDAProtocolException
 	{
 		DRDAStatement stmt = null;
-		int updateCount = 0;
 		boolean PRPSQLSTTfailed = false;
 		boolean checkSecurityCodepoint = session.requiresSecurityCodepoint();
 		do
@@ -774,7 +773,7 @@ class DRDAConnThread extends Thread {
 					break;
 				case CodePoint.EXCSQLIMM:
 					try {
-						updateCount = parseEXCSQLIMM();
+						int updateCount = parseEXCSQLIMM();
 						// RESOLVE: checking updateCount is not sufficient
 						// since it will be 0 for creates, we need to know when
 						// any logged changes are made to the database
@@ -843,7 +842,6 @@ class DRDAConnThread extends Thread {
 					}
 					break;
 				case CodePoint.OPNQRY:
-					PreparedStatement ps = null;
 					try {
 						if (PRPSQLSTTfailed) {
 							// read the command objects
@@ -860,7 +858,7 @@ class DRDAConnThread extends Thread {
 						if (pkgnamcsn != null)
 						{
 							stmt = database.getDRDAStatement(pkgnamcsn);
-							ps = stmt.getPreparedStatement();
+							PreparedStatement ps = stmt.getPreparedStatement();
 							ps.clearWarnings();
                             if (pendingStatementTimeout >= 0) {
                                 ps.setQueryTimeout(pendingStatementTimeout);
@@ -1412,14 +1410,7 @@ class DRDAConnThread extends Thread {
 	private int verifyUserIdPassword() throws DRDAProtocolException
 	{
 		databaseAccessException = null;
-		int retSecChkCode = 0;
-
-		String realName = database.getDatabaseName(); //first strip off properties
-		int endOfName = realName.indexOf(';');
-		if (endOfName != -1)
-			realName = realName.substring(0, endOfName);
-		retSecChkCode = getConnFromDatabaseName();
-		return retSecChkCode;
+        return getConnFromDatabaseName();
 	}
 
 	/**
@@ -2707,7 +2698,7 @@ class DRDAConnThread extends Thread {
 			numVars = (dtaGrpLen - 3) / 3;
 			if (SanityManager.DEBUG)
 				trace("num of vars is: "+numVars);
-			int[] outovr_drdaType = null;
+			int[] outovr_drdaType;
 			if (first)
 			{
 				outovr_drdaType = new int[numVars];
@@ -3743,10 +3734,8 @@ class DRDAConnThread extends Thread {
 		int codePoint;
 		boolean rtnsqlda = false;
 		boolean rtnOutput = true; 	// Return output SQLDA is default
-		String typdefnam;
 		Pkgnamcsn pkgnamcsn = null;
 
-		DRDAStatement stmt = null;  
 		Database databaseToSet = null;
 
 		reader.markCollection();
@@ -3785,7 +3774,7 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 
-		stmt = database.newDRDAStatement(pkgnamcsn);
+		DRDAStatement stmt = database.newDRDAStatement(pkgnamcsn);
 		String sqlStmt = parsePRPSQLSTTobjects(stmt);
 		if (databaseToSet != null)
 			stmt.setDatabase(database);
@@ -5350,8 +5339,6 @@ class DRDAConnThread extends Thread {
 		boolean gotSqlStt = false;
 		boolean hadUnrecognizedStmt = false;
 
-		String sqlStmt = null;
-		int codePoint;
 		DRDAStatement drdaStmt = database.getDefaultStatement();
 		drdaStmt.initialize();
 
@@ -5361,7 +5348,7 @@ class DRDAConnThread extends Thread {
 			while (reader.moreDssData())
 			{
 
-				codePoint = reader.readLengthAndCodePoint( false );
+				int codePoint = reader.readLengthAndCodePoint(false);
 
 				switch(codePoint)
 				{
@@ -5375,7 +5362,7 @@ class DRDAConnThread extends Thread {
 						break;
 					// required
 					case CodePoint.SQLSTT:
-						sqlStmt = parseEncodedString();
+						String sqlStmt = parseEncodedString();
 						if (sqlStmt != null)
 						// then we have at least one SQL Statement.
 							gotSqlStt = true;
@@ -5834,7 +5821,6 @@ class DRDAConnThread extends Thread {
 			// PGKNAMCSN, so even for explicit closes we have
 			// to ignore.
 			//writeQRYNOPRM(CodePoint.SVRCOD_ERROR);
-			pkgnamcsn = null;
 		}
 
 		stmt.CLSQRY();
@@ -6224,7 +6210,7 @@ class DRDAConnThread extends Thread {
 	private String buildSqlerrmc (SQLException se) 
 	{
 		boolean severe = (se.getErrorCode() >=  ExceptionSeverity.SESSION_SEVERITY);	
-		String sqlerrmc = null;
+		String sqlerrmc;
 
 		// get exception which carries Derby messageID and args, per DERBY-1178
 		se = Util.getExceptionFactory().getArgumentFerry( se );
@@ -7079,7 +7065,7 @@ class DRDAConnThread extends Thread {
 	private boolean writeFDODTA (DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
 	{
-		boolean hasdata = false;
+		boolean hasdata;
 		int blksize = stmt.getBlksize() > 0 ? stmt.getBlksize() : CodePoint.QRYBLKSZ_MAX;
 		long rowCount = 0;
 		ResultSet rs =null;
@@ -7180,7 +7166,6 @@ class DRDAConnThread extends Thread {
 				int precision;
 				int scale;
 
-				Object val = null;
 				boolean valNull;
 				if (rs != null)
 				{
@@ -7259,7 +7244,8 @@ class DRDAConnThread extends Thread {
                                           stmt, false);
 							break;
 						default:
-                            val = getObjectForWriteFdoca(rs, i, drdaType);
+                            Object val =
+                                getObjectForWriteFdoca(rs, i, drdaType);
                             writeFdocaVal(i, val, drdaType,
 										  precision, scale, rs.wasNull(),
                                           stmt, false);
@@ -7280,7 +7266,7 @@ class DRDAConnThread extends Thread {
                                                 
 						if (SanityManager.DEBUG)
 							trace("***getting Object "+i);
-                        val = getObjectForWriteFdoca(
+                        Object val = getObjectForWriteFdoca(
                                 (CallableStatement) stmt.ps, i, drdaType);
 						valNull = (val == null);
 						writeFdocaVal(i, val, drdaType, precision, scale,
@@ -8620,11 +8606,9 @@ class DRDAConnThread extends Thread {
 	 *
 	 ***/
 	public static void showmem() {
-		Runtime rt = null;
-		Date d = null;
-		rt = Runtime.getRuntime();
+        Runtime rt = Runtime.getRuntime();
+        Date d = new Date();
 		rt.gc();
-		d = new Date();
 		System.out.println("total memory: "
 						   + rt.totalMemory()
 						   + " free: "
@@ -8846,13 +8830,12 @@ class DRDAConnThread extends Thread {
 	{
 		// instead of writing a chain of sql warning, we send the first one, this is
 		// jcc/db2 limitation, see beetle 4629
-		SQLWarning warning = null;
 		SQLWarning reportWarning = null;
 		try
 		{
 			if (stmt != null)
 			{
-				warning = stmt.getWarnings();
+				SQLWarning warning = stmt.getWarnings();
 				if (warning != null)
 				{
 					stmt.clearWarnings();
@@ -8861,7 +8844,7 @@ class DRDAConnThread extends Thread {
 			}
 			if (rs != null)
 			{
-				warning = rs.getWarnings();
+				SQLWarning warning = rs.getWarnings();
 				if (warning != null)
 				{
 					rs.clearWarnings();
@@ -8871,7 +8854,7 @@ class DRDAConnThread extends Thread {
 			}
 			if (conn != null)
 			{
-				warning = conn.getWarnings();
+				SQLWarning warning = conn.getWarnings();
 				if (warning != null)
 				{
 					conn.clearWarnings();
@@ -8946,7 +8929,6 @@ class DRDAConnThread extends Thread {
      */
     private int validateSecMecUSRSSBPWD() throws  DRDAProtocolException
     {
-        String dbName = null;
         AuthenticationService authenticationService = null;
         org.apache.derby.iapi.db.Database databaseObj = null;
         String srvrlslv = appRequester.srvrlslv;
@@ -8986,7 +8968,7 @@ class DRDAConnThread extends Thread {
         if (appRequester.supportsSecMecUSRSSBPWD() == false)
             return CodePoint.SECCHKCD_NOTSUPPORTED; // Not Supported
 
-        dbName = database.getShortDbName();
+        String dbName = database.getShortDbName();
         // Check if the database is available (booted)
         // 
         // First we need to have the database name available and it should
@@ -9102,7 +9084,7 @@ class DRDAConnThread extends Thread {
 
         byte[] buffer = new byte[Math.min(byteArrayLength, 32*1024)];
         
-        int c = 0;
+        int c;
         
         while( ( c = stream.read( buffer,
                                   0,
