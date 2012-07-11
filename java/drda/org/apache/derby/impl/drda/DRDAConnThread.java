@@ -4255,11 +4255,10 @@ class DRDAConnThread extends Thread {
 		else  if (! sendSQLDTARD)
 		{
 			int updateCount = ps.getUpdateCount();
-			if (false && (database.RDBUPDRM_sent == false) &&
-				! isProcedure)
-			{
-				writeRDBUPDRM();
-			}
+
+            // The protocol wants us to send RDBUPDRM here, but we don't do
+            // that because it used to cause protocol errors. DERBY-5847 has
+            // some discussion about this issue.
 
 			checkWarning(database.getConnection(), stmt.ps, null, updateCount, true, true);
 		}
@@ -7694,7 +7693,7 @@ class DRDAConnThread extends Thread {
 				case Types.DECIMAL:
 				case Types.NUMERIC:
 					scale = rtnOutput ? rsmeta.getScale(jdbcElemNum) : pmeta.getScale(jdbcElemNum);
-					outlen[0] = ((precision <<8) | (scale <<0));
+					outlen[0] = ((precision <<8) | scale);
 					if (SanityManager.DEBUG) 
 						trace("\n\nprecision =" +precision +
 						  " scale =" + scale);
@@ -8704,15 +8703,17 @@ class DRDAConnThread extends Thread {
 	 */
 	private void setDatabase(int codePoint) throws DRDAProtocolException
 	{
-		String rdbnam = parseRDBNAM();
+		String dbname = parseRDBNAM();
 		// using same database so we are done
-		if (database != null && database.getDatabaseName().equals(rdbnam))
+		if (database != null && database.getDatabaseName().equals(dbname)) {
 			return;
-		Database d = session.getDatabase(rdbnam);
-		if (d == null)
+        }
+		Database d = session.getDatabase(dbname);
+		if (d == null) {
 			rdbnamMismatch(codePoint);
-		else
+        } else {
 			database = d;
+        }
 		session.database = d;
 	}
 	/**
