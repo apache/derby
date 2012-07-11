@@ -123,14 +123,14 @@ class DRDAConnThread extends Thread {
 
 	private NetworkServerControlImpl server;			// server who created me
 	private Session	session;	// information about the session
-	private long timeSlice;				// time slice for this thread
-	private Object timeSliceSync = new Object(); // sync object for updating time slice 
-	private boolean logConnections;		// log connections to databases
+    /** Time slice for this thread. */
+    private volatile long timeSlice;
+    /** Whether or not to log connections. */
+    private volatile boolean logConnections;
 
 	private boolean	sendWarningsOnCNTQRY = false;	// Send Warnings for SELECT if true
-	private Object logConnectionsSync = new Object(); // sync object for log connect
-	private boolean close;				// end this thread
-	private Object closeSync = new Object();	// sync object for parent to close us down
+    /** End this thread. */
+    private volatile boolean close;
 	private static HeaderPrintWriter logStream;
 	private AppRequester appRequester;	// pointer to the application requester
 										// for the session being serviced
@@ -445,10 +445,7 @@ class DRDAConnThread extends Thread {
 	 */
 	protected void close()
 	{
-		synchronized (closeSync)
-		{
-			close = true;
-		}
+        close = true;
 	}
 
 	/**
@@ -458,9 +455,7 @@ class DRDAConnThread extends Thread {
 	 */
 	protected void setLogConnections(boolean value)
 	{
-		synchronized(logConnectionsSync) {
-			logConnections = value;
-		}
+        logConnections = value;
 	}
 	/**
 	 * Set time slice value
@@ -469,9 +464,7 @@ class DRDAConnThread extends Thread {
 	 */
 	protected void setTimeSlice(long value)
 	{
-		synchronized(timeSliceSync) {
-			timeSlice = value;
-		}
+        timeSlice = value;
 	}
 	/**
 	 * Indicate a communications failure
@@ -8526,10 +8519,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private boolean closed()
 	{
-		synchronized (closeSync)
-		{
-			return close;
-		}
+        return close;
 	}
 	/**
 	 * Get whether connections are logged
@@ -8538,9 +8528,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private boolean getLogConnections()
 	{
-		synchronized(logConnectionsSync) {
-			return logConnections;
-		}
+        return logConnections;
 	}
 	/**
 	 * Get time slice value for length of time to work on a session
@@ -8549,9 +8537,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private long getTimeSlice()
 	{
-		synchronized(timeSliceSync) {
-			return timeSlice;
-		}
+        return timeSlice;
 	}
 	/**
 	 * Send string to console
