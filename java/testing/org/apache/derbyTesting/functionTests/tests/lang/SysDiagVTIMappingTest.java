@@ -369,7 +369,35 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         
         JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
         JDBC.assertFullResultSet(rs, expRS, true);
+
+        // verify the fix to DERBY-5554: joins to VTIs in the FROM list still
+        // work when there are more than 1 base tables in the FROM list and
+        // they join in the WHERE clause
         
+        rs = st.executeQuery
+            (
+             "select t2.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        table (syscs_diag.space_table(systabs.tablename)) as t2,\n" +
+             "        sys.sysconglomerates syscgs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = syscgs.tableid\n"
+             );        
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        rs = st.executeQuery
+            (
+             "select t2.*\n" +
+             "    from\n" +
+             "        sys.sysconglomerates syscgs,\n" +
+             "        table (syscs_diag.space_table(systabs.tablename)) as t2,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = syscgs.tableid\n"
+             );        
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
         // Now do some sanity checking to make sure SPACE_TABLE cannot be
         // used in any illegal ways.        
 

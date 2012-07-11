@@ -117,6 +117,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private String[] projectedColumnNames; // for RestrictedVTIs
     private Restriction vtiRestriction; // for RestrictedVTIs
 
+    // for remapping column references in VTI args at code generation time
+    private HashMap argSources = new HashMap();
+
     /**
 	 * @param invocation		The constructor or static method for the VTI
 	 * @param correlationName	The correlation name
@@ -885,13 +888,17 @@ public class FromVTI extends FromTable implements VTIEnvironment
             // VTI parameters to refer to other VTIs.
             //
             int referencedTableNumber = ref.getTableNumber();
-                
+
             for ( int i = 0; i < fromListParam.size(); i++ )
             {
                 FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
 
                 if ( referencedTableNumber == fromTable.getTableNumber() )
                 {
+                    // remember this FromTable so that we can code generate the arg
+                    // from actual result columns later on.
+                    argSources.put( new Integer( fromTable.getTableNumber() ), fromTable );
+                    
                     if ( isDerbyStyleTableFunction || (fromTable instanceof FromVTI) )
                     {
                         throw StandardException.newException
@@ -1503,6 +1510,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 */
 		RemapCRsVisitor rcrv = new RemapCRsVisitor(true);
 		methodCall.accept(rcrv);
+        remapBaseTableColumns();
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -1513,6 +1521,36 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		int nargs = getScanArguments(acb, mb);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getVTIResultSet",ClassName.NoPutResultSet, nargs);
 	}
+
+    /**
+     * <p>
+     * Remap the column references in vti arguments.
+     * Point those column references at the result columns for the base table. This
+     * prevents us from code-generating the args from references to unfilled columns in
+     * higher join nodes. See DERBY-5554.
+     * </p>
+     */
+    private void remapBaseTableColumns() throws StandardException
+    {
+		Vector colRefs = getNodesFromParameters(ColumnReference.class);
+		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		{
+			ColumnReference ref = (ColumnReference)e.nextElement();
+            FromTable   fromTable = (FromTable) argSources.get( new Integer( ref.getTableNumber() ) );
+
+            if ( fromTable != null )
+            {
+                ResultColumnList    rcl = fromTable.getResultColumns();
+
+                if ( rcl != null )
+                {
+                    ResultColumn    newRC = rcl.getResultColumn( ref.getColumnName() );
+
+                    if ( newRC != null ) { ref.setSource( newRC ); }
+                }
+            }
+        }
+    }
 
 	private int getScanArguments(ActivationClassBuilder acb,
 										  MethodBuilder mb)
