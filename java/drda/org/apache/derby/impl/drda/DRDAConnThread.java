@@ -233,12 +233,8 @@ class DRDAConnThread extends Thread {
 	DRDAConnThread(Session session, NetworkServerControlImpl server, 
 						  long timeSlice,
 						  boolean logConnections) {
-	
-   	super();
-
-		// Create a more meaningful name for this thread (but preserve its
-		// thread id from the default name).
-		NetworkServerControlImpl.setUniqueThreadName(this, "DRDAConnThread");
+        // Use a more meaningful name for this thread.
+        super(NetworkServerControlImpl.getUniqueThreadName("DRDAConnThread"));
 
 		this.session = session;
 		this.server = server;

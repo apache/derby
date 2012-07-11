@@ -30,14 +30,12 @@ final class ClientThread extends Thread {
 	NetworkServerControlImpl parent;
 	ServerSocket serverSocket;
 	private int timeSlice;
-	private int connNum;
     
     ClientThread (NetworkServerControlImpl nsi, ServerSocket ss) {
-        
-        // Create a more meaningful name for this thread (but preserve its
-        // thread id from the default name).
-        NetworkServerControlImpl.setUniqueThreadName(this, "NetworkServerThread");
-        
+        // Use a more meaningful name for this thread.
+        super(NetworkServerControlImpl.getUniqueThreadName(
+                "NetworkServerThread"));
+
         parent=nsi;
         serverSocket=ss;
         timeSlice=nsi.getTimeSlice();
