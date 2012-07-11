@@ -45,9 +45,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.Vector;
 import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
@@ -141,10 +141,8 @@ class DRDAConnThread extends Thread {
 	private byte diagnosticLevel = (byte)0xF0; 
 
 	// manager processing
-	private Vector unknownManagers;
-	private Vector knownManagers;
-	private Vector errorManagers;
-	private Vector errorManagersLevel;
+    private List unknownManagers;
+    private List knownManagers;
 
 	// database accessed failed
 	private SQLException databaseAccessException;
@@ -1702,10 +1700,10 @@ class DRDAConnThread extends Thread {
 		int manager, managerLevel;
 		int currentLevel;
 		// set up vectors to keep track of manager information
-		unknownManagers = new Vector();
-		knownManagers = new Vector();
-		errorManagers = new Vector();
-		errorManagersLevel = new Vector();
+		unknownManagers = new ArrayList();
+		knownManagers = new ArrayList();
+		ArrayList errorManagers = new ArrayList();
+		ArrayList errorManagersLevel = new ArrayList();
 		if (SanityManager.DEBUG)
 			trace("Manager Levels");
 
