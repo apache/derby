@@ -885,26 +885,39 @@ public class FromVTI extends FromTable implements VTIEnvironment
             //
             // Table Function parameters may not reference columns from other tables in the
             // FROM list of the current query block. See DERBY-5579. We also do not allow
-            // VTI parameters to refer to other VTIs.
+            // VTI parameters to refer to other VTIs. We also do not allow even VTIs to
+            // reference other elements in the current <joined table>.
             //
             int referencedTableNumber = ref.getTableNumber();
+            boolean illegalReference = !ref.getCorrelated();
 
-            for ( int i = 0; i < fromListParam.size(); i++ )
+            if ( !ref.getCorrelated() ) // if the arg refers to a table in this query block
             {
-                FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
-
-                if ( referencedTableNumber == fromTable.getTableNumber() )
+                for ( int i = 0; i < fromListParam.size(); i++ )
                 {
-                    // remember this FromTable so that we can code generate the arg
-                    // from actual result columns later on.
-                    argSources.put( new Integer( fromTable.getTableNumber() ), fromTable );
-                    
-                    if ( isDerbyStyleTableFunction || (fromTable instanceof FromVTI) )
+                    FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
+
+                    if ( referencedTableNumber == fromTable.getTableNumber() )
                     {
-                        throw StandardException.newException
-                            ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, ref.getSQLColumnName() );
+                        // remember this FromTable so that we can code generate the arg
+                        // from actual result columns later on.
+                        argSources.put( new Integer( fromTable.getTableNumber() ), fromTable );
+
+                        // the only legal kind of reference is a VTI argument which
+                        // references a non-VTI table in the current query block
+                        if ( !isDerbyStyleTableFunction && !(fromTable instanceof FromVTI) )
+                        {
+                            illegalReference = false;
+                            break;
+                        }
                     }
                 }
+            }
+            
+            if ( illegalReference )
+            {
+                throw StandardException.newException
+                    ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, ref.getSQLColumnName() );
             }
 
 			// Rebind the CR if the tableNumber is uninitialized

@@ -52,6 +52,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
     private static  final   String  UTF8 = "UTF-8";
 
+    private static  final   String  BAD_ARG_JOIN = "42ZB7";
+
     private static  final   int MAX_VARIABLE_DATA_TYPE_LENGTH = 32700;
     
     // functions to drop at teardown time
@@ -2064,9 +2066,33 @@ public class TableFunctionTest extends BaseJDBCTestCase
         // by DERBY-5779.
         expectError
             (
-             "42ZB7",
+             BAD_ARG_JOIN,
              "select tablename, contents\n" +
              "from sys.systables t, table( lowerCaseRow( cast (t.tablename as varchar(32672)) ) ) s\n"
+             );
+        // diagnostic vti arg joining to another table in a <joined table> clause
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt join sys.systables st using(tableid)"
+             );
+        // table function arg joining to another table in a <joined table> clause
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table( lowerCaseRow(st.tablename)) tt join sys.systables st on tt.contents = st.tablename"
+             );
+        // diagnostic vti arg joining to another table in a <joined table> clause
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt right join sys.systables st using(tableid)"
+             );
+        // table function arg joining to another table in a <joined table> clause
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table( lowerCaseRow(st.tablename)) tt right join sys.systables st on tt.contents = st.tablename"
              );
 
         // pre-existing error not affected: table function correlated
