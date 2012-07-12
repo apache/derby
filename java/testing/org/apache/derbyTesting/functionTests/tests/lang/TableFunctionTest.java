@@ -2076,23 +2076,93 @@ public class TableFunctionTest extends BaseJDBCTestCase
              BAD_ARG_JOIN,
              "select tt.* from table(syscs_diag.space_table(st.tablename)) tt join sys.systables st using(tableid)"
              );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from sys.systables st join table(syscs_diag.space_table(st.tablename)) tt using(tableid)"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt right join sys.systables st using(tableid)"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from sys.systables st right join table(syscs_diag.space_table(st.tablename)) tt using(tableid)"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt left join sys.systables st using(tableid)"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from sys.systables st left join table(syscs_diag.space_table(st.tablename)) tt using(tableid)"
+             );
         // table function arg joining to another table in a <joined table> clause
         expectError
             (
              BAD_ARG_JOIN,
              "select tt.* from table( lowerCaseRow(st.tablename)) tt join sys.systables st on tt.contents = st.tablename"
              );
-        // diagnostic vti arg joining to another table in a <joined table> clause
         expectError
             (
              BAD_ARG_JOIN,
-             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt right join sys.systables st using(tableid)"
+             "select tt.* from sys.systables st join table( lowerCaseRow(st.tablename)) tt on tt.contents = st.tablename"
              );
-        // table function arg joining to another table in a <joined table> clause
         expectError
             (
              BAD_ARG_JOIN,
              "select tt.* from table( lowerCaseRow(st.tablename)) tt right join sys.systables st on tt.contents = st.tablename"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from sys.systables st right join table( lowerCaseRow(st.tablename)) tt on tt.contents = st.tablename"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table( lowerCaseRow(st.tablename)) tt left join sys.systables st on tt.contents = st.tablename"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from sys.systables st left join table( lowerCaseRow(st.tablename)) tt on tt.contents = st.tablename"
+             );
+        // 3-way <joined table>
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from ( table(syscs_diag.space_table('foo')) tt join sys.systables st using(tableid) ) join table(syscs_diag.space_table(st.tablename)) tr using(tableid)"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from ( table( lowerCaseRow('foo')) tt join sys.systables st on tt.contents = st.tablename ) join table( lowerCaseRow(st.tablename)) tr on tr.contents = st.tablename"
+             );
+        // cross joins
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table(syscs_diag.space_table(st.tablename)) tt cross join sys.systables st"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from table( lowerCaseRow(st.tablename)) tt cross join sys.systables st"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from ( table(syscs_diag.space_table('foo')) tt cross join sys.systables st ) cross join table(syscs_diag.space_table(st.tablename)) tr"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.* from ( table( lowerCaseRow('foo')) tt cross join sys.systables st ) cross join table( lowerCaseRow(st.tablename)) tr"
              );
 
         // pre-existing error not affected: table function correlated
@@ -2104,8 +2174,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "from table( lowerCaseRow( cast( t.tablename as varchar(32672)) ) ) s\n" +
              "where exists ( select tableid from sys.systables t )\n"
              );
-
-        //???;
     }
     
     /**
