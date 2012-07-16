@@ -491,7 +491,7 @@ public class classlister {
 		}
 
 		// drda explicitly brings in some database engine classes.
-		// they must be picke dup from cs.jar and not put in
+		// they must be picked up from derby.jar and not put in
 		// the network server jar.
 		if (db2jdrda) {
 
@@ -501,6 +501,8 @@ public class classlister {
 				|| className.startsWith("org.apache.derby.impl.services")
 				|| className.startsWith("org.apache.derby.iapi.")
 				|| className.startsWith("org.apache.derby.security.")
+                || (className.startsWith("org.apache.derby.mbeans.") &&
+                    !className.startsWith("org.apache.derby.mbeans.drda."))
 				)
 			{
 				return;

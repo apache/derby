@@ -149,9 +149,9 @@ final class ClientThread extends Thread {
      * 
      */
     private Socket acceptClientWithRetry() {
-        return (Socket) AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<Socket>() {
+                    public Socket run() {
                         for (int trycount = 1; trycount <= 3; trycount++) {
                             try {
                                 // DERBY-5347 Need to exit if

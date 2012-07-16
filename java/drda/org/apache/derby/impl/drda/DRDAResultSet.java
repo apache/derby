@@ -79,11 +79,10 @@ class DRDAResultSet
 	protected int nbrrow;			   // number of fetch or insert rows
 	protected byte [] rslsetflg;		// Result Set Flags
 
-	private ArrayList  extDtaObjects;  // Arraylist of Blobs and Clobs 
-	                                   // Return Values to 
-		                               // send with extdta objects.
+    /** List of Blobs and Clobs. Return values to send with extdta objects. */
+    private ArrayList<Object> extDtaObjects;
 	
-	private ArrayList rsExtPositions;
+    private ArrayList<Integer> rsExtPositions;
 
 	protected ConsistencyToken pkgcnstkn; // Unique consistency token for ResultSet 0
 
@@ -258,11 +257,11 @@ class DRDAResultSet
 	protected void  addExtDtaObject (Object o, int jdbcIndex )
 	{
 		if (extDtaObjects == null)
-			extDtaObjects = new java.util.ArrayList();
+			extDtaObjects = new java.util.ArrayList<Object>();
 		extDtaObjects.add (o);
 
 		if (rsExtPositions == null)
-			rsExtPositions = new java.util.ArrayList();
+			rsExtPositions = new java.util.ArrayList<Integer>();
 		
 		// need to record the 0 based position so subtract 1
 		rsExtPositions.add (new Integer(jdbcIndex -1 ));
@@ -312,20 +311,11 @@ class DRDAResultSet
 	 *
 	 *  @return ArrayList with extdta
 	 */
-	protected ArrayList getExtDtaObjects()
+	protected ArrayList<Object> getExtDtaObjects()
 	{
 		return extDtaObjects;
 	}
 
-	/**
-	 * Set the extData Objects
-	 */
-	protected void  setExtDtaObjects(ArrayList a)
-	{
-		extDtaObjects =a;
-	}
-	
-	
 	/**
 	 * This method closes the JDBC objects and frees up all references held by
 	 * this object.

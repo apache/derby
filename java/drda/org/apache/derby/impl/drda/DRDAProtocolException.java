@@ -82,7 +82,7 @@ class DRDAProtocolException extends Exception
 	// when getMessage() is called on this Exception object
 	private String msg;
     
-	private static Hashtable errorInfoTable;
+	private static Hashtable<String, DRDAProtocolExceptionInfo> errorInfoTable;
 	
 	protected static String DRDA_Proto_CMDCHKRM=	"DRDA_Proto_CMDCHKRM";
 	protected static String DRDA_Proto_CMDNSPRM=	"DRDA_Proto_CMDNSPRM";
@@ -109,7 +109,7 @@ class DRDAProtocolException extends Exception
 	   DRDAProtocolExceptionInfo for each of our messages.
 	*/
 	
-	errorInfoTable = new Hashtable();
+	errorInfoTable = new Hashtable<String, DRDAProtocolExceptionInfo>();
 	
 	errorInfoTable.put(
 			   DRDA_Proto_CMDCHKRM,

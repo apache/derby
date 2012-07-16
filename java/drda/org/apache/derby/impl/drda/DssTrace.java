@@ -185,9 +185,9 @@ public class DssTrace
                 try {             	
                     // The writer will be buffered for effeciency.
                     comBufferWriter =
-                        ((PrintWriter)AccessController.doPrivileged(
-                            new PrivilegedExceptionAction() {
-                                public Object run()
+                        (AccessController.doPrivileged(
+                            new PrivilegedExceptionAction<PrintWriter>() {
+                                public PrintWriter run()
                                         throws SecurityException, IOException {
                                     File f = new File(fileName);
                                     boolean exists = f.exists();
@@ -214,8 +214,8 @@ public class DssTrace
                         final File traceDirectory = new File(fileName).getParentFile();
                         if (traceDirectory != null) {
                             AccessController.doPrivileged(
-                                    new PrivilegedAction() {
-                                        public Object run() {
+                                    new PrivilegedAction<Void>() {
+                                        public Void run() {
                                             // DERBY-4128: First try to create the
                                             // directory with mkdir(), as that doesn't
                                             // require read permission for the parent

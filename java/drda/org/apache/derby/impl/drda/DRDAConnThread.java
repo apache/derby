@@ -141,8 +141,8 @@ class DRDAConnThread extends Thread {
 	private byte diagnosticLevel = (byte)0xF0; 
 
 	// manager processing
-    private List unknownManagers;
-    private List knownManagers;
+    private List<Integer> unknownManagers;
+    private List<Integer> knownManagers;
 
 	// database accessed failed
 	private SQLException databaseAccessException;
@@ -1689,10 +1689,10 @@ class DRDAConnThread extends Thread {
 		int manager, managerLevel;
 		int currentLevel;
 		// set up vectors to keep track of manager information
-		unknownManagers = new ArrayList();
-		knownManagers = new ArrayList();
-		ArrayList errorManagers = new ArrayList();
-		ArrayList errorManagersLevel = new ArrayList();
+		unknownManagers = new ArrayList<Integer>();
+		knownManagers = new ArrayList<Integer>();
+		ArrayList<Integer> errorManagers = new ArrayList<Integer>();
+		ArrayList<Integer> errorManagersLevel = new ArrayList<Integer>();
 		if (SanityManager.DEBUG)
 			trace("Manager Levels");
 
@@ -8733,7 +8733,7 @@ class DRDAConnThread extends Thread {
 
   void writeEXTDTA (DRDAStatement stmt) throws SQLException, DRDAProtocolException
   {
-	  ArrayList extdtaValues = stmt.getExtDtaObjects();
+	  ArrayList<Object> extdtaValues = stmt.getExtDtaObjects();
     // build the EXTDTA data, if necessary
     if (extdtaValues == null) 
 		return;

@@ -320,8 +320,9 @@ public class NetworkServerControl{
             if (command == NetworkServerControlImpl.COMMAND_START &&
                     JVMInfo.JDK_ID >= JVMInfo.J2SE_17) {
                 try {
-                    AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                            public Object run() throws Exception {
+                    AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<Void>() {
+                            public Void run() throws Exception {
                                 System.setProperty(
                                     Property.SERVER_STARTED_FROM_CMD_LINE,
                                     "true");

@@ -99,8 +99,10 @@ class DRDAStatement
 
 
 	private DRDAResultSet currentDrdaRs;  // Current ResultSet
-	private Hashtable resultSetTable;     // Hashtable with resultsets            
-	private ArrayList resultSetKeyList;  // ordered list of hash keys
+    /** Hashtable with resultsets. */
+    private Hashtable<ConsistencyToken, DRDAResultSet> resultSetTable;
+    /** Ordered list of hash keys. */
+    private ArrayList<ConsistencyToken> resultSetKeyList;
 	private int numResultSets = 0;  
 
     /**
@@ -414,17 +416,9 @@ class DRDAStatement
 	 *
 	 *  @return ArrayList with extdta
 	 */
-	protected ArrayList getExtDtaObjects()
+	protected ArrayList<Object> getExtDtaObjects()
 	{
 		return currentDrdaRs.getExtDtaObjects();
-	}
-
-	/**
-	 * Set the extData Objects
-	 */
-	protected void  setExtDtaObjects(ArrayList a)
-	{
-		currentDrdaRs.setExtDtaObjects(a);
 	}
 
 	public void setSplitQRYDTA(byte []data)
@@ -981,9 +975,10 @@ class DRDAStatement
 				// If hashtable doesn't exist, create it and store resultSet 0
 				// before we store our new resultSet.
 				// For just a single resultSet we don't ever create the Hashtable.
-				resultSetTable = new Hashtable();
+				resultSetTable =
+                        new Hashtable<ConsistencyToken, DRDAResultSet>();
 				resultSetTable.put(pkgcnstkn, currentDrdaRs);
-				resultSetKeyList = new ArrayList();
+				resultSetKeyList = new ArrayList<ConsistencyToken>();
 				resultSetKeyList.add(0, pkgcnstkn);
 			}
 

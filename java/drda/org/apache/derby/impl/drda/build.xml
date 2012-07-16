@@ -36,47 +36,9 @@
   <target name="drda" depends="compile"/>
 
   <target name="compile">
-  <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.drda.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/drda/DecryptionManager.java"/>
-    </javac>
-  <javac
-    source="1.4"
-    target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.drda.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/drda/DRDAXAProtocol.java"/>
-      <include name="${derby.dir}/impl/drda/DRDAXid.java"/>
-      <include name="${derby.dir}/impl/drda/XADatabase.java"/>
-    </javac>
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.5"
+      target="1.5"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -91,10 +53,6 @@
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/*.java"/>
-      <exclude name="${derby.dir}/impl/drda/DecryptionManager.java"/>
-      <exclude name="${derby.dir}/impl/drda/DRDAXAProtocol.java"/>
-      <exclude name="${derby.dir}/impl/drda/DRDAXid.java"/>
-      <exclude name="${derby.dir}/impl/drda/XADatabase.java"/>
     </javac>
   </target>
 

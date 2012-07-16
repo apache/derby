@@ -81,7 +81,8 @@ class Database
 	DRDAStatement defaultStatement;    // default statement used 
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
-	private Hashtable stmtTable;		// Hash table for storing statements
+    /** Hash table for storing statements. */
+    private Hashtable<Object, DRDAStatement> stmtTable;
 
 	// constructor
 	/**
@@ -92,7 +93,7 @@ class Database
 	Database (String dbName)
 	{
 		setDatabaseName(dbName);
-		this.stmtTable = new Hashtable();
+		this.stmtTable = new Hashtable<Object, DRDAStatement>();
 		initializeDefaultStatement();
 	}
 

@@ -225,7 +225,7 @@ public final class NetworkServerControlImpl {
 	private final static int ERRTYPE_UNKNOWN = -1;
 
 	// command argument information
-	private Vector commandArgs = new Vector();
+	private Vector<String> commandArgs = new Vector<String>();
 	private String databaseArg;
 	// DERBY-2109: Note that derby JDBC clients have a default user name
     // "APP" (= Property.DEFAULT_USER_NAME) assigned if they don't provide
@@ -303,26 +303,28 @@ public final class NetworkServerControlImpl {
 	private NetworkServerControlImpl serverInstance;
 	private LocalizedResource langUtil;
 	public String clientLocale;
-	ArrayList  localAddresses; // list of local addresses for checking admin
-	                              // commands. 
+    /** List of local addresses for checking admin commands. */
+    ArrayList<InetAddress> localAddresses;
 
 	// open sessions
-	private Hashtable sessionTable = new Hashtable();
+	private Hashtable<Integer, Session> sessionTable =
+            new Hashtable<Integer, Session>();
 
 	// current session
 	private Session currentSession;
 	// DRDAConnThreads
-	private Vector threadList = new Vector();
+	private Vector<DRDAConnThread> threadList = new Vector<DRDAConnThread>();
 
 	// queue of sessions waiting for a free thread - the queue is managed
 	// in a simple first come, first serve manner - no priorities
-	private Vector runQueue = new Vector();
+	private Vector<Session> runQueue = new Vector<Session>();
 
 	// number of DRDAConnThreads waiting for something to do
 	private int freeThreads;
 
 	// known application requesters
-	private Hashtable appRequesterTable = new Hashtable();
+	private Hashtable<String, AppRequester> appRequesterTable =
+            new Hashtable<String, AppRequester>();
 
 	// accessed by inner classes for privileged action
 	private String propertyFileName;
@@ -718,9 +720,9 @@ public final class NetworkServerControlImpl {
 		// Open a server socket listener	  
 		try{
 			serverSocket = 
-				(ServerSocket) 
-				AccessController.doPrivileged(new PrivilegedExceptionAction() {
-						public Object run() throws IOException
+				AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<ServerSocket>() {
+						public ServerSocket run() throws IOException
 						{
 							return createServerSocket();
 						}
@@ -790,16 +792,12 @@ public final class NetworkServerControlImpl {
 
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
-		final ClientThread clientThread =	 
-			(ClientThread) AccessController.doPrivileged(
-								new PrivilegedExceptionAction() {
-									public Object run() throws Exception
-									{
-										return new ClientThread(thisControl, 
-																serverSocket);
-									}
-								}
-							);
+        final ClientThread clientThread = AccessController.doPrivileged(
+                new PrivilegedExceptionAction<ClientThread>() {
+                    public ClientThread run() throws Exception {
+                        return new ClientThread(thisControl, serverSocket);
+                    }
+                });
 		clientThread.start();
 
 		try {
@@ -818,8 +816,8 @@ public final class NetworkServerControlImpl {
 	        
 	        try {
 	            AccessController.doPrivileged(
-	                    new PrivilegedAction() {
-	                        public Object run()  {
+	                    new PrivilegedAction<Void>() {
+	                        public Void run() {
 	                        // Need to interrupt the memcheck thread if it is sleeping.
 	                            if (mc != null)
 	                                mc.interrupt();
@@ -857,12 +855,12 @@ public final class NetworkServerControlImpl {
 	 	                
 	 	 				threadi.close();
 	 					AccessController.doPrivileged(
-	 								new PrivilegedAction() {
-	 									public Object run() {
-	 										threadi.interrupt();
-	 										return null;
-	 									}
-	 								});
+                                new PrivilegedAction<Void>() {
+                                    public Void run() {
+                                        threadi.interrupt();
+                                        return null;
+                                    }
+                                });
 	 				} catch (Exception exception) {
 	 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 	 				}
@@ -2534,10 +2532,10 @@ public final class NetworkServerControlImpl {
 	{
 		
 		try {
-			clientSocket = (Socket) AccessController.doPrivileged(
-								new PrivilegedExceptionAction() {
+			clientSocket = AccessController.doPrivileged(
+								new PrivilegedExceptionAction<Socket>() {
 										
-									public Object run() 
+									public Socket run()
 										throws UnknownHostException,
 											   IOException, 
 											   java.security.NoSuchAlgorithmException,
@@ -2626,7 +2624,7 @@ public final class NetworkServerControlImpl {
 	 **/
 	private void buildLocalAddressList(InetAddress bindAddr) 
 	{
-        localAddresses = new ArrayList(3);
+        localAddresses = new ArrayList<InetAddress>(3);
         localAddresses.add(bindAddr);
         
         try { localAddresses.add(InetAddress.getLocalHost()); }
@@ -4098,19 +4096,18 @@ public final class NetworkServerControlImpl {
 	{
 		ProductVersionHolder myPVH= null;
 		try {
-			myPVH = (ProductVersionHolder) AccessController.doPrivileged(
-								new PrivilegedExceptionAction() {
-										
-									public Object run() throws UnknownHostException,IOException
-									{
-										InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.NET_INFO);
-
-										return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
-									}
-									});
-		
-}
-		catch(PrivilegedActionException e) {
+			myPVH = AccessController.doPrivileged(
+                new PrivilegedExceptionAction<ProductVersionHolder>() {
+                    public ProductVersionHolder run()
+                            throws UnknownHostException, IOException {
+                        InputStream versionStream =
+                            getClass().getResourceAsStream(
+                                ProductGenusNames.NET_INFO);
+                        return ProductVersionHolder.
+                                getProductVersionHolderFromMyEnv(versionStream);
+                    }
+                });
+        } catch (PrivilegedActionException e) {
 			Exception e1 = e.getException();
 			consolePropertyMessage("DRDA_ProductVersionReadError.S", e1.getMessage());			
 		}

@@ -26,7 +26,7 @@ package org.apache.derby.impl.drda;
   It is arranged in alphabetical order.
 */
 
-class CodePointNameTable extends java.util.Hashtable
+class CodePointNameTable extends java.util.Hashtable<Integer, String>
 {
   CodePointNameTable ()
   {
@@ -165,7 +165,7 @@ class CodePointNameTable extends java.util.Hashtable
 
   String lookup (int codePoint)
   {
-    return (String) get (new Integer (codePoint));
+    return get(codePoint);
   }
 
 }

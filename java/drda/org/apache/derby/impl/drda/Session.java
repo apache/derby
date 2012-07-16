@@ -69,7 +69,8 @@ class Session
 	protected LocalizedResource langUtil;		// localization information for command session
 										// client
 
-	private	Hashtable	dbtable;		// Table of databases accessed in this session
+    /** Table of databases accessed in this session. */
+    private	Hashtable<String, Database> dbtable;
 	private NetworkServerControlImpl nsctrl;        // NetworkServerControlImpl needed for logging
                                                         // message if tracing fails.
                                                         
@@ -94,7 +95,7 @@ class Session
 		this.traceOn = traceOn;
 		if (traceOn)
 			dssTrace = new DssTrace(); 
-		dbtable = new Hashtable();
+		dbtable = new Hashtable<String, Database>();
 		initialize(traceDirectory);
 	}
 

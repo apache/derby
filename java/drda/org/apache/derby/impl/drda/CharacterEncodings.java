@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.drda;
 
+import java.util.HashMap;
+
 final class CharacterEncodings
 {
 
@@ -28,7 +30,8 @@ final class CharacterEncodings
   private CharacterEncodings () {}
 
   //private static java.util.Hashtable javaEncodingToCCSIDTable__ = new java.util.Hashtable();
-  private static java.util.Hashtable ccsidToJavaEncodingTable__ = new java.util.Hashtable();
+  private static final HashMap<Integer, String> ccsidToJavaEncodingTable__ =
+          new HashMap<Integer, String>();
 
   static {
     populate_ccsidToJavaEncodingTable();
@@ -377,7 +380,7 @@ final class CharacterEncodings
 
   public static String getJavaEncoding (int ccsid) throws java.io.UnsupportedEncodingException
   {
-    String javaEncoding = (String) ccsidToJavaEncodingTable__.get (new Integer (ccsid));
+    String javaEncoding = ccsidToJavaEncodingTable__.get(ccsid);
     if (javaEncoding == null)
       throw new java.io.UnsupportedEncodingException ("unsupported ccsid");
     else
