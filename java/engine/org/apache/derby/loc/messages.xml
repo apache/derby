@@ -2930,7 +2930,7 @@ Guide.
 
             <msg>
                 <name>42ZB7</name>
-                <text>Illegal reference to column '{0}'. Table function parameters may not refer to other tables in the same query block.</text>
+                <text>Illegal reference to column '{0}' by a table function or VTI.</text>
                 <arg>columnName</arg>
             </msg>
 

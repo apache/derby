@@ -2164,6 +2164,153 @@ public class TableFunctionTest extends BaseJDBCTestCase
              BAD_ARG_JOIN,
              "select tt.* from ( table( lowerCaseRow('foo')) tt cross join sys.systables st ) cross join table( lowerCaseRow(st.tablename)) tr"
              );
+        // subqueries in the FROM list
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        ( select * from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        ( select * from table (lowerCaseRow( systabs.tablename )) as t2 ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tablename = tt.contents\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        ( select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        ( select * from table (lowerCaseRow( systabs.tablename )) as t2 ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        // union subquery
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        (\n" +
+             "            select columnname from sys.syscolumns\n" +
+             "            union\n" +
+             "            select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2\n" +
+             "        ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        (\n" +
+             "            select columnname from sys.syscolumns\n" +
+             "            union\n" +
+             "            select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2\n" +
+             "        ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        (\n" +
+             "            select columnname from sys.syscolumns\n" +
+             "            union\n" +
+             "            select contents from table (lowerCaseRow( systabs.tablename )) as t2\n" +
+             "        ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        (\n" +
+             "            select columnname from sys.syscolumns\n" +
+             "            union\n" +
+             "            select contents from table (lowerCaseRow( systabs.tablename )) as t\n" +
+             "        ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        // nested subqueries
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        (\n" +
+             "            select * from\n" +
+             "            sys.syscolumns col,\n" +
+             "            ( select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2 ) ti\n" +
+             "            where col.columnname = ti.tablename\n" +
+             "        ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        sys.systables systabs,\n" +
+             "        (\n" +
+             "            select * from\n" +
+             "            sys.syscolumns col,\n" +
+             "            ( select contents from table (lowerCaseRow( systabs.tablename )) as t2 ) ti\n" +
+             "            where col.columnname = ti.contents\n" +
+             "        ) tt\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        (\n" +
+             "            select * from\n" +
+             "            sys.syscolumns col,\n" +
+             "            ( select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2 ) ti\n" +
+             "            where col.columnname = ti.tablename\n" +
+             "        ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
+        expectError
+            (
+             BAD_ARG_JOIN,
+             "select tt.*\n" +
+             "    from\n" +
+             "        (\n" +
+             "            select * from\n" +
+             "            sys.syscolumns col,\n" +
+             "            ( select contents from table (lowerCaseRow( systabs.tablename )) as t2 ) ti\n" +
+             "            where col.columnname = ti.contents\n" +
+             "        ) tt,\n" +
+             "        sys.systables systabs\n" +
+             "    where systabs.tabletype = 'T' and systabs.tableid = tt.tableid\n"
+             );
 
         // pre-existing error not affected: table function correlated
         // to inner query block

@@ -2667,6 +2667,24 @@ public class FromBaseTable extends FromTable
 		*/
 		if (columnsTableName == null || columnsTableName.equals(exposedTableName))
 		{
+            //
+            // The only way that we can be looking up a column reference BEFORE
+            // the base table is bound is if we are binding a reference inside an argument
+            // to a VTI/tableFunction. See DERBY-5779. This can happen in the following
+            // query:
+            //
+            // select tt.*
+            //     from
+            //         ( select tablename from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt,
+            //         sys.systables systabs
+            //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
+            //
+            if ( resultColumns == null )
+            {
+                throw StandardException.newException
+                    ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, columnReference.getColumnName() );
+            }
+            
 			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
 			/* Did we find a match? */
 			if (resultColumn != null)

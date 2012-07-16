@@ -365,8 +365,24 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
              "        table (syscs_diag.space_table()) as t2\n" +
              "    where systabs.tabletype = 'T'\n" +
              "    and systabs.tableid = t2.tableid\n"
-             );
-        
+             );        
+        JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        rs = st.executeQuery
+            (
+             "select t1.*\n" +
+             "    from\n" +
+             "        sys.systables systabs1,\n" +
+             "        table (syscs_diag.space_table( systabs1.tablename )) as t1\n" +
+             "    where systabs1.tabletype = 'T'\n" +
+             "union\n" +
+             "select t2.*\n" +
+             "    from\n" +
+             "        sys.systables systabs2,\n" +
+             "        table (syscs_diag.space_table( systabs2.tablename )) as t2\n" +
+             "    where systabs2.tabletype = 'T'\n"
+             );        
         JDBC.assertColumnNames(rs, ALL_SPACE_TABLE_COLUMNS);
         JDBC.assertFullResultSet(rs, expRS, true);
 

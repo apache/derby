@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
@@ -117,6 +118,18 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private String[] projectedColumnNames; // for RestrictedVTIs
     private Restriction vtiRestriction; // for RestrictedVTIs
 
+    // If this FromVTI is invoked in a subquery which is invoked in an outer FROM list,
+    // then arguments to this FromVTI may not reference other tables in that FROM list.
+    // See DERBY-5779. Here is an example of a reference we want to forbid:
+    //
+    // select tt.*
+    //     from
+    //         sys.systables systabs,
+    //         ( select * from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt
+    //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
+    //
+    private ArrayList   outerFromLists = new ArrayList();
+    
     // for remapping column references in VTI args at code generation time
     private HashMap argSources = new HashMap();
 
@@ -336,6 +349,16 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		return super.modifyAccessPath(outerTables);
 	}
+
+    /**
+     * Add a FromList to the collection of FromLists which bindExpressions() checks
+     * when vetting VTI arguments which reference columns in other tables.
+     * See DERBY-5554 and DERBY-5779.
+     */
+    public  void    addOuterFromList( FromList fromList )
+    {
+        outerFromLists.add( fromList );
+    }
 
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 		throws StandardException
@@ -888,32 +911,46 @@ public class FromVTI extends FromTable implements VTIEnvironment
             // VTI parameters to refer to other VTIs. We also do not allow even VTIs to
             // reference other elements in the current <joined table>.
             //
-            int referencedTableNumber = ref.getTableNumber();
             boolean illegalReference = !ref.getCorrelated();
 
-            if ( !ref.getCorrelated() ) // if the arg refers to a table in this query block
+            if ( ref.getCorrelated() ) // the arg refers to a table in an outer query block
             {
-                for ( int i = 0; i < fromListParam.size(); i++ )
+                // If the outer table appears in a FROM list alongside a subquery which
+                // we're inside, then the reference is undefined and illegal. The following query
+                // is an example of this problem. Again, see DERBY-5779.
+                //
+                // select tt.*
+                //     from
+                //         sys.systables systabs,
+                //         ( select * from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt
+                //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
+                //
+                for ( int i = 0; i < outerFromLists.size(); i++ )
                 {
-                    FromTable   fromTable = (FromTable) fromListParam.elementAt( i );
+                    FromTable   fromTable = columnInFromList( (FromList) outerFromLists.get( i ), ref );
 
-                    if ( referencedTableNumber == fromTable.getTableNumber() )
+                    if ( fromTable != null )
                     {
-                        // remember this FromTable so that we can code generate the arg
-                        // from actual result columns later on.
-                        argSources.put( new Integer( fromTable.getTableNumber() ), fromTable );
-
-                        // the only legal kind of reference is a VTI argument which
-                        // references a non-VTI table in the current query block
-                        if ( !isDerbyStyleTableFunction && !(fromTable instanceof FromVTI) )
-                        {
-                            illegalReference = false;
-                            break;
-                        }
+                        illegalReference = true;
+                        break;
                     }
                 }
             }
-            
+            else // the arg refers to a table in this query block
+            {
+                FromTable   fromTable = columnInFromList( fromListParam, ref );
+                if ( fromTable != null )
+                {
+                    // the only legal kind of reference is a VTI argument which
+                    // references a non-VTI/tableFunction table in the current query block
+                    if ( !isDerbyStyleTableFunction && !(fromTable instanceof FromVTI) )
+                    {
+                        illegalReference = false;
+                        break;
+                    }
+                }
+            }
+
             if ( illegalReference )
             {
                 throw StandardException.newException
@@ -934,6 +971,32 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			}
 		}
 	}
+
+    /**
+     * If the referenced column appears in the indicated FROM list, then
+     * return the table it appears in.
+     */
+    private FromTable columnInFromList( FromList fromList, ColumnReference ref )
+        throws StandardException
+    {
+        int referencedTableNumber = ref.getTableNumber();
+        
+        for ( int i = 0; i < fromList.size(); i++ )
+        {
+            FromTable   fromTable = (FromTable) fromList.elementAt( i );
+
+            if ( referencedTableNumber == fromTable.getTableNumber() )
+            {
+                // remember this FromTable so that we can code generate the arg
+                // from actual result columns later on.
+                argSources.put( new Integer( fromTable.getTableNumber() ), fromTable );
+
+                return fromTable;
+            }
+        }
+
+        return null;
+    }
 
 	/**
 	 * Get all of the nodes of the specified class
