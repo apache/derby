@@ -134,6 +134,7 @@ public class LogicalPreparedStatement
          getPhysPs().setBinaryStream(parameterIndex, x, length);
     }
 
+    @Deprecated
     public void setUnicodeStream(int parameterIndex, InputStream x, int length)
             throws SQLException {
          getPhysPs().setUnicodeStream(parameterIndex, x, length);

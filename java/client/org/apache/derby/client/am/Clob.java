@@ -677,12 +677,9 @@ public class Clob extends Lob implements java.sql.Clob {
         }
         else {
             //The Clob is not locator enabled.
-            String newString = string_.substring(0, (int) pos - 1);
-            string_ = newString.concat(str.substring(offset, offset + length));
-            asciiStream_ = new java.io.StringBufferInputStream(string_);
-            unicodeStream_ = new java.io.StringBufferInputStream(string_);
-            characterStream_ = new java.io.StringReader(string_);
-            setSqlLength(string_.length());
+            reInitForNonLocator(
+                string_.substring(0, (int) pos - 1)
+                    .concat(str.substring(offset, offset + length)));
         }
         return length;
     }
@@ -800,12 +797,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 }
                 else {
                     //The Lob is not locator enabled.
-                    String newstr = string_.substring(0, (int) len);
-                    string_ = newstr;
-                    asciiStream_ = new java.io.StringBufferInputStream(string_);
-                    unicodeStream_ = new java.io.StringBufferInputStream(string_);
-                    characterStream_ = new java.io.StringReader(string_);
-                    setSqlLength(string_.length());
+                    reInitForNonLocator(string_.substring(0, (int) len));
                 }
             }
         }
@@ -1033,6 +1025,25 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
 
+    /**
+     * Reinitialize the value of this CLOB.
+     *
+     * This is legacy code, only used when talking to servers that don't
+     * support locators.
+     *
+     * @param newString the new value
+     */
+    // The StringBufferInputStream class is deprecated, but we don't care too
+    // much since this code is only for talking to very old servers. Suppress
+    // the deprecation warnings for now.
+    @SuppressWarnings("deprecation")
+    void reInitForNonLocator(String newString) {
+        string_ = newString;
+        asciiStream_ = new java.io.StringBufferInputStream(string_);
+        unicodeStream_ = new java.io.StringBufferInputStream(string_);
+        characterStream_ = new java.io.StringReader(string_);
+        setSqlLength(string_.length());
+    }
 
 
     /**

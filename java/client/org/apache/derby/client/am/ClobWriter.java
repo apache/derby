@@ -82,12 +82,7 @@ public class ClobWriter extends java.io.Writer {
     
     private void updateClob(StringBuffer sb) 
     {
-        clob_.string_ = sb.toString();
-        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-        clob_.unicodeStream_ 
-            = new java.io.StringBufferInputStream(clob_.string_);
-        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
-        clob_.setSqlLength(clob_.string_.length());
+        clob_.reInitForNonLocator(sb.toString());
         offset_ = clob_.string_.length() + 1;
     }
 }

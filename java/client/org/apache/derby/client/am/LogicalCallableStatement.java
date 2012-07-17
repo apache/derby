@@ -203,6 +203,7 @@ public class LogicalCallableStatement
         return getPhysCs().getBigDecimal(parameterIndex);
     }
 
+    @Deprecated
     public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
         return getPhysCs().getBigDecimal(parameterIndex, scale);
     }

@@ -998,6 +998,17 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /**
+     * Create a calendar with default locale and time zone.
+     * @param date the initial time of the calendar
+     * @return a calendar initialized to the specified time
+     */
+    private static Calendar createCalendar(java.util.Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal;
+    }
+
+    /**
      * Convert a date originally set using the default calendar to a value
      * representing the same date in a different calendar.
      *
@@ -1006,9 +1017,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @return a date object that represents the date in {@code cal}
      */
     private Date convertFromDefaultCalendar(Date date, Calendar cal) {
+        Calendar from = createCalendar(date);
         cal.clear();
-        cal.set(date.getYear() + 1900, date.getMonth(), date.getDate(),
-                0, 0, 0); // normalized time: 00:00:00
+        cal.set(from.get(Calendar.YEAR),
+                from.get(Calendar.MONTH),
+                from.get(Calendar.DAY_OF_MONTH));
         return new Date(cal.getTimeInMillis());
     }
 
@@ -1021,9 +1034,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @return a time object that represents the time in {@code cal}
      */
     private Time convertFromDefaultCalendar(Time time, Calendar cal) {
+        Calendar from = createCalendar(time);
         cal.clear();
         cal.set(1970, Calendar.JANUARY, 1, // normalized date: 1970-01-01
-                time.getHours(), time.getMinutes(), time.getSeconds());
+                from.get(Calendar.HOUR_OF_DAY),
+                from.get(Calendar.MINUTE),
+                from.get(Calendar.SECOND));
         return new Time(cal.getTimeInMillis());
     }
 
@@ -1036,9 +1052,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @return a timestamp object that represents the timestamp in {@code cal}
      */
     private Timestamp convertFromDefaultCalendar(Timestamp ts, Calendar cal) {
+        Calendar from = createCalendar(ts);
         cal.clear();
-        cal.set(ts.getYear() + 1900, ts.getMonth(), ts.getDate(),
-                ts.getHours(), ts.getMinutes(), ts.getSeconds());
+        cal.set(from.get(Calendar.YEAR),
+                from.get(Calendar.MONTH),
+                from.get(Calendar.DAY_OF_MONTH),
+                from.get(Calendar.HOUR_OF_DAY),
+                from.get(Calendar.MINUTE),
+                from.get(Calendar.SECOND));
 
         Timestamp result = new Timestamp(cal.getTimeInMillis());
         result.setNanos(ts.getNanos());
