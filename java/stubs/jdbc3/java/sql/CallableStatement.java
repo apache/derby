@@ -446,7 +446,7 @@ public interface CallableStatement extends PreparedStatement {
      * @throws SQLException
      *             if a database error happens
      */
-    public Object getObject(int parameterIndex, Map map)
+    public Object getObject(int parameterIndex, Map<String, Class<?>> map)
             throws SQLException;
 
     /**
@@ -478,7 +478,7 @@ public interface CallableStatement extends PreparedStatement {
      * @throws SQLException
      *             if there is a problem accessing the database
      */
-    public Object getObject(String parameterName, Map map)
+    public Object getObject(String parameterName, Map<String, Class<?>> map)
             throws SQLException;
 
     /**

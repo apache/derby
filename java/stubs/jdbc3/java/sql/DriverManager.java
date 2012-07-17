@@ -50,7 +50,7 @@ public class DriverManager {
      * Set to hold Registered Drivers - initial capacity 10 drivers (will expand
      * automatically if necessary.
      */
-    private static final List theDrivers = new ArrayList(10);
+    private static final List<Driver> theDrivers = new ArrayList<Driver>(10);
 
     // Permission for setting log
     private static final SQLPermission logPermission = null;
