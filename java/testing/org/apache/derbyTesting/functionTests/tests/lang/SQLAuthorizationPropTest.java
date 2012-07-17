@@ -1,6 +1,6 @@
 /*
 *
-* Derby - Class org.apache.derbyTesting.functionTests.lang.SQLAuthorizationPropTest
+* Derby - Class org.apache.derbyTesting.functionTests.tests.lang.SQLAuthorizationPropTest
 *
 * Licensed to the Apache Software Foundation (ASF) under one or more
 * contributor license agreements.  See the NOTICE file distributed with
@@ -171,4 +171,21 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
         }
         
 	}
+
+	/**
+	 * Verify that you can't make the database unbootable by changing
+     * the database version. See DERBY-5838.
+	 */
+	public void test_5838() throws Exception
+    {
+        Statement stmt = createStatement();
+
+        assertStatementError
+            (
+             "XCY02",
+             stmt,
+             "call syscs_util.syscs_set_database_property( 'DataDictionaryVersion', 'foobar' )"
+             );
+    }
+    
 }
