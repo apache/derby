@@ -4875,11 +4875,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // currentRowInRowset_ should never be bigger than the max value of an int,
         // because we have a driver imposed limit of fetch size 1000.
         cursor_.columnDataPosition_ =
-                (int[]) cursor_.columnDataPositionCache_.get((int) currentRowInRowset_);
+                cursor_.columnDataPositionCache_.get((int) currentRowInRowset_);
         cursor_.columnDataComputedLength_ =
-                (int[]) cursor_.columnDataLengthCache_.get((int) currentRowInRowset_);
+                cursor_.columnDataLengthCache_.get((int) currentRowInRowset_);
         cursor_.isNull_ =
-                (boolean[]) cursor_.columnDataIsNullCache_.get((int) currentRowInRowset_);
+                cursor_.columnDataIsNullCache_.get((int) currentRowInRowset_);
         cursor_.isUpdateDeleteHole_ = ((Boolean) cursor_.isUpdateDeleteHoleCache_.get((int) currentRowInRowset_)).booleanValue();
     }
 

@@ -70,7 +70,7 @@ public class PreparedStatement extends Statement
 
     public ColumnMetaData parameterMetaData_; // type information for input sqlda
     
-    private ArrayList parameterTypeList;
+    private ArrayList<int[]> parameterTypeList;
 
 
     // The problem with storing the scrollable ResultSet associated with cursorName in scrollableRS_ is
@@ -1614,7 +1614,7 @@ public class PreparedStatement extends Statement
                 checkThatAllParametersAreSet();
                 
                 if (parameterTypeList == null) {
-                    parameterTypeList = new ArrayList();
+                    parameterTypeList = new ArrayList<int[]>();
                 }
 
                 // ASSERT: since OUT/INOUT parameters are not allowed, there should
@@ -2267,7 +2267,7 @@ public class PreparedStatement extends Statement
 
         for (int i = 0; i < batchSize; i++) {
             if (parameterMetaData_ != null) {
-                parameterMetaData_.clientParamtertype_ = (int[]) parameterTypeList.get(i);
+                parameterMetaData_.clientParamtertype_ = parameterTypeList.get(i);
                 parameters_ = (Object[]) batch_.get(i);
             }
             

@@ -21,8 +21,8 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -136,7 +136,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     ResultSet[] resultSetList_ = null;   // array of ResultSet objects
 
     protected final static String TIMEOUT_STATEMENT = "SET STATEMENT_TIMEOUT ";
-    protected java.util.ArrayList timeoutArrayList = new java.util.ArrayList(1);
+    protected ArrayList<String> timeoutArrayList = new ArrayList<String>(1);
     protected boolean doWriteTimeout = false;
     int timeout_ = 0; // for query timeout in seconds
     int maxRows_ = 0;
@@ -156,7 +156,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // This collection is used for two different purposes:
     //   For statement batching it contains the batched SQL strings.
     //   For prepared statement batching it contains the batched input rows.
-    final java.util.ArrayList batch_ = new java.util.ArrayList();
+    final ArrayList<Object> batch_ = new ArrayList<Object>();
 
 
     // Scrollable cursor attributes

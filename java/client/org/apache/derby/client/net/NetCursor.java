@@ -21,17 +21,19 @@
 
 package org.apache.derby.client.net;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.Blob;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.SignedBinary;
+import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlWarning;
 import org.apache.derby.client.am.Types;
-import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -55,8 +57,13 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     boolean[] isGraphic_;
 
     // key = column position, value = index into extdtaData_
-    java.util.HashMap extdtaPositions_;
-    java.util.ArrayList extdtaData_; // queue to hold EXTDTA data that hasn't been correlated to its column #
+    HashMap<Integer, Integer> extdtaPositions_;
+
+    /**
+     * Queue to hold EXTDTA data that hasn't been correlated to its
+     * column number.
+     */
+    ArrayList<byte[]> extdtaData_;
 
 
     boolean rtnextrow_ = true;
@@ -74,8 +81,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         netAgent_ = netAgent;
         numMddOverrides_ = 0;
         maximumRowSize_ = 0;
-        extdtaPositions_ = new java.util.HashMap();
-        extdtaData_ = new java.util.ArrayList();
+        extdtaPositions_ = new HashMap<Integer, Integer>();
+        extdtaData_ = new ArrayList<byte[]>();
     }
 
     NetCursor(NetAgent netAgent,
@@ -882,7 +889,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         if (extdtaPositions_.containsKey(key)) {
             //  found, get the data
             int extdtaQueuePosition = ((Integer) extdtaPositions_.get(key)).intValue();
-            data = (byte[]) (extdtaData_.get(extdtaQueuePosition));
+            data = extdtaData_.get(extdtaQueuePosition);
         }
 
         return data;
@@ -1138,7 +1145,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             columnDataPosition = new int[columns_];
             columnDataPositionCache_.add(columnDataPosition);
         } else {
-            columnDataPosition = (int[]) columnDataPositionCache_.get(row);
+            columnDataPosition = columnDataPositionCache_.get(row);
         }
         return columnDataPosition;
     }
@@ -1149,7 +1156,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             columnDataComputedLength = new int[columns_];
             columnDataLengthCache_.add(columnDataComputedLength);
         } else {
-            columnDataComputedLength = (int[]) columnDataLengthCache_.get(row);
+            columnDataComputedLength = columnDataLengthCache_.get(row);
         }
         return columnDataComputedLength;
     }
@@ -1160,7 +1167,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             columnDataIsNull = new boolean[columns_];
             columnDataIsNullCache_.add(columnDataIsNull);
         } else {
-            columnDataIsNull = (boolean[]) columnDataIsNullCache_.get(row);
+            columnDataIsNull = columnDataIsNullCache_.get(row);
         }
         return columnDataIsNull;
     }

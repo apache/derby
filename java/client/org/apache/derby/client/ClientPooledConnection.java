@@ -22,18 +22,18 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.derby.client.net.NetXAConnection;
-import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDriver;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.client.net.NetXAConnection;
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -47,7 +47,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
     //@GuardedBy("this")
     /** List of {@code ConnectionEventListener}s. Never {@code null}. */
-    private ArrayList listeners_ = new ArrayList();
+    private ArrayList<ConnectionEventListener> listeners_ =
+            new ArrayList<ConnectionEventListener>();
 
     /**
      * The number of iterators going through the list of connection event
@@ -323,7 +324,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
-            listeners_ = (ArrayList) listeners_.clone();
+            listeners_ = new ArrayList<ConnectionEventListener>(listeners_);
         }
         listeners_.add(listener);
     }
@@ -338,7 +339,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
-            listeners_ = (ArrayList) listeners_.clone();
+            listeners_ = new ArrayList<ConnectionEventListener>(listeners_);
         }
         listeners_.remove(listener);
     }

@@ -21,17 +21,17 @@
 
 package org.apache.derby.client.am;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.security.AccessController;
-
 import javax.naming.NamingException;
 import javax.naming.RefAddr;
 import javax.naming.Reference;
-
 import org.apache.derby.jdbc.ClientBaseDataSource;
-
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -1225,9 +1225,9 @@ public class LogWriter {
     	//do the work related to PrintWriter in it's run method and return 
     	//PrintWriter object.
         try {
-    	printWriter = (java.io.PrintWriter)AccessController.doPrivileged(
-    			new java.security.PrivilegedExceptionAction(){
-    				public Object run()throws java.io.IOException{
+            printWriter = AccessController.doPrivileged(
+                new PrivilegedExceptionAction<PrintWriter>(){
+                    public PrintWriter run() throws IOException {
     			        String fileCanonicalPath = new java.io.File(fileName).getCanonicalPath();
     					return new java.io.PrintWriter(
     							new java.io.BufferedOutputStream(

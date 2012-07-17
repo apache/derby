@@ -22,7 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
-
+import java.util.Hashtable;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -98,7 +98,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
     public transient int resultSetConcurrency_;
 
-    transient private java.util.Hashtable columnNameToIndexCache_ = null;
+    transient private Hashtable<String, Integer> columnNameToIndexCache_;
 
     transient private boolean statementClosed_ = false;
 
@@ -805,9 +805,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     int findColumnX(String columnName) throws SqlException {
         // Create cache if it doesn't exist
         if (columnNameToIndexCache_ == null) {
-            columnNameToIndexCache_ = new java.util.Hashtable();
+            columnNameToIndexCache_ = new Hashtable<String, Integer>();
         } else { // Check cache for mapping
-            Integer index = (Integer) columnNameToIndexCache_.get(columnName);
+            Integer index = columnNameToIndexCache_.get(columnName);
             if (index != null) {
                 return index.intValue();
             }
@@ -819,7 +819,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                     this.sqlName_[col] != null &&
                     this.sqlName_[col].equalsIgnoreCase(columnName)) {
                 // Found it, add it to the cache
-                columnNameToIndexCache_.put(columnName, new Integer(col + 1));
+                columnNameToIndexCache_.put(columnName, col + 1);
                 return col + 1;
             }
         }
@@ -830,10 +830,10 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     // assign ordinal position as the column name if null.
     void assignColumnName(int column) {
         if (columnNameToIndexCache_ == null) {
-            columnNameToIndexCache_ = new java.util.Hashtable();
+            columnNameToIndexCache_ = new Hashtable<String, Integer>();
         }
-        String columnName = (new Integer(column)).toString();
-        columnNameToIndexCache_.put(columnName, new Integer(column));
+        String columnName = Integer.toString(column);
+        columnNameToIndexCache_.put(columnName, column);
         sqlName_[column - 1] = columnName;
     }
 

@@ -30,6 +30,7 @@ import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 // When we calculate column offsets make sure we calculate the correct offsets for double byte charactr5er data
@@ -88,19 +89,19 @@ public abstract class Cursor {
 
     // Row positioning for all cached rows
     // For scrollable result sets, these lists hold the offsets into the cached rowset buffer for each row of data.
-    protected java.util.ArrayList columnDataPositionCache_ = new java.util.ArrayList();
-    protected java.util.ArrayList columnDataLengthCache_ = new java.util.ArrayList();
-    protected java.util.ArrayList columnDataIsNullCache_ = new java.util.ArrayList();
-    public java.util.ArrayList isUpdateDeleteHoleCache_ = new java.util.ArrayList();
-    public boolean isUpdateDeleteHole_;
+    protected ArrayList<int[]> columnDataPositionCache_ = new ArrayList<int[]>();
+    protected ArrayList<int[]> columnDataLengthCache_ = new ArrayList<int[]>();
+    protected ArrayList<boolean[]> columnDataIsNullCache_ = new ArrayList<boolean[]>();
+    ArrayList<Boolean> isUpdateDeleteHoleCache_ = new ArrayList<Boolean>();
+    boolean isUpdateDeleteHole_;
 
     // State to keep track of when a row has been updated,
     // cf. corresponding set and get accessors.  Only implemented for
     // scrollable updatable insensitive result sets for now.
     private boolean isRowUpdated_;
 
-    final static public java.lang.Boolean ROW_IS_NULL = new Boolean(true);
-    final static public java.lang.Boolean ROW_IS_NOT_NULL = new Boolean(false);
+    final static Boolean ROW_IS_NULL = Boolean.TRUE;
+    final static Boolean ROW_IS_NOT_NULL = Boolean.FALSE;
 
     java.util.Calendar recyclableCalendar_ = null;
 

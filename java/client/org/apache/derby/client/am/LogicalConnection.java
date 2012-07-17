@@ -20,9 +20,10 @@
 */
 
 package org.apache.derby.client.am;
-import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
+import java.util.Map;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * A simple delegation wrapper handle for a physical connection.
@@ -444,7 +445,7 @@ public class LogicalConnection implements java.sql.Connection {
 		}
     }
 
-    synchronized public java.util.Map getTypeMap() throws SQLException {
+    synchronized public Map<String, Class<?>> getTypeMap() throws SQLException {
 		try {
 	        checkForNullPhysicalConnection();
 	        return physicalConnection_.getTypeMap();
@@ -454,7 +455,7 @@ public class LogicalConnection implements java.sql.Connection {
 		}
     }
 
-    synchronized public void setTypeMap(java.util.Map map) throws SQLException {
+    synchronized public void setTypeMap(Map map) throws SQLException {
 		try {
 	        checkForNullPhysicalConnection();
 	        physicalConnection_.setTypeMap(map);

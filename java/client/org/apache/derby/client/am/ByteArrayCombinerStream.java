@@ -47,7 +47,7 @@ public class ByteArrayCombinerStream
     extends InputStream {
 
     /** A list of the arrays to combine. */
-    private final ArrayList arrays;
+    private final ArrayList<byte[]> arrays;
     /** Length of the stream. */
     private final long specifiedLength;
     /** Global offset into the whole stream. */
@@ -72,7 +72,7 @@ public class ByteArrayCombinerStream
      *      specified by <code>length</code>, or <code>length</code> is
      *      negative.
      */
-    public ByteArrayCombinerStream(ArrayList arraysIn, long length) {
+    public ByteArrayCombinerStream(ArrayList<byte[]> arraysIn, long length) {
         // Don't allow negative length.
         if (length < 0) {
             throw new IllegalArgumentException("Length cannot be negative: " +
@@ -84,11 +84,11 @@ public class ByteArrayCombinerStream
             // Copy references to the byte arrays to a new ArrayList.
             int arrayCount = arraysIn.size();
             byte[] tmpArray;
-            arrays = new ArrayList(arrayCount);
+            arrays = new ArrayList<byte[]>(arrayCount);
             // Truncate data if there are more bytes then specified.
             // Done to simplify boundary checking in the read-methods.
             for (int i=0; i < arrayCount && tmpRemaining > 0; i++) {
-                tmpArray = (byte[])arraysIn.get(i);
+                tmpArray = arraysIn.get(i);
                 if (tmpRemaining < tmpArray.length) {
                     // Create a new shrunk array.
                     byte[] shrunkArray =

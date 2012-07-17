@@ -24,10 +24,7 @@ package org.apache.derby.client.am;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.client.am.stmtcache.StatementKeyFactory;
@@ -62,7 +59,8 @@ public final class StatementCacheInteractor {
     private final Connection physicalConnection;
     /** List of open logical statements created by this cache interactor. */
     //@GuardedBy("this")
-    private final ArrayList openLogicalStatements = new ArrayList();
+    private final ArrayList<LogicalStatementEntity> openLogicalStatements =
+            new ArrayList<LogicalStatementEntity>();
     /**
      * Tells if this interactor is in the process of shutting down.
      * <p>
@@ -217,10 +215,7 @@ public final class StatementCacheInteractor {
         // statements as we work our way through the list.
         this.connCloseInProgress = true;
         // Iterate through the list and close the logical statements.
-        Iterator logicalStatements = this.openLogicalStatements.iterator();
-        while (logicalStatements.hasNext()) {
-            LogicalStatementEntity logicalStatement =
-                    (LogicalStatementEntity)logicalStatements.next();
+        for (LogicalStatementEntity logicalStatement : openLogicalStatements) {
             logicalStatement.close();
         }
         // Clear the list for good measure.

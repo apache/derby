@@ -22,24 +22,23 @@
 package org.apache.derby.client.net;
 
 import java.sql.ResultSet;
-
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.Section;
-import org.apache.derby.client.am.SqlState;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.StatementCallbackInterface;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.shared.common.i18n.MessageUtil;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetStatementReply extends NetPackageReply implements StatementReplyInterface {
     NetStatementReply(NetAgent netAgent, int bufferSize) {
@@ -371,7 +370,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         // server.
 
         // the result set summary component consists of a result set reply message.
-        java.util.ArrayList sectionAL = parseRSLSETRM();
+        List<Section> sectionAL = parseRSLSETRM();
 
         // following the RSLSETRM is an SQLCARD or an SQLDTARD.  check for a
         // TYPDEFNAM or TYPDEFOVR before looking for these objects.
@@ -405,7 +404,8 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         NetResultSet[] resultSets = new NetResultSet[numberOfResultSets];
         for (int i = 0; i < numberOfResultSets; i++) {
             // parse the result set component of the stored procedure reply.
-            NetResultSet netResultSet = parseResultSetCursor(statementI, (Section) sectionAL.get(i));
+            NetResultSet netResultSet =
+                    parseResultSetCursor(statementI, sectionAL.get(i));
             resultSets[i] = netResultSet;
         }
 
@@ -1142,11 +1142,11 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     //   SVRCOD - required  (0 INFO)
     //   PKGSNLST - required
     //   SRVDGN - optional
-    protected java.util.ArrayList parseRSLSETRM() throws DisconnectException {
+    private List<Section> parseRSLSETRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean pkgsnlstReceived = false;
-        java.util.ArrayList pkgsnlst = null;
+        List<Section> pkgsnlst = null;
 
         parseLengthAndMatchCodePoint(CodePoint.RSLSETRM);
         pushLengthOnCollectionStack();
@@ -1545,7 +1545,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     //
     // Only called for generated secctions from a callable statement.
     //
-    protected Object parsePKGNAMCSN(boolean skip) throws DisconnectException {
+    protected Section parsePKGNAMCSN(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.PKGNAMCSN);
         if (skip) {
             skipBytes();
@@ -1725,15 +1725,13 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // RDB Package Namce, Consistency Token, and Section Number List
     // specifies a list of fully qualified names of specific sections
     // within one or more packages.
-    protected java.util.ArrayList parsePKGSNLST() throws DisconnectException {
-        Object pkgnamcsn = null;
-        java.util.ArrayList pkgsnlst = new java.util.ArrayList(); // what default size should we use
+    private List<Section> parsePKGSNLST() throws DisconnectException {
+        ArrayList<Section> pkgsnlst = new ArrayList<Section>();
 
         parseLengthAndMatchCodePoint(CodePoint.PKGSNLST);
         pushLengthOnCollectionStack();
         while (peekCodePoint() != Reply.END_OF_COLLECTION) {
-            pkgnamcsn = parsePKGNAMCSN(false);
-            pkgsnlst.add(pkgnamcsn);
+            pkgsnlst.add(parsePKGNAMCSN(false));
         }
         popCollectionStack();
         return pkgsnlst;
@@ -1745,9 +1743,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         return parseSQLDARDarray(columnMetaData, skipBytes);
     }
 
-    protected int parseSQLRSLRD(java.util.ArrayList sectionAL) throws DisconnectException {
+    private int parseSQLRSLRD(List<Section> sections)
+            throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLRSLRD);
-        return parseSQLRSLRDarray(sectionAL);
+        return parseSQLRSLRDarray(sections);
     }
 
     protected ColumnMetaData parseSQLCINRD() throws DisconnectException {
@@ -1845,10 +1844,11 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // SQL Result Set Reply Data (SQLRSLRD) is a byte string that specifies
     // information about result sets returned as reply data in the response to
     // an EXCSQLSTT command that invokes a stored procedure
-    int parseSQLRSLRDarray(java.util.ArrayList sectionAL) throws DisconnectException {
+    private int parseSQLRSLRDarray(List<Section> sections)
+            throws DisconnectException {
         int numOfResultSets = parseSQLNUMROW();
         for (int i = 0; i < numOfResultSets; i++) {
-            parseSQLRSROW((Section) sectionAL.get(i));
+            parseSQLRSROW(sections.get(i));
         }
         return numOfResultSets;
     }

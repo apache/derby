@@ -22,8 +22,6 @@
 package org.apache.derby.client.net;
 
 import java.sql.Array;
-import org.apache.derby.client.am.SQLExceptionFactory;
-import org.apache.derby.client.am.SqlException;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,12 +30,13 @@ import java.sql.SQLException;
 import java.sql.SQLPermission;
 import java.sql.SQLXML;
 import java.sql.Struct;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.FailedProperties40;
+import org.apache.derby.client.am.SQLExceptionFactory;
+import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
@@ -324,21 +323,6 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 	    return new Properties();
 	} 
 	catch (SqlException se) { throw se.getSQLException(); }
-    }
-
-    
-    /**
-     * Returns the type map for this connection.
-     *
-     * @return type map for this connection
-     * @exception SQLException if a database access error occurs
-     */
-    @SuppressWarnings("unchecked")
-    public final Map<String, Class<?>> getTypeMap() throws SQLException {
-        // Return the map from the super class. The method is overridden
-        // just to get the generic signature and prevent an unchecked warning
-        // at compile time.
-        return super.getTypeMap();
     }
 
     /**

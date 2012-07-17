@@ -53,7 +53,7 @@ public final class JDBCStatementCache {
 
     /** Structure holding the cached prepared statement objects. */
     //@GuardedBy("this");
-    private final LinkedHashMap statements;
+    private final LinkedHashMap<StatementKey, PreparedStatement> statements;
 
     /**
      * Creates a new, empty JDBC statement cache.
@@ -83,7 +83,7 @@ public final class JDBCStatementCache {
             SanityManager.ASSERT(statementKey != null,
                                  "statementKey is not supposed to be null");
         }
-        return (PreparedStatement)this.statements.remove(statementKey);
+        return statements.remove(statementKey);
     }
 
     /**
@@ -117,7 +117,8 @@ public final class JDBCStatementCache {
      * removed after the new entry has been inserted.
      */
     //@NotThreadSafe
-    private static class BoundedLinkedHashMap extends LinkedHashMap {
+    private static class BoundedLinkedHashMap
+            extends LinkedHashMap<StatementKey, PreparedStatement> {
 
         /** Maximum number of entries. */
         private final int maxSize;
@@ -146,11 +147,12 @@ public final class JDBCStatementCache {
          * @return <code>true</code> if the element is to be removed,
          *      <code>false</code> if not.
          */
-        protected boolean removeEldestEntry(Map.Entry eldest) {
+        protected boolean removeEldestEntry(
+                Map.Entry<StatementKey, PreparedStatement> eldest) {
             final boolean remove = size() > maxSize;
             if (remove && eldest != null) {
                 try {
-                    ((PreparedStatement)eldest.getValue()).close();
+                    eldest.getValue().close();
                 } catch (SQLException ex) {
                     // Ignore this exception in insane mode, throw an assertion
                     // error if a sane build is run.

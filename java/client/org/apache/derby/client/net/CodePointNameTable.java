@@ -27,7 +27,7 @@ package org.apache.derby.client.net;
 // This data type may be modified for performance to adapt to any sort of lookup implementation,
 // such as binary search on an underlying sorted array.
 
-class CodePointNameTable extends java.util.Hashtable {
+class CodePointNameTable extends java.util.Hashtable<Integer, String> {
     CodePointNameTable() {
         put(new Integer(CodePoint.ACCSECRD), "ACCSECRD");
         put(new Integer(CodePoint.TYPDEFNAM), "TYPDEFNAM");
@@ -91,6 +91,6 @@ class CodePointNameTable extends java.util.Hashtable {
     }
 
     String lookup(int codePoint) {
-        return (String) get(new Integer(codePoint));
+        return get(codePoint);
     }
 }

@@ -21,31 +21,30 @@
 
 package org.apache.derby.jdbc;
 
-import java.io.Serializable;
-import java.io.PrintWriter;
 import java.io.File;
-import java.security.AccessController;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
+import java.io.PrintWriter;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
-import javax.naming.Referenceable;
-import javax.naming.Reference;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
-
+import org.apache.derby.client.ClientDataSourceFactory;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Configuration;
+import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Connection;
-import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
-import org.apache.derby.client.ClientDataSourceFactory;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -445,9 +444,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     	//readSystemProperty, have an anonymous class implement PrivilegeAction.
     	//This class will read the system property in it's run method and
     	//return the value to the caller.
-    	return (String )AccessController.doPrivileged
-    	    (new java.security.PrivilegedAction(){
-    		    public Object run(){
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+                public String run() {
                     try {
                         return System.getProperty(key);
                     } catch (SecurityException se) {

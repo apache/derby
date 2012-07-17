@@ -21,13 +21,17 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
-
-import java.sql.SQLException;
-import java.util.Collections;
-import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class Connection
@@ -47,7 +51,8 @@ public abstract class Connection
         
     // In Connection.markStatementsClosed() method, this list is traversed to get a
     // list of open statements, which are marked closed and removed from the list.
-    final java.util.WeakHashMap openStatements_ = new java.util.WeakHashMap();
+    final WeakHashMap<Statement, Void> openStatements_ =
+            new WeakHashMap<Statement, Void>();
 
     // Some statuses of DERBY objects may be invalid on server
     // after both commit and rollback. For example,
@@ -55,7 +60,9 @@ public abstract class Connection
     //     after both commit and rollback
     // (2) result set will be unpositioned on server after both commit and rollback.
     // If they depend on both commit and rollback, they need to get on CommitAndRollbackListeners_.
-    final java.util.WeakHashMap CommitAndRollbackListeners_ = new java.util.WeakHashMap();
+    final WeakHashMap<UnitOfWorkListener, Void> CommitAndRollbackListeners_ =
+            new WeakHashMap<UnitOfWorkListener, Void>();
+
     private SqlWarning warnings_ = null;
     
     //Constant representing an invalid locator value
@@ -168,7 +175,9 @@ public abstract class Connection
     public int portNumber_;
     public int clientSSLMode_ = ClientBaseDataSource.SSL_OFF;
 
-    java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
+    Hashtable<String, String> clientCursorNameCache_ =
+            new Hashtable<String, String>();
+
     public int commBufferSize_ = 32767;
 
     // indicates if a deferred reset connection is required
@@ -868,25 +877,25 @@ public abstract class Connection
     }
 
     private void markStatementsClosed() {
-    	java.util.Set keySet = openStatements_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            Statement stmt = (Statement) i.next();
+        Set<Statement> keySet = openStatements_.keySet();
+        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
+            Statement stmt = i.next();
             stmt.markClosed();
             i.remove();
         }
     }
 
     private void writeCloseStatements() throws SqlException {
-    	java.util.Set keySet = openStatements_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            ((Statement) i.next()).writeClose(false);  // false means don't permit auto-commits
+        Set<Statement> keySet = openStatements_.keySet();
+        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
+            i.next().writeClose(false); // false means don't permit auto-commits
         }
     }
 
     private void readCloseStatements() throws SqlException {
-    	java.util.Set keySet = openStatements_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            ((Statement) i.next()).readClose(false);  // false means don't permit auto-commits
+        Set<Statement> keySet = openStatements_.keySet();
+        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
+            i.next().readClose(false); // false means don't permit auto-commits
         }
     }
 
@@ -1401,14 +1410,14 @@ public abstract class Connection
         return resultSetType;
     }
 
-    public java.util.Map getTypeMap() throws SQLException {
+    public Map<String, Class<?>> getTypeMap() throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTypeMap");
             }
             checkForClosedConnection();
-            java.util.Map map = Collections.EMPTY_MAP;
+            Map<String, Class<?>> map = Collections.emptyMap();
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTypeMap", map);
             }
@@ -1420,7 +1429,7 @@ public abstract class Connection
         }
     }
 
-    synchronized public void setTypeMap(java.util.Map map) throws SQLException {
+    synchronized public void setTypeMap(Map map) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -2024,10 +2033,9 @@ public abstract class Connection
                                                 throws SqlException;
 
     public void completeLocalCommit() {
-    	java.util.Set keySet = CommitAndRollbackListeners_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
-            listener.completeLocalCommit(i);
+        Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
+        for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
+            i.next().completeLocalCommit(i);
         }
         inUnitOfWork_ = false;
         transactionID_++;
@@ -2041,10 +2049,9 @@ public abstract class Connection
     // This is a client-side only operation.
     // This method will only throw an exception on bug check.
     public void completeLocalRollback() {
-    	java.util.Set keySet = CommitAndRollbackListeners_.keySet();
-    	for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
-            listener.completeLocalRollback(i);
+        Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
+        for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
+            i.next().completeLocalRollback(i);
         }
         inUnitOfWork_ = false;
         transactionID_++;
@@ -2057,9 +2064,9 @@ public abstract class Connection
      *
      */
     public void completeSpecificRollback(UnitOfWorkListener uwl) {
-        java.util.Set keySet = CommitAndRollbackListeners_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            UnitOfWorkListener listener = (UnitOfWorkListener) i.next();
+        Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
+        for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
+            UnitOfWorkListener listener = i.next();
             if(listener == uwl) {
                 listener.completeLocalRollback(i);
                 break;
@@ -2237,10 +2244,8 @@ public abstract class Connection
         // Iterate through the physical statements and re-enable them for reuse.
 
         if (closeStatementsOnClose) {
-            java.util.Set keySet = openStatements_.keySet();
-            for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-                Object o = i.next();
-                ((Statement) o).reset(closeStatementsOnClose);
+            for (Statement stmt : openStatements_.keySet()) {
+                stmt.reset(closeStatementsOnClose);
             }
         }
         // Must reset transaction isolation level if it has been changed,

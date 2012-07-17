@@ -22,8 +22,8 @@
 package org.apache.derby.client.am;
 
 import java.lang.ref.WeakReference;
-
-
+import java.util.Hashtable;
+import java.util.Stack;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
@@ -44,8 +44,8 @@ public class SectionManager {
     // For performance, the section objects themselves are pooled,
     // rather than just keeping track of free section numbers;
     // this way, we don't have to new-up a section if one is available in the pool.
-    java.util.Stack freeSectionsNonHold_ = null;
-    java.util.Stack freeSectionsHold_ = null;
+    private final Stack<Section> freeSectionsNonHold_;
+    private final Stack<Section> freeSectionsHold_;
 
     int nextAvailableSectionNumber_ = 1;
 
@@ -74,11 +74,15 @@ public class SectionManager {
     // When requested (rs.getCursorName()), if the cursor name is still null,
     // then is given the canned cursor name as defined by our jdbc package set and added to the cursor map.
     // Still need to consider how positioned updates should interact with multiple result sets from a stored.
-    private java.util.Hashtable positionedUpdateCursorNameToQuerySection_ = new java.util.Hashtable();
+    private final Hashtable<String, Section>
+        positionedUpdateCursorNameToQuerySection_ =
+            new Hashtable<String, Section>();
 
     // Cursor name to ResultSet mapping is needed for positioned updates to check whether
     // a ResultSet is scrollable.  If so, exception is thrown.
-    private java.util.Hashtable positionedUpdateCursorNameToResultSet_ = new java.util.Hashtable();
+    private final Hashtable<String, WeakReference<ResultSet>>
+        positionedUpdateCursorNameToResultSet_ =
+            new Hashtable<String, WeakReference<ResultSet>>();
 
     String databaseName;
 
@@ -88,8 +92,8 @@ public class SectionManager {
         collection_ = collection;
         agent_ = agent;
         this.databaseName = databaseName;
-        freeSectionsNonHold_ = new java.util.Stack();
-        freeSectionsHold_ = new java.util.Stack();
+        freeSectionsNonHold_ = new Stack<Section>();
+        freeSectionsHold_ = new Stack<Section>();
     }
 
     /**
@@ -186,11 +190,12 @@ public class SectionManager {
 
     void mapCursorNameToResultSet(String cursorName, ResultSet resultSet) {
         // DERBY-3316. Needs WeakReference so that ResultSet can be garbage collected
-        positionedUpdateCursorNameToResultSet_.put(cursorName, new WeakReference(resultSet));
+        positionedUpdateCursorNameToResultSet_.put(
+                cursorName, new WeakReference<ResultSet>(resultSet));
     }
 
     ResultSet getPositionedUpdateResultSet(String cursorName) throws SqlException {
-        ResultSet rs = (ResultSet) ((WeakReference) (positionedUpdateCursorNameToResultSet_.get(cursorName))).get();
+        ResultSet rs = positionedUpdateCursorNameToResultSet_.get(cursorName).get();
         if (rs == null) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_RESULT_SET_NOT_OPEN), "update");

@@ -21,12 +21,12 @@
 
 package org.apache.derby.client.net;
 
+import java.net.Socket;
+import java.security.PrivilegedExceptionAction;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
 
-public class OpenSocketAction implements java.security.PrivilegedExceptionAction {
+public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
     private int port_;
     private int clientSSLMode_;
@@ -37,7 +37,8 @@ public class OpenSocketAction implements java.security.PrivilegedExceptionAction
         clientSSLMode_ = clientSSLMode;
     }
 
-    public Object run() 
+    @Override
+    public Socket run()
         throws java.net.UnknownHostException, 
                java.io.IOException,
                java.security.NoSuchAlgorithmException,

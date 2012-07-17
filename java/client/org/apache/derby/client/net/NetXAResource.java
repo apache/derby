@@ -102,7 +102,8 @@ public class NetXAResource implements XAResource {
     int port_;     // port needed to make secondary connection for recover in DS mode.
     String ipaddr_;  // ip address needed to make secondary connection for recover in DS mode.
 
-    private List specialRegisters_ = Collections.synchronizedList(new LinkedList());
+    private final List<String> specialRegisters_ =
+            Collections.synchronizedList(new LinkedList<String>());
 
     /** The value of the transaction timeout in seconds. */
     private int timeoutSeconds = 0;

@@ -204,7 +204,7 @@ public abstract class Lob implements UnitOfWorkListener {
     protected InputStream materializeStream(InputStream is, String typeDesc)
             throws SqlException {
         final int GROWBY = 32 * 1024; // 32 KB
-        ArrayList byteArrays = new ArrayList();
+        ArrayList<byte[]> byteArrays = new ArrayList<byte[]>();
         byte[] curBytes = new byte[GROWBY];
         int totalLength = 0;
         int partLength = 0;

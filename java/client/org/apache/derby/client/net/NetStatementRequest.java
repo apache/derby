@@ -23,25 +23,28 @@ package org.apache.derby.client.net;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.client.am.Lob;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.derby.client.am.Blob;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.DateTime;
+import org.apache.derby.client.am.DateTimeValue;
+import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Types;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.DateTimeValue;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters
 
 public class NetStatementRequest extends NetPackageRequest implements StatementRequestInterface {
-    java.util.ArrayList extdtaPositions_ = null; // Integers: build EXTDTA for column i
+    // Integers: build EXTDTA for column i
+    private ArrayList<Integer> extdtaPositions_ = null;
 
     // promototed parameters hold parameters that are promotoed to a different
     // data type because they are too large to represent in PROTOCOL otherwise.
@@ -49,7 +52,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // The key for this structure is the parameter index.  Note that having this
     // collection does not eliminate the need for extdtaPositions_ because that
     // is still needed for non-promototed LOBs
-    java.util.HashMap promototedParameters_ = new java.util.HashMap();
+    private final HashMap<Integer, Object> promototedParameters_ =
+            new HashMap<Integer, Object>();
 
     NetStatementRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
@@ -927,7 +931,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 boolean chainFlag, chainedWithSameCorrelator;
 
                 for (int i = 0; i < extdtaPositions_.size(); i++) {
-                    int index = ((Integer) extdtaPositions_.get(i)).intValue();
+                    int index = extdtaPositions_.get(i);
 
                     // is this the last EXTDTA to be built?
                     if (i != extdtaPositions_.size() - 1) { // no
@@ -1117,7 +1121,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         if (promototedParameters_.isEmpty()) {
             return null;
         }
-        return promototedParameters_.get(new Integer(index));
+        return promototedParameters_.get(index);
     }
 
     private int calculateColumnsInSQLDTAGRPtriplet(int numVars) {
@@ -1192,7 +1196,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             // inputRow[i] = c;
                             // Place the new Lob in the promototedParameter_ collection for
                             // NetStatementRequest use
-                            promototedParameters_.put(new Integer(i), c);
+                            promototedParameters_.put(i, c);
                             
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
 
@@ -1340,7 +1344,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             // inputRow[i] = c;
                             // Place the new Lob in the promototedParameter_ collection for
                             // NetStatementRequest use
-                            promototedParameters_.put(new Integer(i), c);
+                            promototedParameters_.put(i, c);
 
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(c.length());
@@ -1367,7 +1371,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
-                        promototedParameters_.put(new Integer(i), b);
+                        promototedParameters_.put(i, b);
 
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
@@ -1388,7 +1392,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
                         // NetStatementRequest use
-                        promototedParameters_.put(new Integer(i), b);
+                        promototedParameters_.put(i, b);
 
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
@@ -1775,9 +1779,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
         if (dataLength != 0) {
             if (extdtaPositions_ == null) {
-                extdtaPositions_ = new java.util.ArrayList();
+                extdtaPositions_ = new ArrayList<Integer>();
             }
-            extdtaPositions_.add(new Integer(i));
+            extdtaPositions_.add(i);
         }
     }
     
@@ -1785,10 +1789,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         short v = 1;
         writeShort( v <<= 15 );
         if (extdtaPositions_ == null) {
-            extdtaPositions_ = new java.util.ArrayList();
+            extdtaPositions_ = new ArrayList<Integer>();
         }
         
-        extdtaPositions_.add(new Integer(i));
+        extdtaPositions_.add(i);
     }
 
     private boolean checkSendQryrowset(int fetchSize,

@@ -194,10 +194,10 @@ public class Configuration {
     private static ProductVersionHolder buildProductVersionHolder() throws
             java.security.PrivilegedActionException, IOException {
         ProductVersionHolder myPVH = null;
-        myPVH = (ProductVersionHolder)
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+        myPVH = AccessController.doPrivileged(
+                new PrivilegedExceptionAction<ProductVersionHolder>() {
 
-                    public Object run() throws IOException {
+                    public ProductVersionHolder run() throws IOException {
                         InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DNC_INFO);
 
                         return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);

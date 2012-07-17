@@ -267,7 +267,7 @@ public class LogicalCallableStatement
          getPhysCs().setObject(parameterName, x, targetSqlType, scale);
     }
 
-    public Object getObject(int i, Map map) throws SQLException {
+    public Object getObject(int i, Map<String, Class<?>> map) throws SQLException {
         return getPhysCs().getObject(i, map);
     }
 
@@ -355,7 +355,7 @@ public class LogicalCallableStatement
         return getPhysCs().getTimestamp(parameterIndex, cal);
     }
 
-    public Object getObject(String parameterName, Map map) throws SQLException {
+    public Object getObject(String parameterName, Map<String, Class<?>> map) throws SQLException {
         return getPhysCs().getObject(parameterName, map);
     }
 

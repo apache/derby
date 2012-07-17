@@ -23,19 +23,17 @@ package org.apache.derby.client.am;
 
 import java.sql.Array;
 import java.sql.Blob;
-import java.sql.SQLClientInfoException;
 import java.sql.Clob;
 import java.sql.NClob;
-import java.sql.SQLXML;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.net.NetConnection40;
 import org.apache.derby.shared.common.reference.SQLState;
-import java.util.Map;
 
 /**
  * A simple delegation wrapper handle for a physical connection.
@@ -178,23 +176,6 @@ public class LogicalConnection40
             throws SQLException {
         return new LogicalDatabaseMetaData40(
                                 this, physicalConnection_.agent_.logWriter_);
-    }
-
-    /**
-     * Returns the type map for this connection.
-     *
-     * @return type map for this connection
-     * @exception SQLException if a database access error occurs
-     */
-    public Map<String, Class<?>> getTypeMap() throws SQLException {
-        try
-        {
-            checkForNullPhysicalConnection();
-            return ((java.sql.Connection) physicalConnection_).getTypeMap();
-		} catch (SQLException sqle) {
-			notifyException(sqle);
-			throw sqle;
-		}
     }
 
     /**

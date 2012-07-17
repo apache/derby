@@ -149,7 +149,6 @@ public class NetXAConnectionReply extends NetResultSetReply {
         int svrcod = CodePoint.SVRCOD_INFO;
         int xaretval = 0;
         int synctype = 0;
-        java.util.Hashtable indoubtTransactions = null;
         NetConnection conn = netAgent_.netConnection_;
 
         parseLengthAndMatchCodePoint(CodePoint.SYNCCRD);
@@ -183,8 +182,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
 
             if (peekCP == CodePoint.PRPHRCLST) {
                 foundInPass = true;
-                indoubtTransactions = parseIndoubtList();
-                conn.setIndoubtTransactions(indoubtTransactions);
+                conn.setIndoubtTransactions(parseIndoubtList());
                 peekCP = peekCodePoint();
             }
 
@@ -306,7 +304,8 @@ public class NetXAConnectionReply extends NetResultSetReply {
             peekCP = peekCodePoint();
         }
 
-        java.util.Hashtable indoubtTransactions = new java.util.Hashtable();
+        java.util.Hashtable<Xid, NetIndoubtTransaction> indoubtTransactions =
+                new java.util.Hashtable<Xid, NetIndoubtTransaction>();
         while (peekCP == CodePoint.XID) {
             Xid xid = parseXID();
             indoubtTransactions.put(xid, new NetIndoubtTransaction(xid, null, null, null, sIpAddr, port));
