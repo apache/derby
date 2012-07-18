@@ -171,6 +171,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("PreparedStatementTest:client")));
 
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                        TestConfiguration.connectionCPDecorator( baseSuite
+                                ("PreparedStatementTest:logical"))));
+
         // Tests for the client side JDBC statement cache.
         suite.addTest(TestConfiguration.clientServerDecorator(
                 statementCachingSuite()));
