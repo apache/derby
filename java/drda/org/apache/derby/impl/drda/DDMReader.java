@@ -222,11 +222,6 @@ class DDMReader
         ccsidManager = ebcdicCcsidManager;
     }
     
-    // Get the current ccsidManager
-    protected CcsidManager getCurrentCcsidManager() {
-        return ccsidManager;
-    }
-    
 	protected boolean terminateChainOnErr()
 	{
 		return terminateChainOnErr;
@@ -977,14 +972,6 @@ class DDMReader
       }
     }
 
-	
-
-	byte[] getExtData (boolean checkNullability) throws DRDAProtocolException
-	{
-		return  getExtData(ddmScalarLen, checkNullability);
-	}
-
-	
 	/**
 	 * Creates an InputStream which can stream EXTDTA objects.
 	 * The InputStream uses this DDMReader to read data from network. The 
@@ -1353,18 +1340,6 @@ class DDMReader
     }
 
 	/**
-	 * Read boolean value
-	 * @return	value
-	 *
-	 * @exception DRDAProtocolException if a protocol error is detected
-	 */
-	protected boolean readBoolean () throws DRDAProtocolException
-	{
-		ensureBLayerDataInBuffer (1, ADJUST_LENGTHS);
-		return buffer[pos++] != 0;
-	}
-
-	/**
 	 * Read encrypted string
 	 * @param   decryptM  decryption manager
 	 * @param   securityMechanism security mechanism
@@ -1456,18 +1431,6 @@ class DDMReader
 		
 		pos += length;
 		return s;
-	}
-
-	/**
-	 * Read string value in DDM data with default encoding
-	 * @return value
-	 *
-	 * @exception DRDAProtocolException if a protocol error is detected
-	 */
-	protected String readStringData()
-		throws DRDAProtocolException
-	{
-		return readString((int)ddmScalarLen, NetworkServerControlImpl.DEFAULT_ENCODING);
 	}
 
 	/**
@@ -1964,16 +1927,6 @@ class DDMReader
 	{
 		if (agent != null)
 			agent.trace(msg);
-	}
-
-	protected String toDebugString(String indent)
-	{
-		String s = indent + "***** DDMReader toDebugString ******\n";
-		int buflen = 0;
-		if (buffer != null)
-			buflen = buffer.length;
-	   s += indent + "Reader buffer length = " + buffer.length + "\n";
-	   return s;
 	}
 
 	/**

@@ -675,43 +675,6 @@ class DDMWriter
 		ensureLength (2);
 		buffer.putShort((short) value);
 	}
-
-	/**
-	 * Write length and codepoint
-	 *
-	 * @param 	length - length of object
-	 * @param 	codePoint - code point to write
-	 */
-	protected void startDdm (int length, int codePoint)
-	{
-		ensureLength (4);
-		buffer.putShort((short) length);
-		buffer.putShort((short) codePoint);
-	}
-
-	/**
-	 * Write scalar byte array object includes length, codepoint and value
-	 *
-	 * @param 	codePoint - code point to write
-	 * @param	buf  - value to write after code point
-	 * @param	length - number of bytes to write
-	 */
-	protected void writeScalarBytes (int codePoint, byte[] buf, int length)
-	{
-		if (SanityManager.DEBUG)
-		{
-			if (buf == null && length > 0)
-		    	SanityManager.THROWASSERT("Buf is null");
-			if (length > buf.length)
-		    	SanityManager.THROWASSERT("Not enough bytes in buffer");
-		}
-		ensureLength (length + 4);
-		buffer.putShort((short) length);
-		buffer.putShort((short) codePoint);
-		buffer.put(buf, 0, length);
-	}
-
-
     
     protected void writeScalarStream (boolean chainedWithSameCorrelator,
 									  int codePoint,
@@ -965,23 +928,6 @@ class DDMWriter
 	}
 
 	/**
-	 * Write padded scalar string object value
-	 * the string is converted into the appropriate codeset (EBCDIC)
-	 *
-	 * @param	string - string to be written
-	 * @param 	paddedLength - length to pad string to
-	 */
-	protected void writeScalarPaddedString (String string, int paddedLength)
-	{
-		int stringLength = ccsidManager.getByteLength(string);
-
-		int fillLength = paddedLength -stringLength;
-		ensureLength (paddedLength);
-		ccsidManager.convertFromJavaString(string, buffer);
-		padBytes(ccsidManager.space, fillLength);
-	}
-
-	/**
 	 * Write padded scalar <code>DRDAString</code> object value. The
 	 * string is converted into the appropriate codeset.
 	 *
@@ -1043,29 +989,6 @@ class DDMWriter
 		buffer.put(buf);
 	}
 
-	/**
-	 * Write scalar byte array object includes length, codepoint and value
-	 *
-	 * @param 	codePoint - code point to write
-	 * @param	buf - byte array to be written
-	 * @param	start - starting point
-	 * @param 	length - length to write
-	 */
-	protected void writeScalarBytes (int codePoint, byte[] buf, int start, int length)
-	{
-		if (SanityManager.DEBUG)
-		{
-			if (buf == null && length > start)
-		    	SanityManager.THROWASSERT("Buf is null");
-			if (length - start > buf.length)
-				SanityManager.THROWASSERT("Not enough bytes in buffer");
-		}
-		int numBytes = length - start;
-		ensureLength (numBytes + 4);
-		buffer.putShort((short) (numBytes + 4));
-		buffer.putShort((short) codePoint);
-		buffer.put(buf, start, length);
-	}
 	// The following methods write data in the platform format
 	// The platform format was indicated during connection time as ASC since
 	// JCC doesn't read JVM platform (yet)
@@ -1801,39 +1724,6 @@ class DDMWriter
 	}
 
 
-	/***
-	 * Prepend zeros to numeric string
-	 *
-	 * @param s string
-	 * @param precision - length of padded string
- 	 *
-	 * @return zero padded string
-	 */
-	public static String zeroPadString(String s, int precision)
-	{
-
-		if (s == null)
-			return s;
-
-		int slen = s.length();
-		if (precision == slen)
-			return s;
-		else if (precision > slen)
-		{
-			char[] ca  = new char[precision - slen];
-			Arrays.fill(ca,0,precision - slen,'0');
-			return new String(ca) + s;
-		}
-		else
-		{
-			// Shouldn't happen but just in case 
-			// truncate
-			return s.substring(0,precision);
-		}
-
-	}
-
-    
     private void sendBytes (java.io.OutputStream socketOutputStream) 
 	throws java.io.IOException{
 	
@@ -1869,14 +1759,6 @@ class DDMWriter
       clearBuffer();
     }
   }
-
-	protected String toDebugString(String indent)
-	{
-		String s = indent + "***** DDMWriter toDebugString ******\n";
-		int len = (buffer != null) ? buffer.capacity() : 0;
-		s += indent + "byte buffer length  = " + len + "\n";
-		return s;
-	}
 
 	/**
 	 * Reset any chaining state that needs to be reset
