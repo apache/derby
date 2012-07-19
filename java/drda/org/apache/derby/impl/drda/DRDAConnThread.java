@@ -1815,15 +1815,11 @@ class DRDAConnThread extends Thread {
 	 */
 	private void writeMGRLEVELS() throws DRDAProtocolException
 	{
-		int manager;
-		int appLevel;
-		int serverLevel;
 		writer.startDdm(CodePoint.MGRLVLLS);
-		for (int i = 0; i < knownManagers.size(); i++)
+		for (int manager : knownManagers)
 		{
-			manager = ((Integer)knownManagers.get(i)).intValue();
-			appLevel = appRequester.getManagerLevel(manager);
-			serverLevel = server.getManagerLevel(manager);
+			int appLevel = appRequester.getManagerLevel(manager);
+			int serverLevel = server.getManagerLevel(manager);
 			if (serverLevel >= appLevel)
 			{
 				//Note appLevel has already been set to 0 if we can't support
@@ -1838,9 +1834,8 @@ class DRDAConnThread extends Thread {
 			}
 		}
 		// write 0 for all unknown managers
-		for (int i = 0; i < unknownManagers.size(); i++)
+		for (int manager : unknownManagers)
 		{
-			manager = ((Integer)unknownManagers.get(i)).intValue();
 			writer.writeCodePoint4Bytes(manager, 0);
 		}
 		writer.endDdm();

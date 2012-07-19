@@ -53,7 +53,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -834,9 +833,8 @@ public final class NetworkServerControlImpl {
 			
 	 		// Close out the sessions
 	 		synchronized(sessionTable) {
-	 			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+	 			for (Session session : sessionTable.values())
 	 			{	
-	 				Session session = (Session) e.nextElement();
 	 				try {
 	 					session.close();
 	 				} catch (Exception exception) {
@@ -848,11 +846,9 @@ public final class NetworkServerControlImpl {
 			synchronized (threadList)
 			{
 	 			//interupt any connection threads still active
-	 			for (int i = 0; i < threadList.size(); i++)
+	 			for (final DRDAConnThread threadi : threadList)
 	 			{
 	 				try {
-	 					final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
-	 	                
 	 	 				threadi.close();
 	 					AccessController.doPrivileged(
                                 new PrivilegedAction<Void>() {
@@ -984,8 +980,7 @@ public final class NetworkServerControlImpl {
 
 						// Close and remove sessions on runQueue.
 						synchronized (runQueue) {
-							for (int i = 0; i < runQueue.size(); i++) {
-								Session s = (Session) runQueue.get(i);
+							for (Session s : runQueue) {
 								s.close();
 								removeFromSessionTable(s.getConnNum());
 							}
@@ -2601,13 +2596,9 @@ public final class NetworkServerControlImpl {
 	
 	private void checkAddressIsLocal(InetAddress inetAddr) throws UnknownHostException,Exception
 	{
-		for(int i = 0; i < localAddresses.size(); i++)
-		{
-			if (inetAddr.equals((InetAddress)localAddresses.get(i)))
-			{
-				return;
-			}
-		}
+        if (localAddresses.contains(inetAddr)) {
+            return;
+        }
 		consolePropertyMessage("DRDA_NeedLocalHost.S", new String[] {inetAddr.getHostName(),serverSocket.getInetAddress().getHostName()});
 
 	}
@@ -3544,9 +3535,8 @@ public final class NetworkServerControlImpl {
 		}
 		// update the value in all the threads
 		synchronized(threadList) {
-			for (Enumeration e = threadList.elements(); e.hasMoreElements(); )
+			for (DRDAConnThread thread : threadList)
 			{
-				DRDAConnThread thread = (DRDAConnThread)e.nextElement();
 				thread.setLogConnections(value);
 			}
 		}
@@ -3602,10 +3592,8 @@ public final class NetworkServerControlImpl {
 		if (sessionArg == 0)
 		{
 			synchronized(sessionTable) {
-				for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+				for (Session session : sessionTable.values())
 				{
-                   
-				    Session session = (Session) e.nextElement();
 					if (on)
 						try {
 							session.setTraceOn(traceDirectory,true);
@@ -3623,7 +3611,7 @@ public final class NetworkServerControlImpl {
 		}
 		else
 		{
-			Session session = (Session) sessionTable.get(new Integer(sessionArg));
+			Session session = sessionTable.get(sessionArg);
 			if (session != null)
 			{	
 				if (on)
@@ -3908,9 +3896,8 @@ public final class NetworkServerControlImpl {
 		if (!getTraceAll())
 		{
 			synchronized(sessionTable) {
-				for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+				for (Session session : sessionTable.values())
 				{	
-					Session session = (Session) e.nextElement();
 					if (session.isTraceOn())
 						retval.put(Property.DRDA_PROP_TRACE+"."+session.getConnNum(), "true");
 				}
@@ -4006,10 +3993,9 @@ public final class NetworkServerControlImpl {
 		String s = locallangUtil.getTextMessage("DRDA_RuntimeInfoBanner.I")+ "\n";
 		int sessionCount = 0;
 		s += locallangUtil.getTextMessage("DRDA_RuntimeInfoSessionBanner.I") + "\n";
-		for (int i = 0; i < threadList.size(); i++)
+		for (DRDAConnThread thread : threadList)
 		{
-			String sessionInfo  = ((DRDAConnThread)
-								   threadList.get(i)).buildRuntimeInfo("",locallangUtil) ;
+			String sessionInfo = thread.buildRuntimeInfo("", locallangUtil);
 			if (!sessionInfo.equals(""))
 			{
 				sessionCount ++;
@@ -4017,9 +4003,9 @@ public final class NetworkServerControlImpl {
 			}
 		}
 		int waitingSessions = 0;
-		for (int i = 0; i < runQueue.size(); i++)
+		for (Session session : runQueue)
 		{
-				s += ((Session)runQueue.get(i)).buildRuntimeInfo("", locallangUtil);
+				s += session.buildRuntimeInfo("", locallangUtil);
 				waitingSessions ++;
 		}
 		s+= "-------------------------------------------------------------\n";
@@ -4044,24 +4030,24 @@ public final class NetworkServerControlImpl {
     
     long getBytesRead() {
         long count=0;
-        for (int i = 0; i < threadList.size(); i++) {
-            count += ((DRDAConnThread)threadList.get(i)).getBytesRead();
+        for (DRDAConnThread thread : threadList) {
+            count += thread.getBytesRead();
         }
         return count;
     }
     
      long getBytesWritten() {
         long count=0;
-        for (int i = 0; i < threadList.size(); i++) {
-            count += ((DRDAConnThread)threadList.get(i)).getBytesWritten();
+        for (DRDAConnThread thread : threadList) {
+            count += thread.getBytesWritten();
         }
         return count;
     }
      
     int getActiveSessions() {
         int count=0;
-        for (int i = 0; i < threadList.size(); i++) {
-           if (((DRDAConnThread)threadList.get(i)).hasSession()) {
+        for (DRDAConnThread thread : threadList) {
+           if (thread.hasSession()) {
                count++;
            }
         }
