@@ -340,7 +340,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		// strictly alphanumeric and the number of total possible keys a little
 		// bigger.
 		int IVlen = BLOCK_LENGTH;
-		
+
 		byte[] iv = null;
 		if(cryptoAlgorithmShort.equals(AES))
 		{
@@ -732,8 +732,8 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 
 		int checkKey = digest(generatedKey);
 
-		if (checkKey != verifyKey)
-			throw StandardException.newException(errorState);
+        if (checkKey != verifyKey)
+        { throw StandardException.newException(errorState); }
 
 		// if encodedKeyLength is not defined, then either it is an old version with no support for different
 		// key sizes and padding except for defaults
@@ -790,9 +790,15 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		byte[] IV = generateIV(generatedKey);
 
 		if (!((JCECipherProvider) verify).verifyIV(IV))
-			throw StandardException.newException(SQLState.WRONG_BOOT_PASSWORD);
+		{ throw StandardException.newException(SQLState.WRONG_BOOT_PASSWORD); }
 
-
+        // DERBY-5622:
+        // if we survive those two quick checks, verify that the generated key is still correct
+        // by using it to decrypt something encrypted by the original generated key
+        CipherProvider  newDecrypter = createNewCipher
+            ( DECRYPT, generateKey( generatedKey ), IV );
+        vetCipherProviders( newDecrypter, verify, SQLState.WRONG_BOOT_PASSWORD );
+        
 		// Make the new key.  The generated key is unchanged, only the
 		// encrypted key is changed.
 		String newkey = saveSecretKey(generatedKey, newBPAscii);
@@ -802,6 +808,44 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 
 		return saveSecretKey(generatedKey, newBPAscii);
 	}
+
+    /**
+     * <p>
+     * Verify that a decrypter matches an encrypter. Raises an exception if they don't.
+     * The verification is performed by encrypting a block of text and checking that
+     * it decrypts to the same block.
+     * </p>
+     */
+    private void    vetCipherProviders
+        ( CipherProvider decrypter, CipherProvider encrypter, String sqlState )
+        throws StandardException
+    {
+        int     clearTextLength = 1024;
+        int     byteSize = 256;
+        byte[]  clearText = new byte[ clearTextLength ];
+        byte[]  cipherText = new byte[ clearTextLength ];
+        byte[]  unencryptedText = new byte[ clearTextLength ];
+
+        for ( int i = 0; i < clearTextLength; i++ ) { clearText[ i ] = (byte) (i % byteSize); }
+
+        int     bytesEncrypted = encrypter.encrypt
+            ( clearText, 0, clearTextLength, cipherText, 0 );
+        int     bytesDecrypted = decrypter.decrypt
+            ( cipherText, 0, bytesEncrypted, unencryptedText, 0 );
+
+        if ( (bytesEncrypted != clearTextLength) || (bytesDecrypted != clearTextLength) )
+        {
+            throw StandardException.newException( sqlState );
+        }
+
+        for ( int i = 0; i < clearTextLength; i++ )
+        {
+            if ( clearText[ i ] != unencryptedText[ i ] )
+            {
+                throw StandardException.newException( sqlState );
+            }
+        }
+    }
 
 	/**
 	 	perform actions with privileges enabled.
