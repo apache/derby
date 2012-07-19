@@ -53,6 +53,11 @@ public class Derby {
      */
     public static boolean hasServer()
     {
+        // DERBY-5864: The network server is not supported on J2ME.
+        if (JDBC.vmSupportsJSR169()) {
+            return false;
+        }
+
         // classes folder - assume all is available.
         if (!SecurityManagerSetup.isJars)
             return true;
@@ -77,19 +82,20 @@ public class Derby {
      */
     public static boolean hasClient()
     {
-        // classes folder - assume all is available.
-        if (!SecurityManagerSetup.isJars)
-            return true;
-
         // if we attempt to check on availability of the ClientDataSource with 
         // JSR169, attempts will be made to load classes not supported in
         // that environment, such as javax.naming.Referenceable. See DERBY-2269.
-        if (!JDBC.vmSupportsJSR169()) {
-            return hasCorrectJar("/derbyclient.jar",
-                "org.apache.derby.jdbc.ClientDataSource");
-        }
-        else
+        if (JDBC.vmSupportsJSR169()) {
             return false;
+        }
+
+        // classes folder - assume all is available.
+        if (!SecurityManagerSetup.isJars) {
+            return true;
+        }
+
+        return hasCorrectJar("/derbyclient.jar",
+                "org.apache.derby.jdbc.ClientDataSource");
     }
     
     private static boolean hasCorrectJar(String jarName, String className)
