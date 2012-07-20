@@ -26,7 +26,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 
 /**

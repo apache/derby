@@ -23,7 +23,6 @@ package org.apache.derby.impl.drda;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.derby.iapi.reference.DRDAConstants;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.DerbyIOException;

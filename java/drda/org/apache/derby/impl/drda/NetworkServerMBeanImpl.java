@@ -23,13 +23,12 @@ package org.apache.derby.impl.drda;
 
 import java.security.AccessControlException;
 import java.security.AccessController;
-
-import org.apache.derby.mbeans.drda.NetworkServerMBean;
-import org.apache.derby.security.SystemPermission;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.mbeans.drda.NetworkServerMBean;
+import org.apache.derby.security.SystemPermission;
 
 /**
  * <p>

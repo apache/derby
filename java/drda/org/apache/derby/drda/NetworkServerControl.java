@@ -22,8 +22,8 @@
 package org.apache.derby.drda;
 
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
@@ -31,7 +31,6 @@ import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-
 import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 /** 

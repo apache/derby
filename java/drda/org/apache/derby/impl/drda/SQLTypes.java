@@ -21,11 +21,9 @@
 
 package org.apache.derby.impl.drda;
 
-import java.sql.Types;
 import java.sql.SQLException;
+import java.sql.Types;
 import org.apache.derby.iapi.reference.DRDAConstants;
-
-
 
 class SQLTypes {
 

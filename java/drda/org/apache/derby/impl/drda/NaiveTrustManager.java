@@ -22,14 +22,14 @@
 package org.apache.derby.impl.drda;
 
 import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import javax.net.SocketFactory;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.net.ssl.KeyManagerFactory;
-import java.security.KeyStore;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 

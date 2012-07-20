@@ -25,10 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import java.sql.SQLException;
 
 /**
 	Session stores information about the current session

@@ -22,12 +22,12 @@
 package org.apache.derby.impl.drda;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,13 +35,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.lang.reflect.Array;
-
-import java.sql.DataTruncation;
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.JDBC30Translation;

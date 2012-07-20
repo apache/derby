@@ -20,16 +20,15 @@
  */
 package org.apache.derby.impl.drda;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedInputStream;
 import java.io.Reader;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
 import java.sql.Blob;
+import java.sql.CallableStatement;
 import java.sql.Clob;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.services.sanity.SanityManager;

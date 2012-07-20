@@ -20,12 +20,13 @@
  */
 
 package org.apache.derby.impl.drda;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	The DDMReader is used to read DRDA protocol.   DRDA Protocol is divided into

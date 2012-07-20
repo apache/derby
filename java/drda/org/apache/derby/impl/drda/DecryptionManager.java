@@ -21,21 +21,20 @@
 
 package org.apache.derby.impl.drda;
 
-import java.security.KeyPairGenerator;
-import java.security.KeyPair;
-import javax.crypto.KeyAgreement;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHPublicKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.sql.SQLException;
 import java.math.BigInteger;
-import org.apache.derby.shared.common.sanity.SanityManager;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+import java.sql.SQLException;
+import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This class is used to decrypt password and/or userid.

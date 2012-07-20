@@ -20,9 +20,9 @@
  */
 package org.apache.derby.impl.drda;
 
+import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import java.sql.SQLException;
 import org.apache.derby.iapi.reference.Limits;
 
 class FdocaConstants

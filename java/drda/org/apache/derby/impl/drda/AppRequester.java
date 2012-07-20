@@ -20,9 +20,9 @@
  */
 
 package org.apache.derby.impl.drda;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	AppRequester stores information about the application requester.

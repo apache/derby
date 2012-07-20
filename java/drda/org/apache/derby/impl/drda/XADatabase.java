@@ -21,22 +21,13 @@
 
 package org.apache.derby.impl.drda;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-
-import javax.transaction.xa.XAResource;
-import javax.sql.XADataSource;
-import javax.sql.XAConnection;
-
-import java.util.Hashtable;
 import java.util.Properties;
-import java.util.Enumeration;
-
-
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.jdbc.EmbeddedXADataSource;
 
 /**
  * This class contains database state specific to XA,

@@ -21,20 +21,14 @@
 
 package org.apache.derby.impl.drda;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
-
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	Database stores information about the current database

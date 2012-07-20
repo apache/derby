@@ -21,9 +21,12 @@
 
 package org.apache.derby.impl.drda;
 
-import java.io.*;
-import java.net.*;
-import java.security.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
 
 final class ClientThread extends Thread {
 

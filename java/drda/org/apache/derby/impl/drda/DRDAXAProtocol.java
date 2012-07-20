@@ -20,11 +20,14 @@
  */
 
 package org.apache.derby.impl.drda;
+
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
-import javax.transaction.xa.*;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
@@ -246,7 +249,7 @@ class DRDAXAProtocol {
 												throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 
 		try {
 			if (xid.getFormatId() == -1 && xaTimeout != -1) {
@@ -340,7 +343,7 @@ class DRDAXAProtocol {
 	private void commitXATransaction(Xid xid, int xaflags) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 		// check this
 		boolean isOnePhase = (xaflags & XAResource.TMONEPHASE) != 0;
 		try {
@@ -412,7 +415,7 @@ class DRDAXAProtocol {
 	private void rollbackXATransaction(Xid xid, boolean sendSYNCCRD) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 
 		try {
 			xaResource.rollback(xid);
@@ -440,7 +443,7 @@ class DRDAXAProtocol {
 	private void endXA(Xid xid, int xaflags) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();		
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 
 		try {
 			xaResource.end(xid,xaflags);
@@ -469,7 +472,7 @@ class DRDAXAProtocol {
 	private void prepareXATransaction(Xid xid) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal;
 
 		try {
 			xaRetVal = xaResource.prepare(xid);
@@ -495,7 +498,7 @@ class DRDAXAProtocol {
 	private void forgetXATransaction(Xid xid) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 
 		try {
 			xaResource.forget(xid);
@@ -526,7 +529,7 @@ class DRDAXAProtocol {
 	private void recoverXA(int xaflags) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
-		int xaRetVal = xaResource.XA_OK;
+		int xaRetVal = XAResource.XA_OK;
 		Xid[] indoubtXids = null;
 		try {
 			indoubtXids = xaResource.recover(xaflags);

@@ -35,12 +35,11 @@ import java.nio.charset.CodingErrorAction;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.Arrays;
-
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is

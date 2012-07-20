@@ -19,9 +19,10 @@
    under the License.
 */
 package org.apache.derby.impl.drda;
-import java.io.InputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Implementation of InputStream which get EXTDTA from the DDMReader.

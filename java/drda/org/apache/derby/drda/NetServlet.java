@@ -21,19 +21,22 @@
 
 package org.apache.derby.drda;
 
-import java.io.*;
-import java.util.*;
-
-import java.net.*;
-
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
 	This servlet can be used to start Derby Network Server from a remote location.
