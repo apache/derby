@@ -248,9 +248,11 @@ class DRDAConnThread extends Thread {
 	 * Main routine for thread, loops until the thread is closed
 	 * Gets a session, does work for the session
 	 */
+    @Override
     public void run() {
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("Starting new connection thread");
+        }
 
 		Session prevSession;
 		while(!closed())
@@ -259,11 +261,14 @@ class DRDAConnThread extends Thread {
 			// get a new session
 			prevSession = session;
 			session = server.getNextSession(session);
-			if (session == null)
+			if (session == null) {
 				close();
+            }
 
-			if (closed())
+			if (closed()) {
 				break;
+            }
+
 			if (session != prevSession)
 			{
 				initializeForSession();
@@ -275,8 +280,9 @@ class DRDAConnThread extends Thread {
 				{
 					case Session.INIT:
 						sessionInitialState();
-						if (session == null)
+						if (session == null) {
 							break;
+                        }
                         // else fallthrough
 					case Session.ATTEXC:
 					case Session.SECACC:
@@ -333,8 +339,9 @@ class DRDAConnThread extends Thread {
                 }
             }
 		}
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("Ending connection thread");
+        }
 		server.removeThread(this);
 
 	}
@@ -421,9 +428,7 @@ class DRDAConnThread extends Thread {
 	 */
 	protected byte[] getCrrtkn()
 	{
-		if (database != null)
-			return database.crrtkn;
-		return null;
+        return (database == null) ? null : database.crrtkn;
 	}
 	/**
 	 * Get database name
@@ -432,9 +437,7 @@ class DRDAConnThread extends Thread {
 	 */
 	protected String getDbName()
 	{
-		if (database != null)
-			return database.getDatabaseName();
-		return null;
+        return (database == null) ? null : database.getDatabaseName();
 	}
 	/**
 	 * Close DRDA  connection thread
@@ -494,14 +497,8 @@ class DRDAConnThread extends Thread {
         protected void markCommunicationsFailure(Exception e, String arg1, String arg2, String arg3,
                 String arg4) throws DRDAProtocolException
         {
-            String dbname = null;
-   
-            if (database != null)
-            {
-                dbname = database.getDatabaseName();
-            }
             if (e != null) {
-                println2Log(dbname,session.drdaID, e.getMessage());
+                println2Log(getDbName(), session.drdaID, e.getMessage());
                 server.consoleExceptionPrintTrace(e);
             }
         
@@ -535,12 +532,8 @@ class DRDAConnThread extends Thread {
 	 */
 	protected void agentError(String msg) throws DRDAProtocolException
 	{
-
-		String dbname = null;
-		if (database != null)
-			dbname = database.getDatabaseName();
 		throw DRDAProtocolException.newAgentError(this, CodePoint.SVRCOD_PRMDMG, 
-			dbname, msg);
+            getDbName(), msg);
 	}
 	/**
 	 * Missing code point
@@ -561,14 +554,16 @@ class DRDAConnThread extends Thread {
 	 */
 	protected static void println2Log(String dbname, String drdaID, String msg)
 	{
-		if (logStream == null)
+		if (logStream == null) {
 			logStream = Monitor.getStream();
+        }
 
 		if (dbname != null)
 		{
 			int endOfName = dbname.indexOf(';');
-			if (endOfName != -1)
+			if (endOfName != -1) {
 				dbname = dbname.substring(0, endOfName);
+            }
 		}
 		logStream.printlnWithHeader("(DATABASE = " + dbname + "), (DRDAID = " + drdaID + "), " + msg);
 	}
@@ -582,10 +577,10 @@ class DRDAConnThread extends Thread {
 		throws DRDAProtocolException
 	{
         CcsidManager currentManager = writer.getCurrentCcsidManager();
-        
-        int len = currentManager.getByteLength(rdbnam);
-        if (len < CodePoint.RDBNAM_LEN)
-        	len = CodePoint.RDBNAM_LEN;
+
+        int len = Math.max(
+                CodePoint.RDBNAM_LEN,
+                currentManager.getByteLength(rdbnam));
 
         /* Write the string padded */
         writer.writeScalarPaddedString(CodePoint.RDBNAM, rdbnam, len);
@@ -633,8 +628,9 @@ class DRDAConnThread extends Thread {
 		appRequester = session.appRequester;
 
 		// set sqlamLevel
-		if (session.state == Session.ATTEXC)
+		if (session.state == Session.ATTEXC) {
 			sqlamLevel = appRequester.getManagerLevel(CodePoint.SQLAM);
+        }
 
         /* All sessions MUST start as EBCDIC */
         reader.setEbcdicCcsid();
@@ -662,13 +658,10 @@ class DRDAConnThread extends Thread {
 				reader.initialize(this, null);
 				writer.reset(null);
 				closeSession();
+            } catch (InterruptedException ie) {
+                throw ie;
 			} catch (Throwable t) {
-				if (t instanceof InterruptedException)
-					throw (InterruptedException)t;
-				else
-				{
-					server.consoleExceptionPrintTrace(t);
-				}
+                server.consoleExceptionPrintTrace(t);
 			}
 
 		}
@@ -731,8 +724,9 @@ class DRDAConnThread extends Thread {
 			int codePoint = reader.readLengthAndCodePoint( false );
 			int writerMark = writer.markDSSClearPoint();
 			
-			if (checkSecurityCodepoint)
+			if (checkSecurityCodepoint) {
 				verifyInOrderACCSEC_SECCHK(codePoint,session.getRequiredSecurityCodepoint());
+            }
 
 			switch(codePoint)
 			{
@@ -791,9 +785,10 @@ class DRDAConnThread extends Thread {
 
 				case CodePoint.EXCSQLSET:
 					try {
-						if (parseEXCSQLSET())
-						// all went well.
-							writeSQLCARDs(null,0);
+                        if (parseEXCSQLSET()) {
+                            // all went well.
+                            writeSQLCARDs(null, 0);
+                        }
 					}
 					catch (SQLWarning w)
 					{
@@ -814,12 +809,13 @@ class DRDAConnThread extends Thread {
 						database.getConnection().clearWarnings();
 						sqldaType = parsePRPSQLSTT();
                         database.getCurrentStatement().sqldaType = sqldaType;
-						if (sqldaType > 0)		// do write SQLDARD
+						if (sqldaType > 0) {	// do write SQLDARD
 							writeSQLDARD(database.getCurrentStatement(),
 										 (sqldaType ==  CodePoint.TYPSQLDA_LIGHT_OUTPUT),
 										 database.getConnection().getWarnings());
-						else
+                        } else {
 							checkWarning(database.getConnection(), null, null, 0, true, true);
+                        }
 
 					} catch (SQLException e)
 					{
@@ -913,8 +909,9 @@ class DRDAConnThread extends Thread {
 				case CodePoint.RDBCMM:
 					try
 					{
-						if (SanityManager.DEBUG)
+						if (SanityManager.DEBUG) {
 							trace("Received commit");
+                        }
 						if (!database.getConnection().getAutoCommit())
 						{
 							database.getConnection().clearWarnings();
@@ -938,8 +935,9 @@ class DRDAConnThread extends Thread {
 				case CodePoint.RDBRLLBCK:
 					try
 					{
-						if (SanityManager.DEBUG)
+						if (SanityManager.DEBUG) {
 							trace("Received rollback");
+                        }
 						database.getConnection().clearWarnings();
 						database.rollback();
 						writeENDUOWRM(ROLLBACK);
@@ -989,9 +987,10 @@ class DRDAConnThread extends Thread {
 					checkSecurityCodepoint = true;
 					break;
 				case CodePoint.SECCHK:
-					if(parseDRDAConnection())
+					if (parseDRDAConnection()) {
 						// security all checked and connection ok
 						checkSecurityCodepoint = false;
+                    }
 					break;
 				/* since we don't support sqlj, we won't get bind commands from jcc, we
 				 * might get it from ccc; just skip them.
@@ -1047,8 +1046,9 @@ class DRDAConnThread extends Thread {
 						parseEXCSQLSTT();
 
 						DRDAStatement curStmt = database.getCurrentStatement();
-						if (curStmt != null)
+						if (curStmt != null) {
 							curStmt.rsSuspend();
+                        }
                         writePBSD();
 					} catch (SQLException e)
 					{
@@ -1063,8 +1063,9 @@ class DRDAConnThread extends Thread {
 					}
 					break;
 				case CodePoint.SYNCCTL:
-					if (xaProto == null)
+					if (xaProto == null) {
 						xaProto = new DRDAXAProtocol(this);
+                    }
 					xaProto.parseSYNCCTL();
  					try {
  						writePBSD();
@@ -1136,7 +1137,9 @@ class DRDAConnThread extends Thread {
 	{
 		if (reader.terminateChainOnErr() && (getExceptionSeverity(e) > CodePoint.SVRCOD_ERROR))
 		{
-			if (SanityManager.DEBUG)  trace("terminating the chain on error...");
+			if (SanityManager.DEBUG) {
+                trace("terminating the chain on error...");
+            }
 			skipRemainder(false);
 		}
 	}
@@ -1185,8 +1188,9 @@ class DRDAConnThread extends Thread {
 
 
 		int securityCheckCode = parseSECCHK();
-		if (SanityManager.DEBUG)
-			trace("*** SECCHKRM securityCheckCode is: "+securityCheckCode);
+		if (SanityManager.DEBUG) {
+            trace("*** SECCHKRM securityCheckCode is: " + securityCheckCode);
+        }
 		writeSECCHKRM(securityCheckCode);
 		//at this point if the security check failed, we're done, the session failed
 		if (securityCheckCode != 0)
@@ -1228,8 +1232,10 @@ class DRDAConnThread extends Thread {
 			writeRDBfailure(CodePoint.RDBACCRM);
 			return false;
 		}
-		else // everything is fine 
-			writeACCRDBRM(svrcod);
+		else
+        {
+            writeACCRDBRM(svrcod);
+        }
 
 		// compare this application requester with previously stored
 		// application requesters and if we have already seen this one
@@ -1415,8 +1421,9 @@ class DRDAConnThread extends Thread {
 		Properties p = new Properties();
 		databaseAccessException = null;
 		//if we haven't got the correlation token yet, use session number for drdaID
-		if (session.drdaID == null)
-			session.drdaID = leftBrace + session.connNum + rightBrace;
+		if (session.drdaID == null) {
+            session.drdaID = leftBrace + session.connNum + rightBrace;
+        }
 		p.put(Attribute.DRDAID_ATTR, session.drdaID);
 
         // We pass extra property information for the authentication provider
@@ -1452,8 +1459,9 @@ class DRDAConnThread extends Thread {
 			databaseAccessException = se;
 			for (; se != null; se = se.getNextException())
 			{
-				if (SanityManager.DEBUG)
-					trace(se.getMessage());
+				if (SanityManager.DEBUG) {
+                    trace(se.getMessage());
+                }
 	 			println2Log(database.getDatabaseName(), session.drdaID, se.getMessage());
 			}
 
@@ -1496,10 +1504,11 @@ class DRDAConnThread extends Thread {
 		
 	
 		// Everything worked so log connection to the database.
-		if (getLogConnections())
+		if (getLogConnections()) {
 	 		println2Log(database.getDatabaseName(), session.drdaID,
 				"Apache Derby Network Server connected to database " +
 						database.getDatabaseName());
+        }
 		return 0;
 	}
 
@@ -1566,10 +1575,12 @@ class DRDAConnThread extends Thread {
 				// optional
 				case CodePoint.EXTNAM:
 					appRequester.extnam = reader.readString();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("extName = " + appRequester.extnam);
-					if (appRequester.extnam.length() > CodePoint.MAX_NAME)
+                    }
+					if (appRequester.extnam.length() > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.EXTNAM);
+                    }
 					break;
 				// optional
 				case CodePoint.MGRLVLLS:
@@ -1580,32 +1591,39 @@ class DRDAConnThread extends Thread {
 					appRequester.spvnam = reader.readString();
 					// This is specified as a null parameter so length should
 					// be zero
-					if (appRequester.spvnam != null)
+					if (appRequester.spvnam != null) {
 						badObjectLength(CodePoint.SPVNAM);
+                    }
 					break;
 				// optional
 				case CodePoint.SRVNAM:
 					appRequester.srvnam = reader.readString();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("serverName = " +  appRequester.srvnam);
-					if (appRequester.srvnam.length() > CodePoint.MAX_NAME)
+                    }
+					if (appRequester.srvnam.length() > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.SRVNAM);
+                    }
 					break;
 				// optional
 				case CodePoint.SRVRLSLV:
 					appRequester.srvrlslv = reader.readString();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("serverlslv = " + appRequester.srvrlslv);
-					if (appRequester.srvrlslv.length() > CodePoint.MAX_NAME)
+                    }
+					if (appRequester.srvrlslv.length() > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.SRVRLSLV);
+                    }
 					break;
 				// optional
 				case CodePoint.SRVCLSNM:
 					appRequester.srvclsnm = reader.readString();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("serverClassName = " + appRequester.srvclsnm);
-					if (appRequester.srvclsnm.length() > CodePoint.MAX_NAME)
+                    }
+					if (appRequester.srvclsnm.length() > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.SRVCLSNM);
+                    }
 					break;
 				default:
 					invalidCodePoint(codePoint);
@@ -1693,8 +1711,9 @@ class DRDAConnThread extends Thread {
 		knownManagers = new ArrayList<Integer>();
 		ArrayList<Integer> errorManagers = new ArrayList<Integer>();
 		ArrayList<Integer> errorManagersLevel = new ArrayList<Integer>();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("Manager Levels");
+        }
 
 		while (reader.moreDdmData())
 		{
@@ -1722,10 +1741,14 @@ class DRDAConnThread extends Thread {
 
 			}
 			else
+            {
 				unknownManagers.add(new Integer(manager));
-			if (SanityManager.DEBUG)
+            }
+
+            if (SanityManager.DEBUG) {
 			   trace("Manager = " + java.lang.Integer.toHexString(manager) + 
 					  " ManagerLevel " + managerLevel);
+            }
 		}
 		sqlamLevel = appRequester.getManagerLevel(CodePoint.SQLAM);
 		// did we have any errors
@@ -1761,8 +1784,9 @@ class DRDAConnThread extends Thread {
         writer.writeScalarString(CodePoint.EXTNAM,
                                  NetworkServerControlImpl.att_extnam);
 		//only reply with manager levels if we got sent some
-		if (knownManagers != null && knownManagers.size() > 0)
+		if (knownManagers != null && knownManagers.size() > 0) {
 			writeMGRLEVELS();
+        }
         writer.writeScalarString(CodePoint.SRVCLSNM,
                                  NetworkServerControlImpl.att_srvclsnm);
         writer.writeScalarString(CodePoint.SRVNAM,
@@ -1877,15 +1901,17 @@ class DRDAConnThread extends Thread {
 				//optional
 				case CodePoint.SECMGRNM:
 					// this is defined to be 0 length
-					if (reader.getDdmLength() != 0)
+					if (reader.getDdmLength() != 0) {
 						badObjectLength(CodePoint.SECMGRNM);
+                    }
 					break;
 				//required
 				case CodePoint.SECMEC:
 					checkLength(CodePoint.SECMEC, 2);
 					securityMechanism = reader.readNetworkShort();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("parseACCSEC - Security mechanism = " + securityMechanism);
+                    }
                     
                     // if Property.DRDA_PROP_SECURITYMECHANISM has been set, then
                     // network server only accepts connections which use that
@@ -1939,13 +1965,15 @@ class DRDAConnThread extends Thread {
                                 //
                                 // See validateSecMecUSRSSBPWD() call below
                                 if (securityMechanism ==
-                                        CodePoint.SECMEC_USRSSBPWD)
+                                        CodePoint.SECMEC_USRSSBPWD) {
                                     break;
+                                }
 
                                 // SECMEC_EUSRIDPWD initialization
                                 try {
-                                    if (decryptionManager == null)
+                                    if (decryptionManager == null) {
                                         decryptionManager = new DecryptionManager();
+                                    }
                                     myPublicKey = decryptionManager.obtainPublicKey();
                                 } catch (SQLException e) {
                                     println2Log(null, session.drdaID, e.getMessage());
@@ -1962,7 +1990,9 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					Database d = session.getDatabase(dbname);
 					if (d == null)
+                    {
 						initializeDatabase(dbname);
+                    }
 					else
                     {
                         // reset database for connection re-use 
@@ -1988,12 +2018,14 @@ class DRDAConnThread extends Thread {
 		}
 
 		// check for required CodePoint's
-		if (securityMechanism == 0)
+		if (securityMechanism == 0) {
 			missingCodePoint(CodePoint.SECMEC);
+        }
 
 
-		if (database == null)
+		if (database == null) {
 			initializeDatabase(null);
+        }
 		database.securityMechanism = securityMechanism;
 		database.secTokenIn = secTokenIn;
 
@@ -2003,11 +2035,12 @@ class DRDAConnThread extends Thread {
         if (securityCheckCode == 0  &&
             (database.securityMechanism == CodePoint.SECMEC_USRSSBPWD))
         {
-            if (SanityManager.DEBUG)
+            if (SanityManager.DEBUG) {
 		        SanityManager.ASSERT((securityCheckCode == 0),
 						"SECMEC_USRSSBPWD: securityCheckCode should not " +
                         "already be set, found it initialized with " +
                         "a value of '" + securityCheckCode + "'.");
+            }
             securityCheckCode = validateSecMecUSRSSBPWD();
         }
 
@@ -2016,17 +2049,22 @@ class DRDAConnThread extends Thread {
 			(database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD ||
             database.securityMechanism == CodePoint.SECMEC_USRSSBPWD) &&
 			database.secTokenIn == null)
+        {
 			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING_OR_INVALID;
+        }
 
 		// shouldn't have security token
 		if (securityCheckCode == 0 &&
 			(database.securityMechanism == CodePoint.SECMEC_USRIDPWD ||
 			database.securityMechanism == CodePoint.SECMEC_USRIDONL)  &&
 			database.secTokenIn != null)
+        {
 			securityCheckCode = CodePoint.SECCHKCD_SECTKNMISSING_OR_INVALID;
+        }
 
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("** ACCSECRD securityCheckCode is: " + securityCheckCode);
+        }
 		
 		// If the security check was successful set the session state to
 		// security accesseed.  Otherwise go back to attributes exchanged so we
@@ -2086,17 +2124,20 @@ class DRDAConnThread extends Thread {
 					qryblkctl = reader.readNetworkShort();
 					//The only type of query block control we can specify here
 					//is forced fixed row
-					if (qryblkctl != CodePoint.FRCFIXROW)
+					if (qryblkctl != CodePoint.FRCFIXROW) {
 						invalidCodePoint(qryblkctl);
-					if (SanityManager.DEBUG)
+                    }
+					if (SanityManager.DEBUG) {
 						trace("!!qryblkctl = "+Integer.toHexString(qryblkctl));
+                    }
 					gotQryblksz = true;
 					break;
 				//optional
 			  	case CodePoint.MAXBLKEXT:
 					maxblkext = reader.readSignedNetworkShort();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("maxblkext = "+maxblkext);
+                    }
 					break;
 				// optional
 				case CodePoint.OUTOVROPT:
@@ -2125,10 +2166,12 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 		// check for required variables
-		if (pkgnamcsn == null)
+		if (pkgnamcsn == null) {
 			missingCodePoint(CodePoint.PKGNAMCSN);
-		if (!gotQryblksz)
+        }
+		if (!gotQryblksz) {
 			missingCodePoint(CodePoint.QRYBLKSZ);
+        }
 
 		// get the statement we are opening
 		DRDAStatement stmt = database.getDRDAStatement(pkgnamcsn);
@@ -2158,8 +2201,9 @@ class DRDAConnThread extends Thread {
 		// for ps with parameter
 		if (reader.isChainedWithSameID())
 		{
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("&&&&&& parsing SQLDTA");
+            }
 			parseOPNQRYobjects(stmt);
 		}
 		return pkgnamcsn;
@@ -2226,10 +2270,13 @@ class DRDAConnThread extends Thread {
 	{
 		checkLength(CodePoint.OUTOVROPT, 1);
 		int outovropt = reader.readUnsignedByte();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("output override option: "+outovropt);
-		if (outovropt != CodePoint.OUTOVRFRS && outovropt != CodePoint.OUTOVRANY)
+        }
+		if (outovropt != CodePoint.OUTOVRFRS &&
+                outovropt != CodePoint.OUTOVRANY) {
 			invalidValue(CodePoint.OUTOVROPT);
+        }
 		return outovropt;
 	}
 
@@ -2244,10 +2291,13 @@ class DRDAConnThread extends Thread {
 	{
 		checkLength(CodePoint.QRYBLKSZ, 4);
 		int blksize = reader.readNetworkInt();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("qryblksz = "+blksize);
-		if (blksize < CodePoint.QRYBLKSZ_MIN || blksize > CodePoint.QRYBLKSZ_MAX)
+        }
+		if (blksize < CodePoint.QRYBLKSZ_MIN ||
+                blksize > CodePoint.QRYBLKSZ_MAX) {
 			invalidValue(CodePoint.QRYBLKSZ);
+        }
 		return blksize;
 	}
 	/**
@@ -2261,10 +2311,12 @@ class DRDAConnThread extends Thread {
 	{
 		checkLength(CodePoint.QRYROWSET, 4);
 		int qryrowset = reader.readNetworkInt();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("qryrowset = " + qryrowset);
-		if (qryrowset < minVal || qryrowset > CodePoint.QRYROWSET_MAX)
+        }
+		if (qryrowset < minVal || qryrowset > CodePoint.QRYROWSET_MAX) {
 			invalidValue(CodePoint.QRYROWSET);
+        }
 		return qryrowset;
 	}
 
@@ -2277,12 +2329,15 @@ class DRDAConnThread extends Thread {
 	   
 		checkLength(CodePoint.QRYCLSIMP, 1);
 		int qryclsimp = reader.readUnsignedByte();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace ("qryclsimp = " + qryclsimp);
+        }
 		if (qryclsimp != CodePoint.QRYCLSIMP_SERVER_CHOICE &&
 			qryclsimp != CodePoint.QRYCLSIMP_YES &&
 			qryclsimp != CodePoint.QRYCLSIMP_NO )
+        {
 			invalidValue(CodePoint.QRYCLSIMP);
+        }
 		return qryclsimp;
 	}
 
@@ -2468,15 +2523,17 @@ class DRDAConnThread extends Thread {
 				//optional
 				case CodePoint.QRYRELSCR:
 					qryrelscr = readBoolean(CodePoint.QRYRELSCR);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrelscr = "+qryrelscr);
+                    }
 					break;
 				//optional
 				case CodePoint.QRYSCRORN:
 					checkLength(CodePoint.QRYSCRORN, 1);
 					qryscrorn = reader.readUnsignedByte();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryscrorn = "+qryscrorn);
+                    }
 					switch (qryscrorn)
 					{
 						case CodePoint.QRYSCRREL:
@@ -2492,74 +2549,85 @@ class DRDAConnThread extends Thread {
 				case CodePoint.QRYROWNBR:
 					checkLength(CodePoint.QRYROWNBR, 8);
 					qryrownbr = reader.readNetworkLong();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrownbr = "+qryrownbr);
+                    }
 					break;
 				//optional
 				case CodePoint.QRYROWSNS:
 					checkLength(CodePoint.QRYROWSNS, 1);
 					qryrowsns = readBoolean(CodePoint.QRYROWSNS);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrowsns = "+qryrowsns);
+                    }
 					gotQryrowsns = true;
 					break;
 				//optional
 				case CodePoint.QRYBLKRST:
 					checkLength(CodePoint.QRYBLKRST, 1);
 					qryblkrst = readBoolean(CodePoint.QRYBLKRST);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryblkrst = "+qryblkrst);
+                    }
 					break;
 				//optional
 				case CodePoint.QRYRTNDTA:
 					qryrtndta = readBoolean(CodePoint.QRYRTNDTA);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrtndta = "+qryrtndta);
+                    }
 					break;
 				//optional
 				case CodePoint.QRYROWSET:
 					//Note minimum for CNTQRY is 1
 					qryrowset = parseQRYROWSET(1);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrowset = "+qryrowset);
+                    }
 					break;
 				//optional
 				case CodePoint.QRYRFRTBL:
 					qryrfrtbl = readBoolean(CodePoint.QRYRFRTBL);
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryrfrtbl = "+qryrfrtbl);
+                    }
 					break;
 				//optional
 				case CodePoint.NBRROW:
 					checkLength(CodePoint.NBRROW, 4);
 					nbrrow = reader.readNetworkInt();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("nbrrow = "+nbrrow);
+                    }
 					break;
 				//optional
 				case CodePoint.MAXBLKEXT:
 					checkLength(CodePoint.MAXBLKEXT, 2);
 					maxblkext = reader.readSignedNetworkShort();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("maxblkext = "+maxblkext);
+                    }
 					break;
 				//optional
 				case CodePoint.RTNEXTDTA:
 					checkLength(CodePoint.RTNEXTDTA, 1);
 					rtnextdta = reader.readUnsignedByte();
 					if (rtnextdta != CodePoint.RTNEXTROW && 
-							rtnextdta != CodePoint.RTNEXTALL)
+							rtnextdta != CodePoint.RTNEXTALL) {
 						invalidValue(CodePoint.RTNEXTDTA);
-					if (SanityManager.DEBUG)
+                    }
+					if (SanityManager.DEBUG) {
 						trace("rtnextdta = "+rtnextdta);
+                    }
 					break;
 				// required for SQLAM >= 7
 				case CodePoint.QRYINSID:
 					checkLength(CodePoint.QRYINSID, 8);
 					qryinsid = reader.readNetworkLong();
 					gotQryinsid = true;
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("qryinsid = "+qryinsid);
+                    }
 					break;
 				// optional
 				case CodePoint.MONITOR:
@@ -2571,12 +2639,15 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 		// check for required variables
-		if (pkgnamcsn == null)
+		if (pkgnamcsn == null) {
 			missingCodePoint(CodePoint.PKGNAMCSN);
- 		if (!gotQryblksz)
+        }
+ 		if (!gotQryblksz) {
 			missingCodePoint(CodePoint.QRYBLKSZ);
-		if (sqlamLevel >= MGRLVL_7 && !gotQryinsid)
+        }
+		if (sqlamLevel >= MGRLVL_7 && !gotQryinsid) {
 			missingCodePoint(CodePoint.QRYINSID);
+        }
 
 		// get the statement we are continuing
 		DRDAStatement stmt = database.getDRDAStatement(pkgnamcsn);
@@ -2596,8 +2667,10 @@ class DRDAConnThread extends Thread {
 						 qryscrorn,qryrowsns,qryblkrst,qryrtndta,qryrowset,
 						 rtnextdta);
 
-		if (reader.isChainedWithSameID())
+		if (reader.isChainedWithSameID()) {
 			parseCNTQRYobjects(stmt);
+        }
+
 		return stmt;
 	}
 	/**
@@ -2679,8 +2752,9 @@ class DRDAConnThread extends Thread {
 				break;
 			}
 			numVars = (dtaGrpLen - 3) / 3;
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("num of vars is: "+numVars);
+            }
 			int[] outovr_drdaType;
 			if (first)
 			{
@@ -2713,11 +2787,13 @@ class DRDAConnThread extends Thread {
                     }
                 }
                 outovr_drdaType[i] = drdaType;
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("drdaType is: "+ outovr_drdaType[i]);
+                }
 				precision = reader.readNetworkShort();
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("drdaLength is: "+precision);
+                }
 				outovr_drdaType[i] |= (precision << 8);
 			}
 			stmt.setOutovr_drdaType(outovr_drdaType);
@@ -2798,13 +2874,15 @@ class DRDAConnThread extends Thread {
 	private void writeOPNQRYRM(boolean isDssObject, DRDAStatement stmt) 
 		throws DRDAProtocolException, SQLException
 	{
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("WriteOPNQRYRM");
+        }
 
-		if (isDssObject)
+		if (isDssObject) {
 			writer.createDssObject();
-		else
+        } else {
 			writer.createDssReply();
+        }
 		writer.startDdm(CodePoint.OPNQRYRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD,CodePoint.SVRCOD_INFO);
 
@@ -2812,8 +2890,9 @@ class DRDAConnThread extends Thread {
 		// JCC will throw an ArrayOutOfBounds exception.  Once this is fixed, we
 		// don't need to pass the two arguments for getQryprctyp.
 		int prcType = stmt.getQryprctyp();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("sending QRYPRCTYP: " + prcType);
+        }
 		writer.writeScalar2Bytes(CodePoint.QRYPRCTYP, prcType);
 
 		//pass the SQLCSRHLD codepoint only if statement producing the ResultSet has 
@@ -2821,7 +2900,9 @@ class DRDAConnThread extends Thread {
 		//JDBC, the holdability of the ResultSet will be the holdability of the statement 
 		//in the stored procedure, not the holdability of the calling statement.
 		if (stmt.getCurrentDrdaResultSet().withHoldCursor == ResultSet.HOLD_CURSORS_OVER_COMMIT)
+        {
 			writer.writeScalar1Byte(CodePoint.SQLCSRHLD, CodePoint.TRUE);
+        }
 		if (sqlamLevel >= MGRLVL_7)
 		{
 			writer.writeScalarHeader(CodePoint.QRYINSID, 8);
@@ -2914,13 +2995,16 @@ class DRDAConnThread extends Thread {
 			rdbNotFound(null);
 		}
 		//SQLAM level 7 allows db name up to 255, level 6 fixed len 18
-		if (rdbName.length < CodePoint.RDBNAM_LEN || rdbName.length > CodePoint.MAX_NAME)
+		if (rdbName.length < CodePoint.RDBNAM_LEN ||
+                rdbName.length > CodePoint.MAX_NAME) {
 			badObjectLength(CodePoint.RDBNAM);
+        }
 		name = reader.convertBytes(rdbName);
 		// trim trailing blanks from the database name
 		name = name.trim();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("RdbName " + name);
+        }
 		return name;
 	}
 
@@ -2947,7 +3031,9 @@ class DRDAConnThread extends Thread {
 		writer.startDdm(CodePoint.ACCSECRD);
 
 		if (securityCheckCode != CodePoint.SECCHKCD_NOTSUPPORTED)
+        {
 			writer.writeScalar2Bytes(CodePoint.SECMEC, database.securityMechanism);
+        }
 		else
 		{ 
             // if server doesnt recognize or allow the client requested security mechanism,
@@ -2957,7 +3043,9 @@ class DRDAConnThread extends Thread {
             // security mechanism, if so send only the security mechanism  that the 
             // server will accept, to the client
             if ( server.getSecurityMechanism() != NetworkServerControlImpl.INVALID_OR_NOTSET_SECURITYMECHANISM )
+            {
                 writer.writeScalar2Bytes(CodePoint.SECMEC, server.getSecurityMechanism());
+            }
             else
             {
                 // note: per the DDM manual , ACCSECRD response is of 
@@ -2968,8 +3056,9 @@ class DRDAConnThread extends Thread {
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDPWD);
                 // include EUSRIDPWD in the list of supported secmec only if 
                 // server can truely support it in the jvm that is running in
-                if ( server.supportsEUSRIDPWD())
+                if ( server.supportsEUSRIDPWD()) {
                     writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
+                }
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDONL);
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRSSBPWD);
             }
@@ -2983,9 +3072,13 @@ class DRDAConnThread extends Thread {
 		{
 			// we need to send back the key if encryption is being used
 			if (database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD)
+            {
 				writer.writeScalarBytes(CodePoint.SECTKN, myPublicKey);
+            }
             else if (database.securityMechanism == CodePoint.SECMEC_USRSSBPWD)
+            {
 				writer.writeScalarBytes(CodePoint.SECTKN, myTargetSeed);
+            }
 		}
     	writer.endDdmAndDss ();
 
@@ -3054,12 +3147,14 @@ class DRDAConnThread extends Thread {
 				case CodePoint.SECMEC:
 					checkLength(CodePoint.SECMEC, 2);
 					securityMechanism = reader.readNetworkShort();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("parseSECCHK - Security mechanism = " + securityMechanism);
+                    }
 					//RESOLVE - spec is not clear on what should happen
 					//in this case
-					if (securityMechanism != database.securityMechanism)
+					if (securityMechanism != database.securityMechanism) {
 						invalidValue(CodePoint.SECMEC);
+                    }
 					break;
 				//optional - depending on security Mechanism 
 				case CodePoint.SECTKN:
@@ -3086,13 +3181,15 @@ class DRDAConnThread extends Thread {
 						    } catch (SQLException se) {
 							    println2Log(database.getDatabaseName(), session.drdaID,
                                             se.getMessage());
-							    if (securityCheckCode == 0)
+							    if (securityCheckCode == 0) {
                                     //userid invalid
 								    securityCheckCode = CodePoint.SECCHKCD_13;
+                                }
 						    }
 						    database.userId = database.decryptedUserId;
-						    if (SanityManager.DEBUG)
+						    if (SanityManager.DEBUG) {
                                 trace("**decrypted userid is: "+database.userId);
+                            }
 					    }
 					    else if (database.decryptedPassword == null)
                         {
@@ -3106,14 +3203,16 @@ class DRDAConnThread extends Thread {
 						    } catch (SQLException se) {	
                                 println2Log(database.getDatabaseName(), session.drdaID,
                                             se.getMessage());
-                                if (securityCheckCode == 0)
+                                if (securityCheckCode == 0) {
                                     //password invalid
                                     securityCheckCode = CodePoint.SECCHKCD_0F;
+                                }
                             }
                             database.password = database.decryptedPassword;
-                            if (SanityManager.DEBUG)
+                            if (SanityManager.DEBUG) {
                                 trace("**decrypted password is: " +
                                       database.password);
+                            }
                         }
                     }
                     else if (database.securityMechanism ==
@@ -3122,11 +3221,12 @@ class DRDAConnThread extends Thread {
                         if (database.passwordSubstitute == null)
                         {
                             database.passwordSubstitute = reader.readBytes();
-					        if (SanityManager.DEBUG)
+					        if (SanityManager.DEBUG) {
                                 trace("** Substitute Password is:" +
                                       DecryptionManager.toHexString(
                                         database.passwordSubstitute, 0,
                                         database.passwordSubstitute.length));
+                            }
                             database.password =
                                 DecryptionManager.toHexString(
                                     database.passwordSubstitute, 0,
@@ -3141,7 +3241,9 @@ class DRDAConnThread extends Thread {
 				//optional - depending on security Mechanism
 				case CodePoint.PASSWORD:
 					database.password = reader.readString();
-					if (SanityManager.DEBUG) trace("PASSWORD " + database.password);
+					if (SanityManager.DEBUG) {
+                        trace("PASSWORD " + database.password);
+                    }
 					break;
 				//optional - depending on security Mechanism
 				//we are not supporting this method so we'll skip bytes
@@ -3151,7 +3253,9 @@ class DRDAConnThread extends Thread {
 				//optional - depending on security Mechanism
 				case CodePoint.USRID:
 					database.userId = reader.readString();
-					if (SanityManager.DEBUG) trace("USERID " + database.userId);
+					if (SanityManager.DEBUG) {
+                        trace("USERID " + database.userId);
+                    }
 					break;
 				//optional - depending on security Mechanism
 				case CodePoint.RDBNAM:
@@ -3164,8 +3268,9 @@ class DRDAConnThread extends Thread {
 							session.addDatabase(database);
 							session.database = database;
 						}
-						else if (!database.getDatabaseName().equals(dbname))
+						else if (!database.getDatabaseName().equals(dbname)) {
 							rdbnamMismatch(CodePoint.SECCHK);
+                        }
 					}
 					else
 					{
@@ -3182,12 +3287,14 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 		// check for SECMEC which is required
-		if (securityMechanism == 0)
+		if (securityMechanism == 0) {
 			missingCodePoint(CodePoint.SECMEC);
+        }
 
 		// Check that we have a database name.
-		if (database == null  || database.getDatabaseName() == null)
+		if (getDbName() == null) {
 			missingCodePoint(CodePoint.RDBNAM);
+        }
 
 		//check if we have a userid and password when we need it
 		if (securityCheckCode == 0 && 
@@ -3195,11 +3302,14 @@ class DRDAConnThread extends Thread {
 		    database.securityMechanism == CodePoint.SECMEC_USRIDONL ))
 		{
 			if (database.userId == null)
+            {
 				securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
+            }
 			else if (database.securityMechanism == CodePoint.SECMEC_USRIDPWD)
 			{
-			    if (database.password == null)
-				securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+                if (database.password == null) {
+                    securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+                }
 			}
 			//Note, we'll ignore encryptedUserId and encryptedPassword if they
 			//are also set
@@ -3208,19 +3318,21 @@ class DRDAConnThread extends Thread {
 		if (securityCheckCode == 0 && 
 				database.securityMechanism == CodePoint.SECMEC_USRSSBPWD)
 		{
-			if (database.userId == null)
-				securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
-			else if (database.passwordSubstitute == null)
-				securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+            if (database.userId == null) {
+                securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
+            } else if (database.passwordSubstitute == null) {
+                securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+            }
 		}
 
 		if (securityCheckCode == 0 && 
 				database.securityMechanism == CodePoint.SECMEC_EUSRIDPWD)
 		{
-			if (database.decryptedUserId == null)
-				securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
-			else if (database.decryptedPassword == null)
-				securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+            if (database.decryptedUserId == null) {
+                securityCheckCode = CodePoint.SECCHKCD_USERIDMISSING;
+            } else if (database.decryptedPassword == null) {
+                securityCheckCode = CodePoint.SECCHKCD_PASSWORDMISSING;
+            }
 		}
 		// RESOLVE - when we do security we need to decrypt encrypted userid & password
 		// before proceeding
@@ -3295,10 +3407,11 @@ class DRDAConnThread extends Thread {
 	private int svrcodFromSecchkcd(int securityCheckCode)
 	{
 		if (securityCheckCode == 0 || securityCheckCode == 2 ||
-			securityCheckCode == 5 || securityCheckCode == 8)
+			securityCheckCode == 5 || securityCheckCode == 8) {
 			return CodePoint.SVRCOD_INFO;
-		else
+        } else {
 			return CodePoint.SVRCOD_ERROR;
+        }
 	}
 	/**
 	 * Parse access RDB
@@ -3334,30 +3447,35 @@ class DRDAConnThread extends Thread {
 				case CodePoint.RDBACCCL:
 					checkLength(CodePoint.RDBACCCL, 2);
 					int sqlam = reader.readNetworkShort();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("RDBACCCL = " + sqlam);
+                    }
 					// required to be SQLAM 
 
-					if (sqlam != CodePoint.SQLAM)
+					if (sqlam != CodePoint.SQLAM) {
 						invalidValue(CodePoint.RDBACCCL);
+                    }
 					removeFromRequired(CodePoint.RDBACCCL);
 					break;
 				//required
 				case CodePoint.CRRTKN:
 					database.crrtkn = reader.readBytes();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("crrtkn " + convertToHexString(database.crrtkn));
+                    }
 					removeFromRequired(CodePoint.CRRTKN);
 					int l = database.crrtkn.length;
-					if (l > CodePoint.MAX_NAME)
+					if (l > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.CRRTKN);
+                    }
 					// the format of the CRRTKN is defined in the DRDA reference
 					// x.yz where x is 1 to 8 bytes (variable)
 					// 		y is 1 to 8 bytes (variable)
 					//		x is 6 bytes fixed
 					//		size is variable between 9 and 23
-					if (l < 9 || l > 23)
+					if (l < 9 || l > 23) {
 						invalidValue(CodePoint.CRRTKN);
+                    }
 					byte[] part1 = new byte[l - 6];
                     System.arraycopy(database.crrtkn, 0,
                                      part1, 0, part1.length);
@@ -3365,8 +3483,9 @@ class DRDAConnThread extends Thread {
 							l-8, SignedBinary.BIG_ENDIAN); // as "long" as unique
 					session.drdaID = reader.convertBytes(part1) + 
 									time + leftBrace + session.connNum + rightBrace;
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("******************************************drdaID is: " + session.drdaID);
+                    }
 					database.setDrdaID(session.drdaID);
 	
 					break;
@@ -3375,15 +3494,18 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					if (database != null)
 					{ 
-						if (!database.getDatabaseName().equals(dbname))
+						if (!database.getDatabaseName().equals(dbname)) {
 							rdbnamMismatch(CodePoint.ACCRDB);
+                        }
 					}
 					else
 					{
 						//first time we have seen a database name
 						Database d = session.getDatabase(dbname);
 						if (d == null)
+                        {
 							initializeDatabase(dbname);
+                        }
 						else
 						{
 							database = d;
@@ -3395,10 +3517,12 @@ class DRDAConnThread extends Thread {
 				//required
 				case CodePoint.PRDID:
 					appRequester.setClientVersion(reader.readString());
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("prdId " + appRequester.prdid);
-					if (appRequester.prdid.length() > CodePoint.PRDID_MAX)
+                    }
+					if (appRequester.prdid.length() > CodePoint.PRDID_MAX) {
 						tooBig(CodePoint.PRDID);
+                    }
                     if (appRequester.getClientType() != AppRequester.DNC_CLIENT) {
                         invalidClient(appRequester.prdid);
                     }
@@ -3429,20 +3553,22 @@ class DRDAConnThread extends Thread {
 				case CodePoint.RDBALWUPD:
 					checkLength(CodePoint.RDBALWUPD, 1);
 					database.rdbAllowUpdates = readBoolean(CodePoint.RDBALWUPD);
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("rdbAllowUpdates = "+database.rdbAllowUpdates);
+                    }
 					break;
 				//optional, ignorable
 				case CodePoint.PRDDTA:
 					// check that it fits in maximum but otherwise ignore for now
-					if (reader.getDdmLength() > CodePoint.MAX_NAME)
+					if (reader.getDdmLength() > CodePoint.MAX_NAME) {
 						tooBig(CodePoint.PRDDTA);
+                    }
 					reader.skipBytes();
 					break;
 				case CodePoint.TRGDFTRT:
-					byte b = reader.readByte();
-					if (b == (byte)0xF1)
+					if (reader.readByte() == (byte) 0xF1) {
 						database.sendTRGDFTRT = true;
+                    }
 					break;
 				//optional - not used in JCC so skip for now
 				case CodePoint.STTDECDEL:
@@ -3459,7 +3585,9 @@ class DRDAConnThread extends Thread {
 		// set svrcod to warning if they are not supported
 		if ((database.ccsidDBC != 0 && !server.supportsCCSID(database.ccsidDBC)) ||
 				(database.ccsidMBC != 0 && !server.supportsCCSID(database.ccsidMBC))) 
+        {
 			svrcod = CodePoint.SVRCOD_WARNING;
+        }
 		return svrcod;
 	}
 	/**
@@ -3471,15 +3599,20 @@ class DRDAConnThread extends Thread {
 	private String parseTYPDEFNAM() throws DRDAProtocolException
 	{
 		String typDefNam = reader.readString();
-		if (SanityManager.DEBUG) trace("typeDefName " + typDefNam);
-		if (typDefNam.length() > CodePoint.MAX_NAME)
+		if (SanityManager.DEBUG) {
+            trace("typeDefName " + typDefNam);
+        }
+		if (typDefNam.length() > CodePoint.MAX_NAME) {
 			tooBig(CodePoint.TYPDEFNAM);
+        }
 		checkValidTypDefNam(typDefNam);
 		// check if the typedef is one we support
 		if (!typDefNam.equals(CodePoint.TYPDEFNAM_QTDSQLASC)  &&
 			!typDefNam.equals(CodePoint.TYPDEFNAM_QTDSQLJVM) &&
 			!typDefNam.equals(CodePoint.TYPDEFNAM_QTDSQLX86))
+        {
 			valueNotSupported(CodePoint.TYPDEFNAM);
+        }
 		return typDefNam;
 	}
 
@@ -3606,8 +3739,9 @@ class DRDAConnThread extends Thread {
 		codePoint = reader.getCodePoint();
 		// at least one of the following instance variable is required
 		// if the TYPDEFOVR is specified in a command object
-		if (codePoint == -1 && st != null)
+		if (codePoint == -1 && st != null) {
 			missingCodePoint(CodePoint.CCSIDSBC);
+        }
 
 		while (codePoint != -1)
 		{
@@ -3622,8 +3756,9 @@ class DRDAConnThread extends Thread {
 					} catch (Exception e) {
 						valueNotSupported(CodePoint.CCSIDSBC);
 					}
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("ccsidsbc = " + ccsidSBC + " encoding = " + ccsidSBCEncoding);
+                    }
 					break;
 				case CodePoint.CCSIDDBC:
 					checkLength(CodePoint.CCSIDDBC, 2);
@@ -3635,11 +3770,13 @@ class DRDAConnThread extends Thread {
 						// we write a warning later for this so no error
 						// unless for a statement
 						ccsidDBCEncoding = null;
-						if (st != null)
+						if (st != null) {
 							valueNotSupported(CodePoint.CCSIDSBC);
+                        }
 					}
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("ccsiddbc = " + ccsidDBC + " encoding = " + ccsidDBCEncoding);
+                    }
 					break;
 				case CodePoint.CCSIDMBC:
 					checkLength(CodePoint.CCSIDMBC, 2);
@@ -3650,11 +3787,13 @@ class DRDAConnThread extends Thread {
 					} catch (Exception e) {
 						// we write a warning later for this so no error
 						ccsidMBCEncoding = null;
-						if (st != null)
+						if (st != null) {
 							valueNotSupported(CodePoint.CCSIDMBC);
+                        }
 					}
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("ccsidmbc = " + ccsidMBC + " encoding = " + ccsidMBCEncoding);
+                    }
 					break;
 				default:
 					invalidCodePoint(codePoint);
@@ -3759,18 +3898,20 @@ class DRDAConnThread extends Thread {
 
 		DRDAStatement stmt = database.newDRDAStatement(pkgnamcsn);
 		String sqlStmt = parsePRPSQLSTTobjects(stmt);
-		if (databaseToSet != null)
+		if (databaseToSet != null) {
 			stmt.setDatabase(database);
+        }
 		stmt.explicitPrepare(sqlStmt);
 		// set the statement as the current statement
 		database.setCurrentStatement(stmt);
 
-		if (!rtnsqlda)
-			return 0;
-		else if (rtnOutput)   
-			return 2;
-		else
-			return 1;
+        if (!rtnsqlda) {
+            return 0;
+        } else if (rtnOutput) {
+            return 2;
+        } else {
+            return 1;
+        }
 	}
 	/**
 	 * Parse PRPSQLSTT objects
@@ -3806,8 +3947,9 @@ class DRDAConnThread extends Thread {
 					// required
 					case CodePoint.SQLSTT:
 						sqlStmt = parseEncodedString();
-						if (SanityManager.DEBUG) 
+						if (SanityManager.DEBUG) {
 							trace("sqlStmt = " + sqlStmt);
+                        }
 						break;
 					// optional
 					case CodePoint.TYPDEFNAM:
@@ -3826,8 +3968,9 @@ class DRDAConnThread extends Thread {
 				}
 			}
 		} while (reader.isChainedWithSameID());
-		if (sqlStmt == null)
+		if (sqlStmt == null) {
 			missingCodePoint(CodePoint.SQLSTT);
+        }
 
 		return sqlStmt;
 	}
@@ -3842,18 +3985,25 @@ class DRDAConnThread extends Thread {
 	{
 		checkLength(CodePoint.TYPSQLDA, 1);
 		byte sqldaType = reader.readByte();
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("typSQLDa " + sqldaType);
+        }
 		if (sqldaType == CodePoint.TYPSQLDA_STD_OUTPUT ||
 				sqldaType == CodePoint.TYPSQLDA_LIGHT_OUTPUT ||
 				sqldaType == CodePoint.TYPSQLDA_X_OUTPUT)
+        {
 			return true;
+        }
 		else if (sqldaType == CodePoint.TYPSQLDA_STD_INPUT ||
 					 sqldaType == CodePoint.TYPSQLDA_LIGHT_INPUT ||
 					 sqldaType == CodePoint.TYPSQLDA_X_INPUT)
+        {
 				return false;
+        }
 		else
+        {
 			invalidValue(CodePoint.TYPSQLDA);
+        }
 
 		// shouldn't get here but have to shut up compiler
 		return false;
@@ -3874,8 +4024,9 @@ class DRDAConnThread extends Thread {
 	protected void parseSQLATTR(DRDAStatement stmt) throws DRDAProtocolException
 	{
 		String attrs = parseEncodedString();
-		if (SanityManager.DEBUG)
+		if (SanityManager.DEBUG) {
 			trace("sqlattr = '" + attrs+"'");
+        }
 		//let Derby handle any errors in the types it doesn't support
 		//just set the attributes
 
@@ -3960,8 +4111,9 @@ class DRDAConnThread extends Thread {
 			}
 			codePoint = reader.getCodePoint();
 		}
-		if (pkgnamcsn == null)
+		if (pkgnamcsn == null) {
 			missingCodePoint(CodePoint.PKGNAMCSN);
+        }
 		return rtnOutput;
 	}
 
@@ -4018,21 +4170,24 @@ class DRDAConnThread extends Thread {
 				// optional
 				case CodePoint.OUTEXP:
 					outputExpected = readBoolean(CodePoint.OUTEXP);
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("outexp = "+ outputExpected);
+                    }
 					break;
 				// optional
 				case CodePoint.NBRROW:
 					checkLength(CodePoint.NBRROW, 4);
 					numRows = reader.readNetworkInt();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("# of rows: "+numRows);
+                    }
 					break;
 				// optional
 				case CodePoint.PRCNAM:
 					procName = reader.readString();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("Procedure Name = " + procName);
+                    }
 					break;
 				// optional
 				case CodePoint.QRYBLKSZ:
@@ -4046,8 +4201,9 @@ class DRDAConnThread extends Thread {
 					// -1 - requester is able to receive all result sets
 					checkLength(CodePoint.MAXRSLCNT, 2);
 					maxrslcnt = reader.readNetworkShort();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("max rs count: "+maxrslcnt);
+                    }
 					break;
 				// optional
 				case CodePoint.MAXBLKEXT:
@@ -4056,16 +4212,19 @@ class DRDAConnThread extends Thread {
 					// -1 - can receive entire result set
 					checkLength(CodePoint.MAXBLKEXT, 2);
 					maxblkext = reader.readNetworkShort();
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("max extra blocks: "+maxblkext);
+                    }
 					break;
 				// optional
 				case CodePoint.RSLSETFLG:
 					//Result set flags
 					rslsetflg = reader.readBytes();
-					for (int i=0;i<rslsetflg.length;i++)
-						if (SanityManager.DEBUG) 
-							trace("rslsetflg: "+rslsetflg[i]);
+                    if (SanityManager.DEBUG) {
+                        for (byte b : rslsetflg) {
+                            trace("rslsetflg: " + b);
+                        }
+                    }
 					break;
 				// optional
 				case CodePoint.RDBCMTOK:
@@ -4091,8 +4250,9 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 
-		if (pkgnamcsn == null)
+		if (pkgnamcsn == null) {
 			missingCodePoint(CodePoint.PKGNAMCSN);
+        }
 
 		DRDAStatement stmt;
 		boolean needPrepareCall = false;
@@ -4153,8 +4313,9 @@ class DRDAConnThread extends Thread {
 				// be prepared with parseEXCQLSTTobjects, otherwise we
 				// have to do it here
 				String prepareString = "call " + stmt.procName +"()";
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace ("$$$prepareCall is: "+prepareString);
+                }
 				database.getConnection().clearWarnings();
 				CallableStatement cs = (CallableStatement) stmt.prepare(prepareString);
 			}
@@ -4200,7 +4361,7 @@ class DRDAConnThread extends Thread {
                     writeEXTDTA(stmt);
                 }
 			}
-			else if (hasResultSet)
+			else if (hasResultSet) {
 			// DRDA spec says that we MUST return either an
 			// SQLDTARD or an SQLCARD--the former when we have
 			// output parameters, the latter when we don't.
@@ -4212,6 +4373,7 @@ class DRDAConnThread extends Thread {
 			// checkWarning() below, which will write an
 			// SQLCARD for us.
 				writeNullSQLCARDobject();
+            }
 		}
 
 		//We need to marke that params are finished so that we know we 
@@ -4226,10 +4388,12 @@ class DRDAConnThread extends Thread {
 			stmt.setCurrentDrdaResultSet(rsNum);
 			//indicate that we are going to return data
 			stmt.setQryrtndta(true);
-			if (! isProcedure)
+			if (!isProcedure) {
 				checkWarning(null, ps, null, -1, true, true);
-			if (rsNum == 0)
+            }
+			if (rsNum == 0) {
 				writeSQLRSLRD(stmt);
+            }
 			writeOPNQRYRM(true, stmt);
 			writeSQLCINRD(stmt);
 			writeQRYDSC(stmt, false);
@@ -4240,8 +4404,9 @@ class DRDAConnThread extends Thread {
 			 * does not allow LOB to be sent with OPNQRYRM.  So this "if" here will have
 			 * to add "no lob columns".
 			 */
-			if (stmt.getQryprctyp() == CodePoint.LMTBLKPRC)
+			if (stmt.getQryprctyp() == CodePoint.LMTBLKPRC) {
 				writeQRYDTA(stmt);
+            }
 		}
 		else  if (! sendSQLDTARD)
 		{
@@ -4269,8 +4434,9 @@ class DRDAConnThread extends Thread {
 	private void parseRDBCMTOK() throws DRDAProtocolException
 	{
 		boolean rdbcmtok = readBoolean(CodePoint.RDBCMTOK);
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("rdbcmtok = " + rdbcmtok);
+        }
 	}
 
 	/**
@@ -4338,8 +4504,9 @@ class DRDAConnThread extends Thread {
 		} while (reader.isChainedWithSameID());
 
 		// SQLDTA is required
-		if (! gotSQLDTA)
+		if (!gotSQLDTA) {
 			missingCodePoint(CodePoint.SQLDTA);
+        }
 		
 		if (! gotEXTDTA) {
 			stmt.ps.clearWarnings();
@@ -4361,16 +4528,18 @@ class DRDAConnThread extends Thread {
 
 		writer.createDssObject();
 		writer.startDdm(CodePoint.SQLCINRD);
-		if (sqlamLevel >= MGRLVL_7)
+        if (sqlamLevel >= MGRLVL_7) {
 			writeSQLDHROW(((EngineResultSet) rs).getHoldability());
+        }
 
 		ResultSetMetaData rsmeta = rs.getMetaData();
 		int ncols = rsmeta.getColumnCount();
 		writer.writeShort(ncols);	// num of columns
 		if (sqlamLevel >= MGRLVL_7)
 		{
-			for (int i = 0; i < ncols; i++)
+			for (int i = 0; i < ncols; i++) {
 				writeSQLDAGRP (rsmeta, null, i, true);
+            }
 		}
 		else
 		{
@@ -4426,8 +4595,9 @@ class DRDAConnThread extends Thread {
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, 0);
 		writer.startDdm(CodePoint.PKGSNLST);
 		
-		for (int i = 0; i < numResults; i++)
+		for (int i = 0; i < numResults; i++) {
 			writePKGNAMCSN(stmt.getResultSetPkgcnstkn(i).getBytes());
+        }
 		writer.endDdm();
 		writer.endDdmAndDss();
 	}
@@ -4485,34 +4655,40 @@ class DRDAConnThread extends Thread {
 					{
 						int dtaGrpLen = reader.readUnsignedByte();
 						int numVarsInGrp = (dtaGrpLen - 3) / 3;
-						if (SanityManager.DEBUG) 
+						if (SanityManager.DEBUG) {
 							trace("num of vars in this group is: "+numVarsInGrp);
+                        }
 						reader.readByte();		// tripletType
 						reader.readByte();		// id
 						for (int j = 0; j < numVarsInGrp; j++)
 						{
 							final byte t = reader.readByte();
-							if (SanityManager.DEBUG) 
+							if (SanityManager.DEBUG)  {
 								trace("drdaType is: "+ "0x" +
        								  Integer.toHexString(t));
+                            }
 							int drdaLength = reader.readNetworkShort();
-							if (SanityManager.DEBUG) 
+							if (SanityManager.DEBUG) {
 								trace("drdaLength is: "+drdaLength);
+                            }
 							stmt.addDrdaParam(t, drdaLength);
 						}
 					}
 					numVars = stmt.getDrdaParamCount();
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("numVars = " + numVars);
+                    }
 					if (ps == null)		// it is a CallableStatement under construction
 					{
 						StringBuilder marks = new StringBuilder();	// construct parameter marks
                         marks.append("(?");
-						for (int i = 1; i < numVars; i++)
+						for (int i = 1; i < numVars; i++) {
 							marks.append(", ?");
+                        }
 						String prepareString = "call " + stmt.procName + marks.toString() + ")";
-						if (SanityManager.DEBUG) 
+						if (SanityManager.DEBUG) {
 							trace ("$$ prepareCall is: "+prepareString);
+                        }
 						CallableStatement cs = null;
 						try {
 							cs = (CallableStatement)
@@ -4520,17 +4696,22 @@ class DRDAConnThread extends Thread {
 							stmt.registerAllOutParams();
 						} catch (SQLException se) {
 							if (! stmt.outputExpected || 
-								(!se.getSQLState().equals(SQLState.LANG_NO_METHOD_FOUND)))
+								(!se.getSQLState().equals(
+                                    SQLState.LANG_NO_METHOD_FOUND))) {
 								throw se;
-							if (SanityManager.DEBUG) 
+                            }
+							if (SanityManager.DEBUG) {
 								trace("****** second try with return parameter...");
+                            }
 							// Save first SQLException most likely suspect
-							if (numVars == 1)
+							if (numVars == 1) {
 								prepareString = "? = call " + stmt.procName +"()";
-							else
+                            } else {
 								prepareString = "? = call " + stmt.procName +"("+marks.substring(3) + ")";
-							if (SanityManager.DEBUG)
+                            }
+							if (SanityManager.DEBUG) {
 								trace ("$$ prepareCall is: "+prepareString);
+                            }
 							try {
 								cs = (CallableStatement) stmt.prepare(prepareString);
 							} catch (SQLException se2)
@@ -4559,13 +4740,16 @@ class DRDAConnThread extends Thread {
 							int nullData = reader.readUnsignedByte();
 							if ((nullData & 0xFF) == FdocaConstants.NULL_DATA)
 							{
-								if (SanityManager.DEBUG)
+								if (SanityManager.DEBUG) {
 									trace("******param null");
-								if (pmeta.getParameterMode(i + 1) 
-									!= ParameterMetaData.parameterModeOut)
+                                }
+								if (pmeta.getParameterMode(i + 1)
+									!= ParameterMetaData.parameterModeOut) {
 										ps.setNull(i+1, pmeta.getParameterType(i+1));
-								if (stmt.isOutputParam(i+1))
+                                }
+								if (stmt.isOutputParam(i+1)) {
 									stmt.registerOutParam(i+1);
+                                }
 								continue;
 							}
 						}
@@ -4650,48 +4834,54 @@ class DRDAConnThread extends Thread {
             case DRDAConstants.DRDA_TYPE_NBOOLEAN:
             {
                 boolean paramVal = (reader.readByte() == 1);
-                if (SanityManager.DEBUG)
+                if (SanityManager.DEBUG) {
                     trace("boolean parameter value is: " + paramVal);
+                }
                 ps.setBoolean(i+1, paramVal);
                 break;
             }
 			case DRDAConstants.DRDA_TYPE_NSMALL:
 			{
 				short paramVal = (short) reader.readShort(getByteOrder());
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("short parameter value is: "+paramVal);
+                }
                 ps.setShort(i+1, paramVal);
 				break;
 			}
 			case  DRDAConstants.DRDA_TYPE_NINTEGER:
 			{
 				int paramVal = reader.readInt(getByteOrder());
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("integer parameter value is: "+paramVal);
+                }
 				ps.setInt(i+1, paramVal);
 				break;
 			}
 			case DRDAConstants.DRDA_TYPE_NINTEGER8:
 			{
 				long paramVal = reader.readLong(getByteOrder());
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("parameter value is: "+paramVal);
+                }
 				ps.setLong(i+1, paramVal);
 				break;
 			}
 			case DRDAConstants.DRDA_TYPE_NFLOAT4:
 			{
 				float paramVal = reader.readFloat(getByteOrder());
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("parameter value is: "+paramVal);
+                }
 				ps.setFloat(i+1, paramVal);
 				break;
 			}
 			case DRDAConstants.DRDA_TYPE_NFLOAT8:
 			{
 				double paramVal = reader.readDouble(getByteOrder());
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("nfloat8 parameter value is: "+paramVal);
+                }
 				ps.setDouble(i+1, paramVal);
 				break;
 			}
@@ -4700,16 +4890,18 @@ class DRDAConnThread extends Thread {
 				int precision = (paramLenNumBytes >> 8) & 0xff;
 				int scale = paramLenNumBytes & 0xff;
 				BigDecimal paramVal = reader.readBigDecimal(precision, scale);
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("ndecimal parameter value is: "+paramVal);
+                }
 				ps.setBigDecimal(i+1, paramVal);
 				break;
 			}
 			case DRDAConstants.DRDA_TYPE_NDATE:
 			{
 				String paramVal = reader.readStringData(10).trim();  //parameter may be char value
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("ndate parameter value is: \""+paramVal+"\"");
+                }
 				try {
                     Calendar cal = getGMTCalendar();
                     ps.setDate(i+1, parseDate(paramVal, cal), cal);
@@ -4727,8 +4919,9 @@ class DRDAConnThread extends Thread {
 			case DRDAConstants.DRDA_TYPE_NTIME:
 			{
 				String paramVal = reader.readStringData(8).trim();  //parameter may be char value
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("ntime parameter value is: "+paramVal);
+                }
 				try {
                     Calendar cal = getGMTCalendar();
                     ps.setTime(i+1, parseTime(paramVal, cal), cal);
@@ -4745,8 +4938,9 @@ class DRDAConnThread extends Thread {
                 int timestampLength = appRequester.getTimestampLength();
                 
 				String paramVal = reader.readStringData( timestampLength ).trim();  //parameter may be char value
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("ntimestamp parameter value is: "+paramVal);
+                }
 				try {
                     Calendar cal = getGMTCalendar();
                     ps.setTimestamp(i+1, parseTimestamp(paramVal, cal), cal);
@@ -4764,16 +4958,18 @@ class DRDAConnThread extends Thread {
 			case DRDAConstants.DRDA_TYPE_NLONGMIX:
 			{
 				String paramVal = reader.readLDStringData(stmt.ccsidMBCEncoding);
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("char/varchar parameter value is: "+paramVal);
+                }
 				ps.setString(i+1, paramVal);
 				break;
 			}
 			case  DRDAConstants.DRDA_TYPE_NFIXBYTE:
 			{
 				byte[] paramVal = reader.readBytes();
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("fix bytes parameter value is: "+ convertToHexString(paramVal));
+                }
 				ps.setBytes(i+1, paramVal);
 				break;
 			}
@@ -4781,8 +4977,9 @@ class DRDAConnThread extends Thread {
 			case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
 			{
 				int length = reader.readNetworkShort();	//protocol control data always follows big endian
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					trace("===== binary param length is: " + length);
+                }
 				byte[] paramVal = reader.readBytes(length);
 				ps.setBytes(i+1, paramVal);
 				break;
@@ -4805,10 +5002,11 @@ class DRDAConnThread extends Thread {
 				 }
 				 else   /* empty */
 				 {
-					if (drdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES)
-						ps.setBytes(i+1, new byte[0]);
-					else
-						ps.setString(i+1, "");
+                     if (drdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) {
+                         ps.setBytes(i + 1, new byte[0]);
+                     } else {
+                         ps.setString(i + 1, "");
+                     }
 				 }
 				 break;
 			 }
@@ -4817,8 +5015,9 @@ class DRDAConnThread extends Thread {
                             //read the locator value
                             int paramVal = reader.readInt(getByteOrder());
                             
-                            if (SanityManager.DEBUG)
+                            if (SanityManager.DEBUG) {
                                 trace("locator value is: "+paramVal);
+                            }
                             
                             //Map the locator value to the Blob object in the
                             //Hash map.
@@ -4835,8 +5034,9 @@ class DRDAConnThread extends Thread {
                             //read the locator value.
                             int paramVal = reader.readInt(getByteOrder());
                             
-                            if (SanityManager.DEBUG)
+                            if (SanityManager.DEBUG) {
                                 trace("locator value is: "+paramVal);
+                            }
                             
                             //Map the locator value to the Clob object in the
                             //Hash Map.
@@ -4851,8 +5051,9 @@ class DRDAConnThread extends Thread {
 			default:
 				{
 				String paramVal = reader.readLDStringData(stmt.ccsidMBCEncoding);
-				if (SanityManager.DEBUG) 
+				if (SanityManager.DEBUG) {
 					trace("default type parameter value is: "+paramVal);
+                }
 				ps.setObject(i+1, paramVal);
 			}
 		}
@@ -5067,9 +5268,9 @@ class DRDAConnThread extends Thread {
             // Note the switch from zero-based to one-based index below.
 			drdaType = (drdaType & 0x000000ff); // need unsigned value
 			boolean checkNullability = false;
-			if (sqlamLevel >= MGRLVL_7 &&
-				FdocaConstants.isNullable(drdaType))
+            if (sqlamLevel >= MGRLVL_7 && FdocaConstants.isNullable(drdaType)) {
 				checkNullability = true;
+            }
 
             final EXTDTAReaderInputStream stream =
                 reader.getEXTDTAReaderInputStream(checkNullability);
@@ -5287,8 +5488,9 @@ class DRDAConnThread extends Thread {
 					// required
 					case CodePoint.SQLSTT:
 						sqlStmt = parseEncodedString();
-						if (SanityManager.DEBUG) 
+						if (SanityManager.DEBUG) {
 							trace("sqlStmt = " + sqlStmt);
+                        }
 						break;
 					default:
 						invalidCodePoint(codePoint);
@@ -5297,8 +5499,9 @@ class DRDAConnThread extends Thread {
 		} while (reader.isChainedWithSameID());
 
 		// SQLSTT is required
-		if (sqlStmt == null)
+		if (sqlStmt == null) {
 			missingCodePoint(CodePoint.SQLSTT);
+        }
 		return sqlStmt;
 	}
 
@@ -5345,9 +5548,10 @@ class DRDAConnThread extends Thread {
 					// required
 					case CodePoint.SQLSTT:
 						String sqlStmt = parseEncodedString();
-						if (sqlStmt != null)
+						if (sqlStmt != null) {
 						// then we have at least one SQL Statement.
 							gotSqlStt = true;
+                        }
 
                         if (sqlStmt.startsWith(TIMEOUT_STATEMENT)) {
                             String timeoutString = sqlStmt.substring(TIMEOUT_STATEMENT.length());
@@ -5371,8 +5575,9 @@ class DRDAConnThread extends Thread {
 							break;
 						}
 
-						if (SanityManager.DEBUG) 
+						if (SanityManager.DEBUG) {
 							trace("sqlStmt = " + sqlStmt);
+                        }
 
 						// initialize statement for reuse
 						drdaStmt.initialize();
@@ -5385,11 +5590,12 @@ class DRDAConnThread extends Thread {
 							// to mean that the given SET statement is not
 							// recognized; take note (so we can throw a
 							// warning later), but don't interfere otherwise.
-							if (e.getSQLState().equals(SYNTAX_ERR))
-								hadUnrecognizedStmt = true;
-							else
-							// something else; assume it's serious.
-								throw e;
+                            if (e.getSQLState().equals(SYNTAX_ERR)) {
+                                hadUnrecognizedStmt = true;
+                            } else {
+                                // something else; assume it's serious.
+                                throw e;
+                            }
 						}
 						break;
 					default:
@@ -5400,8 +5606,9 @@ class DRDAConnThread extends Thread {
 		} while (reader.isChainedWithSameID());
 
 		// SQLSTT is required.
-		if (!gotSqlStt)
+		if (!gotSqlStt) {
 			missingCodePoint(CodePoint.SQLSTT);
+        }
 
 		// Now that we've processed all SET statements (assuming no
 		// severe exceptions), check for warnings and, if we had any,
@@ -5416,9 +5623,7 @@ class DRDAConnThread extends Thread {
 
 	private boolean canIgnoreStmt(String stmt)
 	{
-		if (stmt.indexOf("SET CLIENT") != -1)
-			return true;
-		return false;
+        return (stmt.indexOf("SET CLIENT") != -1);
 	}
 
 	/**
@@ -5465,8 +5670,9 @@ class DRDAConnThread extends Thread {
 		{
 			// This is a scalar object with the following fields
 			reader.readString(rdbnam, CodePoint.RDBNAM_LEN, true);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("rdbnam = " + rdbnam);
+            }
                         
             // A check that the rdbnam field corresponds to a database
             // specified in a ACCRDB term.
@@ -5480,36 +5686,43 @@ class DRDAConnThread extends Thread {
             // check the client version first
             if (appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
-                if (!rdbnam.toString().equals(database.getDatabaseName()))
+                if (!rdbnam.toString().equals(database.getDatabaseName())) {
                     rdbnamMismatch(CodePoint.PKGNAMCSN);
+                }
             }
 
 			reader.readString(rdbcolid, CodePoint.RDBCOLID_LEN, true);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG)  {
 				trace("rdbcolid = " + rdbcolid);
+            }
 
 			reader.readString(pkgid, CodePoint.PKGID_LEN, true);
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("pkgid = " + pkgid);
+            }
 
 			// we need to use the same UCS2 encoding, as this can be
 			// bounced back to jcc (or keep the byte array)
 			reader.readString(pkgcnstkn, CodePoint.PKGCNSTKN_LEN, false);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("pkgcnstkn = " + pkgcnstkn);
+            }
 
 			pkgsn = reader.readNetworkShort();
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("pkgsn = " + pkgsn);
+            }
 		}
 		else	// extended format
 		{
 			int length = reader.readNetworkShort();
-			if (length < CodePoint.RDBNAM_LEN || length > CodePoint.MAX_NAME)
+			if (length < CodePoint.RDBNAM_LEN || length > CodePoint.MAX_NAME) {
 				badObjectLength(CodePoint.RDBNAM);
+            }
 			reader.readString(rdbnam, length, true);
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("rdbnam = " + rdbnam);
+            }
 
             // A check that the rdbnam field corresponds to a database
             // specified in a ACCRDB term.
@@ -5525,30 +5738,36 @@ class DRDAConnThread extends Thread {
             if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
                  || appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
-                if (!rdbnam.toString().equals(database.getDatabaseName()))
+                if (!rdbnam.toString().equals(database.getDatabaseName())) {
                     rdbnamMismatch(CodePoint.PKGNAMCSN);
+                }
             }
 
 			//RDBCOLID can be variable length in this format
 			length = reader.readNetworkShort();
 			reader.readString(rdbcolid, length, true);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("rdbcolid = " + rdbcolid);
+            }
 
 			length = reader.readNetworkShort();
-			if (length != CodePoint.PKGID_LEN)
+			if (length != CodePoint.PKGID_LEN) {
 				badObjectLength(CodePoint.PKGID);
+            }
 			reader.readString(pkgid, CodePoint.PKGID_LEN, true);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("pkgid = " + pkgid);
+            }
 
 			reader.readString(pkgcnstkn, CodePoint.PKGCNSTKN_LEN, false);
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("pkgcnstkn = " + pkgcnstkn);
+            }
 
 			pkgsn = reader.readNetworkShort();
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("pkgsn = " + pkgsn);
+            }
 		}
 
 		// In most cases, the pkgnamcsn object is equal to the
@@ -5586,8 +5805,9 @@ class DRDAConnThread extends Thread {
 		correlationID = reader.readDssHeader();
 		int codePoint = reader.readLengthAndCodePoint( false );
 		String strVal = parseEncodedString();
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("SQL Statement = " + strVal);
+        }
 		return strVal;
 	}
 
@@ -5599,10 +5819,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private String parseEncodedString() throws DRDAProtocolException
 	{
-		if (sqlamLevel < 7)
-			return parseVCMorVCS();
-		else
-			return parseNOCMorNOCS();
+        return (sqlamLevel < 7) ? parseVCMorVCS() : parseNOCMorNOCS();
 	}
 
 	/**
@@ -5620,13 +5837,15 @@ class DRDAConnThread extends Thread {
 	{
 		String strVal = null;
 		int vcm_length = reader.readNetworkShort();
-		if (vcm_length > 0)
+		if (vcm_length > 0) {
 			strVal = parseCcsidMBC(vcm_length);
+        }
 		int vcs_length = reader.readNetworkShort();
 		if (vcs_length > 0)
 		{
-			if (strVal != null)
+			if (strVal != null) {
 				agentError ("Both VCM and VCS have lengths > 0");
+            }
 			strVal = parseCcsidSBC(vcs_length);
 		}
 		return strVal;
@@ -5657,8 +5876,9 @@ class DRDAConnThread extends Thread {
 		byte nocs_nullByte = reader.readByte();
 		if (nocs_nullByte != NULL_VALUE)
 		{
-			if (strVal != null)
+			if (strVal != null) {
 				agentError("Both CM and CS are non null");
+            }
 			length = reader.readNetworkInt();
 			strVal = parseCcsidSBC(length);
 		}
@@ -5683,8 +5903,9 @@ class DRDAConnThread extends Thread {
 		}
 		String ccsidMBCEncoding = currentStatement.ccsidMBCEncoding;
 
-		if (length == 0)
+		if (length == 0) {
 			return null;
+        }
 		byte [] byteStr = reader.readBytes(length);
 		if (ccsidMBCEncoding != null)
 		{
@@ -5696,7 +5917,9 @@ class DRDAConnThread extends Thread {
 			}
 		}
 		else
+        {
 			agentError("Attempt to decode mixed byte string without CCSID being set");
+        }
 		return strVal;
 	}
 	/**
@@ -5719,8 +5942,9 @@ class DRDAConnThread extends Thread {
 		String ccsidSBCEncoding = currentStatement.ccsidSBCEncoding;
 		System.out.println("ccsidSBCEncoding - " + ccsidSBCEncoding);
 		
-		if (length == 0)
+		if (length == 0) {
 			return null;
+        }
 		byte [] byteStr = reader.readBytes(length);
 		if (ccsidSBCEncoding != null)
 		{
@@ -5732,7 +5956,9 @@ class DRDAConnThread extends Thread {
 			}
 		}
 		else
+        {
 			agentError("Attempt to decode single byte string without CCSID being set");
+        }
 		return strVal;
 	}
 	/**
@@ -5781,10 +6007,12 @@ class DRDAConnThread extends Thread {
 			codePoint = reader.getCodePoint();
 		}
 		// check for required variables
-		if (pkgnamcsn == null)
+		if (pkgnamcsn == null) {
 			missingCodePoint(CodePoint.PKGNAMCSN);
-		if (sqlamLevel >= MGRLVL_7 && !gotQryinsid)
+        }
+		if (sqlamLevel >= MGRLVL_7 && !gotQryinsid) {
 			missingCodePoint(CodePoint.QRYINSID);
+        }
 
 		DRDAStatement stmt = database.getDRDAStatement(pkgnamcsn);
 		if (stmt == null)
@@ -5887,7 +6115,9 @@ class DRDAConnThread extends Thread {
      */
     private int getSqlCode(SQLException e)
 	{
-        if (e == null) return 0;
+        if (e == null) {
+            return 0;
+        }
 
         // All SQLWarnings should have warning severity. However,
         // DataTruncation conditions for write operations (with SQL state
@@ -5993,8 +6223,9 @@ class DRDAConnThread extends Thread {
 	{
 		int severity= CodePoint.SVRCOD_INFO;
 
-		if (e == null)
+		if (e == null) {
 			return severity;
+        }
 
 		int ec = e.getErrorCode();
 		switch (ec)
@@ -6013,10 +6244,12 @@ class DRDAConnThread extends Thread {
 				break;
 			default:
 				String sqlState = e.getSQLState();
-				if (sqlState != null && sqlState.startsWith("01"))		// warning
+				if (sqlState != null && sqlState.startsWith("01")) {
+                    // warning
 					severity = CodePoint.SVRCOD_WARNING;
-				else
+                } else {
 					severity = CodePoint.SVRCOD_ERROR;
+                }
 		}
 
 		return severity;
@@ -6197,24 +6430,27 @@ class DRDAConnThread extends Thread {
 		// get exception which carries Derby messageID and args, per DERBY-1178
 		se = Util.getExceptionFactory().getArgumentFerry( se );
 		
-		if (se instanceof EmbedSQLException  && ! severe)
+        if (se instanceof EmbedSQLException  && ! severe) {
 			sqlerrmc = buildTokenizedSqlerrmc(se);
-        else if (se instanceof DataTruncation)
+        } else if (se instanceof DataTruncation) {
             sqlerrmc = buildDataTruncationSqlerrmc((DataTruncation) se);
-		else {
+        } else {
 			// If this is not an EmbedSQLException or is a severe excecption where
 			// we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
 			// preformatted message using the server locale
 			sqlerrmc = buildPreformattedSqlerrmc(se);
-			}
-			// Truncate the sqlerrmc to a length that the client can support.
-			int maxlen = (sqlerrmc == null) ? -1 : Math.min(sqlerrmc.length(),
+        }
+
+        // Truncate the sqlerrmc to a length that the client can support.
+        int maxlen = (sqlerrmc == null) ? -1 : Math.min(sqlerrmc.length(),
 					appRequester.supportedMessageParamLength());
-			if ((maxlen >= 0) && (sqlerrmc.length() > maxlen))
+        if ((maxlen >= 0) && (sqlerrmc.length() > maxlen)) {
 			// have to truncate so the client can handle it.
 			sqlerrmc = sqlerrmc.substring(0, maxlen);
-			return sqlerrmc;
-		}
+        }
+
+        return sqlerrmc;
+    }
 
 	/**
 	 * Build preformatted SQLException text 
@@ -6227,8 +6463,9 @@ class DRDAConnThread extends Thread {
 	 * 
 	 */
 	private String  buildPreformattedSqlerrmc(SQLException se) {
-		if (se == null)
+		if (se == null) {
 			return "";
+        }
 		
 		 // String buffer to build up message
         StringBuilder sb = new StringBuilder();
@@ -6260,8 +6497,9 @@ class DRDAConnThread extends Thread {
 				String messageId = ((EmbedSQLException)se).getMessageId();
 				// arguments are variable part of a message
 				Object[] args = ((EmbedSQLException)se).getArguments();
-				for (int i = 0; args != null &&  i < args.length; i++)
+				for (int i = 0; args != null &&  i < args.length; i++) {
 					sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
+                }
 				sqlerrmc += messageId;
 				se = se.getNextException();
 			}
@@ -6372,8 +6610,9 @@ class DRDAConnThread extends Thread {
 			writer.writeShort(0);  //CCC on Win does not take RDBNAME
 		}
 		writeVCMorVCS(sqlerrmc);
-		if (sqlamLevel >=7)
+		if (sqlamLevel >= 7) {
 			writeSQLDIAGGRP(nextException);
+        }
 	}
 
 	/**
@@ -6459,10 +6698,11 @@ class DRDAConnThread extends Thread {
 			// SQLCode < 0 -> Error
 			int severity = getExceptionSeverity(se);
 			int sqlCode = -1;
-			if (severity == CodePoint.SVRCOD_WARNING)
+			if (severity == CodePoint.SVRCOD_WARNING) {
 				sqlCode = 1;
-			else if (severity == CodePoint.SVRCOD_INFO)
+            } else if (severity == CodePoint.SVRCOD_INFO) {
 				sqlCode = 0;
+            }
 
 			String sqlerrmc = "";
 			if (diagnosticLevel == CodePoint.DIAGLVL1) {
@@ -6475,16 +6715,13 @@ class DRDAConnThread extends Thread {
 				// we are only able to get arguments of EmbedSQLException
 				if (se instanceof EmbedSQLException) {
 					Object[] args = ((EmbedSQLException)se).getArguments();
-					for (int i = 0; args != null &&  i < args.length; i++)
+					for (int i = 0; args != null &&  i < args.length; i++) {
 						sqlerrmc += args[i].toString() + SQLERRMC_TOKEN_DELIMITER;
+                    }
 				}
 			}
 
-			String dbname = null;
-			if (database != null)
-				dbname = database.getDatabaseName();
-
-			writeSQLDCROW(rowNum++, sqlCode, sqlState, dbname, sqlerrmc);
+			writeSQLDCROW(rowNum++, sqlCode, sqlState, getDbName(), sqlerrmc);
 
 			se = se.getNextException();
 		}
@@ -6515,7 +6752,9 @@ class DRDAConnThread extends Thread {
 		SQLException se;
 
 		/* Count the number of chained exceptions to be sent */
-		for (se = nextException; se != null; se = se.getNextException()) i++;
+		for (se = nextException; se != null; se = se.getNextException()) {
+            i++;
+        }
 		writer.writeShort(i);
 	}
 
@@ -6623,10 +6862,11 @@ class DRDAConnThread extends Thread {
 		int numElems = 0;
 		if (e == null || e instanceof SQLWarning)
 		{
-			if (rtnOutput && (rsmeta != null))
+			if (rtnOutput && (rsmeta != null)) {
 				numElems = rsmeta.getColumnCount();
-			else if ((! rtnOutput) && (pmeta != null))
+            } else if ((! rtnOutput) && (pmeta != null)) {
 				numElems = pmeta.getParameterCount();
+            }
 		}
 
 		writer.createDssObject();
@@ -6635,16 +6875,19 @@ class DRDAConnThread extends Thread {
 		writer.startDdm(CodePoint.SQLDARD);
 		writeSQLCAGRP(e, 0, 0);
 
-		if (sqlamLevel >= MGRLVL_7)
+		if (sqlamLevel >= MGRLVL_7) {
 			writeSQLDHROW(ps.getResultSetHoldability());
+        }
 
 		//SQLNUMROW
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("num Elements = " + numElems);
+        }
 		writer.writeShort(numElems);
 
-		for (int i=0; i < numElems; i++)
+		for (int i=0; i < numElems; i++) {
 			writeSQLDAGRP (rsmeta, pmeta, i, rtnOutput);
+        }
 		writer.endDdmAndDss();
 
 	}
@@ -6672,12 +6915,15 @@ class DRDAConnThread extends Thread {
 		ResultSet rs = null;
 		ResultSetMetaData rsmeta = null;
 		ParameterMetaData pmeta = null;
-		if (!stmt.needsToSendParamData)
+		if (!stmt.needsToSendParamData) {
 			rs = stmt.getResultSet();
-		if (rs == null)		// this is a CallableStatement, use parameter meta data
+        }
+		if (rs == null)	{
+            // this is a CallableStatement, use parameter meta data
 			pmeta = stmt.getParameterMetaData();
-		else
+        } else {
 			rsmeta = rs.getMetaData();
+        }
 
 	    int  numCols = (rsmeta != null ? rsmeta.getColumnCount() : pmeta.getParameterCount());
 		int numGroups = 1;
@@ -6701,22 +6947,25 @@ class DRDAConnThread extends Thread {
 			// we are limited to FdocaConstants.MAX_VARS_IN_NGDA
 			if (firstcols > FdocaConstants.MAX_VARS_IN_NGDA)
 			{
-				if (SanityManager.DEBUG)
+				if (SanityManager.DEBUG) {
 					SanityManager.ASSERT(numCols > FdocaConstants.MAX_VARS_IN_NGDA,
 						"Number of columns " + numCols + 
 						" is less than MAX_VARS_IN_NGDA");
+                }
 				numGroups = numCols/FdocaConstants.MAX_VARS_IN_NGDA;
 				// some left over
-				if (FdocaConstants.MAX_VARS_IN_NGDA * numGroups < numCols)
+				if (FdocaConstants.MAX_VARS_IN_NGDA * numGroups < numCols) {
 					numGroups++;
+                }
 				colEnd = FdocaConstants.MAX_VARS_IN_NGDA;
 			}
 			else
 			{
 				colEnd = firstcols;
 				numGroups += (numCols-firstcols)/FdocaConstants.MAX_VARS_IN_NGDA;
-				if (FdocaConstants.MAX_VARS_IN_NGDA * numGroups < numCols)
+				if (FdocaConstants.MAX_VARS_IN_NGDA * numGroups < numCols) {
 					numGroups++;
+                }
 			}
 		}
 
@@ -6732,13 +6981,14 @@ class DRDAConnThread extends Thread {
 							(i == 0 ? true : false));
 			colStart = colEnd + 1;
 			// 4868 - Limit range to MAX_VARS_IN_NGDA (used to have extra col)
-			colEnd = colEnd + FdocaConstants.MAX_VARS_IN_NGDA;
-			if (colEnd > numCols)
-				colEnd = numCols;
+            colEnd = Math.min(
+                    colEnd + FdocaConstants.MAX_VARS_IN_NGDA,
+                    numCols);
 		}
 		writer.writeBytes(FdocaConstants.SQLCADTA_SQLDTARD_RLO);
-		if (! FDODSConly)
+		if (!FDODSConly) {
 			writer.endDdmAndDss();
+        }
 	}
 	/**
 	 * Write SQLDTAGRP
@@ -6826,8 +7076,9 @@ class DRDAConnThread extends Thread {
 
 			}
 
-			if (SanityManager.DEBUG)
+			if (SanityManager.DEBUG) {
 				trace("jdbcType=" + colType + "  \tdrdaType=" + Integer.toHexString(drdaType));
+            }
 
 			// Length or precision and scale for decimal values.
 			writer.writeByte(drdaType);
@@ -6837,11 +7088,17 @@ class DRDAConnThread extends Thread {
 				writer.writeByte(scale);
 			}
 			else if (outlen[0] != -1)
+            {
 				writer.writeShort(outlen[0]);
+            }
 			else if (hasRs)
+            {
 				writer.writeShort(rsmeta.getColumnDisplaySize(i));
+            }
 			else
+            {
 				writer.writeShort(stmt.getParamLen(i));
+            }
 		}
 	}
 
@@ -6940,8 +7197,9 @@ class DRDAConnThread extends Thread {
 		int startLength = 0;
 		writer.createDssObject();
 
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("Write QRYDTA");
+        }
 		writer.startDdm(CodePoint.QRYDTA);
 		// Check to see if there was leftover data from splitting
 		// the previous QRYDTA for this result set. If there was, and
@@ -6953,8 +7211,9 @@ class DRDAConnThread extends Thread {
 			if (stmt.getSplitQRYDTA() == null)
 			{
 				stmt.rowCount += 1;
-				if (stmt.getExtDtaObjects() != null)
+				if (stmt.getExtDtaObjects() != null) {
 					writeEXTDTA(stmt);
+                }
 			}
 			return;
 		}
@@ -6980,8 +7239,9 @@ class DRDAConnThread extends Thread {
 			{
 				int endLength = writer.getDSSLength();
 				int rowsize = endLength - startLength;
-				if ((stmt.getBlksize() - endLength ) < rowsize)
+				if ((stmt.getBlksize() - endLength ) < rowsize) {
 					getMoreData = false;
+                }
 
 				startLength = endLength;
 			}
@@ -6990,8 +7250,9 @@ class DRDAConnThread extends Thread {
 		// If we sent extDta we will rely on
 		// writeScalarStream to end the dss with the proper chaining.
 		// otherwise end it here.
-		if (! sentExtData)
+		if (!sentExtData) {
 			writer.endDdmAndDss();
+        }
 
 		if (!stmt.hasdata()) {
 			final boolean qryclsOnLmtblkprc =
@@ -7063,10 +7324,11 @@ class DRDAConnThread extends Thread {
 		if (rs != null)
 		{
 			numCols = stmt.getNumRsCols();					
-			if (stmt.isScrollable())
+			if (stmt.isScrollable()) {
 				hasdata = positionCursor(stmt, rs);
-			else
+            } else {
 				hasdata = rs.next();
+            }
 		}
 		else	// it's for a CallableStatement
 		{
@@ -7119,10 +7381,11 @@ class DRDAConnThread extends Thread {
             // we need to add more warnings later.
             final int sqlcagrpStart = writer.getBufferPosition();
 
-			if (sqlw == null)
+			if (sqlw == null) {
                 writeSQLCAGRP(nullSQLState, 0, -1, -1);
-			else
+            } else {
 				writeSQLCAGRP(sqlw, 1, -1);
+            }
 
             // Save the position right after the warnings so we know where to
             // insert more warnings later.
@@ -7133,15 +7396,17 @@ class DRDAConnThread extends Thread {
 			// if the row has been deleted return QRYDTA null (delete hole)
 			boolean noRetrieveRS = (rs != null && 
 					(!stmt.getQryrtndta() || rs.rowDeleted()));
-			if (noRetrieveRS)
+			if (noRetrieveRS) {
 				writer.writeByte(0xFF);  //QRYDTA null indicator: IS NULL
-			else
+            } else {
 				writer.writeByte(0);  //QRYDTA null indicator: not null
+            }
 
 			for (int i = 1; i <= numCols; i++)
 			{
-				if (noRetrieveRS)
+				if (noRetrieveRS) {
 					break;
+                }
 
 				int drdaType;
 				int ndrdaType;
@@ -7156,9 +7421,10 @@ class DRDAConnThread extends Thread {
 					scale = stmt.getRsScale(i);
 					ndrdaType = drdaType | 1;
 
-					if (SanityManager.DEBUG)
+					if (SanityManager.DEBUG) {
 						trace("!!drdaType = " + java.lang.Integer.toHexString(drdaType) + 
 					 			 " precision=" + precision +" scale = " + scale);
+                    }
 					switch (ndrdaType)
 					{
 						case DRDAConstants.DRDA_TYPE_NLOBBYTES:
@@ -7171,47 +7437,57 @@ class DRDAConnThread extends Thread {
 						case DRDAConstants.DRDA_TYPE_NINTEGER:
 							int ival = rs.getInt(i);
 							valNull = rs.wasNull();
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing int: "+ ival + " is null: " + valNull);
+                            }
 							writeNullability(drdaType,valNull);
-							if (! valNull)
+							if (!valNull) {
 								writer.writeInt(ival);
+                            }
 							break;
 						case DRDAConstants.DRDA_TYPE_NSMALL:
 							short sval = rs.getShort(i);
 							valNull = rs.wasNull();
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing small: "+ sval + " is null: " + valNull);
+                            }
 							writeNullability(drdaType,valNull);
-							if (! valNull)
+							if (!valNull) {
 								writer.writeShort(sval);
+                            }
 							break;
 						case DRDAConstants.DRDA_TYPE_NINTEGER8:
 							long lval = rs.getLong(i);
 							valNull = rs.wasNull();
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing long: "+ lval + " is null: " + valNull);
+                            }
 							writeNullability(drdaType,valNull);
-							if (! valNull)
+							if (!valNull) {
 								writer.writeLong(lval);
+                            }
 							break;
 						case DRDAConstants.DRDA_TYPE_NFLOAT4:
 							float fval = rs.getFloat(i);
 							valNull = rs.wasNull();
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing float: "+ fval + " is null: " + valNull);
+                            }
 							writeNullability(drdaType,valNull);
-							if (! valNull)
+							if (!valNull) {
 								writer.writeFloat(fval);
+                            }
 							break;
 						case DRDAConstants.DRDA_TYPE_NFLOAT8:
 							double dval = rs.getDouble(i);
 							valNull = rs.wasNull();
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing double: "+ dval + " is null: " + valNull);
+                            }
 							writeNullability(drdaType,valNull);
-							if (! valNull)
+							if (!valNull) {
 								writer.writeDouble(dval);
+                            }
 							break;
 						case DRDAConstants.DRDA_TYPE_NCHAR:
 						case DRDAConstants.DRDA_TYPE_NVARCHAR:
@@ -7219,8 +7495,9 @@ class DRDAConnThread extends Thread {
 						case DRDAConstants.DRDA_TYPE_NLONG:
 						case DRDAConstants.DRDA_TYPE_NLONGMIX:
 							String valStr = rs.getString(i);
-							if (SanityManager.DEBUG)
+							if (SanityManager.DEBUG) {
 								trace("====== writing char/varchar/mix :"+ valStr + ":");
+                            }
 							writeFdocaVal(i, valStr, drdaType,
 										  precision, scale, rs.wasNull(),
                                           stmt, false);
@@ -7246,18 +7523,19 @@ class DRDAConnThread extends Thread {
 						precision = stmt.getOutputParamPrecision(i);
 						scale = stmt.getOutputParamScale(i);
                                                 
-						if (SanityManager.DEBUG)
+						if (SanityManager.DEBUG) {
 							trace("***getting Object "+i);
+                        }
                         Object val = getObjectForWriteFdoca(
                                 (CallableStatement) stmt.ps, i, drdaType);
 						valNull = (val == null);
 						writeFdocaVal(i, val, drdaType, precision, scale,
                                       valNull, stmt, true);
 					}
-					else
+                    else {
 						writeFdocaVal(i, null, drdaType, precision, scale,
                                       true, stmt, true);
-
+                    }
 				}
 			}
 
@@ -7285,8 +7563,9 @@ class DRDAConnThread extends Thread {
 				return false;
 			}
 
-			if (rs == null)
+			if (rs == null) {
 				return moreData;
+            }
 
 			//get the next row
 			rowCount++;
@@ -7297,14 +7576,17 @@ class DRDAConnThread extends Thread {
 			/*(1) scrollable we return at most a row set; OR (2) no retrieve data
 			 */
 			else if (stmt.isScrollable() || noRetrieveRS)
+            {
 				moreData=false;
+            }
 
 		} while (hasdata && rowCount < stmt.getQryrowset());
 
 		// add rowCount to statement row count
 		// for non scrollable cursors
-		if (!stmt.isScrollable())
+		if (!stmt.isScrollable()) {
 			stmt.rowCount += rowCount;
+        }
 
 		if (!hasdata)
 		{
@@ -7312,8 +7594,10 @@ class DRDAConnThread extends Thread {
 			moreData=false;
 		}
 
-		if (!stmt.isScrollable())
+		if (!stmt.isScrollable()) {
 			stmt.setHasdata(hasdata);
+        }
+
 		return moreData;
 	}
 
@@ -7435,13 +7719,14 @@ class DRDAConnThread extends Thread {
 		byte [] temp = writer.copyDSSDataToEnd(blksize);
 		// truncate to end of blocksize
 		writer.truncateDSS(blksize);
-		if (temp.length == 0)
+		if (temp.length == 0) {
 			agentError("LMTBLKPRC violation: splitQRYDTA was " +
 				"called to split a QRYDTA block, but the " +
 				"entire row fit successfully into the " +
 				"current block. Server rowsize computation " +
 				"was probably incorrect (perhaps an off-by-" +
 				"one bug?). QRYDTA blocksize: " + blksize);
+        }
 		stmt.setSplitQRYDTA(temp);
 	}
 	/**
@@ -7463,8 +7748,9 @@ class DRDAConnThread extends Thread {
 		throws SQLException,DRDAProtocolException
 	{
 		byte []leftovers = stmt.getSplitQRYDTA();
-		if (leftovers == null)
+		if (leftovers == null) {
 			return false;
+        }
 		int blksize = stmt.getBlksize() > 0 ? stmt.getBlksize() : CodePoint.QRYBLKSZ_MAX;
 		blksize = blksize - 10; //DSS header + QRYDTA and length
 		if (leftovers.length < blksize)
@@ -7476,8 +7762,8 @@ class DRDAConnThread extends Thread {
 		{
 			writer.writeBytes(leftovers, 0, blksize);
 			byte []newLeftovers = new byte[leftovers.length-blksize];
-			for (int i = 0; i < newLeftovers.length; i++)
-				newLeftovers[i] = leftovers[blksize+i];
+            System.arraycopy(
+                leftovers, blksize, newLeftovers, 0, newLeftovers.length);
 			stmt.setSplitQRYDTA(newLeftovers);
 		}
 		// finish off query block and send
@@ -7498,8 +7784,9 @@ class DRDAConnThread extends Thread {
 	private void doneData(DRDAStatement stmt, ResultSet rs) 
 			throws DRDAProtocolException, SQLException
 	{
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("*****NO MORE DATA!!");
+        }
 		int blksize = stmt.getBlksize() > 0 ? stmt.getBlksize() : CodePoint.QRYBLKSZ_MAX;
 		if (rs != null)
 		{
@@ -7659,9 +7946,10 @@ class DRDAConnThread extends Thread {
 
 		int elemType = rtnOutput ? rsmeta.getColumnType(jdbcElemNum) : pmeta.getParameterType(jdbcElemNum);
 
-		int precision = rtnOutput ? rsmeta.getPrecision(jdbcElemNum) : pmeta.getPrecision(jdbcElemNum);
-		if (precision > FdocaConstants.NUMERIC_MAX_PRECISION)
-			precision = FdocaConstants.NUMERIC_MAX_PRECISION;
+        int precision = Math.min(
+                FdocaConstants.NUMERIC_MAX_PRECISION,
+                rtnOutput ? rsmeta.getPrecision(jdbcElemNum) :
+                            pmeta.getPrecision(jdbcElemNum));
 
 		// 2-byte precision
 		writer.writeShort(precision);
@@ -7685,9 +7973,10 @@ class DRDAConnThread extends Thread {
 				case Types.NUMERIC:
 					scale = rtnOutput ? rsmeta.getScale(jdbcElemNum) : pmeta.getScale(jdbcElemNum);
 					outlen[0] = ((precision <<8) | scale);
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("\n\nprecision =" +precision +
 						  " scale =" + scale);
+                    }
 					break;
 				default:
 					outlen[0] = Math.min(FdocaConstants.LONGVARCHAR_MAX_LEN,
@@ -7707,20 +7996,23 @@ class DRDAConnThread extends Thread {
 											pmeta.getPrecision(jdbcElemNum));
 		}
 
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("SQLDAGRP len =" + java.lang.Integer.toHexString(outlen[0]) + "for type:" + elemType);
+        }
 
 	   // 8 or 4 byte sqllength
-		if (sqlamLevel >= MGRLVL_6)
+		if (sqlamLevel >= MGRLVL_6) {
 			writer.writeLong(outlen[0]);
-		else
+        } else {
 			writer.writeInt(outlen[0]);
+        }
 
 
 		String typeName = rtnOutput ? rsmeta.getColumnTypeName(jdbcElemNum) :
 										pmeta.getParameterTypeName(jdbcElemNum);
-		if (SanityManager.DEBUG) 
+		if (SanityManager.DEBUG) {
 			trace("jdbcType =" + typeName + "  sqlType =" + sqlType + "len =" +outlen[0]);
+        }
 
 		writer.writeShort(sqlType);
 
@@ -7730,10 +8022,11 @@ class DRDAConnThread extends Thread {
 		if (elemType == java.sql.Types.CHAR ||
 			elemType == java.sql.Types.VARCHAR
 			|| elemType == java.sql.Types.LONGVARCHAR
-			|| elemType == java.sql.Types.CLOB)
+			|| elemType == java.sql.Types.CLOB) {
 			writer.writeScalar2Bytes(1208);
-		else
+        } else {
 			writer.writeScalar2Bytes(0);
+        }
 
 		if (sqlamLevel < MGRLVL_7) 
 		{
@@ -7745,8 +8038,9 @@ class DRDAConnThread extends Thread {
 			//SQLComments
 			writeVCMorVCS(null);
 
-			if (sqlamLevel == MGRLVL_6)
+			if (sqlamLevel == MGRLVL_6) {
 				writeSQLUDTGRP(rsmeta, pmeta, jdbcElemNum, rtnOutput);
+            }
 		}
 		else
 		{
@@ -7883,10 +8177,11 @@ class DRDAConnThread extends Thread {
 		writer.writeShort(rtnOutput ? rsmeta.isWritable(jdbcElemNum) : false);
 
 		//   SQLXGENERATED; DRDA TYPE I2; ENVLID 0x04; Length Override 2
-		if (rtnOutput && rsmeta.isAutoIncrement(jdbcElemNum)) 
+		if (rtnOutput && rsmeta.isAutoIncrement(jdbcElemNum)) {
 			writer.writeShort(2);
-		else
+        } else {
 			writer.writeShort(0);
+        }
 
 		//   SQLXPARMMODE; DRDA TYPE I2; ENVLID 0x04; Length Override 2
 		if (pmeta != null && !rtnOutput)
@@ -7971,12 +8266,10 @@ class DRDAConnThread extends Thread {
  					{
  						writer.writeShort(((Boolean) val).booleanValue());
  					}
- 					else if (val instanceof Short)
- 						writer.writeShort(((Short) val).shortValue());
- 					else if (val instanceof Byte)
- 						writer.writeShort(((Byte) val).byteValue());
-					else
- 						writer.writeShort(((Integer) val).shortValue());
+                    else
+                    {
+ 						writer.writeShort(((Number) val).shortValue());
+                    }
 					break;
 				case  DRDAConstants.DRDA_TYPE_NINTEGER:
 					writer.writeInt(((Integer) val).intValue());
@@ -7991,8 +8284,9 @@ class DRDAConnThread extends Thread {
 					writer.writeDouble(((Double) val).doubleValue());
 					break;
 				case DRDAConstants.DRDA_TYPE_NDECIMAL:
-					if (precision == 0)
+					if (precision == 0) {
 						precision = FdocaConstants.NUMERIC_DEFAULT_PRECISION;
+                    }
 					BigDecimal bd = (java.math.BigDecimal) val;
 					writer.writeBigDecimal(bd,precision,scale);
 					break;
@@ -8048,8 +8342,9 @@ class DRDAConnThread extends Thread {
 					writer.writeUDT( val, index );
 					break;
 				default:
-					if (SanityManager.DEBUG) 
+					if (SanityManager.DEBUG) {
 						trace("ndrdaType is: "+ndrdaType);
+                    }
 					writer.writeLDString(val.toString(), index, stmt, isParam);
 			}
 		}
@@ -8067,7 +8362,9 @@ class DRDAConnThread extends Thread {
 		if(FdocaConstants.isNullable(drdaType))
 		{
 			if (valNull)
+            {
 				writer.writeByte(FdocaConstants.NULL_DATA);
+            }
 			else
 			{
 				writer.writeByte(FdocaConstants.INDICATOR_NULLABLE);
@@ -8183,8 +8480,9 @@ class DRDAConnThread extends Thread {
 	private void copyToRequired(int [] req)
 	{
 		currentRequiredLength = req.length;
-		if (currentRequiredLength > required.length)
+		if (currentRequiredLength > required.length) {
 			required = new int[currentRequiredLength];
+        }
         System.arraycopy(req, 0, required, 0, req.length);
 	}
 	/**
@@ -8194,10 +8492,11 @@ class DRDAConnThread extends Thread {
 	 */
 	private void removeFromRequired(int codePoint)
 	{
-		for (int i = 0; i < currentRequiredLength; i++)
-			if (required[i] == codePoint)
+        for (int i = 0; i < currentRequiredLength; i++) {
+            if (required[i] == codePoint) {
 				required[i] = 0;
-
+            }
+        }
 	}
 	/**
 	 * Check whether we have seen all the required code points
@@ -8215,8 +8514,9 @@ class DRDAConnThread extends Thread {
 				break;
 			}
 		}
-		if (firstMissing != 0)
+		if (firstMissing != 0) {
 			missingCodePoint(firstMissing);
+        }
 	}
 	/**
 	 * Error routines
@@ -8396,13 +8696,15 @@ class DRDAConnThread extends Thread {
 	 */
 	private void closeSession()
 	{
-		if (session == null)
+		if (session == null) {
 			return;
+        }
 
         /* DERBY-2220: Rollback the current XA transaction if it is
            still associated with the connection. */
-        if (xaProto != null)
+        if (xaProto != null) {
             xaProto.rollbackCurrentTransaction();
+        }
 
 		server.removeFromSessionTable(session.connNum);
 		try {
@@ -8454,11 +8756,7 @@ class DRDAConnThread extends Thread {
 	 * @param de <code>DRDAProtocolException</code> to be sent
 	 */
 	private void sendProtocolException(DRDAProtocolException de) {
-		String dbname = null;
-		if (database != null) {
-			dbname = database.getDatabaseName();
-		}
-
+		String dbname = getDbName();
 		try {
 			println2Log(dbname, session.drdaID, de.getMessage());
 			server.consoleExceptionPrintTrace(de);
@@ -8480,10 +8778,8 @@ class DRDAConnThread extends Thread {
 	{
 
 		DRDAProtocolException unExpDe;
-		String dbname = null;
 		try {
-			if (database != null)
-				dbname = database.getDatabaseName();
+            String dbname = getDbName();
 			println2Log(dbname,session.drdaID, e.getMessage());
 			server.consoleExceptionPrintTrace(e);
 			unExpDe = DRDAProtocolException.newAgentError(this,
@@ -8536,8 +8832,9 @@ class DRDAConnThread extends Thread {
 	 */
 	protected  void trace(String value)
 	{
-		if (SanityManager.DEBUG && server.debugOutput == true)
+		if (SanityManager.DEBUG && server.debugOutput == true) {
 			server.consoleMessage(value, true);
+        }
 	}
 
 
@@ -8611,19 +8908,14 @@ class DRDAConnThread extends Thread {
 	private void checkValidTypDefNam(String typdefnam)
 		throws DRDAProtocolException
 	{
-		if (typdefnam.equals("QTDSQL370"))
-			return;
-		if (typdefnam.equals("QTDSQL400"))
-			return;
-		if (typdefnam.equals("QTDSQLX86"))
-			return;
-		if (typdefnam.equals("QTDSQLASC"))
-			return;
-		if (typdefnam.equals("QTDSQLVAX"))
-			return;
-		if (typdefnam.equals("QTDSQLJVM"))
-			return;
-		invalidValue(CodePoint.TYPDEFNAM);
+        if (!(typdefnam.equals("QTDSQL370")
+                || typdefnam.equals("QTDSQL400")
+                || typdefnam.equals("QTDSQLX86")
+                || typdefnam.equals("QTDSQLASC")
+                || typdefnam.equals("QTDSQLVAX")
+                || typdefnam.equals("QTDSQLJVM"))) {
+    		invalidValue(CodePoint.TYPDEFNAM);
+        }
 	}
 	/**
 	 * Check that the length is equal to the required length for this codepoint
@@ -8637,10 +8929,11 @@ class DRDAConnThread extends Thread {
 		throws DRDAProtocolException
 	{
 		long len = reader.getDdmLength();
-		if (len < reqlen)
+		if (len < reqlen) {
 			badObjectLength(codepoint);
-		else if (len > reqlen)
+        } else if (len > reqlen) {
 			tooBig(codepoint);
+        }
 	}
 	/**
 	 * Read and check a boolean value
@@ -8654,13 +8947,14 @@ class DRDAConnThread extends Thread {
 	{
 		checkLength(codepoint, 1);
 		byte val = reader.readByte();
-		if (val == CodePoint.TRUE)
+        if (val == CodePoint.TRUE) {
 			return true;
-		else if (val == CodePoint.FALSE)
+        } else if (val == CodePoint.FALSE) {
 			return false;
-		else
+        } else {
 			invalidValue(codepoint);
-		return false;	//to shut the compiler up
+            return false;   // to shut the compiler up
+        }
 	}
 	/**
 	 * Create a new database and intialize the 
@@ -8678,7 +8972,9 @@ class DRDAConnThread extends Thread {
 			db = new XADatabase(dbname);
 		}
 		else
+        {
 			db = new Database(dbname);
+        }
 		if (dbname != null) {
 			session.addDatabase(db);
 			session.database = db;
@@ -8730,8 +9026,9 @@ class DRDAConnThread extends Thread {
   {
 	  ArrayList<Object> extdtaValues = stmt.getExtDtaObjects();
     // build the EXTDTA data, if necessary
-    if (extdtaValues == null) 
+    if (extdtaValues == null) {
 		return;
+    }
 	boolean chainFlag, chainedWithSameCorrelator;
 	boolean writeNullByte = false;
 
@@ -8747,9 +9044,9 @@ class DRDAConnThread extends Thread {
         }
 
 		
-		if (sqlamLevel >= MGRLVL_7)
-			if (stmt.isExtDtaValueNullable(i))
-				writeNullByte = true;
+        if ((sqlamLevel >= MGRLVL_7) && stmt.isExtDtaValueNullable(i)) {
+            writeNullByte = true;
+        }
 		
 		Object o  = extdtaValues.get(i);
         if (o instanceof EXTDTAInputStream) {
@@ -8812,8 +9109,9 @@ class DRDAConnThread extends Thread {
 				if (warning != null)
 				{
 					rs.clearWarnings();
-					if (reportWarning == null)
+					if (reportWarning == null) {
 						reportWarning = warning;
+                    }
 				}
 			}
 			if (conn != null)
@@ -8822,21 +9120,24 @@ class DRDAConnThread extends Thread {
 				if (warning != null)
 				{
 					conn.clearWarnings();
-					if (reportWarning == null)
+					if (reportWarning == null) {
 						reportWarning = warning;
+                    }
 				}
 			}
 			
 		}
 		catch (SQLException se)
 		{
-			if (SanityManager.DEBUG) 
+			if (SanityManager.DEBUG) {
 				trace("got SQLException while trying to get warnings.");
+            }
 		}
 
 
-		if ((alwaysSend || reportWarning != null) && sendWarn)
+		if ((alwaysSend || reportWarning != null) && sendWarn) {
 			writeSQLCARDs(reportWarning, updateCount);
+        }
 	}
 
     boolean hasSession() {
@@ -8853,13 +9154,11 @@ class DRDAConnThread extends Thread {
 
 	protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil )
 	{
-		String s ="";
-		if (!hasSession())
-			return s;
-		else
-			s += session.buildRuntimeInfo("", localLangUtil);
-		s += "\n";
-		return s;
+        if (!hasSession()) {
+            return "";
+        } else {
+            return session.buildRuntimeInfo("", localLangUtil) + "\n";
+        }
 	}
 
 
@@ -8909,8 +9208,9 @@ class DRDAConnThread extends Thread {
         if ((srvrlslv == null) || (srvrlslv.length() == 0) ||
             (srvrlslv.length() < CodePoint.PRDID_MAX) ||
             (srvrlslv.indexOf(DRDAConstants.DERBY_DRDA_CLIENT_ID)
-                    == -1))
+                    == -1)) {
             return CodePoint.SECCHKCD_NOTSUPPORTED; // Not Supported
+        }
 
 
         // Client product version is extracted from the srvrlslv field.
@@ -8929,8 +9229,9 @@ class DRDAConnThread extends Thread {
         appRequester.setClientVersion(
                 srvrlslv.substring(0, (int) CodePoint.PRDID_MAX));
 
-        if (appRequester.supportsSecMecUSRSSBPWD() == false)
+        if (appRequester.supportsSecMecUSRSSBPWD() == false) {
             return CodePoint.SECCHKCD_NOTSUPPORTED; // Not Supported
+        }
 
         String dbName = database.getShortDbName();
         // Check if the database is available (booted)
@@ -8956,9 +9257,10 @@ class DRDAConnThread extends Thread {
             // 
             // if monitor is never setup by any ModuleControl, getMonitor
             // returns null and no Derby database has been booted. 
-            if (Monitor.getMonitor() != null)
+            if (Monitor.getMonitor() != null) {
                 databaseObj = (org.apache.derby.iapi.db.Database)
                     Monitor.findService(Property.DATABASE_MODULE, dbName);
+            }
 
             if (databaseObj == null)
             {
@@ -8975,9 +9277,10 @@ class DRDAConnThread extends Thread {
             // supported down below as we could not verify we can handle
             // it.
             try {
-                if (databaseObj != null)
+                if (databaseObj != null) {
                     authenticationService =
                         databaseObj.getAuthenticationService();
+                }
             } catch (StandardException se) {
                 println2Log(null, session.drdaID, se.getMessage());
                 // Local security service non-retryable error.
@@ -8992,8 +9295,9 @@ class DRDAConnThread extends Thread {
             String authClassName = authenticationService.getClass().getName();
                 
             if (!authClassName.equals(AUTHENTICATION_PROVIDER_BUILTIN_CLASS) &&
-                !authClassName.equals(AUTHENTICATION_PROVIDER_NONE_CLASS))
+                !authClassName.equals(AUTHENTICATION_PROVIDER_NONE_CLASS)) {
                 return CodePoint.SECCHKCD_NOTSUPPORTED; // Not Supported
+            }
         }
 
         // SECMEC_USRSSBPWD target initialization
@@ -9112,8 +9416,9 @@ class DRDAConnThread extends Thread {
         
         // DERBY-3085. Save the stream so it can be drained later
         // if not  used.
-        if (streamLOB)
+        if (streamLOB) {
             stmt.setStreamedParameter(extdtaStream);
+        }
         
         final InputStream is = 
             streamLOB ?
