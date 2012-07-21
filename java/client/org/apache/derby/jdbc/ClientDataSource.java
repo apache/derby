@@ -24,10 +24,11 @@ package org.apache.derby.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * ClientDataSource is a simple data source implementation
@@ -36,11 +37,11 @@ import org.apache.derby.client.net.NetLogWriter;
  * The class ClientConnectionPoolDataSource can be used in a connection pooling environment,
  * and the class ClientXADataSource can be used in a distributed, and pooling
  * environment. Use these DataSources if your application runs under
- * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
+ * JDBC 3.0 or JDBC 4.0, that is, on the following Java Virtual Machines:
  * <p/>
  * <UL>
- * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
- * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * <LI> JDBC 4.0 - Java SE 6
+ * <LI> JDBC 3.0 - J2SE 5.0
  * </UL>
  *
  * <p>The example below registers a DNC data source object with a JNDI naming service.
@@ -214,5 +215,40 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
                 (NetLogWriter)dncLogWriter, user, password, this, -1, false);
 
     }
+
+    // JDBC 4.0 java.sql.Wrapper interface methods
+
+    /**
+     * Check whether this instance wraps an object that implements the interface
+     * specified by {@code iface}.
+     *
+     * @param iface a class defining an interface
+     * @return {@code true} if this instance implements {@code iface}, or
+     * {@code false} otherwise
+     * @throws SQLException if an error occurs while determining if this
+     * instance implements {@code iface}
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param  iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw new SqlException(null,
+                    new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                    iface).getSQLException();
+        }
+    }
+
 }
 

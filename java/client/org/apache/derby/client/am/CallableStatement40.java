@@ -34,8 +34,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import org.apache.derby.client.ClientPooledConnection;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
@@ -173,40 +171,16 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     
     /**************************************************************************
      * The methods from PreparedStatement for JDBC 4.0.                       *
-     * These are added here because we can't inherit                          *
-     * PreparedStatement40.java. Instead of moving the non-implemented        *
-     * classes to PreparedStatement.java, we duplicate them here.             *
+     * These are added here because we can't inherit PreparedStatement40.     *
+     * Since the methods reference classes that did not exist prior to        *
+     * JDBC 4.0, we cannot implement them in PreparedStatement, so we         *
+     * duplicate them here.                                                   *
      **************************************************************************/
-    public void setNString(int index, String value) throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
-    }
-    
-    public void setNCharacterStream(int parameterIndex, Reader value)
-            throws SQLException {
-        throw SQLExceptionFactory.notImplemented("setNCharacterStream" +
-                "(int,Reader)");
-    }
 
-    public void setNCharacterStream(int index, Reader value, long length) throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
-                "(int,Reader,long)");
-    }
-    
     public void setNClob(int index, NClob value) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
     }
-    
-    public void setNClob(int parameterIndex, Reader reader)
-            throws SQLException {
-        throw SQLExceptionFactory.notImplemented("setNClob(int,Reader)");
-    }
 
-    public void setNClob(int parameterIndex, Reader reader, long length)
-    throws SQLException {
-        throw SQLExceptionFactory.notImplemented ("setNClob (int, " +
-                "Reader, long)");
-    }
-    
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
     }
@@ -254,28 +228,6 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
             throws SQLException {
         throw SQLExceptionFactory.notImplemented("setNClob(String,Reader)");
     }
-
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
-                                   throws SQLException {
-        try { 
-            checkForClosedStatement();
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(null, new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    interfaces).getSQLException();
-        } catch (SqlException se) {
-            throw se.getSQLException();
-        }
-    }
-
 
     /**
      * Sets the designated parameter to the given input stream, which will have

@@ -28,10 +28,7 @@ import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-
 import org.apache.derby.client.am.stmtcache.StatementKey;
-
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * JDBC 4 specific wrapper class for a Derby physical callable statement.
@@ -165,28 +162,6 @@ public class LogicalCallableStatement40
     public boolean isPoolable()
             throws SQLException {
         return getPhysCs().isPoolable();
-    }
-
-    public <T> T unwrap(Class<T> arg0)
-            throws SQLException {
-        try {
-            if (getPhysCs().isClosed()) {
-                throw (new SqlException(null,
-                    new ClientMessageId(SQLState.ALREADY_CLOSED),
-                                        "CallableStatement")).getSQLException();
-            }
-            return arg0.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(
-                    null,
-                    new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    arg0).getSQLException();
-        }
-    }
-
-    public boolean isWrapperFor(Class<?> arg0)
-            throws SQLException {
-        return getPhysCs().isWrapperFor(arg0);
     }
 
     public RowId getRowId(int arg0)

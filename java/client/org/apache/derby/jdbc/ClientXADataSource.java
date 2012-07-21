@@ -24,15 +24,13 @@ package org.apache.derby.jdbc;
 import java.sql.SQLException;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
-
-import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
-
+import org.apache.derby.client.net.NetLogWriter;
 
 /**
  * <p>
- * This is Derby's network XADataSource for use with JDBC3.0 and JDBC2.0.
+ * This is Derby's network XADataSource for use with JDBC 3.0 and JDBC 4.0.
  * </p>
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource
@@ -41,8 +39,8 @@ import org.apache.derby.client.am.SqlException;
  * ClientXADataSource automatically supports the correct JDBC specification version
  * for the Java Virtual Machine's environment.
  * <UL>
- * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
- * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * <LI> JDBC 4.0 - Java SE 6
+ * <LI> JDBC 3.0 - J2SE 5.0
  * </UL>
  *
  * <P>ClientXADataSource is serializable and referenceable.</p>

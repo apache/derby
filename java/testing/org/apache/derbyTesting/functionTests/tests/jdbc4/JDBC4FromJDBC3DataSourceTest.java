@@ -41,9 +41,22 @@ import javax.sql.StatementEventListener;
 import javax.sql.XADataSource;
 
 /**
+ * <p>
  * This test ensures that when a JDBC 4 application instantiates a JDBC 3
  * data source, that data source will return JDBC 4 connections even though
  * the data source itself is not a JDBC 4 object.
+ * </p>
+ *
+ * <p>
+ * Note that after DERBY-5868, all the data sources on the client implement
+ * all JDBC 4.0 methods. On embedded, the JDBC 3 variants of the data sources
+ * still don't implement the full JDBC 4.0 interface.
+ * </p>
+ *
+ * <p>
+ * Neither the client nor the embedded variants of the JDBC 3 data sources
+ * implement the full JDBC 4.1 interface.
+ * </p>
  */
 public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     
@@ -105,6 +118,14 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     private void assertNonJDBC4DataSource(DataSource ds)
         throws SQLException
     {
+        // After DERBY-5868, however, all the data sources on the client
+        // driver implement the JDBC 4.0 interface, so expect this check
+        // to pass.
+        if (usingDerbyNetClient()) {
+            assertTrue(ds.isWrapperFor(DataSource.class));
+            return;
+        }
+
         /* Simplest way is to try to call a JDBC 4 interface method;
          * if it succeeds, then we must have a JDBC 4 data source
          * (which we don't want).

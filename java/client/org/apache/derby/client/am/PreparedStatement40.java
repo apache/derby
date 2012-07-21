@@ -21,16 +21,11 @@
 
 package org.apache.derby.client.am;
 
-import java.sql.RowId;
 import java.sql.NClob;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-import java.io.Reader;
-import java.io.InputStream;
 import org.apache.derby.client.ClientPooledConnection;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.shared.common.reference.SQLState;
 
 public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
 
@@ -100,64 +95,16 @@ public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedSt
                 columnNames, columnIndexes, cpc);
     }
     
-    
     public void setRowId(int parameterIndex, RowId x) throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setRowId (int, RowId)");
     }
     
-    public void setNString(int index, String value) throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setNString (int, String)");
-    }
-
-    public void setNCharacterStream(int parameterIndex, Reader value)
-            throws SQLException {
-        throw SQLExceptionFactory.notImplemented("setNCharacterStream" +
-                "(int,Reader)");
-    }
-
-    public void setNCharacterStream(int index, Reader value, long length) 
-                throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setNCharacterStream " +
-                "(int,Reader,long)");
-    }
-
-    public void setNClob(int parameterIndex, Reader reader)
-            throws SQLException {
-        throw SQLExceptionFactory.notImplemented("setNClob(int,Reader)");
-    }
-
     public void setNClob(int index, NClob value) throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setNClob (int, NClob)");
-    }
-    
-    public void setNClob(int parameterIndex, Reader reader, long length)
-    throws SQLException{
-        throw SQLExceptionFactory.notImplemented ("setNClob (int, Reader, long)");
     }
     
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) 
                 throws SQLException{
         throw SQLExceptionFactory.notImplemented ("setSQLXML (int, SQLXML)");
-    }
-    
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
-                                   throws SQLException {
-        try { 
-            checkForClosedStatement();
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    interfaces).getSQLException();
-        } catch (SqlException se) {
-            throw se.getSQLException();
-        }
     }
 }

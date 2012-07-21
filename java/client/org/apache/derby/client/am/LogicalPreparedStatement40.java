@@ -22,15 +22,11 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.Reader;
-
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-
 import org.apache.derby.client.am.stmtcache.StatementKey;
-
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * JDBC 4 specific wrapper class for a Derby physical prepared statement.
@@ -166,25 +162,4 @@ public class LogicalPreparedStatement40
         return getPhysPs().isPoolable();
     }
 
-    public <T> T unwrap(Class<T> arg0)
-            throws SQLException {
-        try {
-            if (getPhysPs().isClosed()) {
-                throw (new SqlException(null,
-                    new ClientMessageId(SQLState.ALREADY_CLOSED),
-                                        "PreparedStatement")).getSQLException();
-            }
-            return arg0.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(
-                    null,
-                    new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    arg0).getSQLException();
-        }
-    }
-
-    public boolean isWrapperFor(Class<?> arg0)
-            throws SQLException {
-        return getPhysPs().isWrapperFor(arg0);
-    }
 }

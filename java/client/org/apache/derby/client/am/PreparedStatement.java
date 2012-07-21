@@ -21,10 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.shared.common.reference.JDBC40Translation;
-import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.sanity.SanityManager;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Date;
@@ -36,6 +32,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.jdbc.ClientDriver;
+import org.apache.derby.shared.common.reference.JDBC40Translation;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class PreparedStatement extends Statement
         implements java.sql.PreparedStatement,
@@ -2541,7 +2540,7 @@ public class PreparedStatement extends Statement
         	connection_.CommitAndRollbackListeners_.remove(this);
     }
     
-    //jdbc 4.0 methods
+    // JDBC 4.0 methods
 
     /**
      * Sets the designated parameter to the given input stream.
@@ -2740,6 +2739,34 @@ public class PreparedStatement extends Statement
         }
     }    
  
+    public void setNString(int index, String value) throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNString(int, String)");
+    }
+
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setNCharacterStream(int, Reader)");
+    }
+
+    public void setNCharacterStream(int index, Reader value, long length)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented(
+                "setNCharacterStream(int, Reader, long)");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNClob(int, Reader)");
+    }
+
+    public void setNClob(int parameterIndex, Reader reader, long length)
+            throws SQLException {
+        throw SQLExceptionFactory.notImplemented("setNClob(int, Reader, long)");
+    }
+
+    // End of JDBC 4.0 methods
+
         /*
          * Method calls onStatementError occurred on the 
          * BrokeredConnectionControl class after checking the 

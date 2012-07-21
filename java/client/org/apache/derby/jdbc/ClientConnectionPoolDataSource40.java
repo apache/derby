@@ -21,10 +21,8 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -34,51 +32,17 @@ import org.apache.derby.shared.common.reference.SQLState;
  * An object that implements this interface
  * will typically be registered with a naming service that is based on the
  * Java Naming and Directory Interface (JNDI). Use this factory
- * if your application runs at JDBC level 4.0 (or higher).
- * Use
+ * if your application runs at JDBC level 4.1 (or higher). Use
  * ClientConnectionPoolDataSource, instead, if your application runs under
- * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
+ * JDBC 4.0 or JDBC 3.0, that is, on the following Java Virtual Machines:
  * <p/>
  * <UL>
- * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
- * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * <LI> JDBC 4.0 - Java SE 6
+ * <LI> JDBC 3.0 - J2SE 5.0
  * </UL>
  */
 public class ClientConnectionPoolDataSource40
         extends ClientConnectionPoolDataSource {
-    /**
-     * Returns false unless <code>interfaces</code> is implemented 
-     * 
-     * @param  interfaces             a Class defining an interface.
-     * @return true                   if this implements the interface or 
-     *                                directly or indirectly wraps an object 
-     *                                that does.
-     * @throws java.sql.SQLException  if an error occurs while determining 
-     *                                whether this is a wrapper for an object 
-     *                                with the given interface.
-     */
-    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
-        return interfaces.isInstance(this);
-    }
-    
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
-                                   throws SQLException {
-        try { 
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(null,new ClientMessageId(
-                    SQLState.UNABLE_TO_UNWRAP), interfaces).getSQLException();
-        }
-    }    
-
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

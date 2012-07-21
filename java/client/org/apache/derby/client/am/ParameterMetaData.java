@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 // Parameter meta data as used internally by the driver is always a column meta data instance.
 // We will only create instances of this class when getParameterMetaData() is called.
@@ -89,6 +90,37 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         return columnMetaData_.getScale(param);
     }
 
+    // JDBC 4.0 java.sql.Wrapper interface methods
+
+    /**
+     * Check whether this instance wraps an object that implements the interface
+     * specified by {@code iface}.
+     *
+     * @param iface a class defining an interface
+     * @return {@code true} if this instance implements {@code iface}, or
+     * {@code false} otherwise
+     * @throws SQLException if an error occurs while determining if this
+     * instance implements {@code iface}
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param  iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw new SqlException(null,
+                    new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                    iface).getSQLException();
+        }
+    }
 }
-
-

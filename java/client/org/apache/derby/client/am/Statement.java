@@ -529,13 +529,35 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
      *                                whether this is a wrapper for an object 
      *                                with the given interface.
      */
-    public boolean isWrapperFor(Class iface) throws SQLException {
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         try {
             checkForClosedStatement();
         } catch (SqlException se) {
             throw se.getSQLException();
         }
         return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param  iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        try {
+            checkForClosedStatement();
+            try {
+                return iface.cast(this);
+            } catch (ClassCastException cce) {
+                throw new SqlException(
+                  null, new ClientMessageId(SQLState.UNABLE_TO_UNWRAP), iface);
+            }
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
     }
 
     /**

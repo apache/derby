@@ -37,11 +37,11 @@ import org.apache.derby.shared.common.reference.MessageId;
  * will typically be registered with a naming service that is based on the
  * Java Naming and Directory Interface (JNDI). Use
  * ClientConnectionPoolDataSource if your application runs under
- * JDBC3.0 or JDBC2.0, that is, on the following Java Virtual Machines:
+ * JDBC 3.0 or JDBC 4.0, that is, on the following Java Virtual Machines:
  * <p/>
  * <UL>
- * <LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
- * <LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+ * <LI> JDBC 4.0 - Java SE 6
+ * <LI> JDBC 3.0 - J2SE 5.0
  * </UL>
  */
 public class ClientConnectionPoolDataSource extends ClientDataSource 
