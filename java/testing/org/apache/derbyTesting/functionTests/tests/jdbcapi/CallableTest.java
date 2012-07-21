@@ -175,6 +175,9 @@ public class CallableTest extends BaseJDBCTestCase {
 
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("CallableTest:client")));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                                TestConfiguration.connectionCPDecorator( baseSuite
+                                        ("CallableTest:logical"))));
         return suite;
     }
     private static Test baseSuite(String name) {

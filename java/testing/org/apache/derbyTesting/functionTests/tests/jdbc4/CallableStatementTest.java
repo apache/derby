@@ -826,6 +826,9 @@ public class CallableStatementTest  extends Wrapper41Test
         suite.addTest(baseSuite("CallableStatementTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("CallableStatementTest:client")));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                                TestConfiguration.connectionCPDecorator( baseSuite
+                                        ("CallableStatementTest:logical"))));
         return suite;
     }
 

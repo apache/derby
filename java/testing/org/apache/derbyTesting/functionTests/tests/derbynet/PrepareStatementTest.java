@@ -46,6 +46,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -77,12 +78,19 @@ public class PrepareStatementTest extends BaseJDBCTestCase
      * run in both embedded and client/server.
      */
     public static Test suite()
-    {	
+    {
         if ( JDBC.vmSupportsJSR169())
             // see DERBY-2233 for details
             return new TestSuite("empty PrepareStatementTest - client not supported on JSR169");
         else
-            return TestConfiguration.defaultSuite(PrepareStatementTest.class);
+        {
+            TestSuite suite = new TestSuite("PrepareStatementTest");
+            suite.addTest(TestConfiguration.defaultSuite(PrepareStatementTest.class));
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                TestConfiguration.connectionCPDecorator(new CleanDatabaseTestSetup(
+                    new TestSuite(PrepareStatementTest.class)))));
+            return suite;
+        }
     }
 
 
