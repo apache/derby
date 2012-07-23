@@ -28,6 +28,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -117,9 +120,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
         TestSuite suite = new TestSuite("ClosedObjectTest suite");
-        suite.addTest(baseSuite("ClosedObjectTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-            baseSuite("ClosedObjectTest:client")));
+        suite.addTest(baseSuite(false));
+        suite.addTest(baseSuite(true));
         return suite;
     }
 
@@ -128,11 +130,13 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * <code>DataSource</code>, <code>ConnectionPoolDataSource</code>
      * and <code>XADataSource</code> to obtain objects.
      *
+     * @param network whether or not to run tests with the network client
      * @return a <code>Test</code> value
      * @exception Exception if an error occurs while building the test suite
      */
-    private static Test baseSuite(String name)  {
-        TestSuite topSuite = new TestSuite(name);
+    private static Test baseSuite(boolean network) {
+        TestSuite topSuite = new TestSuite(
+            "ClosedObjectTest:" + (network ? "client" : "embedded"));
 
         TestSuite dsSuite = new TestSuite("ClosedObjectTest DataSource");
         DataSourceDecorator dsDecorator = new DataSourceDecorator(dsSuite);
@@ -141,21 +145,43 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
         // JDBC 3 required for ConnectionPoolDataSource and XADataSource
         if (JDBC.vmSupportsJDBC3()) {
-            
-            TestSuite poolSuite = new TestSuite(
-                    "ClosedObjectTest ConnectionPoolDataSource");
-            PoolDataSourceDecorator poolDecorator =
-                new PoolDataSourceDecorator(poolSuite);
-            topSuite.addTest(poolDecorator);
-            fillDataSourceSuite(poolSuite, poolDecorator);
-    
+
+            // Plain connection pool test.
+            topSuite.addTest(poolSuite(Collections.emptyMap()));
+
+            // The client driver has a variant of connection pool that caches
+            // and reuses JDBC statements. Test it here by setting the
+            // maxStatements property.
+            if (network) {
+                topSuite.addTest(poolSuite(Collections.singletonMap(
+                        "maxStatements", Integer.valueOf(5))));
+            }
+
             TestSuite xaSuite = new TestSuite("ClosedObjectTest XA");
             XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
             topSuite.addTest(xaDecorator);
             fillDataSourceSuite(xaSuite, xaDecorator);
         }
 
-        return topSuite;
+        return network ?
+                TestConfiguration.clientServerDecorator(topSuite) :
+                topSuite;
+    }
+
+    /**
+     * Creates a suite that tests objects produced by a
+     * ConnectionPoolDataSource.
+     *
+     * @param dsProps properties to set on the data source
+     * @return a suite
+     */
+    private static Test poolSuite(Map dsProps) {
+        TestSuite poolSuite = new TestSuite(
+                "ClosedObjectTest ConnectionPoolDataSource");
+        PoolDataSourceDecorator poolDecorator =
+                new PoolDataSourceDecorator(poolSuite, dsProps);
+        fillDataSourceSuite(poolSuite, poolDecorator);
+        return poolDecorator;
     }
 
     /**
@@ -750,13 +776,17 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * <code>ConnectionPoolDataSource</code>.
      */
     private static class PoolDataSourceDecorator extends DataSourceDecorator {
+        private final Map dsProps;
+
         /**
          * Creates a new <code>PoolDataSourceDecorator</code> instance.
          *
          * @param test the test to decorate
+         * @param dsProps data source properties
          */
-        public PoolDataSourceDecorator(Test test) {
+        public PoolDataSourceDecorator(Test test, Map dsProps) {
             super(test);
+            this.dsProps = dsProps;
         }
 
         /**
@@ -768,6 +798,11 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         protected Connection newConnection_() throws SQLException {
             ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
+            for (Iterator it = dsProps.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry e = (Map.Entry) it.next();
+                J2EEDataSource.setBeanProperty(
+                    ds, (String) e.getKey(), e.getValue());
+            }
             PooledConnection pc =
                 ds.getPooledConnection();
             return pc.getConnection();

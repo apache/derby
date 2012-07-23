@@ -372,6 +372,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         assertFalse(ps.isWrapperFor(ResultSet.class));
     }
 
+    public void testIsWrapperForSelf() throws SQLException {
+        assertTrue(ps.isWrapperFor(ps.getClass()));
+    }
+
     public void testUnwrapStatement() throws SQLException {
         Statement stmt = ps.unwrap(Statement.class);
         assertSame("Unwrap returned wrong object.", ps, stmt);
@@ -379,6 +383,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
     public void testUnwrapPreparedStatement() throws SQLException {
         PreparedStatement ps2 = ps.unwrap(PreparedStatement.class);
+        assertSame("Unwrap returned wrong object.", ps, ps2);
+    }
+
+    public void testUnwrapAsSelf() throws SQLException {
+        PreparedStatement ps2 = ps.unwrap(ps.getClass());
         assertSame("Unwrap returned wrong object.", ps, ps2);
     }
 

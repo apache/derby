@@ -491,6 +491,10 @@ public class CallableStatementTest  extends Wrapper41Test
         assertFalse(cStmt.isWrapperFor(ResultSet.class));
     }
 
+    public void testIsWrapperForSelf() throws SQLException {
+        assertTrue(cStmt.isWrapperFor(cStmt.getClass()));
+    }
+
     public void testUnwrapStatement() throws SQLException {
         Statement stmt = cStmt.unwrap(Statement.class);
         assertSame("Unwrap returned wrong object.", cStmt, stmt);
@@ -503,6 +507,11 @@ public class CallableStatementTest  extends Wrapper41Test
 
     public void testUnwrapCallableStatement() throws SQLException {
         Statement cs = cStmt.unwrap(CallableStatement.class);
+        assertSame("Unwrap returned wrong object.", cStmt, cs);
+    }
+
+    public void testUnwrapAsSelf() throws SQLException {
+        PreparedStatement cs = cStmt.unwrap(cStmt.getClass());
         assertSame("Unwrap returned wrong object.", cStmt, cs);
     }
 

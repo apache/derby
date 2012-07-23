@@ -231,8 +231,8 @@ abstract class LogicalStatementEntity
      * instance implements {@code iface}
      */
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return ((org.apache.derby.client.am.Statement) getPhysStmt())
-                .isWrapperFor(iface);
+        getPhysStmt(); // Just to check that the statement is not closed.
+        return iface.isInstance(this);
     }
 
     /**
