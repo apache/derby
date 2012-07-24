@@ -255,29 +255,37 @@ public class BaseTypeIdImpl implements Formatable
             // will lose the format id. This can happen if you pass one of these
             // objects across the network. Here we recover the format id.
             //
-            if ( "BOOLEAN".equals( unqualifiedName ) ) { return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
-            else if ( "BIGINT".equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
-            else if ( "INTEGER".equals( unqualifiedName ) ) { return StoredFormatIds.INT_TYPE_ID_IMPL; }
-            else if ( "SMALLINT".equals( unqualifiedName ) ) { return StoredFormatIds.SMALLINT_TYPE_ID_IMPL; }
-            else if ( "TINYINT".equals( unqualifiedName ) ) { return StoredFormatIds.TINYINT_TYPE_ID_IMPL; }
-            else if ( "LONGINT".equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
-            else if ( "DECIMAL".equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
-            else if ( "NUMERIC".equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
-            else if ( "DOUBLE".equals( unqualifiedName ) ) { return StoredFormatIds.DOUBLE_TYPE_ID_IMPL; }
-            else if ( "REAL".equals( unqualifiedName ) ) { return StoredFormatIds.REAL_TYPE_ID_IMPL; }
-            else if ( "REF".equals( unqualifiedName ) ) { return StoredFormatIds.REF_TYPE_ID_IMPL; }
-            else if ( "CHAR".equals( unqualifiedName ) ) { return StoredFormatIds.CHAR_TYPE_ID_IMPL; }
-            else if ( "VARCHAR".equals( unqualifiedName ) ) { return StoredFormatIds.VARCHAR_TYPE_ID_IMPL; }
-            else if ( "LONG VARCHAR".equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL; }
-            else if ( "CLOB".equals( unqualifiedName ) ) { return StoredFormatIds.CLOB_TYPE_ID_IMPL; }
+            if ( TypeId.BOOLEAN_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
+            else if ( TypeId.INTEGER_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.INT_TYPE_ID_IMPL; }
+            else if ( TypeId.SMALLINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.SMALLINT_TYPE_ID_IMPL; }
+            else if ( TypeId.TINYINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TINYINT_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
+            else if ( TypeId.DECIMAL_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( TypeId.NUMERIC_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( TypeId.DOUBLE_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DOUBLE_TYPE_ID_IMPL; }
+            else if ( TypeId.REAL_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.REAL_TYPE_ID_IMPL; }
+            else if ( TypeId.REF_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.REF_TYPE_ID_IMPL; }
+            else if ( TypeId.CHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.CHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.VARCHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.VARCHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGVARCHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.CLOB_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.CLOB_TYPE_ID_IMPL; }
+            //DERBY-5407 Network Server on wire sends CHAR () FOR BIT DATA 
+            // not CHAR FOR BIT DATA. Keeping the check for CHAR FOR BIT
+            // DATA just in case if there is any dependency on that check
+            else if ( TypeId.BIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BIT_TYPE_ID_IMPL; }
             else if ( "CHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.BIT_TYPE_ID_IMPL; }
+            //DERBY-5407 Network Server on wire sends VARCHAR () FOR BIT DATA 
+            // not VARCHAR FOR BIT DATA. Keeping the check for VARCHAR FOR BIT
+            // DATA just in case if there is any dependency on that check
+            else if ( TypeId.VARBIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
             else if ( "VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
-            else if ( "LONG VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL; }
-            else if ( "BLOB".equals( unqualifiedName ) ) { return StoredFormatIds.BLOB_TYPE_ID_IMPL; }
-            else if ( "DATE".equals( unqualifiedName ) ) { return StoredFormatIds.DATE_TYPE_ID_IMPL; }
-            else if ( "TIME".equals( unqualifiedName ) ) { return StoredFormatIds.TIME_TYPE_ID_IMPL; }
-            else if ( "TIMESTAMP".equals( unqualifiedName ) ) { return StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL; }
-            else if ( "XML".equals( unqualifiedName ) ) { return StoredFormatIds.XML_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGVARBIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL; }
+            else if ( TypeId.BLOB_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BLOB_TYPE_ID_IMPL; }
+            else if ( TypeId.DATE_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DATE_TYPE_ID_IMPL; }
+            else if ( TypeId.TIME_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TIME_TYPE_ID_IMPL; }
+            else if ( TypeId.TIMESTAMP_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL; }
+            else if ( TypeId.XML_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.XML_TYPE_ID_IMPL; }
             else { return 0; }
         }
     }

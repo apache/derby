@@ -25,6 +25,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.Types;
+
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -40,7 +43,7 @@ import junit.framework.TestSuite;
  */
 public class SystemCatalogTest extends BaseJDBCTestCase {
 
-	public SystemCatalogTest(String name) {
+    public SystemCatalogTest(String name) {
 		super(name);
 	}
 	
@@ -554,6 +557,117 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 		s.execute("drop table t");
 		s.execute("drop table uniquekey3");
 		s.close();
+	}
+
+	/**
+	 * This test creates a table with all supported datatypes aqnd ensures 
+	 * that bound embedded and network server return the identical datatypes
+	 * for those datatypes. DERBY-5407
+	 * @throws SQLException
+	 */
+	public void testColumnDatatypesOfAllDataTypesInSystemCatalogs() throws SQLException {
+		int totalNumOfColumnDatatypes = 21;
+		Statement s = createStatement();
+		s.execute("create table allTypesTable (" +
+			"    a01 bigint," +
+			"    a02 blob,\n" +
+			"    a03 char( 1 ),\n" +
+			"    a04 char( 1 ) for bit data ,\n" +
+			"    a05 clob,\n" +
+			"    a06 date,\n" +
+			"    a07 decimal,\n" +
+			"    a08 double,\n" +
+			"    a09 float,\n" +
+			"    a10 int,\n" +
+			"    a11 long varchar,\n" +
+			"    a12 long varchar for bit data,\n" +
+			"    a13 numeric,\n" +
+			"    a14 real,\n" +
+			"    a15 smallint,\n" +
+			"    a16 time,\n" +
+			"    a17 timestamp,\n" +
+			"    a18 varchar(10),\n" +
+			"    a19 varchar(10) for bit data,\n" +
+			"    a20 xml,\n" +
+			"    a21 boolean\n" +
+        	")");
+		ResultSet rs = s.executeQuery("select columndatatype "+
+			"from sys.systables, sys.syscolumns "+
+			"where tablename='ALLTYPESTABLE' "+
+			"and tableid=referenceid "+
+			"order by columnname");
+		for (int i=1; i<=totalNumOfColumnDatatypes; i++)
+		{
+			rs.next();
+			switch(i)
+			{
+			case 1 :
+				assertTrue(rs.getString(1).startsWith("BIGINT"));
+				break;
+			case 2 :
+				assertTrue(rs.getString(1).startsWith("BLOB(2147483647)"));
+				break;
+			case 3 :
+				assertTrue(rs.getString(1).startsWith("CHAR(1)"));
+				break;
+			case 4 :
+				assertTrue(rs.getString(1).startsWith("CHAR (1) FOR BIT DATA"));
+				break;
+			case 5 :
+				assertTrue(rs.getString(1).startsWith("CLOB(2147483647)"));
+				break;
+			case 6 :
+				assertTrue(rs.getString(1).startsWith("DATE"));
+				break;
+			case 7 :
+				assertTrue(rs.getString(1).startsWith("DECIMAL(5,0)"));
+				break;
+			case 8 :
+				assertTrue(rs.getString(1).startsWith("DOUBLE"));
+				break;
+			case 9 :
+				assertTrue(rs.getString(1).startsWith("DOUBLE"));
+				break;
+			case 10 :
+				assertTrue(rs.getString(1).startsWith("INTEGER"));
+				break;
+			case 11 :
+				assertTrue(rs.getString(1).startsWith("LONG VARCHAR"));
+				break;
+			case 12 :
+				assertTrue(rs.getString(1).startsWith("LONG VARCHAR FOR BIT DATA"));
+				break;
+			case 13 :
+				assertTrue(rs.getString(1).startsWith("NUMERIC(5,0)"));
+				break;
+			case 14 :
+				assertTrue(rs.getString(1).startsWith("REAL"));
+				break;
+			case 15 :
+				assertTrue(rs.getString(1).startsWith("SMALLINT"));
+				break;
+			case 16 :
+				assertTrue(rs.getString(1).startsWith("TIME"));
+				break;
+			case 17 :
+				assertTrue(rs.getString(1).startsWith("TIMESTAMP"));
+				break;
+			case 18 :
+				assertTrue(rs.getString(1).startsWith("VARCHAR(10)"));
+				break;
+			case 19 :
+				assertTrue(rs.getString(1).startsWith("VARCHAR (10) FOR BIT DATA"));
+				break;
+			case 20 :
+				assertTrue(rs.getString(1).startsWith("XML"));
+				break;
+			case 21 :
+				assertTrue(rs.getString(1).startsWith("BOOLEAN"));
+				break;
+			}
+		}
+		rs.close();
+		s.execute("drop table ALLTYPESTABLE");
 	}
 	
 	/**
