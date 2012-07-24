@@ -24,8 +24,8 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.SQLClientInfoException;
 import java.sql.NClob;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
@@ -277,21 +277,6 @@ public class BrokeredConnection40
         } catch (SQLException sqle) {
             notifyException(sqle);
             throw sqle;
-        }
-    }
-    
-    /**
-     * Returns the type map for this connection.
-     *
-     * @return type map for this connection
-     * @exception SQLException if a database access error occurs
-     */
-    public final java.util.Map<String,Class<?>> getTypeMap() throws SQLException {
-        try {
-            return getRealConnection().getTypeMap();
-        } catch (SQLException se) {
-            notifyException(se);
-            throw se;
         }
     }
     

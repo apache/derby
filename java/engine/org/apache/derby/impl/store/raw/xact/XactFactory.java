@@ -102,7 +102,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	private boolean inCreateNoLog = false;	// creating database, no logging
 
-	private   XAResourceManager xa_resource;
+    private /* XAResourceManager */ Object xa_resource;
 
 	private Object   backupSemaphore = new Object();
 	private long     backupBlockingOperations = 0;

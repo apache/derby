@@ -21,11 +21,9 @@
 
 package org.apache.derbyTesting.unitTests.harness;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derbyTesting.unitTests.harness.UnitTestManager;
-
+import java.io.PrintWriter;
 import java.util.Properties;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 /** 
 	A very simple class to boot up a system based upon a configuration file
@@ -48,6 +46,6 @@ public class UnitTestMain  {
 		// request that a unit test manager service is started
 		bootProperties.put("derby.service.unitTestManager", UnitTestManager.MODULE);
 
-		Monitor.startMonitor(bootProperties, System.err);
+        Monitor.startMonitor(bootProperties, new PrintWriter(System.err, true));
 	}
 }

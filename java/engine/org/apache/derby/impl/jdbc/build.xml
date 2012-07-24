@@ -88,8 +88,8 @@
   	</target>
   <target name="compile_jdbc3" depends="compile_jsr169">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.5"
+      target="1.5"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

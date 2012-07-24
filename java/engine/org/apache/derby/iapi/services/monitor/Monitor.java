@@ -21,24 +21,20 @@
 
 package org.apache.derby.iapi.services.monitor;
 
+import java.io.PrintWriter;
+import java.util.Locale;
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.iapi.services.loader.InstanceGetter;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.iapi.services.loader.InstanceGetter;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
-
-import java.util.Properties;
-import java.util.Locale;
-import java.io.PrintStream;
 
 /**
 	<P><B>Services</B><BR>
@@ -284,7 +280,7 @@ public class Monitor {
 			until an InfoStreams module is successfully started.
 	*/
 
-	public static void startMonitor(Properties bootProperties, PrintStream logging) {
+	public static void startMonitor(Properties bootProperties, PrintWriter logging) {
 
 		new org.apache.derby.impl.services.monitor.FileMonitor(bootProperties, logging);			
 	}

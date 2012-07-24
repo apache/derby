@@ -29,7 +29,6 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedConnection30;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement40;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
 import org.apache.derby.impl.jdbc.EmbedConnection40;
@@ -57,10 +56,6 @@ import javax.sql.XAConnection;
 public class Driver40 extends Driver30 {
     
     public Connection getNewNestedConnection(EmbedConnection conn) {
-        if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(conn instanceof EmbedConnection30,
-                "conn expected to be instanceof EmbedConnection30");
-        }
         return new EmbedConnection40(conn);
     }
     

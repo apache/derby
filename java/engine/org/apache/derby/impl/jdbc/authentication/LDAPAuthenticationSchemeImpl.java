@@ -21,28 +21,19 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
-
-import org.apache.derby.authentication.UserAuthenticator;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.util.StringUtil;
-
-import javax.naming.*;
-import javax.naming.directory.*;
-
-
-import java.util.Properties;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
+import java.util.Properties;
+import javax.naming.*;
+import javax.naming.directory.*;
+import org.apache.derby.authentication.UserAuthenticator;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * This is the Derby LDAP authentication scheme implementation.
@@ -206,22 +197,16 @@ extends JNDIAuthenticationSchemeBase
      */
     private DirContext privInitialDirContext(final Properties env) throws NamingException {
         try {
-            return ((InitialDirContext)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run() throws SecurityException, NamingException {
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<DirContext>() {
+                        public DirContext run() throws NamingException {
                             return new InitialDirContext(env);
                     }
-                }));
-    } catch (PrivilegedActionException pae) {
-            Exception e = pae.getException();
-       
-            if (e instanceof NamingException)
-                    throw (NamingException)e;
-            else
-                throw (SecurityException)e;
-        }   
-   
-    }   
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (NamingException) pae.getCause();
+        }
+    }
 
     /**
 	 * This method basically tests and sets default/expected JNDI properties
@@ -383,41 +368,35 @@ extends JNDIAuthenticationSchemeBase
 			}
 		}
 
-		if (SanityManager.DEBUG)
-		{
-			if (SanityManager.DEBUG_ON(
-						AuthenticationServiceBase.AuthenticationTrace)) {
-                             
-                                // This tracing needs some investigation and cleanup.
-                                // 1) It creates the file in user.dir instead of derby.system.home
-                                // 2) It doesn't seem to work. The file is empty after successful
-                                //    and unsuccessful ldap connects.  Perhaps the fileOutputStream
-                                // is never flushed and closed.
-                                // I (Kathey Marsden) wrapped this in a priv block and kept the previous
-                                // behaviour that it will not stop processing if file 
-                                // creation fails. Perhaps that should be investigated as well.
-                                FileOutputStream fos = null;
-                                try {
-                                    fos =  ((FileOutputStream)AccessController.doPrivileged(
-                                                new PrivilegedExceptionAction() {
-                                                    public Object run() throws SecurityException, java.io.IOException {
-                                                        return new  FileOutputStream("DerbyLDAP.out");
-                                                    }
-                                                }));
-                                } catch (PrivilegedActionException pae) {
-                                    // If trace file creation fails do not stop execution.                                    
-                                }
-                                if (fos != null)
-                                    initDirContextEnv.put("com.sun.naming.ldap.trace.ber",fos);
+        if (SanityManager.DEBUG &&
+            SanityManager.DEBUG_ON(
+                AuthenticationServiceBase.AuthenticationTrace)) {
 
-				
-			}
-		}
+            // This tracing needs some investigation and cleanup.
+            // 1) It creates the file in user.dir instead of derby.system.home
+            // 2) It doesn't seem to work. The file is empty after successful
+            //    and unsuccessful ldap connects. Perhaps the fileOutputStream
+            // is never flushed and closed.
+            // I (Kathey Marsden) wrapped this in a priv block and kept the
+            // previous behaviour that it will not stop processing if file
+            // creation fails. Perhaps that should be investigated as well.
+            FileOutputStream fos = null;
+            try {
+                fos = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileOutputStream>() {
+                        public FileOutputStream run() throws IOException {
+                            return new FileOutputStream("DerbyLDAP.out");
+                        }
+                    });
+            } catch (PrivilegedActionException pae) {
+                // If trace file creation fails do not stop execution.
+            }
+            if (fos != null) {
+                initDirContextEnv.put("com.sun.naming.ldap.trace.ber", fos);
+            }
+        }
 	}
 
-	
-	
-	
 
 	/**
 	 * Search for the full user's DN in the LDAP server.

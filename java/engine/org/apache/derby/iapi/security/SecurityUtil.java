@@ -54,7 +54,7 @@ public class SecurityUtil {
      * @see <a href="http://wiki.apache.org/db-derby/UserIdentifiers">User Names & Authorization Identifiers in Derby</a>
      */
     static public Subject createSystemPrincipalSubject(String user) {
-        final Set principals = new HashSet();
+        final Set<SystemPrincipal> principals = new HashSet<SystemPrincipal>();
         // add the authenticated user
         if (user != null) {
             // The Java security runtime checks whether a Subject falls
@@ -117,16 +117,16 @@ public class SecurityUtil {
     static public void checkSubjectHasPermission(final Subject subject,
                                                  final Permission perm) {
         // the checks
-        final PrivilegedAction runCheck
-            = new PrivilegedAction() {
-                    public Object run() {
+        final PrivilegedAction<Void> runCheck
+            = new PrivilegedAction<Void>() {
+                    public Void run() {
                         AccessController.checkPermission(perm);
                         return null;
                     }
                 };
-        final PrivilegedAction runCheckAsPrivilegedUser
-            = new PrivilegedAction() {
-                    public Object run() {
+        final PrivilegedAction<Void> runCheckAsPrivilegedUser
+            = new PrivilegedAction<Void>() {
+                    public Void run() {
                         // run check only using the the subject
                         // (by using null as the AccessControlContext)
                         final AccessControlContext acc = null;

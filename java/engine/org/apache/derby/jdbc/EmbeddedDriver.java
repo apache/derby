@@ -21,19 +21,15 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.DriverManager;
-import java.sql.Driver;
+import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
-
-import java.io.PrintStream;
 import java.util.Properties;
-
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
+import org.apache.derby.iapi.reference.Attribute;
 
 
 /**
@@ -191,12 +187,13 @@ public class EmbeddedDriver  implements Driver {
 	*  This is package protected so that AutoloadedDriver can call it.
 	*/
 	static void boot() {
-		PrintStream ps = DriverManager.getLogStream();
+        PrintWriter pw = DriverManager.getLogWriter();
 
-		if (ps == null)
-			ps = System.err;
+        if (pw == null) {
+            pw = new PrintWriter(System.err, true);
+        }
 
-		new JDBCBoot().boot(Attribute.PROTOCOL, ps);
+        new JDBCBoot().boot(Attribute.PROTOCOL, pw);
 	}
 
 

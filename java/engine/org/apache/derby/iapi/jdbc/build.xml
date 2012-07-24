@@ -75,29 +75,6 @@
     </javac>
   </target>
 
-  <target name="compile_iapi_jdbc_jdbc2" depends="compile_iapi_jdbc_stmt,compile_iapi_jdbc_jsr169">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>
-	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement.java"/>
-	  <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement.java"/>
-    </javac>
-  </target>
-
   <target name="compile_iapi_jdbc_stmt">
     <javac
       source="1.4"
@@ -119,10 +96,10 @@
     </javac>
   </target>
 
-  <target name="compile_iapi_jdbc_jdbc3" depends="compile_iapi_jdbc_jdbc2">
+  <target name="compile_iapi_jdbc_jdbc3" depends="compile_iapi_jdbc_stmt,compile_iapi_jdbc_jsr169">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.5"
+      target="1.5"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -136,6 +113,9 @@
       <classpath>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>
+	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement.java"/>
+	  <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection30.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement30.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredCallableStatement30.java"/>

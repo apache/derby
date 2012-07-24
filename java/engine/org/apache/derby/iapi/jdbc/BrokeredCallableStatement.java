@@ -163,8 +163,7 @@ public abstract class BrokeredCallableStatement extends BrokeredPreparedStatemen
         return getCallableStatement().getBigDecimal( parameterIndex);
     }
 
-    public final Object getObject(int i,
-                            Map map)
+    public final Object getObject(int i, Map<String, Class<?>> map)
         throws SQLException
     {
         return getCallableStatement().getObject( i, map);

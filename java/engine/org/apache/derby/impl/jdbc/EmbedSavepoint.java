@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.EmbedSavepoint30
+   Derby - Class org.apache.derby.impl.jdbc.EmbedSavepoint
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,19 +21,13 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.ConnectionChild;
-import org.apache.derby.impl.jdbc.Util;
-
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import java.sql.Savepoint;
-import java.sql.SQLException;
-
 /**
- * This class implements the Savepoint interface from JDBC3.0
+ * This class implements the Savepoint interface from JDBC 3.0.
  * This allows to set, release, or rollback a transaction to
  * designated Savepoints. Savepoints provide finer-grained
  * control of transactions by marking intermediate points within
@@ -48,7 +42,7 @@ import java.sql.SQLException;
  * @see java.sql.Savepoint
  *
  */
-final class EmbedSavepoint30 extends ConnectionChild
+final class EmbedSavepoint extends ConnectionChild
     implements Savepoint {
 
     //In order to avoid name conflict, the external names are prepanded
@@ -66,7 +60,7 @@ final class EmbedSavepoint30 extends ConnectionChild
 		and restore it.
 	    @exception SQLException on error
 	 */
-    EmbedSavepoint30(EmbedConnection conn, String name)
+    EmbedSavepoint(EmbedConnection conn, String name)
     throws StandardException {
    		super(conn);
    		if (name == null) //this is an unnamed savepoint
@@ -91,8 +85,9 @@ final class EmbedSavepoint30 extends ConnectionChild
     * @exception SQLException if this is a named savepoint
     */
     public int getSavepointId() throws SQLException {
-   		if (savepointID == -1)
+   		if (savepointID == -1) {
 			throw newSQLException(SQLState.NO_ID_FOR_NAMED_SAVEPOINT);
+        }
    		return savepointID;
     }
 
@@ -105,8 +100,9 @@ final class EmbedSavepoint30 extends ConnectionChild
     * @exception SQLException if this is an un-named savepoint
     */
     public String getSavepointName() throws SQLException {
-   		if (savepointID != -1)
+   		if (savepointID != -1) {
 			throw newSQLException(SQLState.NO_NAME_FOR_UNNAMED_SAVEPOINT);
+        }
    		return savepointName.substring(2);
     }
 

@@ -336,7 +336,7 @@ public abstract class BrokeredConnection implements EngineConnection
 		}
 	}
 
-    public java.util.Map getTypeMap() throws SQLException
+    public java.util.Map<String, Class<?>> getTypeMap() throws SQLException
 	{
 		try
 		{
@@ -349,7 +349,7 @@ public abstract class BrokeredConnection implements EngineConnection
 		}
 	}
 
-    public final void setTypeMap(java.util.Map map) throws SQLException
+    public final void setTypeMap(java.util.Map<String, Class<?>> map) throws SQLException
 	{
 		try
 		{

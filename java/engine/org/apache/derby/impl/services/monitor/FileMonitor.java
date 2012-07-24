@@ -21,22 +21,19 @@
 
 package org.apache.derby.impl.services.monitor;
 
-import org.apache.derby.iapi.reference.Property;
-
-import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
-
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
-
 import java.util.Properties;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.info.ProductGenusNames;
+import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.iapi.services.io.FileUtil;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -57,7 +54,7 @@ public final class FileMonitor extends BaseMonitor
 		applicationProperties = readApplicationProperties();
 	}
 
-	public FileMonitor(java.util.Properties properties, java.io.PrintStream log) {
+	public FileMonitor(Properties properties, PrintWriter log) {
 		runWithState(properties, log);
 	}
 

@@ -424,8 +424,8 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 				// shutdown by a 'jdbc:derby:;shutdown=true'
 				if (driver == null || !driver.acceptsURL(url)) {
 					
-					
-					new JDBCBoot().boot(Attribute.PROTOCOL, System.err);
+                    new JDBCBoot().boot(Attribute.PROTOCOL,
+                        new PrintWriter(System.err, true));
 					
 					// If we know the driver, we loaded it. Otherwise only
 					// work if DriverManager has already loaded it.

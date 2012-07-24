@@ -62,12 +62,7 @@ public class Driver30 extends Driver20 {
 	 */
 	public Connection getNewNestedConnection(EmbedConnection conn)
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(conn instanceof EmbedConnection30,
-				"conn expected to be instanceof EmbedConnection30");
-		}
-		return new EmbedConnection30(conn);
+        return new EmbedConnection(conn);
 	}
 
 	/*
@@ -77,7 +72,7 @@ public class Driver30 extends Driver20 {
 	protected EmbedConnection getNewEmbedConnection(String url, Properties info)
 		 throws SQLException 
 	{
-		return new EmbedConnection30(this, url, info);
+        return new EmbedConnection(this, url, info);
 	}
 
 	/**

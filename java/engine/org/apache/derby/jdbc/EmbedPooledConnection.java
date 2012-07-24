@@ -71,7 +71,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
      * The list of {@code ConnectionEventListener}s. It is initially {@code
      * null} and will be initialized lazily when the first listener is added.
      */
-    private ArrayList eventListener;
+    private ArrayList<ConnectionEventListener> eventListener;
 
     /**
      * The number of iterators going through the list of connection event
@@ -198,7 +198,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	private void closeCurrentConnectionHandle() throws SQLException {
 		if (currentConnectionHandle != null)
 		{
-			ArrayList tmpEventListener = eventListener;
+            ArrayList<ConnectionEventListener> tmpEventListener = eventListener;
 			eventListener = null;
 
 			try {
@@ -279,13 +279,14 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		if (listener == null)
 			return;
         if (eventListener == null) {
-            eventListener = new ArrayList();
+            eventListener = new ArrayList<ConnectionEventListener>();
         } else if (eventIterators > 0) {
             // DERBY-3401: Someone is iterating over the ArrayList, and since
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
-            eventListener = (ArrayList) eventListener.clone();
+            eventListener =
+                new ArrayList<ConnectionEventListener>(eventListener);
         }
         eventListener.add(listener);
 	}
@@ -303,7 +304,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
             // we were able to synchronize on this, that someone is us. Clone
             // the list of listeners in order to prevent invalidation of the
             // iterator.
-            eventListener = (ArrayList) eventListener.clone();
+            eventListener =
+                new ArrayList<ConnectionEventListener>(eventListener);
         }
         eventListener.remove(listener);
 	}
@@ -360,9 +362,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
             ConnectionEvent event = new ConnectionEvent(this, exception);
             eventIterators++;
             try {
-                for (Iterator it = eventListener.iterator(); it.hasNext();) {
-                    ConnectionEventListener l =
-                            (ConnectionEventListener) it.next();
+                for (ConnectionEventListener l : eventListener) {
                     if (exception == null) {
                         l.connectionClosed(event);
                     } else {

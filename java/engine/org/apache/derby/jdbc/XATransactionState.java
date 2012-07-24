@@ -67,7 +67,7 @@ final class XATransactionState extends ContextImpl {
 		the JTA spec. Note that while the transaction is suspended by this XAResource,
 		another XAResource may join the transaction and suspend it after the join.
 	*/
-	HashMap suspendedList;
+    HashMap<EmbedXAResource, XATransactionState> suspendedList;
 
 
 	/**
@@ -292,8 +292,10 @@ final class XATransactionState extends ContextImpl {
 				if (resource != associatedResource)
 					throw new XAException(XAException.XAER_PROTO);
 
-				if (suspendedList == null)
-					suspendedList = new HashMap();
+                if (suspendedList == null) {
+                    suspendedList =
+                        new HashMap<EmbedXAResource, XATransactionState>();
+                }
 				suspendedList.put(resource, this);
 
 				associationState = XATransactionState.T0_NOT_ASSOCIATED;

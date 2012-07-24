@@ -21,15 +21,13 @@
 
 package org.apache.derby.iapi.jdbc;
 
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
+import java.io.PrintWriter;
 import java.util.Properties;
-import java.io.PrintStream;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 /**
 	A class to boot a Derby system that includes a JDBC driver.
@@ -55,7 +53,7 @@ public class JDBCBoot {
 		no current JDBC driver that is handling the required protocol.
 
 	*/
-	public void boot(String protocol, PrintStream logging) {
+	public void boot(String protocol, PrintWriter logging) {
 
 		if (org.apache.derby.jdbc.InternalDriver.activeDriver() == null)
 		{

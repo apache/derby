@@ -22,12 +22,8 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.sql.*;
-import java.math.BigDecimal;
 import java.net.URL;
-
-import java.util.Calendar;
 import java.util.Map;
-
 
 /**
 	JDBC 3 brokered CallableStatement
@@ -155,7 +151,8 @@ public class BrokeredCallableStatement30 extends BrokeredCallableStatement
     public final java.math.BigDecimal getBigDecimal(java.lang.String parameterName) throws SQLException {
 		return getCallableStatement().getBigDecimal(parameterName);
 	}
-    public final java.lang.Object getObject(java.lang.String parameterName, java.util.Map map) throws SQLException {
+    public final java.lang.Object getObject(String parameterName,
+            Map<String, Class<?>> map) throws SQLException {
 		return getCallableStatement().getObject(parameterName, map);
 	}
     public final java.sql.Ref getRef(java.lang.String parameterName) throws SQLException {

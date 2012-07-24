@@ -31,7 +31,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedConnection30;
 import org.apache.derby.jdbc.Driver30;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -49,7 +48,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
     class MockInternalDriver extends Driver30 {
 
-        public class MockConnectionFailWhenRollBack extends EmbedConnection30 {
+        public class MockConnectionFailWhenRollBack extends EmbedConnection {
 
             public MockConnectionFailWhenRollBack(Connection connection) {
                 super((EmbedConnection)connection);

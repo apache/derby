@@ -57,7 +57,7 @@ public class Driver169 extends InternalDriver {
 		 throws SQLException
 	{
 		// make a new local connection with a new transaction resource
-		return new EmbedConnection30(this, url, info);
+        return new EmbedConnection(this, url, info);
 	}
 
 
@@ -71,7 +71,7 @@ public class Driver169 extends InternalDriver {
 	 */
 	public Connection getNewNestedConnection(EmbedConnection conn)
 	{
-		return new EmbedConnection30(conn);
+        return new EmbedConnection(conn);
 	}
 
 	/*

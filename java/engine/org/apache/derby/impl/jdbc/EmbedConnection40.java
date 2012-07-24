@@ -38,7 +38,7 @@ import org.apache.derby.iapi.jdbc.EngineConnection40;
 import org.apache.derby.iapi.jdbc.FailedProperties40;
 
 public class EmbedConnection40
-        extends EmbedConnection30 implements EngineConnection40 {
+        extends EmbedConnection implements EngineConnection40 {
     
     /** Creates a new instance of EmbedConnection40 */
     public EmbedConnection40(EmbedConnection inputConnection) {

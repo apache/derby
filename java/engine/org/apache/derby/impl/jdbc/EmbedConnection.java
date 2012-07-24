@@ -70,6 +70,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Savepoint;
 import java.sql.Statement;
 
 import java.util.HashSet;
@@ -81,6 +82,8 @@ import java.util.Iterator;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.jdbc.ExceptionFactory;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
@@ -106,14 +109,14 @@ import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
  * the a synchronized object return by the rootConnection.
    <P><B>Supports</B>
    <UL>
-  <LI> JDBC 2.0
+   <LI> JDBC 3.0
    </UL>
  * 
  *
  * @see TransactionResourceImpl
  *
  */
-public abstract class EmbedConnection implements EngineConnection
+public class EmbedConnection implements EngineConnection
 {
 
 	protected static final StandardException exceptionClose = StandardException.closeException();
@@ -3421,6 +3424,180 @@ public abstract class EmbedConnection implements EngineConnection
         setInactive();
     }
         
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 3.0    -   New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Creates an unnamed savepoint in the current transaction and
+     * returns the new Savepoint object that represents it.
+     *
+     * @return  The new Savepoint object
+     *
+     * @exception SQLException if a database access error occurs or
+     * this Connection object is currently in auto-commit mode
+     */
+    public Savepoint setSavepoint() throws SQLException {
+        return commonSetSavepointCode(null, false);
+    }
+
+    /**
+     * Creates a savepoint with the given name in the current transaction and
+     * returns the new Savepoint object that represents it.
+     *
+     * @param name  A String containing the name of the savepoint
+     *
+     * @return  The new Savepoint object
+     *
+     * @exception SQLException if a database access error occurs or
+     * this Connection object is currently in auto-commit mode
+     */
+    public Savepoint setSavepoint(String name) throws SQLException {
+        return commonSetSavepointCode(name, true);
+    }
+
+    /**
+     * Creates a savepoint with the given name (if it is a named
+     * savepoint else we will generate a name because Derby only
+     * supports named savepoints internally) in the current
+     * transaction and returns the new Savepoint object that
+     * represents it.
+     *
+     * @param name A String containing the name of the savepoint. Will
+     * be null if this is an unnamed savepoint
+     * @param userSuppliedSavepointName If true means it's a named
+     * user defined savepoint.
+     *
+     * @return  The new Savepoint object
+     */
+    private Savepoint commonSetSavepointCode(String name, boolean userSuppliedSavepointName) throws SQLException
+    {
+        synchronized (getConnectionSynchronization()) {
+            setupContextStack();
+            try {
+                verifySavepointCommandIsAllowed();
+                // make sure that if it is a named savepoint then
+                // supplied name is not null
+                if (userSuppliedSavepointName && (name == null)) {
+                    throw newSQLException(SQLState.NULL_NAME_FOR_SAVEPOINT);
+                }
+                // make sure that if it is a named savepoint then
+                // supplied name length is not > 128
+                if (userSuppliedSavepointName &&
+                       (name.length() > Limits.MAX_IDENTIFIER_LENGTH)) {
+                    throw newSQLException(SQLState.LANG_IDENTIFIER_TOO_LONG,
+                        name, String.valueOf(Limits.MAX_IDENTIFIER_LENGTH));
+                }
+                // to enforce DB2 restriction which is savepoint name
+                // can't start with SYS
+                if (userSuppliedSavepointName && name.startsWith("SYS")) {
+                    throw newSQLException(SQLState.INVALID_SCHEMA_SYS, "SYS");
+                }
+                Savepoint savePt = new EmbedSavepoint(this, name);
+                return savePt;
+            } catch (StandardException e) {
+                throw handleException(e);
+            } finally {
+                restoreContextStack();
+            }
+        }
+    }
+
+    /**
+     * Undoes all changes made after the given Savepoint object was set.
+     * This method should be used only when auto-commit has been disabled.
+     *
+     * @param savepoint  The Savepoint object to rollback to
+     *
+     * @exception SQLException  if a database access error occurs,
+     * the Savepoint object is no longer valid, or this Connection
+     * object is currently in auto-commit mode
+     */
+    public void rollback(Savepoint savepoint) throws SQLException {
+        synchronized (getConnectionSynchronization()) {
+            setupContextStack();
+            try {
+                verifySavepointCommandIsAllowed();
+                verifySavepointArg(savepoint);
+                // Need to cast and get the name because JDBC3 spec
+                // doesn't support names for unnamed savepoints but
+                // Derby keeps names for named & unnamed savepoints.
+                getLanguageConnection().internalRollbackToSavepoint(
+                    ((EmbedSavepoint)savepoint).getInternalName(),
+                    true, savepoint);
+            } catch (StandardException e) {
+                throw handleException(e);
+            } finally {
+                restoreContextStack();
+            }
+        }
+    }
+
+    /**
+     * Removes the given Savepoint object from the current transaction.
+     * Any reference to the savepoint after it has been removed will cause
+     * an SQLException to be thrown
+     *
+     * @param savepoint  The Savepoint object to be removed
+     *
+     * @exception SQLException if a database access error occurs or
+     * the given Savepoint object is not a valid savepoint in the
+     * current transaction
+     */
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        synchronized (getConnectionSynchronization()) {
+            setupContextStack();
+            try {
+                verifySavepointCommandIsAllowed();
+                verifySavepointArg(savepoint);
+                // Need to cast and get the name because JDBC3 spec
+                // doesn't support names for unnamed savepoints but
+                // Derby keeps name for named & unnamed savepoints.
+                getLanguageConnection().releaseSavePoint(
+                    ((EmbedSavepoint)savepoint).getInternalName(), savepoint);
+            } catch (StandardException e) {
+                throw handleException(e);
+            } finally {
+                restoreContextStack();
+            }
+        }
+    }
+
+    // used by setSavepoint to check autocommit is false and not
+    // inside the trigger code
+    private void verifySavepointCommandIsAllowed() throws SQLException {
+        if (autoCommit) {
+            throw newSQLException(SQLState.NO_SAVEPOINT_WHEN_AUTO);
+        }
+
+        //Bug 4507 - savepoint not allowed inside trigger
+        StatementContext stmtCtxt =
+            getLanguageConnection().getStatementContext();
+        if (stmtCtxt!= null && stmtCtxt.inTrigger()) {
+            throw newSQLException(SQLState.NO_SAVEPOINT_IN_TRIGGER);
+        }
+    }
+
+    // used by release/rollback to check savepoint argument
+    private void verifySavepointArg(Savepoint savepoint) throws SQLException {
+        //bug 4451 - Check for null savepoint
+        EmbedSavepoint lsv = (EmbedSavepoint) savepoint;
+        // bug 4451 need to throw error for null Savepoint
+        if (lsv == null) {
+            throw Util.generateCsSQLException(
+                SQLState.XACT_SAVEPOINT_NOT_FOUND, "null");
+        }
+
+        // bug 4468 - verify that savepoint rollback is for a savepoint from
+        // the current connection
+        if (!lsv.sameConnection(this)) {
+            throw newSQLException(
+                SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL);
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

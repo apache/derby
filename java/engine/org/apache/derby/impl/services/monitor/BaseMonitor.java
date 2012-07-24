@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.InfoStreams;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
@@ -72,7 +71,6 @@ import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
-import java.io.PrintStream;
 
 import java.util.Collections;
 import java.util.Date;
@@ -127,7 +125,7 @@ abstract class BaseMonitor
     private TimerFactory timerFactory;
 
 	boolean reportOn;
-	private PrintStream logging;
+	private PrintWriter logging;
 
 	ThreadGroup daemonGroup;
 
@@ -239,7 +237,7 @@ abstract class BaseMonitor
 		}
 	}
 
-	protected final void runWithState(Properties properties, PrintStream log) {
+	protected final void runWithState(Properties properties, PrintWriter log) {
 
 		bootProperties = properties;
 		logging = log;

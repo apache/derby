@@ -67,6 +67,8 @@ class ProtocolKey {
 			t = cnfe;
 		} catch (IllegalArgumentException iae) {
 			t = iae;
+        } catch (LinkageError le) {
+            t = le;
 		}
 
 		throw Monitor.exceptionStartingModule(t);	

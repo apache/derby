@@ -51,7 +51,7 @@ public class ResourceAdapterImpl
 	private XAResourceManager rm;	
 
 	// maps Xid to XATransationResource for run time transactions
-	private Hashtable connectionTable;
+    private Hashtable<XAXactId, XATransactionState> connectionTable;
 
 	/*
 	 * Module control
@@ -63,7 +63,7 @@ public class ResourceAdapterImpl
 		// we can only run on jdk1.2 or beyond with JTA and JAVA 20 extension
 		// loaded.
 
-		connectionTable = new Hashtable();
+        connectionTable = new Hashtable<XAXactId, XATransactionState>();
 
 		AccessFactory af = 
 			(AccessFactory)Monitor.findServiceModule(this, AccessFactory.MODULE);
@@ -77,9 +77,10 @@ public class ResourceAdapterImpl
 	{
 		active = false;
 
-		for (Enumeration e = connectionTable.elements(); e.hasMoreElements(); ) {
+        for (Enumeration<XATransactionState> e = connectionTable.elements();
+                e.hasMoreElements(); ) {
 
-			XATransactionState tranState = (XATransactionState) e.nextElement();
+            XATransactionState tranState = e.nextElement();
 
 			try {
 				tranState.conn.close();
@@ -111,7 +112,7 @@ public class ResourceAdapterImpl
 		// put this into the transaction table, if the xid is already
 		// present as an in-doubt transaction, we need to remove it from
 		// the run time list
-		connectionTable.put(xid, conn);
+        connectionTable.put(xid, (XATransactionState) conn);
 		return true;
 	}
 
