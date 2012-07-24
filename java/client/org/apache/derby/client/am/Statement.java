@@ -28,21 +28,6 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class Statement implements java.sql.Statement, StatementCallbackInterface{
 
-    // JDBC 3 constant indicating that the current ResultSet object
-    // should be closed when calling getMoreResults.
-    // Constant value matches that defined by JDBC 3 java.sql.Statement.CLOSE_CURRENT_RESULT
-    public final static int CLOSE_CURRENT_RESULT = 1;
-
-    // JDBC 3 constant indicating that the current ResultSet object
-    // should not be closed when calling getMoreResults.
-    // Constant value matches that defined by JDBC 3 java.sql.Statement.KEEP_CURRENT_RESULT
-    public final static int KEEP_CURRENT_RESULT = 2;
-
-    // JDBC 3 constant indicating that all ResultSet objects that
-    // have previously been kept open should be closed when calling getMoreResults.
-    // Constant value matches that defined by JDBC 3 java.sql.Statement.CLOSE_ALL_RESULTS
-    public final static int CLOSE_ALL_RESULTS = 3;
-
     //---------------------navigational members-----------------------------------
 
     public MaterialStatement materialStatement_ = null;
