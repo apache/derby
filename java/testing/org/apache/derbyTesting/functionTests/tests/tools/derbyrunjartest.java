@@ -114,7 +114,7 @@ public class derbyrunjartest extends BaseTestCase {
         String[] cmd = { "dblook" };
         String[] output = {
             " USAGE:",
-            " java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]",
+            " java org.apache.derby.tools.dblook -d <sourceDBUrl> [options]",
             " 	where the source URL is the full URL, including the connection protocol",
             " 	and any connection attributes that might apply.  For example, use",
             " 	options include:",

@@ -5946,14 +5946,14 @@ CREATE SEQUENCE "APP"."SEQUENCE_1"
     NO CYCLE
 -- ----------------------------------------------
 -- DDL Statements for jars
--- **** NOTE **** In order for jar files to be loaded correctly,
+-- **** Note **** In order for jar files to be loaded correctly,
 -- you must either 1) ensure that the DBJARS directory (created
 -- automatically by dblook) exists where it was created (i.e. at
 -- the path shown in the statements below), or else 2) change the
 -- path in the statements below to reflect the current location of
 -- DBJARS.  If the DBJARS directory does not exist, or if it
 -- has been moved and the path is not correct, the following DDL
--- statements will throw errors, and the jar files will NOT be
+-- statements will throw errors, and the jar files will not be
 -- loaded.
 -- ----------------------------------------------
 CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
@@ -6058,7 +6058,7 @@ File dblook.log was empty.
 Msg Test 3
 ************
  USAGE:
- java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
+ java org.apache.derby.tools.dblook -d <sourceDBUrl> [options]
  	where the source URL is the full URL, including the connection protocol
  	and any connection attributes that might apply.  For example, use
  	'jdbc:derby:myDB', or 'jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/myDB;user=usr;'. 
@@ -6103,14 +6103,14 @@ CREATE SEQUENCE "APP"."SEQUENCE_1"
  #
 -- ----------------------------------------------
 -- DDL Statements for jars
--- **** NOTE **** In order for jar files to be loaded correctly,
+-- **** Note **** In order for jar files to be loaded correctly,
 -- you must either 1) ensure that the DBJARS directory (created
 -- automatically by dblook) exists where it was created (i.e. at
 -- the path shown in the statements below), or else 2) change the
 -- path in the statements below to reflect the current location of
 -- DBJARS.  If the DBJARS directory does not exist, or if it
 -- has been moved and the path is not correct, the following DDL
--- statements will throw errors, and the jar files will NOT be
+-- statements will throw errors, and the jar files will not be
 -- loaded.
 -- ----------------------------------------------
 CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
