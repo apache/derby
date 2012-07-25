@@ -572,7 +572,6 @@ public class MessageBuilder extends Task
         {
             displayText = replaceSpecialChars( escapeTextWithAQuote( rawText ) );
             displayText = plugInArgs( displayText , args );
-
         }
         else
         {
@@ -585,7 +584,18 @@ public class MessageBuilder extends Task
             ditaWriter.writeTextElement( "entry", "colname=\"col2\"", displayText );
         }
         ditaWriter.endTag();
-        
+
+        propertiesPW.println( "" );
+        if ( args.length != 0 )
+        {
+            propertiesPW.println( "# Arguments:" );
+            propertiesPW.println( "#" );
+            for ( int i = 0; i < args.length; i++ )
+            {
+                propertiesPW.println( "#    " + args[ i ] );
+            }
+            propertiesPW.println( "#" );
+        }
         propertiesPW.println( name + "=" + propertyText );
     }
 
