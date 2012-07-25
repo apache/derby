@@ -1634,13 +1634,19 @@ public class ResultColumnList extends QueryTreeNodeVector
 				int savedItem;
 				RowLocation rl;
 				
-				cc = getLanguageConnectionContext().
-						getTransactionCompile().openConglomerate(
-							conglomerateId,
-                            false,
-							0,
-							TransactionController.MODE_RECORD,
-							TransactionController.ISOLATION_READ_COMMITTED);
+				LanguageConnectionContext lcc = getLanguageConnectionContext();
+				DataDictionary dd = lcc.getDataDictionary();
+				
+				int isolationLevel = (dd.getCacheMode() == DataDictionary.DDL_MODE) ? 
+						TransactionController.ISOLATION_READ_COMMITTED : TransactionController.ISOLATION_NOLOCK;
+
+				cc = lcc.getTransactionCompile().openConglomerate(
+						conglomerateId,
+                        false,
+						0,
+						TransactionController.MODE_RECORD,
+						isolationLevel);
+
 				try
 				{
 					rl = cc.newRowLocationTemplate();
