@@ -35,7 +35,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 
 public class BrokeredConnection40
-        extends BrokeredConnection30 implements EngineConnection40 {
+        extends BrokeredConnection implements EngineConnection40 {
     
     /** Creates a new instance of BrokeredConnection40 */
     public BrokeredConnection40(BrokeredConnectionControl control)

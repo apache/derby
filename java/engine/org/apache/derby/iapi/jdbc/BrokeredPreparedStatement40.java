@@ -28,7 +28,7 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
+public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement {
     
     public BrokeredPreparedStatement40(BrokeredStatementControl control, String sql, Object generatedKeys) throws SQLException {
         super(control, sql,generatedKeys);

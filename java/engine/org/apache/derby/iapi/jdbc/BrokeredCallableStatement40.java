@@ -30,7 +30,7 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-public class BrokeredCallableStatement40 extends BrokeredCallableStatement30
+public class BrokeredCallableStatement40 extends BrokeredCallableStatement
         implements EngineCallableStatement40 {
     
     public BrokeredCallableStatement40(BrokeredStatementControl control, String sql) throws SQLException{

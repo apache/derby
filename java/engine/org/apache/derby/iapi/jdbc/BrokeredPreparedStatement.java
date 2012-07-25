@@ -23,16 +23,15 @@ package org.apache.derby.iapi.jdbc;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.net.URL;
+import java.sql.*;
 import java.util.Calendar;
 
-import java.sql.*;
-import java.net.URL;
-
 /**
-	JDBC 2 brokered PreparedStatement. Forwards calls off to a real prepared statement
+	JDBC 3 brokered PreparedStatement. Forwards calls off to a real prepared statement
 	obtained through the BrokeredStatementControl getRealPreparedStatement method.
  */
-public abstract class BrokeredPreparedStatement extends BrokeredStatement
+public class BrokeredPreparedStatement extends BrokeredStatement
 	implements EnginePreparedStatement
 {
 
@@ -41,10 +40,18 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 	*/
 	final String	sql;
 
-    public BrokeredPreparedStatement(BrokeredStatementControl control, String sql) throws SQLException
+    /**
+     * An Integer, an int array or a String array that specifies generated
+     * key columns, or null if there are no generated key columns.
+     */
+    private final Object generatedKeys;
+
+    public BrokeredPreparedStatement(BrokeredStatementControl control,
+            String sql, Object generatedKeys) throws SQLException
     {
         super(control);
 		this.sql = sql;
+        this.generatedKeys = generatedKeys;
     }
 
 	/**
@@ -73,6 +80,7 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
         return getPreparedStatement().executeUpdate();
     }
 
+    @Override
 	public void close() throws SQLException
 	{
 	    control.closeRealPreparedStatement();
@@ -516,6 +524,16 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
         
     }
 
+    // JDBC 3.0 methods
+
+    public final void setURL(int i, URL x) throws SQLException {
+        getPreparedStatement().setURL(i, x);
+    }
+
+    public final ParameterMetaData getParameterMetaData() throws SQLException {
+        return getPreparedStatement().getParameterMetaData();
+    }
+
 	/*
 	** Control methods.
 	*/
@@ -534,6 +552,7 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 	/**
 		Override the BrokeredStatement's getStatement() to always return a PreparedStatement.
 	*/
+    @Override
 	public final Statement getStatement() throws SQLException {
 		return getPreparedStatement();
 	}
@@ -543,7 +562,25 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 	*/
 	public PreparedStatement createDuplicateStatement(Connection conn, PreparedStatement oldStatement) throws SQLException {
 
-		PreparedStatement newStatement = conn.prepareStatement(sql, resultSetType, resultSetConcurrency);
+        PreparedStatement newStatement;
+
+        if (generatedKeys == null) {
+            newStatement = conn.prepareStatement(
+                sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+        } else {
+            // The prepareStatement() calls that take a generated key value do not take resultSet* type
+            // parameters, but since they don't return ResultSets that is OK. There are only for INSERT statements.
+            if (generatedKeys instanceof Integer) {
+                newStatement = conn.prepareStatement(
+                    sql, ((Integer) generatedKeys).intValue());
+            } else if (generatedKeys instanceof int[]) {
+                newStatement =
+                    conn.prepareStatement(sql, (int[]) generatedKeys);
+            } else {
+                newStatement = conn.prepareStatement(
+                    sql, (String[]) generatedKeys);
+            }
+        }
 
 		setStatementState(oldStatement, newStatement);
 

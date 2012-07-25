@@ -21,26 +21,15 @@
 
 package org.apache.derby.jdbc;
 
-import org.apache.derby.impl.jdbc.EmbedConnection;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.BrokeredConnection;
-import org.apache.derby.iapi.jdbc.BrokeredConnection30;
-import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
-import org.apache.derby.iapi.jdbc.ResourceAdapter;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.derby.impl.jdbc.*;
-
-/** -- jdbc 2.0. extension -- */
+import java.util.Properties;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
-
-import java.util.Properties;
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.impl.jdbc.*;
 
 /**
 	This class extends the local20 JDBC driver in order to determine at JBMS
@@ -124,8 +113,7 @@ public class Driver30 extends Driver20 {
             BrokeredConnectionControl control)
         throws SQLException
     {
-
-		return new BrokeredConnection30(control);
+        return new BrokeredConnection(control);
 	}
 
     /**
