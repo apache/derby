@@ -142,8 +142,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         // Disallow negative values.
         if (maxStatements < 0) {
             throw new IllegalArgumentException(msgUtil.getTextMessage(
-                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS,
-                    new Integer(maxStatements)));
+                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS, maxStatements));
         }
         this.maxStatements = maxStatements;
     }
@@ -175,8 +174,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         // Make sure maxStatements is zero or higher.
         if (maxStatements < 0) {
             throw new IllegalArgumentException(msgUtil.getTextMessage(
-                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS,
-                    new Integer(maxStatements)));
+                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS, maxStatements));
         }
     }
 

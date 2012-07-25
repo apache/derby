@@ -107,19 +107,19 @@ final class CrossConverters {
             return Boolean.valueOf(source);
 
         case Types.SMALLINT:
-            return new Short(numVal);
+            return Short.valueOf(numVal);
 
         case Types.INTEGER:
-            return new Integer(numVal);
+            return Integer.valueOf(numVal);
 
         case Types.BIGINT:
-            return new Long(numVal);
+            return Long.valueOf(numVal);
 
         case Types.REAL:
-            return new Float(numVal);
+            return Float.valueOf(numVal);
 
         case Types.DOUBLE:
-            return new Double(numVal);
+            return Double.valueOf(numVal);
 
         case Types.DECIMAL:
             return java.math.BigDecimal.valueOf(numVal);
@@ -151,19 +151,19 @@ final class CrossConverters {
             return Boolean.valueOf(source != 0);
 
         case Types.SMALLINT:
-            return new Short(source);
+            return Short.valueOf(source);
 
         case Types.INTEGER:
-            return new Integer(source);
+            return Integer.valueOf(source);
 
         case Types.BIGINT:
-            return new Long(source);
+            return Long.valueOf(source);
 
         case Types.REAL:
-            return new Float(source);
+            return Float.valueOf(source);
 
         case Types.DOUBLE:
-            return new Double(source);
+            return Double.valueOf(source);
 
         case Types.DECIMAL:
             return java.math.BigDecimal.valueOf(source);
@@ -194,19 +194,19 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
-            return new Short((short) source);
+            return Short.valueOf((short) source);
 
         case Types.INTEGER:
-            return new Integer(source);
+            return Integer.valueOf(source);
 
         case Types.BIGINT:
-            return new Long(source);
+            return Long.valueOf(source);
 
         case Types.REAL:
-            return new Float(source);
+            return Float.valueOf(source);
 
         case Types.DOUBLE:
-            return new Double(source);
+            return Double.valueOf(source);
 
         case Types.DECIMAL:
             return java.math.BigDecimal.valueOf(source);
@@ -289,7 +289,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
-            return new Short((short) source);
+            return Short.valueOf((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
@@ -297,16 +297,16 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "INTEGER");
             }
-            return new Integer((int) source);
+            return Integer.valueOf((int) source);
 
         case Types.BIGINT:
-            return new Long(source);
+            return Long.valueOf(source);
 
         case Types.REAL:
-            return new Float(source);
+            return Float.valueOf(source);
 
         case Types.DOUBLE:
-            return new Double(source);
+            return Double.valueOf(source);
 
         case Types.DECIMAL:
             return java.math.BigDecimal.valueOf(source);
@@ -337,7 +337,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
-            return new Short((short) source);
+            return Short.valueOf((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
@@ -345,7 +345,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "INTEGER");
             }
-            return new Integer((int) source);
+            return Integer.valueOf((int) source);
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
@@ -353,7 +353,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "BIGINT");
             }
-            return new Long((long) source);
+            return Long.valueOf((long) source);
 
         case Types.REAL:
             if (Configuration.rangeCheckCrossConverters &&
@@ -371,7 +371,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "REAL");
             }
-            return new Float(source);
+            return Float.valueOf(source);
 
         case Types.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
@@ -388,7 +388,7 @@ final class CrossConverters {
                     agent_.logWriter_, "DOUBLE");
             }
             // source passed in is a float, do we need to check if the source already contains "infinity"??
-            return new Double(String.valueOf(source));
+            return Double.valueOf(String.valueOf(source));
 
         case Types.DECIMAL:
             // Can't use the following commented out line because it changes precision of the result.
@@ -421,7 +421,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
-            return new Short((short) source);
+            return Short.valueOf((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
@@ -429,7 +429,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "INTEGER");
             }
-            return new Integer((int) source);
+            return Integer.valueOf((int) source);
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
@@ -437,7 +437,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "BIGINT");
             }
-            return new Long((long) source);
+            return Long.valueOf((long) source);
 
         case Types.REAL:
             if (Configuration.rangeCheckCrossConverters &&
@@ -445,7 +445,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "REAL");
             }
-            return new Float((float) source);
+            return Float.valueOf((float) source);
 
         case Types.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
@@ -463,7 +463,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "DOUBLE");
             }
-            return new Double(source);
+            return Double.valueOf(source);
 
         case Types.DECIMAL:
             return new java.math.BigDecimal(String.valueOf(source));  // This matches derby semantics
@@ -494,7 +494,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "SMALLINT");
             }
-            return new Short(source.shortValue());
+            return Short.valueOf(source.shortValue());
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
@@ -502,7 +502,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "INTEGER");
             }
-            return new Integer(source.intValue());
+            return Integer.valueOf(source.intValue());
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
@@ -510,7 +510,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "BIGINT");
             }
-            return new Long(source.longValue());
+            return Long.valueOf(source.longValue());
 
         case Types.REAL:
             if (Configuration.rangeCheckCrossConverters &&
@@ -518,7 +518,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "REAL");
             }
-            return new Float(source.floatValue());
+            return Float.valueOf(source.floatValue());
 
         case Types.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
@@ -526,7 +526,7 @@ final class CrossConverters {
                 throw new OutsideRangeForDataTypeException(
                     agent_.logWriter_, "DOUBLE");
             }
-            return new Double(source.doubleValue());
+            return Double.valueOf(source.doubleValue());
 
         case Types.DECIMAL:
             return source;

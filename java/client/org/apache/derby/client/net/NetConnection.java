@@ -433,7 +433,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             default:
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
-                    new Integer(securityMechanism));
+                    securityMechanism);
             }
         } catch (java.lang.Throwable e) { // if *anything* goes wrong, make sure the connection is destroyed
             // always mark the connection closed in case of an error.
@@ -556,7 +556,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             default:
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
-                    new Integer(securityMechanism));
+                    securityMechanism);
             }
         } catch (SqlException sqle) {            // this may not be needed because on method up the stack
             open_ = false;                       // all reset exceptions are caught and wrapped in disconnect exceptions
@@ -1086,8 +1086,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         if ((usridLength == 0) || (usridLength > NetConfiguration.USRID_MAXSIZE)) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.CONNECT_USERID_LENGTH_OUT_OF_RANGE),
-                new Integer(usridLength), 
-                new Integer(NetConfiguration.USRID_MAXSIZE));
+                usridLength, NetConfiguration.USRID_MAXSIZE);
         }
     }
 
@@ -1096,8 +1095,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         if ((passwordLength == 0) || (passwordLength > NetConfiguration.PASSWORD_MAXSIZE)) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.CONNECT_PASSWORD_LENGTH_OUT_OF_RANGE),
-                new Integer(passwordLength),
-                new Integer(NetConfiguration.PASSWORD_MAXSIZE));
+                passwordLength, NetConfiguration.PASSWORD_MAXSIZE);
         }
     }
 
@@ -1141,7 +1139,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         if (!secmecSupported) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
-                new Integer(securityMechanism));
+                securityMechanism);
         }
     }
 

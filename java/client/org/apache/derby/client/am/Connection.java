@@ -997,7 +997,7 @@ public abstract class Connection
         default:
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
-                new Integer(level));
+                level);
         }
         if (setTransactionIsolationStmt == null  ||
                 !(setTransactionIsolationStmt.openOnClient_ &&

@@ -1593,7 +1593,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                     new DisconnectException(agent_,
                         new ClientMessageId(
                             SQLState.NET_SQLCDTA_INVALID_FOR_RDBNAM),
-                    new Integer(scldtaLen)));
+                    scldtaLen));
                 return null;
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes
@@ -1607,7 +1607,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_RDBCOLID),
-                    new Integer(scldtaLen)));
+                    scldtaLen));
                 return null;
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes
@@ -1620,7 +1620,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             if (scldtaLen < 18 || scldtaLen > 255) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_SQLCDTA_INVALID_FOR_PKGID),
-                    new Integer(scldtaLen)));
+                    scldtaLen));
                 return null; // To make compiler happy.
             }
             // read 2+scldtaLen number of bytes from the reply buffer into the pkgnamcsnBytes
@@ -1635,7 +1635,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         } else {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                 new ClientMessageId(SQLState.NET_PGNAMCSN_INVALID_AT_SQLAM),
-                new Integer(ddmLength), new Integer(netAgent_.targetSqlam_)));
+                ddmLength, netAgent_.targetSqlam_));
             return null;  // To make compiler happy.
         }
 

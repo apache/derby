@@ -1198,9 +1198,9 @@ public class CallableStatement extends PreparedStatement
                 //
                 if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
                 {
-                    if ( (returnArg != null) && (returnArg instanceof Integer) )
+                    if (returnArg instanceof Integer)
                     {
-                        returnArg = new Short( ((Integer) returnArg).shortValue() );
+                        returnArg = ((Integer) returnArg).shortValue();
                     }
                 }
                 
@@ -1229,7 +1229,7 @@ public class CallableStatement extends PreparedStatement
         if (parameterMetaData_ == null || parameterMetaData_.sqlxParmmode_[parameterIndex - 1] < java.sql.ParameterMetaData.parameterModeInOut) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
-                new Integer(parameterIndex));
+                parameterIndex);
         }
     }
 

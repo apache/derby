@@ -1302,9 +1302,10 @@ public final class NetworkServerControlImpl {
 			consolePropertyMessage("DRDA_TraceChangeAll.I", on ? "DRDA_ON.I" : "DRDA_OFF.I");
 		else
 		{
-			String[] args = new String[2];
-			args[0] = on ? "DRDA_ON.I" : "DRDA_OFF.I";
-			args[1] = new Integer(connNum).toString();
+            String[] args = {
+                on ? "DRDA_ON.I" : "DRDA_OFF.I",
+                Integer.toString(connNum),
+            };
 			consolePropertyMessage("DRDA_TraceChangeOne.I", args);
 		}
 	}
@@ -1411,8 +1412,8 @@ public final class NetworkServerControlImpl {
             send();
             readResult();
             int newval = readInt();
-            consolePropertyMessage("DRDA_MaxThreadsChange.I", new Integer(
-                    newval).toString());
+            consolePropertyMessage("DRDA_MaxThreadsChange.I",
+                    String.valueOf(newval));
         } finally {
             closeSocket();
         }		
@@ -1438,7 +1439,7 @@ public final class NetworkServerControlImpl {
             readResult();
             int newval = readInt();
             consolePropertyMessage("DRDA_TimeSliceChange.I",
-                    new Integer(newval).toString());
+                    String.valueOf(newval));
         } finally {
             closeSocket();
         }  
@@ -1500,7 +1501,7 @@ public final class NetworkServerControlImpl {
 	 */
 	protected void removeFromSessionTable(int sessionid)
 	{
-		sessionTable.remove(new Integer(sessionid));
+        sessionTable.remove(sessionid);
 	}
 
 	/**
@@ -1631,8 +1632,10 @@ public final class NetworkServerControlImpl {
 			String codeset = null;
 			// get the version
 			int version = reader.readNetworkShort();
-			if (version <= 0 || version > MAX_ALLOWED_PROTOCOL_VERSION)
-				throw new Throwable(langUtil.getTextMessage("DRDA_UnknownProtocol.S",  new Integer(version).toString()));
+            if (version <= 0 || version > MAX_ALLOWED_PROTOCOL_VERSION) {
+                throw new Throwable(langUtil.getTextMessage(
+                        "DRDA_UnknownProtocol.S", version));
+            }
 			int localeLen = reader.readByte();
 			if (localeLen > 0)
 			{
@@ -1700,7 +1703,7 @@ public final class NetworkServerControlImpl {
 							sendMessage(writer, ERROR,  
 							    localizeMessage("DRDA_SessionNotFound.U", 
 									    (session.langUtil == null) ? langUtil : session.langUtil,
-									    new String [] {new Integer(sessionArg).toString()}));
+									    new String [] {Integer.toString(sessionArg)}));
 					    else
 							sendMessage(writer, ERROR,  
 										localizeMessage("DRDA_ErrorStartingTracing.S",null));          
@@ -1747,7 +1750,7 @@ public final class NetworkServerControlImpl {
 					int newval = getMaxThreads();
 					sendOKInt(writer, newval);
 					consolePropertyMessage("DRDA_MaxThreadsChange.I", 
-						new Integer(newval).toString());
+                        String.valueOf(newval));
 					break;
 				case COMMAND_TIMESLICE:
 					int timeslice = reader.readNetworkInt();
@@ -1760,7 +1763,7 @@ public final class NetworkServerControlImpl {
 					newval = getTimeSlice();
 					sendOKInt(writer, newval);
 					consolePropertyMessage("DRDA_TimeSliceChange.I", 
-						new Integer(newval).toString());
+                        String.valueOf(newval));
 					break;
 			}
 		} catch (DRDAProtocolException e) {
@@ -2239,7 +2242,7 @@ public final class NetworkServerControlImpl {
 			case COMMAND_TESTCONNECTION:
 				ping();
 				consolePropertyMessage("DRDA_ConnectionTested.I", new String [] 
-					{hostArg, (new Integer(portNumber)).toString()});
+					{hostArg, Integer.toString(portNumber)});
 				break;
 			case COMMAND_LOGCONNECTIONS:
 				{
@@ -2264,7 +2267,7 @@ public final class NetworkServerControlImpl {
 				}
 				if (max < MIN_MAXTHREADS)
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-						{new Integer(max).toString(), "maxthreads"});
+						{Integer.toString(max), "maxthreads"});
 				netSetMaxThreads(max);
 
 				break;
@@ -2283,7 +2286,7 @@ public final class NetworkServerControlImpl {
             	}
 				if (timeslice < MIN_TIMESLICE)
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-						{new Integer(timeslice).toString(), "timeslice"});
+						{Integer.toString(timeslice), "timeslice"});
 				netSetTimeSlice(timeslice);
 				
 				break;
@@ -2572,9 +2575,11 @@ public final class NetworkServerControlImpl {
 			}
 			else if (e1 instanceof IOException) {
 					consolePropertyMessage("DRDA_NoIO.S",
-										   new String [] {hostArg, 
-														  (new Integer(portNumber)).toString(), 
-														  e1.getMessage()});
+                        new String [] {
+                            hostArg,
+                            Integer.toString(portNumber),
+                            e1.getMessage()
+                        });
 			}
 		} catch (Exception e) {
 		// If we find other (unexpected) errors, we ultimately exit--so make
@@ -3211,7 +3216,7 @@ public final class NetworkServerControlImpl {
 	{
 		int val = 0;
 		try {
-			 val = (new Integer(propVal)).intValue();
+            val = Integer.parseInt(propVal);
 		} catch (Exception e)
 		{
 			consolePropertyMessage("DRDA_InvalidPropVal.S", new String [] 
@@ -3651,7 +3656,7 @@ public final class NetworkServerControlImpl {
 	{
 		if (value < MIN_TIMESLICE)
 			consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-				{new Integer(value).toString(), "timeslice"});
+				{Integer.toString(value), "timeslice"});
 		if (value == USE_DEFAULT)
 			value = DEFAULT_TIMESLICE;
 		synchronized(timeSliceSync) {
@@ -3711,7 +3716,7 @@ public final class NetworkServerControlImpl {
 	{
 		if (value < MIN_MAXTHREADS)
 			consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-				{new Integer(value).toString(), "maxthreads"});
+				{Integer.toString(value), "maxthreads"});
 		if (value == USE_DEFAULT)
 			value = DEFAULT_MAXTHREADS;
 		synchronized(threadsSync) {
@@ -3860,20 +3865,20 @@ public final class NetworkServerControlImpl {
 	Properties getPropertyValues()
 	{
 		Properties retval = new Properties();
-		retval.put(Property.DRDA_PROP_PORTNUMBER, new Integer(portNumber).toString());
+		retval.put(Property.DRDA_PROP_PORTNUMBER, Integer.toString(portNumber));
 		retval.put(Property.DRDA_PROP_HOSTNAME, hostArg);
-		retval.put(Property.DRDA_PROP_KEEPALIVE, new Boolean(keepAlive).toString());
+		retval.put(Property.DRDA_PROP_KEEPALIVE, Boolean.toString(keepAlive));
 
 		String tracedir = getTraceDirectory();
 		if (tracedir != null)
 			retval.put(Property.DRDA_PROP_TRACEDIRECTORY, tracedir);
-		retval.put(Property.DRDA_PROP_TRACEALL, new Boolean(getTraceAll()).toString());
-		retval.put(Property.DRDA_PROP_MINTHREADS, new Integer(getMinThreads()).toString());
-		retval.put(Property.DRDA_PROP_MAXTHREADS, new Integer(getMaxThreads()).toString());
-		retval.put(Property.DRDA_PROP_TIMESLICE, new Integer(getTimeSlice()).toString());
+		retval.put(Property.DRDA_PROP_TRACEALL, Boolean.toString(getTraceAll()));
+		retval.put(Property.DRDA_PROP_MINTHREADS, Integer.toString(getMinThreads()));
+		retval.put(Property.DRDA_PROP_MAXTHREADS, Integer.toString(getMaxThreads()));
+		retval.put(Property.DRDA_PROP_TIMESLICE, Integer.toString(getTimeSlice()));
 
-		retval.put(Property.DRDA_PROP_TIMESLICE, new  Integer(getTimeSlice()).toString());
-		retval.put(Property.DRDA_PROP_LOGCONNECTIONS, new Boolean(getLogConnections()).toString());
+		retval.put(Property.DRDA_PROP_TIMESLICE, Integer.toString(getTimeSlice()));
+		retval.put(Property.DRDA_PROP_LOGCONNECTIONS, Boolean.toString(getLogConnections()));
 		String startDRDA = PropertyUtil.getSystemProperty(Property.START_DRDA);
 		//DERBY-375 If a system property is specified without any value, getProperty returns 
 		//an empty string. Use default values in such cases.
@@ -3933,7 +3938,7 @@ public final class NetworkServerControlImpl {
 		Session session = new Session(this,connectionNumber, clientSocket,
 									  getTraceDirectory(), getTraceAll());
 
-		sessionTable.put(new Integer(connectionNumber), session);
+        sessionTable.put(connectionNumber, session);
 
 		// Check whether there are enough free threads to service all the
 		// threads in the run queue in addition to the newly added session.

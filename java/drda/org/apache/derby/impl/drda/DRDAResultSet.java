@@ -263,7 +263,7 @@ class DRDAResultSet
 			rsExtPositions = new java.util.ArrayList<Integer>();
 		
 		// need to record the 0 based position so subtract 1
-		rsExtPositions.add (new Integer(jdbcIndex -1 ));
+        rsExtPositions.add(jdbcIndex - 1);
 
 	}
 

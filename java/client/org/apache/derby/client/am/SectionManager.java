@@ -126,7 +126,7 @@ public class SectionManager {
         } else {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY), 
-                new Integer(resultSetHoldability));
+                resultSetHoldability);
         }
     }
 

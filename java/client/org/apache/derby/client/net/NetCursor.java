@@ -512,7 +512,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             // key = column position, data = index to corresponding data in extdtaData_
             // ASSERT: the server always returns the EXTDTA objects in ascending order
             {
-                extdtaPositions_.put(new Integer(i + 1), new Integer(currentPosition++));
+                extdtaPositions_.put(i + 1, currentPosition++);
             }
         }
     }
@@ -884,11 +884,10 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         byte[] data = null;
 
         // locate the EXTDTA bytes, if any
-        Integer key = new Integer(column);
+        Integer extdtaQueuePosition = extdtaPositions_.get(column);
 
-        if (extdtaPositions_.containsKey(key)) {
+        if (extdtaQueuePosition != null) {
             //  found, get the data
-            int extdtaQueuePosition = ((Integer) extdtaPositions_.get(key)).intValue();
             data = extdtaData_.get(extdtaQueuePosition);
         }
 

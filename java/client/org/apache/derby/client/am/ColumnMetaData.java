@@ -743,7 +743,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         if (column < 1 || column > columns_) {
             throw new SqlException(logWriter_, 
             		new ClientMessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
-            		new Integer (column), new Integer(columns_));
+            		column, columns_);
         }
     }
 

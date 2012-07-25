@@ -907,8 +907,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     default:
                         throw new SqlException(netAgent_.logWriter_, 
                             new ClientMessageId(SQLState.NET_UNRECOGNIZED_JDBC_TYPE),
-                               new Integer(protocolTypesAndLengths[i][0]),
-                               new Integer(numVars), new Integer(i));
+                               protocolTypesAndLengths[i][0], numVars, i);
                     }
                 }
             }
@@ -1170,7 +1169,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 if (jdbcType == 0) {
                     throw new SqlException(netAgent_.logWriter_, 
                         new ClientMessageId(SQLState.NET_INVALID_JDBC_TYPE_FOR_PARAM),
-                        new Integer(i));
+                        i);
                 }
 
                 switch (jdbcType) {
@@ -1239,7 +1238,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = 2;
                         if (inputRow[i] instanceof Boolean) {
                             Boolean bool = (Boolean) inputRow[i];
-                            inputRow[i] = new Short(
+                            inputRow[i] = Short.valueOf(
                                     bool.booleanValue() ? (short) 1 : 0);
                         }
                     }
@@ -1535,7 +1534,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 default :
                     throw new SqlException(netAgent_.logWriter_, 
                         new ClientMessageId(SQLState.UNRECOGNIZED_JAVA_SQL_TYPE),
-                        new Integer(jdbcType));
+                        jdbcType);
                 }
 
                 if (!parameterMetaData.nullable_[i]) {
@@ -1627,7 +1626,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         if ((prcnamLength == 0) || (prcnamLength > 255)) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE),
-                new Integer(prcnamLength), new Integer(255));
+                prcnamLength, 255);
         }
 
         writeScalarString(CodePoint.PRCNAM, prcnam);

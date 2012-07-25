@@ -323,12 +323,11 @@ public class Request {
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
 					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-					netAgent_.accumulateReadException(new SqlException(
-																	   netAgent_.logWriter_,
-																	   new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-																	   new Integer(parameterIndex),
-																	   e.getMessage(),
-																	   e));
+                    netAgent_.accumulateReadException(
+                        new SqlException(
+                            netAgent_.logWriter_,
+                            new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
+                            parameterIndex, e.getMessage(), e));
 
 					return;
 				}
@@ -337,9 +336,10 @@ public class Request {
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
 					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-					netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-																	   new ClientMessageId(SQLState.NET_PREMATURE_EOS),
-																	   new Integer(parameterIndex)));
+                    netAgent_.accumulateReadException(
+                        new SqlException(netAgent_.logWriter_,
+                            new ClientMessageId(SQLState.NET_PREMATURE_EOS),
+                            parameterIndex));
 					return;
 				} else {
 					bytesToRead -= bytesRead;
@@ -356,19 +356,19 @@ public class Request {
 			if (in.read() != -1) {
                 status = DRDAConstants.STREAM_TOO_LONG;
 				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
-																   new Integer(parameterIndex)));
+                netAgent_.accumulateReadException(new SqlException(
+                        netAgent_.logWriter_,
+                        new ClientMessageId(
+                            SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+                        parameterIndex));
 			}
 		} catch (Exception e) {
             status = DRDAConstants.STREAM_READ_ERROR;
-			netAgent_.accumulateReadException(new SqlException(
-															   netAgent_.logWriter_,
-															   new ClientMessageId(
-																				   SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
-															   new Integer(parameterIndex),
-															   e.getMessage(),
-															   e));
+            netAgent_.accumulateReadException(new SqlException(
+                    netAgent_.logWriter_,
+                    new ClientMessageId(
+                        SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
+                    parameterIndex, e.getMessage(), e));
 		}
         // Write the status byte to the send buffer.
         if (writeEXTDTAStatusByte) {
@@ -470,9 +470,7 @@ public class Request {
             final SqlException sqlex = 
                 new SqlException(netAgent_.logWriter_,
                                  new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-                                 new Integer(parameterIndex),
-                                 e.getMessage(),
-                                 e);
+                                 parameterIndex, e.getMessage(), e);
 
             netAgent_.accumulateReadException(sqlex);
             
@@ -960,7 +958,7 @@ public class Request {
                 protocolType = lidAndLengthOverrides[offset][0];
                 // lookup the protocolType in the protocolType->overrideLid map
                 // if an entry exists, replace the protocolType with the overrideLid
-                entry = map.get(new Integer(protocolType));
+                entry = map.get(protocolType);
                 overrideLid = (entry == null) ? protocolType : ((Integer) entry).intValue();
                 buffer.put((byte) overrideLid);
                 buffer.putShort((short) lidAndLengthOverrides[offset][1]);

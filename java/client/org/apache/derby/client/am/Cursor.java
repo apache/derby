@@ -1292,17 +1292,18 @@ public abstract class Cursor {
     public final Object getObject(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.BOOLEAN:
-            return get_BOOLEAN(column) ? Boolean.TRUE : Boolean.FALSE;
+            return get_BOOLEAN(column);
         case java.sql.Types.SMALLINT:
-            return new Integer(get_SMALLINT(column)); // See Table 4 in JDBC 1 spec (pg. 932 in jdbc book)
+            // See Table 4 in JDBC 1 spec (pg. 932 in jdbc book)
+            return Integer.valueOf(get_SMALLINT(column));
         case java.sql.Types.INTEGER:
-            return new Integer(get_INTEGER(column));
+            return get_INTEGER(column);
         case java.sql.Types.BIGINT:
-            return new Long(get_BIGINT(column));
+            return get_BIGINT(column);
         case java.sql.Types.REAL:
-            return new Float(get_FLOAT(column));
+            return get_FLOAT(column);
         case java.sql.Types.DOUBLE:
-            return new Double(get_DOUBLE(column));
+            return get_DOUBLE(column);
         case java.sql.Types.DECIMAL:
             return get_DECIMAL(column);
         case java.sql.Types.DATE:

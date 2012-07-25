@@ -145,7 +145,7 @@ public class DssTrace
   // method entry and exit tracing.  Since each trace may be writing
   // to different logs, separate objects will be used to perform the
   // synchronization.
-  private Boolean comBufferSync = new Boolean (true);
+  private final Object comBufferSync = new Object();
 
 
   // The zero character is defined for convinience.

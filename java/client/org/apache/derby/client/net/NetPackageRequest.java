@@ -168,7 +168,7 @@ public class NetPackageRequest extends NetConnectionRequest {
         if (length > maxIdentifierLength) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.LANG_IDENTIFIER_TOO_LONG),
-                identifier, new Integer(maxIdentifierLength));
+                identifier, maxIdentifierLength);
         }
 
         return (length > lengthRequiringScldta);

@@ -2832,7 +2832,7 @@ public class NetConnectionReply extends Reply
             }
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                 new ClientMessageId(SQLState.DRDA_NO_AVAIL_CODEPAGE_CONVERSION),
-                new Integer(cpValue), value));
+                cpValue, value));
             return;
         }
         // the problem isn't with one of the ccsid values so...

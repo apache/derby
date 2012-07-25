@@ -169,7 +169,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         if (timeout < 0) {
             throw new SqlException(agent_.logWriter_,
                                new ClientMessageId(SQLState.INVALID_API_PARAMETER),
-                               new Integer(timeout), "timeout",
+                               timeout, "timeout",
                                "java.sql.Connection.isValid" ).getSQLException();
         }
 

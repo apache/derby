@@ -251,7 +251,7 @@ public class EncryptionManager {
         if (key.length != 8) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.DES_KEY_HAS_WRONG_LENGTH), 
-                new Integer(8), new Integer(key.length)); 
+                8, key.length);
                         
         }
         for (int i = 0; i < 8; i++) {
@@ -337,7 +337,7 @@ public class EncryptionManager {
             } else {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.SHARED_KEY_LENGTH_ERROR),
-                    new Integer(sharedSecret.length)); 
+                    sharedSecret.length);
             }
 
             //we do parity check here and flip the parity bit if the byte has even number of 1s

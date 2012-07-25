@@ -461,7 +461,7 @@ public class PreparedStatement extends Statement
         if (!parameterMetaData_.nullable_[parameterIndex - 1]) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
-                new Integer(parameterIndex));
+                parameterIndex);
         }
         setInput(parameterIndex, null);
     }
@@ -525,7 +525,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TINYINT;
-                setInput(parameterIndex, new Short(x));
+                setInput(parameterIndex, Short.valueOf(x));
             }
         }
         catch ( SqlException se )
@@ -566,7 +566,7 @@ public class PreparedStatement extends Statement
     // also used by DBMD methods
     void setShortX(int parameterIndex, short x) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.SMALLINT;
-        setInput(parameterIndex, new Short(x));
+        setInput(parameterIndex, x);
 
     }
 
@@ -600,7 +600,7 @@ public class PreparedStatement extends Statement
     // also used by DBMD methods
     void setIntX(int parameterIndex, int x) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.INTEGER;
-        setInput(parameterIndex, new Integer(x));
+        setInput(parameterIndex, x);
     }
 
 
@@ -635,7 +635,7 @@ public class PreparedStatement extends Statement
         // Column numbers starts at 1, clientParamtertype_[0] refers to column 1
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] 
                 = java.sql.Types.BIGINT;
-        setInput(parameterIndex, new Long(x));
+        setInput(parameterIndex, x);
     }
 
     public void setFloat(int parameterIndex, float x) throws SQLException {
@@ -658,7 +658,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.REAL;
-                setInput(parameterIndex, new Float(x));
+                setInput(parameterIndex, x);
             }
         }
         catch ( SqlException se )
@@ -957,7 +957,8 @@ public class PreparedStatement extends Statement
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", new Long(length));
+                    agent_.logWriter_.traceEntry(this, "setBinaryStream",
+                        parameterIndex, "<input stream>", Long.valueOf(length));
                 }
                 
                 checkTypeForSetBinaryStream(parameterIndex);
@@ -1025,7 +1026,7 @@ public class PreparedStatement extends Statement
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream",
-                            parameterIndex, "<input stream>", new Long(length));
+                        parameterIndex, "<input stream>", Long.valueOf(length));
                 }
                 
                 checkTypeForSetAsciiStream(parameterIndex);
@@ -1073,8 +1074,8 @@ public class PreparedStatement extends Statement
                         agent_.logWriter_,
                         new ClientMessageId(
                             SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                        new Long(length),
-                        new Integer(Integer.MAX_VALUE)
+                        length,
+                        Integer.MAX_VALUE
                     ).getSQLException();
         } else if (length < 0) {
             throw new SqlException(
@@ -1224,7 +1225,8 @@ public class PreparedStatement extends Statement
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, new Long(length));
+                    agent_.logWriter_.traceEntry(this, "setCharacterStream",
+                            parameterIndex, x, Long.valueOf(length));
                 }
                 checkTypeForSetCharacterStream(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
@@ -2185,7 +2187,7 @@ public class PreparedStatement extends Statement
             if (resultSet_ != null && resultSet_.resultSetHoldability_ != resultSetHoldability_ && sqlMode_ != isCall__) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.UNABLE_TO_OPEN_RESULTSET_WITH_REQUESTED_HOLDABILTY),
-                        new Integer(resultSetHoldability_));
+                        resultSetHoldability_);
             }
     }
 
@@ -2223,7 +2225,7 @@ public class PreparedStatement extends Statement
 		if (batchSize > 65534)
             throw new BatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
-                new Integer(65534), updateCounts);
+                65534, updateCounts);
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
@@ -2413,8 +2415,7 @@ public class PreparedStatement extends Statement
         if (parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_PARAM_POSITION),
-                new Integer(parameterIndex), 
-                new Integer(parameterMetaData_.columns_));
+                parameterIndex, parameterMetaData_.columns_);
         }
     }
 
@@ -2432,8 +2433,7 @@ public class PreparedStatement extends Statement
     void checkForValidScale(int scale) throws SqlException {
         if (scale < 0 || scale > 31) {
             throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.BAD_SCALE_VALUE),
-                new Integer(scale));
+                new ClientMessageId(SQLState.BAD_SCALE_VALUE), scale);
         }
     }
 
@@ -2651,7 +2651,7 @@ public class PreparedStatement extends Statement
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setClob",
-                        parameterIndex, reader, new Long(length));
+                        parameterIndex, reader, Long.valueOf(length));
             }
             try {
                 checkForClosedStatement();
@@ -2661,7 +2661,7 @@ public class PreparedStatement extends Statement
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
-                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                    length, Integer.MAX_VALUE).getSQLException();
             else
                 setInput(parameterIndex, new Clob(agent_, reader, (int)length));
         }
@@ -2722,12 +2722,12 @@ public class PreparedStatement extends Statement
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
-                        inputStream, new Long(length));
+                        inputStream, Long.valueOf(length));
             }
             if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
-                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                    length, Integer.MAX_VALUE).getSQLException();
             else {
                 try {
                     checkTypeForSetBlob(parameterIndex);

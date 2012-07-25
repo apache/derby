@@ -250,8 +250,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 new SqlWarning(
                     agent_.logWriter_, 
                     new ClientMessageId(SQLState.INVALID_RESULTSET_TYPE),
-                        new Integer(statement_.resultSetType_),
-                        new Integer(resultSetType_)));
+                        statement_.resultSetType_, resultSetType_));
         }
 
         // Only set the warning if actual resultSetConcurrency returned by the server is
@@ -2359,7 +2358,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (row > Integer.MAX_VALUE) {
             this.accumulateWarning(new SqlWarning(agent_.logWriter_, 
                 new ClientMessageId(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT),
-                new Long(row)));
+                row));
         }
         return (int) row;
     }
@@ -2658,7 +2657,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 default:
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_DIRECTION),
-                        new Integer(direction));
+                        direction);
                 }
             }
         }
@@ -2694,7 +2693,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_SIZE),
-                        new Integer(rows)).getSQLException();
+                        rows).getSQLException();
                 }
                 setFetchSize_(rows);
             }
@@ -2827,7 +2826,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (!resultSetMetaData_.nullable_[column - 1]) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.LANG_NULL_INTO_NON_NULL),
-                        new Integer(column));
+                        column);
                 }
                 updateColumn(column, null);
             }
@@ -4771,7 +4770,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (column < 1 || column > resultSetMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_COLUMN_POSITION),
-                new Integer(column), new Integer(resultSetMetaData_.columns_));
+                column, resultSetMetaData_.columns_);
         }
     }
 
@@ -5673,7 +5672,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                    length, Integer.MAX_VALUE).getSQLException();
         else
             updateAsciiStream(columnIndex,x,(int)length);
     }
@@ -5737,7 +5736,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
          if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                    length, Integer.MAX_VALUE).getSQLException();
         else
             updateBinaryStream(columnIndex,x,(int)length);
 
@@ -5838,7 +5837,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if(length > Integer.MAX_VALUE)
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                    new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
+                    length, Integer.MAX_VALUE).getSQLException();
         else
             updateCharacterStream(columnIndex,x,(int)length);
     }

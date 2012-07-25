@@ -269,7 +269,7 @@ public class DateTime {
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
-                new Integer(year), "9999");
+                year, "9999");
         }
         int month = date.getMonth() + 1;
         int day = date.getDayOfMonth();
@@ -356,7 +356,7 @@ public class DateTime {
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
-                new Integer(year), "9999");
+                year, "9999");
         }
         int month = timestamp.getMonth() + 1;
         int day = timestamp.getDayOfMonth();

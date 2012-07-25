@@ -37,8 +37,7 @@ public class ClobWriter extends java.io.Writer {
 
         if (offset_ - 1 > clob_.sqlLength()) {
             throw new SqlException(clob_.agent_.logWriter_, 
-                new ClientMessageId(SQLState.BLOB_INVALID_OFFSET),
-                new Long(offset));
+                new ClientMessageId(SQLState.BLOB_INVALID_OFFSET), offset);
         }
     }
 

@@ -196,8 +196,7 @@ public class Reply {
                 netAgent_.accumulateChainBreakingReadExceptionAndThrow(
                     new DisconnectException(netAgent_,
                         new ClientMessageId(SQLState.NET_INSUFFICIENT_DATA),
-                        new Integer(minimumBytesNeeded),
-                        new Integer(totalBytesRead)));
+                        minimumBytesNeeded, totalBytesRead));
             }
         }
         return totalBytesRead;
@@ -953,7 +952,7 @@ public class Reply {
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
                 SqlException.getMessageUtil().getTextMessage(
                     MessageId.CONN_DRDA_DATASTREAM_SYNTAX_ERROR,
-                    new Integer(syntaxErrorCode)));
+                    syntaxErrorCode));
             
         // if we are communicating to an older server, we may get a SYNTAXRM on
         // ACCSEC (missing codepoint RDBNAM) if we were unable to convert to
@@ -1075,8 +1074,7 @@ public class Reply {
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_, 
                     new ClientMessageId(SQLState.NET_NOT_EXPECTED_CODEPOINT), 
-                    new Integer(actualCodePoint), 
-                    new Integer(expectedCodePoint)));
+                    actualCodePoint, expectedCodePoint));
         }
     }
 
@@ -1391,8 +1389,7 @@ public class Reply {
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_, 
                     new ClientMessageId(SQLState.NET_NOT_EXPECTED_CODEPOINT), 
-                    new Integer(actualCodePoint), 
-                    new Integer(expectedCodePoint)));
+                    actualCodePoint, expectedCodePoint));
         }
     }
 

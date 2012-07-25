@@ -236,8 +236,7 @@ public class NetXAConnection {
         platform = "Linux, Unix, Windows";
         throw new SqlException(netCon.agent_.logWriter_, 
             new ClientMessageId(SQLState.NET_WRONG_XA_VERSION),
-            platform, new Integer(supportedVersion), 
-            new Integer(netCon.xaHostVersion_));
+            platform, supportedVersion, netCon.xaHostVersion_);
     }
     
     /**

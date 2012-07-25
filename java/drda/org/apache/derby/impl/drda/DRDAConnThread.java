@@ -1721,7 +1721,7 @@ class DRDAConnThread extends Thread {
 			managerLevel = reader.readNetworkShort();
 			if (CodePoint.isKnownManager(manager))
 			{
-				knownManagers.add(new Integer(manager));
+                knownManagers.add(manager);
 				//if the manager level hasn't been set, set it
 				currentLevel = appRequester.getManagerLevel(manager);
 				if (currentLevel == AppRequester.MGR_LEVEL_UNKNOWN)
@@ -1734,15 +1734,15 @@ class DRDAConnThread extends Thread {
 					if (currentLevel != managerLevel)
 					{
 						//keep a list of conflicting managers
-						errorManagers.add(new Integer(manager));
-						errorManagersLevel.add(new Integer (managerLevel));
+                        errorManagers.add(manager);
+                        errorManagersLevel.add(managerLevel);
 					}
 				}
 
 			}
 			else
             {
-				unknownManagers.add(new Integer(manager));
+                unknownManagers.add(manager);
             }
 
             if (SanityManager.DEBUG) {
