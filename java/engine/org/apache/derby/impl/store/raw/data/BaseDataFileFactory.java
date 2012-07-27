@@ -351,17 +351,17 @@ public class BaseDataFileFactory
 		}
 
 		logMsg(LINE);
-        String readOnlyMsg = (isReadOnly()) 
-            ? MessageService.getTextMessage(MessageId.STORE_BOOT_READONLY_MSG)
-            : "";
+        String messageID = (isReadOnly())  ?
+            MessageId.STORE_BOOT_MSG_READ_ONLY
+            : MessageId.STORE_BOOT_MSG;
         boolean logBootTrace = Boolean.valueOf(startParams.getProperty(Property.LOG_BOOT_TRACE,
                PropertyUtil.getSystemProperty(Property.LOG_BOOT_TRACE))).booleanValue();
         logMsg(new Date() +
-			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
+			   MessageService.getTextMessage(messageID,
                                              jbmsVersion,
                                              identifier,
+                                             dataDirectory,
                                              // cast to Object so we get object hash code
-                                             dataDirectory + " " + readOnlyMsg,
                                              (Object) this.getClass().getClassLoader(),
                                              jarCPath
                                              ));

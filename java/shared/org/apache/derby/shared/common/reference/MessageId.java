@@ -75,6 +75,7 @@ public interface MessageId {
      * Raw Store data
      */
 
+    String STORE_BOOT_MSG_READ_ONLY = "D000";
     String STORE_BOOT_MSG                   = "D001";
     String STORE_SHUTDOWN_MSG               = "D002";
     String STORE_BACKUP_STARTED             = "D004";
@@ -88,7 +89,6 @@ public interface MessageId {
     String STORE_BACKUP_COMPLETED           = "D012";
     String STORE_DURABILITY_TESTMODE_NO_SYNC = "D013"; // for derby.system.durability is 
                                                        // set to test
-    String STORE_BOOT_READONLY_MSG          = "D014";
     /**
      * When the specified overflow page isn't found while streaming from a
      * page overflow chain (large data values, typically BLOB or CLOB).
@@ -159,7 +159,6 @@ public interface MessageId {
     String CONN_DRDA_RDBACCRM                               = "J124";
     String CONN_DRDA_DTARMCHRM                              = "J125";
     String CONN_DRDA_PRCCNVRM                               = "J126";
-    String CONN_PARSE_SQLDIAGGRP_NOT_IMPLEMENTED            = "J127";
     String CONN_CURSOR_NOT_OPEN                             = "J128";
     String CONN_DRDA_QRYOPEN                                = "J129";
     String CONN_DRDA_INVALIDFDOCA                           = "J130";

@@ -244,7 +244,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSLAL","log record size {2} exceeded the maximum allowable log file size {3}. Error encountered in log file {0}, position {1}.","45000"},
         		{"XSLAM","Cannot verify database format at {1} due to IOException.","45000"},
         		{"XSLAN","Database at {0} has an incompatible format with the current version of the software.  The database was created by or upgraded by version {1}.","45000"},
-        		{"XSLAO","Recovery failed unexpected problem {0}.","45000"},
+        		{"XSLAO","Recovery failed unexpected problem: {0}.","45000"},
         		{"XSLAP","Database at {0} is at version {1}. Beta databases cannot be upgraded,","45000"},
         		{"XSLAQ","cannot create log file at directory {0}.","45000"},
         		{"XSLAR","Unable to copy log file '{0}' to '{1}' during restore. Please make sure that there is enough space and permissions are correct. ","45000"},

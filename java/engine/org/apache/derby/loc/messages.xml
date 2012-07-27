@@ -6020,7 +6020,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSLAO.D</name>
-                <text>Recovery failed unexpected problem {0}.</text>
+                <text>Recovery failed unexpected problem: {0}.</text>
                 <arg>value</arg>
             </msg>
 
@@ -7611,6 +7611,19 @@ MessageId.java.
             <title>Undocumented Raw Store Messages from MessageId.java</title>
 
             <msg>
+                <name>D000</name>
+                <text>:
+Booting Derby (version {0}) instance {1} 
+on database directory {2} in READ ONLY mode with class loader {3}. 
+Loaded from {4}.</text>
+                <arg>derbyVersion</arg>
+                <arg>id</arg>
+                <arg>directoryName</arg>
+                <arg>classloader</arg>
+                <arg>JarClassPath</arg>
+            </msg>
+
+            <msg>
                 <name>D001</name>
                 <text>:
 Booting Derby version {0}: instance {1} 
@@ -7641,7 +7654,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>D005</name>
-                <text>moved old backup copy from {0} to {1}</text>
+                <text>Moved old backup copy from {0} to {1}</text>
                 <arg>filePath</arg>
                 <arg>filePath</arg>
             </msg>
@@ -7654,18 +7667,18 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>D007</name>
-                <text>edited database service.properties to use default log device</text>
+                <text>Edited database service.properties to use default log device</text>
             </msg>
 
             <msg>
                 <name>D008</name>
-                <text>error editing database service.properties, backup aborted: {0}</text>
+                <text>Error editing database service.properties, backup aborted: {0}</text>
                 <arg>errorMessage</arg>
             </msg>
 
             <msg>
                 <name>D009</name>
-                <text>copied log directory from {0} to {1}</text>
+                <text>Copied log directory from {0} to {1}</text>
                 <arg>filePath</arg>
                 <arg>filePath</arg>
             </msg>
@@ -7677,7 +7690,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>D011</name>
-                <text>removed old backup copy at {0}</text>
+                <text>Removed old backup copy at {0}</text>
                 <arg>filePath</arg>
             </msg>
 
@@ -7694,11 +7707,6 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 </text>
                 <arg>durabilityProperty</arg>
                 <arg>noSync</arg>
-            </msg>
-
-            <msg>
-                <name>D014</name>
-                <text>in READ ONLY mode</text>
             </msg>
 
             <msg>
@@ -7759,102 +7767,102 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J004</name>
-                <text>database identity</text>
+                <text>Database identity</text>
             </msg>
 
             <msg>
                 <name>J005</name>
-                <text>shut down Derby</text>
+                <text>Shut down Derby</text>
             </msg>
 
             <msg>
 	        <name>J006</name>
-		<text>deregister AutoloadedDriver</text>
+		<text>Deregister AutoloadedDriver</text>
             </msg>
 
             <msg>
                 <name>J007</name>
-                <text>create database</text>
+                <text>Create database</text>
             </msg>
 
             <msg>
                 <name>J008</name>
-                <text>no details</text>
+                <text>No details</text>
             </msg>
 
             <msg>
                 <name>J010</name>
-                <text>encrypt database on disk</text>
+                <text>Encrypt database on disk</text>
             </msg>
 
             <msg>
                 <name>J013</name>
-                <text>upgrade database</text>
+                <text>Upgrade database</text>
             </msg>
 
             <msg>
                 <name>J016</name>
-                <text>cryptographic service provider</text>
+                <text>Cryptographic service provider</text>
             </msg>
 
             <msg>
                 <name>J017</name>
-                <text>cryptographic algorithm</text>
+                <text>Cryptographic algorithm</text>
             </msg>
 
             <msg>
                 <name>J018</name>
-                <text>cryptographic key length</text>
+                <text>Cryptographic key length</text>
             </msg>
 
             <msg>
                 <name>J019</name>
-                <text>external cryptographic key</text>
+                <text>External cryptographic key</text>
             </msg>
 
             <msg>
                 <name>J020</name>
-                <text>secret cryptographic key</text>
+                <text>Secret cryptographic key</text>
             </msg>
 
             <msg>
                 <name>J021</name>
-                <text>territory for the database</text>
+                <text>Territory for the database</text>
             </msg>
 
             <msg>
                 <name>J022</name>
-                <text>user name</text>
+                <text>User name</text>
             </msg>
 
             <msg>
                 <name>J023</name>
-                <text>user password</text>
+                <text>User password</text>
             </msg>
 
             <msg>
                 <name>J025</name>
-                <text>log directory path</text>
+                <text>Log directory path</text>
             </msg>
 
             <msg>
                 <name>J028</name>
-                <text>backup path for rollforward recovery</text>
+                <text>Backup path for roll-forward recovery</text>
             </msg>
 
             <msg>
                 <name>J029</name>
-                <text>backup path for creating database from backup</text>
+                <text>Backup path for creating database from backup</text>
             </msg>
 
             <msg>
                 <name>J030</name>
-                <text>backup path for restoring database from backup</text>
+                <text>Backup path for restoring database from backup</text>
             </msg>
 
             <msg>
                 <name>J031</name>
-                <text>collation for chararcter datatypes</text>
+                <text>Collation for chararcter datatypes</text>
             </msg>
 
             <msg>
@@ -7911,37 +7919,37 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J110</name>
-                <text>security mechanism not supported</text>
+                <text>Security mechanism not supported</text>
             </msg>
 
             <msg>
                 <name>J111</name>
-                <text>password missing</text>
+                <text>Password missing</text>
             </msg>
 
             <msg>
                 <name>J112</name>
-                <text>userid missing</text>
+                <text>Userid missing</text>
             </msg>
 
             <msg>
                 <name>J113</name>
-                <text>userid or password invalid</text>
+                <text>Userid or password invalid</text>
             </msg>
 
             <msg>
                 <name>J114</name>
-                <text>userid revoked</text>
+                <text>Userid revoked</text>
             </msg>
 
             <msg>
                 <name>J115</name>
-                <text>new password invalid</text>
+                <text>New password invalid</text>
             </msg>
 
             <msg>
                 <name>J116</name>
-                <text>local security service non-retryable error</text>
+                <text>Local security service non-retryable error</text>
             </msg>
 
             <msg>
@@ -7951,68 +7959,63 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J118</name>
-                <text>password expired</text>
+                <text>Password expired</text>
             </msg>
 
             <msg>
                 <name>J120</name>
-                <text>not specified</text>
+                <text>Unspecified connection error</text>
             </msg>
 
             <msg>
                 <name>J121</name>
-                <text>the user is not authorized to access the database</text>
+                <text>The user is not authorized to access the database.</text>
             </msg>
 
             <msg>
                 <name>J122</name>
-                <text>a command requesting services of the database was issued prior to the command requesting access to database (ACCRDB)</text>
+                <text>A command requesting services of the database was issued prior to the command requesting access to database (ACCRDB).</text>
             </msg>
 
             <msg>
                 <name>J123</name>
-                <text>the requested command encountered an unarchitected and implementation-specific condition for which there was no architected message (additional information may be available in the derby.log file on the server)</text>
+                <text>The requested command encountered an unarchitected and implementation-specific condition for which there was no architected message (additional information may be available in the derby.log file on the server).</text>
             </msg>
 
             <msg>
                 <name>J124</name>
-                <text>the access relational database (ACCRDB) command cannot be issued because the database is already currently accessed</text>
+                <text>The access relational database (ACCRDB) command cannot be issued because the database is already currently accessed.</text>
             </msg>
 
             <msg>
                 <name>J125</name>
-                <text>a Data Descriptor Mismatch Error was detected.</text>
+                <text>A Data Descriptor Mismatch Error was detected.</text>
             </msg>
 
             <msg>
                 <name>J126</name>
-                <text>a conversational protocol error was detected.  Reason: 0x{0}.</text>
+                <text>A conversational protocol error was detected.  Reason: 0x{0}.</text>
                 <arg>hexNumber</arg>
             </msg>
 
             <msg>
-                <name>J127</name>
-                <text>parseSQLDIAGGRP is not yet implemented</text>
-            </msg>
-
-            <msg>
                 <name>J128</name>
-                <text>the cursor is not open</text>
+                <text>The cursor is not open.</text>
             </msg>
 
             <msg>
                 <name>J129</name>
-                <text>an Open Query command was issued for a query which was already open</text>
+                <text>An Open Query command was issued for a query which was already open.</text>
             </msg>
 
             <msg>
                 <name>J130</name>
-                <text>A PROTOCOL Invalid FDOCA Description Error was detected</text>
+                <text>A protocol error (Invalid FDOCA Description Error) was detected.</text>
             </msg>
 
             <msg>
                 <name>J131</name>
-                <text>A PROTOCOL Data Stream Syntax Error was detected.  Reason: 0x{0}. Plaintext connection attempt to an SSL enabled server?</text>
+                <text>A protocol error (Data Stream Syntax Error) was detected.  Reason: 0x{0}. Perhaps this is an attempt to open a plaintext connection to an SSL enabled server.</text>
                 <arg>hexNumber</arg>
             </msg>
 
@@ -8120,13 +8123,13 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>L012</name>
-                <text>log record is Not first but transaction is not in transaction table : {0}</text>
+                <text>Log record is Not first but transaction is not in transaction table : {0}</text>
                 <arg>transactionID</arg>
             </msg>
 
             <msg>
                 <name>L013</name>
-                <text>log record is first but transaction is already in transaction table : {0}</text>
+                <text>Log record is first but transaction is already in transaction table : {0}</text>
                 <arg>transactionID</arg>
             </msg>
 
@@ -8137,19 +8140,19 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>L015</name>
-                <text>new log file exist and cannot be deleted {0}</text>
+                <text>New log file exist and cannot be deleted {0}</text>
                 <arg>fileName</arg>
             </msg>
 
             <msg>
                 <name>L016</name>
-                <text>cannot create a new log file {0}</text>
+                <text>Cannot create a new log file {0}</text>
                 <arg>fileName</arg>
             </msg>
 
             <msg>
                 <name>L017</name>
-                <text>cannot create a new log file {0} due to {1}</text>
+                <text>Cannot create a new log file {0} due to {1}</text>
                 <arg>fileName</arg>
                 <arg>errorMessage</arg>
             </msg>
@@ -8304,7 +8307,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>N001</name>
-                <text>caused by</text>
+                <text>This error is caused by the following error.</text>
             </msg>
 
         </family>
