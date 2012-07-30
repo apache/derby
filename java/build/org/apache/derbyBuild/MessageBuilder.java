@@ -560,7 +560,8 @@ public class MessageBuilder extends Task
         String        rawText = squeezeText( getFirstChild( message, "text" ) );
         String        propertyText = escapePropertiesText( rawText );
         int             parameterCount = countParameters( rawText );
-        String[]     args = getArgs( message );
+        String[]     comments = getOptionalSubElements( message, "comment" );
+        String[]     args = getOptionalSubElements( message, "arg" );
 
         if ( parameterCount != args.length )
         {
@@ -586,6 +587,16 @@ public class MessageBuilder extends Task
         ditaWriter.endTag();
 
         propertiesPW.println( "" );
+        
+        if ( comments.length != 0 )
+        {
+            for ( int i = 0; i < comments.length; i++ )
+            {
+                propertiesPW.println( "# " + comments[ i ] );
+            }
+            propertiesPW.println( "#" );
+        }
+        
         if ( args.length != 0 )
         {
             propertiesPW.println( "# Arguments:" );
@@ -613,21 +624,21 @@ public class MessageBuilder extends Task
 
     /**
      * <p>
-     * Get all of the human-readable parameter names out of the message element.
+     * Get some optional sub-elements.
      * </p>
      */
-    private String[]    getArgs( Element message )
+    private String[]    getOptionalSubElements( Element message, String subElementTag )
         throws Exception
     {
-        NodeList   args = message.getElementsByTagName( "arg" );
-        int             argCount = args.getLength();
-        String[]    retval = new String[ argCount ];
+        NodeList   options = message.getElementsByTagName( subElementTag );
+        int             count = options.getLength();
+        String[]    retval = new String[ count ];
 
-        for ( int i = 0; i < argCount; i++ )
+        for ( int i = 0; i < count; i++ )
         {
-            Element     arg = (Element) args.item( i );
+            Element     option = (Element) options.item( i );
             
-            retval[ i ] = squeezeText( arg );
+            retval[ i ] = squeezeText( option );
         }
 
         return retval;

@@ -26,6 +26,7 @@ information:
 
   * Name of the message - for most messages, this encodes a SQLState
   * Message text returned to the user
+  * Optional comments to help translators understand how the message is used
   * Human-readable names for message arguments
 
 Message argument names should be listed in numeric order rather than
