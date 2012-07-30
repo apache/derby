@@ -390,7 +390,6 @@ public interface SQLState {
 	*/
 	String LOG_WRITE_LOG_RECORD                                 = "XSLB1.S";
 	String LOG_BUFFER_FULL                                      = "XSLB2.S";
-	String LOG_TRUNC_LWM_NULL                                   = "XSLB4.S";
 	String LOG_TRUNC_LWM_ILLEGAL                                = "XSLB5.S";
 	String LOG_ZERO_LENGTH_LOG_RECORD                           = "XSLB6.S";
 	String LOG_RESET_BEYOND_SCAN_LIMIT                          = "XSLB8.S";
@@ -838,7 +837,8 @@ public interface SQLState {
 	String LANG_DUPLICATE_COLUMN_NAME_UPDATE                           = "42X16";
 	String LANG_INVALID_JOIN_ORDER_SPEC                                = "42X17";
 	String LANG_NOT_COMPARABLE                                         = "42818";
-	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19";
+	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19.S.1";
+	String LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE        = "42X19.S.2";
 	String LANG_INTEGER_LITERAL_EXPECTED                               = "42X20";
 	String LANG_CURSOR_NOT_UPDATABLE                                   = "42X23";
 	String LANG_INVALID_COL_HAVING_CLAUSE                              = "42X24";
@@ -1018,8 +1018,6 @@ public interface SQLState {
 	String LANG_BINARY_OPERATOR_NOT_SUPPORTED                          = "42Y95";
 	String LANG_UNKNOWN												   = "42Y96.U";
 	String LANG_INVALID_ESCAPE										   = "42Y97";
-	String LANG_JAVACC_SYNTAX										   = "42Y98.U";
-	String LANG_JAVACC_LEXICAL_ERROR								   = "42Y99.U";
 	String LANG_JAVA_METHOD_CALL_OR_FIELD_REF						   = "42Z00.U";
 	String LANG_UNTYPED												   = "42Z01.U";
 	// TEMPORARY COMPILATION RESTRICTIONS
@@ -1109,7 +1107,6 @@ public interface SQLState {
     // beetle 2758.  For now just raise an error for literals > 64K
     String LANG_INVALID_LITERAL_LENGTH                                = "42Z99";
     String LANG_READ_UNCOMMITTED                                      = "42Z9A";
-    String LANG_VTI_BLOB_CLOB_UNSUPPORTED                             = "42Z9B";
     String LANG_UNSUPPORTED_TRIGGER_STMT                              = "42Z9D";
     String LANG_UNSUPPORTED_TRIGGER_PROC                              = "42Z9D.S.1";
     String LANG_DROP_CONSTRAINT_TYPE                                  = "42Z9E";
@@ -1491,7 +1488,6 @@ public interface SQLState {
 	/*
 	** Dependency manager
 	*/
-	String DEP_UNABLE_TO_RESTORE                                       = "XD003.S";
 	String DEP_UNABLE_TO_STORE                                         = "XD004.S";
 
     /*
@@ -1563,7 +1559,6 @@ public interface SQLState {
     String PARAM_NOT_OUT_OR_INOUT = "XJ091.S";
     String BLOB_TOO_LARGE_FOR_CLIENT  = "XJ093.S";
     String ERROR_PRIVILEGED_ACTION = "XJ095.S";
-    String MISSING_RESOURCE_BUNDLE = "XJ096.S";
     String SAVEPOINT_NOT_CREATED_BY_CONNECTION = "XJ097.S";
     String BAD_AUTO_GEN_KEY_VALUE = "XJ098.S";
     String READER_UNDER_RUN = "XJ099.S";

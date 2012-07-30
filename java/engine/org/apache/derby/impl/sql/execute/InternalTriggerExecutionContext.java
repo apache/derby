@@ -333,7 +333,7 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 		// parser. However, this runtime check is needed to prevent execution
 		// of DDL statements by procedures within a trigger context. 
  		if (constantAction instanceof DDLConstantAction) {
-			throw StandardException.newException(SQLState.LANG_NO_DDL_IN_TRIGGER, triggerd.getName(), constantAction.toString());
+			throw StandardException.newException(SQLState.LANG_NO_DDL_IN_TRIGGER, triggerd.getName());
 		}
 		
 		// No INSERT/UPDATE/DELETE for a before trigger. There is no need to 

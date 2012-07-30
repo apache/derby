@@ -92,15 +92,15 @@ ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INT
 ij> prepare p1 as 'select * from t1 where 1';
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where ?';
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'PARAMETER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where ? for update';
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'PARAMETER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where (?)';
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'PARAMETER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where ? and 1=1';
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'PARAMETER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where ? and 1=? or 2=2';
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'PARAMETER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.
 ij> prepare p1 as 'select * from t1 where not ?';
 ERROR 42X36: The 'not' operator is not allowed to take a ? parameter as an operand.
 ij> prepare p1 as 'select * from t1 where lower(?)';

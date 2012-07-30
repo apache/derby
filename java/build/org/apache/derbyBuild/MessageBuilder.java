@@ -379,7 +379,7 @@ public class MessageBuilder extends Task
         }
         catch (Exception e)
         {
-            throw new BuildException( "Could not generate English properties from message descriptors.", e );
+            throw new BuildException( "Could not generate English properties from message descriptors: " + e.getMessage(), e );
         }
         finally
         {

@@ -28,6 +28,16 @@ information:
   * Message text returned to the user
   * Human-readable names for message arguments
 
+Message argument names should be listed in numeric order rather than
+position order. So, for the following message...
+
+    "Table {1} in schema {0} cannot be indexed."
+
+...the order of arguments should be
+
+    schemaName
+    tableName
+
 For further guidance on writing messages with human-readable argument
 names, please see the following page on the Derby website:
 
@@ -140,7 +150,7 @@ Guide.
             <msg>
                 <name>01505</name>
                 <text>The value {0} may be truncated.</text>
-                <arg>valueName</arg>
+                <arg>dataValue</arg>
             </msg>
 
             <msg>
@@ -319,7 +329,7 @@ Guide.
             <msg>
                 <name>08001.C.6</name>
                 <text>Password length ({0}) is outside the range of 1 to {1}.</text>
-                <arg>value</arg>
+                <arg>length</arg>
                 <arg>number</arg>
             </msg>
 
@@ -593,9 +603,9 @@ Guide.
             <msg>
                 <name>22001</name>
                 <text>A truncation error was encountered trying to shrink {0} '{1}' to length {2}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>dataValue</arg>
+                <arg>length</arg>
             </msg>
 
             <msg>
@@ -607,8 +617,8 @@ Guide.
             <msg>
                 <name>22003.S.1</name>
                 <text>Year ({0}) exceeds the maximum '{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>year</arg>
+                <arg>year</arg>
             </msg>
 
             <msg>
@@ -651,8 +661,8 @@ Guide.
                 <name>22005.S.4</name>
                 <text>Unrecognized JDBC type. Type: {0}, columnCount: {1}, columnIndex: {2}.</text>
                 <arg>typeName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>number</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -746,15 +756,15 @@ Guide.
             <msg>
                 <name>22013</name>
                 <text>Attempt to take the square root of a negative number, '{0}'.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>22014</name>
                 <text>The start position for LOCATE is invalid; it must be a positive integer. The index  to start the search from is '{2}'.  The string to search for is '{0}'.  The string to search from is '{1}'. </text>
-                <arg>startIndex</arg>
                 <arg>searchString</arg>
                 <arg>fromString</arg>
+                <arg>startIndex</arg>
             </msg>
 
             <msg>
@@ -836,24 +846,24 @@ Guide.
             <msg>
                 <name>23503</name>
                 <text>{2} on table '{1}' caused a violation of foreign key constraint '{0}' for key {3}.  The statement has been rolled back.</text>
-                <arg>value</arg>
-                <arg>tableName</arg>
                 <arg>constraintName</arg>
+                <arg>tableName</arg>
+                <arg>statementType</arg>
                 <arg>keyName</arg>
             </msg>
 
             <msg>
                 <name>23505</name>
                 <text>The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by '{0}' defined on '{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>23513</name>
                 <text>The check constraint '{1}' was violated while performing an INSERT or UPDATE on table '{0}'.</text>
-                <arg>constraintName</arg>
                 <arg>tableName</arg>
+                <arg>constraintName</arg>
             </msg>
 
         </family>
@@ -1193,8 +1203,8 @@ Guide.
             <msg>
                 <name>4250B</name>
                 <text>Invalid database authorization property '{0}={1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>propertyName</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
@@ -1206,8 +1216,8 @@ Guide.
             <msg>
                 <name>4250D</name>
                 <text>Repeated user(s) '{1}' in access list '{0}';</text>
-                <arg>authorizationID</arg>
                 <arg>listName</arg>
+                <arg>authorizationID</arg>
             </msg>
 
             <msg>
@@ -1219,7 +1229,7 @@ Guide.
             <msg>
                 <name>4251A</name>
                 <text>Statement {0} can only be issued by database owner.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
@@ -1315,7 +1325,7 @@ Guide.
             <msg>
                 <name>42611</name>
                 <text>The length, precision, or scale attribute for column, or type mapping '{0}' is not valid. </text>
-                <arg>value</arg>
+                <arg>dataType</arg>
             </msg>
 
             <msg>
@@ -1327,7 +1337,7 @@ Guide.
             <msg>
                 <name>42621</name>
                 <text>A check constraint or generated column that is defined with '{0}' is invalid.</text>
-                <arg>value</arg>
+                <arg>columnName</arg>
             </msg>
 
             <msg>
@@ -1358,14 +1368,14 @@ Guide.
             <msg>
                 <name>42815.S.713</name>
                 <text>The replacement value for '{0}' is invalid.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
                 <name>42815.S.171</name>
                 <text>The data type, length or value of arguments '{0}' and '{1}' is incompatible.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>dataType</arg>
             </msg>
 
             <msg>
@@ -1457,8 +1467,8 @@ Guide.
             <msg>
                 <name>42886</name>
                 <text>'{0}' parameter '{1}' requires a parameter marker '?'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>parameterMode</arg>
+                <arg>parameterName</arg>
             </msg>
 
             <msg>
@@ -1494,9 +1504,9 @@ Guide.
 
             <msg>
                 <name>42915</name>
-                <text>Foreign  Key '{0}' is invalid because '{1}'. </text>
+                <text>Foreign  Key '{0}' is invalid for the reason which follows: '{1}'. </text>
                 <arg>key</arg>
-                <arg>value</arg>
+                <arg>detailedReason</arg>
             </msg>
 
             <msg>
@@ -1538,7 +1548,7 @@ Guide.
             <msg>
                 <name>42X02</name>
                 <text>{0}.</text>
-                <arg>value</arg>
+                <arg>parserException</arg>
             </msg>
 
             <msg>
@@ -1606,7 +1616,7 @@ Guide.
                 <name>42X14</name>
                 <text>'{0}' is not a column in table or VTI '{1}'.</text>
                 <arg>columnName</arg>
-                <arg>value</arg>
+                <arg>tableOrVTIName</arg>
             </msg>
 
             <msg>
@@ -1624,13 +1634,18 @@ Guide.
             <msg>
                 <name>42X17</name>
                 <text>In the Properties list of a FROM clause, the value '{0}' is not valid as a joinOrder specification. Only the values FIXED and UNFIXED are valid.  </text>
-                <arg>value</arg>
+                <arg>joinOrder</arg>
             </msg>
 
             <msg>
-                <name>42X19</name>
+                <name>42X19.S.1</name>
                 <text>The WHERE or HAVING clause or CHECK CONSTRAINT definition is a '{0}' expression.  It must be a BOOLEAN expression.</text>
-                <arg>value</arg>
+                <arg>dataType</arg>
+            </msg>
+
+            <msg>
+                <name>42X19.S.2</name>
+                <text>The WHERE or HAVING clause or CHECK CONSTRAINT definition is an untyped parameter expression.  It must be a BOOLEAN expression.</text>
             </msg>
 
             <msg>
@@ -1711,19 +1726,19 @@ Guide.
             <msg>
                 <name>42X35</name>
                 <text>It is not allowed for both operands of '{0}' to be ? parameters.</text>
-                <arg>value</arg>
+                <arg>operatorName</arg>
             </msg>
 
             <msg>
                 <name>42X36</name>
                 <text>The '{0}' operator is not allowed to take a ? parameter as an operand.</text>
-                <arg>operator</arg>
+                <arg>operatorName</arg>
             </msg>
 
             <msg>
                 <name>42X37</name>
                 <text>The unary '{0}' operator is not allowed on the '{1}' type.</text>
-                <arg>operator</arg>
+                <arg>operatorName</arg>
                 <arg>type</arg>
             </msg>
 
@@ -1746,7 +1761,7 @@ Guide.
                 <name>42X41</name>
                 <text>In the Properties clause of a FROM list, the property '{0}' is not valid (the property was being set to '{1}'). </text>
                 <arg>propertyName</arg>
-                <arg>value</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
@@ -1770,9 +1785,9 @@ Guide.
             <msg>
                 <name>42X45</name>
                 <text>{0} is an invalid type for argument number {1} of {2}.</text>
-                <arg>type</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>argumentNumber</arg>
+                <arg>operatorName</arg>
             </msg>
 
             <msg>
@@ -1790,22 +1805,22 @@ Guide.
             <msg>
                 <name>42X48</name>
                 <text>Value '{1}' is not a valid precision for {0}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>42X49</name>
                 <text>Value '{0}' is not a valid integer literal.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>42X50</name>
                 <text>No method was found that matched the method call {0}.{1}({2}), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.</text>
+                <arg>className</arg>
                 <arg>methodName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>parameterTypes</arg>
             </msg>
 
             <msg>
@@ -1837,20 +1852,20 @@ Guide.
                 <name>42X55</name>
                 <text>Table name '{1}' should be the same as '{0}'.</text>
                 <arg>tableName</arg>
-                <arg>value</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>42X56</name>
                 <text>The number of columns in the view column list does not match the number of columns in the underlying query expression in the view definition for '{0}'.</text>
-                <arg>value</arg>
+                <arg>viewName</arg>
             </msg>
 
             <msg>
                 <name>42X57</name>
                 <text>The getColumnCount() for external virtual table '{0}' returned an invalid value '{1}'.  Valid values are greater than or equal to 1. </text>
                 <arg>tableName</arg>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -1867,23 +1882,23 @@ Guide.
             <msg>
                 <name>42X60</name>
                 <text>Invalid value '{0}' for insertMode property specified for table '{1}'.</text>
-                <arg>value</arg>
+                <arg>insertMode</arg>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>42X61</name>
                 <text>Types '{0}' and '{1}' are not {2} compatible.</text>
-                <arg>type</arg>
-                <arg>type</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>dataType</arg>
+                <arg>sqlOperator</arg>
             </msg>
 
             <msg>
                 <name>42X62</name>
                 <text>'{0}' is not allowed in the '{1}' schema.</text>
-                <arg>value</arg>
-                <arg>schemaNamet</arg>
+                <arg>sqlText</arg>
+                <arg>schemaName</arg>
             </msg>
 
             <msg>
@@ -1894,7 +1909,7 @@ Guide.
             <msg>
                 <name>42X64</name>
                 <text>In the Properties list, the invalid value '{0}' was specified for the useStatistics property. The only valid values are TRUE or FALSE. </text>
-                <arg>value</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
@@ -1926,7 +1941,7 @@ Guide.
             <msg>
                 <name>42X70</name>
                 <text>The number of columns in the table column list does not match the number of columns in the underlying query expression in the table definition for '{0}'.</text>
-                <arg>value</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
@@ -1946,9 +1961,9 @@ Guide.
             <msg>
                 <name>42X73</name>
                 <text>Method resolution for signature {0}.{1}({2}) was ambiguous. (No single maximally specific method.)</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>className</arg>
+                <arg>methodName</arg>
+                <arg>parameterTypes</arg>
             </msg>
 
             <msg>
@@ -1959,8 +1974,8 @@ Guide.
             <msg>
                 <name>42X75</name>
                 <text>No constructor was found with the signature {0}({1}).  It may be that the parameter types are not method invocation convertible.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>className</arg>
+                <arg>parameterTypes</arg>
             </msg>
 
             <msg>
@@ -2075,8 +2090,8 @@ Guide.
             <msg>
                 <name>42X94</name>
                 <text>{0} '{1}' does not exist.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlObjectType</arg>
+                <arg>objectName</arg>
             </msg>
 
             <msg>
@@ -2111,7 +2126,7 @@ Guide.
             <msg>
                 <name>42XA2</name>
                 <text>'{0}' cannot appear in a GENERATION CLAUSE because it may return unreliable results.</text>
-                <arg>value</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -2383,7 +2398,7 @@ Guide.
             <msg>
                 <name>42Y37</name>
                 <text>'{0}' is a Java primitive and cannot be used with this operator.</text>
-                <arg>value</arg>
+                <arg>javaTypeName</arg>
             </msg>
 
             <msg>
@@ -2395,27 +2410,27 @@ Guide.
             <msg>
                 <name>42Y39</name>
                 <text>'{0}' may not appear in a CHECK CONSTRAINT definition because it may return non-deterministic results.</text>
-                <arg>value</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
                 <name>42Y40</name>
                 <text>'{0}' appears multiple times in the UPDATE OF column list for trigger '{1}'.</text>
-                <arg>value</arg>
+                <arg>columnName</arg>
                 <arg>triggerName</arg>
             </msg>
 
             <msg>
                 <name>42Y41</name>
                 <text>'{0}' cannot be directly invoked via EXECUTE STATEMENT because it is part of a trigger.</text>
-                <arg>value</arg>
+                <arg>storedPreparedStatementName</arg>
             </msg>
 
             <msg>
                 <name>42Y42</name>
                 <text>Scale '{1}' is not a valid scale for a {0}.</text>
+                <arg>dataType</arg>
                 <arg>scaleValue</arg>
-                <arg>value</arg>
             </msg>
 
             <msg>
@@ -2435,7 +2450,7 @@ Guide.
             <msg>
                 <name>42Y45</name>
                 <text>VTI '{0}' cannot be bound because it is a special trigger VTI and this statement is not part of a trigger action or WHEN clause.</text>
-                <arg>value</arg>
+                <arg>vtiName</arg>
             </msg>
 
             <msg>
@@ -2467,8 +2482,8 @@ Guide.
             <msg>
                 <name>42Y55</name>
                 <text>'{0}' cannot be performed on '{1}' because it does not exist.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlText</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -2481,26 +2496,26 @@ Guide.
             <msg>
                 <name>42Y58</name>
                 <text>NumberFormatException occurred when converting value '{0}' for optimizer override '{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
+                <arg>optimizerOverrideName</arg>
             </msg>
 
             <msg>
                 <name>42Y59</name>
                 <text>Invalid value, '{0}', specified for hashInitialCapacity override. Value must be greater than 0.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>42Y60</name>
                 <text>Invalid value, '{0}', specified for hashLoadFactor override. Value must be greater than 0.0 and less than or equal to 1.0.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>42Y61</name>
                 <text>Invalid value, '{0}', specified for hashMaxCapacity override. Value must be greater than 0.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -2520,7 +2535,7 @@ Guide.
             <msg>
                 <name>42Y64</name>
                 <text>bulkFetch value of '{0}' is invalid. The minimum value for bulkFetch is 1.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -2571,7 +2586,7 @@ Guide.
             <msg>
                 <name>42Y84</name>
                 <text>'{0}' may not appear in a DEFAULT definition.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
@@ -2592,8 +2607,8 @@ Guide.
             <msg>
                 <name>42Y92</name>
                 <text>{0} triggers may only reference {1} transition variables/tables.</text>
-                <arg>triggerName</arg>
-                <arg>value</arg>
+                <arg>sqlKeyword</arg>
+                <arg>sqlKeyword</arg>
             </msg>
 
             <msg>
@@ -2634,8 +2649,8 @@ Guide.
             <msg>
                 <name>42Z08</name>
                 <text>Bulk insert replace is not permitted on '{0}' because it has an enabled trigger ({1}).</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>tableName</arg>
+                <arg>triggerName</arg>
             </msg>
 
             <msg>
@@ -2702,8 +2717,8 @@ Guide.
             <msg>
                 <name>42Z24</name>
                 <text>Overflow occurred in identity value for column '{1}' in table '{0}'.</text>
-                <arg>columnName</arg>
                 <arg>tableName</arg>
+                <arg>columnName</arg>
             </msg>
 
             <msg>
@@ -2726,21 +2741,21 @@ Guide.
             <msg>
                 <name>42Z50</name>
                 <text>INTERNAL ERROR: Unable to generate code for {0}.</text>
-                <arg>value</arg>
+                <arg>queryTreeNodeIdentifier</arg>
             </msg>
 
             <msg>
                 <name>42Z53</name>
                 <text>INTERNAL ERROR: Type of activation to generate for node choice {0} is unknown.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>42Z60</name>
                 <text>{0} not allowed unless database property {1} has value '{2}'.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
                 <arg>propertyName</arg>
-                <arg>value</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
@@ -2786,7 +2801,7 @@ Guide.
             <msg>
                 <name>42Z77</name>
                 <text>Context item must have type 'XML'; '{0}' is not allowed.</text>
-                <arg>value</arg>
+                <arg>dataType</arg>
             </msg>
 
             <msg>
@@ -2835,13 +2850,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>42Z9B</name>
-                <text>The external virtual table interface does not support BLOB or CLOB columns. '{0}' column '{1}'. </text>
-                <arg>value</arg>
-                <arg>value</arg>
-            </msg>
-
-            <msg>
                 <name>42Z9D.S.1</name>
                 <text>Procedures that modify SQL data are not allowed in BEFORE triggers.</text>
             </msg>
@@ -2857,7 +2865,7 @@ Guide.
                 <name>42Z9E</name>
                 <text>Constraint '{0}' is not a {1} constraint.</text>
                 <arg>constraintName</arg>
-                <arg>value</arg>
+                <arg>constraintType</arg>
             </msg>
 
             <msg>
@@ -2882,17 +2890,17 @@ Guide.
             <msg>
                 <name>42ZA2</name>
                 <text>Operand of LIKE predicate with type {0} and collation {1} is not compatable with LIKE pattern operand with type {2} and collation {3}.</text>
-                <arg>type</arg>
-                <arg>value</arg>
-                <arg>type</arg>
-                <arg>value</arg>
+                <arg>dataType</arg>
+                <arg>collationType</arg>
+                <arg>dataType</arg>
+                <arg>collationType</arg>
             </msg>
 
             <msg>
                 <name>42ZA3</name>
                 <text>The table will have collation type {0} which is different than the collation of the schema {1} hence this operation is not supported .</text>
-                <arg>type</arg>
-                <arg>type</arg>
+                <arg>collationType</arg>
+                <arg>schemaName</arg>
             </msg>
 
             <msg>
@@ -2983,8 +2991,8 @@ Guide.
             <msg>
                 <name>58009.C.12</name>
                 <text>Network protocol exception: actual code point, {0}, does not match expected code point, {1}.  The connection has been terminated.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>codePoint</arg>
+                <arg>codePoint</arg>
             </msg>
 
             <msg>
@@ -3010,7 +3018,7 @@ Guide.
             <msg>
                 <name>58009.C.17</name>
                 <text>Network protocol exception: end of stream prematurely reached while reading InputStream, parameter #{0}.  The connection has been terminated.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -3049,37 +3057,37 @@ Guide.
                 <name>58009.C.9</name>
                 <text>Network protocol exception: PKGNAMCSN length, {0}, is invalid at SQLAM {1}.  The connection has been terminated.</text>
                 <arg>length</arg>
-                <arg>value</arg>
+                <arg>sqlApplicationManager</arg>
             </msg>
             <msg>
                 <name>58010.C</name>
                 <text>A network protocol error was encountered.  A connection could not be established because the manager {0} at level {1} is not supported by the server. </text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>managerCodePoint</arg>
+                <arg>level</arg>
             </msg>
 
             <msg>
                 <name>58014.C</name>
                 <text>The DDM command 0x{0} is not supported.  The connection has been terminated.</text>
-                <arg>value</arg>
+                <arg>distributedDataManagementCommand</arg>
             </msg>
 
             <msg>
                 <name>58015.C</name>
                 <text>The DDM object 0x{0} is not supported.  The connection has been terminated.</text>
-                <arg>value</arg>
+                <arg>distributedDataManagementObject</arg>
             </msg>
 
             <msg>
                 <name>58016.C</name>
                 <text>The DDM parameter 0x{0} is not supported.  The connection has been terminated.</text>
-                <arg>value</arg>
+                <arg>distributedDataManagementParameter</arg>
             </msg>
 
             <msg>
                 <name>58017.C</name>
                 <text>The DDM parameter value 0x{0} is not supported.  An input host variable may not be within the range the server supports.  The connection has been terminated.</text>
-                <arg>value</arg>
+                <arg>distributedDataManagementParameterValue</arg>
             </msg>
 
         </family>
@@ -3171,13 +3179,13 @@ Guide.
             <msg>
                 <name>X0X61.S</name>
                 <text>The values for column '{4}' in index '{0}' and table '{1}.{2}' do not match for row location {3}.  The value in the index is '{5}', while the value in the base table is '{6}'.  The full index key, including the row location, is '{7}'.  The suggested corrective action is to recreate the index.</text>
-                <arg>columnName</arg>
                 <arg>indexName</arg>
-                <arg>schemaNamet</arg>
+                <arg>schemaName</arg>
                 <arg>tableName</arg>
-                <arg>location</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>rowLocation</arg>
+                <arg>columnName</arg>
+                <arg>dataValue</arg>
+                <arg>dataValue</arg>
                 <arg>indexKey</arg>
             </msg>
 
@@ -3193,7 +3201,7 @@ Guide.
             <msg>
                 <name>X0X63.S</name>
                 <text>Got IOException '{0}'.</text>
-                <arg>value</arg>
+                <arg>exceptionText</arg>
             </msg>
 
             <msg>
@@ -3205,8 +3213,8 @@ Guide.
             <msg>
                 <name>X0X81.S</name>
                 <text>{0} '{1}' does not exist.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlObjectType</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -3242,7 +3250,7 @@ Guide.
             <msg>
                 <name>X0Y16.S</name>
                 <text>'{0}' is not a view.  If it is a table, then use DROP TABLE instead.</text>
-                <arg>value</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -3265,9 +3273,9 @@ Guide.
                 <name>X0Y25.S</name>
                 <text>Operation '{0}' cannot be performed on object '{1}' because {2} '{3}' is dependent on that object.</text>
                 <arg>operationName</arg>
-                <arg>objectName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlObjectName</arg>
+                <arg>sqlObjectType</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -3303,10 +3311,10 @@ Guide.
             <msg>
                 <name>X0Y32.S</name>
                 <text>{0} '{1}' already exists in {2} '{3}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlObjectType</arg>
+                <arg>sqlObjectName</arg>
+                <arg>sqlObjectType</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
@@ -3332,11 +3340,10 @@ Guide.
 
             <msg>
                 <name>X0Y43.S</name>
-                <text>Constraint '{0}' is invalid: the number of columns in {0} ({1}) does not match the number of columns in the referenced key ({2}).</text>
+                <text>Constraint '{0}' is invalid: the number of columns ({1}) does not match the number of columns in the referenced key ({2}).</text>
                 <arg>constraintName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>number</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -3379,7 +3386,7 @@ Guide.
             <msg>
                 <name>X0Y56.S</name>
                 <text>'{0}' is not allowed on the System table '{1}'.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
                 <arg>tableName</arg>
             </msg>
 
@@ -3398,9 +3405,9 @@ Guide.
             <msg>
                 <name>X0Y59.S</name>
                 <text>Attempt to add or enable constraint(s) on table '{1}' failed because the table contains {2} row(s) that violate the following check constraint(s): {0}.</text>
-                <arg>tableName</arg>
-                <arg>rowName</arg>
                 <arg>constraintName</arg>
+                <arg>tableName</arg>
+                <arg>rowCount</arg>
             </msg>
 
             <msg>
@@ -3428,22 +3435,21 @@ Guide.
             <msg>
                 <name>X0Y68.S</name>
                 <text>{0} '{1}' already exists.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>sqlObjectType</arg>
+                <arg>sqlObjectName</arg>
             </msg>
 
             <msg>
                 <name>X0Y69.S</name>
-                <text>{1} is not supported in trigger {0}.</text>
-                <arg>value</arg>
+                <text>DDL is not supported in trigger {0}.</text>
                 <arg>triggerName</arg>
             </msg>
 
             <msg>
                 <name>X0Y70.S</name>
                 <text>INSERT, UPDATE and DELETE are not permitted on table {1} because trigger {0} is active.</text>
-                <arg>tableName</arg>
                 <arg>triggerName</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
@@ -3455,8 +3461,8 @@ Guide.
             <msg>
                 <name>X0Y72.S</name>
                 <text>Bulk insert replace is not permitted on '{0}' because it has an enabled trigger ({1}).</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>tableName</arg>
+                <arg>triggerName</arg>
             </msg>
 
             <msg>
@@ -3472,15 +3478,15 @@ Guide.
             <msg>
                 <name>X0Y78.S.1</name>
                 <text>{0}.executeQuery() cannot be called because multiple result sets were returned.  Use {1}.execute() to obtain multiple results.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>javaInterfaceName</arg>
+                <arg>javaInterfaceName</arg>
             </msg>
 
             <msg>
                 <name>X0Y78.S.2</name>
                 <text>{0}.executeQuery() was called but no result set was returned. Use {1}.executeUpdate() for non-queries.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>javaInterfaceName</arg>
+                <arg>javaInterfaceName</arg>
             </msg>
 
             <msg>
@@ -3531,8 +3537,8 @@ Guide.
             <msg>
                 <name>XBCA0.S</name>
                 <text>Cannot create new object with key {1} in {0} cache. The object already exists in the cache. </text>
-                <arg>key</arg>
-                <arg>cache</arg>
+                <arg>cacheName</arg>
+                <arg>keyValue</arg>
             </msg>
 
         </family>
@@ -3556,15 +3562,15 @@ Guide.
             <msg>
                 <name>XBCM3.S</name>
                 <text>Method {1}() does not exist in generated class {0}.</text>
-                <arg>methodName</arg>
                 <arg>className</arg>
+                <arg>methodName</arg>
             </msg>
 
             <msg>
                 <name>XBCM4.S</name>
                 <text>Java class file format limit(s) exceeded: {1} in generated class {0}.</text>
-                <arg>value</arg>
                 <arg>className</arg>
+                <arg>limitDescriptor</arg>
             </msg>
 
         </family>
@@ -3622,7 +3628,7 @@ Guide.
             <msg>
                 <name>XBCXB.S</name>
                 <text>Bad encryption padding '{0}' or padding not specified. 'NoPadding' must be used.</text>
-                <arg>value</arg>
+                <arg>paddingDirective</arg>
             </msg>
 
             <msg>
@@ -3753,13 +3759,13 @@ Guide.
             <msg>
                 <name>XBM02.D</name>
                 <text>Startup failed due to missing functionality for {0}. Please ensure your classpath includes the correct Derby software.</text>
-                <arg>value</arg>
+                <arg>moduleName</arg>
             </msg>
 
             <msg>
                 <name>XBM05.D</name>
                 <text>Startup failed due to missing product version information for {0}.</text>
-                <arg>value</arg>
+                <arg>productName</arg>
             </msg>
 
             <msg>
@@ -3775,8 +3781,8 @@ Guide.
             <msg>
                 <name>XBM08.D</name>
                 <text>Could not instantiate {0} StorageFactory class {1}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>subSubProtocol</arg>
+                <arg>className</arg>
             </msg>
 
             <msg>
@@ -3887,34 +3893,34 @@ Guide.
             <msg>
                 <name>XBM0V.S</name>
                 <text>An exception was thrown while loading class {1} registered for identifier {0}.</text>
-                <arg>className</arg>
                 <arg>identifierName</arg>
+                <arg>className</arg>
             </msg>
 
             <msg>
                 <name>XBM0W.S</name>
                 <text>An exception was thrown while creating an instance of class {1} registered for identifier {0}.</text>
-                <arg>className</arg>
                 <arg>identifierName</arg>
+                <arg>className</arg>
             </msg>
 
             <msg>
                 <name>XBM0X.D</name>
                 <text>Supplied territory description '{0}' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.</text>
-                <arg>value</arg>
+                <arg>territoryID</arg>
             </msg>
 
             <msg>
                 <name>XBM03.D</name>
                 <text>Supplied value '{0}' for collation attribute is invalid, expecting UCS_BASIC or TERRITORY_BASED.</text>
-                <arg>value</arg>
+                <arg>collationName</arg>
             </msg>
 
             <msg>
                 <name>XBM04.D</name>
                 <text>Collator support not available from the JVM for the database's locale '{0}'.</text>
-                <arg>value</arg>
+                <arg>localeName</arg>
             </msg>
 
             <msg>
@@ -4070,7 +4076,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCL30.S</name>
                 <text>An IOException was thrown when reading a '{0}' from an InputStream.</text>
-                <arg>value</arg>
+                <arg>dataType</arg>
             </msg>
 
             <msg>
@@ -4099,13 +4105,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCL36.S</name>
                 <text>The delete rule of foreign key must be {0}. (The referential constraint is self-referencing and an existing self-referencing constraint has the indicated delete rule (NO ACTION, RESTRICT or CASCADE).)</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
                 <name>XCL37.S</name>
                 <text>The delete rule of foreign key must be {0}. (The referential constraint is self-referencing and the table is dependent in a relationship with a delete rule of CASCADE.)</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
@@ -4157,7 +4163,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCL47.S</name>
                 <text>Use of '{0}' requires database to be upgraded from version {1} to version {2} or later.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
                 <arg>versionNumber</arg>
                 <arg>versionNumber</arg>
             </msg>
@@ -4165,14 +4171,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCL48.S</name>
                 <text> TRUNCATE TABLE is not permitted on '{0}' because unique/primary key constraints on this table are referenced by enabled foreign key constraints from other tables. </text>
-                <arg>value</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>XCL49.S</name>
                 <text> TRUNCATE TABLE is not permitted on '{0}' because it has an enabled DELETE trigger ({1}).</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>tableName</arg>
+                <arg>triggerName</arg>
             </msg>
 
             <msg>
@@ -4201,8 +4207,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCW00.D</name>
                 <text>Unsupported upgrade from '{0}' to '{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>versionID</arg>
+                <arg>versionID</arg>
             </msg>
 
         </family>
@@ -4241,15 +4247,15 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCY00.S</name>
                 <text>Invalid value for property '{0}'='{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>propertyName</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
                 <name>XCY02.S</name>
                 <text>The requested property change is not supported '{0}'='{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>propertyName</arg>
+                <arg>propertyValue</arg>
             </msg>
 
             <msg>
@@ -4294,8 +4300,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCZ02.S</name>
                 <text>Invalid parameter '{0}'='{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>propertyName</arg>
+                <arg>propertyValue</arg>
             </msg>
 
         </family>
@@ -4303,13 +4309,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
         <family>
             <title>Class XD00: Dependency Manager</title>
-
-            <msg>
-                <name>XD003.S</name>
-                <text>Unable to restore dependency from disk. DependableFinder = '{0}'. Further information: '{1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
-            </msg>
 
             <msg>
                 <name>XD004.S</name>
@@ -4464,7 +4463,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ009.S</name>
                 <text>Use of CallableStatement required for stored procedure call or use of output parameters: {0}</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
@@ -4480,7 +4479,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ012.S</name>
                 <text>'{0}' already closed.</text>
-                <arg>value</arg>
+                <arg>interfaceName</arg>
             </msg>
 
             <msg>
@@ -4568,14 +4567,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ042.S</name>
                 <text>'{0}' is not a valid value for property '{1}'.</text>
-                <arg>value</arg>
+                <arg>propertyValue</arg>
                 <arg>propertyName</arg>
             </msg>
 
             <msg>
                 <name>XJ044.S</name>
                 <text>'{0}' is an invalid scale.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -4629,8 +4628,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XJ05B.C</name>
                 <text>JDBC attribute '{0}' has an invalid value '{1}', valid values are '{2}'.</text>
                 <arg>attributeName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>attributeValue</arg>
+                <arg>attributeValues</arg>
             </msg>
 
             <msg>
@@ -4647,31 +4646,31 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ062.S</name>
                 <text>Invalid parameter value '{0}' for ResultSet.setFetchSize(int rows).</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>XJ063.S</name>
                 <text>Invalid parameter value '{0}' for Statement.setMaxRows(int maxRows).  Parameter value must be &gt;= 0.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>XJ064.S</name>
                 <text>Invalid parameter value '{0}' for setFetchDirection(int direction).</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>XJ065.S</name>
                 <text>Invalid parameter value '{0}' for Statement.setFetchSize(int rows).</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
                 <name>XJ066.S</name>
                 <text>Invalid parameter value '{0}' for Statement.setMaxFieldSize(int max).</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -4714,7 +4713,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ074.S</name>
                 <text>Invalid parameter value '{0}' for Statement.setQueryTimeout(int seconds).</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -4731,7 +4730,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ078.S</name>
                 <text>Offset '{0}' is either less than zero or is too large for the current BLOB/CLOB.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -4755,7 +4754,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ081.S</name>
                 <text>Invalid value '{0}' passed as parameter '{1}' to method '{2}'</text>
-                <arg>value</arg>
+                <arg>parameterValue</arg>
                 <arg>parameterName</arg>
                 <arg>methodName</arg>
             </msg>
@@ -4806,13 +4805,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XJ096.S</name>
-                <text>A resource bundle could not be found in the {0} package for {1}</text>
-                <arg>packageName</arg>
-                <arg>value</arg>
-            </msg>
-
-            <msg>
                 <name>XJ097.S</name>
                 <text>Cannot rollback or release a savepoint that was not created by this connection.</text>
             </msg>
@@ -4820,7 +4812,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ098.S</name>
                 <text>The auto-generated keys value {0} is invalid</text>
-                <arg>value</arg>
+                <arg>keyValue</arg>
             </msg>
 
             <msg>
@@ -4841,7 +4833,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ104.S</name>
                 <text>Shared key length is invalid: {0}.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -4897,7 +4889,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ115.S</name>
                 <text>Unable to open resultSet with requested holdability {0}.</text>
-                <arg>value</arg>
+                <arg>invalidNumber</arg>
             </msg>
 
             <msg>
@@ -4949,13 +4941,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ128.S</name>
                 <text>Unable to unwrap for '{0}'</text>
-                <arg>value</arg>
+                <arg>interfaceName</arg>
             </msg>
 
             <msg>
                 <name>XJ200.S</name>
                 <text>Exceeded maximum number of sections {0}</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -4979,7 +4971,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ206.S</name>
                 <text>SQL text '{0}' has no tokens.</text>
-                <arg>value</arg>
+                <arg>sqlText</arg>
             </msg>
 
             <msg>
@@ -5103,40 +5095,40 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XN014.S</name>
                 <text>Encountered an Exception while reading from the stream specified by parameter #{0}.  The remaining data expected by the server has been filled with 0x0. The Exception had this message: {1}.</text>
-                <arg>value</arg>
+                <arg>number</arg>
                 <arg>messageText</arg>
             </msg>
 
             <msg>
                 <name>XN015.S</name>
                 <text>Network protocol error: the specified size of the InputStream, parameter #{0}, is less than the actual InputStream length.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>XN016.S</name>
                 <text>Encountered an Exception while trying to verify the length of the stream specified by parameter #{0}.  The Exception had this message: {1}.</text>
-                <arg>value</arg>
+                <arg>number</arg>
                 <arg>messageText</arg>
             </msg>
 
             <msg>
                 <name>XN017.S</name>
                 <text>End of stream prematurely reached while reading the stream specified by parameter #{0}.  The remaining data expected by the server has been filled with 0x0.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>XN018.S</name>
                 <text>Network protocol error: the specified size of the Reader, parameter #{0}, is less than the actual InputStream length.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>XN019.S</name>
                 <text>Error executing a {0}, server returned {1}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>xaFunctionName</arg>
+                <arg>xaError</arg>
             </msg>
 
             <msg>
@@ -5295,7 +5287,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSAI2.S</name>
                 <text>The conglomerate ({0}) requested does not exist.</text>
-                <arg>value</arg>
+                <arg>conglomerateNumber</arg>
             </msg>
 
             <msg>
@@ -5312,7 +5304,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSAM0.S</name>
                 <text>Exception encountered while trying to boot module for '{0}'.</text>
-                <arg>value</arg>
+                <arg>interfaceName</arg>
             </msg>
 
             <msg>
@@ -5340,10 +5332,10 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSAM6.S</name>
-                <text>Record {2} on page {1} in container {0} not found.</text>
-                <arg>recordNumber</arg>
-                <arg>pageNumber</arg>
                 <arg>containerName</arg>
+                <text>Record {2} on page {1} in container {0} not found.</text>
+                <arg>pageNumber</arg>
+                <arg>recordNumber</arg>
             </msg>
 
         </family>
@@ -5419,7 +5411,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSCB4.S</name>
                 <text>A method on a btree open scan has been called prior to positioning the scan on the first row (i.e. no next() call has been made yet).  The current state of the scan is ({0}).</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -5435,14 +5427,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSCB7.S</name>
                 <text>An internal error was encountered during a btree scan - current_rh is null = {0}, position key is null = {1}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>trueOrFalse</arg>
+                <arg>trueOrFalse</arg>
             </msg>
 
             <msg>
                 <name>XSCB8.S</name>
                 <text>The btree conglomerate {0} is closed.</text>
-                <arg>value</arg>
+                <arg>conglomerateNumber</arg>
             </msg>
 
             <msg>
@@ -5564,7 +5556,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSDAA.S</name>
                 <text>Illegal time stamp {0}, either time stamp is from a different page or of incompatible implementation</text>
-                <arg>value</arg>
+                <arg>timestamp</arg>
             </msg>
 
             <msg>
@@ -5611,13 +5603,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSDAK.S</name>
                 <text>Wrong page is gotten for record handle {0}.</text>
-                <arg>value</arg>
+                <arg>recordHandle</arg>
             </msg>
 
             <msg>
                 <name>XSDAL.S</name>
                 <text>Record handle {0} unexpectedly points to overflow page.</text>
-                <arg>value</arg>
+                <arg>recordHandle</arg>
             </msg>
 
             <msg>
@@ -5659,14 +5651,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDB2.D</name>
                 <text>Unknown container format at container {0} : {1}</text>
                 <arg>containerName</arg>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>XSDB3.D</name>
                 <text>Container information cannot change once written: was {0}, now {1}</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>number</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
@@ -5692,17 +5684,17 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSDB7.D</name>
                 <text>WARNING: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result and may have already occurred.</text>
-                <arg>value</arg>
+                <arg>derbyInstanceID</arg>
                 <arg>databaseName</arg>
-                <arg>value</arg>
+                <arg>derbyInstanceID</arg>
             </msg>
 
             <msg>
                 <name>XSDB8.D</name>
                 <text>WARNING: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result if 2 instances of Derby boot on the same database at the same time.  The derby.database.forceDatabaseLock=true property has been set, so the database will not boot until the db.lck is no longer present.  Normally this file is removed when the first instance of Derby to boot on the database exits, but it may be left behind in some shutdowns.  It will be necessary to remove the file by hand in that case.  It is important to verify that no other VM is accessing the database before deleting the db.lck file by hand.</text>
-                <arg>value</arg>
+                <arg>derbyInstanceID</arg>
                 <arg>databaseName</arg>
-                <arg>value</arg>
+                <arg>derbyInstanceID</arg>
             </msg>
 
             <msg>
@@ -5721,7 +5713,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDBB.D</name>
                 <text>Unknown page format at page {0}, page dump follows: {1} </text>
                 <arg>page</arg>
-                <arg>value</arg>
+                <arg>hexDump</arg>
             </msg>
 
             <msg>
@@ -5752,7 +5744,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDF2.S</name>
                 <text>Exception during creation of file {0} for container, file could not be removed.  The exception was: {1}.</text>
                 <arg>fileName</arg>
-                <arg>value</arg>
+                <arg>exceptionText</arg>
             </msg>
 
             <msg>
@@ -5765,7 +5757,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDF4.S</name>
                 <text>Exception during remove of file {0} for dropped container, file could not be removed {1}.</text>
                 <arg>fileName</arg>
-                <arg>value</arg>
+                <arg>detailedException</arg>
             </msg>
 
             <msg>
@@ -5777,7 +5769,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSDF7.S</name>
                 <text>Newly created page failed to be latched {0}</text>
-                <arg>value</arg>
+                <arg>pageKey</arg>
             </msg>
 
             <msg>
@@ -5795,8 +5787,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDFD.S</name>
                 <text>Different page image read on 2 I/Os on Page {0}, first image has incorrect checksum, second image has correct checksum. Page images follows: {1} {2}</text>
                 <arg>page</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>hexDump</arg>
+                <arg>hexDump</arg>
             </msg>
 
             <msg>
@@ -5838,9 +5830,9 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDG2.D</name>
                 <text>Invalid checksum on Page {0}, expected={1}, on-disk version={2}, page dump follows: {3}</text>
                 <arg>page</arg>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>number</arg>
+                <arg>number</arg>
+                <arg>hexDump</arg>
             </msg>
 
             <msg>
@@ -5859,7 +5851,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSDG6.D</name>
                 <text>Data segment directory not found in {0} backup during restore. Please make sure that backup copy is the right one and it is not corrupted.</text>
-                <arg>value</arg>
+                <arg>directoryPath</arg>
             </msg>
 
             <msg>
@@ -5872,7 +5864,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSDG8.D</name>
                 <text>Unable to copy directory '{0}' to '{1}' during restore. Please make sure that there is enough space and permissions are correct. </text>
                 <arg>directoryName</arg>
-                <arg>value</arg>
+                <arg>directoryName</arg>
             </msg>
 
             <msg>
@@ -5889,7 +5881,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSLA0.D</name>
                 <text>Cannot flush the log file to disk {0}.</text>
-                <arg>value</arg>
+                <arg>filePath</arg>
             </msg>
 
             <msg>
@@ -5933,9 +5925,9 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSLA8.D</name>
                 <text>Cannot rollback transaction {0}, trying to compensate {1} operation with {2}</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>transactionID</arg>
+                <arg>undoableOperation</arg>
+                <arg>compensationOperation</arg>
             </msg>
 
             <msg>
@@ -5951,23 +5943,23 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSLAC.D</name>
-                <text>Database at {0} have incompatible format with the current version of software, it may have been created by or upgraded by a later version.</text>
-                <arg>value</arg>
+                <text>Database at {0} has a format incompatible with the current version of software. It may have been created by or upgraded by a later version.</text>
+                <arg>directoryPath</arg>
             </msg>
 
             <msg>
                 <name>XSLAD.D</name>
-                <text>log Record at instant {2} in log file {3} corrupted. Expected log record length {0}, real length {1}.</text>
-                <arg>value</arg>
+                <text>Log Record at instant {2} in log file {3} corrupted. Expected log record length {0}, real length {1}.</text>
+                <arg>length</arg>
+                <arg>length</arg>
+                <arg>logInstant</arg>
                 <arg>logfileName</arg>
-                <arg>value</arg>
-                <arg>value</arg>
             </msg>
 
             <msg>
                 <name>XSLAE.D</name>
                 <text>Control file at {0} cannot be written or updated.</text>
-                <arg>value</arg>
+                <arg>fileName</arg>
             </msg>
 
             <msg>
@@ -5993,41 +5985,42 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSLAK.D</name>
                 <text>Database has exceeded largest log file number {0}.</text>
-                <arg>value</arg>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>XSLAL.D</name>
-                <text>log record size {2} exceeded the maximum allowable log file size {3}. Error encountered in log file {0}, position {1}.</text>
-                <arg>value</arg>
-                <arg>number</arg>
+                <text>Log record size {2} exceeded the maximum allowable log file size {3}. Error encountered in log file {0}, position {1}.</text>
                 <arg>logfileName</arg>
-                <arg>value</arg>
+                <arg>position</arg>
+                <arg>size</arg>
+                <arg>size</arg>
             </msg>
 
             <msg>
                 <name>XSLAM.D</name>
-                <text>Cannot verify database format at {1} due to IOException.</text>
-                <arg>value</arg>
+                <text>Cannot verify database format at {1} due to IOException: {0}</text>
+                <arg>exceptionDetails</arg>
+                <arg>directoryPath</arg>
             </msg>
 
             <msg>
                 <name>XSLAN.D</name>
                 <text>Database at {0} has an incompatible format with the current version of the software.  The database was created by or upgraded by version {1}.</text>
-                <arg>value</arg>
+                <arg>directoryPath</arg>
                 <arg>versionNumber</arg>
             </msg>
 
             <msg>
                 <name>XSLAO.D</name>
                 <text>Recovery failed unexpected problem: {0}.</text>
-                <arg>value</arg>
+                <arg>detailedMessage</arg>
             </msg>
 
             <msg>
                 <name>XSLAP.D</name>
                 <text>Database at {0} is at version {1}. Beta databases cannot be upgraded,</text>
-                <arg>value</arg>
+                <arg>directoryPath</arg>
                 <arg>versionNumber</arg>
             </msg>
 
@@ -6041,7 +6034,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XSLAR.D</name>
                 <text>Unable to copy log file '{0}' to '{1}' during restore. Please make sure that there is enough space and permissions are correct. </text>
                 <arg>logfileName</arg>
-                <arg>value</arg>
+                <arg>logFileName</arg>
             </msg>
 
             <msg>
@@ -6075,18 +6068,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XSLB4.S</name>
-                <text>Cannot find truncationLWM {0}.</text>
-                <arg>value</arg>
-            </msg>
-
-            <msg>
                 <name>XSLB5.S</name>
                 <text>Illegal truncationLWM instant {1} for truncation point {0}. Legal range is from {2} to {3}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>logInstant</arg>
+                <arg>truncationPoint</arg>
+                <arg>logInstant</arg>
+                <arg>logInstant</arg>
             </msg>
 
             <msg>
@@ -6097,8 +6084,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSLB8.S</name>
                 <text>Trying to reset a scan to {0}, beyond its limit of {1}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>logInstant</arg>
+                <arg>logInstant</arg>
             </msg>
 
             <msg>
@@ -6120,14 +6107,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XSRS1.S</name>
                 <text>Cannot backup the database to {0}, which is not a directory.</text>
-                <arg>value</arg>
+                <arg>directoryPath</arg>
             </msg>
 
             <msg>
                 <name>XSRS4.S</name>
                 <text>Error renaming file (during backup) from {0} to {1}.</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>fileName</arg>
+                <arg>fileName</arg>
             </msg>
 
             <msg>
@@ -6257,28 +6244,12 @@ MessageId.java.
                 <name>10000</name>
                 <text>Encountered error while evaluating XML query expression for {0} operator: {1}</text>
                 <arg>operatorName</arg>
-                <arg>value</arg>
+                <arg>detailedError</arg>
             </msg>
 
             <msg>
                 <name>42Y96.U</name>
                 <text>UNKNOWN</text>
-            </msg>
-
-            <msg>
-                <name>42Y98.U</name>
-                <text>Encountered "{0}" at line {1}, column {2}</text>
-                <arg>value</arg>
-                <arg>lineNumber</arg>
-                <arg>columnNumber</arg>
-            </msg>
-
-            <msg>
-                <name>42Y99.U</name>
-                <text>Lexical error at line {0}, column {1}. Encountered: {2}</text>
-                <arg>lineNumber</arg>
-                <arg>columnNumber</arg>
-                <arg>value</arg>
             </msg>
 
             <msg>
@@ -7374,8 +7345,8 @@ MessageId.java.
             <msg>
                 <name>XJ001.U</name>
                 <text>Java exception: '{1}: {0}'.</text>
-                <arg>exceptionClassName</arg>
                 <arg>errorMessage</arg>
+                <arg>exceptionClassName</arg>
             </msg>
 
             <msg>
@@ -7573,35 +7544,35 @@ MessageId.java.
             <msg>
                 <name>C003</name>
                 <text>Exception loading database jar {0} - {1}</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>jarName</arg>
+                <arg>errorMessage</arg>
             </msg>
 
             <msg>
                 <name>C004</name>
                 <text>Stale class loader for class {0}</text>
-                <arg>value</arg>
+                <arg>className</arg>
             </msg>
 
             <msg>
                 <name>C005</name>
                 <text>Database Class Loader started - derby.database.classpath='{0}'</text>
-                <arg>value</arg>
+                <arg>classpath</arg>
             </msg>
 
             <msg>
                 <name>C006</name>
                 <text>Loaded {0} from database jar {1}</text>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>className</arg>
+                <arg>jarName</arg>
             </msg>
 
             <msg>
                 <name>C007</name>
                 <text>Exception loading class {0} from jar {1} - {2}</text>
-                <arg>value</arg>
-                <arg>value</arg>
-                <arg>value</arg>
+                <arg>className</arg>
+                <arg>jarName</arg>
+                <arg>detailedError</arg>
             </msg>
 
         </family>

@@ -602,7 +602,7 @@ public class SelectNode extends ResultSetNode
 			/* If whereClause is a parameter, (where ?/where -?/where +?), then we should catch it and throw exception
 			 */
 			if (whereClause.isParameterNode())
-				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
+				throw StandardException.newException(SQLState.LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE );
 			
 			whereClause = whereClause.checkIsBoolean();
 			getCompilerContext().popCurrentPrivType();

@@ -143,7 +143,7 @@ public class SectionManager {
         {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.EXCEEDED_MAX_SECTIONS),
-                "32k");
+                "32000");
         }
     }
 

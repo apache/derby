@@ -136,7 +136,7 @@ final class UpdateLoader implements LockOwner {
             });
         }
 		if (vs != null) {
-			vs.println(MessageService.getTextMessage(MessageId.CM_CLASS_LOADER_START, classpath));
+			vs.println(MessageService.getTextMessage(MessageId.CM_CLASS_LOADER_START, classpath ));
 		}
 		
 		thisClasspath = classpath;

@@ -315,7 +315,7 @@ public class SqlXmlUtil
              * continue to run as normal. 
              */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, te, opName, te.getMessage());
+                SQLState.LANG_XML_QUERY_ERROR, opName, te.getMessage());
 
         }
     }

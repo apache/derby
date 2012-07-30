@@ -1387,8 +1387,13 @@ public class JDBC {
             Assert.assertEquals("Unexpected row count",
                                 expectedRows.length, actual.size());
         }
-        Assert.assertTrue("Missing rows in ResultSet",
-                          actual.containsAll(expected));
+        if ( !actual.containsAll(expected) )
+        {
+            expected.removeAll( actual );
+            BaseTestCase.println
+                ( "These expected rows don't appear in the actual result: " + expected );
+            Assert.fail( "Missing rows in ResultSet" );
+        }
     }
 
     /**
