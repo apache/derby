@@ -1026,7 +1026,6 @@ public interface SQLState {
 	String LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER                    = "42Z08";
 
 	// MORE GENERIC LANGUAGE STUFF
-	String LANG_COLUMN_DEFAULT										   = "42Z09.U";
 	String LANG_UDT_BUILTIN_CONFLICT										   = "42Z10";
 	String LANG_STREAM												   = "42Z11.U";
     String LANG_STREAM_INVALID_ACCESS                                  = "42Z12.U";
@@ -1300,7 +1299,6 @@ public interface SQLState {
 
 	// org.apache.derby.catalog.types
 	String TI_SQL_TYPE_NAME			= "44X00.U";
-	String TI_NEXT_ERROR			= "44X05.U";
 
 	// INTERNAL EXCEPTIONS
 	String LANG_UNABLE_TO_GENERATE                                     = "42Z50";

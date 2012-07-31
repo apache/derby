@@ -208,10 +208,7 @@ public final class DefaultDescriptor
 
 				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT, 
 									dm.getActionString(action), 
-									p.getObjectName(),
-									MessageService.getTextMessage(
-										SQLState.LANG_COLUMN_DEFAULT
-									),
+									p.getObjectName(), "DEFAULT",
 									td.getQualifiedName() + "." +
 									cd.getColumnName());
 		}

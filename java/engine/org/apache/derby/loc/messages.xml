@@ -2824,6 +2824,7 @@ Guide.
             <msg>
                 <name>42Z92</name>
                 <text>repeatable read</text>
+                <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
             </msg>
 
             <msg>
@@ -2848,6 +2849,7 @@ Guide.
             <msg>
                 <name>42Z9A</name>
                 <text>read uncommitted</text>
+                <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
             </msg>
 
             <msg>
@@ -5562,7 +5564,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSDAB.S</name>
-                <text>cannot set a null time stamp</text>
+                <text>Cannot set a null time stamp.</text>
             </msg>
 
             <msg>
@@ -6020,14 +6022,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSLAP.D</name>
-                <text>Database at {0} is at version {1}. Beta databases cannot be upgraded,</text>
+                <text>Database at {0} is at version {1}. Beta databases cannot be upgraded.</text>
                 <arg>directoryPath</arg>
                 <arg>versionNumber</arg>
             </msg>
 
             <msg>
                 <name>XSLAQ.D</name>
-                <text>cannot create log file at directory {0}.</text>
+                <text>Cannot create log file at directory {0}.</text>
                 <arg>directoryName</arg>
             </msg>
 
@@ -6264,11 +6266,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>42Z09.U</name>
-                <text>the COLUMN DEFAULT for</text>
-            </msg>
-
-            <msg>
                 <name>42Z10</name>
                 <text>The Java class bound to a user defined type may not be a class used internally by Derby: '{0}'.</text>
                 <arg>javaClassName</arg>
@@ -6414,46 +6411,55 @@ MessageId.java.
             <msg>
                 <name>42Z80.U</name>
                 <text>serializable</text>
+                <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
             </msg>
 
             <msg>
                 <name>42Z81.U</name>
                 <text>read committed</text>
+                <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
             </msg>
 
             <msg>
                 <name>42Z82.U</name>
                 <text>exclusive</text>
+                <comment>A lock mode.</comment>
             </msg>
 
             <msg>
                 <name>42Z83.U</name>
                 <text>instantaneous share</text>
+                <comment>A lock mode.</comment>
             </msg>
 
             <msg>
                 <name>42Z84.U</name>
                 <text>share</text>
+                <comment>A lock mode.</comment>
             </msg>
 
             <msg>
                 <name>42Z85.U</name>
                 <text>table</text>
+                <comment>A lock granularity.</comment>
             </msg>
 
             <msg>
                 <name>42Z86.U</name>
                 <text>row</text>
+                <comment>A lock granularity.</comment>
             </msg>
 
             <msg>
                 <name>42Z87.U</name>
                 <text>share table</text>
+                <comment>Lock mode and granularity.</comment>
             </msg>
 
             <msg>
                 <name>42Z88.U</name>
                 <text>share row</text>
+                <comment>Lock mode and granularity.</comment>
             </msg>
 
             <msg>
@@ -6533,11 +6539,13 @@ MessageId.java.
             <msg>
                 <name>43X14.U</name>
                 <text>table locking</text>
+                <comment>Lock granularity.</comment>
             </msg>
 
             <msg>
                 <name>43X15.U</name>
                 <text>row locking</text>
+                <comment>Lock granularity.</comment>
             </msg>
 
             <msg>
@@ -7262,11 +7270,6 @@ MessageId.java.
             <msg>
                 <name>44X00.U</name>
                 <text>SQL Type Name</text>
-            </msg>
-
-            <msg>
-                <name>44X05.U</name>
-                <text>next error</text>
             </msg>
 
             <msg>
