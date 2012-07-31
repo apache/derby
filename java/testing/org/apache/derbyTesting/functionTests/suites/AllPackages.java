@@ -132,6 +132,9 @@ public class AllPackages extends BaseTestCase {
         // Not supp. by JSR169
         classes.add(ReplicationSuite.class);
 
+        // Compatibility tests (MATS)
+        classes.add("org.apache.derbyTesting.functionTests.tests.compatibility._Suite");
+
         return classes;
     }
     
