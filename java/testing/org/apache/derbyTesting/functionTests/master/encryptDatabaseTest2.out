@@ -69,7 +69,7 @@ ij> xa_getconnection;
 ij> insert into foo values (4);
 1 row inserted/updated/deleted
 ij> xa_recover xa_startrscan;
-Recovered 1 in doubt transactions
+Recovered 1 in-doubt transactions
 Transaction 1 : (1,FILTERED,FILTERED)
 ij> xa_commit xa_2phase 1;
 ij> select * from foo;
@@ -119,7 +119,7 @@ ij> xa_getconnection;
 ij> insert into foo values (6);
 1 row inserted/updated/deleted
 ij> xa_recover xa_startrscan;
-Recovered 1 in doubt transactions
+Recovered 1 in-doubt transactions
 Transaction 1 : (3,FILTERED,FILTERED)
 ij> xa_commit xa_2phase 3;
 ij> select * from foo;

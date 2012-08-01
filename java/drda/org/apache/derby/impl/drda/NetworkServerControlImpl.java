@@ -1298,16 +1298,24 @@ public final class NetworkServerControlImpl {
 	private void consoleTraceMessage(int connNum, boolean on)
 		throws Exception
 	{
+        String  messageID;
+        String[]    args = null;
+        
 		if (connNum == 0)
-			consolePropertyMessage("DRDA_TraceChangeAll.I", on ? "DRDA_ON.I" : "DRDA_OFF.I");
+        {
+            if ( on ) { messageID = "DRDA_TraceChangeAllOn.I"; }
+            else { messageID = "DRDA_TraceChangeAllOff.I"; }
+        }
 		else
 		{
-            String[] args = {
-                on ? "DRDA_ON.I" : "DRDA_OFF.I",
-                Integer.toString(connNum),
-            };
-			consolePropertyMessage("DRDA_TraceChangeOne.I", args);
+            if ( on ) { messageID = "DRDA_TraceChangeOneOn.I"; }
+            else { messageID = "DRDA_TraceChangeOneOff.I"; }
+
+            args = new String[] { Integer.toString(connNum) };
+            
 		}
+        
+        consolePropertyMessage( messageID, args );
 	}
 
 	/**
@@ -1727,8 +1735,7 @@ public final class NetworkServerControlImpl {
 					boolean log = (reader.readByte() == 1);
 					setLogConnections(log);
 					sendOK(writer);
-					consolePropertyMessage("DRDA_LogConnectionsChange.I",
-						(log ? "DRDA_ON.I" : "DRDA_OFF.I"));
+                    logConnectionsChange( log );
 					break;
 				case COMMAND_SYSINFO:
 					sendSysInfo(writer);
@@ -1778,6 +1785,20 @@ public final class NetworkServerControlImpl {
 			currentSession = null;
 		}
 	}
+
+    /** Record a change to the connection logging mode */
+    private void    logConnectionsChange( boolean on )
+        throws Exception
+    {
+        String[]    args = null;
+        String      messageID;
+
+        if ( on ) { messageID = "DRDA_LogConnectionsChangeOn.I"; }
+        else { messageID = "DRDA_LogConnectionsChangeOff.I"; }
+
+        consolePropertyMessage( messageID, args );
+    }
+    
 	/**
 	 * Get the next session for the thread to work on
 	 * Called from DRDAConnThread after session completes or timeslice
@@ -2248,7 +2269,7 @@ public final class NetworkServerControlImpl {
 				{
 					boolean on = isOn((String)commandArgs.get(0));
 					logConnections(on);
-					consolePropertyMessage("DRDA_LogConnectionsChange.I", on ? "DRDA_ON.I" : "DRDA_OFF.I");
+                    logConnectionsChange( on );
 					break;
 				}
 			case COMMAND_SYSINFO:
