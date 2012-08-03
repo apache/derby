@@ -603,7 +603,7 @@ public class MessageBuilder extends Task
             propertiesPW.println( "#" );
             for ( int i = 0; i < args.length; i++ )
             {
-                propertiesPW.println( "#    " + args[ i ] );
+                propertiesPW.println( "#    {" + i + "} = " + args[ i ] );
             }
             propertiesPW.println( "#" );
         }
