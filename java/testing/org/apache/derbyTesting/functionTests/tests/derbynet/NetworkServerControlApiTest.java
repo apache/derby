@@ -378,16 +378,16 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "Invalid value, -12, for maxthreads.",
                 "Usage: NetworkServerControl <commands>",
                 "Commands:",
-                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
-                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
-                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
+                "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
         }, maxthreadsCmd3, 1);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
@@ -428,16 +428,16 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for maxthreads.",
                 "Usage: NetworkServerControl <commands>",
                 "Commands:",
-                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
-                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
-                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",}, maxthreadsCmd6, 1);
+                "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
+                "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",}, maxthreadsCmd6, 1);
 
 
         maxValue = server.getMaxThreads();
@@ -517,16 +517,16 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, -12, for timeslice.",
                 "Usage: NetworkServerControl <commands> ",
                 "Commands:",
-                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
-                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
-                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]"}, timesliceCmd3, 1);
+                "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
+                "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]"}, timesliceCmd3, 1);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
     }
@@ -564,16 +564,16 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for timeslice.",
                 "Usage: NetworkServerControl <commands> ",
                 "Commands:",
-                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
-                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
-                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]"}, timesliceCmd6, 1);
+                "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
+                "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]"}, timesliceCmd6, 1);
         timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
     }

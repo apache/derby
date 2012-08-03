@@ -49,7 +49,7 @@ public class StatementUtil
 			break;
 
 		  default:
-			retval = MessageService.getTextMessage(SQLState.LANG_UNKNOWN);
+			retval = "UNKNOWN";
 			break;
 		}
 

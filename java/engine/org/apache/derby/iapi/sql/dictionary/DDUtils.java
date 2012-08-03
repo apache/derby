@@ -861,22 +861,21 @@ public	class	DDUtils
 		String raRuleStringId;
 		switch (raRule){
 		case StatementType.RA_CASCADE:
-			raRuleStringId = SQLState.LANG_DELETE_RULE_CASCADE;
+			raRuleStringId = "CASCADE";
 			break;
 		case StatementType.RA_RESTRICT:
-			raRuleStringId = SQLState.LANG_DELETE_RULE_RESTRICT;
+			raRuleStringId = "RESTRICT";
 				break;
-		case StatementType.RA_NOACTION:
-			raRuleStringId = SQLState.LANG_DELETE_RULE_NOACTION;
-			break;
 		case StatementType.RA_SETNULL:
-			raRuleStringId = SQLState.LANG_DELETE_RULE_SETNULL;
+			raRuleStringId = "SET NULL";
 			break;
 		case StatementType.RA_SETDEFAULT:
-			raRuleStringId = SQLState.LANG_DELETE_RULE_SETDEFAULT;
+			raRuleStringId = "SET DEFAULT";
 			break;
+		case StatementType.RA_NOACTION:
 		default: 
-			raRuleStringId =SQLState.LANG_DELETE_RULE_NOACTION ; // NO ACTION (default value)
+			raRuleStringId = "NO ACTION";
+			break;
 		}
 
 		String raRuleMessageString = MessageService.getTextMessage(raRuleStringId); 

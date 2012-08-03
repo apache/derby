@@ -44,16 +44,16 @@ Test - most elements allowed in a select list
 First try a select with one column less than maximum allowed number of columns
 Next try a select with maximum allowed number of columns
 Next try a select with one column more than maximum allowed number of columns
-expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or SELECT list.
 Next try a select with 2 more columns than maximum allowed number of columns
-expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or SELECT list.
 Test - most columns allowed in a ORDER BY clause
 First try order by with one column less than maximum allowed number of columns
 Next try an order by with maximum allowed number of columns
 Next try an order by with one column more than maximum allowed number of columns
-expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or SELECT list.
 And finally try an order by with 2 more columns than maximum allowed number of columns
-expected exception SELECT statement has too many items in GROUP BY, ORDER BY or select list.
+expected exception SELECT statement has too many items in GROUP BY, ORDER BY or SELECT list.
 Test - most parameters allowed for a stored procedure
 First create a procedure with one parameter less than maximum allowed number of parameters
 Next create a procedure with maximum allowed number of parameters

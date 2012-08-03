@@ -2620,29 +2620,29 @@ ij> values date('1996-09-09'), 'a';
 1         
 ----------
 1996-09-09
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values 'a', date('1996-09-09');
 1         
 ----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values time('11:11:11'), 'a';
 1       
 --------
 11:11:11
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values 'a', time('11:11:11');
 1       
 --------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values timestamp('1996-09-09 11:11:11.5'), 'a';
 1                            
 -----------------------------
 1996-09-09 11:11:11.5        
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values 'a', timestamp('1996-09-09 11:11:11.5');
 1                            
 -----------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> -- comparisons at the language level
 select si from all1 where cast(1 as smallint) = 'a';
 ERROR 42818: Comparisons between 'SMALLINT' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
@@ -2861,77 +2861,77 @@ ERROR 42818: Comparisons between 'CHAR (UCS_BASIC)' and 'DECIMAL' are not suppor
 ij> select si from all1 where 'a' <> 1.1;
 ERROR 42818: Comparisons between 'CHAR (UCS_BASIC)' and 'DECIMAL' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select si from all1 where date('1996-09-09') = 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where date('1996-09-09') > 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where date('1996-09-09') >= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where date('1996-09-09') < 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where date('1996-09-09') <= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where date('1996-09-09') <> 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' = date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' > date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' >= date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' < date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <= date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <> date('1996-09-09');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') = 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') > 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') >= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') < 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') <= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where time('11:11:11') <> 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' = time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' > time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' >= time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' < time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <= time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <> time('11:11:11');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )> 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )>= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )< 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )<= 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where timestamp('1996-09-09 11:11:11.4' )<> 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' = timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' > timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' >= timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' < timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <= timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select si from all1 where 'a' <> timestamp('1996-09-09 11:11:11.4');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> -- create an all types table
 drop table all1;
 0 rows inserted/updated/deleted
@@ -3193,147 +3193,147 @@ ERROR 42818: Comparisons between 'CHAR (UCS_BASIC)' and 'NUMERIC' are not suppor
 ij> select 1 from all1 where dt = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt <> 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <> dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm <> 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <> tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms <> 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <> tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> autocommit off;
 ij> -- test start and stop positions for conversions to (var)char
 create index all1_si on all1(si);
@@ -3565,123 +3565,123 @@ ERROR 42818: Comparisons between 'CHAR (UCS_BASIC)' and 'NUMERIC' are not suppor
 ij> select 1 from all1 where dt = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where dt <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= dt;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tm <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= tm;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms = 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms > 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms >= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms < 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where tms <= 'a';
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' = tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' > tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' >= tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' < tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select 1 from all1 where 'a' <= tms;
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> rollback;
 ij> -- insert tests
 insert into all1(si) values 'a';
@@ -3705,11 +3705,11 @@ ERROR 42821: Columns of type 'DECIMAL' cannot hold values of type 'CHAR'.
 ij> insert into all1(num) values 'a';
 ERROR 42821: Columns of type 'NUMERIC' cannot hold values of type 'CHAR'. 
 ij> insert into all1(dt) values 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> insert into all1(tm) values 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> insert into all1(tms) values 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> -- update tests
 update all1 set si = 'a';
 ERROR 42821: Columns of type 'SMALLINT' cannot hold values of type 'CHAR'. 
@@ -3732,11 +3732,11 @@ ERROR 42821: Columns of type 'DECIMAL' cannot hold values of type 'CHAR'.
 ij> update all1 set num = 'a';
 ERROR 42821: Columns of type 'NUMERIC' cannot hold values of type 'CHAR'. 
 ij> update all1 set dt = 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> update all1 set tm = 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> update all1 set tms = 'a';
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> rollback;
 ij> -- arithmetic
 -- arithmetic on 2 non-numeric strings
@@ -3773,27 +3773,27 @@ ij> -- extract
 values year( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values month( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values day( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values hour( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values minute( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values second( '1');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> -- string does not match default
 -- date for year/month/day
 -- time for hour/minute/second
@@ -3804,7 +3804,7 @@ values year( '1996-09-10 10:11:12.5');
 ij> values year( '10:11:12.5');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values month( '1996-09-10 10:11:12.5');
 1          
 -----------
@@ -3812,7 +3812,7 @@ ij> values month( '1996-09-10 10:11:12.5');
 ij> values month( '10:11:12.5');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values day( '1996-09-10 10:11:12.5');
 1          
 -----------
@@ -3820,7 +3820,7 @@ ij> values day( '1996-09-10 10:11:12.5');
 ij> values day( '10:11:12.5');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values hour( '1996-09-10 10:11:12.5');
 1          
 -----------
@@ -3828,7 +3828,7 @@ ij> values hour( '1996-09-10 10:11:12.5');
 ij> values hour( '1996-09-10');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values minute( '1996-09-10 10:11:12.5');
 1          
 -----------
@@ -3836,7 +3836,7 @@ ij> values minute( '1996-09-10 10:11:12.5');
 ij> values minute( '1996-09-10');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values second( '1996-09-10 10:11:12.5');
 1          
 -----------
@@ -3844,7 +3844,7 @@ ij> values second( '1996-09-10 10:11:12.5');
 ij> values second( '1996-09-10');
 1          
 -----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> -- sum and avg not supported on string types
 select sum('1') from all1;
 ERROR 42Y22: Aggregate SUM cannot operate on type CHAR.
@@ -3873,12 +3873,12 @@ ij> select * from all1 a, all1 b
 where a.dt = b.c;
 SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             |SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select * from all1 a, all1 b 
 where a.dt = b.vc;
 SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             |SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select * from all1 a, all1 b 
 where a.dt = b.lvc;
 ERROR 42818: Comparisons between 'DATE' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
@@ -3886,12 +3886,12 @@ ij> select * from all1 a, all1 b
 where b.dt = a.c;
 SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             |SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select * from all1 a, all1 b 
 where b.dt = a.vc;
 SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             |SI    |I          |LI                  |R            |DP                    |DC     |NUM    |B   |BV  |LBV                                                                                                                             |DT        |TM      |TMS                          |C   |VC  |LVC                                                                                                                             
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select * from all1 a, all1 b 
 where b.dt = a.lvc;
 ERROR 42818: Comparisons between 'DATE' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')

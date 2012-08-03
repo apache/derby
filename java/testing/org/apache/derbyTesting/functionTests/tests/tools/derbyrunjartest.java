@@ -105,7 +105,7 @@ public class derbyrunjartest extends BaseTestCase {
     public void testSysinfo() throws Exception {
         String[] cmd = { "sysinfo", "-cp", "help" };
         String[] output = {
-            "USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [ anyClass.class ] ]"
+            "Usage: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [ anyClass.class ] ]"
         };
         runtool(cmd, output, 0);
     }
@@ -113,15 +113,15 @@ public class derbyrunjartest extends BaseTestCase {
     public void testDblook() throws Exception {
         String[] cmd = { "dblook" };
         String[] output = {
-            " USAGE:",
-            " java org.apache.derby.tools.dblook -d <sourceDBUrl> [options]",
+            " Usage:",
+            " java org.apache.derby.tools.dblook -d <source database url> [options]",
             " 	where the source URL is the full URL, including the connection protocol",
             " 	and any connection attributes that might apply.  For example, use",
             " 	options include:",
-            " 	-z <schemaName> to specify a schema to which the DDL generation",
+            " 	-z <schema name> to specify a schema to which the DDL generation",
             " 	 should be limited.  Only database objects with that schema will have",
             " 	 their DDL generated.",
-            " 	-t <tableOne> <tableTwo> ... to specify a list of tables for which",
+            " 	-t <table one> <table two> ... to specify a list of tables for which",
             " 	 the DDL will be generated; any tables not in the list will be ignored.",
             " 	-td <value> to specify what should be appended to the end",
             " 	 of each DDL statement.",
@@ -143,16 +143,16 @@ public class derbyrunjartest extends BaseTestCase {
         String[] output = {
             "Usage: NetworkServerControl <commands> ",
             "Commands:",
-            "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
-            "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
-            "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
-            "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+            "start [-h <host>] [-p <port number>] [-noSecurityManager] [-ssl <ssl mode>]",
+            "shutdown [-h <host>][-p <port number>] [-ssl <ssl mode>] [-user <username>] [-password <password>]",
+            "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
         };
         runtool(cmd, output, 1);
     }

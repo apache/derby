@@ -41,7 +41,7 @@ next c1;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c1;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c1;
 ij> -- join #1
 get cursor c2 as 
@@ -55,7 +55,7 @@ next c2;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c2;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c2;
 ij> -- join #2
 get cursor c3 as 
@@ -77,7 +77,7 @@ next c3;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c3;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c3;
 ij> -- union all
 get cursor c4 as
@@ -91,7 +91,7 @@ next c4;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c4;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c4;
 ij> -- error in where clause
 -- single table
@@ -106,7 +106,7 @@ next c10;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c10;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c10;
 ij> -- join #1, error on open (1st row in left)
 -- (cursor will not exist after error on open)
@@ -127,7 +127,7 @@ next c13;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c13;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c13;
 ij> -- join #3, error on 1st row in right
 get cursor c14 as 'select * from t1 a, t1 b where b.c1 <> 1 and b.c1/b.c1 = 1';
@@ -136,7 +136,7 @@ next c14;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c14;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c14;
 ij> -- join #4, error on 2nd row in right
 get cursor c15 as 'select * from t1 a, t1 b where b.c1 <> 2 and b.c1/b.c1 = 1';
@@ -150,7 +150,7 @@ next c15;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c15;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c15;
 ij> -- union all
 get cursor c11 as 'select * from t1 where c1/c1 = 1 union all
@@ -165,7 +165,7 @@ next c11;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c11;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c11;
 ij> -- error in join clause
 get cursor c5 as 'select * from t1, t2 where t1.c1/t2.c1 = 1';
@@ -179,7 +179,7 @@ next c5;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c5;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c5;
 ij> -- error in subquery
 -- subquery in select list
@@ -195,7 +195,7 @@ next c8;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c8;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c8;
 ij> -- join
 get cursor c9 as 'select a.c1, (select c1/c1 from t2 where c1 = a.c1) from t1 a, t1 b
@@ -210,7 +210,7 @@ next c9;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c9;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c9;
 ij> -- subquery in where clause
 -- single table query
@@ -226,7 +226,7 @@ next c6;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c6;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c6;
 ij> -- join
 get cursor c7 as 'select * from t1 a, t1 b
@@ -242,7 +242,7 @@ next c7;
 ERROR 22012: Attempt to divide by zero.
 ij> -- Verify that cursor closed on error
 next c7;
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
 ij> close c7;
 ij> -- drop the tables
 drop table t1;

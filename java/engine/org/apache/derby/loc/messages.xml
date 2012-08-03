@@ -112,7 +112,7 @@ Guide.
 
             <msg>
                 <name>0100E</name>
-                <text>XX Attempt to return too many result sets. </text>
+                <text>Attempt to return too many result sets. </text>
             </msg>
 
             <msg>
@@ -692,12 +692,12 @@ Guide.
 
             <msg>
                 <name>22007.S.180</name>
-                <text>The string representation of a datetime value is out of range.</text>
+                <text>The string representation of a date/time value is out of range.</text>
             </msg>
 
             <msg>
                 <name>22007.S.181</name>
-                <text>The syntax of the string representation of a datetime value is incorrect.</text>
+                <text>The syntax of the string representation of a date/time value is incorrect.</text>
             </msg>
 
             <msg>
@@ -716,18 +716,18 @@ Guide.
 
             <msg>
                 <name>2200L</name>
-                <text>Values assigned to XML columns must be well-formed DOCUMENT nodes.</text>
+                <text>Values assigned to XML columns must be well-formed Document nodes.</text>
             </msg>
 
             <msg>
                 <name>2200M</name>
-                <text>Invalid XML DOCUMENT: {0}</text>
+                <text>Invalid XML Document: {0}</text>
                 <arg>parserError</arg>
             </msg>
 
             <msg>
                 <name>2200V</name>
-                <text>Invalid context item for {0} operator; context items must be well-formed DOCUMENT nodes.</text>
+                <text>Invalid context item for {0} operator; context items must be well-formed Document nodes.</text>
                 <arg>operatorName</arg>
             </msg>
 
@@ -944,7 +944,7 @@ Guide.
 
             <msg>
                 <name>2D521.S.2</name>
-                <text>COMMIT or ROLLBACK invalid for application execution environment. </text>
+                <text>Commit or Rollback invalid for application execution environment. </text>
             </msg>
 
         </family>
@@ -1010,7 +1010,7 @@ Guide.
 
             <msg>
                 <name>3B502.S</name>
-                <text>A RELEASE or ROLLBACK TO SAVEPOINT was specified, but the savepoint does not exist.</text>
+                <text>A Release or Rollback to Savepoint was specified, but the savepoint does not exist.</text>
             </msg>
 
         </family>
@@ -1696,7 +1696,7 @@ Guide.
 
             <msg>
                 <name>42X30</name>
-                <text>Cursor '{0}' not found. Verify that autocommit is OFF.</text>
+                <text>Cursor '{0}' not found. Verify that autocommit is off.</text>
                 <arg>cursorName</arg>
             </msg>
 
@@ -2126,7 +2126,7 @@ Guide.
 
             <msg>
                 <name>42XA2</name>
-                <text>'{0}' cannot appear in a GENERATION CLAUSE because it may return unreliable results.</text>
+                <text>'{0}' cannot appear in a Generation Clause because it may return unreliable results.</text>
                 <arg>sqlObjectName</arg>
             </msg>
 
@@ -2144,7 +2144,7 @@ Guide.
 
             <msg>
                 <name>42XA5</name>
-                <text>Routine '{0}' may issue SQL and therefore cannot appear in a GENERATION CLAUSE.</text>
+                <text>Routine '{0}' may issue SQL and therefore cannot appear in a Generation Clause.</text>
                 <arg>routineName</arg>
             </msg>
 
@@ -2580,7 +2580,7 @@ Guide.
 
             <msg>
                 <name>42Y83</name>
-                <text>An untyped null is not permitted as an argument to aggregate {0}.  Please cast the null to a suitable type.</text>
+                <text>An untyped NULL is not permitted as an argument to aggregate {0}.  Please cast the NULL to a suitable type.</text>
                 <arg>aggregateName</arg>
             </msg>
 
@@ -2724,7 +2724,7 @@ Guide.
 
             <msg>
                 <name>42Z25</name>
-                <text>INTERNAL ERROR identity counter. Update was called without arguments with current value \= NULL.</text>
+                <text>Internal Error identity counter. Update was called without arguments with current value \= NULL.</text>
             </msg>
 
             <msg>
@@ -2741,13 +2741,13 @@ Guide.
 
             <msg>
                 <name>42Z50</name>
-                <text>INTERNAL ERROR: Unable to generate code for {0}.</text>
+                <text>Internal Error: Unable to generate code for {0}.</text>
                 <arg>queryTreeNodeIdentifier</arg>
             </msg>
 
             <msg>
                 <name>42Z53</name>
-                <text>INTERNAL ERROR: Type of activation to generate for node choice {0} is unknown.</text>
+                <text>Internal Error: Type of activation to generate for node choice {0} is unknown.</text>
                 <arg>number</arg>
             </msg>
 
@@ -2930,7 +2930,7 @@ Guide.
 
             <msg>
                 <name>42ZB5</name>
-                <text>Class '{0}' implements VTICosting but does not provide a public, no-arg constructor.</text>
+                <text>Class '{0}' implements VTICosting but does not provide a public, no-argument constructor.</text>
                 <arg>className</arg>
             </msg>
 
@@ -3506,7 +3506,7 @@ Guide.
 
             <msg>
                 <name>X0Y83.S</name>
-                <text>WARNING: While deleting a row from a table the index row for base table row {0} was not found in index with conglomerate id {1}.  This problem has automatically been corrected as part of the delete operation.</text>
+                <text>Warning: While deleting a row from a table the index row for base table row {0} was not found in index with conglomerate id {1}.  This problem has automatically been corrected as part of the delete operation.</text>
                 <arg>rowName</arg>
                 <arg>id</arg>
             </msg>
@@ -3589,7 +3589,7 @@ Guide.
 
             <msg>
                 <name>XBCX1.S</name>
-                <text>Initializing cipher with illegal mode, must be either ENCRYPT or DECRYPT.</text>
+                <text>Initializing cipher with illegal mode, must be either CipherFactory.ENCRYPT or CipherFactory.DECRYPT.</text>
             </msg>
 
             <msg>
@@ -3959,7 +3959,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCL07.S</name>
-                <text>Cursor '{0}' is closed. Verify that autocommit is OFF.</text>
+                <text>Cursor '{0}' is closed. Verify that autocommit is off.</text>
                 <arg>cursorName</arg>
             </msg>
 
@@ -4010,7 +4010,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCL16.S</name>
-                <text>ResultSet not open. Operation '{0}' not permitted. Verify that autocommit is OFF.</text>
+                <text>ResultSet not open. Operation '{0}' not permitted. Verify that autocommit is off.</text>
                 <arg>operation</arg>
             </msg>
 
@@ -4136,31 +4136,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XCL41.S</name>
                 <text>the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) </text>
-            </msg>
-
-            <msg>
-                <name>XCL42.S</name>
-                <text>CASCADE</text>
-            </msg>
-
-            <msg>
-                <name>XCL43.S</name>
-                <text>SET NULL</text>
-            </msg>
-
-            <msg>
-                <name>XCL44.S</name>
-                <text>RESTRICT</text>
-            </msg>
-
-            <msg>
-                <name>XCL45.S</name>
-                <text>NO ACTION</text>
-            </msg>
-
-            <msg>
-                <name>XCL46.S</name>
-                <text>SET DEFAULT</text>
             </msg>
 
             <msg>
@@ -4384,7 +4359,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XIE0E.S</name>
-                <text>Read endOfFile at unexpected place on line {0}.</text>
+                <text>Read end of file at unexpected place on line {0}.</text>
                 <arg>lineNumber</arg>
             </msg>
 
@@ -4518,7 +4493,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ020.S</name>
-                <text>Object type not convertible to TYPE '{0}', invalid java.sql.Types value, or object was null.</text>
+                <text>Object type not convertible to type '{0}', invalid java.sql.Types value, or object was null.</text>
                 <arg>typeName</arg>
             </msg>
 
@@ -4551,7 +4526,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ030.S</name>
-                <text>Cannot set AUTOCOMMIT ON when in a nested connection.</text>
+                <text>Cannot set Autocommit On when in a nested connection.</text>
             </msg>
 
             <msg>
@@ -4609,7 +4584,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ056.S</name>
-                <text>Cannot set AUTOCOMMIT ON when in an XA connection.</text>
+                <text>Cannot set Autocommit On when in an XA connection.</text>
             </msg>
 
             <msg>
@@ -5186,7 +5161,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE05.C</name>
-                <text>The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is FATAL for replication - replication will be stopped.</text>
+                <text>The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is fatal for replication - replication will be stopped.</text>
                 <arg>dbname</arg>
                 <arg>masterfile</arg>
                 <arg>masteroffset</arg>
@@ -5686,7 +5661,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSDB7.D</name>
-                <text>WARNING: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result and may have already occurred.</text>
+                <text>Warning: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result and may have already occurred.</text>
                 <arg>derbyInstanceID</arg>
                 <arg>databaseName</arg>
                 <arg>derbyInstanceID</arg>
@@ -5694,7 +5669,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSDB8.D</name>
-                <text>WARNING: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result if 2 instances of Derby boot on the same database at the same time.  The derby.database.forceDatabaseLock=true property has been set, so the database will not boot until the db.lck is no longer present.  Normally this file is removed when the first instance of Derby to boot on the database exits, but it may be left behind in some shutdowns.  It will be necessary to remove the file by hand in that case.  It is important to verify that no other VM is accessing the database before deleting the db.lck file by hand.</text>
+                <text>Warning: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result if 2 instances of Derby boot on the same database at the same time.  The derby.database.forceDatabaseLock=true property has been set, so the database will not boot until the db.lck is no longer present.  Normally this file is removed when the first instance of Derby to boot on the database exits, but it may be left behind in some shutdowns.  It will be necessary to remove the file by hand in that case.  It is important to verify that no other VM is accessing the database before deleting the db.lck file by hand.</text>
                 <arg>derbyInstanceID</arg>
                 <arg>databaseName</arg>
                 <arg>derbyInstanceID</arg>
@@ -6251,18 +6226,13 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>42Y96.U</name>
-                <text>UNKNOWN</text>
-            </msg>
-
-            <msg>
                 <name>42Z00.U</name>
                 <text>Java method call or field reference</text>
             </msg>
 
             <msg>
                 <name>42Z01.U</name>
-                <text>UNTYPED</text>
+                <text>Untyped</text>
             </msg>
 
             <msg>
@@ -7298,7 +7268,7 @@ MessageId.java.
 
             <msg>
                 <name>54004</name>
-                <text>SELECT statement has too many items in GROUP BY, ORDER BY or select list.</text>
+                <text>SELECT statement has too many items in GROUP BY, ORDER BY or SELECT list.</text>
             </msg>
 
             <msg>
@@ -7497,17 +7467,17 @@ MessageId.java.
 
             <msg>
                 <name>A001</name>
-                <text>FATAL: There is no Authentication Service for the system</text>
+                <text>Fatal: There is no Authentication Service for the system</text>
             </msg>
 
             <msg>
                 <name>A002</name>
-                <text>FATAL: There is no Authentication Service for the database</text>
+                <text>Fatal: There is no Authentication Service for the database</text>
             </msg>
 
             <msg>
                 <name>A011</name>
-                <text>WARNING: No LDAP Server/Host name mentioned in {0} property; assuming localhost:389</text>
+                <text>Warning: No LDAP Server/Host name mentioned in {0} property; assuming localhost:389</text>
                 <arg>propertyName</arg>
             </msg>
 
@@ -7678,7 +7648,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>D013</name>
-                <text>WARNING: The database is booted with {0}={1}. In this mode, it is possible that database may not be able to recover, committed transactions may be lost, database may be in an inconsistent state. Please use this mode only when these consequences are acceptable  
+                <text>Warning: The database is booted with {0}={1}. In this mode, it is possible that database may not be able to recover, committed transactions may be lost, database may be in an inconsistent state. Please use this mode only when these consequences are acceptable  
 </text>
                 <arg>durabilityProperty</arg>
                 <arg>noSync</arg>
@@ -8028,47 +7998,47 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>L001</name>
-                <text>------------  BEGIN ERROR MESSAGE -------------
+                <text>------------  Begin Error Message -------------
 </text>
             </msg>
 
             <msg>
                 <name>L002</name>
-                <text>------------  END ERROR MESSAGE -------------
+                <text>------------  End Error Message -------------
 </text>
             </msg>
 
             <msg>
                 <name>L003</name>
                 <text>
-------------  BEGIN SHUTDOWN ERROR STACK -------------
+------------  Begin Shutdown Error Stack -------------
 </text>
             </msg>
 
             <msg>
                 <name>L004</name>
                 <text>
-------------  END SHUTDOWN ERROR STACK -------------
+------------  End Shutdown Error Stack -------------
 </text>
             </msg>
 
             <msg>
                 <name>L005</name>
                 <text>
-------------  BEGIN ERROR STACK -------------
+------------  Begin Error Stack -------------
 </text>
             </msg>
 
             <msg>
                 <name>L006</name>
                 <text>
-------------  END ERROR STACK -------------
+------------  End Error Stack -------------
 </text>
             </msg>
 
             <msg>
                 <name>L007</name>
-                <text>WARNING: Log file not found, creating new log. Possible inconsistency in the database</text>
+                <text>Warning: Log file not found, creating new log. Possible inconsistency in the database</text>
             </msg>
 
             <msg>
@@ -8140,7 +8110,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>L020</name>
-                <text>WARNING: The database was at least at one time booted with {0}={1}. As a result of this mode being used, it is possible that the database may not be able to recover, committed transactions may be lost, and the database may be in an inconsistent state. This may cause unexpected errors.
+                <text>Warning: The database was at least at one time booted with {0}={1}. As a result of this mode being used, it is possible that the database may not be able to recover, committed transactions may be lost, and the database may be in an inconsistent state. This may cause unexpected errors.
 </text>
                 <arg>testModeProperty</arg>
                 <arg>testMode</arg>
@@ -8148,7 +8118,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>L021</name>
-                <text>WARNING: The database was either previously booted or is currently booted with {0} set to {1}. Note that this mode {0}={1} does not guarantee recoverability, and is probably what might have caused this boot error.
+                <text>Warning: The database was either previously booted or is currently booted with {0} set to {1}. Note that this mode {0}={1} does not guarantee recoverability, and is probably what might have caused this boot error.
 </text>
                 <arg>testModeProperty</arg>
                 <arg>testMode</arg>
@@ -8157,7 +8127,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
             </msg>
             <msg>
                <name>L022</name>
-               <text>WARNING: Due to a permissions issue accessing the log files, the status of the database has been changed to read only. 
+               <text>Warning: Due to a permissions issue accessing the log files, the status of the database has been changed to read only. 
                </text>
            </msg>
         </family>
@@ -8167,13 +8137,13 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
             <title>Undocumented Replication Messages from MessageId.java</title>
             <msg>
                 <name>R001</name>
-                <text>----  BEGIN REPLICATION ERROR MESSAGE ({0}) ----</text>
+                <text>----  Begin replication error message ({0}) ----</text>
                 <arg>timestamp</arg>
             </msg>
 
             <msg>
                 <name>R002</name>
-                <text>--------------------  END REPLICATION ERROR MESSAGE ---------------------</text>
+                <text>--------------------  End replication error message ---------------------</text>
             </msg>
 
             <msg>
@@ -8262,6 +8232,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 # ***                Please do NOT edit this file.                 ***
 # *** CHANGING THE CONTENT OF THIS FILE MAY CAUSE DATA CORRUPTION. ***
 # ********************************************************************</text>
+                <comment>Translators: Please translate the ALL CAPS words.</comment>
             </msg>
 
             <msg>

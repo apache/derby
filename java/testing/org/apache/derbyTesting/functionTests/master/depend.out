@@ -181,7 +181,7 @@ C1
 1          
 ij> close c1;
 ij> execute u1;
-ERROR 42X30: Cursor 'C1' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C1' not found. Verify that autocommit is off.
 ij> -- cleanup, roll everything back to the beginning
 rollback;
 ij> -- verify that create index invalidates based on table and

@@ -42,7 +42,7 @@ ij> insert into localtab values(84.391, date('2000-01-21'),'15:33:23','¥ê¥¿¡¼¥ó¥
 ij> insert into localtab values(56.664, date('2000-04-16'),'15:33:40','ÏÀÍı¥í¥° 2¤¬´°Î»¤·¤Ş¤·¤¿¡£');
 1 fila insertada/actualizada/suprimida
 ij> insert into localtab values(22.393, date('2000-03-01'),'15:33;42','¥ê¥¿¡¼¥ó¥³¡¼¥É 1¤òÌá¤·¤Æ¥×¥í¥»¥¹¤¬½ªÎ»¤·¤Ş¤·¤¿:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ÏÀÍı¥í¥° 2¤¬´°Î»¤·¤Ş¤·¤¿¡£ ÏÀÍı');
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> insert into localtab values(90.007, date('2000-11-27'),'15:33:43','¥Á¥§¥Ã¥¯¥İ¥¤¥ó¥È¤¬´°Î»¤·¤Ş¤·¤¿:·ÑÂ³»ş´Ö¤Ï 2ÉÃ¤Ç¤·¤¿');
 1 fila insertada/actualizada/suprimida
 ij> insert into localtab values(30.496, date('2000-04-03'),'15:34:29','ÏÀÍı¥í¥° 3¤¬´°Î»¤·¤Ş¤·¤¿¡£');

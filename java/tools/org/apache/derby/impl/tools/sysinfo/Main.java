@@ -68,8 +68,7 @@ import org.apache.derby.iapi.tools.i18n.*;
   the info properties files from the directory or jar locations on the
   classpath, and eliminates any duplicated information. If no files
   are found, or some other exception occurs, the
-  value returned will be that set for the key
-  SysInfo.failureTag, or be the value "<info unavailable>".
+  value returned will be "<info unavailable>".
 
   <P>
   This class can be used to print out system information at the
@@ -404,13 +403,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
   private final static String locSep  = Main.getTextMessage ("SIF01.P");
 
   private final static String curLoc  = Main.getTextMessage ("SIF01.T");
-
-  /**
-    The name of the failure tag in the information file.
-    The failure tag's value provides a default value if
-    any other properties are missing.
-   */
-  private final static String failureTag = Main.getTextMessage ("SIF01.J");
 
   private static void getClasspathInfo (String args[], java.io.PrintWriter aw) {
 

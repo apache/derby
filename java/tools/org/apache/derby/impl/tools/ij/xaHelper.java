@@ -498,7 +498,7 @@ class xaHelper implements xaAbstractHelper
 	public void CPDisconnectStatement(ij parser, String n) throws SQLException
 	{
 		if (currentPooledConnection == null)
-			throw ijException.noSuchConnection(LocalizedResource.getMessage("IJ_Pool"));
+			throw ijException.noSuchConnection(LocalizedResource.getMessage("PooledConnection"));
 		currentPooledConnection.close();
 		currentPooledConnection = null;
 	}

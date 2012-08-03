@@ -1016,7 +1016,6 @@ public interface SQLState {
 	String LANG_TRIGGER_BAD_REF_CLAUSE_DUPS                            = "42Y93";
 	String LANG_BINARY_LOGICAL_NON_BOOLEAN                             = "42Y94";
 	String LANG_BINARY_OPERATOR_NOT_SUPPORTED                          = "42Y95";
-	String LANG_UNKNOWN												   = "42Y96.U";
 	String LANG_INVALID_ESCAPE										   = "42Y97";
 	String LANG_JAVA_METHOD_CALL_OR_FIELD_REF						   = "42Z00.U";
 	String LANG_UNTYPED												   = "42Z01.U";
@@ -1423,13 +1422,6 @@ public interface SQLState {
 	String LANG_DELETE_RULE_CANT_BE_CASCADE_ESELF					   = "XCL39.S";	
 	String LANG_DELETE_RULE_CANT_BE_CASCADE_ECYCLE					   = "XCL40.S";	
 	String LANG_DELETE_RULE_CANT_BE_CASCADE_MPATH					   = "XCL41.S";	
-
-	// referential action types
-	String LANG_DELETE_RULE_CASCADE									   = "XCL42.S";	
-	String LANG_DELETE_RULE_SETNULL									   = "XCL43.S";	
-	String LANG_DELETE_RULE_RESTRICT								   = "XCL44.S";	
-	String LANG_DELETE_RULE_NOACTION								   = "XCL45.S";	
-	String LANG_DELETE_RULE_SETDEFAULT								   = "XCL46.S";	
 
 	String LANG_STATEMENT_UPGRADE_REQUIRED							   = "XCL47.S";
 
