@@ -1513,9 +1513,9 @@ call takesString(?,?)
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1537,9 +1537,9 @@ call takesString(?,?)
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1561,9 +1561,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1585,9 +1585,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1609,9 +1609,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1633,9 +1633,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1657,9 +1657,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1681,9 +1681,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1709,9 +1709,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1733,9 +1733,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1757,9 +1757,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1781,9 +1781,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1805,9 +1805,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1830,8 +1830,8 @@ call takesString(?,?)
 			getString(1) = 1933-03-03
 			getString(1) = 1933-03-03
 			getDate(1) = 1933-03-03
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1853,9 +1853,9 @@ call takesString(?,?)
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:03:03
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -1918,13 +1918,13 @@ call takesString(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type DATE and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	setDate(1, Date.valueOf(1999-09-09))
 	cs.execute()
@@ -2009,13 +2009,13 @@ call takesTimestamp(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type TIMESTAMP and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	setDate(1, Date.valueOf(1999-09-09))
 	cs.execute()
@@ -2100,13 +2100,13 @@ call takesTimestamp(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setString(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DATE because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, TIME)
@@ -3658,9 +3658,9 @@ call takesString(?,?)
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3682,9 +3682,9 @@ call takesString(?,?)
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3706,9 +3706,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3730,9 +3730,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3754,9 +3754,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3778,9 +3778,9 @@ call takesString(?,?)
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3802,9 +3802,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3826,9 +3826,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3854,9 +3854,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3878,9 +3878,9 @@ call takesString(?,?)
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3902,9 +3902,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3926,9 +3926,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3950,9 +3950,9 @@ call takesString(?,?)
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3975,8 +3975,8 @@ call takesString(?,?)
 			getString(1) = 1933-03-03
 			getString(1) = 1933-03-03
 			getDate(1) = 1933-03-03
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -3998,9 +3998,9 @@ call takesString(?,?)
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:03:03
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -4063,13 +4063,13 @@ call takesString(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type DATE and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	setObject(1, Date.valueOf(1999-09-09))
 	cs.execute()
@@ -4154,13 +4154,13 @@ call takesTimestamp(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type TIMESTAMP and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	setObject(1, Date.valueOf(1999-09-09))
 	cs.execute()
@@ -4245,13 +4245,13 @@ call takesTimestamp(?,?)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DECIMAL because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, CHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, VARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, LONGVARCHAR)
 	setObject(1, "Set via setString()")
-	Exception java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+	Exception java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 	cs.registerOutParameter(1, DATE)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type DATE because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, TIME)
@@ -6378,9 +6378,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6401,9 +6401,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = true
 			getString(1) = true
 			getString(1) = true
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6424,9 +6424,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6447,9 +6447,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6470,9 +6470,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6493,9 +6493,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3
 			getString(1) = 3
 			getString(1) = 3
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6516,9 +6516,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6539,9 +6539,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6565,9 +6565,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6588,9 +6588,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 3.33
 			getString(1) = 3.33
 			getString(1) = 3.33
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:33:00
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6611,9 +6611,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6634,9 +6634,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6657,9 +6657,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = I am a string
 			getString(1) = I am a string
 			getString(1) = I am a string
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6681,8 +6681,8 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 1933-03-03
 			getString(1) = 1933-03-03
 			getDate(1) = 1933-03-03
-			getTime(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTime(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
@@ -6703,9 +6703,9 @@ TESTING RETURN OUTPUT PARAMETERS
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
 			getString(1) = 03:03:03
-			getDate(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getDate(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getTime(1) = 03:03:03
-			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
+			getTimestamp(1) = java.sql.SQLException: The syntax of the string representation of a date/time value is incorrect.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
 			getBytes(1) = java.sql.SQLException: An attempt was made to get a data value of type 'byte[]' from a data value of type 'VARCHAR'.
