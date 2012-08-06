@@ -414,24 +414,6 @@ class ij {
 
 	ijResult quit() throws SQLException {
 		exit = true;
-		if (getExpect()) { // report stats
-			// FIXME: replace with MVC...
-			// FIXME: this is a kludgy way to quiet /0 and make 0/0=1...
-			int numExpectOr1 = (numExpect==0?1:numExpect);
-			int numPassOr1 = (numPass==numExpect && numPass==0)?1:numPass;
-			int numFailOr1 = (numFail==numExpect && numFail==0)?1:numFail;
-			int numUnxOr1 = (numUnx==numExpect && numUnx==0)?1:numUnx;
-
-            LocalizedResource.OutputWriter().println(LocalizedResource.getMessage("IJ_TestsRun0Pass12Fail34",
-            new Object[]{
-			LocalizedResource.getNumber(numExpect), LocalizedResource.getNumber(100*(numPassOr1/numExpectOr1)),
-			LocalizedResource.getNumber(100*(numFailOr1/numExpectOr1))}));
-                        if (numUnx > 0) {
-							LocalizedResource.OutputWriter().println();
-							LocalizedResource.OutputWriter().println(LocalizedResource.getMessage("IJ_UnexpResulUnx01",
-							LocalizedResource.getNumber(numUnx), LocalizedResource.getNumber(100*(numUnxOr1/numExpectOr1))));							
-			}
-		}
 		currentConnEnv.removeAllSessions();
 		theConnection = null;
 		return null;
@@ -473,30 +455,6 @@ class ij {
 		} else {
 			throw ijException.needToDisconnect();
 		}
-	}
-
-	/**
-		Note the Expect Result in the output and in the stats.
-
-		FIXME
-	 */
-	int numExpect, numPass, numFail, numUnx;
-	private void noteExpect(boolean actual, boolean want) {
-		numExpect++;
-		if (actual) numPass++;
-		else numFail++;
-
-                LocalizedResource.OutputWriter().print(LocalizedResource.getMessage(actual?"IJ_Pass":"IJ_Fail"));
-		if (actual != want) {
-			numUnx++;
-					LocalizedResource.OutputWriter().println(LocalizedResource.getMessage("IJ_Unx"));
-		}
-                else LocalizedResource.OutputWriter().println();
-	}
-
-	private boolean getExpect() {
-		String s = util.getSystemProperty("ij.expect");
-		return Boolean.valueOf(s).booleanValue();
 	}
 
 	private	ijResult	addSession
@@ -1229,7 +1187,6 @@ TOKEN [IGNORE_CASE] :
 |	<EQUALS_OPERATOR: "=">
 |	<EXECUTE: "execute">
 |	<EXIT: "exit">
-|	<EXPECT: "expect">
 |	<FAIL: "fail">
 |	<FIRST: "first">
 |	<FOR: "for">
@@ -1623,7 +1580,6 @@ throws SQLException
 |	r=ExecuteStatement()	
 |	r=FirstStatement()	
 |	r=ExitStatement()
-|	r=ExpectStatement()
 |	r=GetCursorStatement()	
 |	r=GetCurrentRowNumber()	
 |	r=HelpStatement()	
@@ -3010,43 +2966,6 @@ Bang() :
 	}
 }
 
-/**
-	ExpectStatement is EXPECT [ FAIL ] {'String'}* END EXPECT
-	<p>
-	Will eventually detect the lines that the strings are without
-	special literals, but for now this is expedient (except for the
-	doubling of quotes...)
-	<p>
-	Used to test the previous statement's output. Note that ij must be
-	in "expect" mode to use this statement, otherwise it is just
-	ignored.  This is due to the overhead of tracking the prior statement's
-	output.
- */
-ijResult
-ExpectStatement() :
-{
-	Token f = null;
-	Vector stringVector = new Vector();
-}
-{
-	<EXPECT> [ f = <FAIL> ] StringList(stringVector) <END> <EXPECT>
-	{
-		if (!getExpect()) return null; // don't bother processing.
-
-		// FIXME
-
-		// Do the comparison of the string list to the prior rows of
-		// output, using a row-by-row perl-regex comparison.
-		boolean result = true;
-
-		// register the result and whether it should be true or false
-		// FIXME: how to find the expecter??
-		noteExpect(result, f==null);
-
-		return null;
-	}
-}
-
 void
 StringList(Vector v) :
 {
@@ -3850,7 +3769,6 @@ keyword() :
 |	tok = <END>
 |	tok = <EXECUTE>
 |	tok = <EXIT>
-|	tok = <EXPECT>
 |	tok = <FAIL>
 |	tok = <FIRST>
 |	tok = <FOR>
