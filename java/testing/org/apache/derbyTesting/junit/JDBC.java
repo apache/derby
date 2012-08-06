@@ -1392,7 +1392,9 @@ public class JDBC {
             expected.removeAll( actual );
             BaseTestCase.println
                 ( "These expected rows don't appear in the actual result: " + expected );
-            Assert.fail( "Missing rows in ResultSet" );
+            String message = "Missing rows in ResultSet; \n\t expected rows: \n\t\t" 
+                + expected + "\n\t actual result: \n\t\t" + actual;
+            Assert.fail( message );
         }
     }
 
