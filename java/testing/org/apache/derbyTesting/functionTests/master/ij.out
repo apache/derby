@@ -82,8 +82,7 @@ help;
                                -- lists tables, views, procedures, functions or synonyms
   SHOW INDEXES { IN schema | FROM table };
                                -- lists indexes in a schema, or for a table
-  SHOW ROLES;                  -- lists all defined roles in the database,
-                               -- sorted
+  SHOW ROLES;                  -- lists all defined roles in the database, sorted
   SHOW ENABLED_ROLES;          -- lists the enabled roles for the current
                                -- connection (to see current role use
                                -- VALUES CURRENT_ROLE), sorted

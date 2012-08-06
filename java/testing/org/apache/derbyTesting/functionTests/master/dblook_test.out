@@ -5984,9 +5984,9 @@ CREATE SYNONYM "APP"."SYN1" FOR "BAR"."T1"
 -- ----------------------------------------------
 -- DDL Statements for keys
 -- ----------------------------------------------
--- primary/unique
+-- PRIMARY/UNIQUE
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C")
--- foreign
+-- FOREIGN
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION
 -- ----------------------------------------------
 -- DDL Statements for checks
@@ -6044,9 +6044,9 @@ CREATE INDEX "BAR"."IX1" ON "BAR"."T1" ("I" DESC);
 -- ----------------------------------------------
 -- DDL Statements for keys
 -- ----------------------------------------------
--- primary/unique
+-- PRIMARY/UNIQUE
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C");
--- foreign
+-- FOREIGN
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION;
 -- ----------------------------------------------
 -- DDL Statements for checks
@@ -6141,9 +6141,9 @@ CREATE SYNONYM "APP"."SYN1" FOR "BAR"."T1" #
 -- ----------------------------------------------
 -- DDL Statements for keys
 -- ----------------------------------------------
--- primary/unique
+-- PRIMARY/UNIQUE
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" PRIMARY KEY ("C") #
--- foreign
+-- FOREIGN
 ALTER TABLE "BAR"."T1" ADD CONSTRAINT "xxxxGENERATED-IDxxxx" FOREIGN KEY ("FKCHAR") REFERENCES "BAR"."T1" ("C") ON DELETE NO ACTION ON UPDATE NO ACTION #
 -- ----------------------------------------------
 -- DDL Statements for checks

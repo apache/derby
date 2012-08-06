@@ -221,8 +221,7 @@ public abstract class DataType
 	 */
 	public InputStream	getStream() throws StandardException
 	{
-		throw dataTypeConversion( 
-			MessageService.getTextMessage(SQLState.LANG_STREAM));
+		throw dataTypeConversion( "InputStream" );
 	}
 
     /**

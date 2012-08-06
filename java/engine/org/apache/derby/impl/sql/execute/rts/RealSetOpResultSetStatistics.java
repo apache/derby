@@ -127,7 +127,7 @@ public class RealSetOpResultSetStatistics
         initFormatInfo(depth);
 
         String rs = (opType == IntersectOrExceptNode.INTERSECT_OP) 
-                ? (SQLState.RTS_INTERSECT_RS) : (SQLState.RTS_EXCEPT_RS);
+                ? "INTERSECT ResultSet" : "EXCEPT ResultSet";
          
         return
             indent + MessageService.getTextMessage(rs) + 
@@ -207,7 +207,7 @@ public class RealSetOpResultSetStatistics
     public String getNodeName() {
         String nodeName = 
             (opType == IntersectOrExceptNode.INTERSECT_OP) 
-                ? (SQLState.RTS_INTERSECT) : (SQLState.RTS_EXCEPT);
+                ? "INTERSECT" : "EXCEPT";
 		
         return MessageService.getTextMessage(nodeName);
     }

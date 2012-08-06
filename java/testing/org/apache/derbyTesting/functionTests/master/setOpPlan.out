@@ -104,7 +104,7 @@ Source result set:
 			qualifiers:
 				None
 	Right result set:
-		Intersect ResultSet:
+		INTERSECT ResultSet:
 		Number of opens = 1
 		Rows seen from the left = 4
 		Rows seen from the right = 4
@@ -210,7 +210,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Except ResultSet:
+EXCEPT ResultSet:
 Number of opens = 1
 Rows seen from the left = 4
 Rows seen from the right = 4
@@ -350,7 +350,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Except ResultSet:
+EXCEPT ResultSet:
 Number of opens = 1
 Rows seen from the left = 3
 Rows seen from the right = 3
@@ -360,7 +360,7 @@ Rows returned = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 Left result set:
-	Intersect ResultSet:
+	INTERSECT ResultSet:
 	Number of opens = 1
 	Rows seen from the left = 3
 	Rows seen from the right = 3

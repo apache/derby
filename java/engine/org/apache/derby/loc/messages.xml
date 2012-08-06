@@ -2818,7 +2818,8 @@ Guide.
 
             <msg>
                 <name>42Z91</name>
-                <text>subquery</text>
+                <text>SELECT</text>
+                <comment>This is a kind of query fragment, which may or may not appear in certain query contexts.</comment>
             </msg>
 
             <msg>
@@ -6242,11 +6243,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>42Z11.U</name>
-                <text>stream</text>
-            </msg>
-
-            <msg>
                 <name>42Z12.U</name>
                 <text>Internal error: Invalid attempt to access a {0} as a stream</text>
                 <arg>dataType</arg>
@@ -6298,6 +6294,7 @@ MessageId.java.
                 <name>42Z37.U</name>
                 <text>None</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
+                <comment>This is a start or stop position for a scan.</comment>
             </msg>
 
             <msg>
@@ -6415,6 +6412,7 @@ MessageId.java.
                 <text>exclusive</text>
                 <comment>A lock mode.</comment>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
+                <comment>This is shorthand for "exclusive lock".</comment>
             </msg>
 
             <msg>
@@ -6564,6 +6562,7 @@ MessageId.java.
                 <name>43X16.U</name>
                 <text>deferred</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
+                <comment>This is shorthand for "deferred update".</comment>
             </msg>
 
             <msg>
@@ -6833,6 +6832,7 @@ MessageId.java.
                 <name>43X59.U</name>
                 <text>all</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
+                <comment>Shorthand for "all columns".</comment>
             </msg>
 
             <msg>
@@ -7389,30 +7389,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>43Y58.U</name>
-                <text>Intersect ResultSet</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
-                <name>43Y59.U</name>
-                <text>Intersect</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
-                <name>43Y60.U</name>
-                <text>Except ResultSet</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
-                <name>43Y61.U</name>
-                <text>Except</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
                 <name>44X00.U</name>
                 <text>SQL Type Name</text>
             </msg>
@@ -7612,11 +7588,13 @@ MessageId.java.
             <msg>
                 <name>XSAJF.U</name>
                 <text>btree</text>
+                <comment>This is a type of conglomerate.</comment>
             </msg>
 
             <msg>
                 <name>XSAJG.U</name>
                 <text>heap</text>
+                <comment>This is a type of conglomerate.</comment>
             </msg>
 
             <msg>
@@ -7627,11 +7605,13 @@ MessageId.java.
             <msg>
                 <name>XSAJI.U</name>
                 <text>external</text>
+                <comment>This is a type of sort.</comment>
             </msg>
 
             <msg>
                 <name>XSAJJ.U</name>
                 <text>internal</text>
+                <comment>This is a type of sort.</comment>
             </msg>
 
         </family>

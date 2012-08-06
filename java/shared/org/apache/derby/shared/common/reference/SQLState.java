@@ -1026,7 +1026,6 @@ public interface SQLState {
 
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_UDT_BUILTIN_CONFLICT										   = "42Z10";
-	String LANG_STREAM												   = "42Z11.U";
     String LANG_STREAM_INVALID_ACCESS                                  = "42Z12.U";
 
 	// String LANG_UPDATABLE_VTI_BAD_GETMETADATA						   = "42Z14";
@@ -1291,10 +1290,6 @@ public interface SQLState {
 	String RTS_END_DEPENDENT_NUMBER									   = "43Y55.U";	
 	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_TABLE			   = "43Y56.U";	
 	String RTS_USER_SUPPLIED_OPTIMIZER_OVERRIDES_FOR_JOIN			   = "43Y57.U";
-	String RTS_INTERSECT_RS                                            = "43Y58.U";
-	String RTS_INTERSECT                                               = "43Y59.U";
-	String RTS_EXCEPT_RS                                               = "43Y60.U";
-	String RTS_EXCEPT                                                  = "43Y61.U";
 
 	// org.apache.derby.catalog.types
 	String TI_SQL_TYPE_NAME			= "44X00.U";
