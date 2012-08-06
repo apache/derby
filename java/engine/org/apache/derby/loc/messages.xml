@@ -6255,57 +6255,68 @@ MessageId.java.
             <msg>
                 <name>42Z30.U</name>
                 <text>time spent in this ResultSet =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z31.U</name>
                 <text>time spent in this ResultSet and below =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z32.U</name>
                 <text>total time breakdown: </text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z33.U</name>
                 <text>constructor time (milliseconds) =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z34.U</name>
                 <text>open time (milliseconds) =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z35.U</name>
                 <text>next time (milliseconds) =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z36.U</name>
                 <text>close time (milliseconds) =</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z37.U</name>
                 <text>None</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z38.U</name>
                 <text>Positioning information not available because this ResultSet was never opened.</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z39.U</name>
                 <text>Unexpected exception {0} getting positioner.</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>exceptionMessage</arg>
             </msg>
 
             <msg>
                 <name>42Z40.U</name>
                 <text>{0} on first {1} column(s).</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>searchOperator</arg>
                 <arg>number</arg>
             </msg>
@@ -6313,31 +6324,37 @@ MessageId.java.
             <msg>
                 <name>42Z41.U</name>
                 <text>Ordered null semantics on the following columns: </text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z42.U</name>
                 <text>Column Id</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z43.U</name>
                 <text>Operator</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z44.U</name>
                 <text>Ordered nulls</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z45.U</name>
                 <text>Unknown return value</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z46.U</name>
                 <text>Negate comparison result</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
@@ -6349,6 +6366,7 @@ MessageId.java.
             <msg>
                 <name>42Z48.U</name>
                 <text>Column[{0}][{1}] Id</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>term</arg>
                 <arg>columnNumber</arg>
             </msg>
@@ -6382,116 +6400,137 @@ MessageId.java.
                 <name>42Z80.U</name>
                 <text>serializable</text>
                 <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z81.U</name>
                 <text>read committed</text>
                 <comment>A transaction isolation level. See http://en.wikipedia.org/wiki/Isolation_%28database_systems%29</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z82.U</name>
                 <text>exclusive</text>
                 <comment>A lock mode.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z83.U</name>
                 <text>instantaneous share</text>
                 <comment>A lock mode.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z84.U</name>
                 <text>share</text>
                 <comment>A lock mode.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z85.U</name>
                 <text>table</text>
                 <comment>A lock granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z86.U</name>
                 <text>row</text>
                 <comment>A lock granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z87.U</name>
                 <text>share table</text>
                 <comment>Lock mode and granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>42Z88.U</name>
                 <text>share row</text>
                 <comment>Lock mode and granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X00.U</name>
                 <text>Attached to</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X01.U</name>
                 <text>Begin Subquery Number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X02.U</name>
                 <text>Any ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X03.U</name>
                 <text>Number of opens</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X04.U</name>
                 <text>Rows seen</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X05.U</name>
                 <text>Source result set</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X06.U</name>
                 <text>End Subquery Number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X07.U</name>
                 <text>optimizer estimated row count: {0,number,###########0.00}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>number</arg>
             </msg>
 
             <msg>
                 <name>43X08.U</name>
                 <text>optimizer estimated cost: {0,number,###########0.00}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>number</arg>
             </msg>
 
             <msg>
                 <name>43X09.U</name>
                 <text>seconds</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X10.U</name>
                 <text>Total</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X11.U</name>
                 <text>Node</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
@@ -6504,33 +6543,39 @@ MessageId.java.
             <msg>
                 <name>43X13.U</name>
                 <text>Delete ResultSet using</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X14.U</name>
                 <text>table locking</text>
                 <comment>Lock granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X15.U</name>
                 <text>row locking</text>
                 <comment>Lock granularity.</comment>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X16.U</name>
                 <text>deferred</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X17.U</name>
                 <text>Rows deleted</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X18.U</name>
                 <text>Indexes updated</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
@@ -6541,21 +6586,25 @@ MessageId.java.
             <msg>
                 <name>43X20.U</name>
                 <text>Distinct Scalar Aggregate ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X21.U</name>
                 <text>Rows input</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X22.U</name>
                 <text>Distinct Scalar Aggregate</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X23.U</name>
                 <text>Distinct Scan ResultSet for {0} using {1} {2}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>constraintOrIndex</arg>
                 <arg>constraintOrIndexName</arg>
@@ -6564,22 +6613,26 @@ MessageId.java.
             <msg>
                 <name>43X24.U</name>
                 <text>constraint</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X25.U</name>
                 <text>index</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X26.U</name>
                 <text>Distinct Scan ResultSet for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43X27.U</name>
                 <text>at {0} isolation level using {1} locking</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>isolationLevel</arg>
                 <arg>lockString</arg>
             </msg>
@@ -6587,56 +6640,67 @@ MessageId.java.
             <msg>
                 <name>43X28.U</name>
                 <text>scan information</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X29.U</name>
                 <text>Distinct column is column number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X30.U</name>
                 <text>Distinct columns are column numbers</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X31.U</name>
                 <text>Hash table size</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X32.U</name>
                 <text>Rows filtered</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X33.U</name>
                 <text>next time in milliseconds/row</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X34.U</name>
                 <text>start position</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X35.U</name>
                 <text>stop position</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X36.U</name>
                 <text>scan qualifiers</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X37.U</name>
                 <text>next qualifiers</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X38.U</name>
                 <text>on {0} using {1}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>indexName</arg>
             </msg>
@@ -6644,66 +6708,79 @@ MessageId.java.
             <msg>
                 <name>43X39.U</name>
                 <text>Distinct Scan</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X40.U</name>
                 <text>Sort information</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X41.U</name>
                 <text>Grouped Aggregate ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X42.U</name>
                 <text>Has distinct aggregate</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X43.U</name>
                 <text>In sorted order</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X44.U</name>
                 <text>Grouped Aggregate</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X45.U</name>
                 <text>Hash Exists Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X46.U</name>
                 <text>Hash Exists Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X47.U</name>
                 <text>Hash Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X48.U</name>
                 <text>Hash Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X49.U</name>
                 <text>Hash Left Outer Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X50.U</name>
                 <text>Hash Left Outer Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X51.U</name>
                 <text>Hash Scan ResultSet for {0} using {1} {2}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>constraintOrIndex</arg>
                 <arg>constraintOrIndexName</arg>
@@ -6712,104 +6789,124 @@ MessageId.java.
             <msg>
                 <name>43X52.U</name>
                 <text>Hash Scan ResultSet for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43X53.U</name>
                 <text>Hash key is column number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X54.U</name>
                 <text>Hash keys are column numbers</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X55.U</name>
                 <text>Hash Scan</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X56.U</name>
                 <text>Attached subqueries</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X57.U</name>
                 <text>Hash Table ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X58.U</name>
                 <text>Hash Table</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X59.U</name>
                 <text>all</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X60.U</name>
                 <text>Index Row to Base Row ResultSet for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43X61.U</name>
                 <text>Columns accessed from heap</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X62.U</name>
                 <text>for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43X63.U</name>
                 <text>Index Row to Base Row</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X64.U</name>
                 <text>insert mode: bulk insert</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X65.U</name>
                 <text>insert mode: normal (unable to perform bulk insert due to non-empty table)</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X66.U</name>
                 <text>insert mode: normal</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X67.U</name>
                 <text>Insert ResultSet using</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X68.U</name>
                 <text>Rows inserted</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X69.U</name>
                 <text>Insert</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X70.U</name>
                 <text>Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X71.U</name>
                 <text>Last Key Index Scan ResultSet for {0} using index {1}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>indexName</arg>
             </msg>
@@ -6817,6 +6914,7 @@ MessageId.java.
             <msg>
                 <name>43X72.U</name>
                 <text>at {0} isolation level using {1} locking chosen by the optimizer</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>isolationLevel</arg>
                 <arg>lockString</arg>
             </msg>
@@ -6824,202 +6922,242 @@ MessageId.java.
             <msg>
                 <name>43X73.U</name>
                 <text>Table Scan</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X74.U</name>
                 <text>Index Scan</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X75.U</name>
                 <text>on {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43X76.U</name>
                 <text>Materialized ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X77.U</name>
                 <text>temporary conglomerate creation time (milliseconds)</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X78.U</name>
                 <text>temporary conglomerate fetching time (milliseconds)</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X79.U</name>
                 <text>Rows seen from the left</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X80.U</name>
                 <text>Rows seen from the right</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X81.U</name>
                 <text>Rows returned</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X82.U</name>
                 <text>Left result set</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X83.U</name>
                 <text>Right result set</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X84.U</name>
                 <text>Nested Loop Exists Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X85.U</name>
                 <text>Nested Loop Exists Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X86.U</name>
                 <text>Nested Loop Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X87.U</name>
                 <text>Nested Loop Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X88.U</name>
                 <text>Empty right rows returned</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X89.U</name>
                 <text>Nested Loop Left Outer Join</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X90.U</name>
                 <text>Nested Loop Left Outer Join ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X91.U</name>
                 <text>Normalize ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X92.U</name>
                 <text>Once ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X93.U</name>
                 <text>Project-Restrict ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X94.U</name>
                 <text>restriction</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X95.U</name>
                 <text>projection</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X96.U</name>
                 <text>restriction time (milliseconds)</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X97.U</name>
                 <text>projection time (milliseconds)</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X98.U</name>
                 <text>Project Restrict</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X99.U</name>
                 <text>Row ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X9A.U</name>
                 <text>Row Count ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X9B.U</name>
                 <text>Row Count</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43X9C.U</name>
                 <text>Window ResultSet: </text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y00.U</name>
                 <text>Scalar Aggregate ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y01.U</name>
                 <text>Index Key Optimization</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y02.U</name>
                 <text>Scalar Aggregate</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y03.U</name>
                 <text>Scroll Insensitive ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y04.U</name>
                 <text>Number of reads from hash table</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y05.U</name>
                 <text>Number of writes to hash table</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y06.U</name>
                 <text>Sort ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y07.U</name>
                 <text>Eliminate duplicates</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y08.U</name>
                 <text>Sort</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y09.U</name>
                 <text>Index Scan ResultSet for {0} using {1} {2}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>constraintOrIndex</arg>
                 <arg>constraintOrIndexName</arg>
@@ -7028,134 +7166,160 @@ MessageId.java.
             <msg>
                 <name>43Y10.U</name>
                 <text>Table Scan ResultSet for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>43Y11.U</name>
                 <text>Actual locking used: table level locking.</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y12.U</name>
                 <text>Fetch Size</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y13.U</name>
                 <text>qualifiers</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y14.U</name>
                 <text>Union ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y15.U</name>
                 <text>Union</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y16.U</name>
                 <text>Update ResultSet using {0} locking</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableOrRow</arg>
             </msg>
 
             <msg>
                 <name>43Y17.U</name>
                 <text>Rows updated</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y18.U</name>
                 <text>Update</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y19.U</name>
                 <text>VTI ResultSet for {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>javaClassName</arg>
             </msg>
 
             <msg>
                 <name>43Y20.U</name>
                 <text>VTI</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y21.U</name>
                 <text>Materialized subqueries</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y22.U</name>
                 <text>Statement Name</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y23.U</name>
                 <text>Statement Text</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y24.U</name>
                 <text>Parse Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y25.U</name>
                 <text>Bind Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y26.U</name>
                 <text>Optimize Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y27.U</name>
                 <text>Generate Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y28.U</name>
                 <text>Compile Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y29.U</name>
                 <text>Execute Time</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y30.U</name>
                 <text>Begin Compilation Timestamp</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y31.U</name>
                 <text>End Compilation Timestamp</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y32.U</name>
                 <text>Begin Execution Timestamp</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y33.U</name>
                 <text>End Execution Timestamp</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y44.U</name>
                 <text>Statement Execution Plan Text</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y45.U</name>
                 <text>Run Time 100%, {0} seconds</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>number</arg>
             </msg>
 
@@ -7182,31 +7346,37 @@ MessageId.java.
             <msg>
                 <name>43Y51.U</name>
                 <text>Delete Cascade ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y52.U</name>
                 <text>Delete Cascade ResultSet using</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y53.U</name>
                 <text>Referential Actions On Dependent Tables</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y54.U</name>
                 <text>Begin Referential Action On Dependent Table Number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y55.U</name>
                 <text>End Referential Action On Dependent Table Number</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y56.U</name>
                 <text>User supplied optimizer overrides on {0} are {1}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>tableName</arg>
                 <arg>userSuppliedOptimizerOverrides</arg>
             </msg>
@@ -7214,27 +7384,32 @@ MessageId.java.
             <msg>
                 <name>43Y57.U</name>
                 <text>User supplied optimizer overrides for join are {0}</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
                 <arg>userSuppliedOptimizerOverrides</arg>
             </msg>
 
             <msg>
                 <name>43Y58.U</name>
                 <text>Intersect ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y59.U</name>
                 <text>Intersect</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y60.U</name>
                 <text>Except ResultSet</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
                 <name>43Y61.U</name>
                 <text>Except</text>
+                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 
             <msg>
