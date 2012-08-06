@@ -2215,7 +2215,7 @@ Guide.
 
             <msg>
                 <name>42XAH</name>
-                <text>A NEXT VALUE FOR expression may not appear in many contexts, including WHERE, ON, HAVING, ORDER BY, DISTINCT, CASE, GENERATION, and AGGREGATE clauses as well as WINDOW functions and CHECK constraints.</text>
+                <text>A NEXT VALUE FOR expression may not appear in many contexts, including WHERE, ON, HAVING, ORDER BY, DISTINCT, CASE, GENERATION, and AGGREGATE clauses as well as WINDOW functions and CHECK CONSTRAINTS.</text>
             </msg>
 
             <msg>
@@ -4120,7 +4120,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCL38.S</name>
-                <text>the delete rule of foreign key  must be {0}. (The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE).) </text>
+                <text>The delete rule of foreign key  must be {0}. The relationship would cause the table to be delete-connected to the same table through multiple relationships and such relationships must have the same delete rule (NO ACTION, RESTRICT or CASCADE). </text>
                 <arg>ruleName</arg>
             </msg>
 
@@ -4136,7 +4136,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCL41.S</name>
-                <text>the delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) </text>
+                <text>The delete rule of foreign key can not be CASCADE. (The relationship would cause another table to be delete-connected to the same table through multiple paths with different delete rules or with delete rule equal to SET NULL.) </text>
             </msg>
 
             <msg>
@@ -4447,12 +4447,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ010.S</name>
-                <text>Cannot issue savepoint when autoCommit is on.</text>
+                <text>Cannot issue SAVEPOINT when autoCommit is on.</text>
             </msg>
 
             <msg>
                 <name>XJ011.S</name>
-                <text>Cannot pass null for savepoint name.</text>
+                <text>Cannot pass null for SAVEPOINT name.</text>
             </msg>
 
             <msg>
@@ -4463,12 +4463,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ013.S</name>
-                <text>No ID for named savepoints.</text>
+                <text>No identifier for named SAVEPOINTS.</text>
             </msg>
 
             <msg>
                 <name>XJ014.S</name>
-                <text>No name for un-named savepoints.</text>
+                <text>No name for un-named SAVEPOINTS.</text>
             </msg>
 
             <msg>
@@ -5131,7 +5131,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE00</name>
-                <text>This LogFactory module does not support replicatiosn.</text>
+                <text>This LogFactory module does not support replication.</text>
             </msg>
             <msg>
                 <name>XRE01</name>
@@ -5255,7 +5255,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE43</name>
-                <text>Unexpected error when trying to stop replication slave mode. To stop repliation slave mode, use operation 'stopSlave' or 'failover'.</text>
+                <text>Unexpected error when trying to stop replication slave mode. To stop replication slave mode, use operation 'stopSlave' or 'failover'.</text>
             </msg>
 
         </family>
@@ -5288,13 +5288,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSAM2.S</name>
-                <text>There is no index or conglomerate with conglom id '{0}' to drop.</text>
+                <text>There is no index or conglomerate with conglomerate id '{0}' to drop.</text>
                 <arg>conglomID</arg>
             </msg>
 
             <msg>
                 <name>XSAM3.S</name>
-                <text>There is no index or conglomerate with conglom id '{0}'.</text>
+                <text>There is no index or conglomerate with conglomerate id '{0}'.</text>
                 <arg>conglomID</arg>
             </msg>
 
@@ -7962,7 +7962,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J031</name>
-                <text>Collation for chararcter datatypes</text>
+                <text>Collation for character datatypes</text>
             </msg>
 
             <msg>
@@ -8049,7 +8049,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J116</name>
-                <text>Local security service non-retryable error</text>
+                <text>Local security service error for an operation which cannot be retried.</text>
             </msg>
 
             <msg>
