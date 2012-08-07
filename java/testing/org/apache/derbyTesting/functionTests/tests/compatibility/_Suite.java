@@ -117,6 +117,11 @@ public class _Suite
      * @return A default suite of compatibility tests.
      */
     public static Test suite() {
+        // DERBY-5889: Disabling tests on Windonws while investigating.
+        if (isWindowsPlatform()) {
+            return new TestSuite(
+                    "tests.compatibilty disabled on Windows, see DERBY-5889");
+        }
         TestSuite suite = new TestSuite();
         addVersionCombinations(suite);
         TestConfiguration config = TestConfiguration.getCurrent();
