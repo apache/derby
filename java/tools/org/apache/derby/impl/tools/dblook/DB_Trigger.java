@@ -125,7 +125,24 @@ public class DB_Trigger {
 						break;
 			case 'U':	sb.append("UPDATE");
 						String updateCols = aTrig.getString(7);
-						if (!aTrig.wasNull()) {
+						//DERBY-5839 dblook run on toursdb fails on triggers
+						//	with java.lang.StringIndexOutOfBoundsException in
+						//	dblook.log
+						//We document that SYSTRIGGERS.REFERENCEDCOLUMNS is not
+						// part of the public API and hence that allows Derby 
+						// to change underneath the behavior of the column.
+						// Prior to 10.9, this column only had information
+						// about columns referenced by UPDATE trigger. But,
+						// with 10.9, we use this column to also hold 
+						// information about the trigger columns being used 
+						// inside trigger action plan. This enables Derby to 
+						// read only necessary columns from trigger table. But
+						// because of this change, it is not enough in dblook
+						// to check if SYSTRIGGERS.REFERENCEDCOLUMNS.wasNull. 
+						// We need to also check if the string representation 
+						// of that column is "NULL". Making this change fixes
+						// DERBY-5839
+						if (!aTrig.wasNull() && !updateCols.equals("NULL")) {
 							sb.append(" OF ");
 							sb.append(dblook.getColumnListFromDescription(
 								aTrig.getString(6), updateCols));
