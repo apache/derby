@@ -6520,12 +6520,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>43X10.U</name>
-                <text>Total</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
                 <name>43X11.U</name>
                 <text>Node</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>

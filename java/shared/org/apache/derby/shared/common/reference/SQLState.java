@@ -1149,7 +1149,6 @@ public interface SQLState {
 	String RTS_OPT_EST_RC											   = "43X07.U";
 	String RTS_OPT_EST_COST											   = "43X08.U";
 	String RTS_SECONDS												   = "43X09.U";
-	String RTS_TOTAL												   = "43X10.U";
 	String RTS_NODE													   = "43X11.U";
 	String RTS_NOT_IMPL												   = "43X12.U";
 	String RTS_DELETE_RS_USING										   = "43X13.U";
