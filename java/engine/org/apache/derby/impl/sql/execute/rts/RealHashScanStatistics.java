@@ -152,15 +152,14 @@ public class RealHashScanStatistics
 
 		if (indexName != null)
 		{
+            // note that the "constraint" and "index" literals are names of SQL
+            // objects and so do not need to be internationalized
 			header =
 				indent +
 					MessageService.getTextMessage(
 										SQLState.RTS_HASH_SCAN_RS_USING,
 										tableName,
-										MessageService.getTextMessage(
-											isConstraint ?
-												SQLState.RTS_CONSTRAINT :
-												SQLState.RTS_INDEX),
+                                        isConstraint ? "constraint" : "index",
 										indexName);
 		}
 		else

@@ -154,14 +154,13 @@ public class RealTableScanStatistics
 		}
 		if (indexName != null)
 		{
+            // note that the "constraint" and "index" literals are names of SQL
+            // objects and so do not need to be internationalized
 			header = header +
 				indent + MessageService.getTextMessage(
 											SQLState.RTS_IS_RS_USING,
 											tableName,
-											MessageService.getTextMessage(
-												(isConstraint) ?
-													SQLState.RTS_CONSTRAINT :
-													SQLState.RTS_INDEX),
+                                            isConstraint ? "constraint" : "index",
 											indexName);
 				
 		}

@@ -119,13 +119,13 @@ public class RealDistinctScanStatistics
 
 		if (indexName != null)
 		{
+            // note that the "constraint" and "index" literals are names of SQL
+            // objects and so do not need to be internationalized
 			header =
 			  indent + MessageService.getTextMessage(
 				SQLState.RTS_DISTINCT_SCAN_RS_USING,
 				tableName,
-				isConstraint ?
-					MessageService.getTextMessage(SQLState.RTS_CONSTRAINT) :
-					MessageService.getTextMessage(SQLState.RTS_INDEX),
+				isConstraint ? "constraint" : "index",
 				indexName);
 		}
 		else

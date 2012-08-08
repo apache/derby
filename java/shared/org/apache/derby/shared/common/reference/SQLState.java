@@ -1162,8 +1162,6 @@ public interface SQLState {
 	String RTS_ROWS_INPUT											   = "43X21.U";
 	String RTS_DISTINCT_SCALAR_AGG									   = "43X22.U";
 	String RTS_DISTINCT_SCAN_RS_USING								   = "43X23.U";
-	String RTS_CONSTRAINT											   = "43X24.U";
-	String RTS_INDEX												   = "43X25.U";
 	String RTS_DISTINCT_SCAN_RS										   = "43X26.U";
 	String RTS_LOCKING												   = "43X27.U";
 	String RTS_SCAN_INFO											   = "43X28.U";
@@ -1257,10 +1255,8 @@ public interface SQLState {
 	String RTS_FETCH_SIZE											   = "43Y12.U";
 	String RTS_QUALS												   = "43Y13.U";
 	String RTS_UNION_RS												   = "43Y14.U";
-	String RTS_UNION												   = "43Y15.U";
 	String RTS_UPDATE_RS_USING										   = "43Y16.U";
 	String RTS_ROWS_UPDATED											   = "43Y17.U";
-	String RTS_UPDATE												   = "43Y18.U";
 	String RTS_VTI_RS												   = "43Y19.U";
 	String RTS_VTI													   = "43Y20.U";
 	String RTS_MATERIALIZED_SUBQS									   = "43Y21.U";

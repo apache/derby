@@ -6604,18 +6604,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>43X24.U</name>
-                <text>constraint</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
-                <name>43X25.U</name>
-                <text>index</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
                 <name>43X26.U</name>
                 <text>Distinct Scan ResultSet for {0}</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
@@ -7189,12 +7177,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>43Y15.U</name>
-                <text>Union</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
                 <name>43Y16.U</name>
                 <text>Update ResultSet using {0} locking</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
@@ -7204,12 +7186,6 @@ MessageId.java.
             <msg>
                 <name>43Y17.U</name>
                 <text>Rows updated</text>
-                <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
-            </msg>
-
-            <msg>
-                <name>43Y18.U</name>
-                <text>Update</text>
                 <comment>Translators: This is part of query plan printout; the string is complete as is.</comment>
             </msg>
 

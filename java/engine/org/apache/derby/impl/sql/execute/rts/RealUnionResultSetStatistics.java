@@ -167,11 +167,12 @@ public class RealUnionResultSetStatistics
     return children;
   }
 	/**
-   * Format for display, a name for this node.
+   * Format for display, a name for this node. Since this is a SQL operator name,
+   * it does not need to be internationalized.
 	 *
 	 */
   public String getNodeName(){
-    return MessageService.getTextMessage(SQLState.RTS_UNION);
+      return "Union";
   }
   
   // -----------------------------------------------------

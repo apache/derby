@@ -142,11 +142,12 @@ public class RealUpdateResultSetStatistics
 		return getStatementExecutionPlanText(0);
 	}
 	/**
-   * Format for display, a name for this node.
+   * Format for display, a name for this node. Since this is a SQL operator name,
+   * it does not need to be internationalized.
 	 *
 	 */
   public String getNodeName(){
-    return MessageService.getTextMessage(SQLState.RTS_UPDATE);
+    return "Update";
   }
   
   // -----------------------------------------------------
