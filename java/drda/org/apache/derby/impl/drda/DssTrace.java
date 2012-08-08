@@ -181,7 +181,7 @@ public class DssTrace
             // We don't try making the directory first because it would require
             // extra permissions if the directory already exists. DERBY-4128
             for (int attempt=0; attempt <2; attempt++) {
-                try {             	
+                try {                 
                     // The writer will be buffered for effeciency.
                     comBufferWriter =
                         (AccessController.doPrivileged(
@@ -246,7 +246,7 @@ public class DssTrace
                         throw e;
                     }
                 }
-        	}
+            }
           // Turn on the trace flag.
           comBufferTraceOn = true;
           // initialize the codepoint name table if it is null.

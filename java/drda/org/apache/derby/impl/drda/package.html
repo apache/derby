@@ -17,18 +17,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
-	<TITLE></TITLE>
-	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.3  (Win32)">
-	<META NAME="AUTHOR" CONTENT="K M">
-	<META NAME="CREATED" CONTENT="20060113;5464555">
-	<META NAME="CHANGEDBY" CONTENT="K M">
-	<META NAME="CHANGED" CONTENT="20060113;6142329">
-	<STYLE>
-	<!--
-		@page { size: 8.5in 11in }
-	-->
-	</STYLE>
+    <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+    <TITLE></TITLE>
+    <META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.3  (Win32)">
+    <META NAME="AUTHOR" CONTENT="K M">
+    <META NAME="CREATED" CONTENT="20060113;5464555">
+    <META NAME="CHANGEDBY" CONTENT="K M">
+    <META NAME="CHANGED" CONTENT="20060113;6142329">
+    <STYLE>
+    <!--
+        @page { size: 8.5in 11in }
+    -->
+    </STYLE>
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
 <H1>Network Server Implementation 
@@ -42,23 +42,23 @@ Summary</FONT></FONT></P>
 <P><B>NetworkServerControlImpl</B> - This class implements methods
 used by the public API and main.  It's functions include:</P>
 <UL>
-	<UL>
-		<LI><P>Launching a ConnectionThread to accept incomming
-		connections.</P>
-	</UL>
+    <UL>
+        <LI><P>Launching a ConnectionThread to accept incomming
+        connections.</P>
+    </UL>
 </UL>
 <UL>
-	<UL>
-		<LI><P>Manaintaining  a list of sessions, a queue of Sessions
-		waiting for free thread and free list of DRDAConnections which are
-		available for reuse.</P>
-	</UL>
+    <UL>
+        <LI><P>Manaintaining  a list of sessions, a queue of Sessions
+        waiting for free thread and free list of DRDAConnections which are
+        available for reuse.</P>
+    </UL>
 </UL>
 <UL>
-	<UL>
-		<LI><P>Handling non-DRDA proprietary protocol requests (e.g.
-		turning tracing on/off)</P>
-	</UL>
+    <UL>
+        <LI><P>Handling non-DRDA proprietary protocol requests (e.g.
+        turning tracing on/off)</P>
+    </UL>
 </UL>
 <P><BR><BR>
 </P>
@@ -66,14 +66,14 @@ used by the public API and main.  It's functions include:</P>
 to accept connections. It is responsible for 
 </P>
 <UL>
-	<UL>
-		<LI><P> accepting connections</P>
-		<LI><P>    creating a new Sessions and adding them to the session
-		table.</P>
-		<LI><P>     Starting a DRDAConnThread (either one from the free
-		list or a new one) or putting the sessions waiting for a thread if
-		maxThreads is exceeded.</P>
-	</UL>
+    <UL>
+        <LI><P> accepting connections</P>
+        <LI><P>    creating a new Sessions and adding them to the session
+        table.</P>
+        <LI><P>     Starting a DRDAConnThread (either one from the free
+        list or a new one) or putting the sessions waiting for a thread if
+        maxThreads is exceeded.</P>
+    </UL>
 </UL>
 <P><B>ApplicationRequester</B> - this contains information about a
 particular application requester(e.g, type, version, level of

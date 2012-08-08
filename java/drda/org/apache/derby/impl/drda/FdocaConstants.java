@@ -103,43 +103,43 @@ class FdocaConstants
 
   static final int SQLCADTA_SQLDTARD_RLO_SIZE = SQLCADTA_SQLDTARD_RLO.length;
 
-	protected static boolean isNullable(int fdocaType)
-	{
-		return ( (fdocaType & 1) == 1);
-	}
+    protected static boolean isNullable(int fdocaType)
+    {
+        return ( (fdocaType & 1) == 1);
+    }
 
-	// The maxumum length for LONG VARCHAR RETURN RESULTS IS
-	// 64K, since we send an unsigned short.  We should be
-	// able to send the number of bytes in which we encode the
-	// length as 4 (or more) , but JCC does not support this yet.
-	// JAVA_OBJECTS are returned as LONG VARCHAR values by calling
-	// their toString() method and their limit is 64K as well.
-	// BUT, that said, we ultimately have to match DB2's limit,
-	// so just use that...
-	protected static int LONGVARCHAR_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
-	protected static int LONGVARBINARY_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
-	protected static int LONGVARCHAR_LEN_NUMBYTES = 2;
+    // The maxumum length for LONG VARCHAR RETURN RESULTS IS
+    // 64K, since we send an unsigned short.  We should be
+    // able to send the number of bytes in which we encode the
+    // length as 4 (or more) , but JCC does not support this yet.
+    // JAVA_OBJECTS are returned as LONG VARCHAR values by calling
+    // their toString() method and their limit is 64K as well.
+    // BUT, that said, we ultimately have to match DB2's limit,
+    // so just use that...
+    protected static int LONGVARCHAR_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
+    protected static int LONGVARBINARY_MAX_LEN = Limits.DB2_LONGVARCHAR_MAXWIDTH;
+    protected static int LONGVARCHAR_LEN_NUMBYTES = 2;
 
-	// JCC  only supports a max precision of 31 like DB2
-	protected static int NUMERIC_MAX_PRECISION=31;
-	protected static int NUMERIC_DEFAULT_PRECISION=NUMERIC_MAX_PRECISION;
-	protected static int NUMERIC_DEFAULT_SCALE=15;
+    // JCC  only supports a max precision of 31 like DB2
+    protected static int NUMERIC_MAX_PRECISION=31;
+    protected static int NUMERIC_DEFAULT_PRECISION=NUMERIC_MAX_PRECISION;
+    protected static int NUMERIC_DEFAULT_SCALE=15;
 
-	/***
-	 * Map jdbctype to fdoca drda type
-	 * @param jdbcType - Jdbc type for mappingy
-	 * @param nullable - true if type is nullable
-	 * @param appRequester - state variable for the connection
-	 * @param outlen - output parameter with length of type.
-	 * @return standard drdaTypeLength. -1 if we don't know.
-	 **/
-	protected static int mapJdbcTypeToDrdaType(int jdbcType, boolean nullable, AppRequester appRequester,
-											   int[] outlen)
-		throws SQLException
-	{
-		int drdaType = 0;
-		switch (jdbcType) {
-			case Types.BOOLEAN:
+    /***
+     * Map jdbctype to fdoca drda type
+     * @param jdbcType - Jdbc type for mappingy
+     * @param nullable - true if type is nullable
+     * @param appRequester - state variable for the connection
+     * @param outlen - output parameter with length of type.
+     * @return standard drdaTypeLength. -1 if we don't know.
+     **/
+    protected static int mapJdbcTypeToDrdaType(int jdbcType, boolean nullable, AppRequester appRequester,
+                                               int[] outlen)
+        throws SQLException
+    {
+        int drdaType = 0;
+        switch (jdbcType) {
+            case Types.BOOLEAN:
                 if ( appRequester.supportsBooleanValues() )
                 {
                     drdaType = DRDAConstants.DRDA_TYPE_NBOOLEAN;
@@ -150,63 +150,63 @@ class FdocaConstants
                     drdaType = DRDAConstants.DRDA_TYPE_NSMALL;
                     outlen[0] = 2;
                 }
-				break;
-			case java.sql.Types.BIT:
-			case java.sql.Types.TINYINT:
-			case java.sql.Types.SMALLINT:
-				drdaType = DRDAConstants.DRDA_TYPE_NSMALL;
-				outlen[0] = 2;
-				break;
-			case java.sql.Types.INTEGER:
-				drdaType = DRDAConstants.DRDA_TYPE_NINTEGER;
-				outlen[0] = 4;
-				break;
-			case java.sql.Types.BIGINT:
-				drdaType = DRDAConstants.DRDA_TYPE_NINTEGER8;
-				outlen[0] = 8;
-				break;
-			case java.sql.Types.REAL:
-				drdaType = DRDAConstants.DRDA_TYPE_NFLOAT4;
-				outlen[0] = 4;
-				break;
-			case java.sql.Types.DOUBLE:
-			case java.sql.Types.FLOAT:
-				drdaType = DRDAConstants.DRDA_TYPE_NFLOAT8;
-				outlen[0] = 8;
-				break;
-			case java.sql.Types.NUMERIC:
-			case java.sql.Types.DECIMAL:
-				drdaType = DRDAConstants.DRDA_TYPE_NDECIMAL;
-				//needs to be adjusted for actual value
-				outlen[0] = -1;
-				break;
-			case java.sql.Types.DATE:
-				drdaType = DRDAConstants.DRDA_TYPE_NDATE;
-				outlen[0] = 10;
-				break;
-			case java.sql.Types.TIME:
-				drdaType = DRDAConstants.DRDA_TYPE_NTIME;
-				outlen[0] = 8;
-				break;
-			case java.sql.Types.TIMESTAMP:
-				drdaType = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
-				outlen[0] = appRequester.getTimestampLength();
-				break;
-			case java.sql.Types.CHAR:
-//				drdaType = DRDAConstants.DRDA_TYPE_NCHAR;
-				//making this NVARMIX for now to handle different byte length
-				//characters - checking with Paul to see if this is the
-				//correct way to handle it.
-				drdaType = DRDAConstants.DRDA_TYPE_NVARMIX;
-				outlen[0] = -1;
-				break;
-			case java.sql.Types.VARCHAR:
-				drdaType = DRDAConstants.DRDA_TYPE_NVARCHAR;
-				outlen[0] = -1;
-				break;
-				// we will just convert a java object to a string
-				// since jcc doesn't support it.
-			case java.sql.Types.JAVA_OBJECT:
+                break;
+            case java.sql.Types.BIT:
+            case java.sql.Types.TINYINT:
+            case java.sql.Types.SMALLINT:
+                drdaType = DRDAConstants.DRDA_TYPE_NSMALL;
+                outlen[0] = 2;
+                break;
+            case java.sql.Types.INTEGER:
+                drdaType = DRDAConstants.DRDA_TYPE_NINTEGER;
+                outlen[0] = 4;
+                break;
+            case java.sql.Types.BIGINT:
+                drdaType = DRDAConstants.DRDA_TYPE_NINTEGER8;
+                outlen[0] = 8;
+                break;
+            case java.sql.Types.REAL:
+                drdaType = DRDAConstants.DRDA_TYPE_NFLOAT4;
+                outlen[0] = 4;
+                break;
+            case java.sql.Types.DOUBLE:
+            case java.sql.Types.FLOAT:
+                drdaType = DRDAConstants.DRDA_TYPE_NFLOAT8;
+                outlen[0] = 8;
+                break;
+            case java.sql.Types.NUMERIC:
+            case java.sql.Types.DECIMAL:
+                drdaType = DRDAConstants.DRDA_TYPE_NDECIMAL;
+                //needs to be adjusted for actual value
+                outlen[0] = -1;
+                break;
+            case java.sql.Types.DATE:
+                drdaType = DRDAConstants.DRDA_TYPE_NDATE;
+                outlen[0] = 10;
+                break;
+            case java.sql.Types.TIME:
+                drdaType = DRDAConstants.DRDA_TYPE_NTIME;
+                outlen[0] = 8;
+                break;
+            case java.sql.Types.TIMESTAMP:
+                drdaType = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
+                outlen[0] = appRequester.getTimestampLength();
+                break;
+            case java.sql.Types.CHAR:
+//                drdaType = DRDAConstants.DRDA_TYPE_NCHAR;
+                //making this NVARMIX for now to handle different byte length
+                //characters - checking with Paul to see if this is the
+                //correct way to handle it.
+                drdaType = DRDAConstants.DRDA_TYPE_NVARMIX;
+                outlen[0] = -1;
+                break;
+            case java.sql.Types.VARCHAR:
+                drdaType = DRDAConstants.DRDA_TYPE_NVARCHAR;
+                outlen[0] = -1;
+                break;
+                // we will just convert a java object to a string
+                // since jcc doesn't support it.
+            case java.sql.Types.JAVA_OBJECT:
                 //boolean b = false;
                 //if ( b )
                 if ( appRequester.supportsUDTs() )
@@ -219,47 +219,47 @@ class FdocaConstants
                     drdaType = DRDAConstants.DRDA_TYPE_NLONG;
                     outlen[0] = LONGVARCHAR_MAX_LEN;
                 }
-				break;
-			case java.sql.Types.LONGVARCHAR:
-					drdaType = DRDAConstants.DRDA_TYPE_NLONG;
-					outlen[0] = LONGVARCHAR_MAX_LEN;
-				break;
-			case java.sql.Types.BINARY:
-			case java.sql.Types.VARBINARY:
-				drdaType = DRDAConstants.DRDA_TYPE_NVARBYTE;
-				outlen[0] = -1;
-				break;
-			case java.sql.Types.LONGVARBINARY:
-					drdaType = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
-					outlen[0] = LONGVARBINARY_MAX_LEN;
-				break;
-				// blob begin
-				// merge BLOB and BLOB_LOCATOR ????
-			case java.sql.Types.BLOB:
-				drdaType = DRDAConstants.DRDA_TYPE_NLOBBYTES;
-				// indicates fdocadata is a place holder with 4 byte length
-				outlen[0] = 0x8004;
-				break;
-			case java.sql.Types.CLOB:
-				drdaType = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-				outlen[0] = 0x8004;
-				break;
-				// blob end
-			case java.sql.Types.ARRAY:
-			case java.sql.Types.DISTINCT:
-			case java.sql.Types.NULL:
-			case java.sql.Types.OTHER:
-			case java.sql.Types.REF:
-			case java.sql.Types.STRUCT:
-				throw new SQLException("Jdbc type" + jdbcType + "not Supported yet");
-			default:
-				throw new SQLException ("unrecognized sql type: " + jdbcType);
-		}
+                break;
+            case java.sql.Types.LONGVARCHAR:
+                    drdaType = DRDAConstants.DRDA_TYPE_NLONG;
+                    outlen[0] = LONGVARCHAR_MAX_LEN;
+                break;
+            case java.sql.Types.BINARY:
+            case java.sql.Types.VARBINARY:
+                drdaType = DRDAConstants.DRDA_TYPE_NVARBYTE;
+                outlen[0] = -1;
+                break;
+            case java.sql.Types.LONGVARBINARY:
+                    drdaType = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
+                    outlen[0] = LONGVARBINARY_MAX_LEN;
+                break;
+                // blob begin
+                // merge BLOB and BLOB_LOCATOR ????
+            case java.sql.Types.BLOB:
+                drdaType = DRDAConstants.DRDA_TYPE_NLOBBYTES;
+                // indicates fdocadata is a place holder with 4 byte length
+                outlen[0] = 0x8004;
+                break;
+            case java.sql.Types.CLOB:
+                drdaType = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                outlen[0] = 0x8004;
+                break;
+                // blob end
+            case java.sql.Types.ARRAY:
+            case java.sql.Types.DISTINCT:
+            case java.sql.Types.NULL:
+            case java.sql.Types.OTHER:
+            case java.sql.Types.REF:
+            case java.sql.Types.STRUCT:
+                throw new SQLException("Jdbc type" + jdbcType + "not Supported yet");
+            default:
+                throw new SQLException ("unrecognized sql type: " + jdbcType);
+        }
 
-		if (!nullable)
-			drdaType--;
-		return drdaType;
-	}
+        if (!nullable)
+            drdaType--;
+        return drdaType;
+    }
 
 
 }

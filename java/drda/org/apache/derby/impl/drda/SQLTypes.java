@@ -99,9 +99,9 @@ class SQLTypes {
     case DRDAConstants.DB2_SQLTYPE_DBCLOB:  // large object character DBCS
       return java.sql.Types.CLOB;
     case DRDAConstants.DB2_SQLTYPE_BLOB:    // large object bytes
-		case DRDAConstants.DB2_SQLTYPE_BLOB_LOCATOR:
-		case DRDAConstants.DB2_SQLTYPE_CLOB_LOCATOR:
-		case DRDAConstants.DB2_SQLTYPE_DBCLOB_LOCATOR:
+        case DRDAConstants.DB2_SQLTYPE_BLOB_LOCATOR:
+        case DRDAConstants.DB2_SQLTYPE_CLOB_LOCATOR:
+        case DRDAConstants.DB2_SQLTYPE_DBCLOB_LOCATOR:
       return java.sql.Types.BLOB;
     default:
       //throw new BugCheckException ("Encountered unexpected type code");
@@ -110,17 +110,17 @@ class SQLTypes {
   }
 
 
-	/**
-	 * Map jdbc type to the DB2 DRDA SQL Types expected by jcc.
-	 *@param jdbctype  - jdbc Type to convert
-	 *@param nullable - whether the type is nullable
-	 **/
+    /**
+     * Map jdbc type to the DB2 DRDA SQL Types expected by jcc.
+     *@param jdbctype  - jdbc Type to convert
+     *@param nullable - whether the type is nullable
+     **/
 
-	
+    
  /**  Map JDBC Type to DB2 SqlType
   * @param jdbctype   JDBC Type from java.sql.Types
   * @param nullable   true if this is a nullable type
-	 * @param appRequester - state variable for the connection
+     * @param appRequester - state variable for the connection
   * @param outlen     output parameter with type length
   *
   * @return Corresponding DB2 SQL Type (See DRDA Manual FD:OCA Meta 
@@ -130,20 +130,20 @@ class SQLTypes {
   */
 
     static protected int mapJdbcTypeToDB2SqlType (int jdbctype, boolean nullable, AppRequester appRequester,
-											   int[] outlen)
-	 throws SQLException
+                                               int[] outlen)
+     throws SQLException
   {
-	  int nullAddVal =0;
+      int nullAddVal =0;
 
-	  if (nullable) 
-		  nullAddVal =1; 
-	  
-	  // Call FdocaConstants just to get the length
-	  FdocaConstants.mapJdbcTypeToDrdaType(jdbctype,nullable,appRequester,outlen);
+      if (nullable) 
+          nullAddVal =1; 
+      
+      // Call FdocaConstants just to get the length
+      FdocaConstants.mapJdbcTypeToDrdaType(jdbctype,nullable,appRequester,outlen);
 
-	  switch(jdbctype)
-	  {
-		  case Types.BOOLEAN:
+      switch(jdbctype)
+      {
+          case Types.BOOLEAN:
               if ( appRequester.supportsBooleanValues() )
               {
                   return DRDAConstants.DB2_SQLTYPE_BOOLEAN + nullAddVal;
@@ -152,37 +152,37 @@ class SQLTypes {
               {
                   return DRDAConstants.DB2_SQLTYPE_SMALL + nullAddVal;
               }
-		  case java.sql.Types.BIT:
-		  case java.sql.Types.TINYINT:
-		  case java.sql.Types.SMALLINT:
-			  return DRDAConstants.DB2_SQLTYPE_SMALL + nullAddVal;
-		  case java.sql.Types.INTEGER:
-			  return DRDAConstants.DB2_SQLTYPE_INTEGER + nullAddVal;
-		  case java.sql.Types.BIGINT:
-			  return DRDAConstants.DB2_SQLTYPE_BIGINT + nullAddVal;
-		  case java.sql.Types.DOUBLE:
-		  case java.sql.Types.REAL:
-			  return DRDAConstants.DB2_SQLTYPE_FLOAT + nullAddVal;
-		  case java.sql.Types.DECIMAL:
-		  case java.sql.Types.NUMERIC:
-			  return DRDAConstants.DB2_SQLTYPE_DECIMAL + nullAddVal;
-		  case java.sql.Types.DATE:
-			  return DRDAConstants.DB2_SQLTYPE_DATE + nullAddVal;
-		  case java.sql.Types.TIME:
-			  return DRDAConstants.DB2_SQLTYPE_TIME + nullAddVal;
-		  case java.sql.Types.TIMESTAMP:
-			  return DRDAConstants.DB2_SQLTYPE_TIMESTAMP + nullAddVal;
-		  case java.sql.Types.CHAR:
-			  return  DRDAConstants.DB2_SQLTYPE_CHAR + nullAddVal;    // null terminated SBCS/Mixed
-		  case java.sql.Types.BINARY:
-			  return DRDAConstants.DB2_SQLTYPE_CHAR + nullAddVal;
+          case java.sql.Types.BIT:
+          case java.sql.Types.TINYINT:
+          case java.sql.Types.SMALLINT:
+              return DRDAConstants.DB2_SQLTYPE_SMALL + nullAddVal;
+          case java.sql.Types.INTEGER:
+              return DRDAConstants.DB2_SQLTYPE_INTEGER + nullAddVal;
+          case java.sql.Types.BIGINT:
+              return DRDAConstants.DB2_SQLTYPE_BIGINT + nullAddVal;
+          case java.sql.Types.DOUBLE:
+          case java.sql.Types.REAL:
+              return DRDAConstants.DB2_SQLTYPE_FLOAT + nullAddVal;
+          case java.sql.Types.DECIMAL:
+          case java.sql.Types.NUMERIC:
+              return DRDAConstants.DB2_SQLTYPE_DECIMAL + nullAddVal;
+          case java.sql.Types.DATE:
+              return DRDAConstants.DB2_SQLTYPE_DATE + nullAddVal;
+          case java.sql.Types.TIME:
+              return DRDAConstants.DB2_SQLTYPE_TIME + nullAddVal;
+          case java.sql.Types.TIMESTAMP:
+              return DRDAConstants.DB2_SQLTYPE_TIMESTAMP + nullAddVal;
+          case java.sql.Types.CHAR:
+              return  DRDAConstants.DB2_SQLTYPE_CHAR + nullAddVal;    // null terminated SBCS/Mixed
+          case java.sql.Types.BINARY:
+              return DRDAConstants.DB2_SQLTYPE_CHAR + nullAddVal;
 
-		  case java.sql.Types.VARCHAR:
-		  case java.sql.Types.VARBINARY:
-			  return  DRDAConstants.DB2_SQLTYPE_VARCHAR + nullAddVal;			  
-		  case java.sql.Types.LONGVARBINARY:
-			  return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
-		  case java.sql.Types.JAVA_OBJECT:
+          case java.sql.Types.VARCHAR:
+          case java.sql.Types.VARBINARY:
+              return  DRDAConstants.DB2_SQLTYPE_VARCHAR + nullAddVal;              
+          case java.sql.Types.LONGVARBINARY:
+              return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
+          case java.sql.Types.JAVA_OBJECT:
               if ( appRequester.supportsUDTs() )
               {
                   return DRDAConstants.DB2_SQLTYPE_FAKE_UDT + nullAddVal;
@@ -191,32 +191,32 @@ class SQLTypes {
               {
                   return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
               }
-		  case java.sql.Types.BLOB:
-			  return DRDAConstants.DB2_SQLTYPE_BLOB + nullAddVal;
-		  case java.sql.Types.CLOB:
-			  return DRDAConstants.DB2_SQLTYPE_CLOB + nullAddVal;
-		  case java.sql.Types.LONGVARCHAR:
-			  return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
-		  case java.sql.Types.ARRAY:
-		  case java.sql.Types.DISTINCT:
-		  case java.sql.Types.NULL:
-		  case java.sql.Types.OTHER:
-		  case java.sql.Types.REF:
-		  case java.sql.Types.STRUCT:
-			  throw new SQLException("Jdbc type" + jdbctype + "not Supported yet");
-			default:
-				throw new SQLException ("unrecognized sql type: " + jdbctype);
-			  //throw new BugCheckException ("Encountered unexpected type code");
+          case java.sql.Types.BLOB:
+              return DRDAConstants.DB2_SQLTYPE_BLOB + nullAddVal;
+          case java.sql.Types.CLOB:
+              return DRDAConstants.DB2_SQLTYPE_CLOB + nullAddVal;
+          case java.sql.Types.LONGVARCHAR:
+              return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
+          case java.sql.Types.ARRAY:
+          case java.sql.Types.DISTINCT:
+          case java.sql.Types.NULL:
+          case java.sql.Types.OTHER:
+          case java.sql.Types.REF:
+          case java.sql.Types.STRUCT:
+              throw new SQLException("Jdbc type" + jdbctype + "not Supported yet");
+            default:
+                throw new SQLException ("unrecognized sql type: " + jdbctype);
+              //throw new BugCheckException ("Encountered unexpected type code");
 
-	  }
+      }
   }
 
-	/**
-	 * Translate DB2 SQL Type to the non-nullable type.
-	 * @param sqlType DB2 SQL Type
-	 *
-	 * @return The Non-Nullable DB2 SQL Type.
-	 */
+    /**
+     * Translate DB2 SQL Type to the non-nullable type.
+     * @param sqlType DB2 SQL Type
+     *
+     * @return The Non-Nullable DB2 SQL Type.
+     */
    protected  static int getNonNullableSqlType (int sqlType)
   {
     return sqlType & ~1;

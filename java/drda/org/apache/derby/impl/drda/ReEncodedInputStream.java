@@ -52,118 +52,118 @@ public class ReEncodedInputStream extends InputStream {
     private ByteArrayInputStream encodedInputStream_;
     
     public ReEncodedInputStream(Reader reader) 
-	throws IOException {
-	
-	reader_ = reader;
-	decodedBuffer_ = new char[BUFFERED_CHAR_LEN];
+    throws IOException {
+    
+    reader_ = reader;
+    decodedBuffer_ = new char[BUFFERED_CHAR_LEN];
 
-	encodedOutputStream_ = new PublicBufferOutputStream( BUFFERED_CHAR_LEN * 3 );
-	encodedStreamWriter_ = new OutputStreamWriter(encodedOutputStream_,"UTF8");
-	
-	encodedInputStream_ = reEncode(reader_);
-	
+    encodedOutputStream_ = new PublicBufferOutputStream( BUFFERED_CHAR_LEN * 3 );
+    encodedStreamWriter_ = new OutputStreamWriter(encodedOutputStream_,"UTF8");
+    
+    encodedInputStream_ = reEncode(reader_);
+    
     }
 
 
     private ByteArrayInputStream reEncode(Reader reader) 
-	throws IOException
+    throws IOException
     {
-	
-		int count;
-		do{
-			count = reader.read(decodedBuffer_, 0, BUFFERED_CHAR_LEN);
-			
-		}while(count == 0);
-			
-		if(count < 0)
-			return null;
-	
-	encodedOutputStream_.reset();
-	encodedStreamWriter_.write(decodedBuffer_,0,count);
-	encodedStreamWriter_.flush();
+    
+        int count;
+        do{
+            count = reader.read(decodedBuffer_, 0, BUFFERED_CHAR_LEN);
+            
+        }while(count == 0);
+            
+        if(count < 0)
+            return null;
+    
+    encodedOutputStream_.reset();
+    encodedStreamWriter_.write(decodedBuffer_,0,count);
+    encodedStreamWriter_.flush();
 
-	int encodedLength = encodedOutputStream_.size();
-	
-	return new ByteArrayInputStream(encodedOutputStream_.getBuffer(),
-					0,
-					encodedLength);
+    int encodedLength = encodedOutputStream_.size();
+    
+    return new ByteArrayInputStream(encodedOutputStream_.getBuffer(),
+                    0,
+                    encodedLength);
     }
     
     
     public int available() 
-	throws IOException {
-	
-	if(encodedInputStream_ == null){
-	    return 0;
-	}
+    throws IOException {
+    
+    if(encodedInputStream_ == null){
+        return 0;
+    }
 
-	return encodedInputStream_.available();
-	
+    return encodedInputStream_.available();
+    
     }
     
 
     public void close() 
-	throws IOException {
-	
-	if(encodedInputStream_ != null ){
-	    encodedInputStream_.close();
-	    encodedInputStream_ = null;
-	}
+    throws IOException {
+    
+    if(encodedInputStream_ != null ){
+        encodedInputStream_.close();
+        encodedInputStream_ = null;
+    }
 
-	if(reader_ != null ){
-	    reader_.close();
-	    reader_ = null;
-	}
+    if(reader_ != null ){
+        reader_.close();
+        reader_ = null;
+    }
 
-	if(encodedStreamWriter_ != null){
-	    encodedStreamWriter_.close();
-	    encodedStreamWriter_ = null;
-	}
-	
+    if(encodedStreamWriter_ != null){
+        encodedStreamWriter_.close();
+        encodedStreamWriter_ = null;
+    }
+    
     }
     
     
     public int read() 
-	throws IOException {
-	
-	if(encodedInputStream_ == null){
-	    return -1;
-	}
-	
-	int c = encodedInputStream_.read();
+    throws IOException {
+    
+    if(encodedInputStream_ == null){
+        return -1;
+    }
+    
+    int c = encodedInputStream_.read();
 
-	if(c > -1){
-	    return c;
-	    
-	}else{
-	    encodedInputStream_ = reEncode(reader_);
-	    
-	    if(encodedInputStream_ == null){
-		return -1;
-	    }
-	    
-	    return encodedInputStream_.read();
+    if(c > -1){
+        return c;
+        
+    }else{
+        encodedInputStream_ = reEncode(reader_);
+        
+        if(encodedInputStream_ == null){
+        return -1;
+        }
+        
+        return encodedInputStream_.read();
 
-	}
-	
+    }
+    
     }
     
     
     protected void finalize() throws IOException {
-	close();
+    close();
     }
     
     
     private static class PublicBufferOutputStream extends ByteArrayOutputStream{
-	
-	PublicBufferOutputStream(int size){
-	    super(size);
-	}
+    
+    PublicBufferOutputStream(int size){
+        super(size);
+    }
 
-	public byte[] getBuffer(){
-	    return buf;
-	}
-	
+    public byte[] getBuffer(){
+        return buf;
+    }
+    
     }
 
 }

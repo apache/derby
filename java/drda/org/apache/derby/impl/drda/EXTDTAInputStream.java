@@ -67,84 +67,84 @@ class EXTDTAInputStream extends InputStream {
     private Blob _blob;
     
       
-	
-	private EXTDTAInputStream(ResultSet rs,
-				  int columnNumber,
-				  int ndrdaType) 
+    
+    private EXTDTAInputStream(ResultSet rs,
+                  int columnNumber,
+                  int ndrdaType) 
     {
-	
+    
         this.rs = (EngineResultSet) rs;
         this.columnNumber = columnNumber;
         this.ndrdaType = ndrdaType;
     }
 
-	private EXTDTAInputStream(Clob clob, int ndrdaType ) 
+    private EXTDTAInputStream(Clob clob, int ndrdaType ) 
     {
         _clob = clob;
         this.ndrdaType = ndrdaType;
     }
 
-	private EXTDTAInputStream(Blob blob, int ndrdaType ) 
+    private EXTDTAInputStream(Blob blob, int ndrdaType ) 
     {
         _blob = blob;
         this.ndrdaType = ndrdaType;
     }
 
     
-	/**
-	 * Create a new EXTDTAInputStream.  Before read the stream must be 
+    /**
+     * Create a new EXTDTAInputStream.  Before read the stream must be 
      * initialized by the user with {@link #initInputStream()} 
-	 * 
-	 * @see DDMWriter#writeScalarStream
+     * 
+     * @see DDMWriter#writeScalarStream
      * @see #initInputStream()
-	 * 
-	 * @param rs
-	 *            result set from which to retrieve the lob
-	 * @param column
-	 *            column number
-	 * @param drdaType
-	 *            FD:OCA type of object one of
-	 * 			   DRDAConstants.DRDA_TYPE_NLOBBYTES
-	 * 			   DRDAConstants.DRDA_TYPE_LOBBYTES
-	 * 			   DRDAConstants.DRDA_TYPE_NLOBCMIXED
-	 *  		   DRDAConstants.DRDA_TYPE_LOBCMIXED
-	 * 
-	 * @return null if the value is null or a new EXTDTAInputStream corresponding to 
-	 *  		rs.getBinaryStream(column) value and associated length
-	 * 
-	 * @throws SQLException
-	 */
-	public static EXTDTAInputStream getEXTDTAStream(ResultSet rs, int column, int drdaType) 
-		{
- 	    
-		int ndrdaType = drdaType | 1; //nullable drdaType
-			
-		return new EXTDTAInputStream(rs,
-					     column,
-					     ndrdaType);
-		
-	}
+     * 
+     * @param rs
+     *            result set from which to retrieve the lob
+     * @param column
+     *            column number
+     * @param drdaType
+     *            FD:OCA type of object one of
+     *                DRDAConstants.DRDA_TYPE_NLOBBYTES
+     *                DRDAConstants.DRDA_TYPE_LOBBYTES
+     *                DRDAConstants.DRDA_TYPE_NLOBCMIXED
+     *             DRDAConstants.DRDA_TYPE_LOBCMIXED
+     * 
+     * @return null if the value is null or a new EXTDTAInputStream corresponding to 
+     *          rs.getBinaryStream(column) value and associated length
+     * 
+     * @throws SQLException
+     */
+    public static EXTDTAInputStream getEXTDTAStream(ResultSet rs, int column, int drdaType) 
+        {
+         
+        int ndrdaType = drdaType | 1; //nullable drdaType
+            
+        return new EXTDTAInputStream(rs,
+                         column,
+                         ndrdaType);
+        
+    }
 
-	/**
-	 * Create a new EXTDTAInputStream from a CallableStatement.
-	 * 
-	 * 
-	 * @param cs
-	 *            CallableStatement from which to retrieve the lob
-	 * @param column
-	 *            column number
-	 * @param drdaType
-	 *            FD:OCA type of object one of
-	 * 			   DRDAConstants.DRDA_TYPE_NLOBBYTES
-	 * 			   DRDAConstants.DRDA_TYPE_LOBBYTES
-	 * 			   DRDAConstants.DRDA_TYPE_NLOBCMIXED
-	 *  		   DRDAConstants.DRDA_TYPE_LOBCMIXED
-	 */
-	public static EXTDTAInputStream getEXTDTAStream(CallableStatement cs, int column, int drdaType)
+    /**
+     * Create a new EXTDTAInputStream from a CallableStatement.
+     * 
+     * 
+     * @param cs
+     *            CallableStatement from which to retrieve the lob
+     * @param column
+     *            column number
+     * @param drdaType
+     *            FD:OCA type of object one of
+     *                DRDAConstants.DRDA_TYPE_NLOBBYTES
+     *                DRDAConstants.DRDA_TYPE_LOBBYTES
+     *                DRDAConstants.DRDA_TYPE_NLOBCMIXED
+     *             DRDAConstants.DRDA_TYPE_LOBCMIXED
+     */
+    public static EXTDTAInputStream getEXTDTAStream(CallableStatement cs, int column, int drdaType)
         throws SQLException
     {
- 	    
-		int ndrdaType = drdaType | 1; //nullable drdaType
+         
+        int ndrdaType = drdaType | 1; //nullable drdaType
 
         switch ( ndrdaType )
         {
@@ -158,118 +158,118 @@ class EXTDTAInputStream extends InputStream {
             return new EXTDTAInputStream( clob, ndrdaType );
         default:
             badDRDAType( ndrdaType );
-			return null;
+            return null;
         }
-	}
+    }
 
-	
-	
-	/**
-	 * Requires {@link #initInputStream()} be called before we can read from the stream
-	 * 
-	 * @see java.io.InputStream#read()
-	 */
-	public int read() throws IOException {
+    
+    
+    /**
+     * Requires {@link #initInputStream()} be called before we can read from the stream
+     * 
+     * @see java.io.InputStream#read()
+     */
+    public int read() throws IOException {
                        
-		return binaryInputStream.read();
-	}
+        return binaryInputStream.read();
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#available()
-	 */
-	public int available() throws IOException {
-		return binaryInputStream.available();
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#available()
+     */
+    public int available() throws IOException {
+        return binaryInputStream.available();
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#close()
-	 */
-	public void close() throws IOException {
-	    
-		if (binaryInputStream != null)
-			binaryInputStream.close();	
-		binaryInputStream = null;
-	    
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#close()
+     */
+    public void close() throws IOException {
+        
+        if (binaryInputStream != null)
+            binaryInputStream.close();    
+        binaryInputStream = null;
+        
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object arg0) {
-		return binaryInputStream.equals(arg0);
-	}
+    /**
+     * 
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object arg0) {
+        return binaryInputStream.equals(arg0);
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		return binaryInputStream.hashCode();
-	}
+    /**
+     * 
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        return binaryInputStream.hashCode();
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#mark(int)
-	 */
-	public void mark(int arg0) {
-		binaryInputStream.mark(arg0);
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#mark(int)
+     */
+    public void mark(int arg0) {
+        binaryInputStream.mark(arg0);
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#markSupported()
-	 */
-	public boolean markSupported() {
-		return binaryInputStream.markSupported();
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#markSupported()
+     */
+    public boolean markSupported() {
+        return binaryInputStream.markSupported();
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#read(byte[])
-	 */
-	public int read(byte[] arg0) throws IOException {
-		return binaryInputStream.read(arg0);
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#read(byte[])
+     */
+    public int read(byte[] arg0) throws IOException {
+        return binaryInputStream.read(arg0);
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#read(byte[], int, int)
-	 */
-	public int read(byte[] arg0, int arg1, int arg2) throws IOException {
-		return binaryInputStream.read(arg0, arg1, arg2);
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+        return binaryInputStream.read(arg0, arg1, arg2);
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#reset()
-	 */
-	public void reset() throws IOException {
-		binaryInputStream.reset();
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#reset()
+     */
+    public void reset() throws IOException {
+        binaryInputStream.reset();
+    }
 
-	/**
-	 * 
-	 * 
-	 * @see java.io.InputStream#skip(long)
-	 */
-	public long skip(long arg0) throws IOException {
-		if (arg0 < 0L) {
-			return 0L;
-		}
-		return binaryInputStream.skip(arg0);
-	}
+    /**
+     * 
+     * 
+     * @see java.io.InputStream#skip(long)
+     */
+    public long skip(long arg0) throws IOException {
+        if (arg0 < 0L) {
+            return 0L;
+        }
+        return binaryInputStream.skip(arg0);
+    }
 
 
     protected boolean isEmptyStream() throws SQLException
@@ -293,45 +293,45 @@ class EXTDTAInputStream extends InputStream {
      *
      */
     public  void initInputStream()
-	throws SQLException
+    throws SQLException
     {
 
-	InputStream is = null;
-	Reader r = null;
-	// BLOBS
-	if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
-	{ 	    	
-	    is = getBinaryStream();
-	    if (is == null) { return; }
-	}
-	    // CLOBS
-	else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
-	{	
-	    try {
-	        
-	        r = getCharacterStream();
-		    	
-	        if(r == null){	            
+    InputStream is = null;
+    Reader r = null;
+    // BLOBS
+    if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
+    {             
+        is = getBinaryStream();
+        if (is == null) { return; }
+    }
+        // CLOBS
+    else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
+    {    
+        try {
+            
+            r = getCharacterStream();
+                
+            if(r == null){                
                     return;
-	        }
+            }
 
-			is = new ReEncodedInputStream(r);
-			
-		    }catch (java.io.UnsupportedEncodingException e) {
-			throw Util.javaException(e);
-			
-		    }catch (IOException e){
-			throw Util.javaException(e);
-			
-		    }
-		    
-		}
+            is = new ReEncodedInputStream(r);
+            
+            }catch (java.io.UnsupportedEncodingException e) {
+            throw Util.javaException(e);
+            
+            }catch (IOException e){
+            throw Util.javaException(e);
+            
+            }
+            
+        }
         else { badDRDAType( ndrdaType ); }
-	if (! is.markSupported()) {
-	    is = new BufferedInputStream(is);
-	    }
-	    
- 	this.binaryInputStream=is;
+    if (! is.markSupported()) {
+        is = new BufferedInputStream(is);
+        }
+        
+     this.binaryInputStream=is;
     }
     private InputStream getBinaryStream() throws SQLException
     {
@@ -354,8 +354,8 @@ class EXTDTAInputStream extends InputStream {
     
         
     protected void finalize() throws Throwable{
-	close();
-	}
+    close();
+    }
 
     /**
      * Is the value null?  Null status is obtained from the underlying 

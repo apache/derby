@@ -129,16 +129,16 @@ class DecryptionManager
     }
     catch (java.security.NoSuchAlgorithmException e) {
       throw new SQLException ("java.security.NoSuchAlgorithmException is caught" +
-			      " when initializing EncryptionManager '" + e.getMessage() + "'");
+                  " when initializing EncryptionManager '" + e.getMessage() + "'");
     }
     catch (java.security.InvalidAlgorithmParameterException e) {
       throw new SQLException ("java.security.InvalidAlgorithmParameterException is caught" +
-			      " when initializing EncryptionManager '" + e.getMessage() + "'");
+                  " when initializing EncryptionManager '" + e.getMessage() + "'");
     }
 
     catch (java.security.InvalidKeyException e) {
       throw new SQLException ("java.security.InvalidKeyException is caught" +
-			      " when initializing EncryptionManager '" + e.getMessage() + "'");
+                  " when initializing EncryptionManager '" + e.getMessage() + "'");
     }
   }
 
@@ -171,7 +171,7 @@ class DecryptionManager
     if (aPubKey.length == 33 && aPubKey[0]==0) {
       byte[] newKey = new byte[32];
       for (int i=0; i < newKey.length; i++)
-		newKey[i] = aPubKey[i+1];
+        newKey[i] = aPubKey[i+1];
       return newKey;
     }
 
@@ -183,10 +183,10 @@ class DecryptionManager
       byte[] newKey = new byte[32];
       int i;
       for (i=0; i < 32-aPubKey.length; i++) {
-		newKey[i] = 0;
+        newKey[i] = 0;
       }
       for (int j=i; j<newKey.length; j++)
-		newKey[j] = aPubKey[j-i];
+        newKey[j] = aPubKey[j-i];
       return newKey;
     }
     return aPubKey;
@@ -213,8 +213,8 @@ class DecryptionManager
     if (securityMechanism == 7) {
       if (initVector.length < 8) { //shorter than 8 bytes, zero padded to 8 bytes
         System.arraycopy(initVector, 0, token, 0, initVector.length);
-		for (int i=initVector.length; i<8; i++)
-	 	 token[i] = 0;
+        for (int i=initVector.length; i<8; i++)
+          token[i] = 0;
       }
       else {  //longer than 8 bytes, truncated to 8 bytes
         System.arraycopy(initVector, 0, token, 0, 8);
@@ -224,7 +224,7 @@ class DecryptionManager
     //the token.
     else if (securityMechanism == 9) {
       for (int i = 0; i < 8; i++) {
-		token[i] = initVector[i + 12];
+        token[i] = initVector[i + 12];
       }
     }
     return token;
@@ -244,9 +244,9 @@ class DecryptionManager
    * @return the decrypted data (plain text) in a byte array.
    */
   public byte[] decryptData (byte[] cipherText,
-			     int    securityMechanism,
-			     byte[] initVector,
-			     byte[] sourcePublicKey) throws SQLException
+                 int    securityMechanism,
+                 byte[] initVector,
+                 byte[] sourcePublicKey) throws SQLException
   {
     byte[] plainText = null;
     byte[] token = calculateDecryptionToken (securityMechanism, initVector);
@@ -274,15 +274,15 @@ class DecryptionManager
       //we trim off the frist byte. If the length of secret key is less than 32, we will
       //pad 0 to the beginning of the byte array tho make the secret key 32 bytes.
       if (sharedSecret.length == 33 && sharedSecret[0] == 0) {
-		for (int i=0; i<newKey.length; i++)
-		  newKey[i] = sharedSecret[i+1];
+        for (int i=0; i<newKey.length; i++)
+          newKey[i] = sharedSecret[i+1];
       }
       if (sharedSecret.length < 32) {
-		int i;
-		for (i=0; i<(32 - sharedSecret.length); i++)
-	 		newKey[i] = 0;
-		for (int j=i; j<sharedSecret.length; j++)
-	 		 newKey[j] = sharedSecret[j-i];
+        int i;
+        for (i=0; i<(32 - sharedSecret.length); i++)
+             newKey[i] = 0;
+        for (int j=i; j<sharedSecret.length; j++)
+              newKey[j] = sharedSecret[j-i];
       }
 
       //The Data Encryption Standard (DES) is going to be used to encrypt userid
@@ -296,37 +296,37 @@ class DecryptionManager
 
       //if secret key is not 32, we will use the adjust length secret key
       if (sharedSecret.length==32) {
-		for (int i=0; i< 8;i++)
-		  key[i] = sharedSecret[i+12];
+        for (int i=0; i< 8;i++)
+          key[i] = sharedSecret[i+12];
       }
       else if (sharedSecret.length==33 || sharedSecret.length < 32) {
-		for (int i=0; i< 8;i++)
-		  key[i] = newKey[i+12];
+        for (int i=0; i< 8;i++)
+          key[i] = newKey[i+12];
       }
       else
-		throw new SQLException ("sharedSecret key length error " + sharedSecret.length);
+        throw new SQLException ("sharedSecret key length error " + sharedSecret.length);
 
-	  // make parity bit right, even number of 1's
-	  byte temp;
-	  int changeParity;
-	  for (int i=0; i<8; i++)
-	  {
-		temp = key[i];
-		changeParity = 1;
-		for (int j=0; j<8; j++)
-		{
-			if (temp < 0)
-				changeParity = 1 - changeParity;
-			temp = (byte) (temp << 1);
-		}
-		if (changeParity == 1)
-		{
-			if ((key[i] & 1) != 0)
-				key[i] &= 0xfe;
-			else
-				key[i] |= 1;
-		}
-	  }
+      // make parity bit right, even number of 1's
+      byte temp;
+      int changeParity;
+      for (int i=0; i<8; i++)
+      {
+        temp = key[i];
+        changeParity = 1;
+        for (int j=0; j<8; j++)
+        {
+            if (temp < 0)
+                changeParity = 1 - changeParity;
+            temp = (byte) (temp << 1);
+        }
+        if (changeParity == 1)
+        {
+            if ((key[i] & 1) != 0)
+                key[i] &= 0xfe;
+            else
+                key[i] |= 1;
+        }
+      }
 
       //use this encryption key to initiate a SecretKeySpec object
       SecretKeySpec desKey = new SecretKeySpec (key, "DES");
@@ -351,35 +351,35 @@ class DecryptionManager
     }
     catch (java.security.NoSuchProviderException e) {
       throw new SQLException ("java.security.NoSuchProviderException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (java.security.NoSuchAlgorithmException e) {
       throw new SQLException ("java.security.NoSuchAlgorithmException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (java.security.spec.InvalidKeySpecException e) {
       throw new SQLException ("java.security.InvalidKeySpecException is caught "
-			      + "when encrypting data");
+                  + "when encrypting data");
     }
     catch (java.security.InvalidKeyException e) {
       throw new SQLException ("java.security.InvalidKeyException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (javax.crypto.NoSuchPaddingException e) {
       throw new SQLException ("javax.crypto.NoSuchPaddingException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (javax.crypto.BadPaddingException e) {
       throw new SQLException ("javax.crypto.BadPaddingException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (java.security.InvalidAlgorithmParameterException e) {
       throw new SQLException ("java.security.InvalidAlgorithmParameterException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     catch (javax.crypto.IllegalBlockSizeException e) {
       throw new SQLException ("javax.crypto.IllegalBlockSizeException is caught "
-			      + "when encrypting data '" + e.getMessage() + "'");
+                  + "when encrypting data '" + e.getMessage() + "'");
     }
     return plainText;
   }
@@ -430,12 +430,12 @@ class DecryptionManager
         For each byte (b) two characaters are generated, the first character
         represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
         the second character represents the low nibble (<code>b & 0x0f</code>).
-		<BR>
+        <BR>
         The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
 
-        @param	data	byte array
-        @param	offset	starting byte (zero based) to convert.
-        @param	length	number of bytes to convert.
+        @param    data    byte array
+        @param    offset    starting byte (zero based) to convert.
+        @param    length    number of bytes to convert.
 
         @return the String (with hexidecimal format) form of the byte array
     */
@@ -467,19 +467,19 @@ class DecryptionManager
         The character at <code>str.charAt(0)</code> is represented by the first two bytes 
         in the returned String.
 
-        @param	str string 
-        @param	offset	starting character (zero based) to convert.
-        @param	length	number of characters to convert.
+        @param    str string 
+        @param    offset    starting character (zero based) to convert.
+        @param    length    number of characters to convert.
 
         @return the byte[]  (with hexidecimal format) form of the string (str) 
     */
     protected static byte[] toHexByte(String str, int offset, int length)
     {
-  	    byte[] data = new byte[(length - offset) * 2];
+          byte[] data = new byte[(length - offset) * 2];
         int end = offset+length;
 
         for (int i = offset; i < end; i++)
- 	    {
+         {
             char ch = str.charAt(i);
             int high_nibble = (ch & 0xf0) >>> 4;
             int low_nibble = (ch & 0x0f);

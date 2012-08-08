@@ -39,7 +39,7 @@ class DRDAProtocolExceptionInfo {
      * required field called SYNERRCD, and PRCCNVRM has a required field called
      * PRCCNVCD.
      */
-    protected int errorCodePoint;	   
+    protected int errorCodePoint;       
     
     // Severity Code
     protected int svrcod;
@@ -52,15 +52,15 @@ class DRDAProtocolExceptionInfo {
     
     // Sends an originating Codepoint
     protected boolean sendsCodpntArg;
-	
+    
     DRDAProtocolExceptionInfo(int errorCodePoint, int svrcod,  
-					int errCdCodePoint,
-					boolean sendsCodpntArg)
+                    int errCdCodePoint,
+                    boolean sendsCodpntArg)
     {
-	this.errorCodePoint = errorCodePoint;
-	this.svrcod = svrcod;
-	this.errCdCodePoint = errCdCodePoint;
-	this.sendsCodpntArg = sendsCodpntArg;
+    this.errorCodePoint = errorCodePoint;
+    this.svrcod = svrcod;
+    this.errCdCodePoint = errCdCodePoint;
+    this.sendsCodpntArg = sendsCodpntArg;
     }
     
     
