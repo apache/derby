@@ -28,90 +28,90 @@ import java.io.IOException;
 import org.apache.derby.shared.common.reference.MessageId;
 
 class CloseFilterInputStream extends FilterInputStream {
-	
-	private static final String ALREADY_CLOSED_ERR_MESSAGE = 
+    
+    private static final String ALREADY_CLOSED_ERR_MESSAGE = 
             SqlException.getMessageUtil().getTextMessage(
                 MessageId.OBJECT_CLOSED);
-	
-	private boolean closed;
-	
-	public CloseFilterInputStream(InputStream is){
-		
-		super(is);
-		closed = false;
-		
-	}
-	
-	
-	public int read() 
-		throws IOException {
+    
+    private boolean closed;
+    
+    public CloseFilterInputStream(InputStream is){
+        
+        super(is);
+        closed = false;
+        
+    }
+    
+    
+    public int read() 
+        throws IOException {
 
-		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
-		}
-		
-		return super.read();
-		
-	}
-	
+        if(closed){
+            throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
+        }
+        
+        return super.read();
+        
+    }
+    
 
-	public int read(byte[] b) 
-		throws IOException {
-		
-		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
-		}
+    public int read(byte[] b) 
+        throws IOException {
+        
+        if(closed){
+            throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
+        }
 
-		return super.read(b);
+        return super.read(b);
 
-	}
-	
-	
-	public int read(byte[] b,
-			int off,
-			int len) 
-		throws IOException{
-		
-		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
-		}
+    }
+    
+    
+    public int read(byte[] b,
+            int off,
+            int len) 
+        throws IOException{
+        
+        if(closed){
+            throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
+        }
 
-		return super.read(b, off, len);
+        return super.read(b, off, len);
 
-	}
+    }
 
-	
-	public long skip(long n)
-		throws IOException{
+    
+    public long skip(long n)
+        throws IOException{
 
-		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
-		}
-		
-		return super.skip(n);
-		
-	}
-	
-	
-	public int available()
-		throws IOException{
-		
-		if(closed){
-			throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
-		}
+        if(closed){
+            throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
+        }
+        
+        return super.skip(n);
+        
+    }
+    
+    
+    public int available()
+        throws IOException{
+        
+        if(closed){
+            throw new IOException(ALREADY_CLOSED_ERR_MESSAGE);
+        }
 
-		return super.available();
-		
-	}
-	
-	
-	public void close()
-		throws IOException{
-		
-		super.close();
-		closed = true;
-		
-	}
-	
-	
+        return super.available();
+        
+    }
+    
+    
+    public void close()
+        throws IOException{
+        
+        super.close();
+        closed = true;
+        
+    }
+    
+    
 }

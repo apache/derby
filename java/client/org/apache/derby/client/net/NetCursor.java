@@ -219,9 +219,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         // If data flows....
         if (daNullIndicator == 0x0) {
 
-	    if (SanityManager.DEBUG && receivedDeleteHoleWarning) {
-		SanityManager.THROWASSERT("Delete hole warning received: nulldata expected");
-	    }
+        if (SanityManager.DEBUG && receivedDeleteHoleWarning) {
+        SanityManager.THROWASSERT("Delete hole warning received: nulldata expected");
+        }
             incrementRowsReadEvent();
 
             // netResultSet_ is null if this method is invoked from Lob.position()
@@ -351,16 +351,16 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             }
         } else {
             if (netResultSet_ != null && netResultSet_.scrollable_) {
-		if (receivedDeleteHoleWarning) {
-		    setIsUpdataDeleteHole(rowIndex, true);
-		} else {
-		    if (SanityManager.DEBUG) {
-			// Invariant: for SUR, we introduced the warning
-			// in addition to null data.
-			SanityManager
-			    .THROWASSERT("Delete hole warning expected");
-		    }
-		}
+        if (receivedDeleteHoleWarning) {
+            setIsUpdataDeleteHole(rowIndex, true);
+        } else {
+            if (SanityManager.DEBUG) {
+            // Invariant: for SUR, we introduced the warning
+            // in addition to null data.
+            SanityManager
+                .THROWASSERT("Delete hole warning expected");
+            }
+        }
             }
         }
 

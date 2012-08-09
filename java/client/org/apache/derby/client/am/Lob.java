@@ -389,7 +389,7 @@ public abstract class Lob implements UnitOfWorkListener {
         }
 
         if(!isValid_ || (isLocator()  && 
-        		(transactionID_ != agent_.connection_.getTransactionID())))
+                (transactionID_ != agent_.connection_.getTransactionID())))
             throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
                                                   .getSQLException();
     }

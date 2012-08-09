@@ -1879,7 +1879,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
      * added to the list of open statements.
      */
     void markClosed() {
-    	markClosed(false);
+        markClosed(false);
     }
     
     /**
@@ -1921,7 +1921,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
         
         if(removeListener)
-        	connection_.openStatements_.remove(this);
+            connection_.openStatements_.remove(this);
 
         if (setSpecialRegisterSection_ != null) {
             setSpecialRegisterSection_.free();
@@ -2735,10 +2735,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             connection_.clientCursorNameCache_.put(cursorName_, 
                                                    cursorName_);
         } else {
-	    // canned cursor name
-	    agent_.sectionManager_.mapCursorNameToQuerySection
+        // canned cursor name
+        agent_.sectionManager_.mapCursorNameToQuerySection
                 (section_.getServerCursorName(), section_);
-	}
+    }
 
         // If client's cursor name is set, map the client's cursor name to the
         // result set, else map the server's cursor name to the result set.

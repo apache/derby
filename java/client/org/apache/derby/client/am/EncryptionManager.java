@@ -505,11 +505,11 @@ public class EncryptionManager {
      * Below are methods for the SECMEC_USRSSBPWD security mechanism.
      ****************************************************************/
 
-	/**
-	 * This method generates an 8-Byte random seed for the client (source).
-	 *
-	 * @return a random 8-Byte seed.
-	 */
+    /**
+     * This method generates an 8-Byte random seed for the client (source).
+     *
+     * @return a random 8-Byte seed.
+     */
     public byte[] generateSeed() {
         byte randomSeedBytes[] = new byte[SECMEC_USRSSBPWD_SEED_LEN];
         secureRandom.setSeed(secureRandom.generateSeed(
@@ -594,9 +594,9 @@ public class EncryptionManager {
 
         messageDigest.reset();
 
-		messageDigest.update(this.toHexByte(password, 0, password.length()));
-		byte[] encryptVal = messageDigest.digest();
-		String hexString = ID_PATTERN_NEW_SCHEME +
+        messageDigest.update(this.toHexByte(password, 0, password.length()));
+        byte[] encryptVal = messageDigest.digest();
+        String hexString = ID_PATTERN_NEW_SCHEME +
                      this.toHexString(encryptVal, 0, encryptVal.length);
 
         // Generate some 20-byte password token
@@ -639,15 +639,15 @@ public class EncryptionManager {
         The byte at <code>data[offset]</code> is represented by the first two
         characters in the returned String.
 
-        @param	data	byte array
-        @param	offset	starting byte (zero based) to convert.
-        @param	length	number of bytes to convert.
+        @param    data    byte array
+        @param    offset    starting byte (zero based) to convert.
+        @param    length    number of bytes to convert.
 
         @return the String (with hexidecimal format) form of the byte array
     */
     private String toHexString(byte[] data, int offset, int length)
     {
-		StringBuffer s = new StringBuffer(length*2);
+        StringBuffer s = new StringBuffer(length*2);
         int end = offset+length;
 
         for (int i = offset; i < end; i++)
@@ -672,9 +672,9 @@ public class EncryptionManager {
         The character at <code>str.charAt(0)</code> is represented by the first two bytes 
         in the returned String.
 
-        @param	str string 
-        @param	offset	starting character (zero based) to convert.
-        @param	length	number of characters to convert.
+        @param    str string 
+        @param    offset    starting character (zero based) to convert.
+        @param    length    number of characters to convert.
 
         @return the byte[]  (with hexidecimal format) form of the string (str) 
     */

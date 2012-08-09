@@ -63,7 +63,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * <code>PreparedStatement</code> has been closed or is invalid.
      * <p>
      *
-     * @param listener	the component which implements the
+     * @param listener    the component which implements the
      * <code>StatementEventListener</code> interface that was previously
      * registered with this <code>PooledConnection</code> object
      * <p>
@@ -82,7 +82,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * to register a <code>StatementEventListener</code> with this <code>PooledConnection</code> object.
      * <p>
      *
-     * @param listener	an component which implements the 
+     * @param listener    an component which implements the 
      *      <code>StatementEventListener</code> interface that is to be 
      *      registered with this <code>PooledConnection</code> object
      * <p>

@@ -205,23 +205,23 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         throws SqlException
     {
         
-		if (s != null){
-			if (s.equalsIgnoreCase(SSL_OFF_STR)) {
-				return SSL_OFF;
+        if (s != null){
+            if (s.equalsIgnoreCase(SSL_OFF_STR)) {
+                return SSL_OFF;
             } else if (s.equalsIgnoreCase(SSL_BASIC_STR)) {
-				return SSL_BASIC;
-			} else if (s.equalsIgnoreCase(SSL_PEER_AUTHENTICATION_STR)) {
-				return SSL_PEER_AUTHENTICATION;
-			} else {
+                return SSL_BASIC;
+            } else if (s.equalsIgnoreCase(SSL_PEER_AUTHENTICATION_STR)) {
+                return SSL_PEER_AUTHENTICATION;
+            } else {
                 throw new SqlException(null,
                         new ClientMessageId(SQLState.INVALID_ATTRIBUTE),
                         Attribute.SSL_ATTR, s, SSL_OFF_STR + ", " +
                         SSL_BASIC_STR + ", " + SSL_PEER_AUTHENTICATION_STR);
-			}
-		} else {
-			// Default
-			return SSL_OFF;
-		}
+            }
+        } else {
+            // Default
+            return SSL_OFF;
+        }
     }
     
     /**
@@ -418,14 +418,14 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * @return value of traceDirectory property
      */
     public static String getTraceDirectory(Properties properties) {
-    	String traceDirectoryString;
+        String traceDirectoryString;
        
-    	traceDirectoryString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_DIRECTORY);
+        traceDirectoryString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_DIRECTORY);
 
-		if (traceDirectoryString == null) 
-			return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
-		else
-			return traceDirectoryString;
+        if (traceDirectoryString == null) 
+            return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
+        else
+            return traceDirectoryString;
     }
     
     
@@ -435,15 +435,15 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * @return value of the system property, null if there is no permission to read the property
      */
     private static String readSystemProperty(final String key) {
-    	//Using an anonymous class to read the system privilege because the
-    	//method java.security.AccessController.doPrivileged requires an 
-    	//instance of a class(which implements java.security.PrivilegedAction). 
-    	//Since readSystemProperty method is static, we can't simply pass "this"  
-    	//to doPrivileged method and have ClientBaseDataSource implement 
-    	//PrivilegedAction. To get around the static nature of method 
-    	//readSystemProperty, have an anonymous class implement PrivilegeAction.
-    	//This class will read the system property in it's run method and
-    	//return the value to the caller.
+        //Using an anonymous class to read the system privilege because the
+        //method java.security.AccessController.doPrivileged requires an 
+        //instance of a class(which implements java.security.PrivilegedAction). 
+        //Since readSystemProperty method is static, we can't simply pass "this"  
+        //to doPrivileged method and have ClientBaseDataSource implement 
+        //PrivilegedAction. To get around the static nature of method 
+        //readSystemProperty, have an anonymous class implement PrivilegeAction.
+        //This class will read the system property in it's run method and
+        //return the value to the caller.
         return AccessController.doPrivileged(new PrivilegedAction<String>() {
                 public String run() {
                     try {
@@ -454,9 +454,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
                         // continue with the connection.  
                         return null;
                     }
-    		    }
-    	    }
-    	    );
+                }
+            }
+            );
     }
 
     // ---------------------------- traceFileAppend -----------------------------------
@@ -486,7 +486,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
     
     public final String getPassword() {
-    	return password;
+        return password;
     }
 
     //------------------------ interface methods ---------------------------------
@@ -1058,11 +1058,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * @return value of traceLevel property
      */
     public static int getTraceLevel(Properties properties) {
-    	String traceLevelString;
-    	traceLevelString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_LEVEL);
-		if (traceLevelString == null) 
-			traceLevelString = properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
-		return parseInt(traceLevelString, propertyDefault_traceLevel);
+        String traceLevelString;
+        traceLevelString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_LEVEL);
+        if (traceLevelString == null) 
+            traceLevelString = properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
+        return parseInt(traceLevelString, propertyDefault_traceLevel);
     }
 
     synchronized public void setTraceLevel(int traceLevel) {

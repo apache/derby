@@ -35,10 +35,10 @@ import org.apache.derby.shared.common.reference.SQLState;
  */
 public class ClientDriver40 extends ClientDriver
 {
-	static
-	{
+    static
+    {
         registerMe( new ClientDriver40() );
-	}
+    }
 
     ////////////////////////////////////////////////////////////////////
     //

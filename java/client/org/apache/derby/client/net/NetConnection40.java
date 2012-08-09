@@ -56,13 +56,13 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     public NetConnection40(NetLogWriter netLogWriter,
                          String databaseName,
                          java.util.Properties properties) throws SqlException {
-	super(netLogWriter,databaseName,properties);
+    super(netLogWriter,databaseName,properties);
     }
     public NetConnection40(NetLogWriter netLogWriter,
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          String user,
                          String password) throws SqlException {
-	super(netLogWriter,dataSource,user,password);
+    super(netLogWriter,dataSource,user,password);
     }
      public NetConnection40(NetLogWriter netLogWriter,
                          int driverManagerLoginTimeout,
@@ -70,7 +70,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          int portNumber,
                          String databaseName,
                          java.util.Properties properties) throws SqlException{
-	super(netLogWriter,driverManagerLoginTimeout,serverName,portNumber,databaseName,properties);
+    super(netLogWriter,driverManagerLoginTimeout,serverName,portNumber,databaseName,properties);
      }
      public NetConnection40(NetLogWriter netLogWriter,
                          String user,
@@ -78,7 +78,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException{
-	super(netLogWriter,user,password,dataSource,rmId,isXAConn);
+    super(netLogWriter,user,password,dataSource,rmId,isXAConn);
     }
     public NetConnection40(NetLogWriter netLogWriter,
                          String ipaddr,
@@ -118,7 +118,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException{
-	super(netLogWriter,user,password,dataSource,rmId,isXAConn,cpc);
+    super(netLogWriter,user,password,dataSource,rmId,isXAConn,cpc);
     }
     
 
@@ -207,7 +207,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                 // we ignore the exception and return false.
                 return false;
             }
-	 }
+     }
 
         return true;  // The connection is valid
     }
@@ -237,12 +237,12 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     public void setClientInfo(String name, String value)
     throws SQLClientInfoException{
         Properties p = FailedProperties40.makeProperties(name,value); 
-	try { checkForClosedConnection(); }
-	catch (SqlException se) {
+    try { checkForClosedConnection(); }
+    catch (SqlException se) {
             throw new SQLClientInfoException
                 (se.getMessage(), se.getSQLState(),
-                		se.getErrorCode(),
-                		new FailedProperties40(p).getProperties());
+                        se.getErrorCode(),
+                        new FailedProperties40(p).getProperties());
         }
 
         if (name == null && value == null) {
@@ -267,27 +267,27 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     public void setClientInfo(Properties properties)
     throws SQLClientInfoException {
-	FailedProperties40 fp = new FailedProperties40(properties);
-	try { checkForClosedConnection(); } 
-	catch (SqlException se) {
-	    throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
-	    		se.getErrorCode(),
-	    		fp.getProperties());
-	}
-	
-	if (properties == null || properties.isEmpty()) {
+    FailedProperties40 fp = new FailedProperties40(properties);
+    try { checkForClosedConnection(); } 
+    catch (SqlException se) {
+        throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
+                se.getErrorCode(),
+                fp.getProperties());
+    }
+    
+    if (properties == null || properties.isEmpty()) {
             return;
         }
 
-	SqlException se = 
-	    new SqlException(agent_.logWriter_,
-			     new ClientMessageId
-			     (SQLState.PROPERTY_UNSUPPORTED_CHANGE), 
-			     fp.getFirstKey(), fp.getFirstValue());
+    SqlException se = 
+        new SqlException(agent_.logWriter_,
+                 new ClientMessageId
+                 (SQLState.PROPERTY_UNSUPPORTED_CHANGE), 
+                 fp.getFirstKey(), fp.getFirstValue());
         throw new SQLClientInfoException(se.getMessage(),
-        		se.getSQLState(), 
-	    		se.getErrorCode(),
-	    		fp.getProperties());
+                se.getSQLState(), 
+                se.getErrorCode(),
+                fp.getProperties());
     }
 
     /**
@@ -301,11 +301,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     public String getClientInfo(String name)
     throws SQLException{
-	try { 
-	    checkForClosedConnection(); 
-	    return null;
-	}
-	catch (SqlException se) { throw se.getSQLException(); }
+    try { 
+        checkForClosedConnection(); 
+        return null;
+    }
+    catch (SqlException se) { throw se.getSQLException(); }
     }
     
     /**
@@ -318,11 +318,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      */
     public Properties getClientInfo()
     throws SQLException{
-	try {
-	    checkForClosedConnection();
-	    return new Properties();
-	} 
-	catch (SqlException se) { throw se.getSQLException(); }
+    try {
+        checkForClosedConnection();
+        return new Properties();
+    } 
+    catch (SqlException se) { throw se.getSQLException(); }
     }
 
     /**

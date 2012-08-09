@@ -259,11 +259,11 @@ public class Typdef implements java.lang.Cloneable {
         /* 0x5F */ 0
     };
 
-	//
-	// FIXME: Instead of magic numbers, the first arg in each of these
-	// constructor calls should be the corresponding constant from
-	// DRDAConstants.
-	//
+    //
+    // FIXME: Instead of magic numbers, the first arg in each of these
+    // constructor calls should be the corresponding constant from
+    // DRDAConstants.
+    //
     protected static final FdocaSimpleDataArray[] environmentTables_ = {
         /* 0x00 Empties */
         null,

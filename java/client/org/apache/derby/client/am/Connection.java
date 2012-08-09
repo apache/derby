@@ -900,8 +900,8 @@ public abstract class Connection
     }
 
    /**
-    * 	Return true if the physical connection is still open.
-    * 	Might be logically closed but available for reuse.
+    *     Return true if the physical connection is still open.
+    *     Might be logically closed but available for reuse.
     *   @return true if physical connection still open
     */
     public boolean isPhysicalConnClosed() {
@@ -943,7 +943,7 @@ public abstract class Connection
         //and return here, otherwise setTransactionIsolation will commit 
         //the transaction which is not the intention.
         if (level == getTransactionIsolationX()) 
-	    return;
+        return;
 
         try {
             // Per jdbc spec (see java.sql.Connection.close() javadoc).
@@ -1060,11 +1060,11 @@ public abstract class Connection
     }
 
     public int getTransactionIsolationX() throws SQLException {
-    	// Store the current auto-commit value and use it to restore 
-    	// at the end of this method.
-    	boolean currentAutoCommit = autoCommit_;
-    	java.sql.ResultSet rs = null;
-    	
+        // Store the current auto-commit value and use it to restore 
+        // at the end of this method.
+        boolean currentAutoCommit = autoCommit_;
+        java.sql.ResultSet rs = null;
+        
         try
         {
             checkForClosedConnection();
@@ -1097,8 +1097,8 @@ public abstract class Connection
             // cached isolation level to TRANSACTION_UNKNOWN which will trigger
             // a refresh from the server.
             if (getTransactionIsolationStmt == null  || 
-            		!(getTransactionIsolationStmt.openOnClient_ &&
-            				getTransactionIsolationStmt.openOnServer_)) {
+                    !(getTransactionIsolationStmt.openOnClient_ &&
+                            getTransactionIsolationStmt.openOnServer_)) {
                 getTransactionIsolationStmt =
                         createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
                                 java.sql.ResultSet.CONCUR_READ_ONLY,
@@ -1130,7 +1130,7 @@ public abstract class Connection
                         (isolation_ == TRANSACTION_UNKNOWN),
                         "isolation_ modified when caching is not supported");
             }
-            rs.close();	
+            rs.close();    
             // So... of we did not have an active transaction before
             // the query, we pretend to still not have an open
             // transaction. The result set is closed, so this should
@@ -1144,10 +1144,10 @@ public abstract class Connection
             throw se.getSQLException();
         }
         finally {
-        	// Restore auto-commit value
-        	autoCommit_ = currentAutoCommit;
-        	if(rs != null)
-        		rs.close();
+            // Restore auto-commit value
+            autoCommit_ = currentAutoCommit;
+            if(rs != null)
+                rs.close();
         }
     }
   
@@ -1201,16 +1201,16 @@ public abstract class Connection
      * @return isolation level as a JDBC integer value 
      */
     private int translateIsolation(String isolationStr) {
-    	if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
-    		return java.sql.Connection.TRANSACTION_REPEATABLE_READ;
-    	else if (isolationStr.compareTo(DERBY_TRANSACTION_SERIALIZABLE) == 0)
-    		return java.sql.Connection.TRANSACTION_SERIALIZABLE;
-    	else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_COMMITTED) == 0)
-    		return java.sql.Connection.TRANSACTION_READ_COMMITTED;
-    	else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_UNCOMMITTED) == 0)
-    		return java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
-    	else 
-    		return java.sql.Connection.TRANSACTION_NONE;
+        if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
+            return java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+        else if (isolationStr.compareTo(DERBY_TRANSACTION_SERIALIZABLE) == 0)
+            return java.sql.Connection.TRANSACTION_SERIALIZABLE;
+        else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_COMMITTED) == 0)
+            return java.sql.Connection.TRANSACTION_READ_COMMITTED;
+        else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_UNCOMMITTED) == 0)
+            return java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
+        else 
+            return java.sql.Connection.TRANSACTION_NONE;
     }
 
     public java.sql.SQLWarning getWarnings() throws SQLException {
@@ -1594,21 +1594,21 @@ public abstract class Connection
             if (savepoint == null) // Throw exception if savepoint is null
             {
                 throw new SqlException(agent_.logWriter_, 
-                		new ClientMessageId (SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL));
+                        new ClientMessageId (SQLState.XACT_SAVEPOINT_RELEASE_ROLLBACK_FAIL));
             } else if (autoCommit_) // Throw exception if auto-commit is on
             {
                 throw new SqlException(agent_.logWriter_, 
-                		new ClientMessageId (SQLState.NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO));
+                        new ClientMessageId (SQLState.NO_SAVEPOINT_ROLLBACK_OR_RELEASE_WHEN_AUTO));
             } 
             // Only allow to rollback to a savepoint from the connection that create the savepoint.
             try {
                 if (this != ((Savepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_,
-                    		new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
+                            new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
             } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
-                		new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
+                        new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
 
             // Construct and flow a savepoint rollback statement to server.
@@ -2301,7 +2301,7 @@ public abstract class Connection
         if (!open_) {
             agent_.checkForDeferredExceptions();
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.NO_CURRENT_CONNECTION));
+                    new ClientMessageId (SQLState.NO_CURRENT_CONNECTION));
         } else {
             agent_.checkForDeferredExceptions();
         }
@@ -2496,7 +2496,7 @@ public abstract class Connection
      * Get the name of the current schema.
      */
     public String   getSchema() throws SQLException
-	{
+    {
         return getCurrentSchemaName();
     }
     
@@ -2504,7 +2504,7 @@ public abstract class Connection
      * Set the default schema for the Connection.
      */
     public void   setSchema(  String schemaName ) throws SQLException
-	{
+    {
         try {
             checkForClosedConnection();
         } catch (SqlException se) {
@@ -2527,6 +2527,6 @@ public abstract class Connection
         {
             if ( ps != null ) { ps.close(); }
         }
-	}
+    }
 
 }

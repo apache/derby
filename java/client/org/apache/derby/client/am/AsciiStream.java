@@ -26,11 +26,11 @@ public class AsciiStream extends java.io.InputStream {
     private java.io.Reader reader_;
     private String materializedString_;
     private int charsRead_ = 0;
-	
-	public AsciiStream(String materializedString){
-		this(materializedString,new StringReader(materializedString));
-	}
-	
+    
+    public AsciiStream(String materializedString){
+        this(materializedString,new StringReader(materializedString));
+    }
+    
     public AsciiStream(String materializedString, java.io.Reader reader) {
         reader_ = reader;
         materializedString_ = materializedString;
@@ -41,11 +41,11 @@ public class AsciiStream extends java.io.InputStream {
         ++charsRead_;
         if (oneChar != -1) // if not eos
         {
-		if(oneChar <= 0x00ff)
-			return oneChar;
-		else
-			return 0x003f;
-		
+        if(oneChar <= 0x00ff)
+            return oneChar;
+        else
+            return 0x003f;
+        
         } else {
             return -1; // end of stream
         }

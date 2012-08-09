@@ -47,8 +47,8 @@ public class ClientDriver implements java.sql.Driver {
     // Keep track of the registere driver so that we can deregister it if we're a stored proc.
     static private ClientDriver registeredDriver__ = null;
 
-	static
-	{
+    static
+    {
         try {
             //
             // We'd rather load this slightly more capable driver.
@@ -61,10 +61,10 @@ public class ClientDriver implements java.sql.Driver {
         {
             registerMe( new ClientDriver() );
         }
-	}
+    }
 
-	protected static void   registerMe( ClientDriver me )
-	{
+    protected static void   registerMe( ClientDriver me )
+    {
         // This may possibly hit the race-condition bug of java 1.1.
         // The Configuration static clause should execute before the following line does.
         if (Configuration.exceptionsOnLoadResources != null) {
@@ -179,27 +179,27 @@ public class ClientDriver implements java.sql.Driver {
      * Other attributes will  be sent to the server with the database name
      * Assumes augmentedProperties is not null
      * 
-	 * @param database - Short database name
-	 * @param augmentedProperties - Set of properties to append as attributes
-	 * @return databaseName + attributes (e.g. mydb;create=true) 
-	 */
-	private String appendDatabaseAttributes(String database, Properties augmentedProperties) {
-	
-		StringBuffer longDatabase = new StringBuffer(database);
-		for (Enumeration keys = augmentedProperties.propertyNames();
-			 keys.hasMoreElements() ;)
-		{
-			String key = (String) keys.nextElement();
-			if (key.equals(Attribute.USERNAME_ATTR) || 
+     * @param database - Short database name
+     * @param augmentedProperties - Set of properties to append as attributes
+     * @return databaseName + attributes (e.g. mydb;create=true) 
+     */
+    private String appendDatabaseAttributes(String database, Properties augmentedProperties) {
+    
+        StringBuffer longDatabase = new StringBuffer(database);
+        for (Enumeration keys = augmentedProperties.propertyNames();
+             keys.hasMoreElements() ;)
+        {
+            String key = (String) keys.nextElement();
+            if (key.equals(Attribute.USERNAME_ATTR) || 
                 key.equals(Attribute.PASSWORD_ATTR) ||
                 key.equals(Attribute.SSL_ATTR))
-				continue;
-			longDatabase.append(";" + key + "=" + augmentedProperties.getProperty(key));
-		}
-		return longDatabase.toString();
-	}
+                continue;
+            longDatabase.append(";" + key + "=" + augmentedProperties.getProperty(key));
+        }
+        return longDatabase.toString();
+    }
 
-	public boolean acceptsURL(String url) throws java.sql.SQLException {
+    public boolean acceptsURL(String url) throws java.sql.SQLException {
         try
         {
             java.util.StringTokenizer urlTokenizer = 
@@ -351,7 +351,7 @@ public class ClientDriver implements java.sql.Driver {
     private static String tokenizeDatabase(java.util.StringTokenizer urlTokenizer,
                                            String url) throws SqlException {
         try {
-        	// DERBY-618 - database name can contain spaces in the path
+            // DERBY-618 - database name can contain spaces in the path
             String databaseName = urlTokenizer.nextToken("\t\n\r\f;");
             return databaseName;
         } catch (java.util.NoSuchElementException e) {

@@ -39,7 +39,7 @@ import java.sql.ClientInfoStatus;
      */
 public class FailedProperties40 {
     private final HashMap<String,ClientInfoStatus> failedProps_ = 
-	new HashMap<String,ClientInfoStatus>();
+    new HashMap<String,ClientInfoStatus>();
 
     private final String firstKey_;
     private final String firstValue_;
@@ -52,10 +52,10 @@ public class FailedProperties40 {
      * @return the created <code>Properties</code> object
      */
     public static Properties makeProperties(String name, String value) {
-	Properties p = new Properties();
+    Properties p = new Properties();
         if (name != null || value != null)
             p.setProperty(name, value);
-	return p;
+    return p;
     }
     
     /**

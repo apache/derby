@@ -38,9 +38,9 @@ import org.apache.derby.shared.common.reference.SQLState;
  * ClientConnectionPoolDataSource, and ClientXADataSource classes if
  * your application runs in the following environments:
  * <p/>
- *	<UL>
- *	<LI> JDBC 4.0 - Java SE 6
- *	<LI> JDBC 3.0 - J2SE 5.0
+ *    <UL>
+ *    <LI> JDBC 4.0 - Java SE 6
+ *    <LI> JDBC 3.0 - J2SE 5.0
  * </UL>
  *
  * <p>The example below registers a DNC data source object with a JNDI naming service.

@@ -239,10 +239,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
             
             if (!newPC_) {
-            	// DERBY-1144 changed the last parameter of this method to true
-            	// to reset the connection state to the default on 
-            	// PooledConnection.getConnection() otherwise the 
-            	// isolation level and holdability was not correct and out of sync with the server.
+                // DERBY-1144 changed the last parameter of this method to true
+                // to reset the connection state to the default on 
+                // PooledConnection.getConnection() otherwise the 
+                // isolation level and holdability was not correct and out of sync with the server.
                 physicalConnection_.reset(logWriter_);
             }
             else {
@@ -371,9 +371,9 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param exception the exception that occurred on the connection
      */
     public void informListeners(SqlException exception) {
-		// only report fatal error  
-		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
-			return;
+        // only report fatal error  
+        if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
+            return;
 
         synchronized (this) {
             fireConnectionEventListeners(exception);

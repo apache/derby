@@ -203,7 +203,7 @@ public class Request {
 
         simpleDssFinalize = simpleFinalizeBuildingNextDss;
     }
-	
+    
     
     final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
@@ -219,10 +219,10 @@ public class Request {
                                writeNullByte,
                                parameterIndex);
         
-	}
+    }
     
-	
-	final void writeScalarStream(boolean chained,
+    
+    final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
                                  long length,
@@ -230,8 +230,8 @@ public class Request {
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
 
-		if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
-			netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
+        if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
+            netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
             // DERBY-4706
             // The network server doesn't support the security mechanisms above.
             // Further, the code in writeEncryptedScalarStream is/was in a bad
@@ -242,19 +242,19 @@ public class Request {
                     new ClientMessageId(SQLState.NOT_IMPLEMENTED),
                     "encrypted scalar streams");
 
-		}else{
-			
-			writePlainScalarStream(chained,
-								   chainedWithSameCorrelator,
-								   codePoint,
-								   length,
-								   in,
-								   writeNullByte,
-								   parameterIndex);
-			
-		}
+        }else{
+            
+            writePlainScalarStream(chained,
+                                   chainedWithSameCorrelator,
+                                   codePoint,
+                                   length,
+                                   in,
+                                   writeNullByte,
+                                   parameterIndex);
+            
+        }
 
-	}
+    }
     
     /**
      * Writes a stream with a known length onto the wire.
@@ -274,7 +274,7 @@ public class Request {
      * @throws DisconnectException if a severe error condition is encountered,
      *      causing the connection to be broken
      */
-	final private void writePlainScalarStream(boolean chained,
+    final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
                                               long length,
@@ -291,9 +291,9 @@ public class Request {
         // send differs from the number of bytes to read (off by one byte).
         long leftToRead = length;
         long bytesToSend = writeEXTDTAStatusByte ? leftToRead + 1 : leftToRead;
-		int extendedLengthByteCount = prepScalarStream(chained,
-													   chainedWithSameCorrelator,
-													   writeNullByte,
+        int extendedLengthByteCount = prepScalarStream(chained,
+                                                       chainedWithSameCorrelator,
+                                                       writeNullByte,
                                                        bytesToSend);
         int nullIndicatorSize = writeNullByte ? 1 : 0;
         int dssMaxDataLength = DssConstants.MAX_DSS_LEN - 6 - 4 -
@@ -307,74 +307,74 @@ public class Request {
             bytesToRead--;
         }
 
-		buildLengthAndCodePointForLob(codePoint,
+        buildLengthAndCodePointForLob(codePoint,
                                       bytesToSend,
-									  writeNullByte,
-									  extendedLengthByteCount);
+                                      writeNullByte,
+                                      extendedLengthByteCount);
         byte status = DRDAConstants.STREAM_OK;
-		int bytesRead = 0;
-		do {
-			do {
-				try {
-					bytesRead =
+        int bytesRead = 0;
+        do {
+            do {
+                try {
+                    bytesRead =
                         in.read(buffer.array(), buffer.position(), bytesToRead);
-				} catch (Exception e) {
+                } catch (Exception e) {
                     status = DRDAConstants.STREAM_READ_ERROR;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
-					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                     netAgent_.accumulateReadException(
                         new SqlException(
                             netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
                             parameterIndex, e.getMessage(), e));
 
-					return;
-				}
-				if (bytesRead == -1) {
+                    return;
+                }
+                if (bytesRead == -1) {
                     status = DRDAConstants.STREAM_TOO_SHORT;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
-					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+                    // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                     netAgent_.accumulateReadException(
                         new SqlException(netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_PREMATURE_EOS),
                             parameterIndex));
-					return;
-				} else {
-					bytesToRead -= bytesRead;
+                    return;
+                } else {
+                    bytesToRead -= bytesRead;
                     buffer.position(buffer.position() + bytesRead);
-					leftToRead -= bytesRead;
-				}
-			} while (bytesToRead > 0);
+                    leftToRead -= bytesRead;
+                }
+            } while (bytesToRead > 0);
 
-			bytesToRead = flushScalarStreamSegment(leftToRead, bytesToRead);
-		} while (leftToRead > 0);
+            bytesToRead = flushScalarStreamSegment(leftToRead, bytesToRead);
+        } while (leftToRead > 0);
 
-		// check to make sure that the specified length wasn't too small
-		try {
-			if (in.read() != -1) {
+        // check to make sure that the specified length wasn't too small
+        try {
+            if (in.read() != -1) {
                 status = DRDAConstants.STREAM_TOO_LONG;
-				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+                // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                 netAgent_.accumulateReadException(new SqlException(
                         netAgent_.logWriter_,
                         new ClientMessageId(
                             SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
                         parameterIndex));
-			}
-		} catch (Exception e) {
+            }
+        } catch (Exception e) {
             status = DRDAConstants.STREAM_READ_ERROR;
             netAgent_.accumulateReadException(new SqlException(
                     netAgent_.logWriter_,
                     new ClientMessageId(
                         SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
                     parameterIndex, e.getMessage(), e));
-		}
+        }
         // Write the status byte to the send buffer.
         if (writeEXTDTAStatusByte) {
             writeEXTDTAStatus(status);
         }
-	}
+    }
 
 
 
@@ -400,14 +400,14 @@ public class Request {
      * @throws DisconnectException if a severe error condition is encountered,
      *      causing the connection to be broken
      */
-	final private void writePlainScalarStream(boolean chained,
+    final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
                                               java.io.InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex)
             throws DisconnectException {
-		
+        
         // We don't have the metadata available when we create this request
         // object, so we have to check here if we are going to write the status
         // byte or not.
@@ -417,7 +417,7 @@ public class Request {
         in = new BufferedInputStream( in );
 
         flushExistingDSS();
-		
+        
         ensureLength(DssConstants.MAX_DSS_LEN - buffer.position());
         
         buildDss(true,
@@ -429,14 +429,14 @@ public class Request {
         
         int spareInDss;
         
-		if (writeNullByte) {
-			spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4 - 1;
-		} else {
-			spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4;
-		}
-				
-		buildLengthAndCodePointForLob(codePoint,
-									  writeNullByte);
+        if (writeNullByte) {
+            spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4 - 1;
+        } else {
+            spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4;
+        }
+                
+        buildLengthAndCodePointForLob(codePoint,
+                                      writeNullByte);
         
         try{
             
@@ -474,13 +474,13 @@ public class Request {
 
             netAgent_.accumulateReadException(sqlex);
             
-					return;
+                    return;
         }
 
         if (writeEXTDTAStatusByte) {
             writeEXTDTAStatus(DRDAConstants.STREAM_OK);
         }
-	}
+    }
 
 
     // Throw DataTruncation, instead of closing connection if input size mismatches

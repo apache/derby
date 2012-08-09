@@ -219,7 +219,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         securityMechanism_ = ClientBaseDataSource.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
         if(!isConnectionNull())
-        	completeConnect();
+            completeConnect();
         //DERBY-2026. reset timeout after connection is made
         netAgent_.setTimeout(0);
     }
@@ -1554,7 +1554,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // Allow local COMMIT/ROLLBACK only if we are not in an XA transaction
     protected boolean allowLocalCommitRollback_() {
        
-    	if (getXAState() == XA_T0_NOT_ASSOCIATED) {
+        if (getXAState() == XA_T0_NOT_ASSOCIATED) {
             return true;
         }
         return false;
@@ -1648,18 +1648,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         agent_.endReadChain();
     }
     
-	/**
-	 * @return Returns the connectionNull.
-	 */
-	public boolean isConnectionNull() {
-		return connectionNull;
-	}
-	/**
-	 * @param connectionNull The connectionNull to set.
-	 */
-	public void setConnectionNull(boolean connectionNull) {
-		this.connectionNull = connectionNull;
-	}
+    /**
+     * @return Returns the connectionNull.
+     */
+    public boolean isConnectionNull() {
+        return connectionNull;
+    }
+    /**
+     * @param connectionNull The connectionNull to set.
+     */
+    public void setConnectionNull(boolean connectionNull) {
+        this.connectionNull = connectionNull;
+    }
 
     /**
      * Check whether the server has full support for the QRYCLSIMP

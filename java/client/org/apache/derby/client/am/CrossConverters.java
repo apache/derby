@@ -771,7 +771,7 @@ final class CrossConverters {
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
-                		new ClientMessageId (SQLState.READER_UNDER_RUN));
+                        new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
             return sw.toString();
         } catch (java.io.IOException e) {
@@ -827,7 +827,7 @@ final class CrossConverters {
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_, 
-                		new ClientMessageId (SQLState.READER_UNDER_RUN));
+                        new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
 
             return new String(baos.toByteArray(), encoding);
@@ -887,7 +887,7 @@ final class CrossConverters {
             if (length != CrossConverters.UNKNOWN_LENGTH &&
                     length != totalRead) {
                 throw new SqlException(agent_.logWriter_,
-                		new ClientMessageId (SQLState.READER_UNDER_RUN));
+                        new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
         } catch (java.io.IOException e) {
             throw SqlException.javaException(agent_.logWriter_, e);
@@ -1074,8 +1074,8 @@ final class CrossConverters {
             return parseByte(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId 
-            		(SQLState.LANG_FORMAT_EXCEPTION), "byte", e);
+                    new ClientMessageId 
+                    (SQLState.LANG_FORMAT_EXCEPTION), "byte", e);
         }
     }
 
@@ -1130,9 +1130,9 @@ final class CrossConverters {
             return parseShort(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId 
-            		(SQLState.LANG_FORMAT_EXCEPTION), 
-            		"short", e);
+                    new ClientMessageId 
+                    (SQLState.LANG_FORMAT_EXCEPTION), 
+                    "short", e);
         }
     }
 
@@ -1177,8 +1177,8 @@ final class CrossConverters {
             return parseInt(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
-            		"int", e);
+                    new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    "int", e);
         }
     }
 
@@ -1213,8 +1213,8 @@ final class CrossConverters {
             return parseLong(source);
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
-        			"long", e);
+                    new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    "long", e);
         }
     }
 
@@ -1239,7 +1239,7 @@ final class CrossConverters {
             return Float.parseFloat(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "float", e);
         }
     }
@@ -1255,7 +1255,7 @@ final class CrossConverters {
             return Double.parseDouble(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "double", e);
         }
     }
@@ -1273,7 +1273,7 @@ final class CrossConverters {
             return new java.math.BigDecimal(source.trim());
         } catch (java.lang.NumberFormatException e) {
             throw new SqlException(agent_.logWriter_,
-            		new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
+                    new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "java.math.BigDecimal", e);
         }
     }
@@ -1308,7 +1308,7 @@ final class CrossConverters {
             return date_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+                    new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1328,7 +1328,7 @@ final class CrossConverters {
             return time_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+                    new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1344,7 +1344,7 @@ final class CrossConverters {
             return timestamp_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
+                    new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
@@ -1700,7 +1700,7 @@ final class CrossConverters {
         if (negative) {
             if (i > 1) {
                 return result;
-            } else {	// Only got "-"
+            } else {    // Only got "-"
                 throw new NumberFormatException(s);
             }
         } else {

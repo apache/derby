@@ -72,7 +72,7 @@ public final class EncodedInputStream extends InputStream {
     }
     
     private static final int BUFFERED_CHAR_LEN = 1024;
-	private static final ByteArrayInputStream suspendMarker = new ByteArrayInputStream( new byte[ 0 ] );
+    private static final ByteArrayInputStream suspendMarker = new ByteArrayInputStream( new byte[ 0 ] );
 
     private Reader reader_;
     private final char[] decodedBuffer_;
@@ -96,118 +96,118 @@ public final class EncodedInputStream extends InputStream {
                                String encoding,
                                int charBufferSize,
                                int initialByteBufferSize) {
-	
-		reader_ = reader;
-		decodedBuffer_ = new char[charBufferSize];
+    
+        reader_ = reader;
+        decodedBuffer_ = new char[charBufferSize];
 
-		encodedOutputStream_ = new PublicBufferOutputStream(
-				initialByteBufferSize);
-		
-		try{
-			encodedStreamWriter_ = new OutputStreamWriter(encodedOutputStream_,
+        encodedOutputStream_ = new PublicBufferOutputStream(
+                initialByteBufferSize);
+        
+        try{
+            encodedStreamWriter_ = new OutputStreamWriter(encodedOutputStream_,
                                                           encoding);
-			
-		}catch(UnsupportedEncodingException e){
-			// Should never happen. It is up to the caller to ensure the
+            
+        }catch(UnsupportedEncodingException e){
+            // Should never happen. It is up to the caller to ensure the
             // specified encoding is available.
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("Unavailable encoding specified: " +
                         encoding, e);
             }
-		}
-	
-		encodedInputStream_ = suspendMarker;
-	
+        }
+    
+        encodedInputStream_ = suspendMarker;
+    
     }
 
 
     private ByteArrayInputStream reEncode(Reader reader) 
-		throws IOException
+        throws IOException
     {
-	
-		int count;
-		do{
-			count = reader.read(decodedBuffer_, 0, decodedBuffer_.length);
-			
-		}while(count == 0);
-			
-		if(count < 0)
-			return null;
-	
-		encodedOutputStream_.reset();
-		encodedStreamWriter_.write(decodedBuffer_,0,count);
-		encodedStreamWriter_.flush();
+    
+        int count;
+        do{
+            count = reader.read(decodedBuffer_, 0, decodedBuffer_.length);
+            
+        }while(count == 0);
+            
+        if(count < 0)
+            return null;
+    
+        encodedOutputStream_.reset();
+        encodedStreamWriter_.write(decodedBuffer_,0,count);
+        encodedStreamWriter_.flush();
 
-		int encodedLength = encodedOutputStream_.size();
-	
-		return new ByteArrayInputStream(encodedOutputStream_.getBuffer(),
-										0,
-										encodedLength);
+        int encodedLength = encodedOutputStream_.size();
+    
+        return new ByteArrayInputStream(encodedOutputStream_.getBuffer(),
+                                        0,
+                                        encodedLength);
     }
     
     
     public int available() 
-		throws IOException {
-		
-		if(encodedInputStream_ == suspendMarker)
-			encodedInputStream_ = reEncode(reader_);
+        throws IOException {
+        
+        if(encodedInputStream_ == suspendMarker)
+            encodedInputStream_ = reEncode(reader_);
 
-		if(encodedInputStream_ == null){
-			return 0;
-		}
+        if(encodedInputStream_ == null){
+            return 0;
+        }
 
-		return encodedInputStream_.available();
-	
+        return encodedInputStream_.available();
+    
     }
     
 
     public void close() 
-		throws IOException {
-	
-		if(encodedInputStream_ != null ){
-			encodedInputStream_.close();
-			encodedInputStream_ = null;
-		}
+        throws IOException {
+    
+        if(encodedInputStream_ != null ){
+            encodedInputStream_.close();
+            encodedInputStream_ = null;
+        }
 
-		if(reader_ != null ){
-			reader_.close();
-			reader_ = null;
-		}
+        if(reader_ != null ){
+            reader_.close();
+            reader_ = null;
+        }
 
-		if(encodedStreamWriter_ != null){
-			encodedStreamWriter_.close();
-			encodedStreamWriter_ = null;
-		}
-	
+        if(encodedStreamWriter_ != null){
+            encodedStreamWriter_.close();
+            encodedStreamWriter_ = null;
+        }
+    
     }
     
     
     public int read() 
-		throws IOException {
-		
-		if(encodedInputStream_ == suspendMarker)
-			encodedInputStream_ = reEncode(reader_);
+        throws IOException {
+        
+        if(encodedInputStream_ == suspendMarker)
+            encodedInputStream_ = reEncode(reader_);
 
-		if(encodedInputStream_ == null){
-			return -1;
-		}
-	
-		int c = encodedInputStream_.read();
+        if(encodedInputStream_ == null){
+            return -1;
+        }
+    
+        int c = encodedInputStream_.read();
 
-		if(c > -1){
-			return c;
-	    
-		}else{
-			encodedInputStream_ = reEncode(reader_);
-	    
-			if(encodedInputStream_ == null){
-				return -1;
-			}
-	    
-			return encodedInputStream_.read();
+        if(c > -1){
+            return c;
+        
+        }else{
+            encodedInputStream_ = reEncode(reader_);
+        
+            if(encodedInputStream_ == null){
+                return -1;
+            }
+        
+            return encodedInputStream_.read();
 
-		}
-	
+        }
+    
     }
 
 }

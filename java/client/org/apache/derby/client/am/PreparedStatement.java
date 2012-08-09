@@ -2218,11 +2218,11 @@ public class PreparedStatement extends Statement
         if (batchSize == 0) {
             return updateCounts;
         }
-		// The network client has a hard limit of 65,534 commands in a single
-		// DRDA request. This is because DRDA uses a 2-byte correlation ID,
-		// and the values 0 and 0xffff are reserved as special values. So
-		// that imposes an upper limit on the batch size we can support:
-		if (batchSize > 65534)
+        // The network client has a hard limit of 65,534 commands in a single
+        // DRDA request. This is because DRDA uses a 2-byte correlation ID,
+        // and the values 0 and 0xffff are reserved as special values. So
+        // that imposes an upper limit on the batch size we can support:
+        if (batchSize > 65534)
             throw new BatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
                 65534, updateCounts);
@@ -2409,8 +2409,8 @@ public class PreparedStatement extends Statement
 
     void checkForValidParameterIndex(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null) 
-			throw new SqlException(agent_.logWriter_,
-					new ClientMessageId(SQLState.NO_INPUT_PARAMETERS));
+            throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.NO_INPUT_PARAMETERS));
 
         if (parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
@@ -2521,9 +2521,9 @@ public class PreparedStatement extends Statement
     protected void markClosed(boolean removeListener){
         if(pooledConnection_ != null)
             pooledConnection_.onStatementClose(this);
-    	super.markClosed(removeListener);
-    	
-    	if (parameterMetaData_ != null) {
+        super.markClosed(removeListener);
+        
+        if (parameterMetaData_ != null) {
             parameterMetaData_.markClosed();
             parameterMetaData_ = null;
         }
@@ -2537,7 +2537,7 @@ public class PreparedStatement extends Statement
         parameters_ = null;
 
         if(removeListener)
-        	connection_.CommitAndRollbackListeners_.remove(this);
+            connection_.CommitAndRollbackListeners_.remove(this);
     }
     
     // JDBC 4.0 methods

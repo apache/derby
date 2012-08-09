@@ -111,7 +111,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         // agent_.checkForDeferredExceptions();
         if (statementClosed_) {
             throw new SqlException(logWriter_, 
-            		new ClientMessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
+                    new ClientMessageId (SQLState.LANG_STATEMENT_CLOSED_NO_REASON));
         }
     }
 
@@ -297,13 +297,13 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return 22;
             case Types.DECIMAL:
             case java.sql.Types.NUMERIC:
-		// There are 3 possible cases with respect to finding the correct max width for DECIMAL type.
-		// 1. If scale = 0, only sign should be added to precision.
-		// 2. scale = precision, 3 should be added to precision for sign, decimal and an additional char '0'.
-		// 3. precision > scale > 0, 2 should be added to precision for sign and decimal.
-		int scale = getScale(column);
-		int precision = getPrecision(column);
-		return (scale == 0) ? (precision + 1) : ((scale == precision) ? (precision + 3) : (precision + 2));
+        // There are 3 possible cases with respect to finding the correct max width for DECIMAL type.
+        // 1. If scale = 0, only sign should be added to precision.
+        // 2. scale = precision, 3 should be added to precision for sign, decimal and an additional char '0'.
+        // 3. precision > scale > 0, 2 should be added to precision for sign and decimal.
+        int scale = getScale(column);
+        int precision = getPrecision(column);
+        return (scale == 0) ? (precision + 1) : ((scale == precision) ? (precision + 3) : (precision + 2));
             case Types.CHAR:
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
@@ -321,16 +321,16 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
             case Types.BLOB:
-		// Derby-2425. For long length values, size overflows the int 
-		// range. In such cases, the size is limited to the max. int value
-		// This behavior is consistent with the same in Embedded mode.
-		int size = (int) (2 * sqlLength_[column - 1]);  // eg. "FF" represents just one byte
-		if ( size < 0 )
-		    size = Integer.MAX_VALUE;
+        // Derby-2425. For long length values, size overflows the int 
+        // range. In such cases, the size is limited to the max. int value
+        // This behavior is consistent with the same in Embedded mode.
+        int size = (int) (2 * sqlLength_[column - 1]);  // eg. "FF" represents just one byte
+        if ( size < 0 )
+            size = Integer.MAX_VALUE;
                 return size;
             default:
                 throw new SqlException(logWriter_, 
-                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
+                        new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -453,7 +453,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return JDBC30Translation.UNKNOWN_PRECISION;
             default:
                 throw new SqlException(logWriter_, 
-                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
+                        new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -611,7 +611,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return sqlUDTname_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
-                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
+                        new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -727,7 +727,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return sqlUDTclassName_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
-                		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
+                        new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
             }
         }
         catch ( SqlException e )
@@ -742,8 +742,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > columns_) {
             throw new SqlException(logWriter_, 
-            		new ClientMessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
-            		column, columns_);
+                    new ClientMessageId (SQLState.LANG_INVALID_COLUMN_POSITION),
+                    column, columns_);
         }
     }
 
@@ -824,7 +824,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             }
         }
         throw new SqlException(logWriter_, 
-        		new ClientMessageId (SQLState.INVALID_COLUMN_NAME), columnName);
+                new ClientMessageId (SQLState.INVALID_COLUMN_NAME), columnName);
     }
 
     // assign ordinal position as the column name if null.
