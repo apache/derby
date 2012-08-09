@@ -42,7 +42,8 @@ Elements of the grammar have the following meanings:
 <!ELEMENT documented EMPTY>
 <!ELEMENT family (title, msg+)>
 <!ELEMENT title (#PCDATA)>
-<!ELEMENT msg (name, text, arg*)>
+<!ELEMENT msg (name, text, comment*, arg*)>
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT text (#PCDATA)>
+<!ELEMENT comment (#PCDATA)>
 <!ELEMENT arg (#PCDATA)>
