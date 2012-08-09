@@ -1346,7 +1346,9 @@ public class JDBC {
 
         Assert.assertEquals("Unexpected row count",
                             expectedRows.length, actual.size());
-        Assert.assertTrue("Missing rows in ResultSet",
+        String message = "Missing rows in ResultSet; \n\t expected rows: \n\t\t" 
+                + expected + "\n\t actual result: \n\t\t" + actual;
+        Assert.assertTrue(message,
                           actual.containsAll(expected));
 
         actual.removeAll(expected);
