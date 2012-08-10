@@ -66,9 +66,7 @@ class DRDAStatement
 
     protected Database database;        // Database this statement is created for
     private   Pkgnamcsn pkgnamcsn;        // Package name/section # and  consistency token
-    protected ConsistencyToken pkgcnstkn;       // Consistency token for the first result set
-     protected String pkgid;              // package id
-     protected int pkgsn;        // section number
+    
     int withHoldCursor = -1;     // hold cursor after commit attribute.
     protected int isolationLevel;         //JCC isolation level for Statement
     protected String cursorName;
@@ -612,10 +610,11 @@ class DRDAStatement
     /**
      * This method is used to initialize the default statement of the database
      * for re-use. It is different from reset() method since default statements
-     * get initiliazed differently. e.g: stmt variable used in default statement
+     * get initialized differently. e.g: stmt variable used in default statement
      * is created only once in Database.makeConnection. 
-     * TODO: Need to see what exactly it means to initialize the default 
-     * statement. (DERBY-1002)
+     * The default statement will be initialized to have the same byte order 
+     * etc as the server. This may be changed when a TYPEDEFNAM is received 
+     * from the client in DRDAConnThread.setStmtOrDbByteOrder()
      * 
      */
     protected void initialize() 
@@ -794,7 +793,7 @@ class DRDAStatement
         // Store the consistency string for the first ResultSet.
         // this will be used to calculate consistency strings for the 
         // other result sets.
-        pkgid = pkgnamcsn.getPkgid();
+        String pkgid = pkgnamcsn.getPkgid();
 
         if (isDynamicPkgid(pkgid))
         {
@@ -818,7 +817,7 @@ class DRDAStatement
             // cursor name
             // trim the SYS off the pkgid so it wont' be in the cursor name
             String shortPkgid = pkgid.substring(pkgid.length() -5 , pkgid.length());
-            pkgsn = pkgnamcsn.getPkgsn();
+            int pkgsn = pkgnamcsn.getPkgsn();
             this.cursorName = "SQL_CUR" +  shortPkgid + "C" + pkgsn ;
         }
         else // static package
@@ -826,7 +825,6 @@ class DRDAStatement
             isolationLevel = getStaticPackageIsolation(pkgid);
         }
 
-        this.pkgcnstkn = pkgnamcsn.getPkgcnstkn();
 
     }
 
@@ -901,8 +899,7 @@ class DRDAStatement
      */
     protected void setCurrentDrdaResultSet(Pkgnamcsn pkgnamcsn)
     {
-        pkgid = pkgnamcsn.getPkgid();
-        pkgsn = pkgnamcsn.getPkgsn();
+        this.pkgnamcsn = pkgnamcsn;
         ConsistencyToken consistToken = pkgnamcsn.getPkgcnstkn();
         DRDAResultSet newDrdaRs = getDrdaResultSet(consistToken);
         if (newDrdaRs != null)
@@ -970,6 +967,7 @@ class DRDAStatement
                 // For just a single resultSet we don't ever create the Hashtable.
                 resultSetTable =
                         new Hashtable<ConsistencyToken, DRDAResultSet>();
+                ConsistencyToken pkgcnstkn = pkgnamcsn.getPkgcnstkn();
                 resultSetTable.put(pkgcnstkn, currentDrdaRs);
                 resultSetKeyList = new ArrayList<ConsistencyToken>();
                 resultSetKeyList.add(0, pkgcnstkn);
@@ -1005,7 +1003,7 @@ class DRDAStatement
     protected ConsistencyToken getResultSetPkgcnstkn(int rsNum)
     {
         if (rsNum == 0)
-            return pkgcnstkn;
+            return pkgnamcsn.getPkgcnstkn();
         else 
             return (ConsistencyToken) resultSetKeyList.get(rsNum);               
     }
@@ -1375,7 +1373,7 @@ class DRDAStatement
             s += indent + ps;
         else
         {
-            s += indent + pkgid + pkgsn ;
+            s += indent + pkgnamcsn.getPkgid() + pkgnamcsn.getPkgsn() ;
             s += "\t" + getSQLText();
         }
         return s;
@@ -1392,9 +1390,9 @@ class DRDAStatement
 
     protected ConsistencyToken calculateResultSetPkgcnstkn(int rsNum)
     {    
-        ConsistencyToken consistToken = pkgcnstkn;
+        ConsistencyToken consistToken = pkgnamcsn.getPkgcnstkn();
 
-        if (rsNum == 0 || pkgcnstkn == null)
+        if (rsNum == 0 || consistToken == null)
             return consistToken;
         else
         {
@@ -1644,6 +1642,7 @@ class DRDAStatement
         
         //First, check if holdability was passed as a SQL attribute "WITH HOLD" for this prepare. If yes, then withHoldCursor
         //should not get overwritten by holdability from package name and that is why the check for -1
+        String pkgid = pkgnamcsn.getPkgid();
         if (isDynamicPkgid(pkgid))
         {       
             if(pkgid.charAt(4) == 'N')
