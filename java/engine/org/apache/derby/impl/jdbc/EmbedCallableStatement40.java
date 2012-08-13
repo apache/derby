@@ -28,13 +28,11 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
-import java.sql.ParameterMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-
 import org.apache.derby.iapi.jdbc.EngineCallableStatement40;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -193,25 +191,6 @@ public class EmbedCallableStatement40
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
         throw Util.notImplemented ("setSQLXML (int, SQLXML)");
     }  
-    
-    /**
-    * JDBC 4.0
-    *
-    * Retrieves the number, types and properties of this CallableStatement
-    * object's parameters.
-    *
-    * @return a ParameterMetaData object that contains information about the
-    * number, types and properties of this CallableStatement object's parameters.
-    * @exception SQLException if a database access error occurs
-    *
-    */
-    public ParameterMetaData getParameterMetaData()
-        throws SQLException
-    {
-	  checkStatus();
-	  return new EmbedParameterMetaData40(
-				getParms(), preparedStatement.getParameterTypes());
-    }
     
     /**
      * Returns false unless <code>interfaces</code> is implemented 

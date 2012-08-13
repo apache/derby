@@ -22,14 +22,11 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
-
-/* -- New jdbc 20 extension types --- */
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 /** 
 	EmbeddedConnectionPoolDataSource is Derby's ConnectionPoolDataSource
-	implementation for the JDBC3.0 environment.
+	implementation for JDBC 3.0 and JDBC 4.0.
 	
 
 	<P>A ConnectionPoolDataSource is a factory for PooledConnection
@@ -39,7 +36,8 @@ import javax.sql.PooledConnection;
 	EmbeddedConnectionPoolDataSource automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
 	<UL>
-	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+    <LI> JDBC 3.0 - J2SE 5.0 </LI>
+    <LI> JDBC 4.0 - Java SE 6 </LI>
 	</UL>
 
 	<P>EmbeddedConnectionPoolDataSource is serializable and referenceable.

@@ -78,26 +78,6 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement {
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException{
         getPreparedStatement().setSQLXML (parameterIndex, xmlObject);
     }    
-    
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces) 
-                            throws SQLException{
-        checkIfClosed();
-        //Derby does not implement non-standard methods on 
-        //JDBC objects
-        try {
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw unableToUnwrap(interfaces);
-        }
-    }
 
     /** 
      * Forwards to the real PreparedStatement.

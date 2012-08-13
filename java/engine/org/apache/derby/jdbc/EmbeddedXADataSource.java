@@ -21,31 +21,20 @@
 
 package org.apache.derby.jdbc;
 
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.services.i18n.MessageService;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.jdbc.ResourceAdapter;
-import org.apache.derby.iapi.db.Database;
-
-import org.apache.derby.iapi.reference.Property;
-
-import org.apache.derby.iapi.error.ExceptionSeverity;
-
 import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Driver;
-
-
-/** -- jdbc 2.0. extension -- */
-import javax.sql.XADataSource;
 import javax.sql.XAConnection;
-
+import org.apache.derby.iapi.db.Database;
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 /**
 
-	EmbeddedXADataSource is Derby's XADataSource implementation for JDBC3.0.
-	
+    EmbeddedXADataSource is Derby's XADataSource implementation for JDBC 3.0
+    and JDBC 4.0.
 
 	<P>An XADataSource is a factory for XAConnection objects.  It represents a
 	RM in a DTP environment.  An object that implements the XADataSource
@@ -54,7 +43,8 @@ import javax.sql.XAConnection;
 	EmbeddedXADataSource automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
 	<UL>
-	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+    <LI> JDBC 3.0 - J2SE 5.0 </LI>
+    <LI> JDBC 4.0 - Java SE 6 </LI>
 	</UL>
 
 	<P>EmbeddedXADataSource object only works on a local database.  There is no

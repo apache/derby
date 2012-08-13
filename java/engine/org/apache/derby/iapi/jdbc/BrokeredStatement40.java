@@ -36,26 +36,6 @@ public class BrokeredStatement40 extends BrokeredStatement {
                                                     throws SQLException {
         super(control);
     }
-    
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces) 
-                            throws SQLException {
-        checkIfClosed();
-        //Derby does not implement non-standard methods on 
-        //JDBC objects
-        try {
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw unableToUnwrap(interfaces);
-        }
-    }
 
     /** 
      * Forwards to the real Statement.

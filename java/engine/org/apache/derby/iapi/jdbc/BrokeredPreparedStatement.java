@@ -500,6 +500,7 @@ public class BrokeredPreparedStatement extends BrokeredStatement
         getPreparedStatement().setTimestamp( i, x, cal);
     }
     
+    // JDBC 4.0 methods exposed via the EnginePreparedStatement interface
     
     public void setBinaryStream(int parameterIndex, 
                                 InputStream x)

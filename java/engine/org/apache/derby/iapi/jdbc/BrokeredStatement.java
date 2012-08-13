@@ -526,6 +526,8 @@ public class BrokeredStatement implements EngineStatement
 		return control;
 	}
 
+    // JDBC 4.0 java.sql.Wrapper interface methods
+
     /**
      * Returns false unless <code>iface</code> is implemented 
      * 
@@ -540,6 +542,24 @@ public class BrokeredStatement implements EngineStatement
     public boolean isWrapperFor(Class iface) throws SQLException {
         checkIfClosed();
         return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        checkIfClosed();
+        // Derby does not implement non-standard methods on JDBC objects.
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw unableToUnwrap(iface);
+        }
     }
 
     /**

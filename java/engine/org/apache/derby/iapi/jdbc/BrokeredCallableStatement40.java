@@ -175,33 +175,6 @@ public class BrokeredCallableStatement40 extends BrokeredCallableStatement
         getCallableStatement().setAsciiStream(parameterIndex, x);
     }
 
-    /**
-     * Sets the designated parameter to the given input stream.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @param x the java input stream which contains the binary parameter value
-     * @throws SQLException if a database access error occurs or this method is
-     *      called on a closed <code>PreparedStatement</code>
-     */
-    public final void setBinaryStream(int parameterIndex, InputStream x)
-            throws SQLException {
-        getCallableStatement().setBinaryStream(parameterIndex, x);
-    }
-
-    /**
-     * Sets the designated parameter to the given <code>Reader</code> object.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @param reader the <code>java.io.Reader</code> object that contains the
-     *      Unicode data
-     * @throws SQLException if a database access error occurs or this method is
-     *      called on a closed <code>PreparedStatement</code>
-     */
-    public final void setCharacterStream(int parameterIndex, Reader reader)
-            throws SQLException {
-        getCallableStatement().setCharacterStream(parameterIndex, reader);
-    }
-
     public void setRowId(int parameterIndex, RowId x) throws SQLException{
         getPreparedStatement().setRowId(parameterIndex,x);
     }
@@ -280,25 +253,6 @@ public class BrokeredCallableStatement40 extends BrokeredCallableStatement
         getPreparedStatement().setSQLXML(parameterIndex,xmlObject);
     }
     
-    /**
-     * Returns <code>this</code> if this class implements the interface
-     *
-     * @param  interfaces a Class defining an interface
-     * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
-     * interface
-     */
-    public <T> T unwrap(java.lang.Class<T> interfaces) 
-                            throws SQLException{
-        checkIfClosed();
-        //Derby does not implement non-standard methods on 
-        //JDBC objects
-        try {
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw unableToUnwrap(interfaces);
-        }
-    }
     /** 
      * Forwards to the real CallableStatement.
      * @return true if the underlying CallableStatement is poolable,

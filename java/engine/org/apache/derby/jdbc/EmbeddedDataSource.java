@@ -21,32 +21,20 @@
 
 package org.apache.derby.jdbc;
 
-import org.apache.derby.iapi.reference.Attribute;
-
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import java.io.PrintWriter;
 import java.util.Properties;
-
-/* -- New jdbc 20 extension types --- */
-import javax.sql.DataSource;
-
-
 import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.impl.jdbc.Util;
 
 /** 
-	
 
-	EmbeddedDataSource is Derby's DataSource implementation for JDBC3.0.
-	
+    EmbeddedDataSource is Derby's DataSource implementation for JDBC 3.0
+    and JDBC 4.0.
 
 	<P>A DataSource  is a factory for Connection objects. An object that
 	implements the DataSource interface will typically be registered with a
@@ -55,7 +43,8 @@ import org.apache.derby.impl.jdbc.Util;
 	EmbeddedDataSource automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
 	<UL>
-	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
+    <LI> JDBC 3.0 - J2SE 5.0 </LI>
+    <LI> JDBC 4.0 - Java SE 6 </LI>
 	</UL>
 
 	<P>The following is a list of properties that can be set on a Derby
@@ -486,7 +475,42 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 
         return conn;
 	}
-   
+
+    // JDBC 4.0 java.sql.Wrapper interface methods
+
+    /**
+     * Returns false unless {@code interfaces} is implemented.
+     *
+     * @param iface a class defining an interface
+     * @return true if this implements the interface or directly or indirectly
+     * wraps an object that does
+     * @throws SQLException if an error occurs while determining
+     * whether this is a wrapper for an object with the given interface
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        // Derby does not implement non-standard methods on JDBC objects,
+        // hence return this if this class implements the interface, or
+        // throw an SQLException.
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
+                    iface);
+        }
+    }
+
 	InternalDriver findDriver() throws SQLException
 	{
 		String url = jdbcurl;

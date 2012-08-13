@@ -76,25 +76,6 @@ public class EmbedPreparedStatement40 extends  EmbedPreparedStatement30 {
         throw Util.notImplemented();
     }
     
-   /**
-    * JDBC 4.0
-    *
-    * Retrieves the number, types and properties of this PreparedStatement
-    * object's parameters.
-    *
-    * @return a ParameterMetaData object that contains information about the
-    * number, types and properties of this PreparedStatement object's parameters.
-    * @exception SQLException if a database access error occurs
-    *
-    */
-    public ParameterMetaData getParameterMetaData()
-        throws SQLException
-    {
-	  checkStatus();
-	  return new EmbedParameterMetaData40(
-				getParms(), preparedStatement.getParameterTypes());
-    }
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

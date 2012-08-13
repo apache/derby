@@ -21,24 +21,20 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.J2EEDataSource;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCClient;
-import org.apache.derbyTesting.junit.JDBCDataSource;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
 import javax.sql.XADataSource;
+import junit.framework.*;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -48,9 +44,8 @@ import javax.sql.XADataSource;
  * </p>
  *
  * <p>
- * Note that after DERBY-5868, all the data sources on the client implement
- * all JDBC 4.0 methods. On embedded, the JDBC 3 variants of the data sources
- * still don't implement the full JDBC 4.0 interface.
+ * Note that after DERBY-5868 and DERBY-5880, all the data sources (except
+ * EmbeddedSimpleDataSource for JSR-169) implement all JDBC 4.0 methods.
  * </p>
  *
  * <p>
@@ -118,24 +113,24 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     private void assertNonJDBC4DataSource(DataSource ds)
         throws SQLException
     {
-        // After DERBY-5868, however, all the data sources on the client
-        // driver implement the JDBC 4.0 interface, so expect this check
-        // to pass.
-        if (usingDerbyNetClient()) {
-            assertTrue(ds.isWrapperFor(DataSource.class));
-            return;
-        }
-
-        /* Simplest way is to try to call a JDBC 4 interface method;
-         * if it succeeds, then we must have a JDBC 4 data source
-         * (which we don't want).
-         */
+        // See if we can invoke the JDBC 4.1 getParentLogger() method. If we
+        // can, we have a JDBC 4 data source.
         try {
-
-            ds.isWrapperFor(DataSource.class);
-            fail("Found JDBC 4 data source when JDBC 3 was expected.");
-
-        } catch (java.lang.AbstractMethodError ame) {}
+            ds.getClass().getMethod("getParentLogger").invoke(ds);
+            fail("Call to getParentLogger() not expected to pass");
+        } catch (NoSuchMethodException nsme) {
+            // OK. Method not found is expected on Java 6.
+        } catch (InvocationTargetException ite) {
+            // On Java 7 and newer the method is found in the CommonDataSource
+            // interface, so expect an AbstractMethodError instead of
+            // NoSuchMethodException.
+            Throwable cause = ite.getCause();
+            if (!(cause instanceof AbstractMethodError)) {
+                fail("Unexpected exception", cause);
+            }
+        } catch (IllegalAccessException iae) {
+            fail("Unexpected exception", iae);
+        }
     }
 
     /**
