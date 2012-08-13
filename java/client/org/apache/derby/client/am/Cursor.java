@@ -937,8 +937,7 @@ public abstract class Cursor {
             float f = get_FLOAT(column);
             return new java.math.BigDecimal(String.valueOf(f));
         case java.sql.Types.DOUBLE:
-            // Can't use the following commented out line because it changes precision of the result.
-            return new java.math.BigDecimal(String.valueOf(get_DOUBLE(column)));
+            return java.math.BigDecimal.valueOf(get_DOUBLE(column));
         case java.sql.Types.SMALLINT:
             return java.math.BigDecimal.valueOf(get_SMALLINT(column));
         case java.sql.Types.INTEGER:

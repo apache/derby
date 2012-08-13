@@ -388,6 +388,8 @@ final class CrossConverters {
                     agent_.logWriter_, "DOUBLE");
             }
             // source passed in is a float, do we need to check if the source already contains "infinity"??
+            // Convert to Double via String to avoid changing the precision,
+            // which may happen if we cast float to double.
             return Double.valueOf(String.valueOf(source));
 
         case Types.DECIMAL:
@@ -466,7 +468,9 @@ final class CrossConverters {
             return Double.valueOf(source);
 
         case Types.DECIMAL:
-            return new java.math.BigDecimal(String.valueOf(source));  // This matches derby semantics
+            // Use BigDecimal.valueOf(source) instead of new BigDecimal(source),
+            // as the latter may change the precision.
+            return java.math.BigDecimal.valueOf(source);
         case Types.CHAR:
         case Types.VARCHAR:
         case Types.LONGVARCHAR:

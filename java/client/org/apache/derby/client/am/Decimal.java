@@ -160,34 +160,13 @@ public class Decimal {
             signum = 1;
         }
 
-        if (precision <= 9) {
-            // can be handled by int without overflow.
-            int value = packedNybblesToInt(buffer, offset, 0, length * 2 - 1);
-
-            // convert value to a byte array of magnitude.
-            byte[] magnitude = new byte[4];
-            magnitude[0] = (byte) (value >>> 24);
-            magnitude[1] = (byte) (value >>> 16);
-            magnitude[2] = (byte) (value >>> 8);
-            magnitude[3] = (byte) (value);
-
-            return new java.math.BigDecimal(new java.math.BigInteger(signum, magnitude), scale);
-        } else if (precision <= 18) {
+        if (precision <= 18) {
             // can be handled by long without overflow.
             long value = packedNybblesToLong(buffer, offset, 0, length * 2 - 1);
-
-            // convert value to a byte array of magnitude.
-            byte[] magnitude = new byte[8];
-            magnitude[0] = (byte) (value >>> 56);
-            magnitude[1] = (byte) (value >>> 48);
-            magnitude[2] = (byte) (value >>> 40);
-            magnitude[3] = (byte) (value >>> 32);
-            magnitude[4] = (byte) (value >>> 24);
-            magnitude[5] = (byte) (value >>> 16);
-            magnitude[6] = (byte) (value >>> 8);
-            magnitude[7] = (byte) (value);
-
-            return new java.math.BigDecimal(new java.math.BigInteger(signum, magnitude), scale);
+            if (signum < 0) {
+                value = -value;
+            }
+            return BigDecimal.valueOf(value, scale);
         } else if (precision <= 27) {
             // get the value of last 9 digits (5 bytes).
             int lo = packedNybblesToInt(buffer, offset, (length - 5) * 2, 9);
