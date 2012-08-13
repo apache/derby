@@ -35,7 +35,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 
 /**
  * This is the implementation of ViewDescriptor. Users of View descriptors

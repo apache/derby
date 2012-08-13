@@ -51,10 +51,9 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${jsr169compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/jdbc/*.java"/>
-	  <exclude name="${derby.dir}/impl/jdbc/*169.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*20.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*30.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*40.java"/>
@@ -66,26 +65,6 @@
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
     </target>
-  	<target name="compile_jsr169_opt">
-  	    <javac
-  	      source="1.4"
-  	      target="1.4"
-        bootclasspath="${empty}"
-        nowarn="on"
-        debug="${debug}"
-        depend="${depend}"
-        deprecation="${deprecation}"
-        optimize="${optimize}"
-        proceed="${proceed}"
-        verbose="${verbose}"
-        srcdir="${derby.engine.src.dir}"
-        destdir="${out.dir}">
-        <classpath>
-          <pathelement path="${jsr169compile.classpath}"/>
-        </classpath>
-        <include name="${derby.dir}/impl/jdbc/*169.java"/>
-    </javac>
-  	</target>
   <target name="compile_jdbc3" depends="compile_jsr169">
     <javac
       source="1.5"

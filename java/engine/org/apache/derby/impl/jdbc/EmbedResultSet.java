@@ -92,7 +92,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
    </UL>
  */
 
-public abstract class EmbedResultSet extends ConnectionChild 
+public class EmbedResultSet extends ConnectionChild
     implements EngineResultSet, Comparable {
 
 	// cursor movement
