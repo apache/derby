@@ -21,8 +21,10 @@
 package org.apache.derbyTesting.functionTests.tests.compatibility;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.net.URI;
 import java.security.AccessController;
+import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -253,8 +255,7 @@ public class VersionCombinationConfigurator {
      *      if trunk is run off the classes directory
      */
     private DerbyDistribution getRunningDistribution() {
-        URL testingURL = getClassURL(getClass());
-        File libDir = new File(testingURL.getPath());
+        File libDir = new File(getClassURI(getClass()));
         if (libDir.isDirectory()) {
             throw new IllegalStateException("only running off jars is " +
                     "supported, currently running off " + libDir);
@@ -263,7 +264,12 @@ public class VersionCombinationConfigurator {
         libDir = libDir.getParentFile();
         DerbyVersion version = DerbyVersion.parseVersionString(
                 sysinfo.getVersionString());
-        return DerbyDistribution.getInstance(libDir, version);
+        DerbyDistribution dist = DerbyDistribution.getInstance(libDir, version);
+        if (dist == null) {
+            throw new IllegalStateException(
+                    "failed to get running distribution (programming error?)");
+        }
+        return dist;
     }
 
     /**
@@ -305,19 +311,25 @@ public class VersionCombinationConfigurator {
     }
 
     /**
-     * Returns the URL of the source for the specified class.
+     * Returns the URI of the source for the specified class.
      *
      * @param cl class to find the source for
-     * @return A {@code URL} pointing to the source, or {@code null} it cannot
+     * @return A {@code URI} pointing to the source, or {@code null} it cannot
      *      be obtained.
      */
-    static URL getClassURL(final Class cl) {
-        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
-            public URL run() {
-                if (cl.getProtectionDomain().getCodeSource() == null) {
-                    return null;
+    static URI getClassURI(final Class cl) {
+        return AccessController.doPrivileged(new PrivilegedAction<URI>() {
+            public URI run() {
+                CodeSource cs = cl.getProtectionDomain().getCodeSource();
+                if (cs != null) {
+                    try {
+                        return cs.getLocation().toURI();
+                    } catch (URISyntaxException use) {
+                        // Shouldn't happen, fall through and return null.
+                        BaseTestCase.alarm("bad URI: " + use.getMessage());
+                    }
                 }
-                return cl.getProtectionDomain().getCodeSource().getLocation();
+                return null;
             }
         });
     }

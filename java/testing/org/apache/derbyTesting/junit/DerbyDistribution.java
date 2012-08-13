@@ -201,6 +201,7 @@ public class DerbyDistribution
                 }
             }
             if (!hasJar) {
+                BaseTestCase.println("missing jar: " + REQUIRED_JARS[i]);
                 return false;
             }
         }

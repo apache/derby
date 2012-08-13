@@ -21,7 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.compatibility;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DerbyDistribution;
@@ -84,7 +84,7 @@ public class ClientCompatibilityRunControl
         // Fork the client test with a minimal classpath.
         String classpath = clientDist.getDerbyClientJarPath() +
                 File.pathSeparator + testingPath +
-                File.pathSeparator + getJUnitURL().getPath();
+                File.pathSeparator + getJUnitPath();
         // If we are running the LOB tests we also need derby.jar, because the
         // test code being run references classes from the iapi package.
         // This may also happen for the non-LOB tests in the future.
@@ -113,13 +113,15 @@ public class ClientCompatibilityRunControl
         println(spawned.getFullServerOutput());
     }
 
-	/**
-	 * Returns the URL of the JUnit classes.
+    /**
+     * Returns the path of the JUnit classes.
      *
-     * @return A URL.
-	 */
-    private static URL getJUnitURL() {
-        return VersionCombinationConfigurator.getClassURL(
+     * @return A path.
+     */
+    private static String getJUnitPath() {
+        URI uri = VersionCombinationConfigurator.getClassURI(
                 junit.framework.TestCase.class);
-	}
+        return new File(uri).getPath();
+    }
 }
+
