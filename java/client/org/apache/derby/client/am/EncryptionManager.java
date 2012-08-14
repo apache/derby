@@ -639,9 +639,9 @@ public class EncryptionManager {
         The byte at <code>data[offset]</code> is represented by the first two
         characters in the returned String.
 
-        @param    data    byte array
-        @param    offset    starting byte (zero based) to convert.
-        @param    length    number of bytes to convert.
+        @param  data    byte array
+        @param  offset  starting byte (zero based) to convert.
+        @param  length  number of bytes to convert.
 
         @return the String (with hexidecimal format) form of the byte array
     */
@@ -672,9 +672,9 @@ public class EncryptionManager {
         The character at <code>str.charAt(0)</code> is represented by the first two bytes 
         in the returned String.
 
-        @param    str string 
-        @param    offset    starting character (zero based) to convert.
-        @param    length    number of characters to convert.
+        @param  str string
+        @param  offset  starting character (zero based) to convert.
+        @param  length  number of characters to convert.
 
         @return the byte[]  (with hexidecimal format) form of the string (str) 
     */

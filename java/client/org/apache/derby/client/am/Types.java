@@ -32,7 +32,7 @@ public class Types {
     public final static int BIT        =  java.sql.Types.BIT;          // -7;
 
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
-    //public final static int TINYINT     = java.sql.Types.TINYINT;       // -6;
+    //public final static int TINYINT   = java.sql.Types.TINYINT;       // -6;
 
     public final static int BOOLEAN = java.sql.Types.BOOLEAN;       // 16;
 
@@ -50,7 +50,7 @@ public class Types {
     public final static int DOUBLE = java.sql.Types.DOUBLE;        // 8;
 
     // We type using DECIMAL
-    //public final static int NUMERIC     = java.sql.Types.NUMERIC;       // 2;
+    //public final static int NUMERIC   = java.sql.Types.NUMERIC;       // 2;
 
     public final static int DECIMAL = java.sql.Types.DECIMAL;       // 3;
 

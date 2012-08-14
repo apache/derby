@@ -900,8 +900,8 @@ public abstract class Connection
     }
 
    /**
-    *     Return true if the physical connection is still open.
-    *     Might be logically closed but available for reuse.
+    *   Return true if the physical connection is still open.
+    *   Might be logically closed but available for reuse.
     *   @return true if physical connection still open
     */
     public boolean isPhysicalConnClosed() {
@@ -1130,7 +1130,7 @@ public abstract class Connection
                         (isolation_ == TRANSACTION_UNKNOWN),
                         "isolation_ modified when caching is not supported");
             }
-            rs.close();    
+            rs.close();
             // So... of we did not have an active transaction before
             // the query, we pretend to still not have an open
             // transaction. The result set is closed, so this should

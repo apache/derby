@@ -33,7 +33,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * </p>
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource
- * interface is typically registered with a JNDI service provider.       
+ * interface is typically registered with a JNDI service provider.
  * <P>
  * Use ClientXADataSource40 if your application runs at JDBC level 4.1 (or
  * higher). Use ClientXADataSource
