@@ -168,18 +168,27 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        // return TestConfiguration.defaultSuite(CallableTest.class);
         TestSuite suite = new TestSuite("CallableTest");
 
         suite.addTest(baseSuite("CallableTest:embedded"));
 
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("CallableTest:client")));
+
+        // Test with ConnectionPoolDataSource on client in order to exercise
+        // LogicalCallableStatement (DERBY-5871).
         suite.addTest(TestConfiguration.clientServerDecorator(
-                                TestConfiguration.connectionCPDecorator( baseSuite
-                                        ("CallableTest:logical"))));
+            TestConfiguration.connectionCPDecorator(
+                baseSuite("CallableTest:logical"))));
+
+        // Test with XADataSource on embedded in order to exercise
+        // BrokeredCallableStatement (DERBY-5854).
+        suite.addTest(TestConfiguration.connectionXADecorator(
+            baseSuite("CallableTest:brokered")));
+
         return suite;
     }
+
     private static Test baseSuite(String name) {
 
         TestSuite suite = new TestSuite(name);
