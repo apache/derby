@@ -104,9 +104,9 @@ class EXTDTAInputStream extends InputStream {
      *            column number
      * @param drdaType
      *            FD:OCA type of object one of
-     *                DRDAConstants.DRDA_TYPE_NLOBBYTES
-     *                DRDAConstants.DRDA_TYPE_LOBBYTES
-     *                DRDAConstants.DRDA_TYPE_NLOBCMIXED
+     *             DRDAConstants.DRDA_TYPE_NLOBBYTES
+     *             DRDAConstants.DRDA_TYPE_LOBBYTES
+     *             DRDAConstants.DRDA_TYPE_NLOBCMIXED
      *             DRDAConstants.DRDA_TYPE_LOBCMIXED
      * 
      * @return null if the value is null or a new EXTDTAInputStream corresponding to 
@@ -116,7 +116,7 @@ class EXTDTAInputStream extends InputStream {
      */
     public static EXTDTAInputStream getEXTDTAStream(ResultSet rs, int column, int drdaType) 
         {
-         
+
         int ndrdaType = drdaType | 1; //nullable drdaType
             
         return new EXTDTAInputStream(rs,
@@ -135,15 +135,15 @@ class EXTDTAInputStream extends InputStream {
      *            column number
      * @param drdaType
      *            FD:OCA type of object one of
-     *                DRDAConstants.DRDA_TYPE_NLOBBYTES
-     *                DRDAConstants.DRDA_TYPE_LOBBYTES
-     *                DRDAConstants.DRDA_TYPE_NLOBCMIXED
+     *             DRDAConstants.DRDA_TYPE_NLOBBYTES
+     *             DRDAConstants.DRDA_TYPE_LOBBYTES
+     *             DRDAConstants.DRDA_TYPE_NLOBCMIXED
      *             DRDAConstants.DRDA_TYPE_LOBCMIXED
      */
     public static EXTDTAInputStream getEXTDTAStream(CallableStatement cs, int column, int drdaType)
         throws SQLException
     {
-         
+
         int ndrdaType = drdaType | 1; //nullable drdaType
 
         switch ( ndrdaType )
@@ -191,7 +191,7 @@ class EXTDTAInputStream extends InputStream {
     public void close() throws IOException {
         
         if (binaryInputStream != null)
-            binaryInputStream.close();    
+            binaryInputStream.close();
         binaryInputStream = null;
         
     }
@@ -300,18 +300,18 @@ class EXTDTAInputStream extends InputStream {
     Reader r = null;
     // BLOBS
     if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
-    {             
+    {
         is = getBinaryStream();
         if (is == null) { return; }
     }
         // CLOBS
     else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
-    {    
+    {
         try {
             
             r = getCharacterStream();
                 
-            if(r == null){                
+            if(r == null){
                     return;
             }
 
@@ -331,7 +331,7 @@ class EXTDTAInputStream extends InputStream {
         is = new BufferedInputStream(is);
         }
         
-     this.binaryInputStream=is;
+    this.binaryInputStream=is;
     }
     private InputStream getBinaryStream() throws SQLException
     {

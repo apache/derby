@@ -122,20 +122,20 @@ class DRDAConnThread extends Thread {
 
 
     private NetworkServerControlImpl server;            // server who created me
-    private Session    session;    // information about the session
+    private Session session;    // information about the session
     /** Time slice for this thread. */
     private volatile long timeSlice;
     /** Whether or not to log connections. */
     private volatile boolean logConnections;
 
-    private boolean    sendWarningsOnCNTQRY = false;    // Send Warnings for SELECT if true
+    private boolean sendWarningsOnCNTQRY = false;   // Send Warnings for SELECT if true
     /** End this thread. */
     private volatile boolean close;
     private static HeaderPrintWriter logStream;
-    private AppRequester appRequester;    // pointer to the application requester
+    private AppRequester appRequester;  // pointer to the application requester
                                         // for the session being serviced
-    private Database database;     // pointer to the current database
-    private int sqlamLevel;        // SQLAM Level - determines protocol
+    private Database database;  // pointer to the current database
+    private int sqlamLevel;     // SQLAM Level - determines protocol
 
     // DRDA diagnostic level, DIAGLVL0 by default 
     private byte diagnosticLevel = (byte)0xF0; 
@@ -311,7 +311,7 @@ class DRDAConnThread extends Thread {
                 if (e instanceof DRDAProtocolException && 
                         ((DRDAProtocolException)e).isDisconnectException())
                 {
-                     // client went away - this is O.K. here
+                    // client went away - this is O.K. here
                     closeSession();
                 }
                 else
@@ -509,7 +509,7 @@ class DRDAConnThread extends Thread {
     /**
      * Syntax error
      *
-     * @param errcd        Error code
+     * @param errcd     Error code
      * @param cpArg  code point value
      * @exception DRDAProtocolException
      */
@@ -526,7 +526,7 @@ class DRDAConnThread extends Thread {
     /**
      * Agent error - something very bad happened
      *
-     * @param msg    Message describing error
+     * @param msg   Message describing error
      *
      * @exception DRDAProtocolException  newAgentError always thrown
      */
@@ -550,7 +550,7 @@ class DRDAConnThread extends Thread {
      *
      * @param dbname  database name
      * @param drdaID    DRDA identifier
-     * @param msg    message
+     * @param msg   message
      */
     protected static void println2Log(String dbname, String drdaID, String msg)
     {
@@ -570,7 +570,7 @@ class DRDAConnThread extends Thread {
     /**
      * Write RDBNAM
      *
-     * @param rdbnam     database name
+     * @param rdbnam    database name
      * @exception DRDAProtocolException
      */
     protected void writeRDBNAM(String rdbnam)
@@ -1029,7 +1029,7 @@ class DRDAConnThread extends Thread {
                         server.consoleExceptionPrint(e);
                         try {
                             writeSQLDARD(database.getCurrentStatement(), true, e);
-                        } catch (SQLException e2) {    // should not get here since doing nothing with ps
+                        } catch (SQLException e2) { // should not get here since doing nothing with ps
                             agentError("Why am I getting another SQLException?");
                         }
                         errorInChain(e);
@@ -1067,12 +1067,12 @@ class DRDAConnThread extends Thread {
                         xaProto = new DRDAXAProtocol(this);
                     }
                     xaProto.parseSYNCCTL();
-                     try {
-                         writePBSD();
-                     } catch (SQLException se) {
+                    try {
+                        writePBSD();
+                    } catch (SQLException se) {
                         server.consoleExceptionPrint(se);
-                         errorInChain(se);
-                     }
+                        errorInChain(se);
+                    }
                     break;
                 default:
                     codePointNotSupported(codePoint);
@@ -1130,8 +1130,8 @@ class DRDAConnThread extends Thread {
      * a set of chained commands or received separately.  The chaining was originally
      * defined as a way to save network costs.
      *
-      * @param e        the SQLException raised
-     * @exception    DRDAProtocolException
+     * @param e     the SQLException raised
+     * @exception   DRDAProtocolException
      */
     private void errorInChain(SQLException e) throws DRDAProtocolException
     {
@@ -1208,7 +1208,7 @@ class DRDAConnThread extends Thread {
         if(database.getConnection() == null && databaseAccessException == null){
             writeRDBfailure(CodePoint.RDBAFLRM);
             return false;
-        }        
+        }
         
         //if earlier we couldn't access the database
         if (databaseAccessException != null)
@@ -1227,7 +1227,7 @@ class DRDAConnThread extends Thread {
             }
             return false;
         }
-        else if (database.accessCount > 1 )    // already in conversation with database
+        else if (database.accessCount > 1 ) // already in conversation with database
         {
             writeRDBfailure(CodePoint.RDBACCRM);
             return false;
@@ -1264,11 +1264,11 @@ class DRDAConnThread extends Thread {
      * Write RDB Failure
      *
      * Instance Variables
-     *     SVRCOD - Severity Code - required
-     *    RDBNAM - Relational Database name - required
+     *  SVRCOD - Severity Code - required
+     *  RDBNAM - Relational Database name - required
      *  SRVDGN - Server Diagnostics - optional (not sent for now)
-      *
-     * @param    codePoint    codepoint of failure
+     *
+     * @param   codePoint   codepoint of failure
      */
     private void writeRDBfailure(int codePoint) throws DRDAProtocolException
     {
@@ -1453,16 +1453,16 @@ class DRDAConnThread extends Thread {
                                                 database.secTokenOut.length));
         }
             
-         try {
+        try {
             database.makeConnection(p);
-          } catch (SQLException se) {
+        } catch (SQLException se) {
             databaseAccessException = se;
             for (; se != null; se = se.getNextException())
             {
                 if (SanityManager.DEBUG) {
                     trace(se.getMessage());
                 }
-                 println2Log(database.getDatabaseName(), session.drdaID, se.getMessage());
+                println2Log(database.getDatabaseName(), session.drdaID, se.getMessage());
             }
 
             if (isAuthenticationException(databaseAccessException)) {
@@ -1505,7 +1505,7 @@ class DRDAConnThread extends Thread {
     
         // Everything worked so log connection to the database.
         if (getLogConnections()) {
-             println2Log(database.getDatabaseName(), session.drdaID,
+            println2Log(database.getDatabaseName(), session.drdaID,
                 "Apache Derby Network Server connected to database " +
                         database.getDatabaseName());
         }
@@ -1516,9 +1516,9 @@ class DRDAConnThread extends Thread {
     /**
      * Parses EXCSAT (Exchange Server Attributes)
      * Instance variables
-     *    EXTNAM(External Name)    - optional
+     *  EXTNAM(External Name)   - optional
      *  MGRLVLLS(Manager Levels) - optional
-     *    SPVNAM(Supervisor Name) - optional
+     *  SPVNAM(Supervisor Name) - optional
      *  SRVCLSNM(Server Class Name) - optional
      *  SRVNAM(Server Name) - optional, ignorable
      *  SRVRLSLV(Server Product Release Level) - optional, ignorable
@@ -1635,9 +1635,9 @@ class DRDAConnThread extends Thread {
     /**
      * Parses EXCSAT2 (Exchange Server Attributes)
      * Instance variables
-     *    EXTNAM(External Name)    - optional
+     *  EXTNAM(External Name)   - optional
      *  MGRLVLLS(Manager Levels) - optional
-     *    SPVNAM(Supervisor Name) - optional
+     *  SPVNAM(Supervisor Name) - optional
      *  SRVCLSNM(Server Class Name) - optional
      *  SRVNAM(Server Name) - optional, ignorable
      *  SRVRLSLV(Server Product Release Level) - optional, ignorable
@@ -1679,26 +1679,26 @@ class DRDAConnThread extends Thread {
     }
 
     /**
-     *    Parse manager levels
+     *  Parse manager levels
      *  Instance variables
-     *        MGRLVL - repeatable, required
-     *          CODEPOINT
-     *            CCSIDMGR - CCSID Manager
-     *            CMNAPPC - LU 6.2 Conversational Communications Manager 
-     *            CMNSYNCPT - SNA LU 6.2 SyncPoint Conversational Communications Manager
-     *            CMNTCPIP - TCP/IP Communication Manager 
-     *            DICTIONARY - Dictionary
-     *            RDB - Relational Database 
-     *            RSYNCMGR - Resynchronization Manager 
-     *            SECMGR - Security Manager
-     *            SQLAM - SQL Application Manager
-     *            SUPERVISOR - Supervisor
-     *            SYNCPTMGR - Sync Point Manager 
-     *          VALUE
+     *      MGRLVL - repeatable, required
+     *        CODEPOINT
+     *          CCSIDMGR - CCSID Manager
+     *          CMNAPPC - LU 6.2 Conversational Communications Manager
+     *          CMNSYNCPT - SNA LU 6.2 SyncPoint Conversational Communications Manager
+     *          CMNTCPIP - TCP/IP Communication Manager
+     *          DICTIONARY - Dictionary
+     *          RDB - Relational Database
+     *          RSYNCMGR - Resynchronization Manager
+     *          SECMGR - Security Manager
+     *          SQLAM - SQL Application Manager
+     *          SUPERVISOR - Supervisor
+     *          SYNCPTMGR - Sync Point Manager
+     *        VALUE
      *
-     *    On the second appearance of this codepoint, it can only add managers
+     *  On the second appearance of this codepoint, it can only add managers
      *
-     * @param time    1 for first time this is seen, 2 for subsequent ones
+     * @param time  1 for first time this is seen, 2 for subsequent ones
      * @exception DRDAProtocolException
      * 
      */
@@ -1769,7 +1769,7 @@ class DRDAConnThread extends Thread {
     /**
      * Write reply to EXCSAT command
      * Instance Variables
-     *    EXTNAM - External Name (optional)
+     *  EXTNAM - External Name (optional)
      *  MGRLVLLS - Manager Level List (optional)
      *  SRVCLSNM - Server Class Name (optional) - used by JCC
      *  SRVNAM - Server Name (optional)
@@ -1821,21 +1821,21 @@ class DRDAConnThread extends Thread {
      * returns must be compatible with the manager-level dependencies of the specified
      * manangers.  Incompatible manager levels cannot be specified.
      *  Instance variables
-     *        MGRLVL - repeatable, required
-     *          CODEPOINT
-     *            CCSIDMGR - CCSID Manager
-     *            CMNAPPC - LU 6.2 Conversational Communications Manager 
-     *            CMNSYNCPT - SNA LU 6.2 SyncPoint Conversational Communications Manager
-     *            CMNTCPIP - TCP/IP Communication Manager   
-     *            DICTIONARY - Dictionary 
-     *            RDB - Relational Database 
-     *            RSYNCMGR - Resynchronization Manager   
-     *            SECMGR - Security Manager
-     *            SQLAM - SQL Application Manager 
-     *            SUPERVISOR - Supervisor 
-     *            SYNCPTMGR - Sync Point Manager 
-     *            XAMGR - XA manager 
-     *          VALUE
+     *      MGRLVL - repeatable, required
+     *        CODEPOINT
+     *          CCSIDMGR - CCSID Manager
+     *          CMNAPPC - LU 6.2 Conversational Communications Manager
+     *          CMNSYNCPT - SNA LU 6.2 SyncPoint Conversational Communications Manager
+     *          CMNTCPIP - TCP/IP Communication Manager
+     *          DICTIONARY - Dictionary
+     *          RDB - Relational Database
+     *          RSYNCMGR - Resynchronization Manager
+     *          SECMGR - Security Manager
+     *          SQLAM - SQL Application Manager
+     *          SUPERVISOR - Supervisor
+     *          SYNCPTMGR - Sync Point Manager
+     *          XAMGR - XA manager
+     *        VALUE
      */
     private void writeMGRLEVELS() throws DRDAProtocolException
     {
@@ -1867,22 +1867,22 @@ class DRDAConnThread extends Thread {
     /**
      *  Parse Access Security
      *
-     *    If the target server supports the SECMEC requested by the application requester
-     *    then a single value is returned and it is identical to the SECMEC value
-     *    in the ACCSEC command. If the target server does not support the SECMEC
-     *    requested, then one or more values are returned and the application requester
+     *  If the target server supports the SECMEC requested by the application requester
+     *  then a single value is returned and it is identical to the SECMEC value
+     *  in the ACCSEC command. If the target server does not support the SECMEC
+     *  requested, then one or more values are returned and the application requester
      *  must choose one of these values for the security mechanism.
      *  We currently support
-     *        - user id and password (default for JCC)
-     *        - encrypted user id and password
+     *      - user id and password (default for JCC)
+     *      - encrypted user id and password
      *      - strong password substitute (USRSSBPWD w/
      *                                    Derby network client only)
      *
      *  Instance variables
      *    SECMGRNM  - security manager name - optional
-     *      SECMEC     - security mechanism - required
-     *      RDBNAM    - relational database name - optional
-     *       SECTKN    - security token - optional, (required if sec mech. needs it)
+     *    SECMEC    - security mechanism - required
+     *    RDBNAM    - relational database name - optional
+     *    SECTKN    - security token - optional, (required if sec mech. needs it)
      *
      *  @return security check code - 0 if everything O.K.
      */
@@ -2115,12 +2115,12 @@ class DRDAConnThread extends Thread {
                     pkgnamcsn = parsePKGNAMCSN();
                     break;
                 //required
-                  case CodePoint.QRYBLKSZ:
+                case CodePoint.QRYBLKSZ:
                     blksize = parseQRYBLKSZ();
                     gotQryblksz = true;
                     break;
                 //optional
-                  case CodePoint.QRYBLKCTL:
+                case CodePoint.QRYBLKCTL:
                     qryblkctl = reader.readNetworkShort();
                     //The only type of query block control we can specify here
                     //is forced fixed row
@@ -2133,7 +2133,7 @@ class DRDAConnThread extends Thread {
                     gotQryblksz = true;
                     break;
                 //optional
-                  case CodePoint.MAXBLKEXT:
+                case CodePoint.MAXBLKEXT:
                     maxblkext = reader.readSignedNetworkShort();
                     if (SanityManager.DEBUG) {
                         trace("maxblkext = "+maxblkext);
@@ -2160,7 +2160,7 @@ class DRDAConnThread extends Thread {
                 case CodePoint.MONITOR:
                     parseMONITOR();
                     break;
-                  default:
+                default:
                     invalidCodePoint(codePoint);
             }
             codePoint = reader.getCodePoint();
@@ -2188,8 +2188,8 @@ class DRDAConnThread extends Thread {
         // this check can't be done since the second executeQuery should work
         //if (stmt.state != DRDAStatement.NOT_OPENED)
         //{
-        //    writeQRYPOPRM();
-        //    pkgnamcsn = null;
+        //  writeQRYPOPRM();
+        //  pkgnamcsn = null;
         //}
         //else
         //{
@@ -2249,7 +2249,7 @@ class DRDAConnThread extends Thread {
                         parseSQLDTA(stmt);
                         break;
                     // optional
-                    case CodePoint.EXTDTA:    
+                    case CodePoint.EXTDTA:
                         readAndSetAllExtParams(stmt, false);
                         break;
                     default:
@@ -2301,7 +2301,7 @@ class DRDAConnThread extends Thread {
         return blksize;
     }
     /**
-      * Parse QRYROWSET - this is the number of rows to return
+     * Parse QRYROWSET - this is the number of rows to return
      *
      * @param minVal - minimum value
      * @return query row set size
@@ -2391,7 +2391,7 @@ class DRDAConnThread extends Thread {
      *  SVRCOD - Severity Code - required - 8 ERROR
      *  RDBNAM - Relational Database Name - required
      *
-     * @param    e    Exception describing failure
+     * @param   e   Exception describing failure
      *
      * @exception DRDAProtocolException
      */
@@ -2426,7 +2426,7 @@ class DRDAConnThread extends Thread {
         if (rdbnam.length() <= CodePoint.RDBNAM_LEN &&
             rdbcolid.length() <= CodePoint.RDBCOLID_LEN &&
             pkgid.length() <= CodePoint.PKGID_LEN)
-        {    // if none of RDBNAM, RDBCOLID and PKGID have a length of
+        {   // if none of RDBNAM, RDBCOLID and PKGID have a length of
             // more than 18, use fixed format
             writer.writeScalarPaddedString(rdbnam, CodePoint.RDBNAM_LEN);
             writer.writeScalarPaddedString(rdbcolid, CodePoint.RDBCOLID_LEN);
@@ -2642,7 +2642,7 @@ class DRDAConnThread extends Thread {
         if (pkgnamcsn == null) {
             missingCodePoint(CodePoint.PKGNAMCSN);
         }
-         if (!gotQryblksz) {
+        if (!gotQryblksz) {
             missingCodePoint(CodePoint.QRYBLKSZ);
         }
         if (sqlamLevel >= MGRLVL_7 && !gotQryinsid) {
@@ -2727,7 +2727,7 @@ class DRDAConnThread extends Thread {
      * This specifies the output format for data to be returned as output to a SQL
      * statement or as output from a query.
      *
-     * @param stmt    DRDA statement this applies to
+     * @param stmt  DRDA statement this applies to
      * @exception DRDAProtocolException
      */
     private void parseOUTOVR(DRDAStatement stmt) throws DRDAProtocolException, SQLException
@@ -2952,7 +2952,7 @@ class DRDAConnThread extends Thread {
     }
     /**
      * Write ENDQRYRM - query process has terminated in such a manner that the
-     *    query or result set is now closed.  It cannot be resumed with the CNTQRY
+     *  query or result set is now closed.  It cannot be resumed with the CNTQRY
      *  command or closed with the CLSQRY command
      * @param svrCod  Severity code - WARNING or ERROR
      * @exception DRDAProtocolException
@@ -2968,7 +2968,7 @@ class DRDAConnThread extends Thread {
      * Write ABNUOWRM - query process has terminated in an error condition
      * such as deadlock or lock timeout.
      * Severity code is always error
-     *      * @exception DRDAProtocolException
+     *   * @exception DRDAProtocolException
      */
     private void writeABNUOWRM() throws DRDAProtocolException
     {
@@ -3015,9 +3015,9 @@ class DRDAConnThread extends Thread {
      * If the security mechanism is not known, we send a list of the ones
      * we know.
      * Instance Variables
-     *     SECMEC - security mechanism - required
-     *    SECTKN - security token    - optional (required if security mechanism 
-     *                        uses encryption)
+     *  SECMEC - security mechanism - required
+     *  SECTKN - security token - optional (required if security mechanism
+     *                      uses encryption)
      *  SECCHKCD - security check code - error occurred in processing ACCSEC
      *
      * @param securityCheckCode
@@ -3094,13 +3094,13 @@ class DRDAConnThread extends Thread {
     /**
      * Parse security check
      * Instance Variables
-     *    SECMGRNM - security manager name - optional, ignorable
-     *  SECMEC    - security mechanism - required
-     *    SECTKN    - security token - optional, (required if encryption used)
-     *    PASSWORD - password - optional, (required if security mechanism uses it)
-     *    NEWPASSWORD - new password - optional, (required if sec mech. uses it)
-     *    USRID    - user id - optional, (required if sec mec. uses it)
-     *    RDBNAM    - database name - optional (required if databases can have own sec.)
+     *  SECMGRNM - security manager name - optional, ignorable
+     *  SECMEC  - security mechanism - required
+     *  SECTKN  - security token - optional, (required if encryption used)
+     *  PASSWORD - password - optional, (required if security mechanism uses it)
+     *  NEWPASSWORD - new password - optional, (required if sec mech. uses it)
+     *  USRID   - user id - optional, (required if sec mec. uses it)
+     *  RDBNAM  - database name - optional (required if databases can have own sec.)
      *
      * 
      * @return security check code
@@ -3200,7 +3200,7 @@ class DRDAConnThread extends Thread {
                                             database.securityMechanism,
                                             myPublicKey,
                                             database.secTokenIn);
-                            } catch (SQLException se) {    
+                            } catch (SQLException se) {
                                 println2Log(database.getDatabaseName(), session.drdaID,
                                             se.getMessage());
                                 if (securityCheckCode == 0) {
@@ -3373,11 +3373,11 @@ class DRDAConnThread extends Thread {
     /**
      * Write security check reply
      * Instance variables
-     *     SVRCOD - serverity code - required
-     *    SECCHKCD    - security check code  - required
-     *    SECTKN - security token - optional, ignorable
-     *    SVCERRNO    - security service error number
-     *    SRVDGN    - Server Diagnostic Information
+     *  SVRCOD - serverity code - required
+     *  SECCHKCD    - security check code  - required
+     *  SECTKN - security token - optional, ignorable
+     *  SVCERRNO    - security service error number
+     *  SRVDGN  - Server Diagnostic Information
      *
      * @exception DRDAProtocolException
      */
@@ -3416,12 +3416,12 @@ class DRDAConnThread extends Thread {
     /**
      * Parse access RDB
      * Instance variables
-     *    RDBACCCL - RDB Access Manager Class - required must be SQLAM
+     *  RDBACCCL - RDB Access Manager Class - required must be SQLAM
      *  CRRTKN - Correlation Token - required
      *  RDBNAM - Relational database name -required
      *  PRDID - Product specific identifier - required
-     *  TYPDEFNAM    - Data Type Definition Name -required
-     *  TYPDEFOVR    - Type definition overrides -required
+     *  TYPDEFNAM   - Data Type Definition Name -required
+     *  TYPDEFOVR   - Type definition overrides -required
      *  RDBALWUPD -  RDB Allow Updates optional
      *  PRDDTA - Product Specific Data - optional - ignorable
      *  STTDECDEL - Statement Decimal Delimiter - optional
@@ -3470,9 +3470,9 @@ class DRDAConnThread extends Thread {
                     }
                     // the format of the CRRTKN is defined in the DRDA reference
                     // x.yz where x is 1 to 8 bytes (variable)
-                    //         y is 1 to 8 bytes (variable)
-                    //        x is 6 bytes fixed
-                    //        size is variable between 9 and 23
+                    //      y is 1 to 8 bytes (variable)
+                    //      x is 6 bytes fixed
+                    //      size is variable between 9 and 23
                     if (l < 9 || l > 23) {
                         invalidValue(CodePoint.CRRTKN);
                     }
@@ -3647,7 +3647,7 @@ class DRDAConnThread extends Thread {
      *  TYPDEFNAM - type definition name -required
      *  TYPDEFOVR - type definition overrides - required
      *  RDBINTTKN - token which can be used to interrupt DDM commands - optional
-     *  CRRTKN    - correlation token - only returned if we didn't get one from requester
+     *  CRRTKN  - correlation token - only returned if we didn't get one from requester
      *  SRVDGN - server diagnostic information - optional
      *  PKGDFTCST - package default character subtype - optional
      *  USRID - User ID at the target system - optional
@@ -3713,14 +3713,14 @@ class DRDAConnThread extends Thread {
     
     /**
      * Parse Type Defintion Overrides
-     *     TYPDEF Overrides specifies the Coded Character SET Identifiers (CCSIDs)
+     *  TYPDEF Overrides specifies the Coded Character SET Identifiers (CCSIDs)
      *  that are in a named TYPDEF.
      * Instance Variables
      *  CCSIDSBC - CCSID for Single-Byte - optional
      *  CCSIDDBC - CCSID for Double-Byte - optional
      *  CCSIDMBC - CCSID for Mixed-byte characters -optional
      *
-      * @param st    Statement this TYPDEFOVR applies to
+     * @param st    Statement this TYPDEFOVR applies to
      *
      * @exception DRDAProtocolException
      */
@@ -3847,7 +3847,7 @@ class DRDAConnThread extends Thread {
      *   MONITOR - Monitor events - optional.
      *   
      * @return return 0 - don't return sqlda, 1 - return input sqlda, 
-     *         2 - return output sqlda
+     *      2 - return output sqlda
      * @throws DRDAProtocolException
      * @throws SQLException
      */
@@ -3855,7 +3855,7 @@ class DRDAConnThread extends Thread {
     {
         int codePoint;
         boolean rtnsqlda = false;
-        boolean rtnOutput = true;     // Return output SQLDA is default
+        boolean rtnOutput = true;   // Return output SQLDA is default
         Pkgnamcsn pkgnamcsn = null;
 
         Database databaseToSet = null;
@@ -4064,7 +4064,7 @@ class DRDAConnThread extends Thread {
     /**
      * Parse DSCSQLSTT - Describe SQL Statement previously prepared
      * Instance Variables
-     *    TYPSQLDA - sqlda type expected (output or input)
+     *  TYPSQLDA - sqlda type expected (output or input)
      *  RDBNAM - relational database name - optional
      *  PKGNAMCSN - RDB Package Name, Consistency Token and Section Number - required
      *  MONITOR - Monitor events - optional.
@@ -4076,7 +4076,7 @@ class DRDAConnThread extends Thread {
     private boolean parseDSCSQLSTT() throws DRDAProtocolException,SQLException
     {
         int codePoint;
-        boolean rtnOutput = true;    // default
+        boolean rtnOutput = true;   // default
         Pkgnamcsn pkgnamcsn = null;
         reader.markCollection();
 
@@ -4148,7 +4148,7 @@ class DRDAConnThread extends Thread {
         Pkgnamcsn pkgnamcsn = null;
         int numRows = 1;    // default value
         int blkSize =  0;
-         int maxrslcnt = 0;     // default value
+        int maxrslcnt = 0;  // default value
         int maxblkext = CodePoint.MAXBLKEXT_DEFAULT;
         int qryrowset = CodePoint.QRYROWSET_DEFAULT;
         int outovropt = CodePoint.OUTOVRFRS;
@@ -4266,9 +4266,9 @@ class DRDAConnThread extends Thread {
         if (isProcedure)        // stored procedure call
         {
             if ( stmt == null  || !(stmt.wasExplicitlyPrepared()))
-            {                 
+            {
                 stmt  = database.newDRDAStatement(pkgnamcsn);
-                stmt.setQryprctyp(CodePoint.QRYBLKCTL_DEFAULT);                
+                stmt.setQryprctyp(CodePoint.QRYBLKCTL_DEFAULT);
                 needPrepareCall = true;
             }
                 
@@ -4285,13 +4285,13 @@ class DRDAConnThread extends Thread {
             stmt.setQryprctyp(CodePoint.QRYBLKCTL_DEFAULT);
         }
 
-         stmt.nbrrow = numRows;
-         stmt.qryrowset = qryrowset;
-         stmt.blksize = blkSize;
-         stmt.maxblkext = maxblkext;
-         stmt.maxrslcnt = maxrslcnt;
-         stmt.outovropt = outovropt;
-         stmt.rslsetflg = rslsetflg;
+        stmt.nbrrow = numRows;
+        stmt.qryrowset = qryrowset;
+        stmt.blksize = blkSize;
+        stmt.maxblkext = maxblkext;
+        stmt.maxrslcnt = maxrslcnt;
+        stmt.outovropt = outovropt;
+        stmt.rslsetflg = rslsetflg;
         if (pendingStatementTimeout >= 0) {
             stmt.getPreparedStatement().setQueryTimeout(pendingStatementTimeout);
             pendingStatementTimeout = -1;
@@ -4444,9 +4444,9 @@ class DRDAConnThread extends Thread {
      * Command Objects
      *  TYPDEFNAM - Data Type Definition Name - optional
      *  TYPDEFOVR - TYPDEF Overrides -optional
-     *    SQLDTA - optional, variable data, specified if prpared statement has input parameters
-     *    EXTDTA - optional, externalized FD:OCA data
-     *    OUTOVR - output override descriptor, not allowed for stored procedure calls
+     *  SQLDTA - optional, variable data, specified if prpared statement has input parameters
+     *  EXTDTA - optional, externalized FD:OCA data
+     *  OUTOVR - output override descriptor, not allowed for stored procedure calls
      *
      * If TYPDEFNAM and TYPDEFOVR are supplied, they apply to the objects
      * sent with the statement.  Once the statement is over, the default values
@@ -4454,7 +4454,7 @@ class DRDAConnThread extends Thread {
      * the values sent in the ACCRDB are used.
      * Objects may follow in one DSS or in several DSS chained together.
      * 
-     * @param stmt    the DRDAStatement to execute
+     * @param stmt  the DRDAStatement to execute
      * @throws DRDAProtocolException
      * @throws SQLException
      */
@@ -4487,7 +4487,7 @@ class DRDAConnThread extends Thread {
                         gotSQLDTA = true;
                         break;
                     // optional
-                    case CodePoint.EXTDTA:    
+                    case CodePoint.EXTDTA:
                         readAndSetAllExtParams(stmt, true);
                         stmt.ps.clearWarnings();
                         result = stmt.execute();
@@ -4523,7 +4523,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void writeSQLCINRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
-    {        
+    {
         ResultSet rs = stmt.getResultSet();
 
         writer.createDssObject();
@@ -4534,7 +4534,7 @@ class DRDAConnThread extends Thread {
 
         ResultSetMetaData rsmeta = rs.getMetaData();
         int ncols = rsmeta.getColumnCount();
-        writer.writeShort(ncols);    // num of columns
+        writer.writeShort(ncols);   // num of columns
         if (sqlamLevel >= MGRLVL_7)
         {
             for (int i = 0; i < ncols; i++) {
@@ -4569,9 +4569,9 @@ class DRDAConnThread extends Thread {
 
         for (int i = 0; i < numResults; i ++)
             {
-                writer.writeInt(i);    // rsLocator
+                writer.writeInt(i); // rsLocator
                 writeVCMorVCS(stmt.getResultSetCursorName(i));
-                writer.writeInt(1);    // num of rows XXX resolve, it doesn't matter for now
+                writer.writeInt(1); // num of rows XXX resolve, it doesn't matter for now
 
             }
         writer.endDdmAndDss();
@@ -4658,14 +4658,14 @@ class DRDAConnThread extends Thread {
                         if (SanityManager.DEBUG) {
                             trace("num of vars in this group is: "+numVarsInGrp);
                         }
-                        reader.readByte();        // tripletType
-                        reader.readByte();        // id
+                        reader.readByte();      // tripletType
+                        reader.readByte();      // id
                         for (int j = 0; j < numVarsInGrp; j++)
                         {
                             final byte t = reader.readByte();
                             if (SanityManager.DEBUG)  {
                                 trace("drdaType is: "+ "0x" +
-                                         Integer.toHexString(t));
+                                      Integer.toHexString(t));
                             }
                             int drdaLength = reader.readNetworkShort();
                             if (SanityManager.DEBUG) {
@@ -4678,9 +4678,9 @@ class DRDAConnThread extends Thread {
                     if (SanityManager.DEBUG) {
                         trace("numVars = " + numVars);
                     }
-                    if (ps == null)        // it is a CallableStatement under construction
+                    if (ps == null)     // it is a CallableStatement under construction
                     {
-                        StringBuilder marks = new StringBuilder();    // construct parameter marks
+                        StringBuilder marks = new StringBuilder();  // construct parameter marks
                         marks.append("(?");
                         for (int i = 1; i < numVars; i++) {
                             marks.append(", ?");
@@ -4731,11 +4731,11 @@ class DRDAConnThread extends Thread {
                     break;
                 // optional
                 case CodePoint.FDODTA:
-                    reader.readByte();    // row indicator
+                    reader.readByte();  // row indicator
                     for (int i = 0; i < numVars; i++)
                     {
                     
-                        if ((stmt.getParamDRDAType(i+1) & 0x1) == 0x1)    // nullable
+                        if ((stmt.getParamDRDAType(i+1) & 0x1) == 0x1)  // nullable
                         {
                             int nullData = reader.readUnsignedByte();
                             if ((nullData & 0xFF) == FdocaConstants.NULL_DATA)
@@ -4802,9 +4802,9 @@ class DRDAConnThread extends Thread {
     /**
      * Read different types of input parameters and set them in
      * PreparedStatement
-     * @param i            index of the parameter
+     * @param i         index of the parameter
      * @param stmt      drda statement
-     * @param pmeta        parameter meta data
+     * @param pmeta     parameter meta data
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -4976,7 +4976,7 @@ class DRDAConnThread extends Thread {
             case DRDAConstants.DRDA_TYPE_NVARBYTE:
             case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
             {
-                int length = reader.readNetworkShort();    //protocol control data always follows big endian
+                int length = reader.readNetworkShort(); //protocol control data always follows big endian
                 if (SanityManager.DEBUG) {
                     trace("===== binary param length is: " + length);
                 }
@@ -5062,7 +5062,7 @@ class DRDAConnThread extends Thread {
     /** Read a UDT from the stream */
     private Object readUDT() throws DRDAProtocolException
     {
-        int length = reader.readNetworkShort();    //protocol control data always follows big endian
+        int length = reader.readNetworkShort(); //protocol control data always follows big endian
         if (SanityManager.DEBUG) { trace("===== udt param length is: " + length); }
         byte[] bytes = reader.readBytes(length);
         
@@ -5255,8 +5255,8 @@ class DRDAConnThread extends Thread {
     /**
      * Read different types of input parameters and set them in PreparedStatement
      * @param i zero-based index of the parameter
-     * @param stmt            associated ps
-     * @param drdaType    drda type of the parameter
+     * @param stmt          associated ps
+     * @param drdaType  drda type of the parameter
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -5294,7 +5294,7 @@ class DRDAConnThread extends Thread {
 
             traceEXTDTARead(drdaType, i+1, stream, streamLOB, encoding);
 
-            try {    
+            try {
                 switch (drdaType)
                 {
                     case  DRDAConstants.DRDA_TYPE_LOBBYTES:
@@ -5571,7 +5571,7 @@ class DRDAConnThread extends Thread {
                         // at some point in the future, simply remove
                         // the follwing line; we will then throw a
                         // warning.
-//                            hadUnrecognizedStmt = true;
+//                          hadUnrecognizedStmt = true;
                             break;
                         }
 
@@ -6166,7 +6166,7 @@ class DRDAConnThread extends Thread {
     /**
      * Write a null SQLCARD as an object
      *
-      * @exception DRDAProtocolException
+     * @exception DRDAProtocolException
      */
     private void writeNullSQLCARDobject()
         throws DRDAProtocolException
@@ -6180,9 +6180,9 @@ class DRDAConnThread extends Thread {
      * Write SQLERRRM
      *
      * Instance Variables
-     *     SVRCOD - Severity Code - required
-      *
-     * @param    severity    severity of error
+     *  SVRCOD - Severity Code - required
+     *
+     * @param   severity    severity of error
      *
      * @exception DRDAProtocolException
      */
@@ -6199,9 +6199,9 @@ class DRDAConnThread extends Thread {
      * Write CMDCHKRM
      *
      * Instance Variables
-     *     SVRCOD - Severity Code - required 
-      *
-     * @param    severity    severity of error
+     *  SVRCOD - Severity Code - required
+     *
+     * @param   severity    severity of error
      *
      * @exception DRDAProtocolException
      */
@@ -6459,7 +6459,7 @@ class DRDAConnThread extends Thread {
      * 
      * @param se  SQLException for which to build SQLERRMC
      * @return preformated message text 
-     *             with messages separted by SQLERRMC_PREFORMATED_MESSAGE_DELIMITER
+     *          with messages separted by SQLERRMC_PREFORMATED_MESSAGE_DELIMITER
      * 
      */
     private String  buildPreformattedSqlerrmc(SQLException se) {
@@ -6475,7 +6475,7 @@ class DRDAConnThread extends Thread {
             sb.append("SQLSTATE: ");
             sb.append(se.getSQLState());
         }
-        return sb.toString();        
+        return sb.toString();
     }
 
     /**
@@ -6518,7 +6518,7 @@ class DRDAConnThread extends Thread {
             }
             if (se != null)
             {
-                sqlerrmc += SystemProcedures.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";                
+                sqlerrmc += SystemProcedures.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";
             }
         } while (se != null);
         return sqlerrmc;
@@ -6635,7 +6635,7 @@ class DRDAConnThread extends Thread {
     }
 
     /**
-      * Write SQLDIAGGRP: SQL Diagnostics Group Description - Identity 0xD1
+     * Write SQLDIAGGRP: SQL Diagnostics Group Description - Identity 0xD1
      * Nullable Group
      * SQLDIAGSTT; DRDA TYPE N-GDA; ENVLID 0xD3; Length Override 0
      * SQLDIAGCN;  DRFA TYPE N-RLO; ENVLID 0xF6; Length Override 0
@@ -6807,21 +6807,21 @@ class DRDAConnThread extends Thread {
         writer.writeString(sqlState);
 
 
-        writer.writeInt(0);                        // REASON_CODE
-        writer.writeInt(0);                        // LINE_NUMBER
-        writer.writeLong(rowNum);                // ROW_NUMBER
+        writer.writeInt(0);                     // REASON_CODE
+        writer.writeInt(0);                     // LINE_NUMBER
+        writer.writeLong(rowNum);               // ROW_NUMBER
 
         byte[] byteArray = new byte[1];
         writer.writeScalarPaddedBytes(byteArray, 47, (byte) 0);
 
-        writer.writeShort(0);                    // CCC on Win does not take RDBNAME
-        writer.writeByte(CodePoint.NULLDATA);    // MESSAGE_TOKENS
-        writer.writeLDString(sqlerrmc);            // MESSAGE_TEXT
+        writer.writeShort(0);                   // CCC on Win does not take RDBNAME
+        writer.writeByte(CodePoint.NULLDATA);   // MESSAGE_TOKENS
+        writer.writeLDString(sqlerrmc);         // MESSAGE_TEXT
 
         writeVCMorVCS(null);                    // COLUMN_NAME
         writeVCMorVCS(null);                    // PARAMETER_NAME
         writeVCMorVCS(null);                    // EXTENDED_NAME
-        writer.writeByte(CodePoint.NULLDATA);    // SQLDCXGRP
+        writer.writeByte(CodePoint.NULLDATA);   // SQLDCXGRP
     }
 
     /*
@@ -6849,7 +6849,7 @@ class DRDAConnThread extends Thread {
      *   SQLDHROW; ROW LID 0xE0; ELEMENT TAKEN 0(all); REP FACTOR 1
      *   SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
      *
-     * @param stmt    prepared statement
+     * @param stmt  prepared statement
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -6918,7 +6918,7 @@ class DRDAConnThread extends Thread {
         if (!stmt.needsToSendParamData) {
             rs = stmt.getResultSet();
         }
-        if (rs == null)    {
+        if (rs == null) {
             // this is a CallableStatement, use parameter meta data
             pmeta = stmt.getParameterMetaData();
         } else {
@@ -6941,7 +6941,7 @@ class DRDAConnThread extends Thread {
         int firstcols = remaining/FdocaConstants.SQLDTAGRP_COL_DSC_SIZE;
 
         // check if it doesn't all fit into the first block and 
-        //    under FdocaConstants.MAX_VARS_IN_NGDA
+        //  under FdocaConstants.MAX_VARS_IN_NGDA
         if (firstcols < numCols || numCols > FdocaConstants.MAX_VARS_IN_NGDA)
         {
             // we are limited to FdocaConstants.MAX_VARS_IN_NGDA
@@ -6999,19 +6999,19 @@ class DRDAConnThread extends Thread {
      *  ID - SQLDTAGRP_LID for first, NULL_LID for following
      *  For each column
      *    DRDA TYPE 
-     *      LENGTH OVERRIDE
-     *        For numeric/decimal types
-     *          PRECISON
-     *          SCALE
-     *        otherwise
-     *          LENGTH or DISPLAY_WIDTH
+     *    LENGTH OVERRIDE
+     *      For numeric/decimal types
+     *        PRECISON
+     *        SCALE
+     *      otherwise
+     *        LENGTH or DISPLAY_WIDTH
      *
-     * @param stmt        drda statement
+     * @param stmt      drda statement
      * @param rsmeta    resultset meta data
-     * @param pmeta        parameter meta data for CallableStatement
-     * @param colStart    starting column for group to send
+     * @param pmeta     parameter meta data for CallableStatement
+     * @param colStart  starting column for group to send
      * @param colEnd    end column to send
-     * @param first        is this the first group
+     * @param first     is this the first group
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -7041,7 +7041,7 @@ class DRDAConnThread extends Thread {
 
                            
 
-        boolean hasRs = (rsmeta != null);    //  if don't have result, then we look at parameter meta
+        boolean hasRs = (rsmeta != null);   //  if don't have result, then we look at parameter meta
 
         for (int i = colStart; i <= colEnd; i++)
         {
@@ -7059,7 +7059,7 @@ class DRDAConnThread extends Thread {
             {
                 precision = rsmeta.getPrecision(i);
                 scale = rsmeta.getScale(i);
-                stmt.setRsDRDAType(i,drdaType);            
+                stmt.setRsDRDAType(i,drdaType);
                 stmt.setRsPrecision(i, precision);
                 stmt.setRsScale(i,scale);
             }
@@ -7113,7 +7113,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
      */
     private void writeSQLDHROW(int holdability) throws DRDAProtocolException,SQLException
-    {        
+    {
         if (JVMInfo.JDK_ID < 2) //write null indicator for SQLDHROW because there is no holdability support prior to jdk1.3
         {
             writer.writeByte(CodePoint.NULLDATA);
@@ -7136,7 +7136,7 @@ class DRDAConnThread extends Thread {
         //SQLDKEYTYPE
         writer.writeShort(0);
         //SQLRDBNAME
-        writer.writeShort(0);    //CCC on Windows somehow does not take any dbname
+        writer.writeShort(0);   //CCC on Windows somehow does not take any dbname
         //SQLDSCHEMA
         writeVCMorVCS(null);
 
@@ -7185,7 +7185,7 @@ class DRDAConnThread extends Thread {
      * Instance Variables
      *   Byte string
      *
-     * @param stmt    DRDA statement we are processing
+     * @param stmt  DRDA statement we are processing
      * @throws DRDAProtocolException
      * @throws SQLException
      */
@@ -7219,7 +7219,7 @@ class DRDAConnThread extends Thread {
         }
 
         while(getMoreData)
-        {            
+        {
             sentExtData = false;
             getMoreData = writeFDODTA(stmt);
 
@@ -7323,7 +7323,7 @@ class DRDAConnThread extends Thread {
 
         if (rs != null)
         {
-            numCols = stmt.getNumRsCols();                    
+            numCols = stmt.getNumRsCols();
             if (stmt.isScrollable()) {
                 hasdata = positionCursor(stmt, rs);
             } else {
@@ -7423,7 +7423,7 @@ class DRDAConnThread extends Thread {
 
                     if (SanityManager.DEBUG) {
                         trace("!!drdaType = " + java.lang.Integer.toHexString(drdaType) + 
-                                  " precision=" + precision +" scale = " + scale);
+                                 " precision=" + precision +" scale = " + scale);
                     }
                     switch (ndrdaType)
                     {
@@ -7841,7 +7841,7 @@ class DRDAConnThread extends Thread {
     /**
      * Position cursor for insensitive scrollable cursors
      *
-     * @param stmt    DRDA statement 
+     * @param stmt  DRDA statement
      * @param rs    Result set
      */
     private boolean positionCursor(DRDAStatement stmt, ResultSet rs) 
@@ -7925,10 +7925,10 @@ class DRDAConnThread extends Thread {
      *   SQLDOPTGRP; DRDA TYPE N-GDA; ENVLID 0xD2; Length Override 0
      *
      * @param rsmeta    resultset meta data
-     * @param pmeta        parameter meta data
-     * @param elemNum    column number we are returning (in case of result set), or,
-     *                    parameter number (in case of parameter)
-     * @param rtnOutput    whether this is for a result set    
+     * @param pmeta     parameter meta data
+     * @param elemNum   column number we are returning (in case of result set), or,
+     *                  parameter number (in case of parameter)
+     * @param rtnOutput whether this is for a result set
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -8055,7 +8055,7 @@ class DRDAConnThread extends Thread {
      * since that is our default and we don't allow it to be changed, we always
      * write mixed byte.
      * 
-     * @param s    string to write
+     * @param s string to write
      * @exception DRDAProtocolException
      */
     private void writeVCMorVCS(String s)
@@ -8110,10 +8110,10 @@ class DRDAConnThread extends Thread {
      *                         Name of the Java class bound to the UDT. One of the above.
      *
      * @param rsmeta    resultset meta data
-     * @param pmeta        parameter meta data
-     * @param jdbcElemNum    column number we are returning (in case of result set), or,
-     *                    parameter number (in case of parameter)
-     * @param rtnOutput    whether this is for a result set    
+     * @param pmeta     parameter meta data
+     * @param jdbcElemNum   column number we are returning (in case of result set), or,
+     *                  parameter number (in case of parameter)
+     * @param rtnOutput whether this is for a result set
      *
      * @throws DRDAProtocolException
      * @throws SQLException
@@ -8260,15 +8260,15 @@ class DRDAConnThread extends Thread {
                     writer.writeBoolean( ((Boolean) val).booleanValue() );
                     break;
                 case DRDAConstants.DRDA_TYPE_NSMALL:
-                     // DB2 does not have a BOOLEAN java.sql.bit type,
+                    // DB2 does not have a BOOLEAN java.sql.bit type,
                     // so we need to send it as a small
-                     if (val instanceof Boolean)
-                     {
-                         writer.writeShort(((Boolean) val).booleanValue());
-                     }
+                    if (val instanceof Boolean)
+                    {
+                        writer.writeShort(((Boolean) val).booleanValue());
+                    }
                     else
                     {
-                         writer.writeShort(((Number) val).shortValue());
+                        writer.writeShort(((Number) val).shortValue());
                     }
                     break;
                 case  DRDAConstants.DRDA_TYPE_NINTEGER:
@@ -8487,7 +8487,7 @@ class DRDAConnThread extends Thread {
     }
     /**
      * Remove codepoint from required list
-      *
+     *
      * @param codePoint - code point to be removed
      */
     private void removeFromRequired(int codePoint)
@@ -8646,7 +8646,7 @@ class DRDAConnThread extends Thread {
      *
      * @param codePoint code point we have
      * @param reqCodePoint code point required at this time
-      *
+     *
      * @exception DRDAProtocolException
      */
     private void verifyRequiredObject(int codePoint, int reqCodePoint)
@@ -8662,7 +8662,7 @@ class DRDAConnThread extends Thread {
      *
      * @param codePoint code point we have
      * @param reqCodePoint code point required at this time
-      *
+     *
      * @exception DRDAProtocolException
      */
     private void verifyInOrderACCSEC_SECCHK(int codePoint, int reqCodePoint)
@@ -8681,7 +8681,7 @@ class DRDAConnThread extends Thread {
      * Database name given under code point doesn't match previous database names
      *
      * @param codePoint codepoint where the mismatch occurred
-      *
+     *
      * @exception DRDAProtocolException
      */
     private void rdbnamMismatch(int codePoint)
@@ -8729,7 +8729,7 @@ class DRDAConnThread extends Thread {
 
     /**
      * Handle Exceptions - write error protocol if appropriate and close session
-     *    or thread as appropriate
+     *  or thread as appropriate
      */
     private void handleException(Exception e)
     {
@@ -8902,8 +8902,8 @@ class DRDAConnThread extends Thread {
      * check that the given typdefnam is acceptable
      * 
      * @param typdefnam 
-      *
-      * @exception DRDAProtocolException
+     *
+     * @exception DRDAProtocolException
      */
     private void checkValidTypDefNam(String typdefnam)
         throws DRDAProtocolException
@@ -8920,10 +8920,10 @@ class DRDAConnThread extends Thread {
     /**
      * Check that the length is equal to the required length for this codepoint
      *
-     * @param codepoint    codepoint we are checking
+     * @param codepoint codepoint we are checking
      * @param reqlen    required length
      * 
-      * @exception DRDAProtocolException
+     * @exception DRDAProtocolException
      */
     private void checkLength(int codepoint, int reqlen)
         throws DRDAProtocolException
@@ -9075,13 +9075,13 @@ class DRDAConnThread extends Thread {
     /**
      * Check SQLWarning and write SQLCARD as needed.
      * 
-     * @param conn         connection to check
-     * @param stmt         statement to check
-     * @param rs         result set to check
-     * @param updateCount     update count to include in SQLCARD
-     * @param alwaysSend     whether always send SQLCARD regardless of
-     *                        the existance of warnings
-     * @param sendWarn     whether to send any warnings or not. 
+     * @param conn      connection to check
+     * @param stmt      statement to check
+     * @param rs        result set to check
+     * @param updateCount   update count to include in SQLCARD
+     * @param alwaysSend    whether always send SQLCARD regardless of
+     *                      the existance of warnings
+     * @param sendWarn  whether to send any warnings or not.
      *
      * @exception DRDAProtocolException
      */
@@ -9174,19 +9174,19 @@ class DRDAConnThread extends Thread {
      *  Validate SECMEC_USRSSBPWD (Strong Password Substitute) can be used as
      *  DRDA security mechanism.
      *
-     *    Here we check that the target server can support SECMEC_USRSSBPWD
-     *    security mechanism based on the environment, application
-     *    requester's identity (PRDID) and connection URL.
+     *  Here we check that the target server can support SECMEC_USRSSBPWD
+     *  security mechanism based on the environment, application
+     *  requester's identity (PRDID) and connection URL.
      *
-     *    IMPORTANT NOTE:
-     *    --------------
-     *    SECMEC_USRSSBPWD is ONLY supported by the target server if:
-     *        - current authentication provider is Derby BUILTIN or
-     *          NONE. (database / system level) (Phase I)
+     *  IMPORTANT NOTE:
+     *  --------------
+     *  SECMEC_USRSSBPWD is ONLY supported by the target server if:
+     *      - current authentication provider is Derby BUILTIN or
+     *        NONE. (database / system level) (Phase I)
      *      - database-level password must have been encrypted with the
      *        SHA-1 based authentication scheme
-     *        - Application requester is 'DNC' (Derby Network Client)
-     *          (Phase I)
+     *      - Application requester is 'DNC' (Derby Network Client)
+     *        (Phase I)
      *
      *  @return security check code - 0 if everything O.K.
      */

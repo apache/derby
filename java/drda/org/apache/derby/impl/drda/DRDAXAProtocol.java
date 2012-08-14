@@ -85,9 +85,9 @@ class DRDAXAProtocol {
             {
                 case CodePoint.XID:
                     xid = parseXID();
-                    break;                    
+                    break;
                 case CodePoint.XAFLAGS:
-                    xaflags = parseXAFlags();                    
+                    xaflags = parseXAFlags();
                     readXAFlags =true;
                     break;
                 case CodePoint.TIMEOUT:
@@ -140,7 +140,7 @@ class DRDAXAProtocol {
             case CodePoint.SYNCTYPE_MIGRATE:
                 // migrate to resync server sync type
                 connThread.codePointNotSupported(codePoint);                
-                break;            
+                break;
             case CodePoint.SYNCTYPE_REQ_COMMIT:
                 // request to commit sync type
                 commitTransaction(xid,xaflags);
@@ -166,7 +166,7 @@ class DRDAXAProtocol {
                 break;
             default:
                 connThread.invalidCodePoint(codePoint);
-         }
+        }
 
     }
 
@@ -186,7 +186,7 @@ class DRDAXAProtocol {
      *   CodePoint.SYNCTYPE_MIGRATED -> not supported
      *   CodePoint.SYNCTYPE_INDOUBT   -> XAResource.recover();
      * 
-     */     
+     */
     protected int  parseSYNCTYPE() throws DRDAProtocolException
     {
         return reader.readUnsignedByte();
@@ -311,7 +311,7 @@ class DRDAXAProtocol {
      *  Commit local transaction. Send SYNCCRD response.
      * 
      *  @throws DRDAProtocolException
-     */       
+     */
     private void commitLocalTransaction() throws DRDAProtocolException
     {
         int xaRetVal = XAResource.XA_OK;
@@ -459,7 +459,7 @@ class DRDAXAProtocol {
             xaRetVal = processXAException(xe);
         }
         writeSYNCCRD(CodePoint.SYNCTYPE_END_UOW,
-                     xaRetVal, null);        
+                     xaRetVal, null);
     }
 
 
@@ -482,11 +482,11 @@ class DRDAXAProtocol {
                                 xaRetVal); 
             }
         } catch (XAException xe)
-        {            
+        {
             xaRetVal = processXAException(xe);
         }
         writeSYNCCRD(CodePoint.SYNCTYPE_PREPARE,
-                     xaRetVal, null);        
+                     xaRetVal, null);
     }
 
     /**
@@ -511,7 +511,7 @@ class DRDAXAProtocol {
             xaRetVal = processXAException(xe);
         }
         writeSYNCCRD(CodePoint.SYNCTYPE_REQ_FORGET,
-                     xaRetVal, null);        
+                     xaRetVal, null);
     }
 
     // JCC doesn't send xaflags but always wants TMSTARTRSCAN.  
@@ -650,7 +650,7 @@ class DRDAXAProtocol {
                 
             default:
                 return "UNKNOWN SYNCTYPE";
-         }
+        }
     }
 
     /** 

@@ -21,9 +21,9 @@
 package org.apache.derby.impl.drda;
 
 // TBD:
-//     organize into separate kinds of code points; impose organizational scheme.
+//   organize into separate kinds of code points; impose organizational scheme.
 // TBD:
-//     reconsider the various SECCHKCD_xx constants, perhaps we should hardwire.
+//   reconsider the various SECCHKCD_xx constants, perhaps we should hardwire.
 
 class CodePoint
 {
@@ -271,10 +271,10 @@ class CodePoint
     // Output override
     static final int OUTOVR = 0x2415;
 
-      //Output override option
+    //Output override option
     static final int OUTOVROPT = 0x2147;
 
-      // Package Consistency Token
+    // Package Consistency Token
     static final int PKGCNSTKN = 0x210D;
 
     // Product Specific Data
@@ -727,9 +727,9 @@ class CodePoint
     static final int SVRCOD_SESDMG = 128;  // Session Damage Severity Code
     
     //---------------------- Security Mechanisms ---------------------------
-    static final int SECMEC_DCESEC = 1;        // Distributed Computing Environment Security
-    static final int SECMEC_USRIDPWD = 3;    // Userid and Password
-    static final int SECMEC_USRIDONL = 4;    // Userid only
+    static final int SECMEC_DCESEC = 1;     // Distributed Computing Environment Security
+    static final int SECMEC_USRIDPWD = 3;   // Userid and Password
+    static final int SECMEC_USRIDONL = 4;   // Userid only
     static final int SECMEC_USRIDNWPWD = 5;  // Userid, Password, and new Password
     static final int SECMEC_USRSBSPWD = 6;  // Userid with substitute password
     static final int SECMEC_USRENCPWD = 7;  // Userid with encrypted password
@@ -738,12 +738,12 @@ class CodePoint
     static final int SECMEC_EUSRIDNWPWD = 10;  // Encrpyted userid and password
 
     //---------------------Security Check Codes ---------------------------
-    static final int SECCHKCD_OK = 0;        // Security info correct and acceptable
-    static final int SECCHKCD_NOTSUPPORTED = 0x01;    // SECMEC value not supported
-    static final int SECCHKCD_SECTKNMISSING_OR_INVALID = 0x0E;    // SECTKN missing or invalid 
-    static final int SECCHKCD_PASSWORDMISSING = 0x10;    // Password missing  
-    static final int SECCHKCD_USERIDMISSING = 0x12;    // User Id missing  
-    static final int SECCHKCD_USERIDINVALID = 0x13;    // Userid invalid
+    static final int SECCHKCD_OK = 0;       // Security info correct and acceptable
+    static final int SECCHKCD_NOTSUPPORTED = 0x01;  // SECMEC value not supported
+    static final int SECCHKCD_SECTKNMISSING_OR_INVALID = 0x0E;  // SECTKN missing or invalid
+    static final int SECCHKCD_PASSWORDMISSING = 0x10;   // Password missing
+    static final int SECCHKCD_USERIDMISSING = 0x12; // User Id missing
+    static final int SECCHKCD_USERIDINVALID = 0x13; // Userid invalid
 
     //----------------------Type Definition Names we care about -----------
     static final String TYPDEFNAM_QTDSQLASC = "QTDSQLASC"; // ASCII
@@ -773,10 +773,10 @@ class CodePoint
     static final int MAXBLKEXT_DEFAULT = MAXBLKEXT_NONE;
 
     //-------------- QRYSCRORN - query scroll orientation values
-    static final int QRYSCRREL = 1;        // relative fetch
-    static final int QRYSCRABS = 2;        // absolute fetch
-    static final int QRYSCRAFT = 3;        // after last row
-    static final int QRYSCRBEF = 4;        // before first row
+    static final int QRYSCRREL = 1;     // relative fetch
+    static final int QRYSCRABS = 2;     // absolute fetch
+    static final int QRYSCRAFT = 3;     // after last row
+    static final int QRYSCRBEF = 4;     // before first row
 
     //---------------OUTOVROPT - output override option values
     static final int OUTOVRFRS = 1;     // Output Override allowed on first CNTQRY
@@ -866,16 +866,16 @@ class CodePoint
 
     protected static int [] MGR_CODEPOINTS = {
                                             AGENT,
-                                            CCSIDMGR,    
+                                            CCSIDMGR,
                                             CMNAPPC, 
-                                            CMNSYNCPT,    
-                                            CMNTCPIP,    
+                                            CMNSYNCPT,
+                                            CMNTCPIP,
                                             DICTIONARY,
                                             RDB,
-                                            RSYNCMGR,    
-                                            SECMGR,    
+                                            RSYNCMGR,
+                                            SECMGR,
                                             SQLAM,
-                                            SUPERVISOR,    
+                                            SUPERVISOR,
                                             SYNCPTMGR,
                                             UNICODEMGR,
                                             XAMGR

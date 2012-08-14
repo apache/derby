@@ -214,7 +214,7 @@ class DecryptionManager
       if (initVector.length < 8) { //shorter than 8 bytes, zero padded to 8 bytes
         System.arraycopy(initVector, 0, token, 0, initVector.length);
         for (int i=initVector.length; i<8; i++)
-          token[i] = 0;
+         token[i] = 0;
       }
       else {  //longer than 8 bytes, truncated to 8 bytes
         System.arraycopy(initVector, 0, token, 0, 8);
@@ -280,9 +280,9 @@ class DecryptionManager
       if (sharedSecret.length < 32) {
         int i;
         for (i=0; i<(32 - sharedSecret.length); i++)
-             newKey[i] = 0;
+            newKey[i] = 0;
         for (int j=i; j<sharedSecret.length; j++)
-              newKey[j] = sharedSecret[j-i];
+             newKey[j] = sharedSecret[j-i];
       }
 
       //The Data Encryption Standard (DES) is going to be used to encrypt userid
@@ -433,9 +433,9 @@ class DecryptionManager
         <BR>
         The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
 
-        @param    data    byte array
-        @param    offset    starting byte (zero based) to convert.
-        @param    length    number of bytes to convert.
+        @param  data    byte array
+        @param  offset  starting byte (zero based) to convert.
+        @param  length  number of bytes to convert.
 
         @return the String (with hexidecimal format) form of the byte array
     */
@@ -467,19 +467,19 @@ class DecryptionManager
         The character at <code>str.charAt(0)</code> is represented by the first two bytes 
         in the returned String.
 
-        @param    str string 
-        @param    offset    starting character (zero based) to convert.
-        @param    length    number of characters to convert.
+        @param  str string
+        @param  offset  starting character (zero based) to convert.
+        @param  length  number of characters to convert.
 
         @return the byte[]  (with hexidecimal format) form of the string (str) 
     */
     protected static byte[] toHexByte(String str, int offset, int length)
     {
-          byte[] data = new byte[(length - offset) * 2];
+        byte[] data = new byte[(length - offset) * 2];
         int end = offset+length;
 
         for (int i = offset; i < end; i++)
-         {
+        {
             char ch = str.charAt(i);
             int high_nibble = (ch & 0xf0) >>> 4;
             int low_nibble = (ch & 0x0f);

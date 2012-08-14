@@ -36,11 +36,11 @@ class AppRequester
 
     protected static final int UNKNOWN_CLIENT = 0;
 
-    protected static final int DNC_CLIENT = 3;        // derby net client 
+    protected static final int DNC_CLIENT = 3;      // derby net client
 
     private static final int [] MIN_MGR_LEVELS = {
                                             3, // AGENT - JCC comes in at 3
-                                            4, // CCSIDMGR    
+                                            4, // CCSIDMGR
                                             3, // CMNAPPC, 
                                             4, // CMNSYNCPT
                                             5, // CMNTCPIP
@@ -56,17 +56,17 @@ class AppRequester
                                             };
     
     // Application requester information
-    protected String    extnam;            // External Name - EXCSAT
-    protected String    srvnam;            // Server Name - EXCSAT
-    protected String     srvrlslv;        // Server Product Release Level - EXCSAT
-    protected String    srvclsnm;        // Server Class Name - EXCSAT
-    protected String    spvnam;            // Supervisor Name - EXCSAT
-    protected String    prdid;            // Product specific identifier - ACCRDB protected
-    private int[]        managerLevels = new int[CodePoint.MGR_CODEPOINTS.length];
+    protected String    extnam;         // External Name - EXCSAT
+    protected String    srvnam;         // Server Name - EXCSAT
+    protected String    srvrlslv;       // Server Product Release Level - EXCSAT
+    protected String    srvclsnm;       // Server Class Name - EXCSAT
+    protected String    spvnam;         // Supervisor Name - EXCSAT
+    protected String    prdid;          // Product specific identifier - ACCRDB protected
+    private int[]       managerLevels = new int[CodePoint.MGR_CODEPOINTS.length];
     private int         clientType;
-    protected int        versionLevel;
-    protected int        releaseLevel;
-    protected int        modifyLevel;
+    protected int       versionLevel;
+    protected int       releaseLevel;
+    protected int       modifyLevel;
     
 
     // constructor 
@@ -84,7 +84,7 @@ class AppRequester
     /**
      * get the Application requester manager level
      *
-     * @param manager    codepoint for manager we are looking for
+     * @param manager   codepoint for manager we are looking for
      *
      * @return manager level for that manager
      */
@@ -171,8 +171,8 @@ class AppRequester
      * not the CCSID requested, the value returned is FFFF
      * For now, we won't support the CCSIDMGR since JCC doesn't request it.
      *
-     * @param manager    codepoint of the manager
-     * @param managerLevel    level for that manager
+     * @param manager   codepoint of the manager
+     * @param managerLevel  level for that manager
      *
      */
     protected void setManagerLevel(int manager, int managerLevel)
@@ -192,7 +192,7 @@ class AppRequester
     /**
      * Check if the application requester is the same as this one
      *
-     * @param a    application requester to compare to
+     * @param a application requester to compare to
      * @return true if same false otherwise
      */
     protected boolean equals(AppRequester a)
@@ -230,7 +230,7 @@ class AppRequester
      * Check whether two objects are not equal when 1 of the objects could
      * be null
      *
-      * @param a    first object
+     * @param a first object
      * @param b second object
      * @return true if not equals false otherwise
      */

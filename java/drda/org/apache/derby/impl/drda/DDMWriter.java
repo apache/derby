@@ -85,14 +85,14 @@ class DDMWriter
     // DRDA connection thread for this writer
     private DRDAConnThread agent;
 
-    //    This Object tracks the location of the current
-    //    Dss header length bytes.    This is done so
-    //    the length bytes can be automatically
-    //    updated as information is added to this stream.
+    //  This Object tracks the location of the current
+    //  Dss header length bytes.    This is done so
+    //  the length bytes can be automatically
+    //  updated as information is added to this stream.
     private int dssLengthLocation;
 
     // Current correlation ID
-    private    int correlationID;
+    private int correlationID;
 
     // Next correlation ID
     private int nextCorrelationID;
@@ -254,20 +254,20 @@ class DDMWriter
      * the high-order bit to "1", per DDM spec.
      * This means:
      *
-     *    1. One or more continuation DSSes will immediately
-     *         follow the current (continued) DSS.
-     *    2. All continuation DSSes will have a 2-byte
-     *         continuation header, followed by data; in
-     *         other words, chaining state, correlation
-     *        id, dss format info, and code point will
-     *         NOT be included.  All of that info is 
-     *         present ONLY in the FIRST DSS in the
-     *        list of continued DSSes.
+     *  1. One or more continuation DSSes will immediately
+     *      follow the current (continued) DSS.
+     *  2. All continuation DSSes will have a 2-byte
+     *      continuation header, followed by data; in
+     *      other words, chaining state, correlation
+     *      id, dss format info, and code point will
+     *      NOT be included.  All of that info is
+     *      present ONLY in the FIRST DSS in the
+     *      list of continued DSSes.
      *
-     *    NOTE: A DSS can be a "continuation" DSS _and_
-     *     a "continued" DSS at the same time.  However,
-     *     the FIRST DSS to be continued canNOT be
-     *    a continuation DSS.
+     *  NOTE: A DSS can be a "continuation" DSS _and_
+     *  a "continued" DSS at the same time.  However,
+     *  the FIRST DSS to be continued canNOT be
+     *  a continuation DSS.
      */
     private void markDssAsContinued(boolean forLob)
     {
@@ -363,7 +363,7 @@ class DDMWriter
      */
     protected void endDdmAndDss ()
     {
-        endDdm();    // updates last DDM object
+        endDdm();   // updates last DDM object
         endDss();
     }
     /**
@@ -453,7 +453,7 @@ class DDMWriter
         int lengthLocation = markStack[--top];
         int length = buffer.position() - lengthLocation;
 
-        // determine if any extended length bytes are needed.    the value returned
+        // determine if any extended length bytes are needed.   the value returned
         // from calculateExtendedLengthByteCount is the number of extended length
         // bytes required. 0 indicates no exteneded length.
         int extendedLengthByteCount = calculateExtendedLengthByteCount (length);
@@ -485,7 +485,7 @@ class DDMWriter
 
             // the two byte length field before the codepoint contains the length
             // of itself, the length of the codepoint, and the number of bytes used
-            // to hold the extended length.    the 2 byte length field also has the first
+            // to hold the extended length. the 2 byte length field also has the first
             // bit on to indicate extended length bytes were used.
             length = extendedLengthByteCount + 4;
             length |= DssConstants.CONTINUATION_BIT;
@@ -527,7 +527,7 @@ class DDMWriter
     /**
      * Write byte
      *
-     * @param     value    byte to be written
+     * @param   value   byte to be written
      */
     protected void writeByte (int value)
     {
@@ -547,7 +547,7 @@ class DDMWriter
     /**
      * Write network short
      *
-     * @param     value    value to be written
+     * @param   value   value to be written
      */
     protected void writeNetworkShort (int value)
     {
@@ -558,7 +558,7 @@ class DDMWriter
     /**
      * Write network int
      *
-     * @param     value    value to be written
+     * @param   value   value to be written
      */
     protected void writeNetworkInt (int value)
     {
@@ -570,8 +570,8 @@ class DDMWriter
     /**
      * Write byte array
      *
-     * @param     buf    byte array to be written
-     * @param    length  - length to write
+     * @param   buf byte array to be written
+     * @param   length  - length to write
      */
     protected void writeBytes (byte[] buf, int length)
     {
@@ -583,9 +583,9 @@ class DDMWriter
     /**
      * Write byte array
      *
-     * @param     buf    byte array to be written
-     * @param    start  - starting position
-     * @param    length  - length to write
+     * @param   buf byte array to be written
+     * @param   start  - starting position
+     * @param   length  - length to write
      */
     protected void writeBytes (byte[] buf, int start, int length)
     {
@@ -604,7 +604,7 @@ class DDMWriter
     /**
      * Write byte array
      *
-     * @param     buf    byte array to be written
+     * @param   buf byte array to be written
      **/
     protected void writeBytes (byte[] buf)
     {
@@ -631,8 +631,8 @@ class DDMWriter
     /**
      * Write code point and 4 bytes
      *
-     * @param     codePoint - code point to write
-     * @param    value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
     void writeCodePoint4Bytes (int codePoint, int value)
     {
@@ -644,8 +644,8 @@ class DDMWriter
     /**
      * Write scalar 1 byte object includes length, codepoint and value
      *
-     * @param     codePoint - code point to write
-     * @param    value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
     void writeScalar1Byte (int codePoint, int value)
     {
@@ -658,8 +658,8 @@ class DDMWriter
     /**
      * Write scalar 2 byte object includes length, codepoint and value
      *
-     * @param     codePoint - code point to write
-     * @param    value  - value to write after code point
+     * @param   codePoint - code point to write
+     * @param   value  - value to write after code point
      */
     protected void writeScalar2Bytes (int codePoint, int value)
     {
@@ -748,7 +748,7 @@ class DDMWriter
     private void beginDss (boolean chainedToNextStructure,
                            int dssType)
     {
-        beginDss(dssType, false);    // false => don't ensure length.
+        beginDss(dssType, false);   // false => don't ensure length.
 
         // always turn on continuation flags... this is helpful for lobs...
         // these bytes will get rest if dss lengths are finalized.
@@ -841,7 +841,7 @@ class DDMWriter
                 try {
                 // Mark current DSS as continued, set its chaining state,
                 // then send the data across.
-                    markDssAsContinued(true);     // true => for lobs
+                    markDssAsContinued(true);   // true => for lobs
                     sendBytes (out,
                            false);
                 
@@ -881,8 +881,8 @@ class DDMWriter
     /**
      * Write scalar object header includes length and codepoint
      *
-     * @param     codePoint - code point to write
-     * @param    dataLength - length of object data
+     * @param   codePoint - code point to write
+     * @param   dataLength - length of object data
      */
     protected void writeScalarHeader (int codePoint, int dataLength)
     {
@@ -895,8 +895,8 @@ class DDMWriter
      * Write scalar string object includes length, codepoint and value
      * the string is converted into the appropriate codeset (EBCDIC)
      *
-     * @param     codePoint - code point to write
-     * @param    string - string to be written
+     * @param   codePoint - code point to write
+     * @param   string - string to be written
      */
     void writeScalarString (int codePoint, String string)
     {
@@ -911,9 +911,9 @@ class DDMWriter
      * Write padded scalar string object includes length, codepoint and value
      * the string is converted into the appropriate codeset (EBCDIC)
      *
-     * @param     codePoint - code point to write
-     * @param    string - string to be written
-     * @param     paddedLength - length to pad string to
+     * @param   codePoint - code point to write
+     * @param   string - string to be written
+     * @param   paddedLength - length to pad string to
      */
     void writeScalarPaddedString (int codePoint, String string, int paddedLength)
     {
@@ -946,10 +946,10 @@ class DDMWriter
     /**
      * Write padded scalar byte array object includes length, codepoint and value
      *
-     * @param     codePoint - code point to write
-     * @param    buf - byte array to be written
-     * @param     paddedLength - length to pad string to
-     * @param    padByte - byte to be used for padding
+     * @param   codePoint - code point to write
+     * @param   buf - byte array to be written
+     * @param   paddedLength - length to pad string to
+     * @param   padByte - byte to be used for padding
      */
     protected void writeScalarPaddedBytes (int codePoint, byte[] buf, int paddedLength, byte padByte)
     {
@@ -963,9 +963,9 @@ class DDMWriter
     /**
      * Write padded scalar byte array object  value
      *
-     * @param    buf - byte array to be written
-     * @param     paddedLength - length to pad string to
-     * @param    padByte - byte to be used for padding
+     * @param   buf - byte array to be written
+     * @param   paddedLength - length to pad string to
+     * @param   padByte - byte to be used for padding
      */
     protected void writeScalarPaddedBytes (byte[] buf, int paddedLength, byte padByte)
     {
@@ -977,8 +977,8 @@ class DDMWriter
     /**
      * Write scalar byte array object includes length, codepoint and value
      *
-     * @param     codePoint - code point to write
-     * @param    buf - byte array to be written
+     * @param   codePoint - code point to write
+     * @param   buf - byte array to be written
      */
     protected void writeScalarBytes (int codePoint, byte[] buf)
     {
@@ -995,7 +995,7 @@ class DDMWriter
     /**
      * Write platform short
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeShort (int v)
     {
@@ -1015,7 +1015,7 @@ class DDMWriter
     /**
      * Write platform int
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeInt (int v)
     {
@@ -1025,7 +1025,7 @@ class DDMWriter
     /**
      * Write platform long
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeLong (long v)
     {
@@ -1036,7 +1036,7 @@ class DDMWriter
     /**
      * Write platform float
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeFloat (float v)
     {
@@ -1046,7 +1046,7 @@ class DDMWriter
     /**
      * Write platform double
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeDouble (double v)
     {
@@ -1056,7 +1056,7 @@ class DDMWriter
     /**
      * Write platform boolean
      *
-     * @param     v    value to be written
+     * @param   v   value to be written
      */
     protected void writeBoolean (boolean v)
     {
@@ -1265,8 +1265,8 @@ class DDMWriter
     /**
      * Write pad bytes using spaceChar
      *
-     * @param   val    value to be written
-     * @param    length        length to be written
+     * @param   val value to be written
+     * @param   length      length to be written
      */
     protected void padBytes (byte val, int length)
     {
@@ -1323,24 +1323,24 @@ class DDMWriter
     /**
      * Write DSS header
      * DSS Header format is
-     *     2 bytes    - length
-     *    1 byte    - 'D0'    - indicates DDM data
-     *     1 byte    - DSS format
-     *        |---|---------|----------|
-     *        | 0    |    flags |    type     |
-     *        |---|---------|----------|
-     *        | 0 | 1    2    3 | 4 5 6 7     |
-     *        |---|---------|----------|
-     *        bit 0 - '0'
-     *        bit 1 - '0' - unchained, '1' - chained
-     *        bit 2 - '0'    - do not continue on error, '1' - continue on error
-     *        bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
-     *                        same correlator
-     *        type - 1 - Request DSS
-     *             - 2 - Reply DSS
-     *             - 3 - Object DSS
-     *             - 4 - Communications DSS
-     *             - 5 - Request DSS where no reply is expected
+     *  2 bytes - length
+     *  1 byte  - 'D0'  - indicates DDM data
+     *  1 byte  - DSS format
+     *      |---|---------|----------|
+     *      | 0 |   flags | type     |
+     *      |---|---------|----------|
+     *      | 0 | 1 2   3 | 4 5 6 7  |
+     *      |---|---------|----------|
+     *      bit 0 - '0'
+     *      bit 1 - '0' - unchained, '1' - chained
+     *      bit 2 - '0' - do not continue on error, '1' - continue on error
+     *      bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
+     *                      same correlator
+     *      type - 1 - Request DSS
+     *           - 2 - Reply DSS
+     *           - 3 - Object DSS
+     *           - 4 - Communications DSS
+     *           - 5 - Request DSS where no reply is expected
      */
     private void beginDss (int dssType, boolean ensureLen)
     {
@@ -1377,7 +1377,7 @@ class DDMWriter
      * Finish a DSS Layer A object.
      * The length of dss object will be calculated based on the difference between the
      * start of the dss, saved on the beginDss call, and the current
-     * offset into the buffer which marks the end of the data.    In the event
+     * offset into the buffer which marks the end of the data.  In the event
      * the length requires the use of continuation Dss headers, one for each 32k
      * chunk of data, the data will be shifted and the continuation headers
      * will be inserted with the correct values as needed.
@@ -1389,7 +1389,7 @@ class DDMWriter
 
         // calculate the total size of the dss and the number of bytes which would
         // require continuation dss headers.    The total length already includes the
-        // the 6 byte dss header located at the beginning of the dss.    It does not
+        // the 6 byte dss header located at the beginning of the dss.   It does not
         // include the length of any continuation headers.
         int totalSize = offset - dssLengthLocation;
         int bytesRequiringContDssHeader = totalSize - DssConstants.MAX_DSS_LENGTH;
@@ -1405,14 +1405,14 @@ class DDMWriter
             if (bytesRequiringContDssHeader % 32765 != 0)
                 contDssHeaderCount++;
 
-            // right now the code will shift to the right.    In the future we may want
+            // right now the code will shift to the right.  In the future we may want
             // to try something fancier to help reduce the copying (maybe keep
             // space in the beginning of the buffer??).
             // the offset points to the next available offset in the buffer to place
             // a piece of data, so the last dataByte is at offset -1.
             // various bytes will need to be shifted by different amounts
             // depending on how many dss headers to insert so the amount to shift
-            // will be calculated and adjusted as needed.    ensure there is enough room
+            // will be calculated and adjusted as needed.   ensure there is enough room
             // for all the conutinuation headers and adjust the offset to point to the
             // new end of the data.
             int dataByte = offset - 1;
@@ -1543,7 +1543,7 @@ class DDMWriter
      *
      * @param ddmSize - size of DDM command
      * @return minimum number of extended length bytes needed. 0 indicates no
-     *     extended length needed.
+     *  extended length needed.
      */
     private int calculateExtendedLengthByteCount (long ddmSize)
     {
@@ -1551,8 +1551,8 @@ class DDMWriter
             return 0;
         // JCC does not support 2 at this time, so we always send
         // at least 4
-        //        else if (ddmSize <= 0xffff)
-        //    return 2;
+        //      else if (ddmSize <= 0xffff)
+        //  return 2;
         else if (ddmSize <= 0xffffffffL)
             return 4;
         else if (ddmSize <= 0xffffffffffffL)
@@ -1621,19 +1621,19 @@ class DDMWriter
         String unscaledStr = b.unscaledValue().abs().toString();
 
         // get precision of the BigDecimal.
-          int bigPrecision = unscaledStr.length();
+        int bigPrecision = unscaledStr.length();
 
         if (bigPrecision > 31)
         {
             clearDdm ();
-              throw new SQLException ("The numeric literal \"" +
+            throw new SQLException ("The numeric literal \"" +
                              b.toString() +
                              "\" is not valid because its value is out of range.",
                              "42820",
                              -405);
         }
         int bigScale = b.scale();
-          int bigWholeIntegerLength = bigPrecision - bigScale;
+        int bigWholeIntegerLength = bigPrecision - bigScale;
         if ( (bigWholeIntegerLength > 0) && (!unscaledStr.equals ("0")) ) {
             // if whole integer part exists, check if overflow.
             int declaredWholeIntegerLength = declaredPrecision - declaredScale;
@@ -1896,7 +1896,7 @@ class DDMWriter
         // last remaining DSS had chaining, so we set "nextCorrelationID"
         // to be 1 greater than whatever the last remaining DSS had as
         // its correlation id.
-             nextCorrelationID =
+            nextCorrelationID =
                 (buffer.getShort(lastDSSBeforeMark + 4) & 0xFFFF) + 1;
         }
 

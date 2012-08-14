@@ -41,30 +41,30 @@ class Database
      * it is probably wise to keep dbName and shortDbName private and have 
      * accessors for them.
      */
-    private String dbName;            // database name 
+    private String dbName;          // database name
     private String shortDbName;       // database name without attributes
     String attrString="";               // attribute string
     protected int securityMechanism;    // Security mechanism
     protected String userId;            // User Id
-    protected String password;            // password
-    protected String decryptedUserId;    // Decrypted User id
-    protected String decryptedPassword;    // Decrypted password
+    protected String password;          // password
+    protected String decryptedUserId;   // Decrypted User id
+    protected String decryptedPassword; // Decrypted password
     protected byte[] passwordSubstitute;// password substitute - SECMEC_USRSSBPWD
-    protected boolean rdbAllowUpdates = true; // Database allows updates -default is true        
-    protected int    accessCount;        // Number of times we have tried to
+    protected boolean rdbAllowUpdates = true; // Database allows updates -default is true
+    protected int   accessCount;        // Number of times we have tried to
                                         // set up access to this database (only 1 
                                         // allowed)
     protected byte[] secTokenIn;        // Security token from app requester
-    protected byte[] secTokenOut;        // Security token sent to app requester
+    protected byte[] secTokenOut;       // Security token sent to app requester
     protected byte[] crrtkn;            // Correlation token
-    protected String typDefNam;            // Type definition name
+    protected String typDefNam;         // Type definition name
     protected int byteOrder;            //deduced from typDefNam, save String comparisons
-    protected int ccsidSBC;                // Single byte CCSID
-    protected int ccsidDBC;                // Double byte CCSID
-    protected int ccsidMBC;                // Mixed byte CCSID
-    protected String ccsidSBCEncoding;    // Encoding for single byte code page
-    protected String ccsidDBCEncoding;    // Encoding for double byte code page
-    protected String ccsidMBCEncoding;    // Encoding for mixed byte code page
+    protected int ccsidSBC;             // Single byte CCSID
+    protected int ccsidDBC;             // Double byte CCSID
+    protected int ccsidMBC;             // Mixed byte CCSID
+    protected String ccsidSBCEncoding;  // Encoding for single byte code page
+    protected String ccsidDBCEncoding;  // Encoding for double byte code page
+    protected String ccsidMBCEncoding;  // Encoding for mixed byte code page
     protected boolean RDBUPDRM_sent = false;    //We have sent that an update
                                             // occurred in this transaction
     protected boolean sendTRGDFTRT = false; // Send package target default value
@@ -301,7 +301,7 @@ class Database
 
     /**
      * Store DRDA prepared statement
-     * @param  stmt    DRDA prepared statement
+     * @param  stmt DRDA prepared statement
      */
     protected void storeStatement(DRDAStatement stmt) throws SQLException
     {
@@ -360,7 +360,7 @@ class Database
                 }
             
             }
-            if (defaultStatement != null)            
+            if (defaultStatement != null)
                 defaultStatement.close();
             if ((conn != null) && !conn.isClosed())
             {
@@ -369,7 +369,7 @@ class Database
                 {
                     conn.rollback();
                 }
-                conn.close();                    
+                conn.close();
             }
         }
         finally {
@@ -406,7 +406,7 @@ class Database
     }
 
     protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil)
-    {    
+    {
       
         String s = indent + 
         localLangUtil.getTextMessage("DRDA_RuntimeInfoDatabase.I") +

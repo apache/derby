@@ -200,17 +200,17 @@ public class NetworkServerControl{
      * a Network Server on a specified port and InetAddress with given
      * user credentials.
      *
-     * @param address      The IP address of the Network Server host.
-     *                       address cannot be null.
+     * @param address     The IP address of the Network Server host.
+     *                     address cannot be null.
      *
      * @param portNumber  port number server is to used. If <= 0,
-     *                      default port number is used
-     *                         
-     * @param userName      The user name for actions requiring authorization.
-     *                         
-     * @param password      The password for actions requiring authorization.
-     *                         
-     * @throws               Exception on error
+     *                    default port number is used
+     *
+     * @param userName    The user name for actions requiring authorization.
+     *
+     * @param password    The password for actions requiring authorization.
+     *
+     * @throws             Exception on error
      */
     public NetworkServerControl(InetAddress address, int portNumber,
                                 String userName, String password)
@@ -225,11 +225,11 @@ public class NetworkServerControl{
      * a Network Server on the default host and the default port with given
      * user credentials.
      *
-     * @param userName      The user name for actions requiring authorization.
-     *                         
-     * @param password      The password for actions requiring authorization.
-     *                         
-     * @throws               Exception on error
+     * @param userName    The user name for actions requiring authorization.
+     *
+     * @param password    The password for actions requiring authorization.
+     *
+     * @throws             Exception on error
      */
     public NetworkServerControl(String userName, String password)
             throws Exception
@@ -292,7 +292,7 @@ public class NetworkServerControl{
     /**
      * main routine for NetworkServerControl
      *
-     * @param args    array of arguments indicating command to be executed.
+     * @param args  array of arguments indicating command to be executed.
      * See class comments for more information
      */
     public static void main(String args[]) {
@@ -408,7 +408,7 @@ public class NetworkServerControl{
      * Shuts down the Network Server listening on the port and InetAddress
      * specified in the constructor for this NetworkServerControl object.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void shutdown()
         throws Exception
@@ -420,7 +420,7 @@ public class NetworkServerControl{
      * Check if Network Server is started
      * Excecutes and returns without error if the server has started
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void  ping() throws Exception
     {
@@ -433,7 +433,7 @@ public class NetworkServerControl{
      *
      * @param on true to turn tracing on, false to turn tracing off.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void trace(boolean on)
         throws Exception
@@ -449,7 +449,7 @@ public class NetworkServerControl{
      *                in the Derby error log if logConnections is on
      * @param on true to turn tracing on, false to turn tracing off.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void trace(int connNum, boolean on)
         throws Exception
@@ -464,7 +464,7 @@ public class NetworkServerControl{
      *
      * @param on            true to turn on, false to turn  off
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void logConnections(boolean on)
         throws Exception
@@ -479,7 +479,7 @@ public class NetworkServerControl{
      * @param traceDirectory    directory for trace files on machine 
      *                          where server is running
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void setTraceDirectory(String traceDirectory)
         throws Exception
@@ -492,7 +492,7 @@ public class NetworkServerControl{
      * Network Server. 
      *
      * @return sysinfo output
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public String getSysinfo()
         throws Exception
@@ -506,7 +506,7 @@ public class NetworkServerControl{
      * prepared statements, and memory usage for the running Network Server. 
      *
      * @return run time information
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public String getRuntimeInfo()
         throws Exception
@@ -520,11 +520,11 @@ public class NetworkServerControl{
      * of threads that will be used for JDBC client connections.   setTimeSlice
      * should also be set so that clients will yield appropriately.
      *
-     * @param max        maximum number of connection threads.
+     * @param max       maximum number of connection threads.
      *                  If <= 0, connection threads will be created when 
      *                  there are no free connection threads.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      * @see #setTimeSlice
      */
     public void setMaxThreads(int max) throws Exception
@@ -536,7 +536,7 @@ public class NetworkServerControl{
     /** Returns the current maxThreads setting for the running Network Server
      * 
      * @return maxThreads setting 
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      * @see #setMaxThreads
      */
     public int getMaxThreads() throws Exception
@@ -551,10 +551,10 @@ public class NetworkServerControl{
      * Set Network Server connection time slice parameter.  
      * This should be set and is only relevant if setMaxThreads > 0.
      *
-     * @param timeslice    number of milliseconds given to each session before yielding to 
-     *                        another session, if <=0, never yield. 
+     * @param timeslice number of milliseconds given to each session before yielding to
+     *                      another session, if <=0, never yield.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      * @see #setMaxThreads
      */
     public void setTimeSlice(int timeslice) throws Exception
@@ -581,7 +581,7 @@ public class NetworkServerControl{
      * Get current Network server properties
      *
      * @return Properties object containing Network server properties
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public Properties getCurrentProperties() throws Exception
     {

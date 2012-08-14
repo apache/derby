@@ -39,7 +39,7 @@ class DRDAProtocolExceptionInfo {
      * required field called SYNERRCD, and PRCCNVRM has a required field called
      * PRCCNVCD.
      */
-    protected int errorCodePoint;       
+    protected int errorCodePoint;
     
     // Severity Code
     protected int svrcod;

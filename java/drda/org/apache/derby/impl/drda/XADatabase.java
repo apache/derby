@@ -83,7 +83,7 @@ class XADatabase extends Database {
         // Get a new logical connection.
         // Contract between network server and embedded engine
         // is that any connection returned implements EngineConnection.
-         conn = (EngineConnection) xaConnection.getConnection();
+        conn = (EngineConnection) xaConnection.getConnection();
         // Client will always drive the commits so connection should
         // always be autocommit false on the server. DERBY-898/DERBY-899
         conn.setAutoCommit(false);

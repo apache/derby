@@ -33,18 +33,18 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
     three layers corresponding to the DDM three-tier architecture. For each layer,
     their is a DSS (Data Stream Structure) defined.
         Layer A     Communications management services
-        Layer B        Agent services
+        Layer B     Agent services
         Layer C     Data management services
     <P>
     At layer A are request, reply and data correlation, structure chaining,
     continuation or termination of chains when errors are detected, interleaving
     and multi-leaving request, reply, and data DSSs for multitasking environments.
     For TCP/IP, the format of the DDM envelope is
-        2 bytes        Length of the data
-        1 byte        'D0' - indicates DDM data
-        1 byte        DDM format byte(DSSFMT) - type of DSS(RQSDSS,RPYDSS), whether it is
+        2 bytes     Length of the data
+        1 byte      'D0' - indicates DDM data
+        1 byte      DDM format byte(DSSFMT) - type of DSS(RQSDSS,RPYDSS), whether it is
                     chained, information about the next chained DSS
-        2 bytes        request correlation identifier
+        2 bytes     request correlation identifier
     <P>
     The correlation identifier ties together a request, the request data and the
     reply.  In a chained DSS, each request has a correlation identifier which
@@ -53,8 +53,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
     <P>
     At layer B are object mapping, object validation and command routing.
     Layer B objects with data 5 bytes less than 32K bytes consist of
-        2 bytes        Length
-        2 bytes        Type of the object (code point)
+        2 bytes     Length
+        2 bytes     Type of the object (code point)
         Object data
     Object data is either SCALAR or COLLECTION data.  Scalar data consists of
     a string of bytes formatted as the class description of the object required.
@@ -62,24 +62,24 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
     are nested within the length/ code point of the collection.
     <P>
     Layer B objects with data >=32763 bytes long format is 
-        2 bytes        Length - length of class, length, and extended total length fields
+        2 bytes     Length - length of class, length, and extended total length fields
                     (high order bit set, indicating >=32763)
-        2 bytes        Type of the object (code point)
-        n bytes        Extended total length - length of the object
+        2 bytes     Type of the object (code point)
+        n bytes     Extended total length - length of the object
                     (n = Length - 4)
         Object data
     <P>
     At layer C are services each class of DDM object provides.
 
             |-------------------------------------------|
-    Layer C | Specific    |    Specific    |    Specific    |
-            | Commands    |    Replies        | Scalars and    |
+    Layer C | Specific  |   Specific    |   Specific    |
+            | Commands  |   Replies     | Scalars and   |
             | and their |  and their    | Collections   |
             |-------------------------------------------|----------------|
-    Layer B | Commands  |    Reply        | Scalars and   | Communications |
-            |            |   Messages    | Collections    |                |
+    Layer B | Commands  |    Reply      | Scalars and   | Communications |
+            |           |   Messages    | Collections   |                |
             |-----------|---------------|---------------|----------------|
-    Layer A |  RQSDSS   |   RPYDSS        | OBJDSS        | CMNDSS         |
+    Layer A |  RQSDSS   |   RPYDSS      | OBJDSS        | CMNDSS         |
             |           |               |               | Mapped Data    |
             |-----------|---------------|---------------|----------------|
             |                DDM Data Stream Structures                  |
@@ -191,7 +191,7 @@ class DDMReader
      * set null and 0 values
      */
     protected void initialize(DRDAConnThread agent, DssTrace dssTrace)
-      {
+    {
         this.agent = agent;
         this.utf8CcsidManager = new Utf8CcsidManager();
         this.ebcdicCcsidManager = new EbcdicCcsidManager();
@@ -233,20 +233,20 @@ class DDMReader
      *
      * @return true if next DSS has the same correlator as current DSS
      */
-      protected boolean isChainedWithSameID()
-      {
+    protected boolean isChainedWithSameID()
+    {
         return dssIsChainedWithSameID;
-      }
+    }
 
     /**
      * Next DSS has different correlator than current DSS
      *
      * @return true if next DSS has a different correlator than current DSS
      */
-      protected boolean isChainedWithDiffID()
-      {
+    protected boolean isChainedWithDiffID()
+    {
         return dssIsChainedWithDiffID;
-      }
+    }
 
     /**
      * Length of current DDM object
@@ -305,25 +305,25 @@ class DDMReader
     /**
      * Read DSS header
      * DSS Header format is 
-     *     2 bytes    - length
-     *    1 byte    - 'D0'    - indicates DDM data
-     *     1 byte    - DSS format 
-     *        |---|---------|----------|
-     *        | 0    |  flags  |  type    |
-     *        |---|---------|----------|
-     *        | 0 | 1  2  3 | 4 5 6 7  |
-     *        |---|---------|----------|
-     *        bit 0 - '0'
-     *        bit 1 - '0' - unchained, '1' - chained
-     *        bit 2 - '0'    - do not continue on error, '1' - continue on error
-     *        bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
-     *                        same correlator
-     *        type - 1 - Request DSS
-     *             - 2 - Reply DSS
-     *             - 3 - Object DSS
-     *             - 4 - Communications DSS
-     *             - 5 - Request DSS where no reply is expected
-     *    2 bytes - request correlation id
+     *  2 bytes - length
+     *  1 byte  - 'D0'  - indicates DDM data
+     *  1 byte  - DSS format
+     *      |---|---------|----------|
+     *      | 0 |  flags  |  type    |
+     *      |---|---------|----------|
+     *      | 0 | 1  2  3 | 4 5 6 7  |
+     *      |---|---------|----------|
+     *      bit 0 - '0'
+     *      bit 1 - '0' - unchained, '1' - chained
+     *      bit 2 - '0' - do not continue on error, '1' - continue on error
+     *      bit 3 - '0' - next DSS has different correlator, '1' - next DSS has
+     *                      same correlator
+     *      type - 1 - Request DSS
+     *           - 2 - Reply DSS
+     *           - 3 - Object DSS
+     *           - 4 - Communications DSS
+     *           - 5 - Request DSS where no reply is expected
+     *  2 bytes - request correlation id
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -371,7 +371,7 @@ class DDMReader
         // Determine if the current DSS is chained with the
         // next DSS, with the same or different request ID.
         if ((gdsFormatter & DssConstants.DSSCHAIN) == DssConstants.DSSCHAIN) 
-        {    // on indicates structure chained to next structure
+        {   // on indicates structure chained to next structure
             if ((gdsFormatter & DssConstants.DSSCHAIN_SAME_ID) 
                     == DssConstants.DSSCHAIN_SAME_ID) 
             {
@@ -393,7 +393,7 @@ class DDMReader
         {
             // chaining bit not b'1', make sure DSSFMT same id not b'1'
             if ((gdsFormatter & DssConstants.DSSCHAIN_SAME_ID) 
-                    == DssConstants.DSSCHAIN_SAME_ID)    
+                    == DssConstants.DSSCHAIN_SAME_ID)
             {  // Next DSS can not have same correlator
                 agent.throwSyntaxrm(CodePoint.SYNERRCD_CHAIN_OFF_SAME_NEXT_CORRELATOR,
                                    DRDAProtocolException.NO_CODPNT_ARG);
@@ -478,7 +478,7 @@ class DDMReader
         // Determine if the current DSS is chained with the
         // next DSS, with the same or different request ID.
         if ((gdsFormatter & DssConstants.DSSCHAIN) == DssConstants.DSSCHAIN) 
-        {    // on indicates structure chained to next structure
+        {   // on indicates structure chained to next structure
             if ((gdsFormatter & DssConstants.DSSCHAIN_SAME_ID) 
                     == DssConstants.DSSCHAIN_SAME_ID) 
             {
@@ -591,7 +591,7 @@ class DDMReader
                                DRDAProtocolException.NO_CODPNT_ARG);
         }
 
-            // adjust the lengths here.    this is a special case since the
+            // adjust the lengths here. this is a special case since the
             // extended length bytes do not include their own length.
             for (int i = 0; i <= topDdmCollectionStack; i++) {
                 ddmCollectionLenStack[i] -= adjustSize;
@@ -628,9 +628,9 @@ class DDMReader
     }
 
     /**
-     *     Get the next CodePoint from a collection
-     *     @return    NO_CODEPOINT if collection stack is empty or remaining length is
-     *        0; otherwise,  read length and code point
+     *  Get the next CodePoint from a collection
+     *  @return NO_CODEPOINT if collection stack is empty or remaining length is
+     *      0; otherwise,  read length and code point
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -656,9 +656,9 @@ class DDMReader
     }
     /**
      * Get the next CodePoint from a collection and check that it matches the specified
-     *     CodePoint
-     * @param    codePointCheck    - codePoint to check against
-     * @return    codePoint
+     *  CodePoint
+     * @param   codePointCheck  - codePoint to check against
+     * @return  codePoint
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -678,7 +678,7 @@ class DDMReader
 
     /**
      * Read byte value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -700,7 +700,7 @@ class DDMReader
 
     /**
      * Read network short value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -713,7 +713,7 @@ class DDMReader
 
     /**
      * Read signed network short value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -725,7 +725,7 @@ class DDMReader
     }
     /**
      * Read platform short value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -741,7 +741,7 @@ class DDMReader
 
     /**
      * Read network int value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -756,7 +756,7 @@ class DDMReader
 
     /**
      * Read platform int value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -772,7 +772,7 @@ class DDMReader
 
     /**
      * Read network long value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -793,7 +793,7 @@ class DDMReader
     
     /**
      * Read network six byte value and put it in a long v
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -812,7 +812,7 @@ class DDMReader
 
     /**
      * Read platform long value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -828,7 +828,7 @@ class DDMReader
 
     /**
      * Read platform float value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -839,7 +839,7 @@ class DDMReader
 
     /**
      * Read platform double value
-     * @return    value
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -850,9 +850,9 @@ class DDMReader
 
     /**
      * Read a BigDecimal value
-     * @param    precision of the BigDecimal
-     * @param    scale of the BigDecimal
-     * @return    value
+     * @param   precision of the BigDecimal
+     * @param   scale of the BigDecimal
+     * @return  value
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -1027,7 +1027,7 @@ class DDMReader
      */
     ByteArrayInputStream readLOBContinuationStream ()
         throws IOException
-    {        
+    {
         if ( SanityManager.DEBUG ) {
             SanityManager.ASSERT( doingLayerBStreaming );
         }
@@ -1048,7 +1048,7 @@ class DDMReader
      */
     ByteArrayInputStream readLOBContinuationStream (final long desiredLength)
         throws IOException
-    {        
+    {
         try {
             return readLOBChunk(true, desiredLength);
         } catch (DRDAProtocolException e) {
@@ -1071,8 +1071,8 @@ class DDMReader
     private ByteArrayInputStream readLOBChunk
         (final boolean readHeader, final long desiredLength)
         throws DRDAProtocolException
-    {        
-        if (readHeader) {            
+    {
+        if (readHeader) {
             readDSSContinuationHeader();
         }
         
@@ -1220,11 +1220,11 @@ class DDMReader
    /**
     * Convert a range of packed nybbles (up to 9 digits without overflow) to an int.
     * Note that for performance purpose, it does not do array-out-of-bound checking.
-    * @param buffer            buffer to read from
-    * @param offset            offset in the buffer
+    * @param buffer         buffer to read from
+    * @param offset         offset in the buffer
     * @param startNybble        start nybble
     * @param numberOfNybbles    number of nybbles
-    * @return    an int value
+    * @return   an int value
     */
     private int packedNybblesToInt (byte[] buffer,
                                          int offset,
@@ -1259,9 +1259,9 @@ class DDMReader
      * Note that for performance purpose, it does not do array-out-of-bound checking.
      * @param buffer        buffer to read from
      * @param offset        offset in the buffer
-     * @param startNybble        start nybble
-     * @param numberOfNybbles    number of nybbles
-     * @return    an long value
+     * @param startNybble       start nybble
+     * @param numberOfNybbles   number of nybbles
+     * @return  an long value
      */
     private long packedNybblesToLong (byte[] buffer,
                                            int offset,
@@ -1288,13 +1288,13 @@ class DDMReader
         value = value*10 + ((buffer[offset+i] & 0xF0) >>> 4);
       }
 
-       return value;
+      return value;
     }
 
     /**
      * Compute the int array of magnitude from input value segments.
-     * @param    input value segments
-     * @return    array of int magnitudes
+     * @param   input value segments
+     * @return  array of int magnitudes
      */
     private int[] computeMagnitude(int[] input)
     {
@@ -1533,7 +1533,7 @@ class DDMReader
     /**
      * Convert EBCDIC byte array to unicode string
      *
-     * @param     buf    - byte array
+     * @param   buf - byte array
      * @return string
      */
     protected String convertBytes(byte[] buf)
@@ -1600,7 +1600,7 @@ class DDMReader
      *
      * @param desiredDataSize - amount of data we need
      *
-     * @exception    DRDAProtocolException
+     * @exception   DRDAProtocolException
      */
     private void ensureALayerDataInBuffer (int desiredDataSize) 
         throws DRDAProtocolException
@@ -1619,7 +1619,7 @@ class DDMReader
      * The data will be in the buffer after this method is called.
      *
      * @param desiredDataSize - amount of data we need
-     * @param adjustLen    - whether to adjust the remaining lengths
+     * @param adjustLen - whether to adjust the remaining lengths
      *
      * @exception DRDAProtocolException if a protocol error is detected
      */
@@ -1648,7 +1648,7 @@ class DDMReader
      *
      * @param continueDssHeaderCount - amount of data we need
      *
-     * @exception    throws DRDAProtocolException
+     * @exception   throws DRDAProtocolException
      */
     private void compressBLayerData (int continueDssHeaderCount) 
         throws DRDAProtocolException
@@ -1675,7 +1675,7 @@ class DDMReader
 
         // for each of the DSS headers to remove,
         // read out the continuation header and increment the DSS length by the
-        // size of the continuation bytes,    then shift the continuation data as needed.
+        // size of the continuation bytes,  then shift the continuation data as needed.
         int shiftSize = 0;
         int bytesToShift = 0;
         int continueHeaderLength = 0;
@@ -1841,7 +1841,7 @@ class DDMReader
 
     /**
      * This method will attempt to read a minimum number of bytes
-     * from the underlying stream.    This method will keep trying to
+     * from the underlying stream.  This method will keep trying to
      * read bytes until it has obtained at least the minimum number.
      * @param minimumBytesNeeded - minimum required bytes
      *

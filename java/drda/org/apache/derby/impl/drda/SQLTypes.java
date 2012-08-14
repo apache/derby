@@ -179,7 +179,7 @@ class SQLTypes {
 
           case java.sql.Types.VARCHAR:
           case java.sql.Types.VARBINARY:
-              return  DRDAConstants.DB2_SQLTYPE_VARCHAR + nullAddVal;              
+              return  DRDAConstants.DB2_SQLTYPE_VARCHAR + nullAddVal;
           case java.sql.Types.LONGVARBINARY:
               return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
           case java.sql.Types.JAVA_OBJECT:

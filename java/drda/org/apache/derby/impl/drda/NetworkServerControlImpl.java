@@ -156,7 +156,7 @@ public final class NetworkServerControlImpl {
     private final static int MIN_TIMESLICE = -1;
     private final static int USE_DEFAULT = -1;
     private final static int DEFAULT_MAXTHREADS = 0; //for now create whenever needed
-    private final static int DEFAULT_TIMESLICE = 0;    //for now never yield
+    private final static int DEFAULT_TIMESLICE = 0; //for now never yield
 
     private final static String DEFAULT_HOST = "localhost";
     private final static String DRDA_MSG_PREFIX = "DRDA_";
@@ -196,7 +196,7 @@ public final class NetworkServerControlImpl {
     // Application Server manager levels - this needs to be in sync
     // with CodePoint.MGR_CODEPOINTS
     protected final static int [] MGR_LEVELS = { 7, // AGENT
-                                                 4,    // CCSID Manager
+                                                 4, // CCSID Manager
                                                  0, // CNMAPPC not implemented
                                                  0, // CMNSYNCPT not implemented
                                                  5, // CMNTCPIP
@@ -234,7 +234,7 @@ public final class NetworkServerControlImpl {
     private String bootPasswordArg;
     private String encAlgArg;
     private String encPrvArg;
-    private String hostArg = DEFAULT_HOST;    
+    private String hostArg = DEFAULT_HOST;
     private InetAddress hostAddress;
     private int sessionArg;
     private boolean unsecureArg;
@@ -244,40 +244,40 @@ public final class NetworkServerControlImpl {
 
     // reply buffer
     private byte [] replyBuffer;    
-    private int replyBufferCount;    //length of reply
-    private int replyBufferPos;        //current position in reply
+    private int replyBufferCount;   //length of reply
+    private int replyBufferPos;     //current position in reply
 
     //
     // server configuration
     //
     // static values - set at start can't be changed once server has started
-    private int    portNumber = NetworkServerControl.DEFAULT_PORTNUMBER;    // port server listens to
+    private int portNumber = NetworkServerControl.DEFAULT_PORTNUMBER;   // port server listens to
 
     // configurable values
-    private String traceDirectory;        // directory to place trace files in
+    private String traceDirectory;      // directory to place trace files in
     private Object traceDirectorySync = new Object();// object to use for syncing
-    private boolean traceAll;            // trace all sessions
-    private Object traceAllSync = new Object();    // object to use for syncing reading
+    private boolean traceAll;           // trace all sessions
+    private Object traceAllSync = new Object(); // object to use for syncing reading
                                         // and changing trace all
-    private Object serverStartSync = new Object();    // for syncing start of server.
-    private boolean logConnections;        // log connects
+    private Object serverStartSync = new Object();  // for syncing start of server.
+    private boolean logConnections;     // log connects
     private Object logConnectionsSync = new Object(); // object to use for syncing 
                                         // logConnections value
-    private int minThreads;                // default minimum number of connection threads
-    private int maxThreads;                // default maximum number of connection threads
+    private int minThreads;             // default minimum number of connection threads
+    private int maxThreads;             // default maximum number of connection threads
     private Object threadsSync = new Object(); // object to use for syncing reading
                                         // and changing default min and max threads
-    private int timeSlice;                // default time slice of a session to a thread
+    private int timeSlice;              // default time slice of a session to a thread
     private Object timeSliceSync = new Object();// object to use for syncing reading
                                         // and changing timeSlice
 
     private boolean keepAlive = true;   // keepAlive value for client socket 
     private int minPoolSize;            //minimum pool size for pooled connections
     private int maxPoolSize;            //maximum pool size for pooled connections
-    private Object poolSync = new Object();    // object to use for syning reading
+    private Object poolSync = new Object(); // object to use for syning reading
 
     protected boolean debugOutput = false;
-    private boolean cleanupOnStart = false;    // Should we clean up when starting the server?
+    private boolean cleanupOnStart = false; // Should we clean up when starting the server?
     private boolean restartFlag = false;
 
     protected final static int INVALID_OR_NOTSET_SECURITYMECHANISM = -1; 
@@ -518,7 +518,7 @@ public final class NetworkServerControlImpl {
      * Set the output stream for console messages
      * If this is set to null, no messages will be written to the console
      *
-     * @param outWriter    output stream for console messages
+     * @param outWriter output stream for console messages
      */
     public void setLogWriter(PrintWriter outWriter)
     {
@@ -538,7 +538,7 @@ public final class NetworkServerControlImpl {
      * Write an error message to console output stream
      * and throw an exception for this error
      *
-     * @param msg    error message
+     * @param msg   error message
      * @exception Exception
      */
     public void consoleError(String msg)
@@ -552,7 +552,7 @@ public final class NetworkServerControlImpl {
      * Write an exception to console output stream,
      * but only if debugOutput is true.
      *
-     * @param e    exception 
+     * @param e exception
      */
     public void consoleExceptionPrint(Exception e)
     {
@@ -566,7 +566,7 @@ public final class NetworkServerControlImpl {
      * Write an exception (with trace) to console
      * output stream.
      *
-     * @param e    exception 
+     * @param e exception
      */
     public void consoleExceptionPrintTrace(Throwable e)
     {
@@ -598,7 +598,7 @@ public final class NetworkServerControlImpl {
     /**
      * Write a message to console output stream
      *
-     * @param msg    message
+     * @param msg   message
      * @param printTimeStamp Whether to prepend a timestamp to the message or not
      */
     public void consoleMessage(String msg, boolean printTimeStamp)
@@ -639,8 +639,8 @@ public final class NetworkServerControlImpl {
      * @param consoleWriter   PrintWriter to which server console will be 
      *                        output. Null will disable console output.
      *
-     *           
-     * @exception Exception    throws an exception if an error occurs
+     *
+     * @exception Exception throws an exception if an error occurs
      */
     public void start(PrintWriter consoleWriter)
         throws Exception
@@ -700,8 +700,8 @@ public final class NetworkServerControlImpl {
      * @param consoleWriter   PrintWriter to which server console will be 
      *                        output. Null will disable console output.
      *
-     *           
-     * @exception Exception    throws an exception if an error occurs
+     *
+     * @exception Exception throws an exception if an error occurs
      */
     public void blockingStart(PrintWriter consoleWriter)
         throws Exception
@@ -830,39 +830,39 @@ public final class NetworkServerControlImpl {
                 consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
             }
             
-             // Close out the sessions
-             synchronized(sessionTable) {
-                 for (Session session : sessionTable.values())
-                 {    
-                     try {
-                         session.close();
-                     } catch (Exception exception) {
-                         consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
-                     }
-                 }
-             }
+            // Close out the sessions
+            synchronized(sessionTable) {
+                for (Session session : sessionTable.values())
+                {
+                    try {
+                        session.close();
+                    } catch (Exception exception) {
+                        consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+                    }
+                }
+            }
 
             synchronized (threadList)
             {
-                 //interupt any connection threads still active
-                 for (final DRDAConnThread threadi : threadList)
-                 {
-                     try {
-                          threadi.close();
-                         AccessController.doPrivileged(
+                //interupt any connection threads still active
+                for (final DRDAConnThread threadi : threadList)
+                {
+                    try {
+                        threadi.close();
+                        AccessController.doPrivileged(
                                 new PrivilegedAction<Void>() {
                                     public Void run() {
                                         threadi.interrupt();
                                         return null;
                                     }
                                 });
-                     } catch (Exception exception) {
-                         consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
-                     }
-                 }
-                 threadList.clear();
+                    } catch (Exception exception) {
+                        consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+                    }
+                }
+                threadList.clear();
             }
-               
+
             // close the listener socket
             try{
                serverSocket.close();
@@ -877,7 +877,7 @@ public final class NetworkServerControlImpl {
             try{
                 synchronized (runQueue) {
                     runQueue.notifyAll();
-                }    
+                }
             } catch (Exception exception) {
                 consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
             }
@@ -930,7 +930,7 @@ public final class NetworkServerControlImpl {
                 //If the console printing is not available,  then we have
                 //a simple stack trace print below to atleast print some
                 //exception info
-                consolePrintAndIgnore("DRDA_UnexpectedException.S", ex, true);                
+                consolePrintAndIgnore("DRDA_UnexpectedException.S", ex, true);
             } catch (Exception e) {}
             ex.printStackTrace();
         }
@@ -944,7 +944,7 @@ public final class NetworkServerControlImpl {
         try {
             consolePropertyMessage(msgProp, true);
         } catch (Exception ce) {} 
-        consoleExceptionPrintTrace(e);        
+        consoleExceptionPrintTrace(e);
     }
     
     /** 
@@ -1019,7 +1019,7 @@ public final class NetworkServerControlImpl {
     /**
      * Shutdown a network server
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void shutdown()
         throws Exception
@@ -1095,7 +1095,7 @@ public final class NetworkServerControlImpl {
             }
         } finally {
             closeSocket();
-        }        
+        }
         
         if (ntry == SHUTDOWN_CHECK_ATTEMPTS)
             consolePropertyMessage("DRDA_ShutdownError.S", new String [] {
@@ -1255,7 +1255,7 @@ public final class NetworkServerControlImpl {
      *
      * @param on            true to turn tracing on, false to turn tracing off
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void trace(boolean on)
         throws Exception
@@ -1266,10 +1266,10 @@ public final class NetworkServerControlImpl {
     /**
      * Turn tracing on or off for one session or all sessions
      *
-     * @param connNum    the connNum of the session, 0 if all sessions
+     * @param connNum   the connNum of the session, 0 if all sessions
      * @param on            true to turn tracing on, false to turn tracing off
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void trace(int connNum, boolean on)
         throws Exception
@@ -1293,7 +1293,7 @@ public final class NetworkServerControlImpl {
      *
      * @param on            true to print tracing on, false to print tracing off
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void consoleTraceMessage(int connNum, boolean on)
         throws Exception
@@ -1324,7 +1324,7 @@ public final class NetworkServerControlImpl {
      *
      * @param on            true to turn on, false to turn  off
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void logConnections(boolean on)
         throws Exception
@@ -1337,7 +1337,7 @@ public final class NetworkServerControlImpl {
             readResult();
         } finally {
             closeSocket();
-        }        
+        }
     }
 
     /**
@@ -1354,7 +1354,7 @@ public final class NetworkServerControlImpl {
             readResult();
         } finally {
             closeSocket();
-        }        
+        }
         
     }
 
@@ -1405,11 +1405,11 @@ public final class NetworkServerControlImpl {
     /**
      * Connect to  network server and set connection maxthread parameter
      *
-     * @param max        maximum number of connections, if 0, connections 
-     *                        created when no free connection available
-     *                        if -1, use default
+     * @param max       maximum number of connections, if 0, connections
+     *                      created when no free connection available
+     *                      if -1, use default
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void netSetMaxThreads(int max) throws Exception
     {
@@ -1424,17 +1424,17 @@ public final class NetworkServerControlImpl {
                     String.valueOf(newval));
         } finally {
             closeSocket();
-        }        
+        }
         
     }
 
     /**
      * Set network server connection timeslice parameter
      *
-     * @param timeslice    amount of time given to each session before yielding to 
-     *                        another session, if 0, never yield. if -1, use default.
+     * @param timeslice amount of time given to each session before yielding to
+     *                      another session, if 0, never yield. if -1, use default.
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public void netSetTimeSlice(int timeslice)
         throws Exception
@@ -1457,7 +1457,7 @@ public final class NetworkServerControlImpl {
      * Get current properties
      *
      * @return Properties object containing properties
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     public Properties getCurrentProperties() 
         throws Exception
@@ -1478,7 +1478,7 @@ public final class NetworkServerControlImpl {
             return p;
         } finally {
             closeSocket();
-        }        
+        }
     }
 
     /**
@@ -1513,123 +1513,123 @@ public final class NetworkServerControlImpl {
     }
 
     /**
-     *     processCommands reads and processes NetworkServerControlImpl commands sent
-     *     to the network server over the socket.  The protocol used is
-     *         4 bytes     - String CMD:
-     *         2 bytes        - Protocol version
-     *        1 byte        - length of locale (0 for default)
-     *            n bytes - locale
-     *        1 byte        - length of codeset (0 for default)
-     *            n bytes - codeset
-     *         1 byte        - command
-     *         n bytes        - parameters for the command
-     *     The server returns
-     *        4 bytes        - String RPY:
-     *    for most commands
-     *        1 byte        - command result, 0 - OK, 1 - warning, 2 - error
-     *     if warning or error
-     *        1 bytes        - length of message key
-     *        n bytes        - message key
-     *        1 byte        - number of parameters to message
-     *        {2 bytes        - length of parameter
-     *        n bytes        - parameter} for each parameter
+     *  processCommands reads and processes NetworkServerControlImpl commands sent
+     *  to the network server over the socket.  The protocol used is
+     *      4 bytes     - String CMD:
+     *      2 bytes     - Protocol version
+     *      1 byte      - length of locale (0 for default)
+     *          n bytes - locale
+     *      1 byte      - length of codeset (0 for default)
+     *          n bytes - codeset
+     *      1 byte      - command
+     *      n bytes     - parameters for the command
+     *  The server returns
+     *      4 bytes     - String RPY:
+     *  for most commands
+     *      1 byte      - command result, 0 - OK, 1 - warning, 2 - error
+     *   if warning or error
+     *      1 bytes     - length of message key
+     *      n bytes     - message key
+     *      1 byte      - number of parameters to message
+     *      {2 bytes        - length of parameter
+     *      n bytes     - parameter} for each parameter
      *  for sysinfo
-     *        1 byte        - command result, 0 - OK, 1 - warning, 2 - error
+     *      1 byte      - command result, 0 - OK, 1 - warning, 2 - error
      *   if OK 
-     *        2 bytes        - length of sysinfo
-     *        n bytes        - sysinfo
-     *        
-     *         
-     *     Note, the 3rd byte of the command must not be 'D0' to distinquish it 
-     *    from DSS structures.
-     *     The protocol for the parameters for each command follows:
+     *      2 bytes     - length of sysinfo
+     *      n bytes     - sysinfo
      *
-     *     Command: trace <connection id> {on | off}
-     *     Protocol:
-     *         4 bytes        - connection id - connection id of 0 means all sessions
-     *         1 byte        - 0 off, 1 on
+     *
+     *  Note, the 3rd byte of the command must not be 'D0' to distinquish it
+     *  from DSS structures.
+     *  The protocol for the parameters for each command follows:
+     *
+     *  Command: trace <connection id> {on | off}
+     *  Protocol:
+     *      4 bytes     - connection id - connection id of 0 means all sessions
+     *      1 byte      - 0 off, 1 on
      * 
-     *     Command: logConnections {on | off}
-     *     Protocol:
-     *         1 byte        - 0 off, 1 on
+     *  Command: logConnections {on | off}
+     *  Protocol:
+     *      1 byte      - 0 off, 1 on
      * 
-     *    Command: shutdown
-     *        // DERBY-2109: transmit user credentials for System Privileges check
-     *        2 bytes        - length of user name
-     *        n bytes        - user name
-     *        2 bytes        - length of password
-     *        n bytes        - password
+     *  Command: shutdown
+     *      // DERBY-2109: transmit user credentials for System Privileges check
+     *      2 bytes     - length of user name
+     *      n bytes     - user name
+     *      2 bytes     - length of password
+     *      n bytes     - password
      * 
-     *     Command: sysinfo
-     *     No parameters
+     *  Command: sysinfo
+     *  No parameters
      * 
-     *     Command: dbstart
-     *     Protocol:
-     *         2 bytes        - length of database name
-     *         n bytes        - database name
-     *         2 bytes        - length of boot password
-     *         n bytes        - boot password 
-     *         2 bytes        - length of encryption algorithm
-     *         n bytes        - encryption algorithm
-     *         2 bytes        - length of encryption provider
-     *         n bytes        - encryption provider
-     *         2 bytes        - length of user name
-     *         n bytes        - user name
-     *         2 bytes        - length of password
-     *         n bytes        - password
+     *  Command: dbstart
+     *  Protocol:
+     *      2 bytes     - length of database name
+     *      n bytes     - database name
+     *      2 bytes     - length of boot password
+     *      n bytes     - boot password
+     *      2 bytes     - length of encryption algorithm
+     *      n bytes     - encryption algorithm
+     *      2 bytes     - length of encryption provider
+     *      n bytes     - encryption provider
+     *      2 bytes     - length of user name
+     *      n bytes     - user name
+     *      2 bytes     - length of password
+     *      n bytes     - password
      *
-     *     Command: dbshutdown
-     *     Protocol:
-     *         2 bytes        - length of database name
-     *         n bytes        - database name
-     *         2 bytes        - length of user name
-     *         n bytes        - user name
-     *         2 bytes        - length of password
-     *         n bytes        - password
+     *  Command: dbshutdown
+     *  Protocol:
+     *      2 bytes     - length of database name
+     *      n bytes     - database name
+     *      2 bytes     - length of user name
+     *      n bytes     - user name
+     *      2 bytes     - length of password
+     *      n bytes     - password
      *
-     *     Command: connpool
-     *     Protocol:
-     *         2 bytes        - length of database name, if 0, default for all databases
-     *                        is set
-     *         n bytes        - database name
-     *        2 bytes        - minimum number of connections, if 0, connection pool not used
-     *                        if value is -1 use default
-     *        2 bytes        - maximum number of connections, if 0, connections are created
-     *                        as needed, if value is -1 use default
+     *  Command: connpool
+     *  Protocol:
+     *      2 bytes     - length of database name, if 0, default for all databases
+     *                      is set
+     *      n bytes     - database name
+     *      2 bytes     - minimum number of connections, if 0, connection pool not used
+     *                      if value is -1 use default
+     *      2 bytes     - maximum number of connections, if 0, connections are created
+     *                      as needed, if value is -1 use default
      *
-     *     Command: maxthreads
-     *     Protocol:
-     *        2 bytes        - maximum number of threads
+     *  Command: maxthreads
+     *  Protocol:
+     *      2 bytes     - maximum number of threads
      *
-     *     Command: timeslice 
-     *     Protocol:
-     *        4 bytes        - timeslice value
+     *  Command: timeslice
+     *  Protocol:
+     *      4 bytes     - timeslice value
      *
-     *     Command: tracedirectory
-     *     Protocol:
-     *         2 bytes        - length of directory name
-     *         n bytes        - directory name
+     *  Command: tracedirectory
+     *  Protocol:
+     *      2 bytes     - length of directory name
+     *      n bytes     - directory name
      *
-     *    Command: test connection
-     *     Protocol:
-     *         2 bytes        - length of database name if 0, just the connection
-     *                        to the network server is tested and user name and 
-     *                        password aren't sent
-     *         n bytes        - database name
-     *         2 bytes        - length of user name (optional)
-     *         n bytes        - user name
-     *         2 bytes        - length of password  (optional)
-     *         n bytes        - password
+     *  Command: test connection
+     *  Protocol:
+     *      2 bytes     - length of database name if 0, just the connection
+     *                      to the network server is tested and user name and
+     *                      password aren't sent
+     *      n bytes     - database name
+     *      2 bytes     - length of user name (optional)
+     *      n bytes     - user name
+     *      2 bytes     - length of password  (optional)
+     *      n bytes     - password
      *
-     *    The calling routine is synchronized so that multiple threads don't clobber each
-     *     other. This means that configuration commands will be serialized.
-     *     This shouldn't be a problem since they should be fairly rare.
-     *         
+     *  The calling routine is synchronized so that multiple threads don't clobber each
+     *  other. This means that configuration commands will be serialized.
+     *  This shouldn't be a problem since they should be fairly rare.
+     *
      * @param reader    input reader for command
      * @param writer output writer for command
-     * @param session    session information
+     * @param session   session information
      *
-     * @exception Throwable    throws an exception if an error occurs
+     * @exception Throwable throws an exception if an error occurs
      */
     protected synchronized void processCommands(DDMReader reader, DDMWriter writer, 
         Session session) throws Throwable
@@ -1904,7 +1904,7 @@ public final class NetworkServerControlImpl {
     /**
      * Check whether a CCSID code page is supported
      *
-     * @param ccsid    CCSID to check
+     * @param ccsid CCSID to check
      * @return true if supported; false otherwise
      */
     protected boolean supportsCCSID(int ccsid)
@@ -1920,7 +1920,7 @@ public final class NetworkServerControlImpl {
     /**
      * Put property message on console
      *
-     * @param msgProp        message property key
+     * @param msgProp       message property key
      * @param printTimeStamp whether to prepend a timestamp to the message
      *
      * @throws Exception if an error occurs
@@ -1933,8 +1933,8 @@ public final class NetworkServerControlImpl {
     /**
      * Put property message on console
      *
-     * @param msgProp        message property key
-     * @param arg            argument for message
+     * @param msgProp       message property key
+     * @param arg           argument for message
      *
      * @throws Exception if an error occurs
      */
@@ -1946,8 +1946,8 @@ public final class NetworkServerControlImpl {
     /**
      * Put property message on console
      *
-     * @param msgProp        message property key
-     * @param args            argument array for message
+     * @param msgProp       message property key
+     * @param args          argument array for message
      *
      * @throws Exception if an error occurs
      */
@@ -2002,7 +2002,7 @@ public final class NetworkServerControlImpl {
      * Send OK and int value
      *
      * @param writer writer to use for sending
-     * @param val     int val to send
+     * @param val   int val to send
      * 
      * @throws Exception if a problem occurs
      */
@@ -2017,8 +2017,8 @@ public final class NetworkServerControlImpl {
      * Send Error or Warning from server to client after processing a command
      *
      * @param writer    writer to use for sending message
-     * @param messageType    1 for Warning, 2 for Error 3 for SQLError
-     * @param message     message 
+     * @param messageType   1 for Warning, 2 for Error 3 for SQLError
+     * @param message   message
      *
      * @throws Exception if a problem occurs sending message
      */
@@ -2035,7 +2035,7 @@ public final class NetworkServerControlImpl {
      *
      * @param writer    writer to use for sending message
      * @param se        Derby exception
-     * @param type        type of exception, SQLERROR or SQLWARNING
+     * @param type      type of exception, SQLERROR or SQLWARNING
      *
      * @throws Exception if a problem occurs sending message
      */
@@ -2065,7 +2065,7 @@ public final class NetworkServerControlImpl {
     /**
      * Send SysInfo information from server to client
      *
-     * @param writer     writer to use for sending sysinfo
+     * @param writer    writer to use for sending sysinfo
      *
      * @throws Exception if a problem occurs sending value
      */
@@ -2087,7 +2087,7 @@ public final class NetworkServerControlImpl {
     /**
      * Send RuntimeInfo information from server to client
      *
-     * @param writer     writer to use for sending sysinfo
+     * @param writer    writer to use for sending sysinfo
      *
      * @throws Exception if a problem occurs sending value
      */
@@ -2108,7 +2108,7 @@ public final class NetworkServerControlImpl {
     /**
      * Send property information from server to client
      *
-     * @param writer     writer to use for sending sysinfo
+     * @param writer    writer to use for sending sysinfo
      *
      * @throws Exception if a problem occurs sending value
      */
@@ -2196,7 +2196,7 @@ public final class NetworkServerControlImpl {
      * NetworkServerControl can figure out whether to install a security manager
      * before the server actually comes up. This is part of the work for DERBY-2196.
      *
-     * @param args    array of arguments indicating command to be executed
+     * @param args  array of arguments indicating command to be executed
      *
      * @return the command to be executed
      */
@@ -2219,7 +2219,7 @@ public final class NetworkServerControlImpl {
      *
      * @param command   The command to execute. The command itself was determined by an earlier call to parseArgs().
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      * see class comments for more information
      */
     public void executeWork(int command) throws Exception
@@ -2322,7 +2322,7 @@ public final class NetworkServerControlImpl {
     /**
      * Add session to the run queue
      *
-     * @param clientSession    session needing work
+     * @param clientSession session needing work
      */
     private void runQueueAdd(Session clientSession)
     {
@@ -2334,10 +2334,10 @@ public final class NetworkServerControlImpl {
     }
     /**
      * Go through the arguments and find the command and save the dash arguments
-     *    and arguments to the command.  Only one command is allowed in the argument
-     *    list.
+     *  and arguments to the command.  Only one command is allowed in the argument
+     *  list.
      *
-     * @param args    arguments to search
+     * @param args  arguments to search
      *
      * @return  command
      */
@@ -2389,12 +2389,12 @@ public final class NetworkServerControlImpl {
     /**
      * Get the dash argument. Optional arguments are formated as -x value.
      *
-     * @param pos    starting point
-     * @param args    arguments to search
+     * @param pos   starting point
+     * @param args  arguments to search
      *
      * @return  command
      *
-     * @exception Exception    thrown if an error occurs
+     * @exception Exception thrown if an error occurs
      */
     private int processDashArg(int pos, String[] args)
         throws Exception
@@ -2505,11 +2505,11 @@ public final class NetworkServerControlImpl {
     /**
      * Is string "on" or "off"
      *
-     * @param arg    string to check
+     * @param arg   string to check
      *
      * @return  true if string is "on", false if string is "off"
      *
-     * @exception Exception    thrown if string is not one of "on" or "off"
+     * @exception Exception thrown if string is not one of "on" or "off"
      */
     private boolean isOn(String arg)
         throws Exception
@@ -2544,7 +2544,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set up client socket to send a command to the network server
      *
-        * @exception Exception    thrown if exception encountered
+     * @exception Exception thrown if exception encountered
      */
     private void setUpSocket() throws Exception
     {
@@ -2669,9 +2669,9 @@ public final class NetworkServerControlImpl {
      * protocol version and command. At this point, all the commands except
      * shutdown with username/passwrod use default protocol version.
      *
-     * @param command    command to be written
+     * @param command   command to be written
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void writeCommandHeader(int command) throws Exception
     {
@@ -2683,11 +2683,11 @@ public final class NetworkServerControlImpl {
      * protocol version and command. At this point, all the commands except
      * shutdown with username/passwrod use default protocol version.
      *
-     * @param command    command to be written
+     * @param command   command to be written
      * @param protocol_version_for_command protocol version to be used
      *   for the given command
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void writeCommandHeader(int command, int protocol_version_for_command) throws Exception
     {
@@ -2714,9 +2714,9 @@ public final class NetworkServerControlImpl {
     /**
      * Write length delimited string string
      *
-     * @param msg    string to be written
+     * @param msg   string to be written
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void writeLDString(String msg) throws Exception
     {
@@ -2751,9 +2751,9 @@ public final class NetworkServerControlImpl {
     /**
      * Write short
      *
-     * @param value    value to be written
+     * @param value value to be written
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void writeShort(int value) throws Exception
     {
@@ -2769,9 +2769,9 @@ public final class NetworkServerControlImpl {
     /**
      * Write byte
      *
-     * @param value    value to be written
+     * @param value value to be written
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void writeByte(int value) throws Exception
     {
@@ -2787,7 +2787,7 @@ public final class NetworkServerControlImpl {
      * Send client message to server
      *
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void send() throws Exception
     {
@@ -2803,7 +2803,7 @@ public final class NetworkServerControlImpl {
     }
     /**
      * Stream error writing to client socket
-      */
+     */
     private void clientSocketError(IOException e) throws IOException
     {
         try {
@@ -2816,7 +2816,7 @@ public final class NetworkServerControlImpl {
     /**
      * Read result from sending client message to server
      *
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private void readResult() throws Exception
     {
@@ -2825,7 +2825,7 @@ public final class NetworkServerControlImpl {
         if (replyBufferPos >= replyBufferCount)
             consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
         int messageType = replyBuffer[replyBufferPos++] & 0xFF;
-        if (messageType == OK)        // O.K.
+        if (messageType == OK)      // O.K.
             return;
         // get error and display and throw exception
         String message =  readLDString();
@@ -2844,7 +2844,7 @@ public final class NetworkServerControlImpl {
      * don't just rely on OS level defaults
      *
      *
-     * @param minimumBytesNeeded    size of buffer required    
+     * @param minimumBytesNeeded    size of buffer required
      * @exception Exception throws an exception if a problem reading the reply
      */
     private void ensureDataInBuffer(int minimumBytesNeeded) throws Exception
@@ -2907,28 +2907,28 @@ public final class NetworkServerControlImpl {
     }
     /**
      * Read short from buffer
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private int readShort() throws Exception
     {
         ensureDataInBuffer(2);
         if (replyBufferPos + 2 > replyBufferCount)
             consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
-         return ((replyBuffer[replyBufferPos++] & 0xff) << 8) + 
+        return ((replyBuffer[replyBufferPos++] & 0xff) << 8) +
                 (replyBuffer[replyBufferPos++] & 0xff);
     }
     /**
      * Read int from buffer
-     * @exception Exception    throws an exception if an error occurs
+     * @exception Exception throws an exception if an error occurs
      */
     private int readInt() throws Exception
     {
         ensureDataInBuffer(4);
         if (replyBufferPos + 4 > replyBufferCount)
             consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
-         return ((replyBuffer[replyBufferPos++] & 0xff) << 24) + 
-              ((replyBuffer[replyBufferPos++] & 0xff) << 16) + 
-             ((replyBuffer[replyBufferPos++] & 0xff) << 8) + 
+        return ((replyBuffer[replyBufferPos++] & 0xff) << 24) +
+            ((replyBuffer[replyBufferPos++] & 0xff) << 16) +
+            ((replyBuffer[replyBufferPos++] & 0xff) << 8) +
                 (replyBuffer[replyBufferPos++] & 0xff);
     }
     /**
@@ -2942,7 +2942,7 @@ public final class NetworkServerControlImpl {
     {
         fillReplyBuffer();
         readCommandReplyHeader();
-        if (replyBuffer[replyBufferPos++] == 0)        // O.K.
+        if (replyBuffer[replyBufferPos++] == 0)     // O.K.
             return readLDString();
         else
             consolePropertyMessage(msgKey, true);
@@ -2980,7 +2980,7 @@ public final class NetworkServerControlImpl {
     {
         fillReplyBuffer();
         readCommandReplyHeader();
-        if (replyBuffer[replyBufferPos++] == 0)        // O.K.
+        if (replyBuffer[replyBufferPos++] == 0)     // O.K.
             return readLDBytes();
         else
             consolePropertyMessage(msgKey, true);
@@ -3086,10 +3086,10 @@ public final class NetworkServerControlImpl {
                 hostArg = DEFAULT_HOST; 
             else
                 hostArg = propval;
-        }    
+        }
         propval = PropertyUtil.getSystemProperty(
                          NetworkServerControlImpl.DRDA_PROP_DEBUG);
-        if (propval != null     && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
+        if (propval != null  && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
             debugOutput = true;
 
         propval = PropertyUtil.getSystemProperty( 
@@ -3226,8 +3226,8 @@ public final class NetworkServerControlImpl {
     /**
      * Get integer property values
      *
-     * @param propName     property name
-     * @param propVal    string property value
+     * @param propName  property name
+     * @param propVal   string property value
      * @return integer value
      *
      * @exception Exception if not a valid integer
@@ -3248,11 +3248,11 @@ public final class NetworkServerControlImpl {
 
     /**
      * Handle console error message
-     *     - display on console and if it is a user error, display usage
+     *  - display on console and if it is a user error, display usage
      *  - if user error or severe error, throw exception with message key and message
      *
      * @param messageKey    message key
-     * @param args            arguments to message
+     * @param args          arguments to message
      * @param printTimeStamp whether to prepend a timestamp to the message
      *
      * @throws Exception if an error occurs
@@ -3306,7 +3306,7 @@ public final class NetworkServerControlImpl {
      * Throw a SQL Exception which was sent over by a server
      * Format of the msg is SQLSTATE:localized message\nSQLSTATE:next localized message
      *
-     * @param msg        msg containing SQL Exception
+     * @param msg       msg containing SQL Exception
      *
      * @throws SQLException
      */
@@ -3366,7 +3366,7 @@ public final class NetworkServerControlImpl {
      * Throw a SQL Warning which was sent over by a server
      * Format of the msg is SQLSTATE:localized message\nSQLSTATE:next localized message
      *
-     * @param msg        msg containing SQL Warning
+     * @param msg       msg containing SQL Warning
      *
      * @throws SQLWarning
      */
@@ -3443,8 +3443,8 @@ public final class NetworkServerControlImpl {
     /**
      * Convenience routine so that NetworkServerControl can localize messages.
      *
-     * @param msgProp    message key
-     * @param args        arguments to message
+     * @param msgProp   message key
+     * @param args      arguments to message
      *
      */
     public String localizeMessage( String msgProp, String[] args )
@@ -3455,9 +3455,9 @@ public final class NetworkServerControlImpl {
     /**
      * Localize a message given a particular AppUI 
      *
-     * @param msgProp    message key
+     * @param msgProp   message key
      * @param localLangUtil LocalizedResource to use to localize message
-     * @param args        arguments to message
+     * @param args      arguments to message
      *
      */
     private String localizeMessage(String msgProp, LocalizedResource localLangUtil, String [] args)
@@ -3477,7 +3477,7 @@ public final class NetworkServerControlImpl {
             switch (args.length)
             {
                 case 1:
-                     locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0]);
+                    locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0]);
                     break;
                 case 2:
                     locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0], argMsg[1]);
@@ -3493,13 +3493,13 @@ public final class NetworkServerControlImpl {
             }
         }
         else
-             locMsg = localLangUtil.getTextMessage(msgProp);
+            locMsg = localLangUtil.getTextMessage(msgProp);
         return locMsg;
     }
     /**
      * Determine type of message
      *
-     * @param msg        message 
+     * @param msg       message
      *
      * @return message type
      */
@@ -3524,9 +3524,9 @@ public final class NetworkServerControlImpl {
     }
     /**
      * Determine whether string is a property key or not
-     *     property keys start with DRDA_MSG_PREFIX
+     *  property keys start with DRDA_MSG_PREFIX
      *
-     * @param msg        message 
+     * @param msg       message
      *
      * @return true if it is a property key; false otherwise
      */
@@ -3551,7 +3551,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set the current value of logging connections
      *
-     * @param value    true to turn logging connections on; false to turn it off
+     * @param value true to turn logging connections on; false to turn it off
      */
     private void setLogConnections(boolean value)
     {
@@ -3638,7 +3638,7 @@ public final class NetworkServerControlImpl {
         {
             Session session = sessionTable.get(sessionArg);
             if (session != null)
-            {    
+            {
                 if (on)
                     try {                         
                         session.setTraceOn(traceDirectory,true);
@@ -3708,7 +3708,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set the current value of minimum number of threads to create at start
      *
-     * @param value     value of minimum number of threads
+     * @param value  value of minimum number of threads
      */
     private void setMinThreads(int value)
     {
@@ -3730,7 +3730,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set the current value of maximum number of threads to create 
      *
-     * @param value    value of maximum number of threads
+     * @param value value of maximum number of threads
      * @exception Exception if value is less than 0
      */
     private void setMaxThreads(int value) throws Exception
@@ -3769,7 +3769,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set the current value of whether to trace all the sessions
      *
-     * @param value    true if tracing is on for all sessions; false otherwise
+     * @param value true if tracing is on for all sessions; false otherwise
      */
     private void setTraceAll(boolean value)
     {
@@ -3791,7 +3791,7 @@ public final class NetworkServerControlImpl {
     /**
      * Set the current value of trace directory
      *
-     * @param value    trace directory
+     * @param value trace directory
      */
     private void setTraceDirectory(String value)
     {
@@ -3806,9 +3806,9 @@ public final class NetworkServerControlImpl {
      * Connect to a database to test whether a connection can be made
      *
      * @param writer    connection to send message to
-     * @param database     database directory to connect to
-     * @param user        user to use
-     * @param password    password to use
+     * @param database  database directory to connect to
+     * @param user      user to use
+     * @param password  password to use
      */
     private void connectToDatabase(DDMWriter writer, String database, String user, 
         String password) throws Exception
@@ -3818,14 +3818,14 @@ public final class NetworkServerControlImpl {
             p.put("user", user);
         if (password != null)
             p.put("password", password);
-         try {
-             Class.forName(CLOUDSCAPE_DRIVER);
+        try {
+            Class.forName(CLOUDSCAPE_DRIVER);
         }
         catch (Exception e) {
             sendMessage(writer, ERROR, e.getMessage());
             return;
-          }
-         try {
+        }
+        try {
             //Note, we add database to the url so that we can allow additional
             //url attributes
             Connection conn = getDriver().connect(Attribute.PROTOCOL+database, p);
@@ -3837,9 +3837,9 @@ public final class NetworkServerControlImpl {
                 sendOK(writer);
             conn.close();
             return;
-          } catch (SQLException se) {
+        } catch (SQLException se) {
             sendSQLMessage(writer, se, SQLERROR);
-          }
+        }
     }
 
     /**
@@ -3922,7 +3922,7 @@ public final class NetworkServerControlImpl {
         {
             synchronized(sessionTable) {
                 for (Session session : sessionTable.values())
-                {    
+                {
                     if (session.isTraceOn())
                         retval.put(Property.DRDA_PROP_TRACE+"."+session.getConnNum(), "true");
                 }
@@ -4120,7 +4120,7 @@ public final class NetworkServerControlImpl {
                 });
         } catch (PrivilegedActionException e) {
             Exception e1 = e.getException();
-            consolePropertyMessage("DRDA_ProductVersionReadError.S", e1.getMessage());            
+            consolePropertyMessage("DRDA_ProductVersionReadError.S", e1.getMessage());
         }
         return myPVH;
     }

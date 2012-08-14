@@ -193,7 +193,7 @@ class FdocaConstants
                 outlen[0] = appRequester.getTimestampLength();
                 break;
             case java.sql.Types.CHAR:
-//                drdaType = DRDAConstants.DRDA_TYPE_NCHAR;
+//              drdaType = DRDAConstants.DRDA_TYPE_NCHAR;
                 //making this NVARMIX for now to handle different byte length
                 //characters - checking with Paul to see if this is the
                 //correct way to handle it.

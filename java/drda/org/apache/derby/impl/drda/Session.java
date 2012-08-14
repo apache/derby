@@ -37,12 +37,12 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 class Session
 {
 
-    // session states       
+    // session states
     protected static final int INIT = 1;    // before exchange of server attributes
-    protected static final int ATTEXC = 2;    // after first exchange of server attributes
-    protected static final int SECACC = 3;    // after ACCSEC (Security Manager Accessed)
-    protected static final int CHKSEC = 4;    // after SECCHK  (Checked Security)
-    protected static final int CLOSED = 5;    // session has ended
+    protected static final int ATTEXC = 2;  // after first exchange of server attributes
+    protected static final int SECACC = 3;  // after ACCSEC (Security Manager Accessed)
+    protected static final int CHKSEC = 4;  // after SECCHK  (Checked Security)
+    protected static final int CLOSED = 5;  // session has ended
 
     // session types
     protected static final int DRDA_SESSION = 1;
@@ -53,24 +53,24 @@ class Session
     private static final String TRACENAME_SUFFIX = ".trace";
 
     // session information
-    protected Socket clientSocket;        // session socket
-    protected int connNum;                // connection number
-    protected InputStream sessionInput;    // session input stream
-    protected OutputStream sessionOutput;    // session output stream
-    protected String traceFileName;        // trace file name for session
-    protected boolean traceOn;            // whether trace is currently on for the session
+    protected Socket clientSocket;      // session socket
+    protected int connNum;              // connection number
+    protected InputStream sessionInput; // session input stream
+    protected OutputStream sessionOutput;   // session output stream
+    protected String traceFileName;     // trace file name for session
+    protected boolean traceOn;          // whether trace is currently on for the session
     protected int state;                // the current state of the session
-    protected int sessionType;            // type of session - DRDA or NetworkServerControl command
+    protected int sessionType;          // type of session - DRDA or NetworkServerControl command
     protected String drdaID;            // DRDA ID of the session
     protected DssTrace dssTrace;        // trace object associated with the session
     protected AppRequester appRequester;    // Application requester for this session
     protected Database database;        // current database
-    protected int qryinsid;                // unique identifier for each query
-    protected LocalizedResource langUtil;        // localization information for command session
+    protected int qryinsid;             // unique identifier for each query
+    protected LocalizedResource langUtil;       // localization information for command session
                                         // client
 
     /** Table of databases accessed in this session. */
-    private    Hashtable<String, Database> dbtable;
+    private Hashtable<String, Database> dbtable;
     private NetworkServerControlImpl nsctrl;        // NetworkServerControlImpl needed for logging
                                                         // message if tracing fails.
                                                         
@@ -79,10 +79,10 @@ class Session
     /**
      * Session constructor
      * 
-     * @param connNum        connection number
-     * @param clientSocket    communications socket for this session
+     * @param connNum       connection number
+     * @param clientSocket  communications socket for this session
      * @param traceDirectory    location for trace files
-     * @param traceOn        whether to start tracing this connection
+     * @param traceOn       whether to start tracing this connection
      *
      * @exception throws IOException
      */
@@ -161,7 +161,7 @@ class Session
     /**
      * Set tracing on
      * 
-     * @param traceDirectory     directory for trace files
+     * @param traceDirectory    directory for trace files
      * @throws Exception 
      */
     protected void setTraceOn(String traceDirectory, boolean throwException) throws Exception
@@ -244,7 +244,7 @@ class Session
                 return CodePoint.SECCHK;
             default:
                 return -1;
-        }     
+        }
     }
 
     /**

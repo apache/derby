@@ -88,7 +88,7 @@ class DRDAProtocolException extends Exception
     protected static String DRDA_Proto_CMDNSPRM=    "DRDA_Proto_CMDNSPRM";
     protected static String DRDA_Proto_DTAMCHRM=    "DRDA_Proto_DTAMCHRM";
 
-    protected static String DRDA_Proto_OBJNSPRM =    "DRDA_Proto_OBJNSPRM";
+    protected static String DRDA_Proto_OBJNSPRM =   "DRDA_Proto_OBJNSPRM";
     protected static String DRDA_Proto_PKGBNARM=    "DRDA_Proto_PKGBNARM";
     protected static String DRDA_Proto_PRCCNVRM=   "DRDA_Proto_PRCCNVRM";
     protected static String DRDA_Proto_PRMNSRM =   "DRDA_Proto_PRMNSPRM";
@@ -215,15 +215,15 @@ class DRDAProtocolException extends Exception
     
     /**  Create a new Protocol exception 
      *
-     * @param agent        DRDAConnThread  that threw this exception
+     * @param agent     DRDAConnThread  that threw this exception
      *
-     * @param cpArg        CODPNT value  to pass to send
+     * @param cpArg     CODPNT value  to pass to send
      *
      *
-     * @param msgid          The messageid for this message. (needs to be
+     * @param msgid       The messageid for this message. (needs to be
      * integrated into logging mechanism)
      *
-     * @param args           Argments for the message in an Object[]
+     * @param args         Argments for the message in an Object[]
      *
      */
     

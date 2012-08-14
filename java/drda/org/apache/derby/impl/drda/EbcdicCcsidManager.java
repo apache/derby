@@ -115,7 +115,7 @@ class EbcdicCcsidManager extends CcsidManager
         //      'A',       'B',       'C',       'D',      'E',
           (byte)0xc1,(byte)0xc2,(byte)0xc3,(byte)0xc4,(byte)0xc5,
         //      'F',       'G',       'H',      'I',       'J',
-            (byte)0xc6,(byte)0xc7,(byte)0xc8,(byte)0xc9,(byte)0xd1,
+          (byte)0xc6,(byte)0xc7,(byte)0xc8,(byte)0xc9,(byte)0xd1,
         //     'K',        'L',       'M',       'N',      'O',
           (byte)0xd2,(byte)0xd3,(byte)0xd4,(byte)0xd5,(byte)0xd6,
         //     'P'

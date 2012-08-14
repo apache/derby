@@ -55,38 +55,38 @@ class DRDAStatement
     // in reset().
     
 
-    protected String typDefNam;        //TYPDEFNAM for this statement
+    protected String typDefNam;     //TYPDEFNAM for this statement
     protected int byteOrder;        //deduced from typDefNam, save String comparisons
-    protected int ccsidSBC;            //CCSID for single byte characters
-    protected int ccsidDBC;            //CCSID for double byte characters
-    protected int ccsidMBC;            //CCSID for mixed byte characters
-    protected String ccsidSBCEncoding;    //Java encoding for CCSIDSBC
-    protected String ccsidDBCEncoding;    //Java encoding for CCSIDDBC
-    protected String ccsidMBCEncoding;    //Java encoding for CCSIDMBC
+    protected int ccsidSBC;         //CCSID for single byte characters
+    protected int ccsidDBC;         //CCSID for double byte characters
+    protected int ccsidMBC;         //CCSID for mixed byte characters
+    protected String ccsidSBCEncoding;  //Java encoding for CCSIDSBC
+    protected String ccsidDBCEncoding;  //Java encoding for CCSIDDBC
+    protected String ccsidMBCEncoding;  //Java encoding for CCSIDMBC
 
     protected Database database;        // Database this statement is created for
-    private   Pkgnamcsn pkgnamcsn;        // Package name/section # and  consistency token
+    private   Pkgnamcsn pkgnamcsn;      // Package name/section # and  consistency token
     
     int withHoldCursor = -1;     // hold cursor after commit attribute.
     protected int isolationLevel;         //JCC isolation level for Statement
     protected String cursorName;
-    protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;            // Sensitive or Insensitive scroll attribute
-    protected int concurType = ResultSet.CONCUR_READ_ONLY;;            // Concurency type
+    protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;         // Sensitive or Insensitive scroll attribute
+    protected int concurType = ResultSet.CONCUR_READ_ONLY;;         // Concurency type
     protected long rowCount;            // Number of rows we have processed
     protected byte [] rslsetflg;        // Result Set Flags
     protected int maxrslcnt;            // Maximum Result set count
     protected PreparedStatement ps;     // Prepared statement
     protected ParameterMetaData stmtPmeta; // param metadata
     protected boolean isCall;
-    protected String procName;            // callable statement's method name
+    protected String procName;          // callable statement's method name
     private   int[] outputTypes;        // jdbc type for output parameter or NOT_OUTPUT_PARAM
                                         // if not an output parameter.
     private int[] outputPrecision;
     private int[] outputScale;
         
     protected static int NOT_OUTPUT_PARAM = -100000;
-    protected boolean outputExpected;    // expect output from a callable statement
-    private Statement stmt;                // SQL statement
+    protected boolean outputExpected;   // expect output from a callable statement
+    private Statement stmt;             // SQL statement
 
 
     private DRDAResultSet currentDrdaRs;  // Current ResultSet
@@ -264,9 +264,9 @@ class DRDAStatement
     // Query options  sent on EXCSQLSTT
     // These the default for ResultSets created for this statement.
     // These can be overriden by OPNQRY or CNTQRY,
-    protected int nbrrow;            // number of fetch or insert rows
+    protected int nbrrow;           // number of fetch or insert rows
     protected int qryrowset;            // Query row set
-    protected int blksize;                // Query block size
+    protected int blksize;              // Query block size
     protected int maxblkext;            // Maximum number of extra blocks
     protected int outovropt;            // Output Override option
     protected boolean qryrfrtbl;        // Query refresh answer set table
@@ -333,7 +333,7 @@ class DRDAStatement
     /**
      * Set statement
      *
-     * @param conn    Connection
+     * @param conn  Connection
      * @exception SQLException
      */
     protected void setStatement(Connection conn)
@@ -391,11 +391,11 @@ class DRDAStatement
     protected void setRsDefaultOptions(DRDAResultSet drs)
     {
         drs.nbrrow = nbrrow;
-         drs.qryrowset = qryrowset;
-         drs.blksize = blksize;
-         drs.maxblkext = maxblkext;
-         drs.outovropt = outovropt;
-         drs.rslsetflg = rslsetflg;
+        drs.qryrowset = qryrowset;
+        drs.blksize = blksize;
+        drs.maxblkext = maxblkext;
+        drs.outovropt = outovropt;
+        drs.rslsetflg = rslsetflg;
         drs.scrollType = scrollType;
         drs.concurType = concurType;
         drs.setQryprctyp(qryprctyp);
@@ -421,7 +421,7 @@ class DRDAStatement
         return currentDrdaRs.getSplitQRYDTA();
     }
     
-       /**
+    /**
      * Add extDtaObject
      * @param o - object to  add
      * @param jdbcIndex - jdbc index for parameter
@@ -586,7 +586,7 @@ class DRDAStatement
         return currentDrdaRs.concurType;
     }
 
-    protected void     setOutovr_drdaType(int[] outovr_drdaType) 
+    protected void  setOutovr_drdaType(int[] outovr_drdaType)
     {
        currentDrdaRs.outovr_drdaType = outovr_drdaType;
     }
@@ -809,7 +809,7 @@ class DRDAStatement
              *      N - normal cursor, H - hold cursor 
              *      200 - package id as sent by jcc 
              *      C - tack-on code for cursors
-             *      1 - section number sent by jcc         
+             *      1 - section number sent by jcc
              */
             
             
@@ -876,7 +876,7 @@ class DRDAStatement
     }
 
     /**
-      * Set currentDrdaResultSet 
+     * Set currentDrdaResultSet
      *
      * @param rsNum   The result set number starting with 0
      *                 
@@ -891,7 +891,7 @@ class DRDAStatement
     }
 
     /**
-      * Set currentDrdaResultSet 
+     * Set currentDrdaResultSet
      *
      * @param pkgnamcsn  The pkgid section number and unique resultset
      *                    consistency token
@@ -988,7 +988,7 @@ class DRDAStatement
 
     /**
      *
-     * @return     number of result sets
+     * @return  number of result sets
      */
     protected int getNumResultSets()
     {
@@ -998,14 +998,14 @@ class DRDAStatement
     
     /**
      * @param rsNum result set starting with 0
-     * @return  consistency token (key) for the result set     
+     * @return  consistency token (key) for the result set
      */
     protected ConsistencyToken getResultSetPkgcnstkn(int rsNum)
     {
         if (rsNum == 0)
             return pkgnamcsn.getPkgcnstkn();
         else 
-            return (ConsistencyToken) resultSetKeyList.get(rsNum);               
+            return (ConsistencyToken) resultSetKeyList.get(rsNum);
     }
 
 
@@ -1029,7 +1029,7 @@ class DRDAStatement
             return;
 
         currentDrdaRs.close();
-        needsToSendParamData = false;        
+        needsToSendParamData = false;
         numResultSets--;
     }
 
@@ -1096,7 +1096,7 @@ class DRDAStatement
         setTypDefValues();
         
         withHoldCursor = -1;
-        scrollType = ResultSet.TYPE_FORWARD_ONLY;    
+        scrollType = ResultSet.TYPE_FORWARD_ONLY;
         concurType = ResultSet.CONCUR_READ_ONLY;;
         rowCount = 0;
         rslsetflg = null;
@@ -1119,10 +1119,10 @@ class DRDAStatement
         drdaParamState_.clear(false);
         
         nbrrow = 0;
-        qryrowset = 0;    
+        qryrowset = 0;
         blksize = 0;        
-        maxblkext = 0;    
-        outovropt = 0;    
+        maxblkext = 0;
+        outovropt = 0;
         qryrfrtbl = false;
         qryprctyp = CodePoint.QRYBLKCTL_DEFAULT;
 
@@ -1262,9 +1262,9 @@ class DRDAStatement
      * @param index - starting with 1
      * @return  DRDA Type of column
      */
-     protected int getParamDRDAType(int index) {
+    protected int getParamDRDAType(int index) {
         return drdaParamState_.getDrdaType(index-1);
-     }
+    }
 
     /**
      * returns drda length of parameter as sent by client.
@@ -1361,13 +1361,13 @@ class DRDAStatement
     public String getResultSetCursorName(int rsNum) throws SQLException
     {
         DRDAResultSet drdaRs = getDrdaResultSet(rsNum);
-        return drdaRs.getResultSetCursorName();            
+        return drdaRs.getResultSetCursorName();
 
     }
 
 
     protected String toDebugString(String indent)
-    {        
+    {
         String s ="";
         if (ps == null) 
             s += indent + ps;
@@ -1389,7 +1389,7 @@ class DRDAStatement
      */
 
     protected ConsistencyToken calculateResultSetPkgcnstkn(int rsNum)
-    {    
+    {
         ConsistencyToken consistToken = pkgnamcsn.getPkgcnstkn();
 
         if (rsNum == 0 || consistToken == null)
@@ -1497,7 +1497,7 @@ class DRDAStatement
         {
                     // For byte[] we are going to assume it is input.
             // For TINYINT output params you gotta use 
-            //  object Integer[] or use a procedure                   
+            //  object Integer[] or use a procedure
                     if (objectName.equals("byte[]"))
                     {
                         return NOT_OUTPUT_PARAM;
@@ -1543,7 +1543,7 @@ class DRDAStatement
         }
         // Not one of the ones we know. This must be a JAVA_OBJECT
         return NOT_OUTPUT_PARAM;
-        //isOutParam[offset] = false;                
+        //isOutParam[offset] = false;
         //return java.sql.Types.JAVA_OBJECT;
 
     }

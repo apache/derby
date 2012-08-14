@@ -47,25 +47,25 @@ class DRDAResultSet
 
     int state;
     protected boolean hasdata = true;
-    protected int[] rsLens;                // result length for each column
-    private int[] rsDRDATypes;            // DRDA Types of the result set columns
+    protected int[] rsLens;             // result length for each column
+    private int[] rsDRDATypes;          // DRDA Types of the result set columns
     private int[] rsPrecision;         // result precision for Decimal types
     private int[] rsScale;              // result sale for Decimal types
 
-    protected int [] outovr_drdaType;    // Output override DRDA type and length
+    protected int [] outovr_drdaType;   // Output override DRDA type and length
 
-    protected int withHoldCursor;            // hold cursor after commit attribute
-    protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;            // Sensitive or Insensitive scroll attribute
-    protected int concurType;            // Concurency type
+    protected int withHoldCursor;           // hold cursor after commit attribute
+    protected int scrollType = ResultSet.TYPE_FORWARD_ONLY;         // Sensitive or Insensitive scroll attribute
+    protected int concurType;           // Concurency type
     protected long rowCount;            // Number of rows we have processed
     private ResultSet rs;              // Current ResultSet
 
-    protected int blksize;                // Query block size
+    protected int blksize;              // Query block size
     protected int maxblkext;            // Maximum number of extra blocks
     protected int outovropt;            // Output Override option
     protected int qryclsimp;            // Implicit Query Close Setting
     protected boolean qryrelscr;        // Query relative scrolling
-    protected long qryrownbr;            // Query row number
+    protected long qryrownbr;           // Query row number
     protected boolean qryrfrtbl;        // Query refresh answer set table
     protected int qryscrorn;            // Query scroll orientation
     protected boolean qryrowsns;        // Query row sensitivity
@@ -75,7 +75,7 @@ class DRDAResultSet
     private   int qryprctyp;            // Protocol type
     private   boolean gotPrctyp;        // save the result, for performance
     protected int rtnextdta;            // Return of EXTDTA option
-    protected int nbrrow;               // number of fetch or insert rows
+    protected int nbrrow;              // number of fetch or insert rows
     protected byte [] rslsetflg;        // Result Set Flags
 
     /** List of Blobs and Clobs. Return values to send with extdta objects. */
@@ -102,7 +102,7 @@ class DRDAResultSet
     }
 
     /**
-      * Set result set and initialize type array.
+     * Set result set and initialize type array.
      *
      * @param value
      * 
@@ -352,34 +352,34 @@ class DRDAResultSet
         
         outovr_drdaType = null;
         
-        withHoldCursor = 0;    
+        withHoldCursor = 0;
         scrollType = ResultSet.TYPE_FORWARD_ONLY;
         concurType = 0;
         rowCount = 0;
         rs = null;
         
         blksize = 0;
-        maxblkext = 0;    
+        maxblkext = 0;
         outovropt = 0;
-        qryclsimp = CodePoint.QRYCLSIMP_NO;    
+        qryclsimp = CodePoint.QRYCLSIMP_NO;
         qryrelscr = false;
         qryrownbr = 0;
-        qryrfrtbl = false;    
+        qryrfrtbl = false;
         qryscrorn = 0;
         qryrowsns = false; 
         qryblkrst = false;
-        qryrtndta = false;    
+        qryrtndta = false;
         qryrowset = 0;
         qryprctyp = 0;
-        gotPrctyp = false;     
-        rtnextdta = 0;    
+        gotPrctyp = false;
+        rtnextdta = 0;
         nbrrow = 0;
-        rslsetflg = null;    
+        rslsetflg = null;
 
         extDtaObjects = null;
         rsExtPositions = null;
         pkgcnstkn = null;
-        splitQRYDTA = null;    
+        splitQRYDTA = null;
     }
 
 

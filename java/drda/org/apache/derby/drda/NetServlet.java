@@ -63,8 +63,8 @@ public class NetServlet extends HttpServlet {
 
     // can be overridden by trips through doGet()
     private volatile String tracingDirectory;
-    private volatile boolean logStatus= false;    /* Logging off */
-    private volatile boolean traceStatus = false;    /* Tracing off */
+    private volatile boolean logStatus= false;  /* Logging off */
+    private volatile boolean traceStatus = false;   /* Tracing off */
 
     private final static int NOT_GIVEN = -2;
     private final static int INVALID = -3;
@@ -240,7 +240,7 @@ public class NetServlet extends HttpServlet {
 
         form = escapeSingleQuotes(form);
         doAction = escapeSingleQuotes(doAction);
-          if (form.equals(startMessage))
+        if (form.equals(startMessage))
         {
             String logButton = getLogging(request);
             String traceButton = getTrace(request);
@@ -477,7 +477,7 @@ public class NetServlet extends HttpServlet {
             out.println("Internal Error: Unknown form");
         }
 
-        out.println( "</body>" );     
+        out.println( "</body>" );
         out.println( "</html>" ); 
     }
 
@@ -524,14 +524,14 @@ public class NetServlet extends HttpServlet {
     }
 
     /**
-     *    Start the network server and attempt to connect to it before
-     *    returning
+     *  Start the network server and attempt to connect to it before
+     *  returning
      *
      * @param localUtil LocalizedResource to use to translate messages
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @exception ServletException throws an exception if error in starting the 
-     *         Network Server during initialization
+     *      Network Server during initialization
      */
     private void runServer
         ( LocalizedResource localUtil, String returnMessage, PrintWriter out )
@@ -602,11 +602,11 @@ public class NetServlet extends HttpServlet {
         }
     }
     /**
-     *    Display an error form
+     *  Display an error form
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param e        Exception to be displayed
-     * @param returnMessage    localized continue message for continue button on error form
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param e     Exception to be displayed
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      */
     private void printErrorForm
@@ -626,12 +626,12 @@ public class NetServlet extends HttpServlet {
         out.println( "</html>" );
     }
     /**
-     *    Display an error form
+     *  Display an error form
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param msg    String to be displayed
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param msg   String to be displayed
      * @param out Form PrintWriter
-     * @param returnMessage    localized continue message for continue button on error form
+     * @param returnMessage localized continue message for continue button on error form
      */
     private void printErrorForm
         (
@@ -647,14 +647,14 @@ public class NetServlet extends HttpServlet {
                 localUtil.getTextMessage("SRV_Message", escapeHTML(msg)) +
                 "</h4>" );
         out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
-        out.println( "</body>" );     
+        out.println( "</body>" );
         out.println( "</html>" ); 
     }
     /**
-     *    Display the current Network server status
+     *  Display the current Network server status
      *
-     * @param localUtil        LocalizedResource to use for localizing messages
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param localUtil     LocalizedResource to use for localizing messages
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      */
     private void displayCurrentStatus
@@ -695,7 +695,7 @@ public class NetServlet extends HttpServlet {
         }
     }
     /**
-     *    Get the currrent server status by using test connection
+     *  Get the currrent server status by using test connection
      *
      * @return true if server is up and reachable; false; otherwise
      */
@@ -709,10 +709,10 @@ public class NetServlet extends HttpServlet {
         return false;
     }
     /**
-     *    Shutdown the network server
+     *  Shutdown the network server
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -734,10 +734,10 @@ public class NetServlet extends HttpServlet {
         return retval;
     }
     /**
-     *    Turn logging of connections on
+     *  Turn logging of connections on
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -760,11 +760,11 @@ public class NetServlet extends HttpServlet {
         return retval;
     }
     /**
-     *    Change tracing for all sessions 
+     *  Change tracing for all sessions
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param val    if true, turn tracing on, if false turn it off
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param val   if true, turn tracing on, if false turn it off
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -787,12 +787,12 @@ public class NetServlet extends HttpServlet {
         return retval;
     }
     /**
-     *    Change tracing for a given session
+     *  Change tracing for a given session
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param val    if true, turn tracing on, if false turn it off
-     * @param session    session to trace
-     * @param returnMessage    localized continue message for continue button on error form    
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param val   if true, turn tracing on, if false turn it off
+     * @param session   session to trace
+     * @param returnMessage localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -819,9 +819,9 @@ public class NetServlet extends HttpServlet {
     /**
      * Set trace directory
      *
-     * @param localUtil    LocalizedResource to use to translate messages
+     * @param localUtil LocalizedResource to use to translate messages
      * @param traceDirectory    directory for trace files
-     * @param returnMessage        localized continue message for continue button on error form    
+     * @param returnMessage     localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -857,10 +857,10 @@ public class NetServlet extends HttpServlet {
     /**
      * Set Network server parameters
      *
-     * @param localUtil    LocalizedResource to use to translate messages
-     * @param max                maximum number of threads
-     * @param slice                time slice for each connection
-     * @param returnMessage        localized continue message for continue button on error form    
+     * @param localUtil LocalizedResource to use to translate messages
+     * @param max               maximum number of threads
+     * @param slice             time slice for each connection
+     * @param returnMessage     localized continue message for continue button on error form
      * @param out Form PrintWriter
      * @return true if succeeded; false; otherwise
      */
@@ -898,11 +898,11 @@ public class NetServlet extends HttpServlet {
     /**
      * Get an integer parameter
      *
-     * @param request             HttpServetRequest for  forms
-     * @param name                parameter name
-     * @param fieldKey            Key for the name of the field we're reading.
-     * @param localUtil                LocalizedResource to use in localizing messages
-     * @param returnMessage        localized continue message for continue button on error form    
+     * @param request           HttpServetRequest for  forms
+     * @param name              parameter name
+     * @param fieldKey          Key for the name of the field we're reading.
+     * @param localUtil             LocalizedResource to use in localizing messages
+     * @param returnMessage     localized continue message for continue button on error form
      * @param out Form PrintWriter
      */
     private int getIntParameter
@@ -920,7 +920,7 @@ public class NetServlet extends HttpServlet {
         if (val == null || val.equals(""))
             return NOT_GIVEN;
         try {
-             retval = (new Integer(val)).intValue();
+            retval = (new Integer(val)).intValue();
         } catch (Exception e) {
             printErrorForm(localUtil,localUtil.getTextMessage("SRV_InvalidVal",
                 val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
@@ -957,9 +957,9 @@ public class NetServlet extends HttpServlet {
     /**
      * Determine the locale file needed for this browsers preferences
      * Defaults to the settings for derby.locale and derby.codeset if set
-     *        English otherwise if browsers preferences can't be found
+     *      English otherwise if browsers preferences can't be found
      *
-     * @param request             HttpServetRequest for forms
+     * @param request           HttpServetRequest for forms
      * @param locale                Name of locale (return arg)
      * @return the appUI which fits the browsers preferences
      */
@@ -998,7 +998,7 @@ public class NetServlet extends HttpServlet {
     /**
      * Get locale string from language which may have qvalue set
      * 
-     * @param lang    language string to parse
+     * @param lang  language string to parse
      *
      * @return stripped language string to use in matching
      */
@@ -1017,7 +1017,7 @@ public class NetServlet extends HttpServlet {
     /**
      * Check if the required translation is available
      *
-     * @param lang    language we are looking for
+     * @param lang  language we are looking for
      * 
      * @return index into language array if found, -1 otherwise;
      */
@@ -1035,7 +1035,7 @@ public class NetServlet extends HttpServlet {
      * Fix the language code, as some browsers send then in a bad format (for instance, 
      * Firefox sends en-us instead of en_US).
      *
-     * @param lang    language to be fixed
+     * @param lang  language to be fixed
      * 
      * @return fixed version of the language, with _ separating parts and country in upper case
      */
