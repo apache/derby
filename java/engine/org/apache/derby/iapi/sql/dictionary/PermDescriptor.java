@@ -40,6 +40,7 @@ public class PermDescriptor extends PermissionsDescriptor
     // object types
     public static final String SEQUENCE_TYPE = "SEQUENCE";
     public static final String UDT_TYPE = "TYPE";
+    public static final String AGGREGATE_TYPE = "DERBY AGGREGATE";
 
     // permissions
     public static final String USAGE_PRIV = "USAGE";

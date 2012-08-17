@@ -67,7 +67,11 @@ public class DropAliasNode extends DDLStatementNode
 	
 		switch (this.aliasType)
 		{
-			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
+			case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR;
+				break;
+
+            case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR;
 				break;
 
@@ -151,6 +155,9 @@ public class DropAliasNode extends DDLStatementNode
 
 		switch ( actualType )
 		{
+			case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+				typeName = "DERBY AGGREGATE";
+				break;
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 				typeName = "PROCEDURE";
 				break;

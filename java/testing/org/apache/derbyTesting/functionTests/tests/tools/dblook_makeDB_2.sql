@@ -100,3 +100,11 @@ create type price external name 'org.apache.derbyTesting.functionTests.tests.lan
 
 create sequence sequence_1;
 
+-- ----------------------------------------------
+-- Aggregates
+-- ----------------------------------------------
+
+create derby aggregate mode for int external name 'foo.bar.Wibble';
+create derby aggregate mode2 for bigint returns double external name 'foo.bar.Wibble';
+
+

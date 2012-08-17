@@ -5970,6 +5970,11 @@ CREATE PROCEDURE "APP"."PROC1" (INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA
 -- ----------------------------------------------
 CREATE FUNCTION "APP"."GATP" ("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' 
 -- ----------------------------------------------
+-- DDL Statements for aggregates
+-- ----------------------------------------------
+CREATE DERBY AGGREGATE "APP"."MODE" FOR INTEGER RETURNS INTEGER EXTERNAL NAME 'foo.bar.Wibble' 
+CREATE DERBY AGGREGATE "APP"."MODE2" FOR BIGINT RETURNS DOUBLE EXTERNAL NAME 'foo.bar.Wibble' 
+-- ----------------------------------------------
 -- DDL Statements for tables
 -- ----------------------------------------------
 CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5))
@@ -6126,6 +6131,11 @@ CREATE PROCEDURE "APP"."PROC1" (INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA
 -- DDL Statements for functions
 -- ----------------------------------------------
 CREATE FUNCTION "APP"."GATP" ("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties'  #
+-- ----------------------------------------------
+-- DDL Statements for aggregates
+-- ----------------------------------------------
+CREATE DERBY AGGREGATE "APP"."MODE" FOR INTEGER RETURNS INTEGER EXTERNAL NAME 'foo.bar.Wibble'  #
+CREATE DERBY AGGREGATE "APP"."MODE2" FOR BIGINT RETURNS DOUBLE EXTERNAL NAME 'foo.bar.Wibble'  #
 -- ----------------------------------------------
 -- DDL Statements for tables
 -- ----------------------------------------------

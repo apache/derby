@@ -172,6 +172,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 					case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 					case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 					case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+					case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
 						break;
 
 					default:
@@ -302,6 +303,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 				case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR: 
+				case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR: 
 					break;
 
 				default: 
@@ -325,6 +327,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 				case AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR: 
 				case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR: 
+				case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR: 
 					break;
 
 				default: 

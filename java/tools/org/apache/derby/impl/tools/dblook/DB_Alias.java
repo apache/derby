@@ -33,6 +33,7 @@ import org.apache.derby.tools.dblook;
 
 public class DB_Alias
 {
+    private static final char AGGREGATE_TYPE = 'G';
     private static final char UDT_TYPE = 'A';
     private static final char PROCEDURE_TYPE = 'P';
     private static final char FUNCTION_TYPE = 'F';
@@ -42,13 +43,13 @@ public class DB_Alias
 
 	/* ************************************************
 	 * Generate the DDL for all stored procedures,
-	 * functions, and UDTs in a given database and write it to
+	 * functions, aggregates, and UDTs in a given database and write it to
 	 * output via Logs.java.
 	 * @param conn Connection to the source database.
 	 * @param at10_6 True if the database is at 10.6 or higher
 	 ****/
 
-	public static void doProceduresFunctionsAndUDTs(Connection conn, boolean at10_6 )
+	public static void doPFAU(Connection conn, boolean at10_6 )
 		throws SQLException {
 
 		// First do stored procedures.
@@ -59,7 +60,7 @@ public class DB_Alias
              "WHERE ALIASTYPE=?");
 
         //
-        // UDTs come before procedures and functions right now because
+        // UDTs come before procedures, functions, and aggregates right now because
         // procedures and functions can have args and return values which
         // have UDT types. If we add functions to the signatures of UDTs,
         // then we will have to do some trickier dependency analysis in order
@@ -72,6 +73,7 @@ public class DB_Alias
         }
         generateDDL( ps, PROCEDURE_TYPE );	// PROCEDURE_TYPE => for PROCEDURES
 		generateDDL( ps, FUNCTION_TYPE );	// FUNCTION_TYPE => for FUNCTIONS
+		generateDDL( ps, AGGREGATE_TYPE );
 
         ps.close();
 
@@ -131,6 +133,7 @@ public class DB_Alias
                 case UDT_TYPE: Logs.reportMessage( "DBLOOK_UDTHeader" ); break;
                 case PROCEDURE_TYPE: Logs.reportMessage( "DBLOOK_StoredProcHeader" ); break;
                 case FUNCTION_TYPE: Logs.reportMessage( "DBLOOK_FunctionHeader" ); break;
+                case AGGREGATE_TYPE: Logs.reportMessage( "DBLOOK_AggregateHeader" ); break;
                 }
 				Logs.reportString("----------------------------------------------\n");
 			}
@@ -140,7 +143,7 @@ public class DB_Alias
 				dblook.expandDoubleQuotes(aliasName));
 			fullName = procSchema + "." + fullName;
 
-			String creationString = createProcFuncOrUDTString(
+			String creationString = createPFAUString(
 				fullName, rs, aliasType);
 			Logs.writeToNewDDL(creationString);
 			Logs.writeStmtEndToNewDDL();
@@ -162,7 +165,7 @@ public class DB_Alias
 	 *   returned, as a String.
 	 ****/
 
-	private static String createProcFuncOrUDTString(String aliasName,
+	private static String createPFAUString(String aliasName,
 		ResultSet aliasInfo, char aliasType) throws SQLException
 	{
 
@@ -173,13 +176,19 @@ public class DB_Alias
         case UDT_TYPE: alias.append( "TYPE " ); break;
         case PROCEDURE_TYPE: alias.append("PROCEDURE "); break;
         case FUNCTION_TYPE: alias.append("FUNCTION "); break;
+        case AGGREGATE_TYPE: alias.append("DERBY AGGREGATE "); break;
         }
 		alias.append(aliasName);
 		alias.append(" ");
 
 		String params = aliasInfo.getString(2);
 
-        if ( aliasType != UDT_TYPE )
+        if ( aliasType == AGGREGATE_TYPE )
+        {
+            alias.append( params );
+            alias.append( " " );
+        }
+        else if ( aliasType != UDT_TYPE )
         {
             // Just grab the parameter part; we'll get the method name later.
             alias.append(params.substring(params.indexOf("("), params.length()));
@@ -195,7 +204,11 @@ public class DB_Alias
             alias.append("' ");
             alias.append( params );
         }
-        else
+        else if ( aliasType == AGGREGATE_TYPE )
+        {
+            alias.append("' ");
+        }
+        else if ( aliasType != AGGREGATE_TYPE )
         {
             alias.append(".");
             // Get method name from parameter string fetched above.

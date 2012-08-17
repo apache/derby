@@ -31,6 +31,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import	org.apache.derby.catalog.AliasInfo;
+import	org.apache.derby.catalog.types.AggregateAliasInfo;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import	org.apache.derby.catalog.types.UDTAliasInfo;
 
@@ -129,6 +130,10 @@ public final class AliasDescriptor
         if ( aliasInfo instanceof UDTAliasInfo )
         {
             return PermDescriptor.UDT_TYPE;
+        }
+        else if ( aliasInfo instanceof AggregateAliasInfo )
+        {
+            return PermDescriptor.AGGREGATE_TYPE;
         }
         else
         {
@@ -374,6 +379,8 @@ public final class AliasDescriptor
 				return "SYNONYM";
 			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
 				return "TYPE";
+			case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+				return "DERBY AGGREGATE";
 		}
 		return  null;
 	}
@@ -451,6 +458,10 @@ public final class AliasDescriptor
             
         case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
             invalidationType = DependencyManager.DROP_UDT;
+            break;
+            
+        case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+            invalidationType = DependencyManager.DROP_AGGREGATE;
             break;
         }
         

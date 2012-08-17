@@ -57,6 +57,9 @@ public class Changes10_10 extends UpgradeChange
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static  final   String  SYNTAX_ERROR = "42X01";
+    private static  final   String  HARD_UPGRADE_REQUIRED = "XCL47";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -164,4 +167,37 @@ public class Changes10_10 extends UpgradeChange
             }
         }
     }
+
+    /**
+     * Verify upgrade behavior for user-defined aggregates.
+     */
+    public  void    testUDAs()  throws Exception
+    {
+        Statement st = createStatement();
+
+        String  createUDA = "create derby aggregate mode for int external name 'foo.bar.Wibble'";
+        String  dropUDA = "drop derby aggregate mode restrict";
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            assertStatementError( SYNTAX_ERROR, st, createUDA );
+            assertStatementError( SYNTAX_ERROR, st, dropUDA );
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, createUDA );
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, dropUDA );
+            break;
+            
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            st.execute( createUDA );
+            st.execute( dropUDA );
+            break;
+        }
+        
+        st.close();
+    }
+    
 }

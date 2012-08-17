@@ -2963,6 +2963,12 @@ Guide.
                 <arg>clauseName</arg>
             </msg>
 
+            <msg>
+                <name>42ZC3</name>
+                <text>A user defined aggregate may not have the name of an aggregate defined by the SQL Standard or the name of a builtin Derby function having one argument: '{0}'</text>
+                <arg>aggregateName</arg>
+            </msg>
+
         </family>
 
 
@@ -3530,6 +3536,13 @@ Guide.
                 <text>Derby could not obtain the locks needed to release the unused, preallocated values for the sequence '{0}'.'{1}'. As a result, unexpected gaps may appear in this sequence.</text>
                 <arg>schemaName</arg>
                 <arg>sequenceName</arg>
+            </msg>
+
+            <msg>
+                <name>X0Y87.S</name>
+                <text>There is already an aggregate or function with one argument whose name is '{0}'.'{1}'.</text>
+                <arg>schemaName</arg>
+                <arg>aggregateOrFunctionName</arg>
             </msg>
 
         </family>

@@ -1696,7 +1696,8 @@ public class SQLParser
 
         if (
             (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR) &&
-            (aliasType != AliasInfo.ALIAS_TYPE_UDT_AS_CHAR)
+            (aliasType != AliasInfo.ALIAS_TYPE_UDT_AS_CHAR) &&
+            (aliasType != AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR)
             )
         {
             int lastPeriod;
@@ -2543,6 +2544,7 @@ TOKEN [IGNORE_CASE] :
 TOKEN [IGNORE_CASE] :
 {	/* Additional JSQL keywords -- non-SQL92 non-reserved Keywords */
 	<AFTER: "after">
+|	<AGGREGATE: "aggregate">
 |	<BEFORE: "before">
 |	<CLASS: "class">
 |	<COMPRESS: "compress">
@@ -2550,6 +2552,7 @@ TOKEN [IGNORE_CASE] :
 |   <CS: "cs">
 |	<CURSORS: "cursors">
 |	<DB2SQL: "db2sql">
+|	<DERBY: "derby">
 |	<DERBY_JDBC_RESULT_SET: "derby_jdbc_result_set">
 |	<DEFRAGMENT: "defragment">
 |       <DIRTY: "dirty">
@@ -3076,6 +3079,7 @@ createStatements() throws StandardException :
         }
 |		statementNode = procedureDefinition()
 |		statementNode = functionDefinition()
+|		statementNode = aggregateDefinition()
 |		statementNode = udtDefinition()
 |
 		statementNode = indexDefinition()
@@ -11034,6 +11038,37 @@ udtDefinition() throws StandardException :
 }
 
 StatementNode
+aggregateDefinition() throws StandardException :
+{
+	TableName aggregateName;
+    DataTypeDescriptor  forType;
+    DataTypeDescriptor  returnType = null;
+	Object[] aggElements = new Object[CreateAliasNode.AGG_ELEMENT_COUNT];
+	String externalName;
+}
+{
+		<DERBY> <AGGREGATE> aggregateName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+        <FOR> forType = dataTypeDDL()
+        [ <RETURNS> returnType = dataTypeDDL() ]
+		<EXTERNAL> <NAME> externalName = string()
+		{
+            checkVersion(DataDictionary.DD_VERSION_DERBY_10_10, "CREATE DERBY AGGREGATE");
+
+            if ( returnType == null ) { returnType = forType; }
+            aggElements[ CreateAliasNode.AGG_FOR_TYPE ] = forType.getCatalogType();
+            aggElements[ CreateAliasNode.AGG_RETURN_TYPE ] = returnType.getCatalogType();
+
+            return getCreateAliasNode
+            (
+                aggregateName,
+                externalName,
+                aggElements,
+                AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR
+            );
+		}
+}
+
+StatementNode
 viewDefinition(Token beginToken) throws StandardException :
 {
 	int					checkOptionType;
@@ -13714,6 +13749,12 @@ dropAliasStatement() throws StandardException :
 
 		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_UDT_AS_CHAR);
 	}
+|	<DERBY> <AGGREGATE> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <RESTRICT>
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_10, "DROP DERBY AGGREGATE");
+
+		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR);
+	}
 }
 
 StatementNode
@@ -14658,6 +14699,7 @@ nonReservedKeyword()  :
 	|	tok = <ABSVAL>  
 	|	tok = <ACTION>
 	|	tok = <AFTER>
+	|	tok = <AGGREGATE>
 	|	tok = <ALWAYS>
 	|	tok = <BEFORE>
 	|	tok = <BINARY>
@@ -14666,7 +14708,7 @@ nonReservedKeyword()  :
 	|	tok = <CALLED>
 	|	tok = <CLASS>
 	|	tok = <CLOB>
-|	tok = <COALESCE>
+    |	tok = <COALESCE>
 	|	tok = <COBOL>
 	|	tok = <COMMITTED>
 	|	tok = <COMPRESS>
@@ -14683,10 +14725,11 @@ nonReservedKeyword()  :
 	|	tok = <DATE>
 	|	tok = <DAY>
 	|	tok = <DEFRAGMENT>
-        |	tok = <DIRTY>
+    |	tok = <DIRTY>
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
 	|	tok = <DB2SQL>
+	|	tok = <DERBY>
 	|	tok = <DERBY_JDBC_RESULT_SET>
 	|	tok = <DOCUMENT>
 	|	tok = <EACH>

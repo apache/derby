@@ -322,6 +322,12 @@ public class JDBC {
         psf.setString(2, schema);
         rs = psf.executeQuery();
         dropUsingDMD(s, rs, schema, "ALIAS", "TYPE");        
+  
+        // drop aggregates
+        psf.setString(1, "G" );
+        psf.setString(2, schema);
+        rs = psf.executeQuery();
+        dropUsingDMD(s, rs, schema, "ALIAS", "DERBY AGGREGATE");        
         psf.close();
   
         // Synonyms - need work around for DERBY-1790 where
@@ -406,7 +412,12 @@ public class JDBC {
 		{
             String objectName = rs.getString(mdColumn);
             String raw = dropLeadIn + JDBC.escape(schema, objectName);
-            if ( "TYPE".equals( dropType )  || "SEQUENCE".equals( dropType ) ) { raw = raw + " restrict "; }
+            if (
+                "TYPE".equals( dropType )  ||
+                "SEQUENCE".equals( dropType ) ||
+                "DERBY AGGREGATE".equals( dropType )
+                )
+            { raw = raw + " restrict "; }
             ddl.add( raw );
 		}
 		rs.close();

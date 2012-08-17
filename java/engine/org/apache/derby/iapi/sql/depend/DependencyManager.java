@@ -339,6 +339,8 @@ public interface DependencyManager {
 
     public static final int DROP_UDT = 50;
 
+    public static final int DROP_AGGREGATE = 51;
+
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of
      * clashing with action codes in this base interface.

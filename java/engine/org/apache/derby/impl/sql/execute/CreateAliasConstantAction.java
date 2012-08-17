@@ -80,6 +80,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 		this.aliasType = aliasType;
 		switch (aliasType)
 		{
+			case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR;
+				break;
+
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR;
 				break;
@@ -117,6 +121,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 		switch (aliasType)
 		{
+			case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+				type = "CREATE DERBY AGGREGATE ";
+				break;
+
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 				type = "CREATE PROCEDURE ";
 				break;
@@ -224,7 +232,32 @@ class CreateAliasConstantAction extends DDLConstantAction
 									 aliasInfo, null);
 
 		// perform duplicate rule checking
-		switch (aliasType) {
+        switch (aliasType)
+        {
+        case AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR:
+
+            AliasDescriptor duplicateAlias = dd.getAliasDescriptor( sd.getUUID().toString(), aliasName, nameSpace );
+            if ( duplicateAlias != null )
+            {
+                throw StandardException.newException( SQLState.LANG_OBJECT_ALREADY_EXISTS, ads.getDescriptorType(), aliasName );
+            }
+
+            // also don't want to collide with 1-arg functions by the same name
+            java.util.List funcList = dd.getRoutineList( sd.getUUID().toString(), aliasName, AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR );
+            for ( int i = 0; i < funcList.size(); i++ )
+            {
+				AliasDescriptor func = (AliasDescriptor) funcList.get(i);
+
+				RoutineAliasInfo funcInfo = (RoutineAliasInfo) func.getAliasInfo();
+                if ( funcInfo.getParameterCount() == 1 )
+                {
+                    throw StandardException.newException
+                        ( SQLState.LANG_BAD_UDA_OR_FUNCTION_NAME, schemaName, aliasName );
+                }
+			}
+            
+            break;
+            
 		case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
 
             AliasDescriptor duplicateUDT = dd.getAliasDescriptor( sd.getUUID().toString(), aliasName, nameSpace );
@@ -232,28 +265,31 @@ class CreateAliasConstantAction extends DDLConstantAction
             break;
             
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
+
+            vetRoutine( dd, sd, ads );
+            break;
+            
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
-		{
 
-			java.util.List list = dd.getRoutineList(
-				sd.getUUID().toString(), aliasName, aliasType);
-			for (int i = list.size() - 1; i >= 0; i--) {
+            vetRoutine( dd, sd, ads );
 
-				AliasDescriptor proc = (AliasDescriptor) list.get(i);
+            // if this is a 1-arg function, make sure there isn't an aggregate
+            // by the same qualified name
 
-				RoutineAliasInfo procedureInfo = (RoutineAliasInfo) proc.getAliasInfo();
-				int parameterCount = procedureInfo.getParameterCount();
-				if (parameterCount != ((RoutineAliasInfo) aliasInfo).getParameterCount())
-					continue;
+            int paramCount = ((RoutineAliasInfo) aliasInfo).getParameterCount();
+            if ( paramCount == 1 )
+            {
+                AliasDescriptor aliasCollision = dd.getAliasDescriptor
+                    ( sd.getUUID().toString(), aliasName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
+                if ( aliasCollision != null )
+                {
+                    throw StandardException.newException
+                        ( SQLState.LANG_BAD_UDA_OR_FUNCTION_NAME, schemaName, aliasName );
+                }
+            }
+            
+            break;
 
-				// procedure duplicate checking is simple, only
-				// one procedure with a given number of parameters.
-				throw StandardException.newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
-												ads.getDescriptorType(),
-												aliasName);
-			}
-		}
-		break;
 		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			// If target table/view exists already, error.
 			TableDescriptor targetTD = dd.getTableDescriptor(aliasName, sd, tc);
@@ -316,4 +352,36 @@ class CreateAliasConstantAction extends DDLConstantAction
 
         adjustUDTDependencies( lcc, dd, ads, true );
 	}
+
+    /** Common checks to be performed for functions and procedures */
+    private void    vetRoutine
+        (
+         DataDictionary dd,
+         SchemaDescriptor sd,
+         AliasDescriptor ads
+         )
+        throws StandardException
+    {
+        java.util.List list = dd.getRoutineList( sd.getUUID().toString(), aliasName, aliasType );
+        
+        for (int i = list.size() - 1; i >= 0; i--)
+        {
+            AliasDescriptor proc = (AliasDescriptor) list.get(i);
+            
+            RoutineAliasInfo procedureInfo = (RoutineAliasInfo) proc.getAliasInfo();
+            int parameterCount = procedureInfo.getParameterCount();
+            if (parameterCount != ((RoutineAliasInfo) aliasInfo).getParameterCount())
+            { continue; }
+            
+            // procedure duplicate checking is simple, only
+            // one procedure with a given number of parameters.
+            throw StandardException.newException
+                (
+                 SQLState.LANG_OBJECT_ALREADY_EXISTS,
+                 ads.getDescriptorType(),
+                 aliasName
+                 );
+        }
+    }
+        
 }
