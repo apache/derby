@@ -1023,10 +1023,15 @@ public final class TestConfiguration {
      * @param test the test/suite to decorate
      * @return A test setup with the requested decorator.
      */
-    public static TestSetup connectionCPDecorator(Test test)
+    public static Test connectionCPDecorator(Test test)
     {
-        return new ConnectorSetup(test,
+        if (JDBC.vmSupportsJDBC3()) {
+            return new ConnectorSetup(test,
              "org.apache.derbyTesting.junit.ConnectionPoolDataSourceConnector");
+        } else {
+            return new TestSuite("ConnectionPoolDataSource not supported");
+        }
+
     }
 
     /**
@@ -1040,10 +1045,14 @@ public final class TestConfiguration {
      * The tearDown reverts the configuration to the previous
      * configuration.
      */
-    public static TestSetup connectionXADecorator(Test test)
+    public static Test connectionXADecorator(Test test)
     {
-        return new ConnectorSetup(test,
+        if (JDBC.vmSupportsJDBC3()) {
+            return new ConnectorSetup(test,
                 "org.apache.derbyTesting.junit.XADataSourceConnector");
+        } else {
+            return new TestSuite("XADataSource not supported");
+        }
     }
     /**
      * Return a decorator that changes the configuration to obtain
