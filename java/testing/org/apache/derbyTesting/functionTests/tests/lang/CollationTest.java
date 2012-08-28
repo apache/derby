@@ -477,6 +477,40 @@ public void testNorwayCollation() throws SQLException {
 
       }
 
+/**
+ * DERBY-5531 Assert failure when inserting NULL into indexed column with 
+ *  territory-based collation
+ * Make sure that when the row being inserted has all nulls, we do not run
+ *  into assert failure 
+ * @throws SQLException
+ */
+public void testNullColumnInInsert() throws SQLException {
+    Statement s = createStatement();
+    String collation; 
+
+    ResultSet rs = null;
+    s.executeUpdate("CREATE TABLE derby5531_t1(x varchar(10) unique, y varchar(10))");
+    s.executeUpdate("INSERT INTO derby5531_t1 VALUES(NULL, 'a')");
+    s.executeUpdate("INSERT INTO derby5531_t1 VALUES('1', 'a')");
+    s.executeUpdate("INSERT INTO derby5531_t1 VALUES('2', NULL)");
+    s.executeUpdate("INSERT INTO derby5531_t1 VALUES(NULL, NULL)");
+    s.executeUpdate("INSERT INTO derby5531_t1(x) VALUES(NULL)");
+    s.executeUpdate("INSERT INTO derby5531_t1 VALUES('3', 'b')");
+    rs = s.executeQuery("select * from derby5531_t1 order by x");
+    JDBC.assertFullResultSet(rs,
+      		new String[][] {{"1","a"}, {"2",null}, {"3","b"}, {null,null}, {null,null}, {null,"a"}});
+    s.executeUpdate("DROP TABLE derby5531_t1");
+
+    s.executeUpdate("CREATE TABLE derby5531_t2(x varchar(10) unique)");
+    s.executeUpdate("INSERT INTO derby5531_t2 VALUES(NULL)");
+    s.executeUpdate("INSERT INTO derby5531_t2(x) VALUES(NULL)");
+    s.executeUpdate("INSERT INTO derby5531_t2 VALUES('a')");
+    rs = s.executeQuery("select * from derby5531_t2 order by x");
+    JDBC.assertFullResultSet(rs,
+      		new String[][] {{"a"}, {null}, {null}});
+    s.executeUpdate("DROP TABLE derby5531_t2");
+}
+
   /**
    * Test USING clause and NATURAL JOIN for case insensitive and
    * 	case sensitive collations.
@@ -2012,6 +2046,8 @@ public void testMissingCollatorSupport() throws SQLException {
         suite.addTest(collatedSuite("en", false, "testEnglishCollation"));
         suite.addTest(collatedSuite("en", true, "testUsingClauseAndNaturalJoin"));
         suite.addTest(collatedSuite("en", false, "testUsingClauseAndNaturalJoin"));
+        suite.addTest(collatedSuite("en", true, "testNullColumnInInsert"));
+        suite.addTest(collatedSuite("en", false, "testNullColumnInInsert"));
          
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
