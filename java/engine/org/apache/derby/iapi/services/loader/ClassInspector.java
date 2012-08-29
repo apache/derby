@@ -35,7 +35,7 @@ import java.lang.reflect.*;
 	e.g. int, COM.foo.Myclass, int[], java.lang.Object[]. That is java internal
 	class names as defined in the class file format are not understood.
 */
-public final class ClassInspector
+public class ClassInspector
 {
 	private static final String[] primTypeNames =
 		{"boolean", "byte", "char", "short", "int", "long", "float", "double"};
@@ -483,6 +483,21 @@ public final class ClassInspector
 							 receiverClass.getConstructors());
 	}
 
+	/**
+	 * Given an implementation of a parameterized class/interface, return
+     * the actual concrete types of the parameters. Types are returned in the
+     * order that they are declared by the parameterized class/interface.
+     * So for instance, if the parameterized class is Map&lt;K,V&gt; and the
+     * implementation is HashMap&lt;Integer,String&gt;, then the return value is
+     * [ Integer.class, String.class ]. This method raises an exception if the
+     * JVM does not support generics. May return null if type resolution fails.
+	 */
+	public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
+        throws StandardException
+	{
+		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
+    }
+    
 	/**
 	 * Get the parameter types for a method described by a Member as a String[].
 	 *

@@ -191,6 +191,9 @@ public class _Suite extends BaseTestCase  {
             
             // test uses PooledConnections and Savepoints
             suite.addTest(DeclareGlobalTempTableJavaJDBC30Test.suite());
+
+            // requires Java 5 (generics)
+            suite.addTest(UserDefinedAggregatesTest.suite());
         }
         
         suite.addTest(BigDataTest.suite());
@@ -207,7 +210,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(RestrictedVTITest.suite());
         suite.addTest(UDTTest.suite());
         suite.addTest(UDTPermsTest.suite());
-        suite.addTest(UserDefinedAggregatesTest.suite());
         suite.addTest(BooleanValuesTest.suite());
         suite.addTest(AlterColumnTest.suite());
         suite.addTest(UserLobTest.suite());

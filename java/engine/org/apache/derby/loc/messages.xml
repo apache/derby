@@ -2969,6 +2969,41 @@ Guide.
                 <arg>aggregateName</arg>
             </msg>
 
+            <msg>
+                <name>42ZC4</name>
+                <text>User defined aggregate '{0}'.'{1}' is bound to external class '{2}'. The parameter types of that class could not be resolved.</text>
+                <arg>schemaName</arg>
+                <arg>aggregateName</arg>
+                <arg>className</arg>
+            </msg>
+
+            <msg>
+                <name>42ZC6</name>
+                <text>User defined aggregate '{0}'.'{1}' was declared to have this input Java type: '{2}'. However, the actual input Java type is '{3}'.</text>
+                <arg>schemaName</arg>
+                <arg>aggregateName</arg>
+                <arg>javaDataType</arg>
+                <arg>javaDataType</arg>
+            </msg>
+
+            <msg>
+                <name>42ZC7</name>
+                <text>User defined aggregate '{0}'.'{1}' was declared to have this return Java type: '{2}'. However, the actual return Java type is '{3}'.</text>
+                <arg>schemaName</arg>
+                <arg>aggregateName</arg>
+                <arg>javaDataType</arg>
+                <arg>javaDataType</arg>
+            </msg>
+
+            <msg>
+                <name>42ZC8</name>
+                <text>Implementing class '{0}' for user defined aggregate '{1}'.'{2}' could not be instantiated or was malformed. Detailed message follows: {3}</text>
+                <arg>className</arg>
+                <arg>schemaName</arg>
+                <arg>aggregateName</arg>
+                <arg>detailedMessage</arg>
+            </msg>
+
         </family>
 
 
@@ -3588,6 +3623,12 @@ Guide.
                 <text>Java class file format limit(s) exceeded: {1} in generated class {0}.</text>
                 <arg>className</arg>
                 <arg>limitDescriptor</arg>
+            </msg>
+
+            <msg>
+                <name>XBCM5.S</name>
+                <text>This operation requires that the JVM level be at least {0}.</text>
+                <arg>vmLevel</arg>
             </msg>
 
         </family>
@@ -7684,6 +7725,13 @@ MessageId.java.
                 <text>Exception loading class {0} from jar {1} - {2}</text>
                 <arg>className</arg>
                 <arg>jarName</arg>
+                <arg>detailedError</arg>
+            </msg>
+
+            <msg>
+                <name>C008</name>
+                <text>Exception loading class {0}: {1}</text>
+                <arg>className</arg>
                 <arg>detailedError</arg>
             </msg>
 

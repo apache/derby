@@ -22,11 +22,13 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.execute.ExecAggregator;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -46,9 +48,9 @@ public final class MaxMinAggregator
 
 	/**
 	 */
-	public void setup(String aggregateName)
+	public void setup( ClassFactory cf, String aggregateName, DataTypeDescriptor returnType )
 	{
-		super.setup(aggregateName);
+		super.setup( cf, aggregateName, returnType );
 		isMax = aggregateName.equals("MAX");
 	}
 	/**

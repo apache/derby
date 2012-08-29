@@ -26,8 +26,10 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecAggregator;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -40,7 +42,7 @@ abstract class OrderableAggregator extends SystemAggregator
 
 	/**
 	 */
-	public void setup(String aggregateName)
+	public void setup( ClassFactory cf, String aggregateName, DataTypeDescriptor returnDataType )
 	{
 	}
 

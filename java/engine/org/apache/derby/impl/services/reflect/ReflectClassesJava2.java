@@ -26,7 +26,7 @@ import org.apache.derby.iapi.util.ByteArray;
 	Relfect loader with Privileged block for Java 2 security. 
 */
 
-public final class ReflectClassesJava2 extends DatabaseClasses
+public class ReflectClassesJava2 extends DatabaseClasses
 	implements java.security.PrivilegedAction
 {
 

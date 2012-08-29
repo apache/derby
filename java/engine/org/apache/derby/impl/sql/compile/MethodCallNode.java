@@ -39,6 +39,7 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
@@ -1041,7 +1042,9 @@ abstract class MethodCallNode extends JavaValueNode
 		int		count = signature.length;
 		String	parmTypeNames[] = new String[ count ];
 
-		for ( int i = 0; i < count; i++ ) { parmTypeNames[i] = getObjectTypeName( signature[ i ] ); }
+        TypeCompilerFactory tcf = (routineInfo == null ) ? null : getCompilerContext().getTypeCompilerFactory();
+
+		for ( int i = 0; i < count; i++ ) { parmTypeNames[i] = getObjectTypeName( signature[ i ], tcf ); }
 
 		return parmTypeNames;
 	}
@@ -1077,7 +1080,7 @@ abstract class MethodCallNode extends JavaValueNode
 		return isParam;
 	}
 
-	private	String	getObjectTypeName( JSQLType jsqlType )
+	static  String	getObjectTypeName( JSQLType jsqlType, TypeCompilerFactory tcf )
 		throws StandardException
 	{
 		if ( jsqlType != null )
@@ -1102,9 +1105,8 @@ abstract class MethodCallNode extends JavaValueNode
 						case java.sql.Types.BIGINT:
 						case java.sql.Types.REAL:
 						case java.sql.Types.DOUBLE:
-							if (routineInfo != null) {
-								TypeCompiler tc = getTypeCompiler(ctid);
-								return tc.getCorrespondingPrimitiveTypeName();
+							if (tcf != null) {
+								return tcf.getTypeCompiler( ctid ).getCorrespondingPrimitiveTypeName();
 							}
 							// fall through
 						default:

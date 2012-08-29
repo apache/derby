@@ -112,6 +112,7 @@ public interface ClassName
 	String SumAggregator = "org.apache.derby.impl.sql.execute.SumAggregator";
 	String CountAggregator = "org.apache.derby.impl.sql.execute.CountAggregator";
 	String AvgAggregator = "org.apache.derby.impl.sql.execute.AvgAggregator";
+	String UserDefinedAggregator = "org.apache.derby.impl.sql.execute.UserDefinedAggregator";
 
 	String ExecutionFactory = "org.apache.derby.iapi.sql.execute.ExecutionFactory";
 	String LanguageFactory ="org.apache.derby.iapi.sql.LanguageFactory";

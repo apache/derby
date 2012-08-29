@@ -213,6 +213,7 @@ public interface SQLState {
 	String GENERATED_CLASS_INSTANCE_ERROR	= "XBCM2.S";
 	String GENERATED_CLASS_NO_SUCH_METHOD	= "XBCM3.S";
 	String GENERATED_CLASS_LIMIT_EXCEEDED	= "XBCM4.S";
+	String VM_LEVEL_TOO_LOW	= "XBCM5.S";
 
 	/*
 	** Cryptography
@@ -1125,6 +1126,10 @@ public interface SQLState {
 	String LANG_WINDOW_FUNCTION_CONTEXT_ERROR                          = "42ZC2";
 
 	String LANG_ILLEGAL_UDA_NAME                                  = "42ZC3";
+	String LANG_ILLEGAL_UDA_CLASS                                  = "42ZC4";
+	String LANG_UDA_WRONG_INPUT_TYPE                                  = "42ZC6";
+	String LANG_UDA_WRONG_RETURN_TYPE                                  = "42ZC7";
+	String LANG_UDA_INSTANTIATION                                  = "42ZC8";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";

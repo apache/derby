@@ -61,6 +61,10 @@ org/apache/derby/vti/VTICosting.java
 org/apache/derby/vti/VTIEnvironment.java
 org/apache/derby/vti/VTITemplate.java
 
+# package: org.apache.derby.agg
+
+org/apache/derby/agg/Aggregator.java
+
 # package: org.apache.derby.mbeans (all)
 
 org/apache/derby/mbeans/*.java

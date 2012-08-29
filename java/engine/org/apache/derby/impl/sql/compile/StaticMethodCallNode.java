@@ -129,6 +129,8 @@ public class StaticMethodCallNode extends MethodCallNode
 
 	AliasDescriptor	ad;
 
+    private AggregateNode   resolvedAggregate;
+
 
 	/**
 	 * Intializer for a NonStaticMethodCallNode
@@ -148,6 +150,11 @@ public class StaticMethodCallNode extends MethodCallNode
 		this.javaClassName = (String) javaClassName;
 	}
 
+    /**
+     * Get the aggregate, if any, which this method call resolves to.
+     */
+    public  AggregateNode   getResolvedAggregate() { return resolvedAggregate; }
+    
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.
@@ -194,6 +201,21 @@ public class StaticMethodCallNode extends MethodCallNode
             // The field methodName is used by resolveRoutine and
             // is set to the name of the routine (procedureName.getTableName()).
 			resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+
+            if ( (ad != null) && (ad.getAliasType() == AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR) )
+            {
+                resolvedAggregate = (AggregateNode) getNodeFactory().getNode
+                    (
+                     C_NodeTypes.AGGREGATE_NODE,
+                     ((SQLToJavaValueNode) methodParms[ 0 ]).getSQLValueNode(),
+                     new UserAggregateDefinition( ad ), 
+                     Boolean.FALSE,
+                     ad.getJavaClassName(),
+                     getContextManager()
+                     );
+
+                return this;
+            }
 
 			if (ad == null && noSchema && !forCallStatement)
 			{
@@ -660,9 +682,40 @@ public class StaticMethodCallNode extends MethodCallNode
 
 			break;
 		}
-}
+        }
+
+        if ( ad == null )
+        {
+            resolveAggregate( fromList, subqueryList, aggregateVector, sd );
+        }
 	}
 
+	/**
+	 * Resolve a user-defined aggregate.
+     *
+	 * @param fromList
+	 * @param subqueryList
+	 * @param aggregateVector
+	 * @param sd
+	 * @throws StandardException
+	 */
+	private void resolveAggregate
+        (FromList fromList, SubqueryList subqueryList, Vector aggregateVector, SchemaDescriptor sd)
+        throws StandardException
+    {
+        // aggregates have only 1 argument
+        if ( methodParms.length != 1 ) { return; }
+        
+		java.util.List list = getDataDictionary().getRoutineList
+            ( sd.getUUID().toString(), methodName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
+
+        for ( int i = 0; i < list.size(); i++ )
+        {
+            ad = (AliasDescriptor) list.get( i );
+            break;
+        }
+    }
+    
 	/**
 	 * Add code to set up the SQL session context for a stored
 	 * procedure or function which needs a nested SQL session

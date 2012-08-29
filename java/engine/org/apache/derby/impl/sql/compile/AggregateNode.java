@@ -108,16 +108,15 @@ public class AggregateNode extends UnaryOperatorNode
 		super.init(operand);
 		this.aggregateName = (String) aggregateName;
 
-		if (uadClass instanceof String)
+		if (uadClass instanceof AggregateDefinition)
 		{
-			this.aggregateDefinitionClassName = (String) uadClass;
+			this.uad = (AggregateDefinition) uadClass;
+			this.aggregateDefinitionClass = uad.getClass();
 			this.distinct = ((Boolean) distinct).booleanValue();
 		}
 		else
 		{
 			this.aggregateDefinitionClass = (Class) uadClass;
-			this.aggregateDefinitionClassName =
-										aggregateDefinitionClass.getName();
 
 			// Distinct is meaningless for min and max
 			if (!aggregateDefinitionClass.equals(MaxMinAggregateDefinition.class))
@@ -125,6 +124,8 @@ public class AggregateNode extends UnaryOperatorNode
 				this.distinct = ((Boolean) distinct).booleanValue();
 			}
 		}
+        
+        this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
 	}
 
 	/**
@@ -391,63 +392,65 @@ public class AggregateNode extends UnaryOperatorNode
 	*/
 	private void instantiateAggDef() throws StandardException
 	{
-		Class theClass = aggregateDefinitionClass;
+        if ( uad == null )
+        {
+            Class theClass = aggregateDefinitionClass;
 
-		// get the class
-		if (theClass == null)
-		{
-			String aggClassName = aggregateDefinitionClassName;
-			verifyClassExist(aggClassName);
+            // get the class
+            if (theClass == null)
+            {
+                String aggClassName = aggregateDefinitionClassName;
+                verifyClassExist(aggClassName);
 
-			try
-			{
-				theClass = classInspector.getClass(aggClassName);
-			}
-			catch (Throwable t)
-			{
-				throw StandardException.unexpectedUserException(t);
-			}
-		}
+                try
+                {
+                    theClass = classInspector.getClass(aggClassName);
+                }
+                catch (Throwable t)
+                {
+                    throw StandardException.unexpectedUserException(t);
+                }
+            }
 
-		// get an instance
-		Object instance = null;
-		try
-		{
-			instance = theClass.newInstance();
-		}
-		catch (Throwable t)
-		{
-			throw StandardException.unexpectedUserException(t);
-		}
+            // get an instance
+            Object instance = null;
+            try
+            {
+                instance = theClass.newInstance();
+            }
+            catch (Throwable t)
+            {
+                throw StandardException.unexpectedUserException(t);
+            }
 
-		if (!(instance instanceof AggregateDefinition))
-		{
-			throw StandardException.newException(SQLState.LANG_INVALID_USER_AGGREGATE_DEFINITION2, aggregateDefinitionClassName);
-		}
+            if (!(instance instanceof AggregateDefinition))
+            {
+                throw StandardException.newException(SQLState.LANG_INVALID_USER_AGGREGATE_DEFINITION2, aggregateDefinitionClassName);
+            }
 
-		if (instance instanceof MaxMinAggregateDefinition)
-		{
-			MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)instance;
-			if (aggregateName.equals("MAX"))
-				temp.setMaxOrMin(true);
-			else
-				temp.setMaxOrMin(false);
-		}
+            if (instance instanceof MaxMinAggregateDefinition)
+            {
+                MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)instance;
+                if (aggregateName.equals("MAX"))
+                    temp.setMaxOrMin(true);
+                else
+                    temp.setMaxOrMin(false);
+            }
 
-		if (instance instanceof SumAvgAggregateDefinition)
-		{
-			SumAvgAggregateDefinition temp1 = (SumAvgAggregateDefinition)instance;
-			if (aggregateName.equals("SUM"))
-				temp1.setSumOrAvg(true);
-			else
-				temp1.setSumOrAvg(false);
-		}
+            if (instance instanceof SumAvgAggregateDefinition)
+            {
+                SumAvgAggregateDefinition temp1 = (SumAvgAggregateDefinition)instance;
+                if (aggregateName.equals("SUM"))
+                    temp1.setSumOrAvg(true);
+                else
+                    temp1.setSumOrAvg(false);
+            }
 
-		this.uad = (AggregateDefinition)instance;
+            this.uad = (AggregateDefinition)instance;
+        }
 	
 		setOperator(aggregateName);
 		setMethodName(aggregateDefinitionClassName);
-
 	}
 
 	/**

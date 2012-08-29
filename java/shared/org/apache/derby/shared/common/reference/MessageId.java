@@ -106,6 +106,7 @@ public interface MessageId {
 	String CM_CLASS_LOADER_START			= "C005";
 	String CM_CLASS_LOAD					= "C006";
 	String CM_CLASS_LOAD_EXCEPTION			= "C007";
+	String CM_CANNOT_LOAD_CLASS			= "C008";
 
 
 	/*

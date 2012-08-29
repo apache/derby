@@ -85,6 +85,8 @@
       	<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
+      <exclude name="${this.dir}/GenericMode.java"/>
+      <exclude name="${this.dir}/ModeAggregate.java"/>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
       <exclude name="${this.dir}/UpdatableResultSetTest.java"/>
       <exclude name="${this.dir}/holdCursorJavaReflection.java"/>
@@ -123,6 +125,7 @@
       <include name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
     </javac>
   </target>
+
   <target name="compilet3" depends="compilet2">
     <javac
       source="1.4"
@@ -143,10 +146,33 @@
       <include name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
     </javac>
   </target> 
+
+  <target name="compilet3.1" depends="compilet3">
+    <javac
+      source="1.5"
+      target="1.5"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="true"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java15compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/GenericMode.java"/>
+      <include name="${this.dir}/ModeAggregate.java"/>
+    </javac>
+  </target> 
+
 	<!-- Compile _Suite last as it needs to include all other JUnit classes 
 	which may be compiled using a higher compiler level, but it needs to be at
 	base level -->
-	<target name="compilett4" depends="compilet3" >
+	<target name="compilett4" depends="compilet3.1" >
     <javac
       source="1.4"
       target="1.4"

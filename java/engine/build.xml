@@ -61,6 +61,7 @@
     <ant dir="${derby.engine.dir}/database"/>
 
     <ant dir="${derby.engine.dir}/vti"/>
+    <ant dir="${derby.engine.dir}/agg"/>
     <ant dir="${derby.engine.dir}/impl"/>
     <ant dir="${derby.engine.dir}/jdbc"/>
     <ant dir="${derby.engine.dir}/osgi"/>

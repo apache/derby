@@ -21,9 +21,11 @@
 
 package org.apache.derby.iapi.sql.execute;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 
 /**
  * An ExecAggregator is the interface that execution uses
@@ -50,8 +52,12 @@ public interface ExecAggregator extends Formatable
 {
 	/**
 	    Set's up the aggregate for processing.
+
+        @param  classFactory Database-specific class factory.
+        @param  aggregateName   For builtin aggregates, this is a SQL aggregate name like MAX. For user-defined aggregates, this is the name of the user-written class which implements org.apache.derby.agg.Aggregator.
+        @param  returnDataType  The type returned by the getResult() method.
 	 */
-	public void setup(String aggregateName);
+	public void setup(ClassFactory classFactory, String aggregateName, DataTypeDescriptor returnDataType );
 
 	/**
 	 * Iteratively accumulates the addend into the aggregator.

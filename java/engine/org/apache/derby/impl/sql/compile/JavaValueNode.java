@@ -179,7 +179,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *	@return	the corresponding compilation type id
 	  *
 	  */
-	public	TypeId	mapToTypeID( JSQLType jsqlType )
+	public	static  TypeId	mapToTypeID( JSQLType jsqlType )
         throws StandardException
 	{
 		DataTypeDescriptor	dts = jsqlType.getSQLType();

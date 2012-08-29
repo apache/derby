@@ -293,4 +293,128 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         badAggregate( conn, ILLEGAL_AGGREGATE, "var_samp" );
     }
 
+    /**
+     * <p>
+     * Basic test for non-distinct aggregates.
+     * </p>
+     */
+    public void test_05_basicNonDistinct() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn, "create derby aggregate mode for int\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
+        goodStatement( conn, "create table mode_inputs( a int, b int )" );
+        goodStatement( conn, "insert into mode_inputs( a, b ) values ( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )" );
+
+        // scalar aggregate
+        assertResults
+            (
+             conn,
+             "select mode( b ) from mode_inputs",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+
+        // grouped aggregate
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+    }
+
+    /**
+     * <p>
+     * Test for parameterized aggregates.
+     * </p>
+     */
+    public void test_06_parameterizedAggregates() throws Exception
+    {
+        Connection conn = getConnection();
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "intMode",
+             "int",
+             "IntMode",
+             "( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "varcharMode",
+             "varchar( 5 )",
+             "StringMode",
+             "( 1, 'a' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 2, 'abc' ), ( 2, 'abc' ), ( 2, 'abcd' )",
+             new String[][]
+             {
+                 { "ab" },
+             },
+             new String[][]
+             {
+                 { "1", "ab" },
+                 { "2", "abc" },
+             }
+             );
+
+    }
+    private void    vetParameterizedAggregate
+        (
+         Connection conn,
+         String aggName,
+         String sqlType,
+         String nestedClassName,
+         String values,
+         String[][] scalarResult,
+         String[][] groupedResult
+         )
+        throws Exception
+    {
+        String  tableName = aggName + "_mode_inputs";
+        
+        goodStatement
+            ( conn, "create derby aggregate " + aggName + " for " + sqlType + "\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$" + nestedClassName + "'" );
+        goodStatement( conn, "create table " + tableName + "( a int, b " + sqlType + " )" );
+        goodStatement( conn, "insert into " + tableName + "( a, b ) values " + values );
+
+        assertResults
+            (
+             conn,
+             "select " + aggName + "( b ) from " + tableName,
+             scalarResult,
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select a, " + aggName + "( b ) from " + tableName + " group by a",
+             groupedResult,
+             false
+             );
+    }
+
 }

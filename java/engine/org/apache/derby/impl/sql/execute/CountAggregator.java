@@ -21,7 +21,9 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -43,7 +45,7 @@ public final class CountAggregator
 
 	/**
 	 */
-	public void setup(String aggregateName)
+	public void setup( ClassFactory cf, String aggregateName, DataTypeDescriptor returnType )
 	{
 		isCountStar = aggregateName.equals("COUNT(*)");
 	}

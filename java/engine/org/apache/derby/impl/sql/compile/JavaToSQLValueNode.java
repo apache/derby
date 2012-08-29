@@ -236,6 +236,16 @@ public class JavaToSQLValueNode extends ValueNode
 		/* Bind the expression under us */
 		javaNode = javaNode.bindExpression(fromList, subqueryList, aggregateVector);
 
+        if ( javaNode instanceof StaticMethodCallNode )
+        {
+            AggregateNode   agg = ((StaticMethodCallNode) javaNode).getResolvedAggregate();
+
+            if ( agg != null )
+            {
+                return agg.bindExpression( fromList, subqueryList, aggregateVector );
+            }
+        }
+
 		DataTypeDescriptor dts = javaNode.getDataType();
 		if (dts == null)
 		{
