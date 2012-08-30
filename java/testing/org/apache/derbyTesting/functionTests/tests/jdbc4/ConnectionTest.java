@@ -164,8 +164,10 @@ public class ConnectionTest
         // Test with an infinite (0) timeout
         assertTrue(getConnection().isValid(0));
 
-        // Test with a 1 second timeout
-        assertTrue(getConnection().isValid(1));
+        // Test with a large timeout. We expect
+        // to complete and succeed much sooner.
+        // see DERBY-5912
+        assertTrue(getConnection().isValid(200));
 
         // Test with an illegal timeout
         try {
