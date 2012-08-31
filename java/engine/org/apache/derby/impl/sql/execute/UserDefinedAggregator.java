@@ -123,9 +123,9 @@ public final class UserDefinedAggregator  implements ExecAggregator
 	public void merge(ExecAggregator addend)
 		throws StandardException
 	{
-        Aggregator  other = (Aggregator) addend;
+        UserDefinedAggregator  other = (UserDefinedAggregator) addend;
 
-        _aggregator.merge( other );
+        _aggregator.merge( other._aggregator );
 	}
 
 	/**

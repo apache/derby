@@ -29,7 +29,9 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -54,6 +56,7 @@ import org.apache.derby.impl.sql.compile.CountAggregateDefinition;
 import org.apache.derby.impl.sql.compile.MaxMinAggregateDefinition;
 import org.apache.derby.impl.sql.compile.SumAvgAggregateDefinition;
 
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -67,6 +70,7 @@ public class AggregateNode extends UnaryOperatorNode
 	private boolean					distinct;
 
 	private AggregateDefinition		uad;
+    private TableName           userAggregateName;
 	private StringBuffer			aggregatorClassName;
 	private String					aggregateDefinitionClassName;
 	private Class					aggregateDefinitionClass;
@@ -108,10 +112,14 @@ public class AggregateNode extends UnaryOperatorNode
 		super.init(operand);
 		this.aggregateName = (String) aggregateName;
 
-		if (uadClass instanceof AggregateDefinition)
+		if ( uadClass instanceof UserAggregateDefinition )
 		{
-			this.uad = (AggregateDefinition) uadClass;
-			this.aggregateDefinitionClass = uad.getClass();
+            setUserDefinedAggregate( (UserAggregateDefinition) uadClass );
+			this.distinct = ((Boolean) distinct).booleanValue();
+		}
+		else if ( uadClass instanceof TableName )
+		{
+			this.userAggregateName = (TableName) uadClass;
 			this.distinct = ((Boolean) distinct).booleanValue();
 		}
 		else
@@ -123,10 +131,18 @@ public class AggregateNode extends UnaryOperatorNode
 			{
 				this.distinct = ((Boolean) distinct).booleanValue();
 			}
+
+            this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
 		}
         
-        this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
 	}
+    /** initialize fields for user defined aggregate */
+    private void setUserDefinedAggregate( UserAggregateDefinition userAgg )
+    {
+        this.uad = userAgg;
+        this.aggregateDefinitionClass = uad.getClass();
+        this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
+    }
 
 	/**
 	 * Replace aggregates in the expression tree with a ColumnReference to
@@ -268,11 +284,37 @@ public class AggregateNode extends UnaryOperatorNode
 					Vector				aggregateVector)
 			throws StandardException
 	{
+        DataDictionary  dd = getDataDictionary();
 		DataTypeDescriptor 	dts = null;
 		ClassFactory		cf;
 
 		cf = getClassFactory();
 		classInspector = cf.getClassInspector();
+
+        if ( userAggregateName != null )
+        {
+            userAggregateName.bind( dd );
+
+            AliasDescriptor ad = resolveAggregate
+                (
+                 dd,
+                 getSchemaDescriptor( userAggregateName.getSchemaName(), true ),
+                 userAggregateName.getTableName()
+                 );
+
+            if ( ad == null )
+            {
+                throw StandardException.newException
+                    (
+                     SQLState.LANG_OBJECT_NOT_FOUND,
+                     AliasDescriptor.getAliasType( AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR ),
+                     userAggregateName.getTableName()
+                     );
+            }
+            
+            setUserDefinedAggregate( new UserAggregateDefinition( ad ) );
+            aggregateName = ad.getJavaClassName();
+         }
 
 		instantiateAggDef();
 
@@ -370,6 +412,21 @@ public class AggregateNode extends UnaryOperatorNode
 		return this;
 	}
 
+	/**
+	 * Resolve a user-defined aggregate.
+	 */
+	public  static AliasDescriptor resolveAggregate
+        ( DataDictionary dd, SchemaDescriptor sd, String rawName )
+        throws StandardException
+    {
+		java.util.List list = dd.getRoutineList
+            ( sd.getUUID().toString(), rawName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
+
+        if ( list.size() > 0 ) { return (AliasDescriptor) list.get( 0 ); }
+
+        return null;
+    }
+    
 	/*
 	** Make sure the aggregator class is ok
 	*/

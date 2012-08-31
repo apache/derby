@@ -1155,6 +1155,57 @@ public class SQLParser
 
 
 	/**
+	 * Return true if a builtin aggregate follows.
+	 */
+     private    boolean builtinAggregateFollows()
+     {
+		switch (getToken(1).kind)
+		{
+		  case MAX:
+		  case AVG:
+		  case MIN:
+		  case SUM:
+		  case COUNT:
+			// This is a built-in aggregate
+			return true;
+
+		  default:
+			return false;
+		}
+     }
+
+	/**
+	 * Return true if the following tokens are the start of a
+     * distinct user defined aggregate invocation. These have
+     * the form
+     *
+     * aggName( distinct
+     *
+     * or
+     *
+     *  schemaName.aggName( distinct
+	 *
+	 */
+	private boolean distinctUDAFollows()
+	{
+        if ( builtinAggregateFollows() ) { return false; }
+
+        if (
+           (getToken(2).kind == LEFT_PAREN) &&
+           (getToken(3).kind == DISTINCT)
+           )
+        { return true; }
+        else if (
+           (getToken(2).kind == PERIOD) &&
+           (getToken(4).kind == LEFT_PAREN) &&
+           (getToken(5).kind == DISTINCT)
+           )
+        { return true; }
+
+		return false;
+	}
+
+	/**
 	 * Determine whether the next sequence of tokens can be the beginning of a
 	 * window or aggregate function.
 	 * @return	TRUE iff the next set of tokens is the beginning of a
@@ -1162,6 +1213,8 @@ public class SQLParser
 	 */
 	private boolean windowOrAggregateFunctionFollows()
 	{
+        if ( distinctUDAFollows() ) { return false; }
+
 		boolean retval = false;
 
 		switch (getToken(1).kind) {
@@ -7871,6 +7924,28 @@ void methodCallParameterList(Vector parameterList) throws StandardException :
 ValueNode
 routineInvocation() throws StandardException :
 {
+	ValueNode	valueNode;
+}
+{
+	LOOKAHEAD( { !distinctUDAFollows() } )
+    valueNode = routineExpression()
+    {
+        return valueNode;
+    }
+|
+	LOOKAHEAD( { distinctUDAFollows() } )
+    valueNode = distinctUDA()
+    {
+        return valueNode;
+    }
+}
+
+/*
+ * <A NAME="routineExpression">routineExpression</A>
+ */
+ValueNode
+routineExpression() throws StandardException :
+{
 	Vector	parameterList = new Vector();
 	TableName	routineName;
 	MethodCallNode	methodNode;
@@ -7895,6 +7970,36 @@ routineInvocation() throws StandardException :
 		return (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
 								methodNode,
+								getContextManager());
+	}
+}
+
+/*
+ * <A NAME="distinctUDA">distinctUDA</A>
+ */
+ValueNode
+distinctUDA() throws StandardException :
+{
+	ValueNode		value;
+	TableName  aggName;
+}
+{
+	aggName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	<LEFT_PAREN>
+        <DISTINCT> value = additiveExpression(null, 0)
+	<RIGHT_PAREN>
+	{
+        //
+        // The parser can't distinguish one-arg function calls from
+        // non-distinct aggregates. That has to be figured out at
+        // bind() time.
+        //
+		return (ValueNode) nodeFactory.getNode(
+								C_NodeTypes.AGGREGATE_NODE,
+								value,
+								aggName, 
+								Boolean.TRUE,
+								"",
 								getContextManager());
 	}
 }

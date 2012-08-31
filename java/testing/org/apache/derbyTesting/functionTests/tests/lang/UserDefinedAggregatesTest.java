@@ -50,6 +50,10 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String OBJECT_EXISTS = "X0Y68";
     public static final String ILLEGAL_AGGREGATE = "42ZC3";
     public static final String NAME_COLLISION = "X0Y87";
+    public static final String MISSING_FUNCTION = "42Y03";
+    public static final String MISSING_SCHEMA = "42Y07";
+    public static final String BAD_AGGREGATE_USAGE = "42903";
+    public static final String BAD_ORDER_BY = "42Y35";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -295,15 +299,19 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
 
     /**
      * <p>
-     * Basic test for non-distinct aggregates.
+     * Basic test for aggregates in the select list.
      * </p>
      */
-    public void test_05_basicNonDistinct() throws Exception
+    public void test_05_basicSelectList() throws Exception
     {
         Connection conn = getConnection();
 
+        goodStatement( conn, "create schema agg_schema\n" );
         goodStatement
             ( conn, "create derby aggregate mode for int\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
+        goodStatement
+            ( conn, "create derby aggregate agg_schema.mode2 for int\n" +
               "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
         goodStatement( conn, "create table mode_inputs( a int, b int )" );
         goodStatement( conn, "insert into mode_inputs( a, b ) values ( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )" );
@@ -319,6 +327,26 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              },
              false
              );
+        assertResults
+            (
+             conn,
+             "select app.mode( b ) from mode_inputs",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select agg_schema.mode2( b ) from mode_inputs",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
 
         // grouped aggregate
         assertResults
@@ -328,6 +356,291 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              new String[][]
              {
                  { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        
+        // distinct scalar aggregate
+        assertResults
+            (
+             conn,
+             "select mode( distinct b ) from mode_inputs",
+             new String[][]
+             {
+                 { "4" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select agg_schema.mode2( distinct b ) from mode_inputs",
+             new String[][]
+             {
+                 { "4" },
+             },
+             false
+             );
+
+        // distinct grouped aggregate
+        assertResults
+            (
+             conn,
+             "select a, mode( distinct b ) from mode_inputs group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "4" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, agg_schema.mode2( distinct b ) from mode_inputs group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "4" },
+             },
+             false
+             );
+
+        // some negative tests for missing aggregates
+        expectCompilationError( MISSING_FUNCTION, "select agg_schema.mode( b ) from mode_inputs" );
+        expectCompilationError( OBJECT_DOES_NOT_EXIST, "select agg_schema.mode( distinct b ) from mode_inputs" );
+        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode( b ) from mode_inputs" );
+        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode( distinct b ) from mode_inputs" );
+
+        // some negative tests for aggregates in the WHERE clause
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where mode( b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where mode( distinct b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where app.mode( b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where app.mode( distinct b ) = 4" );
+
+        // negative test: can't put an aggregate in an ORDER BY list unless it's in the SELECT list too
+        expectCompilationError( BAD_ORDER_BY, "select * from mode_inputs order by mode( b )" );
+
+        // various other syntactically correct placements of user-defined aggregates
+        assertResults
+            (
+             conn,
+             "select mode( b ) from mode_inputs order by mode( b )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a order by mode( b )",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a order by mode( b ) desc",
+             new String[][]
+             {
+                 { "2", "3" },
+                 { "1", "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a having mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, count( b ) from mode_inputs group by a having mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, sum( b ) from mode_inputs group by a having mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "10" },
+             },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select mode( b ) from mode_inputs order by app.mode( b )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a order by app.mode( b )",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a order by app.mode( b ) desc",
+             new String[][]
+             {
+                 { "2", "3" },
+                 { "1", "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, mode( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, count( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, sum( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "10" },
+             },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select app.mode( b ) from mode_inputs order by app.mode( b )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a order by app.mode( b )",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a order by app.mode( b ) desc",
+             new String[][]
+             {
+                 { "2", "3" },
+                 { "1", "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             new String[][]
+             {
+                 { "2", "3" },
+             },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select app.mode( b ) from mode_inputs order by mode( b )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a order by mode( b )",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a order by mode( b ) desc",
+             new String[][]
+             {
+                 { "2", "3" },
+                 { "1", "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, app.mode( b ) from mode_inputs group by a having mode( b ) = 3",
+             new String[][]
+             {
                  { "2", "3" },
              },
              false
@@ -358,6 +671,15 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              {
                  { "1", "2" },
                  { "2", "3" },
+             },
+             new String[][]
+             {
+                 { "4" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "4" },
              }
              );
 
@@ -376,6 +698,15 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              {
                  { "1", "ab" },
                  { "2", "abc" },
+             },
+             new String[][]
+             {
+                 { "abcd" },
+             },
+             new String[][]
+             {
+                 { "1", "ab" },
+                 { "2", "abcd" },
              }
              );
 
@@ -388,7 +719,9 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
          String nestedClassName,
          String values,
          String[][] scalarResult,
-         String[][] groupedResult
+         String[][] groupedResult,
+         String[][] distinctScalarResult,
+         String[][] distinctGroupedResult
          )
         throws Exception
     {
@@ -413,6 +746,22 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              conn,
              "select a, " + aggName + "( b ) from " + tableName + " group by a",
              groupedResult,
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select " + aggName + "( distinct b ) from " + tableName,
+             distinctScalarResult,
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select a, " + aggName + "( distinct b ) from " + tableName + " group by a",
+             distinctGroupedResult,
              false
              );
     }
