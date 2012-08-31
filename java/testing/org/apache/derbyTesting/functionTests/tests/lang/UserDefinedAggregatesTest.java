@@ -112,20 +112,20 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         goodStatement( conn, "create schema uda_schema3\n" );
 
         // some good aggregate creations
-        goodStatement( conn, "create derby aggregate mode for int external name 'foo.bar.Wibble'" );
-        goodStatement( conn, "create derby aggregate uda_schema.mode2 for int external name 'foo.bar.Wibble'" );
+        goodStatement( conn, "create derby aggregate mode_01 for int external name 'foo.bar.Wibble'" );
+        goodStatement( conn, "create derby aggregate uda_schema.mode_012 for int external name 'foo.bar.Wibble'" );
 
         // can't create an aggregate with an existing name
         expectExecutionError
-            ( conn, OBJECT_EXISTS, "create derby aggregate mode for int external name 'foo.bar.Wibble'" );
+            ( conn, OBJECT_EXISTS, "create derby aggregate mode_01 for int external name 'foo.bar.Wibble'" );
         expectExecutionError
-            ( conn, OBJECT_EXISTS, "create derby aggregate uda_schema.mode2 for int external name 'foo.bar.Wibble'" );
+            ( conn, OBJECT_EXISTS, "create derby aggregate uda_schema.mode_012 for int external name 'foo.bar.Wibble'" );
         
         // only RESTRICTed drops allowed now
-        expectCompilationError( SYNTAX_ERROR, "drop derby aggregate mode" );
+        expectCompilationError( SYNTAX_ERROR, "drop derby aggregate mode_01" );
 
         // successfully drop an aggregate
-        goodStatement( conn, "drop derby aggregate mode restrict" );
+        goodStatement( conn, "drop derby aggregate mode_01 restrict" );
 
         // can't create an aggregate with the same name as a 1-arg function
         // but no collision with 2-arg function names
@@ -173,13 +173,13 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         expectExecutionError( conn, NON_EMPTY_SCHEMA, "drop schema uda_schema restrict" );
 
         // drop the aggregate, then drop the schema
-        goodStatement( conn, "drop derby aggregate uda_schema.mode2 restrict" );
+        goodStatement( conn, "drop derby aggregate uda_schema.mode_012 restrict" );
         goodStatement( conn, "drop schema uda_schema restrict" );
 
         // can't drop a non-existent aggregate
-        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate mode restrict" );
-        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate mode1 restrict" );
-        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate uda_schema2.mode restrict" );
+        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate mode_01 restrict" );
+        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate mode_011 restrict" );
+        expectCompilationError( NONEXISTENT_OBJECT, "drop derby aggregate uda_schema2.mode_01 restrict" );
     }
 
     /**
@@ -308,19 +308,19 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
 
         goodStatement( conn, "create schema agg_schema\n" );
         goodStatement
-            ( conn, "create derby aggregate mode for int\n" +
+            ( conn, "create derby aggregate mode_05 for int\n" +
               "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
         goodStatement
-            ( conn, "create derby aggregate agg_schema.mode2 for int\n" +
+            ( conn, "create derby aggregate agg_schema.mode_052 for int\n" +
               "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
-        goodStatement( conn, "create table mode_inputs( a int, b int )" );
-        goodStatement( conn, "insert into mode_inputs( a, b ) values ( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )" );
+        goodStatement( conn, "create table mode_05_inputs( a int, b int )" );
+        goodStatement( conn, "insert into mode_05_inputs( a, b ) values ( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )" );
 
         // scalar aggregate
         assertResults
             (
              conn,
-             "select mode( b ) from mode_inputs",
+             "select mode_05( b ) from mode_05_inputs",
              new String[][]
              {
                  { "2" },
@@ -330,7 +330,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select app.mode( b ) from mode_inputs",
+             "select app.mode_05( b ) from mode_05_inputs",
              new String[][]
              {
                  { "2" },
@@ -340,7 +340,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select agg_schema.mode2( b ) from mode_inputs",
+             "select agg_schema.mode_052( b ) from mode_05_inputs",
              new String[][]
              {
                  { "2" },
@@ -352,7 +352,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a",
+             "select a, mode_05( b ) from mode_05_inputs group by a",
              new String[][]
              {
                  { "1", "2" },
@@ -363,7 +363,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a",
              new String[][]
              {
                  { "1", "2" },
@@ -376,7 +376,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select mode( distinct b ) from mode_inputs",
+             "select mode_05( distinct b ) from mode_05_inputs",
              new String[][]
              {
                  { "4" },
@@ -386,7 +386,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select agg_schema.mode2( distinct b ) from mode_inputs",
+             "select agg_schema.mode_052( distinct b ) from mode_05_inputs",
              new String[][]
              {
                  { "4" },
@@ -398,7 +398,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( distinct b ) from mode_inputs group by a",
+             "select a, mode_05( distinct b ) from mode_05_inputs group by a",
              new String[][]
              {
                  { "1", "2" },
@@ -409,7 +409,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, agg_schema.mode2( distinct b ) from mode_inputs group by a",
+             "select a, agg_schema.mode_052( distinct b ) from mode_05_inputs group by a",
              new String[][]
              {
                  { "1", "2" },
@@ -419,25 +419,25 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              );
 
         // some negative tests for missing aggregates
-        expectCompilationError( MISSING_FUNCTION, "select agg_schema.mode( b ) from mode_inputs" );
-        expectCompilationError( OBJECT_DOES_NOT_EXIST, "select agg_schema.mode( distinct b ) from mode_inputs" );
-        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode( b ) from mode_inputs" );
-        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode( distinct b ) from mode_inputs" );
+        expectCompilationError( MISSING_FUNCTION, "select agg_schema.mode_05( b ) from mode_05_inputs" );
+        expectCompilationError( OBJECT_DOES_NOT_EXIST, "select agg_schema.mode_05( distinct b ) from mode_05_inputs" );
+        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode_05( b ) from mode_05_inputs" );
+        expectCompilationError( MISSING_SCHEMA, "select missing_schema.mode_05( distinct b ) from mode_05_inputs" );
 
         // some negative tests for aggregates in the WHERE clause
-        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where mode( b ) = 4" );
-        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where mode( distinct b ) = 4" );
-        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where app.mode( b ) = 4" );
-        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_inputs where app.mode( distinct b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_05_inputs where mode_05( b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_05_inputs where mode_05( distinct b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_05_inputs where app.mode_05( b ) = 4" );
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_05_inputs where app.mode_05( distinct b ) = 4" );
 
         // negative test: can't put an aggregate in an ORDER BY list unless it's in the SELECT list too
-        expectCompilationError( BAD_ORDER_BY, "select * from mode_inputs order by mode( b )" );
+        expectCompilationError( BAD_ORDER_BY, "select * from mode_05_inputs order by mode_05( b )" );
 
         // various other syntactically correct placements of user-defined aggregates
         assertResults
             (
              conn,
-             "select mode( b ) from mode_inputs order by mode( b )",
+             "select mode_05( b ) from mode_05_inputs order by mode_05( b )",
              new String[][]
              {
                  { "2" },
@@ -447,7 +447,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a order by mode( b )",
+             "select a, mode_05( b ) from mode_05_inputs group by a order by mode_05( b )",
              new String[][]
              {
                  { "1", "2" },
@@ -458,7 +458,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a order by mode( b ) desc",
+             "select a, mode_05( b ) from mode_05_inputs group by a order by mode_05( b ) desc",
              new String[][]
              {
                  { "2", "3" },
@@ -469,7 +469,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a having mode( b ) = 3",
+             "select a, mode_05( b ) from mode_05_inputs group by a having mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
@@ -479,7 +479,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, count( b ) from mode_inputs group by a having mode( b ) = 3",
+             "select a, count( b ) from mode_05_inputs group by a having mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
@@ -489,7 +489,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, sum( b ) from mode_inputs group by a having mode( b ) = 3",
+             "select a, sum( b ) from mode_05_inputs group by a having mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "10" },
@@ -500,7 +500,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select mode( b ) from mode_inputs order by app.mode( b )",
+             "select mode_05( b ) from mode_05_inputs order by app.mode_05( b )",
              new String[][]
              {
                  { "2" },
@@ -510,7 +510,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a order by app.mode( b )",
+             "select a, mode_05( b ) from mode_05_inputs group by a order by app.mode_05( b )",
              new String[][]
              {
                  { "1", "2" },
@@ -521,7 +521,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a order by app.mode( b ) desc",
+             "select a, mode_05( b ) from mode_05_inputs group by a order by app.mode_05( b ) desc",
              new String[][]
              {
                  { "2", "3" },
@@ -532,7 +532,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, mode( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             "select a, mode_05( b ) from mode_05_inputs group by a having app.mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
@@ -542,7 +542,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, count( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             "select a, count( b ) from mode_05_inputs group by a having app.mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
@@ -552,7 +552,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, sum( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             "select a, sum( b ) from mode_05_inputs group by a having app.mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "10" },
@@ -563,7 +563,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select app.mode( b ) from mode_inputs order by app.mode( b )",
+             "select app.mode_05( b ) from mode_05_inputs order by app.mode_05( b )",
              new String[][]
              {
                  { "2" },
@@ -573,7 +573,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a order by app.mode( b )",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a order by app.mode_05( b )",
              new String[][]
              {
                  { "1", "2" },
@@ -584,7 +584,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a order by app.mode( b ) desc",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a order by app.mode_05( b ) desc",
              new String[][]
              {
                  { "2", "3" },
@@ -595,7 +595,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a having app.mode( b ) = 3",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a having app.mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
@@ -606,7 +606,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select app.mode( b ) from mode_inputs order by mode( b )",
+             "select app.mode_05( b ) from mode_05_inputs order by mode_05( b )",
              new String[][]
              {
                  { "2" },
@@ -616,7 +616,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a order by mode( b )",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a order by mode_05( b )",
              new String[][]
              {
                  { "1", "2" },
@@ -627,7 +627,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a order by mode( b ) desc",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a order by mode_05( b ) desc",
              new String[][]
              {
                  { "2", "3" },
@@ -638,7 +638,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select a, app.mode( b ) from mode_inputs group by a having mode( b ) = 3",
+             "select a, app.mode_05( b ) from mode_05_inputs group by a having mode_05( b ) = 3",
              new String[][]
              {
                  { "2", "3" },
