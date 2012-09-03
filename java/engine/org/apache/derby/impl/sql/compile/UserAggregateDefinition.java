@@ -84,6 +84,15 @@ public class UserAggregateDefinition implements AggregateDefinition
         _alias = alias;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // BEHAVIOR
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Get the wrapped alias descriptor */
+    public  AliasDescriptor getAliasDescriptor() { return _alias; }
+
 	/**
 	 * Determines the result datatype and verifies that the input datatype is correct.
 	 *

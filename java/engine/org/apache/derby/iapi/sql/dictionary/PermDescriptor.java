@@ -161,6 +161,10 @@ public class PermDescriptor extends PermissionsDescriptor
         {
             return dd.getSequenceDescriptor( objectID );
         }
+        else if ( PermDescriptor.AGGREGATE_TYPE.equals( objectType ) )
+        {
+            return dd.getAliasDescriptor( objectID );
+        }
         else if ( PermDescriptor.UDT_TYPE.equals( objectType ) )
         {
             return dd.getAliasDescriptor( objectID );

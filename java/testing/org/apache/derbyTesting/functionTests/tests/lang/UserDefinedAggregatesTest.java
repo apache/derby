@@ -766,4 +766,55 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test restricted drops of aggregates.
+     * </p>
+     */
+    public void test_07_restrictedDrops() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn,
+              "create derby aggregate mode_07 for int external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'" );
+        goodStatement
+            ( conn,
+              "create table mode_inputs_07( a int, b int )" );
+
+        // restricted drop blocked by a view
+        goodStatement
+            ( conn,
+              "create view v_dbo_07( a, modeOfA ) as select a, mode_07( b ) from mode_inputs_07 group by a" );
+        expectExecutionError
+            ( conn, VIEW_DEPENDENCY, "drop derby aggregate mode_07 restrict" );
+        goodStatement
+            ( conn,
+              "drop view v_dbo_07" );
+        
+        // restricted drop blocked by a trigger
+        goodStatement
+            ( conn,
+              "create table t_source_07( a int )" );
+        goodStatement
+            ( conn,
+              "create table t_target_07( a int )" );
+        goodStatement
+            ( conn,
+              "create trigger t_insert_trigger_07\n" +
+              "after insert on t_source_07\n" +
+              "for each row\n" +
+              "insert into t_target_07( a ) select mode_07( b ) from mode_inputs_07\n"
+              );
+        expectExecutionError
+            ( conn, FORBIDDEN_DROP_TRIGGER, "drop derby aggregate mode_07 restrict" );
+        goodStatement
+            ( conn,
+              "drop trigger t_insert_trigger_07" );
+
+        // blocking objects dropped. aggregate is now droppable
+        goodStatement( conn, "drop derby aggregate mode_07 restrict" );
+        
+    }
+    
 }

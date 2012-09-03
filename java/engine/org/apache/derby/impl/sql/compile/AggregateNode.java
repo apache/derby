@@ -318,6 +318,21 @@ public class AggregateNode extends UnaryOperatorNode
 
 		instantiateAggDef();
 
+        // if this is a user-defined aggregate
+        if ( (uad != null) && (uad instanceof UserAggregateDefinition) )
+        {
+            AliasDescriptor ad = ((UserAggregateDefinition) uad).getAliasDescriptor();
+
+            // set up dependency on the user-defined aggregate and compile a check for USAGE
+            // priv if needed
+            getCompilerContext().createDependency( ad );
+
+            if ( isPrivilegeCollectionRequired() )
+            {
+                getCompilerContext().addRequiredUsagePriv( ad );
+            }
+        }
+
 		/* Add ourselves to the aggregateVector before we do anything else */
 		aggregateVector.add(this);
 

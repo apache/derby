@@ -194,6 +194,7 @@ public class _Suite extends BaseTestCase  {
 
             // requires Java 5 (generics)
             suite.addTest(UserDefinedAggregatesTest.suite());
+            suite.addTest(UDAPermsTest.suite());
         }
         
         suite.addTest(BigDataTest.suite());
