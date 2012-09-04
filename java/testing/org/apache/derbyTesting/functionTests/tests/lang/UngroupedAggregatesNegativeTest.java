@@ -135,8 +135,5 @@ public class UngroupedAggregatesNegativeTest extends BaseJDBCTestCase {
                 fail( "Unexpected SQLState: " + actualSQLState );
             }
         }
-
-        assertStatementError("XBCM5", st,
-                             "select bad_mode( columnnumber ) from sys.syscolumns" );
     }
 }
