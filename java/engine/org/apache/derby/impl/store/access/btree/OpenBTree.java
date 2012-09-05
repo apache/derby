@@ -513,6 +513,10 @@ public class OpenBTree
 
             for (int i = 0; i < row.length; i++)
             {
+            	//DERBY-5531 If the row column's value is null, then 
+            	// don't worry about the data type match.
+            	if (row[i].isNull())
+            		continue;
                 // Compare class's rather than format id's to pick up 
                 // different problems with wrong collation implementation.
 				if (!row[i].getClass().equals(template[i].getClass()))
