@@ -134,6 +134,8 @@ public class BaseDataFileFactory
 	
 	private     String          jvmVersion;
 	
+	private     String          osInfo;
+	
 	private     String          jarCPath;
 
 	private     RawStoreFactory	rawStoreFactory; // associated raw store factory
@@ -262,6 +264,8 @@ public class BaseDataFileFactory
 		
 		jvmVersion = buildJvmVersion();
 		
+		osInfo = buildOSinfo();
+		
 		jarCPath = jarClassPath(getClass());
 
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
@@ -368,6 +372,9 @@ public class BaseDataFileFactory
                                              ));
 		//Log the JVM version info
 		logMsg(jvmVersion);
+
+		//Log the OS info
+		logMsg(osInfo);
 
 		//Log derby.system.home It will have null value if user didn't set it
 		logMsg(Property.SYSTEM_HOME_PROPERTY+"=" + 
@@ -2201,6 +2208,32 @@ public class BaseDataFileFactory
         });
     }
     
+    /**
+     * Return values of system properties that identify the OS.
+     * Will catch SecurityExceptions and note them for displaying information.
+     * @return the Java system property value for the OS or a string capturing a
+     * security exception.
+     */
+    private static String buildOSinfo () {
+    	return (String)AccessController.doPrivileged(new PrivilegedAction(){
+    		public Object run() {
+    			String osInfo = "";
+    			try {
+    				String currentProp = PropertyUtil.getSystemProperty("os.name");
+    				if (currentProp != null)
+    					osInfo = "os.name="+currentProp+"\n";
+    				if ((currentProp = PropertyUtil.getSystemProperty("os.arch")) != null)
+    					osInfo += "os.arch="+currentProp+"\n";
+    				if ((currentProp = PropertyUtil.getSystemProperty("os.version")) != null)
+    					osInfo += "os.version="+currentProp;
+    			}
+    			catch(SecurityException se){
+    				return se.getMessage();
+    			}
+    			return osInfo;
+    		}
+    	});
+    }
     
     /**
      * Return values of system properties that identify the JVM. 
