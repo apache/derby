@@ -236,7 +236,6 @@ public class EncryptData implements PrivilegedAction {
      * temporary versions of the container file.  
      */
     private StorageFile getFile(ContainerKey containerId, boolean old) {
-        String path = getFilePath(containerId, old);
         return storageFactory.newStorageFile(getFilePath(containerId, 
                                                          old));
     }
