@@ -827,6 +827,13 @@ class DRDAConnThread extends Thread {
                     break;
                 case CodePoint.OPNQRY:
                     try {
+                        // activate the following to run the isValid(timeout) test in jdbc4.ConnectionTest
+                        /*try { 
+                            Thread.sleep(2000);
+                        } catch (InterruptedException ie) {
+                            System.out.println("interrupted exception: " + ie.getMessage());
+                            ie.printStackTrace();
+                        }*/
                         if (PRPSQLSTTfailed) {
                             // read the command objects
                             // for ps with parameter

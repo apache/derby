@@ -157,7 +157,7 @@ public class ConnectionTest
      * Tests that <code>isValid</code> is implemented and returns true
      * for the connection. This test is very limited but is tested
      * for all connection types. A more complete test of isValid is
-     * found in the TestConnectionMethods.java test that is run for
+     * found in the ConnectionMethodsTest.java test that is run for
      * embedded and network client connections.
      */
     public void testIsValidImplemented() throws SQLException {
@@ -175,6 +175,44 @@ public class ConnectionTest
         } catch (SQLException sqle) {
             assertSQLState("Incorrect SQL state when calling isValid(-1)",
                            "XJ081", sqle);
+        }
+    }
+    
+    /**
+     * Tests that <code>isValid</code> times out when expected.
+     * This test will need a modification to the source code;
+     * activate the commented out Thread.sleep(2000) (2 seconds) in 
+     * DRDAConnThread.ProcessCommands, case CodePoint.OPNQRY
+     * To activate the test, remove the extra 'x' before building
+     */
+    public void xtestIsValidWithTimeout() throws SQLException {
+        // isValid(timeoutvalue) is a no-op in Embedded
+        if (usingEmbedded()) {
+            return;
+        }
+        // Test with a large timeout, see DERBY-5912.
+        boolean convalid=true;
+        Connection conn=getConnection();
+
+        // with a longer time out, the isValid call should not
+        // time out when the sleep is shorter.
+        convalid=conn.isValid(200);
+        assertTrue(convalid);
+
+        // setting the timeout to 1 should timeout if the sleep
+        // is 2 seconds.
+        convalid=conn.isValid(1);
+        assertFalse(convalid);
+
+        // rollback should work even though isvalid timed out...
+        // But there's a bug in that the connection becomes invalid and
+        // it is not getting re-established, see DERBY-5919. 
+        // Catch the exception saying No current Connection and swallow.
+        try {
+            conn.rollback();
+            //conn.close();
+        } catch (Exception e) {
+            //println("exception: " + e.getStackTrace());
         }
     }
 
