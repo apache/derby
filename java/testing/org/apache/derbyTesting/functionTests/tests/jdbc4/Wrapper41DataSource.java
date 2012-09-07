@@ -62,9 +62,9 @@ public  class   Wrapper41DataSource
     public Wrapper41DataSource( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbeddedDataSource40  ) { _embedded = (EmbeddedDataSource40 ) wrapped; }
-        else if ( wrapped instanceof ClientDataSource40 ) { _netclient = (ClientDataSource40) wrapped; }
         else if ( wrapped instanceof EmbeddedConnectionPoolDataSource40 ) { _ecpds = (EmbeddedConnectionPoolDataSource40) wrapped; }
         else if ( wrapped instanceof EmbeddedXADataSource40 ) { _exads = (EmbeddedXADataSource40) wrapped; }
+        else if ( wrapped instanceof ClientDataSource40 ) { _netclient = (ClientDataSource40) wrapped; }
         else if ( wrapped instanceof ClientConnectionPoolDataSource40 ) { _ccpds = (ClientConnectionPoolDataSource40) wrapped; }
         else if ( wrapped instanceof ClientXADataSource40 ) { _cxads = (ClientXADataSource40) wrapped; }
         else { throw nothingWrapped(); }

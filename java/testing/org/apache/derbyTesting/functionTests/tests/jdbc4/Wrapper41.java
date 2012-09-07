@@ -59,10 +59,10 @@ public  class   Wrapper41
     public Wrapper41( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbedResultSet40 ) { _embedded = (EmbedResultSet40) wrapped; }
-        else if ( wrapped instanceof NetResultSet40 ) { _netclient = (NetResultSet40) wrapped; }
         else if ( wrapped instanceof EmbedCallableStatement40 ) { _embedCallableStatement = (EmbedCallableStatement40) wrapped; }
-        else if ( wrapped instanceof CallableStatement40 ) { _callableStatement = (CallableStatement40) wrapped; }
         else if ( wrapped instanceof BrokeredCallableStatement40 ) { _brokeredCallableStatement = (BrokeredCallableStatement40) wrapped; }
+        else if ( wrapped instanceof NetResultSet40 ) { _netclient = (NetResultSet40) wrapped; }
+        else if ( wrapped instanceof CallableStatement40 ) { _callableStatement = (CallableStatement40) wrapped; }
         else if ( wrapped instanceof LogicalCallableStatement40 ) { _logicalCallableStatement = (LogicalCallableStatement40) wrapped; }
         else { throw nothingWrapped(); }
     }

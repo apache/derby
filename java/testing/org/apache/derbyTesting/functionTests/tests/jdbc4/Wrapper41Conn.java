@@ -57,8 +57,8 @@ public  class   Wrapper41Conn
     public Wrapper41Conn( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbedConnection40 ) { _embedded = (EmbedConnection40) wrapped; }
-        else if ( wrapped instanceof NetConnection40 ) { _netclient = (NetConnection40) wrapped; }
         else if ( wrapped instanceof BrokeredConnection40 ) { _brokeredConnection = (BrokeredConnection40) wrapped; }
+        else if ( wrapped instanceof NetConnection40 ) { _netclient = (NetConnection40) wrapped; }
         else if ( wrapped instanceof LogicalConnection40 ) { _logicalConnection = (LogicalConnection40) wrapped; }
         else { throw nothingWrapped(); }
     }

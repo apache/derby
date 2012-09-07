@@ -495,10 +495,8 @@ public final class TestConfiguration {
      * 
      */
     public static Test clientServerSuite(Class testClass)
-    {           
-        TestSuite suite = new TestSuite(testClass,
-                suiteName(testClass)+":client");
-        return clientServerDecorator(suite);
+    {
+        return clientServerDecorator(bareClientServerSuite(testClass));
     }
     /**
      * Create a suite for the passed test class that includes
@@ -508,9 +506,8 @@ public final class TestConfiguration {
      */
 
     public static Test clientServerSuiteWithAlternativePort(Class testClass) {
-        TestSuite suite = new TestSuite(testClass, suiteName(testClass)
-                + ":client");
-        return clientServerDecoratorWithAlternativePort(suite);
+        return clientServerDecoratorWithAlternativePort(
+                bareClientServerSuite(testClass));
     }
 
     /**
@@ -520,9 +517,8 @@ public final class TestConfiguration {
      */
     public static Test clientExistingServerSuite(Class testClass)
     {
-        TestSuite suite = new TestSuite(testClass,
-                suiteName(testClass)+":client");
-        return defaultExistingServerDecorator(suite); // Will not start server and does not stop it when done!.
+        // Will not start server and does not stop it when done.
+        return defaultExistingServerDecorator(bareClientServerSuite(testClass));
     }
     
     /**
@@ -536,18 +532,16 @@ public final class TestConfiguration {
      */
     public static Test clientExistingServerSuite(Class testClass, String hostName, int portNumber)
     {
-        TestSuite suite = new TestSuite(testClass,
-                suiteName(testClass)+":client");
-        return existingServerDecorator(suite, hostName, portNumber); 
                // Will not start server and does not stop it when done!.
+        return existingServerDecorator(bareClientServerSuite(testClass),
+                hostName, portNumber);
     }
     public static Test clientExistingServerSuite(Class testClass, 
             String hostName, int portNumber, String dbPath)
     {
-        TestSuite suite = new TestSuite(testClass,
-                suiteName(testClass)+":client");
-        return existingServerDecorator(suite, hostName, portNumber, dbPath); 
                // Will not start server and does not stop it when done!.
+        return existingServerDecorator(bareClientServerSuite(testClass),
+                hostName, portNumber, dbPath);
     }
 
     /**
@@ -626,9 +620,9 @@ public final class TestConfiguration {
     {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
-        if (!(Derby.hasClient() && Derby.hasServer())
-                || JDBC.vmSupportsJSR169())
+        if (!supportsClientServer()) {
             return new TestSuite("empty: no network server support");
+        }
 
         //
         // This looks bogus to me. Shouldn't this get the hostname and port
@@ -646,9 +640,9 @@ public final class TestConfiguration {
     {
     	// Need to have network server and client and not
         // running in J2ME (JSR169).
-        if (!(Derby.hasClient() && Derby.hasServer())
-                || JDBC.vmSupportsJSR169())
+        if (!supportsClientServer()) {
             return new TestSuite("empty: no network server support");
+        }
 
         Test r =
                 new ServerSetup(test, hostName, PortNumber);
@@ -664,9 +658,9 @@ public final class TestConfiguration {
     {
     	// Need to have network server and client and not
         // running in J2ME (JSR169).
-        if (!(Derby.hasClient() && Derby.hasServer())
-                || JDBC.vmSupportsJSR169())
+        if (!supportsClientServer()) {
             return new TestSuite("empty: no network server support");
+        }
 
         Test r =
                 new ServerSetup(test, hostName, PortNumber);
@@ -681,9 +675,10 @@ public final class TestConfiguration {
     public static Test defaultServerDecoratorWithAlternativePort(Test test) {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
-        if (!(Derby.hasClient() && Derby.hasServer())
-                || JDBC.vmSupportsJSR169())
+        if (!supportsClientServer()) {
             return new TestSuite("empty: no network server support");
+        }
+
         int port = getCurrent().getNextAvailablePort();
 
         //
@@ -692,6 +687,30 @@ public final class TestConfiguration {
         // command line)?
         //
         return new ServerSetup(test, DEFAULT_HOSTNAME, port);
+    }
+
+    /**
+     * Check if client and server testing is supported in the test environment.
+     */
+    private static boolean supportsClientServer() {
+        return JDBC.vmSupportsJDBC3() && Derby.hasClient() && Derby.hasServer();
+    }
+
+    /**
+     * Create a suite of test cases to run in a client/server environment. The
+     * returned test suite is not decorated with a ServerSetup.
+     *
+     * @param testClass the class from which to extract the test cases
+     * @return a test suite with all the test cases in {@code testClass}, or
+     * an empty test suite if client/server is not supported in the test
+     * environment
+     */
+    private static Test bareClientServerSuite(Class testClass) {
+        TestSuite suite = new TestSuite(suiteName(testClass) + ":client");
+        if (supportsClientServer()) {
+            suite.addTestSuite(testClass);
+        }
+        return suite;
     }
 
     /**
