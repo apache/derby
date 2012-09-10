@@ -28,6 +28,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.DerbyVersion;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.ServerSetup;
@@ -120,7 +121,11 @@ public class _Suite
         // DERBY-5889: Disabling tests on Windonws while investigating.
         if (isWindowsPlatform()) {
             return new TestSuite(
-                    "tests.compatibilty disabled on Windows, see DERBY-5889");
+                    "tests.compatibility disabled on Windows, see DERBY-5889");
+        }
+        if (!Derby.hasClient() || !Derby.hasServer()) {
+            return new TestSuite("Compatibility tests skipped because " +
+                                 "client or server is missing");
         }
         TestSuite suite = new TestSuite();
         addVersionCombinations(suite);

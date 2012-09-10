@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
@@ -35,8 +36,23 @@ public class XATestUtil {
     /**
      * Return a new Xid for testing.
     */
-    public static Xid getXid(int xid, int b1, int b2) {
-        return new utilXid(xid, b1, b2);
+    public static Xid getXid(int formatId, int b1, int b2) {
+        byte[] globalId = new byte[Xid.MAXGTRIDSIZE];
+        byte[] branchId = new byte[Xid.MAXBQUALSIZE];
+
+        for (int i = 0; i < globalId.length; i++) {
+            globalId[i] = (byte) (b1 + i);
+        }
+
+        for (int i = 0; i < branchId.length; i++) {
+            branchId[i] = (byte) (b2 + i);
+        }
+
+        return getXid(formatId, globalId, branchId);
+    }
+
+    public static Xid getXid(int formatId, byte[] globalId, byte[] branchId) {
+        return new utilXid(formatId, globalId, branchId);
     }
     
     /**
@@ -133,18 +149,10 @@ class utilXid implements Xid, Serializable {
 
     private byte[] branch_id;
 
-    utilXid(int xid, int b1, int b2) {
-        format_id = xid;
-        global_id = new byte[Xid.MAXGTRIDSIZE];
-        branch_id = new byte[Xid.MAXBQUALSIZE];
-
-        for (int i = 0; i < global_id.length; i++) {
-            global_id[i] = (byte) (b1 + i);
-        }
-
-        for (int i = 0; i < branch_id.length; i++) {
-            branch_id[i] = (byte) (b2 + i);
-        }
+    utilXid(int format_id, byte[] global_id, byte[] branch_id) {
+        this.format_id = format_id;
+        this.global_id = global_id;
+        this.branch_id = branch_id;
     }
 
     /**
@@ -176,5 +184,26 @@ class utilXid implements Xid, Serializable {
      **/
     public byte[] getBranchQualifier() {
         return (branch_id);
+    }
+
+    public boolean equals(Object obj) {
+        boolean ret = false;
+
+        if (obj instanceof utilXid) {
+            utilXid that = (utilXid) obj;
+            ret = this.format_id == that.format_id &&
+                    Arrays.equals(this.global_id, that.global_id) &&
+                    Arrays.equals(this.branch_id, that.branch_id);
+        }
+
+        return ret;
+    }
+
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + this.format_id;
+        hash = 41 * hash + Arrays.hashCode(this.global_id);
+        hash = 41 * hash + Arrays.hashCode(this.branch_id);
+        return hash;
     }
 }

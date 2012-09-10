@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,12 +31,9 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.client.ClientXid;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -118,7 +114,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             gid[i] = (byte) i;
             bid[i] = (byte) (64 - i);
         }
-        Xid xid = new ClientXid(0x1234, gid, bid);
+        Xid xid = XATestUtil.getXid(0x1234, gid, bid);
 
         // get the stuff required to execute the global transaction
         xaConn = xaDataSource.getXAConnection();
@@ -590,8 +586,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
     static Xid createXid(int gtrid, int bqual) throws XAException {
         byte[] gid = new byte[2]; gid[0]= (byte) (gtrid % 256); gid[1]= (byte) (gtrid / 256);
         byte[] bid = new byte[2]; bid[0]= (byte) (bqual % 256); bid[1]= (byte) (bqual / 256);
-        Xid xid = new ClientXid(0x1234, gid, bid);
-        return xid;
+        return XATestUtil.getXid(0x1234, gid, bid);
     }
 
     /** Parses the xid value from the string. The format of the input string is
@@ -623,11 +618,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             bqual[i] = (byte) Integer.parseInt(bqualS.substring(2*i, 2*i + 2), 16);
         }
 
-        // Using ClientXid is ok also for embedded driver
-        // since it does not contain any related code
-        // and there is no implementation of Xid iterface
-        // for embedded driver
-        return new ClientXid(fmtid, gtid, bqual);
+        return XATestUtil.getXid(fmtid, gtid, bqual);
     }
 
     public XATransactionTest(String name) {

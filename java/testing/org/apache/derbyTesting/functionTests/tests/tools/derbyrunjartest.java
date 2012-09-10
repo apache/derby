@@ -27,6 +27,7 @@ import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -46,9 +47,8 @@ public class derbyrunjartest extends BaseTestCase {
         TestSuite suite = new TestSuite(cl);
 
         // The server command can only be used on platforms that support
-        // the network server. Specifically, it does not work in J2ME
-        // environments.
-        if (JDBC.vmSupportsJDBC3()) {
+        // the network server.
+        if (Derby.hasServer()) {
             suite.addTest(new derbyrunjartest("xtestServer"));
         }
 

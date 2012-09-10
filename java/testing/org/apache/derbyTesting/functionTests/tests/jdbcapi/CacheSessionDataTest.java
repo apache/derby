@@ -449,7 +449,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     }
     
     private void verifyCachedSchema(Connection c) throws SQLException {
-        if (c instanceof org.apache.derby.client.am.Connection) {
+        if (usingDerbyNetClient()) {
             String cached =
                     ((org.apache.derby.client.am.Connection) c).
                     getCurrentSchemaName();
