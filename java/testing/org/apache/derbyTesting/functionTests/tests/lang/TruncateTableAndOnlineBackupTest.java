@@ -22,8 +22,6 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,12 +60,7 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     final static String dbName = "TTOB_db";
 //    final static String dbName2 = dbName + "2";
     final static String backupDir = "TTOB_backup";
-    
-    // TODO: figure out if we need this
-    final public static int NEGATIVE = 0; // expected check outcome set
-    final public static int POSITIVE = 1;
-    final public static int UNKNOWN = 2;
-    
+        
     public TruncateTableAndOnlineBackupTest(String name) {
         super(name);
     }
@@ -86,32 +79,35 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     protected static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);
         suite.addTestSuite(TruncateTableAndOnlineBackupTest.class);
-        return new CleanDatabaseTestSetup(suite) {
-            /**
-             * Creates the table used in the test cases.
-             * @exception SQLException if a database error occurs
-             */
-            protected void decorateSQL(Statement stmt) throws SQLException {
-                stmt.executeUpdate("create table truncable(i int)");
-                PreparedStatement ps = getConnection().prepareStatement(
-                    "insert into truncable values (?)");
-
-                // insert some data
-                getConnection().setAutoCommit(false);
-                for (int i=1; i <= 1000; i++) {
-                    ps.setInt(1,i);
-                    ps.executeUpdate();
-                }
-                getConnection().commit();
-            }
-        };
+        return new CleanDatabaseTestSetup(suite); 
     }
     
     public void setUp() throws Exception {
         getConnection();
         home = getSystemProperty("derby.system.home");
+
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table truncable(i int)");
+        PreparedStatement ps = getConnection().prepareStatement(
+                "insert into truncable values (?)");
+
+        // insert some data
+        getConnection().setAutoCommit(false);
+        for (int i=1; i <= 1000; i++) {
+            ps.setInt(1,i);
+            ps.executeUpdate();
+        }
+        getConnection().commit();
     }
     
+    /*
+     * Drop the table truncable that was created in setUp().
+     */
+    public void tearDown() throws Exception
+    {
+        getConnection().createStatement().execute("drop table truncable");
+        super.tearDown();
+    }
 
     /*  uncommitted truncate table followed by online backup; 
      *  then access the backup copy and access the table.
@@ -251,5 +247,98 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
 
         assertDirectoryDeleted(new File(fullBackupDir));
         assertDirectoryDeleted(new File(fullBackupDir2));
+    }    
+    
+    /*  uncommitted truncate table followed by online backup; 
+     *  then access the backup copy and access the table.
+     *  expected behavior: should see the old data.
+     */
+    public void testTruncateFreezeUnfreeze() throws Exception {
+
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        // check...we should have 1000 rows
+        JDBC.assertFullResultSet(
+                s.executeQuery("select count(*) from truncable"),
+                new String[][]{{"1000"}});
+
+        // truncate the table, but do not commit
+        s.executeUpdate("truncate table truncable");
+
+        // check...we should have no rows
+        ResultSet rs = s.executeQuery("select * from truncable");
+        JDBC.assertEmpty(rs);
+
+        // freeze the database
+        s.execute("call syscs_util.syscs_freeze_database()");
+
+        // Now copy the database directory
+        String fullBackupDir = backupDir + "2";
+        File DbDir = new File(home, dbName);
+        File fullBackupDbDir = new File(home, fullBackupDir );
+        PrivilegedFileOpsForTests.copy(DbDir, fullBackupDbDir);
+        
+        // At this point, writing to the original database is blocked.
+        // Try to read from the original database. Should work, we should still
+        // be connected, and read access is allowed during the freeze.
+        rs = s.executeQuery("select * from truncable");
+        JDBC.assertEmpty(rs);
+
+        // connect to backed-up database
+        final DataSource ds2 = JDBCDataSource.getDataSource(fullBackupDir);
+        final Connection con2 = ds2.getConnection();
+        Statement s2 = con2.createStatement();
+        // check...we should have 1000 rows because truncate table was not committed
+        // before the freeze and copy
+        JDBC.assertFullResultSet(
+                s2.executeQuery("select count(*) from truncable"),
+                new String[][]{{"1000"}});
+
+        // unfreeze our original database
+        s.execute("call syscs_util.syscs_unfreeze_database()");
+
+        // ensure we can read and write now.
+        rs = s.executeQuery("select * from truncable");
+        JDBC.assertEmpty(rs);
+        s.executeUpdate("insert into truncable values(2001)");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select count(*) from truncable"),
+                new String[][]{{"1"}});
+
+        // rollback, should rollback the truncate - then 
+        // select again from the org db - should have 1000 rows again instead of 1
+        // then select again from the backup db, should still have 1000 rows.
+        rollback();
+        JDBC.assertFullResultSet(
+                s.executeQuery("select count(*) from truncable"),
+                new String[][]{{"1000"}});
+        JDBC.assertFullResultSet(
+                s2.executeQuery("select count(*) from truncable"),
+                new String[][]{{"1000"}});
+
+        s2.close();
+        con2.close();
+
+        // close down both databases
+        final DataSource[] srcs =
+                new DataSource[] {JDBCDataSource.getDataSource(),
+                ds2};
+
+        for (int i=0; i < srcs.length; i++) {
+            JDBCDataSource.setBeanProperty(
+                    srcs[i], "connectionAttributes", "shutdown=true");
+            try {
+                srcs[i].getConnection();
+                fail("shutdown failed: expected exception");
+            } catch (SQLException e) {
+                assertSQLState(
+                    "database shutdown",
+                    SQLStateConstants.CONNECTION_EXCEPTION_CONNECTION_FAILURE,
+                    e);
+            }
+        }
+
+        assertDirectoryDeleted(new File(home + "/"+fullBackupDir));
     }    
 }
