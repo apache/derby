@@ -1020,4 +1020,49 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
         rollback();
     }
 
+    /**
+     * Prevent pushing of where predicates into selects with fetch
+     * and/or offset (DERBY-5911). Similarly, for windowed selects.
+     */
+    public void testPushAvoidance() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.executeUpdate
+            ("CREATE TABLE COFFEES (COF_NAME VARCHAR(254),PRICE INTEGER)");
+        s.executeUpdate
+            ("INSERT INTO COFFEES VALUES ('Colombian', 5)");
+        s.executeUpdate
+            ("INSERT INTO COFFEES VALUES ('French_Roast', 5)");
+        s.executeUpdate
+            ("INSERT INTO COFFEES VALUES ('Colombian_Decaf', 20)");
+
+        ResultSet rs = s.executeQuery
+            ("select * from " +
+             "    (select COF_NAME, PRICE from COFFEES " +
+             "     order by COF_NAME fetch next 2 rows only" +
+             "    ) t " +
+             "where t.PRICE < 10");
+
+        JDBC.assertFullResultSet(rs, new String[][]{{"Colombian", "5"}});
+
+        rs = s.executeQuery
+            ("select * from " +
+             "    (select COF_NAME, PRICE from COFFEES " +
+             "     order by COF_NAME offset 2 row" +
+             "    ) t " +
+             "where t.PRICE < 10");
+
+        JDBC.assertFullResultSet(rs, new String[][]{{"French_Roast", "5"}});
+
+        rs = s.executeQuery
+            ("select cof_name, price from " +
+             "   (select row_number() over() as rownum, COF_NAME, PRICE from " +
+             "      (select * from COFFEES order by COF_NAME) i" +
+             "   ) t where rownum <= 2 and PRICE < 10");
+
+        JDBC.assertFullResultSet(rs, new String[][]{{"Colombian", "5"}});
+
+
+        rollback();
+    }
 }

@@ -1102,22 +1102,25 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		if (pushPList != null &&
 				(childResult instanceof SelectNode))
 		{
-			SelectNode childSelect = (SelectNode)childResult;
+            SelectNode childSelect = (SelectNode)childResult;
 
-			if ( (childSelect.hasWindows()  &&
-				  childSelect.orderByList != null) ) {
-				// We can't push down if there is an ORDER BY and a window
-				// function because that would make ROW_NUMBER give wrong
-				// result:
-				// E.g.
-				//     SELECT * from (SELECT ROW_NUMBER() OVER (), j FROM T
-				//                    ORDER BY j) WHERE j=5
-				//
-			} else {
-				pushPList.pushExpressionsIntoSelect((SelectNode) childResult,
-													false);
-			}
-		}
+            // We can't push down if there is a window
+            // function because that would make ROW_NUMBER give wrong
+            // result:
+            // E.g.
+            //     SELECT * from (SELECT ROW_NUMBER() OVER (), j FROM T
+            //                    ORDER BY j) WHERE j=5
+            //
+            // Similarly, don't push if we have OFFSET and/or FETCH FROM.
+            //
+            if ((childSelect.hasWindows() ||
+                 childSelect.fetchFirst != null ||
+                 childSelect.offset != null)){
+            } else {
+                pushPList.pushExpressionsIntoSelect((SelectNode) childResult,
+                                                    false);
+            }
+        }
 
 
 		/* DERBY-649: Push simple predicates into Unions. It would be up to UnionNode
