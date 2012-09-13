@@ -141,8 +141,7 @@ public class Derby5624Test extends BaseJDBCTestCase
     {
         TestSuite suite = new TestSuite(name);
         suite.addTestSuite(Derby5624Test.class);
-        return new CleanDatabaseTestSetup(
-                DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 
+        return new CleanDatabaseTestSetup(suite)
         {
             /**
              * Creates the tables used in the test cases.

@@ -21,9 +21,12 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
+import java.util.Properties;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
