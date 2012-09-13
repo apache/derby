@@ -322,10 +322,12 @@ public class ConnectionMethodsTest extends Wrapper41Test
         }
 
        /*
-        * Test with a valid timeout
+        * Test with a valid timeout.
+        * The value is set very large; we expect
+        * to complete and succeed much sooner. See DERBY-5912
         */
-        if (!conn.isValid(1)) {
-            fail("FAIL: isValid(1): returned false");
+        if (!conn.isValid(200)) {
+            fail("FAIL: isValid(200): returned false");
         }
 
        /*

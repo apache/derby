@@ -157,7 +157,7 @@ public class ConnectionTest
      * Tests that <code>isValid</code> is implemented and returns true
      * for the connection. This test is very limited but is tested
      * for all connection types. A more complete test of isValid is
-     * found in the TestConnectionMethods.java test that is run for
+     * found in the ConnectionMethodsTest.java test that is run for
      * embedded and network client connections.
      */
     public void testIsValidImplemented() throws SQLException {
