@@ -575,6 +575,20 @@ public class JoinNode extends TableOperatorNode
 		if (usingRC == null)
 		{
 			rightRC = logicalRightRS.getMatchingColumn(columnReference);
+		} else {
+			//If this column represents the join column from the
+			// right table for predicate generated for USING/NATURAL 
+			// of RIGHT OUTER JOIN then flag it such by setting 
+			// rightOuterJoinUsingClause to true.
+			// eg
+			//     select c from t1 right join t2 using (c)
+			//For "using(c)", a join predicate will be created as 
+			// follows t1.c=t2.c
+			//We are talking about column t2.c of the join predicate.
+			if (this instanceof HalfOuterJoinNode && ((HalfOuterJoinNode)this).isRightOuterJoin()) 
+			{
+    			leftRC.setRightOuterJoinUsingClause(true);
+			}
 		}
 
 		if (rightRC != null)

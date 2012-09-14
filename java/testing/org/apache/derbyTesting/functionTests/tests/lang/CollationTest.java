@@ -476,7 +476,6 @@ public void testNorwayCollation() throws SQLException {
       s.close();
 
       }
-  
 
 /**
  * DERBY-5531 Assert failure when inserting NULL into indexed column with 
@@ -512,6 +511,654 @@ public void testNullColumnInInsert() throws SQLException {
     s.executeUpdate("DROP TABLE derby5531_t2");
 }
 
+  /**
+   * Test USING clause and NATURAL JOIN for case insensitive and
+   * 	case sensitive collations.
+   * As per the SQL spec, "the join columns in a natural join or in a named 
+   *    columns join should be added to the select list by coalescing the 
+   *    column from the left table with the column from the right table. "
+   * DERBY-4631 - Derby did not coalesce as suggested by SQL spec, instead
+   * 	it picked up join column's value from the left table when working with 
+   *    natural left outer join and it picked up the join column's value from 
+   *    the right table when working with natural right outer join. This worked
+   *    ok with non-territory based databases. For territory based databases,
+   *    it worked ok for natural left outer join but depending on the data 
+   *    value, it did not always work for natural right outer join in a 
+   *    territory based database. DERBY-4631 fixes that by using following 
+   *    logic to pick up the correct value in case of RIGHT OUTER JOIN with 
+   *    USING/NATURAL clause
+   *    1)if the left table's column value is null then pick up the
+   *      right table's column's value.
+   *    2)If the left table's column value is non-null, then pick up
+   *      that value
+   * @throws SQLException
+  */
+public void testUsingClauseAndNaturalJoin() throws SQLException {
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
+      String collation; 
+
+      ResultSet rs = null;
+      rs = s.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')");
+      rs.next();
+      collation = rs.getString(1); 
+
+      //Test arithmetic operation on join columns
+      s.executeUpdate("CREATE TABLE derby4631_t1(x int)");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x int)");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES 1,2");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES 2,3");
+      checkLangBasedQuery(s, "SELECT x+2, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x)+2 cx " +
+    		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+      		new String[][] {{"4","4"},{"5","5"}});
+      checkLangBasedQuery(s, "SELECT x+2, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x)+2 cx " +
+    		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+      		"USING(x)",
+      		new String[][] {{"4","4"},{"5","5"}});
+      checkLangBasedQuery(s, "SELECT x*2, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x)*2 cx " +
+    		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+      		new String[][] {{"2","2"},{"4","4"}});
+      checkLangBasedQuery(s, "SELECT x*2, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x)*2 cx " +
+    		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+      		"USING(x)",
+      		new String[][] {{"2","2"},{"4","4"}});
+   	  s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+
+      //Do the testing with one join column but with various combination
+      // of left or right table being empty
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5))");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5))");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES 'A','B'");
+      checkLangBasedQuery(s, "SELECT x, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+    		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+      		new String[][] {{"A","A"},{"B","B"}});
+      checkLangBasedQuery(s, "SELECT x, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+      		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+      		"USING(x)",
+      		new String[][] {{"A","A"},{"B","B"}});
+      checkLangBasedQuery(s, "SELECT x, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+    		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+      		null);
+      checkLangBasedQuery(s, "SELECT x, " +
+    		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+    		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+      		"USING(x)",
+    		null);
+   	  s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+
+      //Do the testing with one join column
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5))");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES 'A','B'");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5))");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES 'b','c'");
+      //Temp table for testing
+      s.executeUpdate("CREATE TABLE derby4631_t3" +
+    	      "(x1 varchar(5), x2 varchar(5), x3 int default 11)");
+      
+      //Derby always picks up the join column's value from the left table
+      // when working with LEFT OUTER JOIN. This logic does not cause any
+      // issue with territory or non-territory based databases. We get 
+      // correct results even though Derby is not doing a coalesce on left 
+      // table's column value and right table's column value as specified
+      // by SQL spec. This is because, in case of LEFT OUTER JOIN, if the
+      // left table's column value is null THEN right table's column value 
+      // will also be null and hence it is ok for Derby to always pick up  
+      // left table's column value for join columns in case of LEFT OUTER
+      // JOIN.
+      //
+      //Test NATURAL LEFT OUTER JOIN
+      checkLangBasedQuery(s, "SELECT x x1, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+    		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+      		new String[][] {{"b","b"},{"c","c"}});
+      //Do the same test as above, but this time using the USING clause
+      // rather the NATURAL join
+      checkLangBasedQuery(s, "SELECT x x1, " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+        		"USING(x)",
+        		new String[][] {{"b","b"},{"c","c"}});
+      //Test insert into a table with data from NATURAL LEFT OUTER JOIN
+      s.executeUpdate("INSERT INTO derby4631_t3(x1, x2) " +
+        		"SELECT x, " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+      		new String[][] {{"b","b","11"},{"c","c","11"}});
+      s.executeUpdate("UPDATE derby4631_t3 SET x3=22 where x1 in "+
+        		"(SELECT " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1)");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+      		new String[][] {{"b","b","22"},{"c","c","22"}});
+      s.executeUpdate("DELETE FROM derby4631_t3 where x1 in "+
+        		"(SELECT " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1)");
+        checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
+          		null);
+      //Do the same test as above, but this time using the USING clause
+      // rather the NATURAL join
+        s.executeUpdate("INSERT INTO derby4631_t3(x1, x2) " +
+      		"SELECT x, " +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+      		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x)");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+      		new String[][] {{"b","b","11"},{"c","c","11"}});
+      s.executeUpdate("UPDATE derby4631_t3 SET x3=22 where x1 in "+
+        		"(SELECT " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x))");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+      		new String[][] {{"b","b","22"},{"c","c","22"}});
+      s.executeUpdate("DELETE FROM derby4631_t3 where x1 in "+
+        		"(SELECT " +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x))");
+        checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
+          		null);
+
+        //Test create view with insert from join
+        s.executeUpdate("create view derby4631_v2 as " +
+        		"(SELECT x," +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1)");
+        checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+        		new String[][] {{"b","b"},{"c","c"}});
+        s.executeUpdate("drop view derby4631_v2 ");
+        //Do the same test as above, but this time using the USING clause
+        // rather the NATURAL join
+        s.executeUpdate("create view derby4631_v2 as " +
+        		"(SELECT x," +
+        		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x))");
+        checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+        		new String[][] {{"b","b"},{"c","c"}});
+        s.executeUpdate("drop view derby4631_v2 ");
+
+        //Test nested NATURAL LEFT OUTER JOIN. They will return correct data
+        // with both territory and non-territory based dbs.
+        checkLangBasedQuery(s, "SELECT x " +
+          		"FROM (values ('b')) v2(x) " +
+        		"NATURAL LEFT OUTER JOIN " +
+        		"derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1 ",
+          		new String[][] {{"b"}});
+      //Test nested LEFT OUTER JOIN with USING clause They will return correct
+      // data with both territory and non-territory based dbs.
+      checkLangBasedQuery(s, "SELECT x " +
+        		"FROM (values ('b')) v2(x) " +
+          		"LEFT OUTER JOIN " +
+          		"derby4631_t2 USING(x) " +
+          		"LEFT OUTER JOIN derby4631_t1 USING(x) ",
+        		new String[][] {{"b"}});
+      
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //We are working with a database with case-insensitive collation.
+    	  // Hence row 'b' in derby4631_t2 will find a match in derby4631_t1
+    	  // with row 'B'.
+    	  
+    	  //Derby used to always pick up the join column's value from the right
+    	  // table when working with RIGHT OUTER JOIN. This could cause issues 
+    	  // with case-sensitive collation databases and it would give wrong
+    	  // results for join columns for RIGHT OUTER JOIN with USING/NATURAL.
+    	  //After DERBY-4631 got fixed, now a query like following returns the
+    	  // correct results. As per the SQL spec, the join column's value 
+    	  // should always be the value resulting from coalescing the left 
+    	  // table's column value with the right table's column value.
+          checkLangBasedQuery(s, "SELECT x x1, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A"},{"b","b"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x x1, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+            		"USING(x)",
+            		new String[][] {{"A","A"},{"b","b"}});
+          
+          //Test insert into a table with data from NATURAL RIGHT OUTER JOIN
+          s.executeUpdate("INSERT INTO derby4631_t3(x1, x2) " +
+            		"SELECT x xx, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+          		new String[][] {{"A","A","11"},{"b","b","11"}});
+          s.executeUpdate("UPDATE derby4631_t3 SET x3=22 where x1 in "+
+          		"(SELECT " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1)");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+        		new String[][] {{"A","A","22"},{"b","b","22"}});
+          s.executeUpdate("DELETE FROM derby4631_t3 where x1 in "+
+            		"(SELECT " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+            		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1)");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
+            		null);
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          s.executeUpdate("INSERT INTO derby4631_t3(x1, x2) " +
+          		"SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x)");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+          		new String[][] {{"A","A","11"},{"b","b","11"}});
+          s.executeUpdate("UPDATE derby4631_t3 SET x3=22 where x1 in "+
+            		"(SELECT " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+            		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x))");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_t3 ",
+          		new String[][] {{"A","A","22"},{"b","b","22"}});
+          s.executeUpdate("DELETE FROM derby4631_t3 where x1 in "+
+            		"(SELECT " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+            		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x))");
+            checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
+              		null);
+
+            //Test create view with insert from join
+            s.executeUpdate("create view derby4631_v2 as " +
+            		"(SELECT x," +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+            		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1)");
+            checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+            		new String[][] {{"A","A"},{"b","b"}});
+            s.executeUpdate("drop view derby4631_v2 ");
+            //Do the same test as above, but this time using the USING clause
+            // rather the NATURAL join
+            s.executeUpdate("create view derby4631_v2 as " +
+            		"(SELECT x," +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+            		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x))");
+            checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+            		new String[][] {{"A","A"},{"b","b"}});
+            s.executeUpdate("drop view derby4631_v2 ");
+
+          //Test nested NATURAL RIGHT OUTER JOIN
+          checkLangBasedQuery(s, "SELECT x " +
+            		"FROM (values ('b')) v2(x) " +
+              		"NATURAL RIGHT OUTER JOIN " +
+              		"derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1 ",
+              		new String[][] {{"A"},{"b"}});
+          //Test nested LEFT OUTER JOIN with USING clause
+          checkLangBasedQuery(s, "SELECT x " +
+            		"FROM (values ('b')) v2(x) " +
+              		"RIGHT OUTER JOIN " +
+              		"derby4631_t2 USING(x) " +
+              		"RIGHT OUTER JOIN derby4631_t1 USING(x) ",
+            		new String[][] {{"A"},{"b"}});
+      } else {
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+          checkLangBasedQuery(s, "SELECT x x1, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A"},{"B","B"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+    	  //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+          checkLangBasedQuery(s, "SELECT x x1, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+            		"USING(x)",
+            		new String[][] {{"A","A"},{"B","B"}});
+      }
+   	  s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+      
+      //Now do the testing with 3 join columns
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5), "+
+      	      "y varchar(2), z int, a int)");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES " +
+      	      "('A','z',1,11),('B','y',2,22)");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5), "+
+      	      "y varchar(2), z int)");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES  " +
+      	      "('b','Y',2),('c','Y',2)");
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //For case-insensitive-territory based db, there will be a match for
+    	  // one of the rows in derby4631_t2 with derby4631_t1 and that is why 
+    	  // column a from derby4631_t1 will be non-null for that row for the 
+    	  // LEFT OUTER JOIN query
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+            		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+            		"a " +
+            		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+            		new String[][] {{"b","b","Y","Y","2","2","22"},
+          		  {"c","c","Y","Y","2","2",null}});
+          //test with USING clause
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y,z)",
+          		new String[][] {{"b","b","Y","Y","2","2","22"},
+          		  {"c","c","Y","Y","2","2",null}});
+          //Test joining on only 2 of the 3 columns
+          checkLangBasedQuery(s, "SELECT " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+            		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+            		"a " +
+            		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+            		"USING(y,z)",
+            		new String[][] {{"b","Y","Y","2","2","22"},
+          		  {"c","Y","Y","2","2","22"}});
+          //Test RIGHT OUTER JOIN using only 2 of the 3 columns
+          checkLangBasedQuery(s, "SELECT " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+          		"USING(y,z)",
+          		new String[][] {{"A","z","z","1","1","11"},
+        		  {"b","Y","Y","2","2","22"},
+          		  {"c","Y","Y","2","2","22"}});
+          //Test NATURAL RIGHT OUTER JOIN
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A","z","z","1","1","11"},
+        		  {"b","b","Y","Y","2","2","22"}});
+        //test with USING clause
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+            		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+            		"a " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+              		"USING(x,y,z)",
+              		new String[][] {{"A","A","z","z","1","1","11"},
+                  		  {"b","b","Y","Y","2","2","22"}});
+      } else {
+    	  //For non-territory based db, there will be no match for both the
+    	  // rows in derby4631_t2 with derby4631_t1 and that is why column
+    	  // a from derby4631_t1 will be null for the LEFT OUTER JOIN
+    	  // query
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+            		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+            		"a " +
+            		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+            		new String[][] {{"b","b","Y","Y","2","2",null},
+          		  {"c","c","Y","Y","2","2",null}});
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y,z)",
+          		new String[][] {{"b","b","Y","Y","2","2",null},
+          		  {"c","c","Y","Y","2","2",null}});
+          //Test LEFT OUTER JOIN using only 2 of the 3 columns
+          checkLangBasedQuery(s, "SELECT " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+          		"USING(y,z)",
+          		new String[][] {{"b","Y","Y","2","2",null},
+        		  {"c","Y","Y","2","2",null}});
+
+          //Test NATURAL RIGHT OUTER JOIN
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A","z","z","1","1","11"},
+        		  {"B","B","y","y","2","2","22"}});
+        //test with USING clause
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+            		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+            		"a " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+              		"USING(x,y,z)",
+              		new String[][] {{"A","A","z","z","1","1","11"},
+                  		  {"B","B","y","y","2","2","22"}});
+          //Test RIGHT OUTER JOIN using only 2 of the 3 columns
+          checkLangBasedQuery(s, "SELECT " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"y, coalesce(derby4631_t2.y, derby4631_t1.y) cy, " +
+          		"z, coalesce(derby4631_t2.z, derby4631_t1.z) cz, " +
+          		"a " +
+          		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+          		"USING(y,z)",
+          		new String[][] {{"A","z","z","1","1","11"},
+        		  {"B","y","y","2","2","22"}});
+      }
+      s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+      
+      //Now do the testing with 2 join columns
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5), y varchar(2))");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES ('A','z'),('B','y')");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5), y varchar(2))");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES ('b','Y'),('c','x')");
+      //Test with views too
+      s.executeUpdate("create view derby4631_v1 as select * from derby4631_t1");
+      s.executeUpdate("create view derby4631_v2 as select * from derby4631_t2");
+      //Test with global temporary tables too
+      s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE gt1 " +
+    	      "(x varchar(5), y varchar(2)) " +
+    	      "on commit delete rows not logged");
+      s.executeUpdate("INSERT INTO session.gt1 VALUES ('A','z'),('B','y')");
+      s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE gt2" +
+    	      "(x varchar(5), y varchar(2)) " +
+    	      "on commit delete rows not logged");
+      s.executeUpdate("INSERT INTO session.gt2 VALUES ('b','Y'),('c','x')");
+
+      //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+      // and hence following is returning the correct results for both
+      // territory and non-territory based databases
+	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+			  "derby4631_t2", "derby4631_t1",
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with views
+	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+			  "derby4631_v2", "derby4631_v1",
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with global temporary tables
+	  joinTesting(s,"gt2", "gt1",
+			  "session.gt2 gt2", "session.gt1 gt1",
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with VALUES
+	  joinTesting(s,"v2", "v1",
+			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+			  " (values('A','z'),('B','y')) v1(x,y) ", 
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test subqueries.
+	  joinTesting(s,"t2", "t1",
+			  " (select * from derby4631_t2) t2(x,y) ",
+			  " (select * from derby4631_t1) t1(x,y) ", 
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+	  
+      //Do the same test as above, but this time using the USING clause
+      // rather the NATURAL join
+      //
+      //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+      // and hence following is returning the correct results.
+	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+			  "derby4631_t2", "derby4631_t1",
+			  "  LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with views
+	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+			  "derby4631_v2", "derby4631_v1",
+			  "  LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with global temporary tables
+	  joinTesting(s,"gt2", "gt1",
+			  "session.gt2 gt2", "session.gt1 gt1",
+			  "  LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with VALUES
+	  joinTesting(s,"v2", "v1",
+			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+			  " (values('A','z'),('B','y')) v1(x,y) ", 
+			  " LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test subqueries.
+	  joinTesting(s,"t2", "t1",
+			  " (select * from derby4631_t2) t2(x,y) ",
+			  " (select * from derby4631_t1) t1(x,y) ", 
+			  " LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //Following query is returning correct data because DERBY-4631 is
+    	  // fixed
+    	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+    			  "derby4631_t2", "derby4631_t1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with views
+    	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+    			  "derby4631_v2", "derby4631_v1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with global temporary tables
+    	  joinTesting(s,"gt2", "gt1",
+    			  "session.gt2 gt2", "session.gt1 gt1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with VALUES
+    	  joinTesting(s,"v2", "v1",
+    			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+    			  " (values('A','z'),('B','y')) v1(x,y) ", 
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test subqueries.
+    	  joinTesting(s,"t2", "t1",
+    			  " (select * from derby4631_t2) t2(x,y) ",
+    			  " (select * from derby4631_t1) t1(x,y) ", 
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+    	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+    			  "derby4631_t2", "derby4631_t1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with views
+    	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+    			  "derby4631_v2", "derby4631_v1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with global temporary tables
+    	  joinTesting(s,"gt2", "gt1",
+    			  "session.gt2 gt2", "session.gt1 gt1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test with VALUES
+    	  joinTesting(s,"v2", "v1",
+    			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+    			  " (values('A','z'),('B','y')) v1(x,y) ", 
+    			  " RIGHT OUTER JOIN ", " USING(x,y) ",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          //Test subqueries.
+    	  joinTesting(s,"t2", "t1",
+    			  " (select * from derby4631_t2) t2(x,y) ",
+    			  " (select * from derby4631_t1) t1(x,y) ", 
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+      } else {
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+    	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+    			  "derby4631_t2", "derby4631_t1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+            		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Test with views
+    	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+    			  "derby4631_v2", "derby4631_v1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+            		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Test with VALUES
+    	  joinTesting(s,"v2", "v1",
+    			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+    			  " (values('A','z'),('B','y')) v1(x,y) ", 
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+          		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+    	  joinTesting(s,"derby4631_t2", "derby4631_t1",
+    			  "derby4631_t2", "derby4631_t1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Test with views
+    	  joinTesting(s,"derby4631_v2", "derby4631_v1",
+    			  "derby4631_v2", "derby4631_v1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Test with VALUES
+    	  joinTesting(s,"v2", "v1",
+    			  " (values ('b','Y'),('c','x')) v2(x,y) ",
+    			  " (values('A','z'),('B','y')) v1(x,y) ", 
+    			  " RIGHT OUTER JOIN ", " USING(x,y) ",
+    			  new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+      }
+
+      s.executeUpdate("DROP TABLE session.gt1");
+      s.executeUpdate("DROP TABLE session.gt2");
+      s.executeUpdate("DROP VIEW derby4631_v1");
+      s.executeUpdate("DROP VIEW derby4631_v2");
+      s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+      
+}
+
+private void joinTesting(Statement s, 
+		String leftTableName, String rightTableName, 
+		String leftTableSource, String rightTableSource,
+		String joinSpecification, String usingClause, 
+		String[][] expectedResults) 
+				throws SQLException{
+	String query = "SELECT x, y," +
+      		"coalesce("+leftTableName+".x, "+
+			rightTableName+".x) cx, " +
+      		"coalesce("+leftTableName+".y, "+
+      		rightTableName+".y) cy " +
+    		"FROM "+leftTableSource+joinSpecification+
+    		rightTableSource+usingClause;
+	checkLangBasedQuery(s, query,
+    		expectedResults);
+    
+}
   /**
    * Test order by with English collation
    *
@@ -1397,6 +2044,8 @@ public void testMissingCollatorSupport() throws SQLException {
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
         suite.addTest(collatedSuite("en", false, "testEnglishCollation"));
+        suite.addTest(collatedSuite("en", true, "testUsingClauseAndNaturalJoin"));
+        suite.addTest(collatedSuite("en", false, "testUsingClauseAndNaturalJoin"));
         suite.addTest(collatedSuite("en", true, "testNullColumnInInsert"));
         suite.addTest(collatedSuite("en", false, "testNullColumnInInsert"));
          

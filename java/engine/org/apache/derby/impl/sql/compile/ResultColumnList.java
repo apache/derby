@@ -1240,6 +1240,91 @@ public class ResultColumnList extends QueryTreeNodeVector
 					continue;
 				}
 
+				//DERBY-4631 - For INNER JOINs and LEFT OUTER
+				// JOINs, Derby retrieves the join column values 
+				// from the left table's join column. But for 
+				// RIGHT OUTER JOINs, the join column's value
+				// will be picked up based on following logic.
+				//1)if the left table's column value is null
+				// then pick up the right table's column's value.
+				//2)If the left table's column value is non-null, 
+				// then pick up that value 
+				if (rc.getJoinResultSet() != null) {
+					//We are dealing with a join column for 
+					// RIGHT OUTER JOIN with USING/NATURAL eg
+					//	 select c from t1 right join t2 using (c)
+					//We are talking about column c as in "select c"
+					ResultColumnList jnRCL = 
+							rc.getJoinResultSet().getResultColumns();
+					ResultColumn joinColumn;
+					int joinResultSetNumber = 
+							rc.getJoinResultSet().getResultSetNumber();
+
+					//We need to know the column positions of left
+					// table's join column and right table's join
+					// column to generate the code explained above
+					int virtualColumnIdRightTable = -1;
+					int virtualColumnIdLeftTable = -1;
+					for (int i=0; i< jnRCL.size(); i++) {
+						joinColumn = (ResultColumn) jnRCL.elementAt(i);
+						if (joinColumn.getName().equals(rc.getUnderlyingOrAliasName())) {
+							if (joinColumn.isRightOuterJoinUsingClause())
+								virtualColumnIdRightTable = joinColumn.getVirtualColumnId();
+							else
+								virtualColumnIdLeftTable = joinColumn.getVirtualColumnId();
+						}
+					}
+					
+					userExprFun.getField(field); // instance
+					userExprFun.push(index + 1); // arg1
+
+					String resultTypeName = 
+							getTypeCompiler(
+									DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+											Types.BOOLEAN).getTypeId()).interfaceName();
+					String	receiverType = ClassName.DataValueDescriptor;
+
+					//Our plan is to generate DERBY-4631
+					//  if(lefTablJoinColumnValue is null) 
+					//  then
+					//    use rightTablJoinColumnValue 
+					//   else
+					//    use lefTablJoinColumnValue 
+					
+					//Following will generate 
+					//  if(lefTablJoinColumnValue is null) 
+				    acb.pushColumnReference(userExprFun, joinResultSetNumber,
+				    		virtualColumnIdLeftTable);
+				    userExprFun.cast(rc.getTypeCompiler().interfaceName());
+				    userExprFun.cast(receiverType);
+				    userExprFun.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
+							"isNullOp",resultTypeName, 0);
+					//Then call generateExpression on left Table's column
+				    userExprFun.cast(ClassName.BooleanDataValue);
+				    userExprFun.push(true);
+				    userExprFun.callMethod(
+				    		VMOpcode.INVOKEINTERFACE, (String) null, "equals", "boolean", 1);
+					//Following will generate 
+					//  then
+					//    use rightTablJoinColumnValue 
+				    userExprFun.conditionalIf();
+				    acb.pushColumnReference(userExprFun, joinResultSetNumber,
+				    		virtualColumnIdRightTable);
+				    userExprFun.cast(rc.getTypeCompiler().interfaceName());
+					//Following will generate 
+					//   else
+					//    use lefTablJoinColumnValue 
+				    userExprFun.startElseCode();
+				    acb.pushColumnReference(userExprFun, joinResultSetNumber, 
+				    		virtualColumnIdLeftTable);
+				    userExprFun.cast(rc.getTypeCompiler().interfaceName());
+				    userExprFun.completeConditional();
+					userExprFun.cast(ClassName.DataValueDescriptor);
+					userExprFun.callMethod(
+							VMOpcode.INVOKEINTERFACE, ClassName.Row, "setColumn", "void", 2);
+					continue;
+				}
+
 				if (sourceExpr instanceof ColumnReference && ! ( ((ColumnReference) sourceExpr).getCorrelated()))
 				{
 					continue;
@@ -3609,6 +3694,19 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ValueNode		expr;
 
 			resultColumn = (ResultColumn) elementAt(index);
+			//DERBY-4631
+			//Following if condition if true means that the 
+			// ResultColumn is a join column for a RIGHT OUTER
+			// JOIN with USING/NATURAL clause. At execution 
+			// time, a join column's value should be determined 
+			// by generated code which is equivalent to 
+			// COALESCE(leftTableJoinColumn,rightTableJoinColumn).
+			// By returning false here, we allow Derby to generate
+			// code for functionality equivalent to COALESCE to
+			// determine join column's value. 
+			if (resultColumn.isRightOuterJoinUsingClause())
+				return false;
+			
 			expr = resultColumn.getExpression();
 			if (! (expr instanceof VirtualColumnNode) &&
 				! (expr instanceof ColumnReference))
@@ -3688,6 +3786,10 @@ public class ResultColumnList extends QueryTreeNodeVector
                     updateArrays(mapArray, cloneMap, seenMap, rc, index);
 
 				}
+			}
+			else if (resultColumn.isRightOuterJoinUsingClause())
+			{
+				mapArray[index] = -1;
 			}
 			else if (resultColumn.getExpression() instanceof ColumnReference)
 			{
