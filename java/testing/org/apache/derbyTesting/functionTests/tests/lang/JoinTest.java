@@ -227,6 +227,10 @@ public class JoinTest extends BaseJDBCTestCase {
             s.executeQuery("select * from t1 cross join t2"),
             cross(T1, T2));
 
+        // Cross Join does not allow USING clause
+        assertStatementError(
+        		SYNTAX_ERROR, s, "select * from t1 cross join t1 USING(c1)");
+        
         // Self join
         JDBC.assertUnorderedResultSet(
             s.executeQuery("select * from t1 a cross join t1 b"),

@@ -892,6 +892,20 @@ private boolean isNullRejecting (
 	{
 		return rightOuterJoin;
 	}
+    
+	/**
+	 * If this is a right outer join node with USING/NATURAL clause, then
+	 *  check if the passed ResultColumn is a join column. If yes, then 
+	 *  ResultColumn should be marked such. DERBY-4631
+	 */
+	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+	{
+		if (isRightOuterJoin() && usingClause != null &&  
+				usingClause.getResultColumn(rc.getUnderlyingOrAliasName()) != null) {
+			rc.setRightOuterJoinUsingClause(true);
+			rc.setJoinResultset(this);
+		}
+	}
 
 	// return the Null-producing table references
 	public JBitSet LOJgetNPReferencedTables(int numTables)

@@ -915,6 +915,16 @@ abstract class FromTable extends ResultSetNode implements Optimizable
         int intRowCount = (rowCount > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) rowCount;
         return intRowCount <= maxCapacity( getCurrentAccessPath().getJoinStrategy(), maxMemoryPerTable);
     }
+    
+	/**
+	 * No-op in FromTable.
+	 * 
+	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
+	 */
+	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+	{
+		return;
+	}
 
 	/**
 	 * @see Optimizable#legalJoinOrder

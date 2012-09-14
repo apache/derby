@@ -55,10 +55,10 @@ import org.apache.derby.iapi.util.StringUtil;
  * for example in certain joins the ResultColumn can be nullable even if
  * its underlying column is not. In an INSERT or UPDATE the ResultColumn
  * will represent the type of the column in the table, the type of
- * the underlying expresion will be the type of the source of the
+ * the underlying expression will be the type of the source of the
  * value to be insert or updated. The method columnTypeAndLengthMatch()
  * can be used to detect when normalization is required between
- * the expression and the tyoe of ResultColumn. This class does
+ * the expression and the type of ResultColumn. This class does
  * not implement any type normalization (conversion), this is
  * typically handled by a NormalizeResultSetNode.
  *
@@ -89,6 +89,26 @@ public class ResultColumn extends ValueNode
 	boolean			updatableByCursor;
 	private boolean defaultColumn;
     private boolean wasDefault;
+    //Following 2 fields have been added for DERBY-4631. 
+    //rightOuterJoinUsingClause will be set to true for following 2 cases
+    //1)if this column represents the join column which is part of the 
+    //  SELECT list of a RIGHT OUTER JOIN with USING/NATURAL. eg
+    //     select c from t1 right join t2 using (c)
+    //  This case is talking about column c as in "select c"
+    //2)if this column represents the join column from the right table 
+    //  for predicates generated for the USING/NATURAL of RIGHT OUTER JOIN
+    //  eg
+    //     select c from t1 right join t2 using (c)
+    //  For "using(c)", a join predicate will be created as follows
+    //    t1.c=t2.c
+    //  This case is talking about column t2.c of the join predicate.
+    private boolean rightOuterJoinUsingClause;
+    //Following will be non-null for the case 1) above. It will show the
+    // association of this result column to the join resultset created
+    // for the RIGHT OUTER JOIN with USING/NATURAL. This information along
+    // with rightOuterJoinUsingClause will be used during the code generation
+    // time.
+    private JoinNode joinResultSet = null;
 
 	// tells us if this ResultColumn is a placeholder for a generated
 	// autoincrement value for an insert statement.
@@ -193,7 +213,73 @@ public class ResultColumn extends ValueNode
 			expression.isInstanceOf(C_NodeTypes.DEFAULT_NODE))
 			defaultColumn = true;
 	}
+	
+	/**
+	 * Returns TRUE if the ResultColumn is join column for a RIGHT OUTER 
+	 *  JOIN with USING/NATURAL. More comments at the top of this class
+	 *  where rightOuterJoinUsingClause is defined.
+	 */
+	public boolean isRightOuterJoinUsingClause()
+	{
+		return rightOuterJoinUsingClause;
+	}
 
+	/**
+	 * Will be set to TRUE if this ResultColumn is join column for a 
+	 *  RIGHT OUTER JOIN with USING/NATURAL. More comments at the top of 
+	 *  this class where rightOuterJoinUsingClause is defined. 2 eg cases
+	 * 1)select c from t1 right join t2 using (c)
+	 *   This case is talking about column c as in "select c"
+	 * 2)select c from t1 right join t2 using (c)
+	 *   For "using(c)", a join predicate will be created as follows
+	 *     t1.c=t2.c
+	 *   This case is talking about column t2.c of the join predicate.
+	 *   
+	 * This method gets called for Case 1) during the bind phase of
+	 *  ResultColumn(ResultColumn.bindExpression).
+	 *   
+	 * This method gets called for Case 2) during the bind phase of
+	 *  JoinNode while we are going through the list of join columns
+	 *  for a NATURAL JOIN or user supplied list of join columns for
+	 *  USING clause(JoinNode.getMatchingColumn).
+	 *  
+	 * @param value True/False
+	 */
+	public void setRightOuterJoinUsingClause(boolean value)
+	{
+		rightOuterJoinUsingClause = value;
+	}
+
+	/**
+	 * Returns a non-null value if the ResultColumn represents the join
+	 * column which is part of the SELECT list of a RIGHT OUTER JOIN with
+	 * USING/NATURAL. eg
+	 *      select c from t1 right join t2 using (c)
+	 * The join column we are talking about is column c as in "select c"
+	 * The return value of following method will show the association of this 
+	 * result column to the join resultset created for the RIGHT OUTER JOIN 
+	 * with USING/NATURAL. This information along with 
+	 * rightOuterJoinUsingClause will be used during the code generation 
+	 * time.
+	 */
+	public JoinNode getJoinResultSet() {
+		return joinResultSet;
+	}
+
+	/**
+	 * This method gets called during the bind phase of a ResultColumn if it
+	 *  is determined that the ResultColumn represents the join column which
+	 *  is part of the SELECT list of a RIGHT OUTER JOIN with 
+	 *  USING/NATURAL. eg
+	 *      select c from t1 right join t2 using (c)
+	 *   This case is talking about column c as in "select c"
+	 * @param resultSet - The ResultColumn belongs to this JoinNode
+	 */
+	public void setJoinResultset(JoinNode resultSet)
+	{
+		joinResultSet = resultSet;
+	}
+	
 	/**
 	 * Returns TRUE if the ResultColumn is standing in for a DEFAULT keyword in
 	 * an insert/update statement.
@@ -241,6 +327,36 @@ public class ResultColumn extends ValueNode
 			columnName.equals(name) ||
 			columnName.equals(getSourceColumnName());
 	}
+	
+	/**
+	 * Get non-null column name. This method is called during the bind phase
+	 *  to see if we are dealing with ResultColumn in the SELECT list that 
+	 *  belongs to a RIGHT OUTER JOIN(NATURAL OR USING)'s join column.
+	 * 					
+	 * For a query like following, we want to use column name x and not the
+	 *  alias x1 when looking in the JoinNode for join column
+	 *   SELECT x x1
+	 *   	 FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1;
+	 * For a query like following, getSourceColumnName() will return null
+	 *  because we are dealing with a function for the column. For this
+	 *  case, "name" will return the alias name cx
+	 *   SELECT coalesce(derby4631_t2.x, derby4631_t1.x) cx
+	 *   	 FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1;	
+	 * For a query like following, getSourceColumnName() and name will 
+	 *  return null and hence need to use the generated name
+	 *   SELECT ''dummy="'|| TRIM(CHAR(x))|| '"'
+	 *        FROM (derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1);
+	 */
+	String getUnderlyingOrAliasName() 
+	{
+		if (getSourceColumnName() != null)
+			return getSourceColumnName();
+		else if (name != null)
+			return name;
+		else
+			return exposedName;
+	}
+	
 	/**
 	 * Returns the underlying source column name, if this ResultColumn
 	 * is a simple direct reference to a table column, or NULL otherwise.
@@ -531,6 +647,8 @@ public class ResultColumn extends ValueNode
 				"isGroupingColumn: " + isGroupingColumn + "\n" +
 				"isReferenced: " + isReferenced + "\n" +
 				"isRedundant: " + isRedundant + "\n" +
+				"rightOuterJoinUsingClause: " + rightOuterJoinUsingClause + "\n" +
+				"joinResultSet: " + joinResultSet + "\n" +
 				"virtualColumnId: " + virtualColumnId + "\n" +
 				"resultSetNumber: " + resultSetNumber + "\n" +
 				super.toString();
@@ -600,6 +718,20 @@ public class ResultColumn extends ValueNode
 			{
 				expression.setType(getTypeServices());
 			}
+		}
+
+		//DERBY-4631
+		//Following code is for a join column(which obviously will not be 
+		// qualified with a table name because join columns are not
+		// associated with left or right table) of RIGHT OUTER JOIN  
+		// with USING/NATURAL join. For such columns, 
+		// isJoinColumnForRightOuterJoin() call will set 
+		// rightOuterJoinUsingClause to true and associate the  
+		// JoinResultSet with it. eg
+		//      select c from t1 right join t2 using (c)
+		// Here, we are talking about column c as in "select c"
+		if (expression.getTableName() == null) {
+			fromList.isJoinColumnForRightOuterJoin(this);
 		}
 
 		setExpression( expression.bindExpression(fromList, subqueryList,
@@ -1457,6 +1589,14 @@ public class ResultColumn extends ValueNode
   			newResultColumn.setAutoincrement();
   		if (isGroupingColumn()) 
   			newResultColumn.markAsGroupingColumn();
+  		
+  		if (isRightOuterJoinUsingClause()) {
+  			newResultColumn.setRightOuterJoinUsingClause(true);
+  		}
+
+  		if (getJoinResultSet() != null) {
+  	  		newResultColumn.setJoinResultset(getJoinResultSet());
+  		}
   		
   		if (isGenerated()) {
   			newResultColumn.markGenerated();
