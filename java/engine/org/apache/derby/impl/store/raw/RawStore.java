@@ -1259,195 +1259,183 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	*/
 
 
-    /*
-     * Setup Encryption Engines. 
+    /**
+     * Setup Encryption Engines.
      */
     private void setupEncryptionEngines(boolean create, Properties properties)
         throws StandardException
     {
-                    
-            // check if user has requested to encrypt the database or it is an
-            // encrypted database.
+        // Check if user has requested to encrypt the database or if the
+        // database is encrypted already.
 
-            String dataEncryption = 
-                properties.getProperty(Attribute.DATA_ENCRYPTION);
-            databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue(); 
+        String dataEncryption =
+            properties.getProperty(Attribute.DATA_ENCRYPTION);
+        databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
 
-            boolean reEncrypt = false;
+        boolean reEncrypt = false;
 
-            if (!create) {
-                // check if database is already encrypted, by directly peeking at the
-                // database service propertes instead of the properties passed 
-                // to this method. By looking at properties to the boot method ,
-                // one can not differentiate if user is requesting for database
-                // encryption or the database is already encrypted because 
-                // Attribute.DATA_ENCRYPTION is used  to store in the 
-                // service properties to indicate that database
-                // is encrypted and also users can specify it as URL attribute 
-                // to encrypt and existing database. 
-                               
-                String name = Monitor.getMonitor().getServiceName(this);
-                PersistentService ps = Monitor.getMonitor().getServiceType(this);
-                String canonicalName = ps.getCanonicalServiceName(name);
-                Properties serviceprops = ps.getServiceProperties(canonicalName, 
-                                                                  (Properties)null);
-                dataEncryption = serviceprops.getProperty(Attribute.DATA_ENCRYPTION);
-                boolean encryptedDatabase = Boolean.valueOf(dataEncryption).booleanValue();
+        if (!create) {
+            // Check if database is already encrypted, by directly peeking at
+            // the database service propertes instead of the properties passed
+            // to this method. By looking at properties passed to the boot
+            // method, one can not differentiate between a request to encrypt
+            // a plaintext database and booting an already encrypted database.
+            // Attribute.DATA_ENCRYPTION is stored in the service properties
+            // for encrypted database, and this takes precedence over the
+            // value specified by the user.
 
-                if (!encryptedDatabase  && databaseEncrypted) {
-                    // it it not an encrypted database, user is asking to 
-                    // encrypt an un-encrypted database. 
-                    encryptDatabase = true;
-                    // set database as un-encrypted, we will set it as encrypted 
-                    // after encrypting the existing data. 
-                    databaseEncrypted = false;
-                } else {
-                    // check if the user has requested to renecrypt  an
-                    // encrypted datbase with new encryption password/key.
-                    if (encryptedDatabase) {
-                        if (properties.getProperty(
-                                       Attribute.NEW_BOOT_PASSWORD) != null) {
-                            reEncrypt = true;
-                        }
-                        else if (properties.getProperty(
-                                       Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null){
-                            reEncrypt = true;
-                        };
-                        encryptDatabase = reEncrypt;
+            String name = Monitor.getMonitor().getServiceName(this);
+            PersistentService ps = Monitor.getMonitor().getServiceType(this);
+            String canonicalName = ps.getCanonicalServiceName(name);
+            Properties serviceprops = ps.getServiceProperties(canonicalName,
+                                                              (Properties)null);
+            dataEncryption = serviceprops.getProperty(Attribute.DATA_ENCRYPTION);
+            boolean encryptedDatabase = Boolean.valueOf(dataEncryption).booleanValue();
+
+            if (!encryptedDatabase  && databaseEncrypted) {
+                // It it not an encrypted database, user is asking to
+                // encrypt an un-encrypted database.
+                encryptDatabase = true;
+                // Set database as un-encrypted, we will set it as encrypted
+                // after encrypting the existing data.
+                databaseEncrypted = false;
+            } else {
+                // Check if the user has requested to re-necrypt an
+                // encrypted datbase with a new encryption password/key.
+                if (encryptedDatabase) {
+                    if (properties.getProperty(
+                                   Attribute.NEW_BOOT_PASSWORD) != null) {
+                        reEncrypt = true;
+                    } else if (properties.getProperty(
+                                   Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null){
+                        reEncrypt = true;
                     }
-
-                }
-                
-                
-                // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
-                // connection URL by mistake on an already encrypted database, 
-                // it is ignored.
-
-
-                // prevent attempt to (re)encrypt of a read-only database
-                if (encryptDatabase) 
-                {
-                    if (isReadOnly()) 
-                    {
-                        if (reEncrypt) 
-                            throw StandardException.newException(
-                                     SQLState.CANNOT_REENCRYPT_READONLY_DATABASE);
-                        else
-                            throw StandardException.newException(
-                                     SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
-                    }
+                    encryptDatabase = reEncrypt;
                 }
             }
 
-            // setup encryption engines. 
-			if (databaseEncrypted || encryptDatabase)
-			{
-                // check if database is configured for encryption, during
-                // configuration  some of the properties database; so that
-                // user does not have to specify them on the URL everytime.
-                // Incase of re-encryption of an already of encrypted database
-                // only some information needs to updated; it is not treated 
-                // like the configuring the database for encryption first time. 
-                boolean setupEncryption = create || (encryptDatabase &&  !reEncrypt);
+            // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
+            // connection URL by mistake on an already encrypted database,
+            // it is ignored.
 
-                // start the cipher factory module, that is is used to create 
-                // instances of the cipher factory with specific enctyption 
-                // properties. 
-
-                CipherFactoryBuilder cb =  (CipherFactoryBuilder)
-                    Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
-
-                // create instance of the cipher factory with the 
-                // specified encryption properties. 
-                currentCipherFactory = cb.createCipherFactory(setupEncryption, 
-                                                              properties, 
-                                                              false);
-
-                // The database can be encrypted using an encryption key that is given at
-                 // connection url. For security reasons, this key is not made persistent
-                // in the database. But it is necessary to verify the encryption key 
-                // whenever booting the database if it is similar to the key that was used
-                // during creation time. This needs to happen before we access the data/logs to 
-                // avoid the risk of corrupting the database because of a wrong encryption key.
-                
-                // Please note this verification process does not provide any added security
-                // but is intended to allow to fail gracefully if a wrong encryption key 
-                // is used during boot time
-  
-
-                currentCipherFactory.verifyKey(setupEncryption, storageFactory, properties);
-
-                // Initializes the encryption and decryption engines
-                encryptionEngine = currentCipherFactory.
-                    createNewCipher(CipherFactory.ENCRYPT);
-                
-                // At creation time of an encrypted database, store the encryption block size
-                // for the algorithm. Store this value as property given by  
-                // RawStoreFactory.ENCRYPTION_BLOCKSIZE. This value
-                // is made persistent by storing it in service.properties
-                // To connect to an existing database, retrieve the value and use it for
-                // appropriate padding.
-                // The  default value of encryption block size is 8,
-                // to allow for downgrade issues
-                // Before support for AES (beetle6023), default encryption block size supported
-                // was 8
-
-                if(setupEncryption) 
-                {
-                    encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
-                    // in case of database create, store the encryption block
-                    // size. Incase of reconfiguring the existing datbase, this
-                    // will be saved after encrypting the exisiting data. 
-                    if (create)
-                        properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
-                                       String.valueOf(encryptionBlockSize));
-                }
-                else
-                {
-                    if(properties.getProperty(RawStoreFactory.ENCRYPTION_BLOCKSIZE) != null)
-                        encryptionBlockSize = Integer.parseInt(properties.getProperty
-                                                               (RawStoreFactory.ENCRYPTION_BLOCKSIZE));
-                    else
-                        encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
-                }   
-
-                decryptionEngine = currentCipherFactory.
-                    createNewCipher(CipherFactory.DECRYPT);
-
-                random = currentCipherFactory.getSecureRandom();
-                    
-                if (encryptDatabase) {
-
+            // Prevent attempt to (re)encrypt a read-only database.
+            if (encryptDatabase) {
+                if (isReadOnly()) {
                     if (reEncrypt) {
-                        // create new cipher factory with the new encrytpion
-                        // properties specified by the user. This cipher factory
-                        // is used to create the new encryption/decryption
-                        // engines to reencrypt the database with the new
-                        // encryption keys. 
-                        newCipherFactory = 
-                            cb.createCipherFactory(setupEncryption, 
-                                                   properties, 
-                                                   true);
-                        newDecryptionEngine = 
-                            newCipherFactory.createNewCipher(CipherFactory.DECRYPT);
-                        newEncryptionEngine = 
-                            newCipherFactory.createNewCipher(CipherFactory.ENCRYPT);
+                        throw StandardException.newException(
+                                 SQLState.CANNOT_REENCRYPT_READONLY_DATABASE);
                     } else {
-                        // there is only one engine when configuring an 
-                        // unencrypted database for encryption 
-                        newDecryptionEngine = decryptionEngine;
-                        newEncryptionEngine = encryptionEngine;
-
+                        throw StandardException.newException(
+                                 SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
                     }
                 }
+            }
+        }
 
-                // save the encryption properties if encryption is enabled 
-                // at database creation time. 
-                if(create)
-                    currentCipherFactory.saveProperties(properties) ;
-			}
+        // setup encryption engines.
+        if (databaseEncrypted || encryptDatabase) {
+            // Check if database is or will be encrypted. We save encryption
+            // properties as service properties, such that
+            // user does not have to specify them on the URL everytime.
+            // Incase of re-encryption of an already of encrypted database
+            // only some information needs to updated; it is not treated
+            // like the configuring the database for encryption first time.
+            boolean setupEncryption = create || (encryptDatabase && !reEncrypt);
+
+            // start the cipher factory module, that is is used to create
+            // instances of the cipher factory with specific enctyption
+            // properties.
+
+            CipherFactoryBuilder cb = (CipherFactoryBuilder)
+                Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+
+            // create instance of the cipher factory with the
+            // specified encryption properties.
+            currentCipherFactory = cb.createCipherFactory(setupEncryption,
+                                                          properties,
+                                                          false);
+
+            // The database can be encrypted using an encryption key that is
+            // specified in the connection URL. For security reasons this key
+            // is not persisted in the database, but it is necessary to verify
+            // the encryption key whenever booting the database. This needs to
+            // happen before we access the data/logs to avoid the risk of
+            // corrupting the database because of a wrong encryption key.
+
+            // Please note this verification process does not provide any added
+            // security. Its purpose is to allow us to fail gracefully if an
+            // incorrect encryption key is used during boot time.
+            currentCipherFactory.verifyKey(
+                    setupEncryption, storageFactory, properties);
+
+            // Initializes the encryption and decryption engines.
+            encryptionEngine = currentCipherFactory.createNewCipher(
+                    CipherFactory.ENCRYPT);
+
+            // At creation time of an encrypted database, store the encryption
+            // block size for the algorithm. Store this value as property given
+            // by RawStoreFactory.ENCRYPTION_BLOCKSIZE. This value is persisted
+            // by storing it in service.properties
+            // To connect to an existing database, retrieve the value and use
+            // it for appropriate padding. The default value of encryption
+            // block size is 8, to allow for downgrade issues.
+            // Before support for AES (beetle6023), default encryption block
+            // size supported was 8.
+
+            if(setupEncryption) {
+                encryptionBlockSize = encryptionEngine.getEncryptionBlockSize();
+                // In case of database create, store the encryption block
+                // size. In the case of reconfiguring an existing database,
+                // this will be saved after encrypting the exisiting data.
+                if (create) {
+                    properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
+                                   String.valueOf(encryptionBlockSize));
+                }
+            } else {
+                if (properties.getProperty(RawStoreFactory.ENCRYPTION_BLOCKSIZE) != null) {
+                    encryptionBlockSize =
+                        Integer.parseInt(properties.getProperty(
+                                RawStoreFactory.ENCRYPTION_BLOCKSIZE));
+                } else {
+                    encryptionBlockSize =
+                        encryptionEngine.getEncryptionBlockSize();
+                }
+            }
+
+            decryptionEngine = currentCipherFactory.
+                createNewCipher(CipherFactory.DECRYPT);
+
+            random = currentCipherFactory.getSecureRandom();
+
+            if (encryptDatabase) {
+                if (reEncrypt) {
+                    // Create new cipher factory with the new encrytpion
+                    // properties specified by the user. This cipher factory
+                    // is used to create the new encryption/decryption
+                    // engines to re-encrypt the database with the new
+                    // encryption keys.
+                    newCipherFactory = cb.createCipherFactory(setupEncryption,
+                                                              properties,
+                                                              true);
+                    newDecryptionEngine =
+                        newCipherFactory.createNewCipher(CipherFactory.DECRYPT);
+                    newEncryptionEngine =
+                        newCipherFactory.createNewCipher(CipherFactory.ENCRYPT);
+                } else {
+                    // There is only one engine when configuring an
+                    // un-encrypted database for encryption.
+                    newDecryptionEngine = decryptionEngine;
+                    newEncryptionEngine = encryptionEngine;
+                }
+            }
+
+            // Save the encryption properties if encryption is enabled
+            // at database creation time.
+            if(create) {
+                currentCipherFactory.saveProperties(properties);
+            }
+        }
     }
-    
 
 	/**
 		Encrypt cleartext into ciphertext.
