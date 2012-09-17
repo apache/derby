@@ -246,7 +246,7 @@ public class EmbedConnection implements EngineConnection
 			EmbedConnectionContext context = pushConnectionContext(tr.getContextManager());
 
 			// if we are shutting down don't attempt to boot or create the database
-			boolean shutdown = Boolean.valueOf(info.getProperty(Attribute.SHUTDOWN_ATTR)).booleanValue();
+            boolean shutdown = isTrue(info, Attribute.SHUTDOWN_ATTR);
 
 			// see if database is already booted
 			Database database = (Database) Monitor.findService(Property.DATABASE_MODULE, tr.getDBName());
@@ -686,19 +686,24 @@ public class EmbedConnection implements EngineConnection
 	{
 		int createCount = 0;
 
-		if (Boolean.valueOf(p.getProperty(Attribute.CREATE_ATTR)).booleanValue())
+        if (isTrue(p, Attribute.CREATE_ATTR)) {
 			createCount++;
+        }
 
 		int restoreCount=0;
 		//check if the user has specified any /create/restore/recover from backup attributes.
-		if (p.getProperty(Attribute.CREATE_FROM) != null)
+        if (isSet(p, Attribute.CREATE_FROM)) {
 			restoreCount++;
-		if (p.getProperty(Attribute.RESTORE_FROM) != null)
+        }
+        if (isSet(p, Attribute.RESTORE_FROM)) {
 			restoreCount++;
-		if (p.getProperty(Attribute.ROLL_FORWARD_RECOVERY_FROM)!=null)
+        }
+        if (isSet(p, Attribute.ROLL_FORWARD_RECOVERY_FROM)) {
 			restoreCount++;
-		if(restoreCount > 1)
+        }
+        if (restoreCount > 1) {
 			throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
+        }
 	
         // check if user has specified re-encryption attributes in
         // combination with createFrom/restoreFrom/rollForwardRecoveryFrom
@@ -747,8 +752,7 @@ public class EmbedConnection implements EngineConnection
      *      {@code false} if not.
      */
     private boolean isDropDatabase(Properties p) {
-        return (Boolean.valueOf(
-                    p.getProperty(Attribute.DROP_ATTR)).booleanValue());
+        return isTrue(p, Attribute.DROP_ATTR);
     }
 
 	/**
@@ -760,10 +764,9 @@ public class EmbedConnection implements EngineConnection
 	 */
 	private boolean isEncryptionBoot(Properties p)
 	{
-		return ((Boolean.valueOf(
-					 p.getProperty(Attribute.DATA_ENCRYPTION)).booleanValue()) ||
-				(p.getProperty(Attribute.NEW_BOOT_PASSWORD) != null)           ||
-				(p.getProperty(Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null));
+        return (isTrue(p, Attribute.DATA_ENCRYPTION) ||
+                isSet(p, Attribute.NEW_BOOT_PASSWORD) ||
+                isSet(p, Attribute.NEW_CRYPTO_EXTERNAL_KEY));
 	}
 
 	/**
@@ -773,22 +776,16 @@ public class EmbedConnection implements EngineConnection
 	 * @param p the attribute set
 	 * @return true if a boot will hard upgrade the database
 	 */
-	private boolean isHardUpgradeBoot(Properties p)
-	{
-		return Boolean.valueOf(
-			p.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
+    private boolean isHardUpgradeBoot(Properties p) {
+        return isTrue(p, Attribute.UPGRADE_ATTR);
 	}
 
     private boolean isStartReplicationSlaveBoot(Properties p) {
-        return ((Boolean.valueOf(
-                 p.getProperty(Attribute.REPLICATION_START_SLAVE)).
-                 booleanValue()));
+        return isTrue(p, Attribute.REPLICATION_START_SLAVE);
     }
 
     private boolean isStartReplicationMasterBoot(Properties p) {
-        return ((Boolean.valueOf(
-                 p.getProperty(Attribute.REPLICATION_START_MASTER)).
-                 booleanValue()));
+        return isTrue(p, Attribute.REPLICATION_START_MASTER);
     }
     
     /**
@@ -799,15 +796,11 @@ public class EmbedConnection implements EngineConnection
      *         false otherwise.
      */
     private boolean isReplicationFailover(Properties p) {
-        return ((Boolean.valueOf(
-                 p.getProperty(Attribute.REPLICATION_FAILOVER)).
-                 booleanValue()));
+        return isTrue(p, Attribute.REPLICATION_FAILOVER);
     }
 
     private boolean isStopReplicationMasterBoot(Properties p) {
-        return ((Boolean.valueOf(
-                 p.getProperty(Attribute.REPLICATION_STOP_MASTER)).
-                 booleanValue()));
+        return isTrue(p, Attribute.REPLICATION_STOP_MASTER);
     }
     
     /**
@@ -819,9 +812,7 @@ public class EmbedConnection implements EngineConnection
      * otherwise.
      */
     private boolean isStopReplicationSlaveBoot(Properties p) {
-        return Boolean.valueOf(
-               p.getProperty(Attribute.REPLICATION_STOP_SLAVE)).
-               booleanValue();
+        return isTrue(p, Attribute.REPLICATION_STOP_SLAVE);
     }
 
     /**
@@ -837,9 +828,17 @@ public class EmbedConnection implements EngineConnection
      * otherwise.
      */
     private boolean isInternalShutdownSlaveDatabase(Properties p) {
-        return Boolean.valueOf(
-               p.getProperty(Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE)).
-               booleanValue();
+        return isTrue(p, Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE);
+    }
+
+    /** Tells if the attribute/property has been set. */
+    private static boolean isSet(Properties p, String attribute) {
+        return p.getProperty(attribute) != null;
+    }
+
+    /** Tells if the attribute/property has the value {@code true}. */
+    private static boolean isTrue(Properties p, String attribute) {
+        return Boolean.valueOf(p.getProperty(attribute)).booleanValue();
     }
 
     private String getReplicationOperation(Properties p) 
