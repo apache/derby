@@ -51,7 +51,6 @@ public class SystemPropertyTestSetup extends TestSetup {
 	{
 		super(test);
 		this.newValues = newValues;
-		this.oldValues = new Properties();
 		this.staticProperties = staticProperties;
 	}
 
@@ -67,7 +66,6 @@ public class SystemPropertyTestSetup extends TestSetup {
 	{
 		super(test);
 		this.newValues = newValues;
-		this.oldValues = new Properties();
 		this.staticProperties = false;
 	}
 	/**
@@ -77,6 +75,15 @@ public class SystemPropertyTestSetup extends TestSetup {
     protected void setUp()
     throws java.lang.Exception
     {
+    	//DERBY-5663 Getting NPE when trying to set 
+    	// derby.language.logStatementText property to true inside a junit 
+    	// suite.
+    	//The same instance of SystemPropertyTestSetup can be used again
+    	// and hence we want to make sure that oldValues is not null as set
+    	// in the tearDown() method. If we leave it null, we will run into NPE
+    	// during the tearDown of SystemPropertyTestSetup during the 
+    	// decorator's reuse.
+		this.oldValues = new Properties();
     	setProperties(newValues);
     	// shutdown engine so static properties take effect
     	if (staticProperties)
@@ -102,7 +109,6 @@ public class SystemPropertyTestSetup extends TestSetup {
     	// shutdown engine to restore any static properties
     	if (staticProperties)
     		TestConfiguration.getCurrent().shutdownEngine();
-        newValues = null;
         oldValues = null;
     }
     
