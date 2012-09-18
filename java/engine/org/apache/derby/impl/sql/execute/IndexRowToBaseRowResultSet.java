@@ -79,9 +79,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	/* Run time statistics variables */
 	public long restrictionTime;
 
-	protected boolean currentRowPrescanned;
-	private boolean sourceIsForUpdateIndexScan;
-
     //
     // class interface
     //
@@ -200,9 +197,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 
 		source.openCore();
-		if ((source instanceof TableScanResultSet) && 
-			((TableScanResultSet) source).indexCols != null)
-			sourceIsForUpdateIndexScan = true;
 
 		/* Get a ConglomerateController for the base conglomerate 
 		 * NOTE: We only need to acquire locks on the data pages when
@@ -312,55 +306,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 	    if ( ! isOpen ) {
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");
-		}
-
-		/* beetle 3865, updateable cursor using index.  When in-memory hash table was full, we
-		 * read forward and saved future row id's in a virtual-memory-like temp table.  So if
-		 * we have rid's saved, and we are here, it must be non-covering index.  Intercept it
-		 * here, so that we don't have to go to underlying index scan.  We get both heap cols
-		 * and index cols together here for better performance.
-		 */
-		if (sourceIsForUpdateIndexScan && ((TableScanResultSet) source).futureForUpdateRows != null)
-		{
-			currentRowPrescanned = false;
-			TableScanResultSet src = (TableScanResultSet) source;
-
-			if (src.futureRowResultSet == null)
-			{
-				src.futureRowResultSet = (TemporaryRowHolderResultSet) src.futureForUpdateRows.getResultSet();
-				src.futureRowResultSet.openCore();
-			}
-
-			ExecRow ridRow = src.futureRowResultSet.getNextRowCore();
-
-			currentRow = null;
-
-			if (ridRow != null)
-			{
-				/* To maximize performance, we only use virtual memory style heap, no
-				 * position index is ever created.  And we save and retrieve rows from the
-				 * in-memory part of the heap as much as possible.  We can also insert after
-				 * we start retrieving, the assumption is that we delete the current row right
-				 * after we retrieve it.
-				 */
-				src.futureRowResultSet.deleteCurrentRow();
-				baseRowLocation = (RowLocation) ridRow.getColumn(1);
-               	baseCC.fetch(
-                  	      baseRowLocation, compactRow.getRowArray(), accessedAllCols);
-
-				currentRow = compactRow;
-				currentRowPrescanned = true;
-			}
-			else if (src.sourceDrained)
-				currentRowPrescanned = true;
-
-			if (currentRowPrescanned)
-			{
-				setCurrentRow(currentRow);
-
-				nextTime += getElapsedMillis(beginTime);
-	 	   		return currentRow;
-			}
 		}
 
 		/* Loop until we get a row from the base page that qualifies or
@@ -575,9 +520,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			SanityManager.ASSERT(isOpen,
 					"IndexRowToBaseRowResultSet is expected to be open");
 		}
-
-		if (currentRowPrescanned)
-			return currentRow;
 
 		/* Nothing to do if we're not currently on a row */
 		if (currentRow == null)

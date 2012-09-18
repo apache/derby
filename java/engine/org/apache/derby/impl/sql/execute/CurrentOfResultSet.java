@@ -30,15 +30,12 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.PreparedStatement;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 
 /**
@@ -148,17 +145,6 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 					TableScanResultSet scan = (TableScanResultSet) target;
 					if (scan.indexCols != null && currentRow != null)
 						currentRow = getSparseRow(currentRow, scan.indexCols);
-				}
-				/* If we are updating rows from cached RIDs, we should compare with forward-most
-				 * scan key when deciding whether to add RID to hash table or not.
-				 */
-				TableScanResultSet scan = (TableScanResultSet) activation.getForUpdateIndexScan();
-				if (scan != null)
-				{
-					if (target instanceof IndexRowToBaseRowResultSet)
-						scan.compareToLastKey = ((IndexRowToBaseRowResultSet) target).currentRowPrescanned;
-					else if (target instanceof TableScanResultSet)
-						scan.compareToLastKey = ((TableScanResultSet) target).currentRowPrescanned;
 				}
 
 				// REMIND: verify the row is still there
