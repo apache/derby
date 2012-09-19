@@ -403,7 +403,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
     /*
      * Initilize the new instance of this class. 
      */
-	public void	init(boolean create, Properties properties, boolean newAttrs)
+    private void init(boolean create, Properties properties, boolean newAttrs)
 		throws StandardException
 	{
 
