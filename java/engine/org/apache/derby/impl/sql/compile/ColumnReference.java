@@ -718,7 +718,10 @@ public class ColumnReference extends ValueNode
 		/* Find the matching ResultColumn */
 		source = getSourceResultColumn();
 		columnName = source.getName();
-		columnNumber = source.getColumnPosition();
+        // Use the virtual column id if the ResultColumn's expression
+        // is a virtual column (DERBY-5933).
+        columnNumber = source.getExpression() instanceof VirtualColumnNode ?
+                source.getVirtualColumnId() : source.getColumnPosition();
 
 		if (source.getExpression() instanceof ColumnReference)
 		{

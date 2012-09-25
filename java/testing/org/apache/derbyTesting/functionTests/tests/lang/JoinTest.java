@@ -2055,4 +2055,50 @@ public class JoinTest extends BaseJDBCTestCase {
 
         rollback();
     }
+
+    /**
+     * DERBY-5933. Error in column reference remapping in connection
+     * with flattening of a left outer join with a base table "d", cf
+     * test case below. In the example, the predicate b1=1 is pushed
+     * into the LOJ node, and in that connection the column reference
+     * to "b1" is remapped. The generated table number of the LOJ node
+     * is 4, and the correct column number of "b1" should be 5, i.e.
+     * [a1: 1, a2: 2, a3: 3, a4: 4, b1:5, c1:6]. However, the
+     * remapping logic erroneously picked b1's column number from its
+     * base table, 1, which really is the position of a1. Now, since
+     * b1 is constant, the column reference b1 "alias" a1 gets marked
+     * as such. Since we are ordering on a1, the sort avoidance logic
+     * is led to believe a1 is constant, and hence sorting is skipped,
+     * hence the wrong result. For related issues, see DERBY-4679,
+     * DERBY-4695, DERBY-3023, DERBY-2526.
+     */
+
+    public void testDerby_5933() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        s.executeUpdate("create table a (a1 int, a2 int, a3 int, a4 int)");
+        s.executeUpdate("create table b (b1 int)");
+        s.executeUpdate("create table c (c1 int)");
+        s.executeUpdate("create table d (d1 int)");
+        s.executeUpdate("insert into a values (1,2,1,2), (2,3,1,3), (1,4,1,4)");
+        s.executeUpdate("insert into b values 1");
+        s.executeUpdate("insert into d values 2,3,4");
+
+        ResultSet rs = s.executeQuery("select a1 from " +
+                "a inner join b on a3 = b1 " +
+                "    left outer join c on a4 = c1 " +
+                "        inner join d on a2 = d1 " +
+                "where b1 = 1 " +
+                "order by a1");
+
+        JDBC.assertFullResultSet(rs, new String[][] {
+            {"1"},
+            {"1"},
+            {"2"}});
+
+        rollback();
+    }
+
 }
