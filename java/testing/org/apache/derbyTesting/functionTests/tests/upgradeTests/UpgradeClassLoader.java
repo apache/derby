@@ -224,8 +224,9 @@ public class UpgradeClassLoader
                 } catch (MalformedURLException e) {
                     Assert.fail(e.toString());
                 } catch (IOException e) {
-                    BaseTestCase.alarm("IOException msg: '" + e.getMessage() + "'." 
+                    BaseTestCase.alarm("IOException connecting to location: " + oldURLJarLocation + ", msg: '" + e.getMessage() + "'." 
                         + " Upgrade tests can NOT be run!");
+                        e.printStackTrace();
                     return null;
                 }
 
