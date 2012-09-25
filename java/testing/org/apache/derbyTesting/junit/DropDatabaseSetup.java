@@ -118,4 +118,19 @@ class DropDatabaseSetup extends BaseTestSetup {
 
         BaseJDBCTestCase.assertDirectoryDeleted(dir);
     }
+
+    /**
+     * Remove all the files in the list
+     * @param list the list of files that will be deleted
+     **/
+    static void removeFiles(String[] list) {
+        for (int i = 0; i < list.length; i++) {
+             try {
+                 File dfile = new File(list[i].toString());            
+                 assertTrue(list[i].toString(), dfile.delete());
+             } catch (IllegalArgumentException e) {
+                 fail("open file error");
+             }
+        }
+    }
 }
