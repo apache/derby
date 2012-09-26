@@ -28,8 +28,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.context.Context;
-
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
@@ -38,10 +36,6 @@ public final class ReflectGeneratedClass extends LoadedGeneratedClass {
 	private final Hashtable methodCache;
 	private static final GeneratedMethod[] directs;
 
-
-	private final Class	factoryClass;
-	private GCInstanceFactory factory;
-
 	static {
 		directs = new GeneratedMethod[10];
 		for (int i = 0; i < directs.length; i++) {
@@ -49,41 +43,9 @@ public final class ReflectGeneratedClass extends LoadedGeneratedClass {
 		}
 	}
 
-	public ReflectGeneratedClass(ClassFactory cf, Class jvmClass, Class factoryClass) {
+	public ReflectGeneratedClass(ClassFactory cf, Class jvmClass) {
 		super(cf, jvmClass);
 		methodCache = new Hashtable();
-		this.factoryClass = factoryClass;
-	}
-
-	public Object newInstance(Context context) throws StandardException	{
-		if (factoryClass == null) {
-			return super.newInstance(context);
-		}
-
-		if (factory == null) {
-
-			Throwable t;
-			try {
-				factory =  (GCInstanceFactory) factoryClass.newInstance();
-				t = null;
-			} catch (InstantiationException ie) {
-				t = ie;
-			} catch (IllegalAccessException iae) {
-				t = iae;
-			} catch (LinkageError le) {
-				t = le;
-			}
-
-			if (t != null)
-				throw StandardException.newException(SQLState.GENERATED_CLASS_INSTANCE_ERROR, t, getName());
-		}
-
-		GeneratedByteCode ni = factory.getNewInstance();
-		ni.initFromContext(context);
-		ni.setGC(this);
-		ni.postConstructor();
-		return ni;
-
 	}
 
 	public GeneratedMethod getMethod(String simpleName)

@@ -21,45 +21,28 @@
 
 package org.apache.derby.impl.services.reflect;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.monitor.ModuleSupportable;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.compiler.*;
-import java.lang.reflect.Modifier;
-import org.apache.derby.iapi.sql.compile.CodeGeneration;
-
-import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.ClassName;
-
-import java.util.Properties;
-import java.util.Hashtable;
-
-import java.io.ObjectStreamClass;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import java.io.ObjectStreamClass;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.FileUtil;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.util.ByteArray;
 
 /**
 
@@ -88,7 +71,6 @@ abstract class DatabaseClasses
 	*/
 
 	private	ClassInspector	classInspector;
-	private JavaFactory		javaFactory;
 
 	private UpdateLoader		applicationLoader;
 
@@ -125,8 +107,6 @@ abstract class DatabaseClasses
 			applicationLoader = new UpdateLoader(classpath, this, true,
                                                  true);
 		}
-
-		javaFactory = (JavaFactory) org.apache.derby.iapi.services.monitor.Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
 	}
 
 
@@ -315,29 +295,6 @@ abstract class DatabaseClasses
 		}
 
 		return -1;
-	}
-
-	public ByteArray buildSpecificFactory(String className, String factoryName)
-		throws StandardException {
-
-		ClassBuilder cb = javaFactory.newClassBuilder(this, CodeGeneration.GENERATED_PACKAGE_PREFIX,
-			Modifier.PUBLIC | Modifier.FINAL, factoryName, "org.apache.derby.impl.services.reflect.GCInstanceFactory");
-
-		MethodBuilder constructor = cb.newConstructorBuilder(Modifier.PUBLIC);
-
-		constructor.callSuper();
-		constructor.methodReturn();
-		constructor.complete();
-		constructor = null;
-
-		MethodBuilder noArg = cb.newMethodBuilder(Modifier.PUBLIC, ClassName.GeneratedByteCode, "getNewInstance");
-		noArg.pushNewStart(className);
-		noArg.pushNewComplete(0);
-		noArg.methodReturn();
-		noArg.complete();
-		noArg = null;
-
-		return cb.getClassBytecode();
 	}
 
 	/*

@@ -50,7 +50,7 @@ public class ReflectClassesJava2 extends DatabaseClasses
 			// not a generated class, just load the class directly.
 			try {
 				Class jvmClass = Class.forName(fullyQualifiedName);
-				ReflectGeneratedClass gc = new ReflectGeneratedClass(this, jvmClass, null);
+				ReflectGeneratedClass gc = new ReflectGeneratedClass(this, jvmClass);
 				preCompiled.put(fullyQualifiedName, gc);
 				return gc;
 			} catch (ClassNotFoundException cnfe) {

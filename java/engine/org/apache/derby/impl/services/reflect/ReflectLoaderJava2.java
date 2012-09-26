@@ -62,23 +62,6 @@ final class ReflectLoaderJava2 extends ClassLoader {
 
 		resolveClass(jvmClass);
 
-		/*
-			DJD - not enabling this yet, need more memory testing, may only
-			create a factory instance when a number of instances are created.
-			This would avoid a factory instance for DDL
-
-		// now generate a factory class that loads instances
-		int lastDot = name.lastIndexOf('.');
-		String factoryName = name.substring(lastDot + 1, name.length()).concat("_F");
-
-		classData = cf.buildSpecificFactory(name, factoryName);
-		Class factoryClass = defineClass(CodeGeneration.GENERATED_PACKAGE_PREFIX.concat(factoryName),
-			classData.getArray(), classData.getOffset(), classData.getLength());
-		resolveClass(factoryClass);
-		
-		  */
-		Class factoryClass = null;
-
-		return new ReflectGeneratedClass(cf, jvmClass, factoryClass);
+        return new ReflectGeneratedClass(cf, jvmClass);
 	}
 }
