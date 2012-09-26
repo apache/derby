@@ -28,18 +28,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.DriverManager;
-
+import java.sql.PreparedStatement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 
 public class DBInJarTest extends BaseJDBCTestCase {
@@ -105,6 +102,97 @@ public class DBInJarTest extends BaseJDBCTestCase {
         }
     }
     
+    /**
+     * Test various queries that use a hash table that may be spilled to disk
+     * if it grows too big. Regression test case for DERBY-2354.
+     */
+    public void testSpillHashToDisk() throws SQLException {
+        createDerby2354Database();
+
+        Connection jarConn =
+            DriverManager.getConnection("jdbc:derby:jar:(d2354db.jar)d2354db");
+
+        Statement stmt = jarConn.createStatement();
+
+        // The following statement used to fail with "Feature not implemented"
+        // or "Container was opened in read-only mode" before DERBY-2354. It
+        // only fails if the hash table used for duplicate elimination spills
+        // to disk, which happens if the hash table gets bigger than 1% of the
+        // total amount of memory allocated to the JVM. This means it won't
+        // expose the bug if the JVM runs with very high memory settings (but
+        // it has been tested with 1 GB heap size and then it did spill to
+        // disk).
+        JDBC.assertDrainResults(
+                stmt.executeQuery("select distinct x from d2354"),
+                40000);
+
+        // Hash joins have the same problem. Force the big table to be used as
+        // the inner table in the hash join.
+        JDBC.assertEmpty(stmt.executeQuery(
+                "select * from --DERBY-PROPERTIES joinOrder = FIXED\n" +
+                "sysibm.sysdummy1 t1(x),\n" +
+                "d2354 t2 --DERBY-PROPERTIES joinStrategy = HASH\n" +
+                "where t1.x = t2.x"));
+
+        // Scrollable result sets keep the rows they've visited in a hash
+        // table, so they may also need to store data on disk temporarily.
+        Statement scrollStmt = jarConn.createStatement(
+            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        JDBC.assertDrainResults(
+                scrollStmt.executeQuery("select * from d2354"),
+                40000);
+
+        stmt.close();
+        scrollStmt.close();
+        jarConn.close();
+
+        // Cleanup. Shut down the database and delete it.
+        shutdownDB("jdbc:derby:jar:(d2354db.jar)d2354db;shutdown=true");
+        removeFiles(new String[] {
+            System.getProperty("derby.system.home") + "/d2354db.jar"
+        });
+    }
+
+    /**
+     * Create a database in a jar for use in {@code testSpillHashToDisk}.
+     */
+    private void createDerby2354Database() throws SQLException {
+        // First create an ordinary database with a table.
+        Connection conn =
+            DriverManager.getConnection("jdbc:derby:d2354db;create=true");
+        conn.setAutoCommit(false);
+        Statement s = conn.createStatement();
+        s.execute("create table d2354 (x varchar(100))");
+        s.close();
+
+        // Insert 40000 unique values into the table. The values should be
+        // unique so that they all occupy an entry in the hash table used by
+        // the DISTINCT query in the test, and thereby increase the likelihood
+        // of spilling to disk.
+        PreparedStatement insert =
+            conn.prepareStatement(
+                "insert into d2354 values ? || " +
+                "'some extra data to increase the size of the table'");
+        for (int i = 0; i < 40000; i++) {
+            insert.setInt(1, i);
+            insert.executeUpdate();
+        }
+        insert.close();
+
+        conn.commit();
+        conn.close();
+
+        // Shut down the database and archive it in a jar file.
+        shutdownDB("jdbc:derby:d2354db;shutdown=true");
+
+        createStatement().execute(
+            "CALL CREATEARCHIVE('d2354db.jar', 'd2354db', 'd2354db')");
+
+        // Clean up the original database directory. We don't need it anymore
+        // now that we have archived it in a jar file.
+        removeDirectory(
+            new File(System.getProperty("derby.system.home") + "/d2354db"));
+    }
     
     protected static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);

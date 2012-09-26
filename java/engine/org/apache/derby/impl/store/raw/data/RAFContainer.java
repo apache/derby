@@ -22,14 +22,7 @@
 package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.impl.store.raw.data.BaseContainer;
-import org.apache.derby.impl.store.raw.data.BaseContainerHandle;
-import org.apache.derby.impl.store.raw.data.BasePage;
 
-import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.diag.Performance;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
@@ -37,18 +30,12 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
-import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
-import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 
-import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.iapi.services.io.FileUtil;
-import java.util.Vector;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -111,44 +98,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	synchronized public boolean isDirty() {
 		return super.isDirty() || needsSync;
 	}
-
-	/*
-	** Methods of Cacheable
-	*/
-
-	/**
-		Set container's identity
-		@exception StandardException Standard Derby error policy
-	*/
-	public Cacheable setIdentity(Object key) throws StandardException {
-
-		ContainerKey newIdentity = (ContainerKey) key;
-
-		// if this is an open for a temp container then return an object of that type
-		if (newIdentity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) {
-
-			TempRAFContainer tmpContainer = new TempRAFContainer(dataFactory);
-			return tmpContainer.setIdent(newIdentity);
-		}
-
-		return setIdent(newIdentity);
-	}
-
-	/**
-		@exception StandardException Standard Derby error policy
-	 */
-	public Cacheable createIdentity(Object key, Object createParameter) throws StandardException {
-
-		ContainerKey newIdentity = (ContainerKey) key;
-
-		if (newIdentity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) {
-			TempRAFContainer tmpContainer = new TempRAFContainer(dataFactory);
-			return tmpContainer.createIdent(newIdentity, createParameter);
-		}
-
-		return createIdent(newIdentity, createParameter);
-	}
-
 
 	/*
 	** Container creation, opening, and closing

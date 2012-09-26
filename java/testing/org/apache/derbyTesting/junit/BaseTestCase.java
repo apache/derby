@@ -704,6 +704,15 @@ public abstract class BaseTestCase
     {
         DropDatabaseSetup.removeDirectory(dir);
     }
+ 
+    /**
+     * Remove all the files in the list
+     * @param list the list contains all the files
+     */
+    public static void removeFiles(String[] list)
+    {
+        DropDatabaseSetup.removeFiles(list);
+    }
 
     /**
      * Fail; attaching an exception for more detail on cause.

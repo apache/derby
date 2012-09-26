@@ -36,6 +36,7 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ConglomerateFactory;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
@@ -173,7 +174,17 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
 	{
         B2I btree = null;
 
-        if (xact_mgr.checkVersion(
+        if ((temporaryFlag & TransactionController.IS_TEMPORARY) != 0 &&
+                xact_mgr.getAccessManager().isReadOnly())
+        {
+            // If this is a temporary conglomerate created for a read-only
+            // database, we don't really care which disk format we use, since
+            // it is not used for persisting data in the database. Use the
+            // current format. A special case is needed because checkVersion()
+            // throws an exception in read-only databases (DERBY-2354).
+            btree = new B2I();
+        }
+        else if (xact_mgr.checkVersion(
                 RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
                 RawStoreFactory.DERBY_STORE_MINOR_VERSION_4,
                 null)) 

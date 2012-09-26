@@ -344,7 +344,15 @@ abstract class FileContainer
 	*/
 	public Cacheable setIdentity(Object key) throws StandardException 
     {
-		return setIdent((ContainerKey) key);
+        ContainerKey newIdentity = (ContainerKey) key;
+
+        // If the new identity represents a temporary container, switch to
+        // TempRAFContainer.
+        if (newIdentity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) {
+            return new TempRAFContainer(dataFactory).setIdent(newIdentity);
+        }
+
+        return setIdent(newIdentity);
 	}
 
     /**
@@ -386,13 +394,16 @@ abstract class FileContainer
 	public Cacheable createIdentity(Object key, Object createParameter) 
         throws StandardException 
     {
-		if (SanityManager.DEBUG) 
-        {
-			SanityManager.ASSERT(
-                !(key instanceof PageKey), "PageKey input to create container");
-		}
+        ContainerKey newIdentity = (ContainerKey) key;
 
-		return createIdent((ContainerKey) key, createParameter);
+        // If the new identity represents a temporary container, switch to
+        // TempRAFContainer.
+        if (newIdentity.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT) {
+            TempRAFContainer tmpContainer = new TempRAFContainer(dataFactory);
+            return tmpContainer.createIdent(newIdentity, createParameter);
+        }
+
+        return createIdent(newIdentity, createParameter);
 	}
 
 
