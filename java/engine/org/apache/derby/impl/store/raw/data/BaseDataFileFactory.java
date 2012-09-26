@@ -198,7 +198,7 @@ public class BaseDataFileFactory
 
 	private Hashtable postRecoveryRemovedFiles;
 
-    private EncryptData containerEncrypter;
+    private EncryptOrDecryptData containerEncrypter;
 
 
     // PrivilegedAction actions
@@ -2066,9 +2066,10 @@ public class BaseDataFileFactory
 		return databaseEncrypted;
 	}
 
-    public void setDatabaseEncrypted()
+    /** {@inheritDoc} */
+    public void setDatabaseEncrypted(boolean isEncrypted)
 	{
-		databaseEncrypted = true;
+        databaseEncrypted = isEncrypted;
 	}
 
 	public int encrypt(
@@ -2102,7 +2103,7 @@ public class BaseDataFileFactory
     
     public void encryptAllContainers(RawTransaction t) throws StandardException
     {
-        containerEncrypter = new EncryptData(this);
+        containerEncrypter = new EncryptOrDecryptData(this);
         // encrypt all the conatiners in the databse
         containerEncrypter.encryptAllContainers(t);
     }
@@ -2122,7 +2123,7 @@ public class BaseDataFileFactory
         // (re)encryption of the  dataabase, but before the 
         // (re)encryption cleanup  was complete. 
         if (inRecovery) {
-            containerEncrypter = new EncryptData(this);
+            containerEncrypter = new EncryptOrDecryptData(this);
         }
         containerEncrypter.removeOldVersionOfContainers(inRecovery);
         containerEncrypter = null;

@@ -1206,23 +1206,31 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 
     /**
-     * Create encrypted version of the  container with the 
-     * user specified encryption properties. 
-     * 
-     * Read all the pages of the container from the original container 
-     * through the page cache, encrypt each page data with new encryption 
-     * mechanism and  write to the specified container file.
+     * Creates encrypted or decrypted version of the container.
      *
-     * @param handle the container handle.
-     * @param newFilePath file to store the new encrypted version of 
-     *                    the container
+     * Reads all the pages of the container from the original container
+     * through the page cache, then either encrypts each page data with the new
+     * encryption mechanism or decrypts the page data, and finally writes the
+     * data to the specified new container file.
+     * <p>
+     * The encryption and decryption engines used to carry out the
+     * cryptographic operation(s) are configured through the raw store, and
+     * accessed via the data factory.
+     *
+     * @param handle the container handle
+     * @param newFilePath file to store the new version of the container in
+     * @param doEncrypt tells whether to encrypt or decrypt
      * @exception StandardException Derby Standard error policy
-     *
      */
-    protected void encryptContainer(BaseContainerHandle handle, 
-                                    String newFilePath)	
+    protected void encryptOrDecryptContainer(BaseContainerHandle handle,
+                                             String newFilePath,
+                                             boolean doEncrypt)
         throws StandardException 
     {
+        // TEMPORARY FOR DERBY-5792
+        if (!doEncrypt) {
+            throw new UnsupportedOperationException("not yet implemented");
+        }
         BasePage page = null; 
         StorageFile newFile = 
             dataFactory.getStorageFactory().newStorageFile(newFilePath);

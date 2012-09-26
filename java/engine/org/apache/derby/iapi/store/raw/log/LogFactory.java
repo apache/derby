@@ -28,12 +28,10 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.Corruptable;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.ScanHandle;
-import org.apache.derby.iapi.store.raw.ScannedTransactionHandle;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.catalog.UUID;
 import java.io.File;
 
 public interface LogFactory extends Corruptable {
@@ -315,16 +313,19 @@ public interface LogFactory extends Corruptable {
 	 **/
 	public void abortLogBackup();
 
-    /*
-     * Set that the database is encrypted , all the transaction log has 
-     * to be encrypted, and flush the log if requesed. Log needs to 
-	 * be flushed  first, if this is  being set during (re) encryption 
-	 * of an existing  database. 
+    /**
+     * Sets whether the database is encrypted, all the transaction log has
+     * to be encrypted, and flush the log if requested.
+     * <p>
+     * Log needs to be flushed first if the cryptographic state of the database
+     * changes (for instance re-encryption with a new key).
 	 *
-	 * @param flushLog  true, if log needs to be flushed, 
-	 *                  otherwise false.  
+     * @param isEncrypted {@code true} if the database is encrypted,
+     *      {@code false} if not
+	 * @param flushLog {@code true} if log needs to be flushed,
+     *      {@code false} otherwise
      */
-    public  void setDatabaseEncrypted(boolean flushLog)
+    public void setDatabaseEncrypted(boolean isEncrypted, boolean flushLog)
 		throws StandardException;
 
     

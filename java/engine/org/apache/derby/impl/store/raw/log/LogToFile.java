@@ -4283,21 +4283,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	}
 
 
-    /*
-     * Set that the database is encrypted , all the transaction log has 
-     * to be encrypted, and flush the log if requesed. Log needs to 
-     * be flushed  first, if this is  being set during (re) encryption 
-     * of an existing  database. 
-     *
-     * @param flushLog  true, if log needs to be flushed, 
-     *                  otherwise false.  
-     */
-    public  void setDatabaseEncrypted(boolean flushLog) 
+    /** {@inheritDoc} */
+    public void setDatabaseEncrypted(boolean isEncrypted, boolean flushLog)
         throws StandardException
     {
-        if (flushLog) 
+        if (flushLog)  {
             flushAll();
-        databaseEncrypted = true;
+        }
+        databaseEncrypted = isEncrypted;
     }
 
 

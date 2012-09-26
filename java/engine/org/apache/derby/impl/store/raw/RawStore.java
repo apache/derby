@@ -79,7 +79,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.security.PrivilegedExceptionAction;
-import java.lang.SecurityException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
@@ -108,8 +107,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private StorageFactory storageFactory;
 
 	private SecureRandom random;
-	private boolean databaseEncrypted;
-    private boolean encryptDatabase;
+	private boolean isEncryptedDatabase;
 	private CipherProvider encryptionEngine;
 	private CipherProvider decryptionEngine;
     private CipherProvider newEncryptionEngine;
@@ -119,8 +117,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	private int counter_encrypt;
 	private int counter_decrypt;
 	private int encryptionBlockSize = RawStoreFactory.DEFAULT_ENCRYPTION_BLOCKSIZE;
-
-	String dataDirectory; 					// where files are stored	
 
 	// this daemon takes care of all daemon work for this raw store
 	protected DaemonService			rawStoreDaemon;
@@ -171,6 +167,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		throws StandardException
 	{
 
+        boolean transformExistingData = false;
         boolean inReplicationSlaveMode = false;
 
         String slave = properties.getProperty(SlaveFactory.REPLICATION_MODE);
@@ -178,7 +175,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             inReplicationSlaveMode = true;
         }
 
-		dataDirectory = properties.getProperty(PersistentService.ROOT);
 		DaemonFactory daemonFactory =
 			(DaemonFactory)Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
 		rawStoreDaemon = daemonFactory.createNewDaemon("rawStoreDaemon");
@@ -206,8 +202,13 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         // setup database encryption engines.
-        if (create) 
-            setupEncryptionEngines(create, properties);
+        if (create) {
+            transformExistingData = setupEncryptionEngines(create, properties);
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(!transformExistingData,
+                        "no crypto data transformation for a new db");
+            }
+        }
 
 
 		// let everyone knows who their rawStoreFactory is and they can use it
@@ -299,14 +300,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 handleIncompleteDatabaseEncryption(properties);
             }
 
-            setupEncryptionEngines(create, properties);
+            transformExistingData = setupEncryptionEngines(create, properties);
         }
 
-        if (databaseEncrypted) {
+        if (isEncryptedDatabase) {
             // let log factory know if the database is encrypted . 
-            logFactory.setDatabaseEncrypted(false);
+            logFactory.setDatabaseEncrypted(true, false);
             // let data factory know if the database is encrypted. 
-            dataFactory.setDatabaseEncrypted();
+            dataFactory.setDatabaseEncrypted(true);
         }
 
         // RawStoreFactory is used by LogFactory.recover() and by
@@ -333,23 +334,22 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// after the factories are loaded, recover the database
 		logFactory.recover(dataFactory, xactFactory);
 
-        // if user requested to encrpty an unecrypted database or encrypt with
-        // new alogorithm then do that now.  
-        if (encryptDatabase) {
-            configureDatabaseForEncryption(properties, 
-                                           newCipherFactory);
+        // If user requested to encrypt an un-encrypted database or encrypt with
+        // a new alogorithm then do that now.
+        if (transformExistingData) {
+            applyBulkCryptoOperation(properties, newCipherFactory);
         }
-
 	}
 
 	public void	stop() {
 
 		if (SanityManager.DEBUG)
 		{
-			if (databaseEncrypted)
+            if (isEncryptedDatabase) {
 				SanityManager.DEBUG_PRINT("encryption statistics",
 						"Encryption called " + counter_encrypt + " times, " +
 						"decryption called " + counter_decrypt + " times");
+            }
 		}
 
 		if (rawStoreDaemon != null)
@@ -1260,18 +1260,23 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 
     /**
-     * Setup Encryption Engines.
+     * Setup encryption engines according to the user properties and the
+     * current database state.
+     *
+     * @param create whether a new database is being created, or if this is
+     *      an existing database
+     * @param properties database properties, including connection attributes
+     * @return {@code true} if the existing data in the database should be
+     *      transformed by applying a cryptographic operation.
+     * @throws StandardException if the properties are conflicting, if the
+     *      requested configuration is denied, or if something else goes wrong
      */
-    private void setupEncryptionEngines(boolean create, Properties properties)
+    private boolean setupEncryptionEngines(boolean create,
+                                           Properties properties)
         throws StandardException
     {
-        // Check if user has requested to encrypt the database or if the
-        // database is encrypted already.
-
-        String dataEncryption =
-            properties.getProperty(Attribute.DATA_ENCRYPTION);
-        databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue();
-
+        // Check if user has requested to encrypt the database.
+        boolean encryptDatabase = isTrue(properties, Attribute.DATA_ENCRYPTION);
         boolean reEncrypt = false;
 
         if (!create) {
@@ -1289,29 +1294,15 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             String canonicalName = ps.getCanonicalServiceName(name);
             Properties serviceprops = ps.getServiceProperties(canonicalName,
                                                               (Properties)null);
-            dataEncryption = serviceprops.getProperty(Attribute.DATA_ENCRYPTION);
-            boolean encryptedDatabase = Boolean.valueOf(dataEncryption).booleanValue();
+            isEncryptedDatabase =
+                    isTrue(serviceprops, Attribute.DATA_ENCRYPTION);
 
-            if (!encryptedDatabase  && databaseEncrypted) {
-                // It it not an encrypted database, user is asking to
-                // encrypt an un-encrypted database.
-                encryptDatabase = true;
-                // Set database as un-encrypted, we will set it as encrypted
-                // after encrypting the existing data.
-                databaseEncrypted = false;
-            } else {
-                // Check if the user has requested to re-necrypt an
+            if (isEncryptedDatabase) {
+                // Check if the user has requested to re-encrypt an
                 // encrypted datbase with a new encryption password/key.
-                if (encryptedDatabase) {
-                    if (properties.getProperty(
-                                   Attribute.NEW_BOOT_PASSWORD) != null) {
-                        reEncrypt = true;
-                    } else if (properties.getProperty(
-                                   Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null){
-                        reEncrypt = true;
-                    }
-                    encryptDatabase = reEncrypt;
-                }
+                reEncrypt = isSet(properties, Attribute.NEW_BOOT_PASSWORD) ||
+                        isSet(properties, Attribute.NEW_CRYPTO_EXTERNAL_KEY);
+                encryptDatabase = reEncrypt;
             }
 
             // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
@@ -1333,7 +1324,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         // setup encryption engines.
-        if (databaseEncrypted || encryptDatabase) {
+        if (isEncryptedDatabase || encryptDatabase) {
             // Check if database is or will be encrypted. We save encryption
             // properties as service properties, such that
             // user does not have to specify them on the URL everytime.
@@ -1392,7 +1383,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                    String.valueOf(encryptionBlockSize));
                 }
             } else {
-                if (properties.getProperty(RawStoreFactory.ENCRYPTION_BLOCKSIZE) != null) {
+                if (isSet(properties, RawStoreFactory.ENCRYPTION_BLOCKSIZE)) {
                     encryptionBlockSize =
                         Integer.parseInt(properties.getProperty(
                                 RawStoreFactory.ENCRYPTION_BLOCKSIZE));
@@ -1409,7 +1400,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             if (encryptDatabase) {
                 if (reEncrypt) {
-                    // Create new cipher factory with the new encrytpion
+                    // Create new cipher factory with the new encryption
                     // properties specified by the user. This cipher factory
                     // is used to create the new encryption/decryption
                     // engines to re-encrypt the database with the new
@@ -1433,8 +1424,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // at database creation time.
             if(create) {
                 currentCipherFactory.saveProperties(properties);
+                isEncryptedDatabase = true;
             }
         }
+        return (!create && encryptDatabase);
     }
 
 	/**
@@ -1449,9 +1442,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                        boolean newEngine)
 		 throws StandardException
 	{
-		if ((databaseEncrypted == false && encryptDatabase == false) || 
-            (encryptionEngine == null && newEncryptionEngine == null))
-        {
+        if ((encryptionEngine == null && newEncryptionEngine == null)) {
             throw StandardException.newException(
                         SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
         }
@@ -1478,8 +1469,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 					   byte[] cleartext, int outputOffset) 
 		 throws StandardException
 	{
-		if (databaseEncrypted == false || decryptionEngine == null)
-        {
+		if (isEncryptedDatabase == false || decryptionEngine == null) {
             throw StandardException.newException(
                         SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
         }
@@ -1501,7 +1491,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public int random()
 	{
 		// don't synchronize it, the more random the better.
-		return databaseEncrypted ? random.nextInt() : 0;
+		return isEncryptedDatabase ? random.nextInt() : 0;
 	}
 
 	public Serializable changeBootPassword(Properties properties, Serializable changePassword)
@@ -1510,7 +1500,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		if (isReadOnly())
 			throw StandardException.newException(SQLState.DATABASE_READ_ONLY);
 
-		if (!databaseEncrypted)
+		if (!isEncryptedDatabase)
 			throw StandardException.newException(SQLState.DATABASE_NOT_ENCRYPTED);
 
 		if (changePassword == null)
@@ -1627,21 +1617,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @param properties  properties related to this database.
      * @exception StandardException Standard Derby Error Policy
      */
-    public void configureDatabaseForEncryption(Properties properties,
-                                               CipherFactory newCipherFactory) 
+    private void applyBulkCryptoOperation(Properties properties,
+                                          CipherFactory newCipherFactory)
         throws StandardException 
     {
 
-        boolean reEncrypt = (databaseEncrypted && encryptDatabase);
+        boolean reEncrypt = isEncryptedDatabase;
 
         // check if the database can be encrypted.
         canEncryptDatabase(reEncrypt);
 
-        boolean externalKeyEncryption = false;
-        if (properties.getProperty(Attribute.CRYPTO_EXTERNAL_KEY) != null)
-        {
-                externalKeyEncryption = true;
-        }
+        boolean externalKeyEncryption =
+                isSet(properties, Attribute.CRYPTO_EXTERNAL_KEY);
 
         // check point the datase, so that encryption does not have
         // to encrypt the existing transactions logs. 
@@ -1679,23 +1666,20 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 // to find if the re(encryption) is complete. 
                 logFactory.checkpoint(this, dataFactory, xactFactory, true);
             }
-                
-
-            encryptDatabase = false;
 
             // let the log factory know that database is 
             // (re) encrypted and ask it to flush the log, 
             // before enabling encryption of the log with 
             // the new key.
-            logFactory.setDatabaseEncrypted(true);
+            logFactory.setDatabaseEncrypted(true, true);
             
             // let the log factory and data factory know that 
             // database is encrypted.
             if (!reEncrypt) {
                 // mark in the raw store that the database is 
                 // encrypted. 
-                databaseEncrypted = true;
-                dataFactory.setDatabaseEncrypted();
+                isEncryptedDatabase = true;
+                dataFactory.setDatabaseEncrypted(true);
             } else {
                 // switch the encryption/decryption engine to the new ones.
                 decryptionEngine = newDecryptionEngine;  
@@ -2563,22 +2547,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
 
-    private synchronized String[] privList(final File file)
-    {
-        actionCode = REGULAR_FILE_LIST_DIRECTORY_ACTION;
-        actionRegularFile = file;
-
-        try
-        {
-            return (String[]) AccessController.doPrivileged( this);
-        }
-        catch( PrivilegedActionException pae) { return null;} // does not throw an exception
-        finally
-        {
-            actionRegularFile = null;
-        }
-    }
-
     private synchronized String[] privList(final StorageFile file)
     {
         actionCode = STORAGE_FILE_LIST_DIRECTORY_ACTION;
@@ -2741,4 +2709,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         return null;
     } // end of run
+
+    /** Tells if the attribute/property has been specified. */
+    private static boolean isSet(Properties p, String attribute) {
+        return p.getProperty(attribute) != null;
+    }
+
+    /** Tells if the attribute/property has been set to {@code true}. */
+    private static boolean isTrue(Properties p, String attribute) {
+        return Boolean.valueOf(p.getProperty(attribute)).booleanValue();
+    }
 }

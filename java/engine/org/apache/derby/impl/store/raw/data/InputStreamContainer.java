@@ -256,13 +256,15 @@ final class InputStreamContainer extends FileContainer  {
 
 
     /**
-     * Encrypt the container.  There is no support to encrypt 
-     * this type of containers. 
-     * 
-     * @exception StandardException Standard Derby error policy 
+     * Encrypts or decrypts the container.
+     * <p>
+     * These operations are unsupported for this type of container.
+     *
+     * @throws StandardException STORE_FEATURE_NOT_IMPLEMENTED
      */
-	protected void encryptContainer(BaseContainerHandle handle, 
-                                    String newFilePath)
+	protected void encryptOrDecryptContainer(BaseContainerHandle handle,
+                                             String newFilePath,
+                                             boolean doEncrypt)
 	    throws StandardException
 	{
         throw StandardException.newException(

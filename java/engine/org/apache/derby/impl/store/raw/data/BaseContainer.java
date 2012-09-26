@@ -878,16 +878,18 @@ abstract class BaseContainer implements Lockable {
 
 
     /**
-     * Create encrypted version of the  container with the 
-     * user specified encryption properties. 
+     * Creates encrypted or decrypted version of the container.
      *
-     * @param handle the container handle.
-     * @param newFilePath file to store the new encrypted version of the container
+     * @param handle the container handle
+     * @param newFilePath file to store the new version of the container
+     * @param doEncrypt tells whether to encrypt or decrypt
      * @exception StandardException Standard Derby error policy 
      */
-	protected abstract void  encryptContainer(BaseContainerHandle handle, 
-                                              String newFilePath) 
-        throws StandardException ;
+    protected abstract void encryptOrDecryptContainer(
+                                             BaseContainerHandle handle,
+                                             String newFilePath,
+                                             boolean doEncrypt)
+            throws StandardException;
 
 
 	/*

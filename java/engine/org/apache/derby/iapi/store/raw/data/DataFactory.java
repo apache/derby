@@ -302,9 +302,12 @@ public interface DataFactory extends Corruptable {
         throws StandardException;
 
     /**
-     * Set that the database is encrypted.
+     * Sets whether the database is encrypted.
+     *
+     * @param isEncrypted {@code true} if the database is encrypted,
+     *      {@code false} otherwise
      */
-    public void setDatabaseEncrypted();
+    public void setDatabaseEncrypted(boolean isEncrypted);
 
 	/**
 		Return the encryption block size used by the algorithm at time of

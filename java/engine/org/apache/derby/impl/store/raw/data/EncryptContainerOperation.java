@@ -180,7 +180,7 @@ public class EncryptContainerOperation implements Undoable
         // restore the container to the state it was before the encrytpion.
         BaseDataFileFactory bdff = 
             (BaseDataFileFactory) ((RawTransaction) tran).getDataFactory();
-        EncryptData ed = new EncryptData(bdff);
+        EncryptOrDecryptData ed = new EncryptOrDecryptData(bdff);
         ed.restoreContainer(containerId);
         releaseResource(tran);
 

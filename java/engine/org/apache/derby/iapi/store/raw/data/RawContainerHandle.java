@@ -123,11 +123,13 @@ public interface RawContainerHandle extends ContainerHandle {
 
 
     /**
-     * Create encrypted version of the container with the 
-     * user specified encryption properties.  
-     * @param newFilePath file to store the new encrypted version of the container
-	 * @exception StandardException	Standard Derby error policy
+     * Creates an encrypted or decrypted version of the container.
+     *
+     * @param newFilePath file to store the new  version of the container
+     * @param doEncrypt tells whether to encrypt or decrypt
+     * @exception StandardException	Standard Derby error policy
      */
-	public void encryptContainer(String newFilePath) throws StandardException;
+    public void encryptOrDecryptContainer(String newFilePath, boolean doEncrypt)
+            throws StandardException;
 
 }
