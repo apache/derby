@@ -35,6 +35,7 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
 
     public  static  final   class   IntMode extends GenericMode<Integer> {}
     public  static  final   class   StringMode extends GenericMode<String> {}
+    public  static  final   class   FullNameMode extends GenericMode<FullName> {}
     
     ///////////////////////////////////////////////////////////////////////////////////
     //

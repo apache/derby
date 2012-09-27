@@ -147,8 +147,8 @@ public class CreateAliasNode extends DDLStatementNode
 				this.javaClassName = (String) targetObject;
 
 				Object[] aggElements = (Object[]) aliasSpecificInfo;
-                TypeDescriptor  aggForType = (TypeDescriptor) aggElements[ AGG_FOR_TYPE ];
-                TypeDescriptor  aggReturnType = (TypeDescriptor) aggElements[ AGG_RETURN_TYPE ];
+                TypeDescriptor  aggForType = bindUserCatalogType( (TypeDescriptor) aggElements[ AGG_FOR_TYPE ] );
+                TypeDescriptor  aggReturnType = bindUserCatalogType( (TypeDescriptor) aggElements[ AGG_RETURN_TYPE ] );
 
 				aliasInfo = new AggregateAliasInfo( aggForType, aggReturnType );
 				implicitCreateSchema = true;
@@ -488,16 +488,7 @@ public class CreateAliasNode extends DDLStatementNode
         int count = parameterTypes.length;
         for ( int i = 0; i < count; i++ )
         {
-            TypeDescriptor td = parameterTypes[ i ];
-
-            // if this is a user defined type, resolve the Java class name
-            if ( td.isUserDefinedType() )
-            {
-                DataTypeDescriptor dtd = DataTypeDescriptor.getType( td );
-
-                dtd = bindUserType( dtd );
-                parameterTypes[ i ] = dtd.getCatalogType();
-            }
+            parameterTypes[ i ] = bindUserCatalogType( parameterTypes[ i ] );
         }
     }
 

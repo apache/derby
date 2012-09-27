@@ -817,4 +817,69 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         
     }
     
+    /**
+     * <p>
+     * Test aggregates on user defined types.
+     * </p>
+     */
+    public void test_08_basicUDTaggregates() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn,
+              "create type FullName external name 'org.apache.derbyTesting.functionTests.tests.lang.FullName' language java" );
+        goodStatement
+            (
+             conn,
+             "create function makeFullName( firstName varchar( 32672 ), lastName varchar( 32672 ) )\n" +
+             "returns FullName language java parameter style java\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.FullName.makeFullName'"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate fullNameMode for FullName\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$FullNameMode'"
+             );
+        goodStatement
+            ( conn,
+              "create table fullNameMode_inputs( a int, b FullName )" );
+        goodStatement
+            (
+             conn,
+             "insert into fullNameMode_inputs( a, b )\n" +
+             "values\n" +
+             "( 1, makeFullName( 'one', 'name'  ) ),\n" +
+             "( 1, makeFullName( 'two', 'name' ) ),\n" +
+             "( 1, makeFullName( 'two', 'name' ) ),\n" +
+             "( 1, makeFullName( 'two', 'name' ) ),\n" +
+             "( 2, makeFullName( 'three', 'name' ) ),\n" +
+             "( 2, makeFullName( 'three', 'name' ) ),\n" +
+             "( 2, makeFullName( 'four', 'name' ) )\n"
+             );
+        
+        assertResults
+            (
+             conn,
+             "select fullNameMode( b ) from fullNameMode_inputs",
+             new String[][]
+             {
+                 { "two name" }
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, fullNameMode( b ) from fullNameMode_inputs group by a",
+             new String[][]
+             {
+                 { "1", "two name" },
+                 { "2", "three name" }
+             },
+             false
+             );
+    }
+
 }

@@ -85,6 +85,7 @@
       	<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
+      <exclude name="${this.dir}/FullName.java"/>
       <exclude name="${this.dir}/GenericMode.java"/>
       <exclude name="${this.dir}/ModeAggregate.java"/>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
@@ -164,6 +165,7 @@
       <classpath>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <include name="${this.dir}/FullName.java"/>
       <include name="${this.dir}/GenericMode.java"/>
       <include name="${this.dir}/ModeAggregate.java"/>
     </javac>

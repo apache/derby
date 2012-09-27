@@ -1651,6 +1651,21 @@ public abstract class QueryTreeNode implements Node, Visitable
         return result;
     }
 
+    /** Bind user defined types as necessary */
+    public  TypeDescriptor  bindUserCatalogType( TypeDescriptor td )
+        throws StandardException
+    {
+        // if this is a user defined type, resolve the Java class name
+        if ( !td.isUserDefinedType() ) { return td; }
+        else
+        {
+            DataTypeDescriptor dtd = DataTypeDescriptor.getType( td );
+
+            dtd = bindUserType( dtd );
+            return dtd.getCatalogType();
+        }
+    }
+
     /**
      * Bind the UDTs in a table type.
      *
@@ -1669,19 +1684,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 
         for ( int i = 0; i < columnCount; i++ )
         {
-            TypeDescriptor columnType = columnTypes[ i ];
-
-            if ( columnType.isUserDefinedType() )
-            {
-                DataTypeDescriptor newColumnDTD = DataTypeDescriptor.getType( columnType );
-
-                newColumnDTD = bindUserType( newColumnDTD );
-
-                TypeDescriptor newColumnType = newColumnDTD.getCatalogType();
-
-                // poke the bound type back into the multi set descriptor
-                columnTypes[ i ] = newColumnType;
-            }
+            columnTypes[ i ] = bindUserCatalogType( columnTypes[ i ] );
         }
 
         return originalDTD;
