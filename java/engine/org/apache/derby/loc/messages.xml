@@ -2979,7 +2979,7 @@ Guide.
 
             <msg>
                 <name>42ZC6</name>
-                <text>User defined aggregate '{0}'.'{1}' was declared to have this input Java type: '{2}'. However, the actual input Java type is '{3}'.</text>
+                <text>User defined aggregate '{0}'.'{1}' was declared to have this input Java type: '{2}'. This does not extend the following actual bounding input Java type: '{3}'.</text>
                 <arg>schemaName</arg>
                 <arg>aggregateName</arg>
                 <arg>javaDataType</arg>
@@ -2988,7 +2988,7 @@ Guide.
 
             <msg>
                 <name>42ZC7</name>
-                <text>User defined aggregate '{0}'.'{1}' was declared to have this return Java type: '{2}'. However, the actual return Java type is '{3}'.</text>
+                <text>User defined aggregate '{0}'.'{1}' was declared to have this return Java type: '{2}'. This does not extend the following actual bounding return Java type: '{3}'.</text>
                 <arg>schemaName</arg>
                 <arg>aggregateName</arg>
                 <arg>javaDataType</arg>

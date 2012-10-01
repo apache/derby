@@ -54,6 +54,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String MISSING_SCHEMA = "42Y07";
     public static final String BAD_AGGREGATE_USAGE = "42903";
     public static final String BAD_ORDER_BY = "42Y35";
+    public static final String INPUT_MISMATCH = "42Y22";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -661,7 +662,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              conn,
              "intMode",
              "int",
-             "IntMode",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode",
              "( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )",
              new String[][]
              {
@@ -688,7 +689,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              conn,
              "varcharMode",
              "varchar( 5 )",
-             "StringMode",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode",
              "( 1, 'a' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 2, 'abc' ), ( 2, 'abc' ), ( 2, 'abcd' )",
              new String[][]
              {
@@ -716,7 +717,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
          Connection conn,
          String aggName,
          String sqlType,
-         String nestedClassName,
+         String externalName,
          String values,
          String[][] scalarResult,
          String[][] groupedResult,
@@ -729,7 +730,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         
         goodStatement
             ( conn, "create derby aggregate " + aggName + " for " + sqlType + "\n" +
-              "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$" + nestedClassName + "'" );
+              "external name '" + externalName + "'" );
         goodStatement( conn, "create table " + tableName + "( a int, b " + sqlType + " )" );
         goodStatement( conn, "insert into " + tableName + "( a, b ) values " + values );
 
@@ -749,21 +750,27 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              false
              );
 
-        assertResults
-            (
-             conn,
-             "select " + aggName + "( distinct b ) from " + tableName,
-             distinctScalarResult,
-             false
-             );
+        if ( distinctScalarResult != null )
+        {
+            assertResults
+                (
+                 conn,
+                 "select " + aggName + "( distinct b ) from " + tableName,
+                 distinctScalarResult,
+                 false
+                 );
+        }
 
-        assertResults
-            (
-             conn,
-             "select a, " + aggName + "( distinct b ) from " + tableName + " group by a",
-             distinctGroupedResult,
-             false
-             );
+        if ( distinctGroupedResult != null )
+        {
+            assertResults
+                (
+                 conn,
+                 "select a, " + aggName + "( distinct b ) from " + tableName + " group by a",
+                 distinctGroupedResult,
+                 false
+                 );
+        }
     }
 
     /**
@@ -880,6 +887,135 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              },
              false
              );
+    }
+
+    /**
+     * <p>
+     * Test aggregates bound to generic classes.
+     * </p>
+     */
+    public void test_09_genericAggregates() throws Exception
+    {
+        Connection conn = getConnection();
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "intMode_09",
+             "int",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode",
+             "( 1, 1 ), ( 1, 2 ), ( 1, 2 ), ( 1, 2 ), ( 2, 3 ), ( 2, 3 ), ( 2, 4 )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+             },
+             new String[][]
+             {
+                 { "4" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "4" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "varcharMode_09",
+             "varchar( 5 )",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode",
+             "( 1, 'a' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 1, 'ab' ), ( 2, 'abc' ), ( 2, 'abc' ), ( 2, 'abcd' )",
+             new String[][]
+             {
+                 { "ab" },
+             },
+             new String[][]
+             {
+                 { "1", "ab" },
+                 { "2", "abc" },
+             },
+             new String[][]
+             {
+                 { "abcd" },
+             },
+             new String[][]
+             {
+                 { "1", "ab" },
+                 { "2", "abcd" },
+             }
+             );
+
+        goodStatement
+            (
+             conn,
+             "create type FullName_09 external name 'org.apache.derbyTesting.functionTests.tests.lang.FullName' language java"
+             );
+        goodStatement
+            (
+             conn,
+             "create function makeFullName_09( firstName varchar( 32672 ), lastName varchar( 32672 ) )\n" +
+             "returns FullName_09 language java parameter style java\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.FullName.makeFullName'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "fullNameMode_09",
+             "FullName_09",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode",
+             "( 1, makeFullName_09( 'one', 'name'  ) ),\n" +
+             "( 1, makeFullName_09( 'two', 'name' ) ),\n" +
+             "( 1, makeFullName_09( 'two', 'name' ) ),\n" +
+             "( 1, makeFullName_09( 'two', 'name' ) ),\n" +
+             "( 2, makeFullName_09( 'three', 'name' ) ),\n" +
+             "( 2, makeFullName_09( 'three', 'name' ) ),\n" +
+             "( 2, makeFullName_09( 'four', 'name' ) )\n",
+             new String[][]
+             {
+                 { "two name" },
+             },
+             new String[][]
+             {
+                 { "1", "two name" },
+                 { "2", "three name" },
+             },
+             null,
+             null
+             );
+    }
+
+    /**
+     * <p>
+     * Negative tests.
+     * </p>
+     */
+    public void test_10_negative() throws Exception
+    {
+        Connection conn = getConnection();
+
+        //
+        // Input operand must agree with input type of aggregate
+        //
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMode_10 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table intMode_10_inputs( a int, b varchar( 10 ) )"
+             );
+        expectCompilationError( INPUT_MISMATCH, "select intMode_10( b ) from intMode_10_inputs" );
+
     }
 
 }

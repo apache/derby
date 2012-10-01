@@ -442,7 +442,13 @@ public abstract class ValueNode extends QueryTreeNode
 									C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
 									stjvn,
 									getContextManager());
-		jtsvn.setType(DataTypeDescriptor.getSQLDataTypeDescriptor(stjvn.getJavaTypeName()));
+
+        DataTypeDescriptor  resultType;
+        if ( (getTypeServices() != null) && getTypeId().userType() ) { resultType = getTypeServices(); }
+        else { resultType = DataTypeDescriptor.getSQLDataTypeDescriptor(stjvn.getJavaTypeName()); }
+
+		jtsvn.setType( resultType );
+
 		return jtsvn;
 	}
 

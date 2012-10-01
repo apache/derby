@@ -35,9 +35,6 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.JSQLType;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 
@@ -107,39 +104,31 @@ public class UserAggregateDefinition implements AggregateDefinition
 	{
 		try
 		{
-			TypeId compType = inputType.getTypeId();
-		
 			CompilerContext cc = (CompilerContext)
 				ContextService.getContext(CompilerContext.CONTEXT_ID);
-			TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
-			TypeCompiler tc = tcf.getTypeCompiler(compType);
             ClassFactory    classFactory = cc.getClassFactory();
 
             Class   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
             Class   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
 
-            Class[] aggregatorTypes = classFactory.getClassInspector().getGenericParameterTypes
+            Class[][]   typeBounds = classFactory.getClassInspector().getTypeBounds
                 ( derbyAggregatorInterface, userAggregatorClass );
 
             if (
-                !derbyAggregatorInterface.isAssignableFrom( userAggregatorClass ) ||
-                (aggregatorTypes == null) ||
-                (aggregatorTypes.length != AGGREGATOR_PARAM_COUNT) ||
-                (aggregatorTypes[ INPUT_TYPE ] == null) ||
-                (aggregatorTypes[ RETURN_TYPE ] == null)
-               )
+                (typeBounds == null) ||
+                (typeBounds.length != AGGREGATOR_PARAM_COUNT) ||
+                (typeBounds[ INPUT_TYPE ] == null) ||
+                (typeBounds[ RETURN_TYPE ] == null)
+                )
             {
-				throw StandardException.newException
+                throw StandardException.newException
                     (
                      SQLState.LANG_ILLEGAL_UDA_CLASS,
                      _alias.getSchemaName(),
                      _alias.getName(),
-                     _alias.getJavaClassName()
+                     userAggregatorClass.getName()
                      );
             }
-
-            Class   actualInputClass = aggregatorTypes[ INPUT_TYPE ];
-            Class   actualReturnClass = aggregatorTypes[ RETURN_TYPE ];
 
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
@@ -147,29 +136,51 @@ public class UserAggregateDefinition implements AggregateDefinition
             Class       expectedInputClass = getJavaClass( expectedInputType );
             Class       expectedReturnClass = getJavaClass( expectedReturnType );
 
-            // check that the aggregator has the correct input and return types
-            if ( actualInputClass != expectedInputClass )
+            // the input operand must be the expected input type of the aggregate
+            if ( !inputType.getTypeId().equals( expectedInputType.getTypeId() ) ) { return null; }
+            
+            //
+            // Make sure that the declared input type of the UDA actually falls within
+            // the type bounds of the Aggregator implementation.
+            //
+            Class[] inputBounds = typeBounds[ INPUT_TYPE ];
+            for ( int i = 0; i < inputBounds.length; i++ )
             {
-				throw StandardException.newException
-                    (
-                     SQLState.LANG_UDA_WRONG_INPUT_TYPE,
-                     _alias.getSchemaName(),
-                     _alias.getName(),
-                     expectedInputClass.toString(),
-                     actualInputClass.toString()
-                     );
+                Class   inputBound = inputBounds[ i ];
+                
+                if ( !inputBound.isAssignableFrom( expectedInputClass ) )
+                {
+                    throw StandardException.newException
+                        (
+                         SQLState.LANG_UDA_WRONG_INPUT_TYPE,
+                         _alias.getSchemaName(),
+                         _alias.getName(),
+                         expectedInputClass.toString(),
+                         inputBound.toString()
+                         );
+                }
             }
-		
-            if ( actualReturnClass != expectedReturnClass )
+
+            //
+            // Make sure that the declared return type of the UDA actually falls within
+            // the type bounds of the Aggregator implementation.
+            //
+            Class[] returnBounds = typeBounds[ RETURN_TYPE ];
+            for ( int i = 0; i < returnBounds.length; i++ )
             {
-				throw StandardException.newException
-                    (
-                     SQLState.LANG_UDA_WRONG_RETURN_TYPE,
-                     _alias.getSchemaName(),
-                     _alias.getName(),
-                     expectedReturnClass.toString(),
-                     actualReturnClass.toString()
+                Class   returnBound = returnBounds[ i ];
+                
+                if ( !returnBound.isAssignableFrom( expectedReturnClass ) )
+                {
+                    throw StandardException.newException
+                        (
+                         SQLState.LANG_UDA_WRONG_RETURN_TYPE,
+                         _alias.getSchemaName(),
+                         _alias.getName(),
+                         expectedReturnClass.toString(),
+                         returnBound.toString()
                      );
+                }
             }
 
             aggregatorClass.append( ClassName.UserDefinedAggregator );

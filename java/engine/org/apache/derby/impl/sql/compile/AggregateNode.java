@@ -415,9 +415,12 @@ public class AggregateNode extends UnaryOperatorNode
 
 		if (resultType == null)
 		{
-			throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_BAD_TYPE, 
-						aggregateName, 
-						operand.getTypeId().getSQLTypeName());
+			throw StandardException.newException
+                (
+                 SQLState.LANG_USER_AGGREGATE_BAD_TYPE, 
+                 getSQLName(), 
+                 operand.getTypeId().getSQLTypeName()
+                 );
 		}
 
 		checkAggregatorClassName(aggregatorClassName.toString());
@@ -699,4 +702,15 @@ public class AggregateNode extends UnaryOperatorNode
 	{
 		return false;
 	}
+
+    /** Get the SQL name of the aggregate */
+    public  String  getSQLName()
+        throws StandardException
+    {
+        if ( uad instanceof UserAggregateDefinition )
+        {
+            return ((UserAggregateDefinition) uad).getAliasDescriptor().getQualifiedName();
+        }
+        else { return aggregateName; }
+    }
 }

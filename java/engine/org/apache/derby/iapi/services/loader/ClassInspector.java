@@ -484,15 +484,11 @@ public class ClassInspector
 	}
 
 	/**
-	 * Given an implementation of a parameterized class/interface, return
-     * the actual concrete types of the parameters. Types are returned in the
-     * order that they are declared by the parameterized class/interface.
-     * So for instance, if the parameterized class is Map&lt;K,V&gt; and the
-     * implementation is HashMap&lt;Integer,String&gt;, then the return value is
-     * [ Integer.class, String.class ]. This method raises an exception if the
+	 * Given an implementation of a parameterized interface, return
+     * the bounds on the type variables. This method raises an exception if the
      * JVM does not support generics. May return null if type resolution fails.
 	 */
-	public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
+	public Class[][] getTypeBounds( Class parameterizedInterface, Class implementation )
         throws StandardException
 	{
 		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
