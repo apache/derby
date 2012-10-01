@@ -116,7 +116,7 @@ grant codeBase "${derby.install.url}derbynet.jar"
 // org.apache.derby.drda.NetworkServerControl constructor in the API
 // or via the property derby.drda.host; the default is localhost.
 // You may want to restrict allowed hosts, e.g. to hosts in a specific
-// subdomain, e.g. "*.acme.com".
+// subdomain, e.g. "*.example.com".
 
   permission java.net.SocketPermission "*", "accept"; 
 
