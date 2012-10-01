@@ -97,7 +97,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
         // set the ldap properties
         setDatabaseProperty("derby.connection.requireAuthentication", "true", conn);
         setDatabaseProperty("derby.authentication.provider", "LDAP", conn);
-        setDatabaseProperty("derby.authentication.server", "noSuchServer", conn);
+        setDatabaseProperty("derby.authentication.server", "noSuchServer.invalid", conn);
         setDatabaseProperty("derby.authentication.ldap.searchBase", "o=dnString", conn);
         setDatabaseProperty("derby.authentication.ldap.searchFilter","(&(objectClass=inetOrgPerson)(uid=%USERNAME%))", conn);
         commit();
