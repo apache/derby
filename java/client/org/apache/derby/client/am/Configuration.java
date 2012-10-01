@@ -82,7 +82,7 @@ public class Configuration {
 
     // for Driver.getCompatibileJREVersions()
     public final static String[] dncCompatibleJREVersions =
-            {"1.4", "1.5", "1.6"};
+            {"1.5", "1.6", "1.7"};
 
     //---------------------- database URL protocols ------------------------------
 
