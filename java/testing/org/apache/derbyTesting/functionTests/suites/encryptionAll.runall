@@ -3,4 +3,3 @@ store/encryptDatabaseTest1.sql
 store/encryptDatabaseTest2.sql
 store/encryptDatabaseTest3.sql
 store/encryptionKey_jar.sql
-store/ReEncryptCrashRecovery.java

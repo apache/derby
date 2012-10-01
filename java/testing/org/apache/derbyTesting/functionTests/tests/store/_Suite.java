@@ -98,6 +98,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(EncryptionKeyDESTest.suite());
             suite.addTest(EncryptionAESTest.suite());
             suite.addTest(EncryptDatabaseTest.suite());
+            suite.addTest(CryptoCrashRecoveryTest.suite());
         }
 
         return suite;
