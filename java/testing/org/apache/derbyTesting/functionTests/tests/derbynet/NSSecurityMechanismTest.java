@@ -22,12 +22,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.lang.reflect.*;
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.CallableStatement;
@@ -37,9 +34,6 @@ import java.sql.DriverManager;
 import javax.sql.DataSource;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
-
-import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource40;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -280,6 +274,13 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // as it's the first in the array, it should use default setting
             if (derby_drda_securityMechanism != null)
             {
+                if (derby_drda_securityMechanism.equals(
+                        "STRONG_PASSWORD_SUBSTITUTE_SECURITY") &&
+                        !hasSufficientEntropy()) {
+                    println("skipping USRSSBPWD secmec due to " +
+                            "assumed lack of entropy");
+                    continue;
+                }
                 // with "" or "INVALID_VALUE", or with other mechanisms with
                 // certain jvms, some settings are not supported. Flag the loop
                 // to not try connections
@@ -478,6 +479,10 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private void assertSecurityMechanismOK(String user, String password,
         Short secmec, String msg, String expectedValue)
     {
+        // Skip this USRSSBPWD on platforms that are short on entropy.
+        if (secmec.shortValue() == SECMEC_USRSSBPWD && !hasSufficientEntropy()){
+            return;
+        }
         Connection conn;
 
         DataSource ds = getDS(user,password);
@@ -530,6 +535,10 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private void assertConnectionUsingDriverManager(
         String dbUrl, String msg, String expectedValue)
     {
+        if (!hasSufficientEntropy() &&
+                dbUrl.indexOf("securityMechanism=8") != -1) {
+            return;
+        }
         try
         {
             TestConfiguration.getCurrent();
@@ -1047,6 +1056,11 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      */
     private void assertUSRSSBPWD_with_BUILTIN(String[] expectedValues)
             throws Exception {
+        // Skip this security mechanism on platforms that are short on entropy,
+        // otherwise this test will take a very long time to complete.
+        if (!hasSufficientEntropy()) {
+            return;
+        }
         // Turn on Derby BUILTIN authentication and attempt connecting with
         // USRSSBPWD security mechanism.
         println("Turning ON Derby BUILTIN authentication");
@@ -1228,5 +1242,16 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             assertEquals("User id can not be null.", sqle.getMessage());
         if (expectedValue.equals("08001.C.8"))
             assertEquals("Password can not be null.", sqle.getMessage());
+    }
+
+    /**
+     * Tells if the current platform is assumed to have sufficient entropy for
+     * the strong password substitution security mechanism to run reasonably
+     * fast.
+     */
+    private boolean hasSufficientEntropy() {
+        // The ARM platform is known to suffer from too little entropy
+        // (unless there is significant disk activity).
+        return !getSystemProperty("os.arch").equalsIgnoreCase("arm");
     }
 }
