@@ -58,7 +58,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet1"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -87,6 +87,11 @@
     </javac>
   </target>
 
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${this.dir}">
+      <fileset dir="${derby.testing.src.dir}/${this.dir}" includes="*.policy"/>
+    </copy>
+  </target>
 
 <!--             ============= End Targets ==============                -->
 
