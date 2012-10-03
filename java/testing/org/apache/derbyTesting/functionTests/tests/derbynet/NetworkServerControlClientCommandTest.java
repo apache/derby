@@ -105,7 +105,8 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     
     public void testPingWithWrongHost() throws InterruptedException, IOException {
         String[] pingWithoutArgsCmd = new String[] {
-                "org.apache.derby.drda.NetworkServerControl", "ping", "-h", "nothere"};
+                "org.apache.derby.drda.NetworkServerControl",
+                "ping", "-h", "nothere.invalid"};
                 
         pingWithoutArgsCmd = decorateCmdWithEnglishLocale(pingWithoutArgsCmd);
                 
