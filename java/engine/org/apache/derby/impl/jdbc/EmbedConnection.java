@@ -261,8 +261,7 @@ public class EmbedConnection implements EngineConnection
 			// upgrade, we need a plain boot, then authenticate, then, if all
 			// is well, boot with (re)encryption or upgrade.  Encryption at
 			// create time is not checked.
-			boolean isTwoPhaseEncryptionBoot = (!createBoot &&
-												isEncryptionBoot(info));
+			boolean isTwoPhaseCryptoBoot = (!createBoot && isCryptoBoot(info));
 			boolean isTwoPhaseUpgradeBoot = (!createBoot &&
 											 isHardUpgradeBoot(info));
 			boolean isStartSlaveBoot = isStartReplicationSlaveBoot(info);
@@ -281,6 +280,10 @@ public class EmbedConnection implements EngineConnection
                         SQLState.CONFLICTING_BOOT_ATTRIBUTES,
                         Attribute.SHUTDOWN_ATTR + ", " + Attribute.DROP_ATTR);
             }
+            // Don't allow conflicting attributes wrt cryptographic operations.
+            if (isTwoPhaseCryptoBoot) {
+                checkConflictingCryptoAttributes(info);
+            }
 
             // check that a replication operation is not combined with
             // other operations
@@ -289,7 +292,7 @@ public class EmbedConnection implements EngineConnection
                 if (createBoot ||
                     shutdown ||
                     dropDatabase ||
-                    isTwoPhaseEncryptionBoot ||
+                    isTwoPhaseCryptoBoot ||
                     isTwoPhaseUpgradeBoot) {
                     throw StandardException.
                         newException(SQLState.
@@ -369,12 +372,12 @@ public class EmbedConnection implements EngineConnection
 			{
 				// database already booted by someone else
 				tr.setDatabase(database);
-				isTwoPhaseEncryptionBoot = false;
+				isTwoPhaseCryptoBoot = false;
 				isTwoPhaseUpgradeBoot = false;
 			}
 			else if (!shutdown)
 			{
-				if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
+				if (isTwoPhaseCryptoBoot || isTwoPhaseUpgradeBoot) {
 					savedInfo = info;
 					info = removePhaseTwoProps((Properties)info.clone());
 				}
@@ -464,7 +467,7 @@ public class EmbedConnection implements EngineConnection
                 }
             }
 
-			if (isTwoPhaseEncryptionBoot ||
+			if (isTwoPhaseCryptoBoot ||
 				isTwoPhaseUpgradeBoot ||
 				isStartSlaveBoot) {
 
@@ -475,8 +478,12 @@ public class EmbedConnection implements EngineConnection
 				if (!usingNoneAuth &&
 						getLanguageConnection().usesSqlAuthorization()) {
 					int operation;
-					if (isTwoPhaseEncryptionBoot) {
-						operation = OP_ENCRYPT;
+					if (isTwoPhaseCryptoBoot) {
+                        if (isTrue(savedInfo, Attribute.DECRYPT_DATABASE)) {
+                            operation = OP_DECRYPT;
+                        } else {
+                            operation = OP_ENCRYPT;
+                        }
 					} else if (isTwoPhaseUpgradeBoot) {
 						operation = OP_HARD_UPGRADE;
 					} else {
@@ -484,8 +491,8 @@ public class EmbedConnection implements EngineConnection
 					}
 					try {
 						// a failure here leaves database booted, but no
-						// (re)encryption has taken place and the connection is
-						// rejected.
+                        // restricted operations have taken place and the
+                        // connection is rejected.
 						checkIsDBOwner(operation);
 					} catch (SQLException sqle) {
 						if (isStartSlaveBoot) {
@@ -709,7 +716,7 @@ public class EmbedConnection implements EngineConnection
         // combination with createFrom/restoreFrom/rollForwardRecoveryFrom
         // attributes.  Re-encryption is not
         // allowed when restoring from backup.
-        if (restoreCount != 0 && isEncryptionBoot(p)) {
+        if (restoreCount != 0 && isCryptoBoot(p)) {
 			throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
         }
 
@@ -755,16 +762,17 @@ public class EmbedConnection implements EngineConnection
         return isTrue(p, Attribute.DROP_ATTR);
     }
 
-	/**
-	 * Examine boot properties and determine if a boot with the given
-	 * attributes would entail an encryption operation.
-	 *
-	 * @param p the attribute set
-	 * @return true if a boot will encrypt or re-encrypt the database
-	 */
-	private boolean isEncryptionBoot(Properties p)
-	{
+    /**
+     * Examines boot properties and determines if a boot with the given
+     * attributes would entail a cryptographic operation on the database.
+     *
+     * @param p the attribute set
+     * @return {@code true} if a boot will perform a cryptographic operation on
+     *      the database.
+     */
+    private boolean isCryptoBoot(Properties p) {
         return (isTrue(p, Attribute.DATA_ENCRYPTION) ||
+                isTrue(p, Attribute.DECRYPT_DATABASE) ||
                 isSet(p, Attribute.NEW_BOOT_PASSWORD) ||
                 isSet(p, Attribute.NEW_CRYPTO_EXTERNAL_KEY));
 	}
@@ -1111,6 +1119,7 @@ public class EmbedConnection implements EngineConnection
 	private Properties removePhaseTwoProps(Properties p)
 	{
 		p.remove(Attribute.DATA_ENCRYPTION);
+        p.remove(Attribute.DECRYPT_DATABASE);
 		p.remove(Attribute.NEW_BOOT_PASSWORD);
 		p.remove(Attribute.NEW_CRYPTO_EXTERNAL_KEY);
 		p.remove(Attribute.UPGRADE_ATTR);
@@ -1361,6 +1370,7 @@ public class EmbedConnection implements EngineConnection
 	private static final int OP_SHUTDOWN = 1;
 	private static final int OP_HARD_UPGRADE = 2;
 	private static final int OP_REPLICATION = 3;
+	private static final int OP_DECRYPT = 4;
 	/**
 	 * Check if actual authenticationId is equal to the database owner's.
 	 *
@@ -1379,6 +1389,9 @@ public class EmbedConnection implements EngineConnection
 			case OP_ENCRYPT:
 				throw newSQLException(SQLState.AUTH_ENCRYPT_NOT_DB_OWNER,
 									  actualId, tr.getDBName());
+            case OP_DECRYPT:
+                throw newSQLException(SQLState.AUTH_DECRYPT_NOT_DB_OWNER,
+                                      actualId, tr.getDBName());
 			case OP_SHUTDOWN:
 				throw newSQLException(SQLState.AUTH_SHUTDOWN_NOT_DB_OWNER,
 									  actualId, tr.getDBName());
@@ -3642,4 +3655,31 @@ public class EmbedConnection implements EngineConnection
         }
 	}
 
+    /**
+     * Examines the boot properties looking for conflicting cryptographic
+     * options and commands.
+     *
+     * @param p boot properties (for instance URL connection attributes)
+     * @throws SQLException if conflicting crypto attributes are detected
+     */
+    private void checkConflictingCryptoAttributes(Properties p)
+            throws SQLException {
+        // Since we cannot detect whether the database is actually encrypted
+        // at this point we let the store handle attempts to both encrypt and
+        // decrypt at the same time (see RawStore).
+        boolean appearsEncrypted = isSet(p, Attribute.CRYPTO_EXTERNAL_KEY) ||
+                isSet(p, Attribute.BOOT_PASSWORD);
+        if (appearsEncrypted && isTrue(p, Attribute.DECRYPT_DATABASE)) {
+            if (isSet(p, Attribute.NEW_BOOT_PASSWORD)) {
+                throw newSQLException(SQLState.CONFLICTING_BOOT_ATTRIBUTES,
+                        Attribute.DECRYPT_DATABASE + ", " +
+                        Attribute.NEW_BOOT_PASSWORD);
+            }
+            if (isSet(p, Attribute.NEW_CRYPTO_EXTERNAL_KEY)) {
+                throw newSQLException(SQLState.CONFLICTING_BOOT_ATTRIBUTES,
+                        Attribute.DECRYPT_DATABASE + ", " +
+                        Attribute.NEW_CRYPTO_EXTERNAL_KEY);
+            }
+        }
+    }
 }

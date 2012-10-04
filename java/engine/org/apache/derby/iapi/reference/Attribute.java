@@ -78,7 +78,11 @@ public interface Attribute {
 	 */
 	String JCC_PROTOCOL = "jdbc:derby:net:";
 	
-	
+    /**
+     * Attribute name for decrypting an encrypted database.
+     */
+    String DECRYPT_DATABASE = "decryptDatabase";
+
 	/**
 		Attribute name to encrypt the database on disk.
 		If set to true, all user data is stored encrypted on disk.

@@ -297,7 +297,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             if(properties.getProperty(
                               RawStoreFactory.DB_ENCRYPTION_STATUS) !=null) 
             {   
-                handleIncompleteDatabaseEncryption(properties);
+                handleIncompleteDbCryptoOperation(properties);
             }
 
             transformExistingData = setupEncryptionEngines(create, properties);
@@ -1275,6 +1275,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                            Properties properties)
         throws StandardException
     {
+        // Check if user has requested to decrypt the database.
+        boolean decryptDatabase = isTrue(properties, Attribute.DECRYPT_DATABASE);
         // Check if user has requested to encrypt the database.
         boolean encryptDatabase = isTrue(properties, Attribute.DATA_ENCRYPTION);
         boolean reEncrypt = false;
@@ -1300,9 +1302,16 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             if (isEncryptedDatabase) {
                 // Check if the user has requested to re-encrypt an
                 // encrypted datbase with a new encryption password/key.
+                // See also attribute check in EmbedConnection.
                 reEncrypt = isSet(properties, Attribute.NEW_BOOT_PASSWORD) ||
                         isSet(properties, Attribute.NEW_CRYPTO_EXTERNAL_KEY);
                 encryptDatabase = reEncrypt;
+            } else if (encryptDatabase && decryptDatabase) {
+                // We cannot both encrypt and decrypt at the same time.
+                throw StandardException.newException(
+                        SQLState.CONFLICTING_BOOT_ATTRIBUTES,
+                        Attribute.DECRYPT_DATABASE + ", " +
+                        Attribute.DATA_ENCRYPTION);
             }
 
             // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
@@ -1320,6 +1329,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                  SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
                     }
                 }
+            }
+            // Prevent attempt to decrypt a read-only database.
+            if (decryptDatabase && isReadOnly()) {
+                throw StandardException.newException(
+                        SQLState.DATABASE_DECRYPTION_DENIED,
+                        "read-only");
             }
         }
 
@@ -1427,7 +1442,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 isEncryptedDatabase = true;
             }
         }
-        return (!create && encryptDatabase);
+        // We need to transform existing data if we are (re-)encrypting an
+        // existing database, or decrypting an already encrypted database.
+        return (!create &&
+                (encryptDatabase || (isEncryptedDatabase && decryptDatabase)));
     }
 
 	/**
@@ -1621,11 +1639,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                           CipherFactory newCipherFactory)
         throws StandardException 
     {
+        boolean decryptDatabase = (isEncryptedDatabase &&
+                isTrue(properties, Attribute.DECRYPT_DATABASE));
+        boolean reEncrypt = (isEncryptedDatabase && (
+                isSet(properties, Attribute.NEW_BOOT_PASSWORD) ||
+                isSet(properties, Attribute.NEW_CRYPTO_EXTERNAL_KEY)));
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(decryptDatabase || reEncrypt || (
+                    !isEncryptedDatabase &&
+                    isSet(properties, Attribute.DATA_ENCRYPTION)));
+        }
 
-        boolean reEncrypt = isEncryptedDatabase;
-
-        // check if the database can be encrypted.
-        canEncryptDatabase(reEncrypt);
+        // Check if the cryptographic operation can be performed.
+        cryptoOperationAllowed(reEncrypt, decryptDatabase);
 
         boolean externalKeyEncryption =
                 isSet(properties, Attribute.CRYPTO_EXTERNAL_KEY);
@@ -1645,7 +1671,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         try 
 		{
 			
-            dataFactory.encryptAllContainers(transaction);
+            if (decryptDatabase) {
+                dataFactory.decryptAllContainers(transaction);
+            } else {
+                dataFactory.encryptAllContainers(transaction);
+            }
 
             // all the containers are (re) encrypted, now mark the database as
             // encrypted if a plain database is getting configured for encryption
@@ -1667,24 +1697,29 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 logFactory.checkpoint(this, dataFactory, xactFactory, true);
             }
 
-            // let the log factory know that database is 
-            // (re) encrypted and ask it to flush the log, 
-            // before enabling encryption of the log with 
-            // the new key.
-            logFactory.setDatabaseEncrypted(true, true);
-            
-            // let the log factory and data factory know that 
+            // Let the log factory and data factory know whether the
             // database is encrypted.
-            if (!reEncrypt) {
-                // mark in the raw store that the database is 
-                // encrypted. 
-                isEncryptedDatabase = true;
-                dataFactory.setDatabaseEncrypted(true);
+            if (decryptDatabase) {
+                isEncryptedDatabase = false;
+                logFactory.setDatabaseEncrypted(false, true);
+                dataFactory.setDatabaseEncrypted(false);
             } else {
-                // switch the encryption/decryption engine to the new ones.
-                decryptionEngine = newDecryptionEngine;  
-                encryptionEngine = newEncryptionEngine;
-                currentCipherFactory = newCipherFactory;
+                // Let the log factory know that database is
+                // (re-)encrypted and ask it to flush the log
+                // before enabling encryption of the log with
+                // the new key.
+                logFactory.setDatabaseEncrypted(true, true);
+
+                if (reEncrypt) {
+                    // Switch the encryption/decryption engine to the new ones.
+                    decryptionEngine = newDecryptionEngine;
+                    encryptionEngine = newEncryptionEngine;
+                    currentCipherFactory = newCipherFactory;
+                } else {
+                    // Mark in the raw store that the database is encrypted.
+                    isEncryptedDatabase = true;
+                    dataFactory.setDatabaseEncrypted(true);
+                }
             }
 
             
@@ -1749,8 +1784,15 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                         properties.put(RawStoreFactory.OLD_ENCRYPTED_KEY,
                                        keyString);
                 }
-            } else 
-            {
+            } else if (decryptDatabase) {
+                // We cannot remove the encryption properties here, as we may
+                // have to revert back to the encrypted database. Instead we set
+                // dataEncryption to false and leave all other encryption
+                // attributes unchanged. This requires that Derby doesn't store
+                // dataEncryption=false for un-encrypted database, otherwise
+                // handleIncompleteDbCryptoOperation will be confused.
+                properties.put(Attribute.DATA_ENCRYPTION, "false");
+            } else {
                 // save the encryption block size;
                 properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
                                String.valueOf(encryptionBlockSize));
@@ -1796,8 +1838,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // remove the old version of the container files.
             dataFactory.removeOldVersionOfContainers(false);
                 
-            if (reEncrypt) 
-            {
+            if (decryptDatabase) {
+                // By now we can remove all cryptographic properties.
+                removeCryptoProperties(properties);
+            } else if (reEncrypt) {
                 if (externalKeyEncryption)
                 {
                     // remove the saved copy of the verify.key file
@@ -1824,12 +1868,15 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             transaction.close(); 
 
         } catch (StandardException se) {
-
-            throw StandardException.newException(
-                      (reEncrypt ? SQLState.DATABASE_REENCRYPTION_FAILED :
-                      SQLState.DATABASE_ENCRYPTION_FAILED),
-                      se,
-                      se.getMessage()); 
+            String sqlState;
+            if (decryptDatabase) {
+                sqlState = SQLState.DATABASE_DECRYPTION_FAILED;
+            } else if (reEncrypt) {
+                sqlState = SQLState.DATABASE_REENCRYPTION_FAILED;
+            } else {
+                sqlState = SQLState.DATABASE_ENCRYPTION_FAILED;
+            }
+            throw StandardException.newException(sqlState, se, se.getMessage());
         } finally {
             // clear the new encryption engines.
             newDecryptionEngine = null;   
@@ -1856,7 +1903,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception StandardException Standard Derby Error Policy
      *
      */
-    public void handleIncompleteDatabaseEncryption(Properties properties) 
+    public void handleIncompleteDbCryptoOperation(Properties properties)
         throws StandardException
     {
         // find what was the encryption status before database crashed. 
@@ -1867,6 +1914,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             dbEncryptionStatus = Integer.parseInt(dbEncryptionStatusStr);
 
         boolean reEncryption = false;
+        boolean decryptionFailed =
+                isSet(properties, Attribute.DATA_ENCRYPTION) &&
+                !isTrue(properties, Attribute.DATA_ENCRYPTION);
         // check if engine crashed when (re) encryption was in progress.
         if (dbEncryptionStatus == RawStoreFactory.DB_ENCRYPTION_IN_PROGRESS)
         {
@@ -1948,8 +1998,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     // only incase of re-encryption there should
                     // be old verify key file. 
                     reEncryption = true;
-                }else 
-                {
+                } else if (!decryptionFailed) {
                     // remove the verify key file. 
                     if (!privDelete(verifyKeyFile))
                         throw StandardException.newException(
@@ -1979,31 +2028,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 }
             }
 
-            if (!reEncryption) {
-                // crash occured when database was getting reconfigured 
-                // for encryption , all encryption properties should be 
-                // removed from service.properties
-                
-                // common props for external key or password.
-                properties.remove(Attribute.DATA_ENCRYPTION);
-                properties.remove(RawStoreFactory.LOG_ENCRYPT_ALGORITHM_VERSION);
-                properties.remove(RawStoreFactory.DATA_ENCRYPT_ALGORITHM_VERSION);
-                properties.remove(RawStoreFactory.ENCRYPTION_BLOCKSIZE);
-
-                // properties specific to password based encryption.
-                properties.remove(Attribute.CRYPTO_KEY_LENGTH);
-                properties.remove(Attribute.CRYPTO_PROVIDER);
-                properties.remove(Attribute.CRYPTO_ALGORITHM);
-                properties.remove(RawStoreFactory.ENCRYPTED_KEY);
-
-            }
-
             if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(!(decryptionFailed && reEncryption));
                 crashOnDebugFlag(
                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY, 
                     reEncryption);
             }
 
+            if (!decryptionFailed && !reEncryption) {
+                // Crash occurred when an un-encrypted database was being
+                // encrypted, all encryption properties should be removed from
+                // service.properties since we are undoing the attempt.
+                removeCryptoProperties(properties);
+            }
         } // end of UNDO
 
 
@@ -2041,6 +2078,19 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             properties.remove(RawStoreFactory.OLD_ENCRYPTED_KEY);
         }
 
+        // Finalize cleanup for failed decryption attempts.
+        if (decryptionFailed) {
+            if (dbEncryptionStatus == RawStoreFactory.DB_ENCRYPTION_IN_UNDO) {
+                // This action is not idempotent in the sense that once set
+                // Derby can't detect that what failed was a decryption attempt
+                // if DB_ENCRYPTION_STATUS is kept unchanged. Too reduce the
+                // window of opportunity this is done here, but should really
+                // be atomic with the removal of DB_ENCRYPTION_STATUS.
+                properties.setProperty(Attribute.DATA_ENCRYPTION, "true");
+            } else {
+                removeCryptoProperties(properties);
+            }
+        }
         // remove the re-encryptin status flag. 
         properties.remove(RawStoreFactory.DB_ENCRYPTION_STATUS);
     }
@@ -2051,28 +2101,41 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     /**
      * checks if the database is in the right state to (re)encrypt it.
      *
-     * @param  reEncrypt true if the database getting encrypted 
-     *                   with new password/key.
+     * @param reEncrypt {@code true} if the database is getting encrypted with
+     *      a new password/key
+     * @param decrypt {@code true} if the database is getting decrypted
      * @exception  StandardException  
      *             if there is global transaction in the prepared state or
-     *             if the database is not at the version 10.2 or above, this
-     *             feature is not supported or  
+     *             if the database is not at the required version or above,
+     *             this feature is not supported or
      *             if the log is archived for the database.
      */
-    private void canEncryptDatabase(boolean reEncrypt) 
+    private void cryptoOperationAllowed(boolean reEncrypt, boolean decrypt)
         throws StandardException 
     {
 
-        String feature = (reEncrypt ? 
-                          "newBootPassword/newEncryptionKey attribute" : 
-                          "dataEncryption attribute on an existing database");
+        String feature;
+        if (decrypt) {
+            feature = Attribute.DECRYPT_DATABASE + " attribute";
+        } else if (reEncrypt) {
+            feature = Attribute.NEW_BOOT_PASSWORD + "/" +
+                    Attribute.NEW_CRYPTO_EXTERNAL_KEY + " attribute";
+        } else {
+            feature = Attribute.DATA_ENCRYPTION +
+                    " attribute on an existing database";
+        }
 
-        // check if the database version is at 10.2 or above.
-        // encrytpion or re-encryption of the database 
-        // is supported  only in version 10.2 or above. 
-		logFactory.checkVersion(
+        // Check if database version is sufficient for the requested feature.
+        // Encryption or re-encryption of the database is supported only in
+        // version 10.2 or above, decryption is only supported in version
+        // 10.10 or above.
+        int requiredMinorVersion = decrypt ?
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_10 :
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_2;
+
+        logFactory.checkVersion(
                        RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
-                       RawStoreFactory.DERBY_STORE_MINOR_VERSION_2, 
+                       requiredMinorVersion,
                        feature);
 
         // database can not be (re)encrypted if there 
@@ -2082,12 +2145,17 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // be read once database is reconfigure with new encryption 
         // key.
         if (xactFactory.hasPreparedXact()) {
-            if(reEncrypt) 
+            if (decrypt) {
+                throw StandardException.newException(
+                        SQLState.DATABASE_DECRYPTION_DENIED,
+                        "prepared global transaction");
+            } else if (reEncrypt) {
                 throw StandardException.newException(
                        SQLState.REENCRYPTION_PREPARED_XACT_EXIST);
-            else 
+            } else {
                 throw StandardException.newException(
                        SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
+            }
         }
 
 
@@ -2099,15 +2167,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // have some logs encrypted with new key and some with old key 
         // when rollforward recovery is performed. 
     
-        if (logFactory.logArchived()) 
-        {
-            if(reEncrypt) 
+        if (logFactory.logArchived()) {
+            if (decrypt) {
+                throw StandardException.newException(
+                        SQLState.DATABASE_DECRYPTION_DENIED,
+                        "log archived");
+            } else if (reEncrypt) {
                 throw StandardException.newException(
                        SQLState.CANNOT_REENCRYPT_LOG_ARCHIVED_DATABASE);
-            else 
+            } else {
                 throw StandardException.newException(
                        SQLState.CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE);
-            
+            }
         }
     }
 
@@ -2264,6 +2335,24 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 requiredMajorVersion, requiredMinorVersion, feature));
     }
 
+    /**
+     * Removes properties related to encrypted databases.
+     *
+     * @param properties property set to remove from
+     */
+    private void removeCryptoProperties(Properties properties) {
+        // Common props for external key or password.
+        properties.remove(Attribute.DATA_ENCRYPTION);
+        properties.remove(RawStoreFactory.LOG_ENCRYPT_ALGORITHM_VERSION);
+        properties.remove(RawStoreFactory.DATA_ENCRYPT_ALGORITHM_VERSION);
+        properties.remove(RawStoreFactory.ENCRYPTION_BLOCKSIZE);
+
+        // Properties specific to password based encryption.
+        properties.remove(Attribute.CRYPTO_KEY_LENGTH);
+        properties.remove(Attribute.CRYPTO_PROVIDER);
+        properties.remove(Attribute.CRYPTO_ALGORITHM);
+        properties.remove(RawStoreFactory.ENCRYPTED_KEY);
+    }
 	
     /*
         These methods require Priv Blocks when run under a security manager.

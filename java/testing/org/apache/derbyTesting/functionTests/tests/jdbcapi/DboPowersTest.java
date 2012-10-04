@@ -63,6 +63,9 @@ public class DboPowersTest extends BaseJDBCTestCase
         "authentication",
         "authentication + sqlAuthorization"};
 
+    final private static boolean ENCRYPT = true;
+    final private static boolean DECRYPT = false;
+
     /**
      * Create a new instance of DboPowersTest (for shutdown test)
      *
@@ -78,11 +81,12 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-     * Create a new instance of DboPowersTest (for encryption and hard
-     * upgrade tests). The database owner credentials is needed to
-     * always be able to perform the restricted operations (when they
-     * are not under test, but used as part of a test fixture for
-     * another operation).
+     * Creates a new instance of DboPowersTest for cryptographic operations
+     * and hard upgrade tests.
+     * <p>
+     * The database owner credentials is needed to always be able to perform
+     * the restricted operations (when they are not under test, but used as
+     * part of a test fixture for another operation).
      *
      * @param name Fixture name
      * @param authLevel authentication level with which test is run
@@ -116,18 +120,16 @@ public class DboPowersTest extends BaseJDBCTestCase
             TestConfiguration.clientServerDecorator(
                 dboShutdownSuite("suite: shutdown powers, client")));
 
-        /* Database (re)encryption powers
-         *
-         * The encryption power tests are not run for JSR169, since Derby
-         * does not support database encryption for that platform, cf.
-         * the specification for JSR169 support in DERBY-97.
-         */
+        // Database (re)encryption powers and decryption powers.
+        // The cryptographic power tests are not run for JSR169, since Derby
+        // does not support database encryption for that platform, cf.
+        // the specification for JSR169 support in DERBY-97.
         if (!JDBC.vmSupportsJSR169()) {
             suite.addTest(
-                dboEncryptionSuite("suite: encryption powers, embedded"));
+                dboCryptoSuite("suite: cryptographic powers, embedded"));
             suite.addTest(
                 TestConfiguration.clientServerDecorator(
-                    dboEncryptionSuite("suite: encryption powers, client")));
+                    dboCryptoSuite("suite: cryptographic powers, client")));
         }
 
         /* Database hard upgrade powers */
@@ -142,7 +144,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-     * Users used by both dboShutdownSuite and dboEncryptionSuite
+     * Users used by both dboShutdownSuite and dboCryptoSuite
      */
     final static String[][] users = {
         /* authLevel == AUTHENTICATION: dbo is APP/APP for db 'wombat',
@@ -315,16 +317,17 @@ public class DboPowersTest extends BaseJDBCTestCase
 
     /**
      *
-     * Construct suite of tests for database encryption action
+     * Constructs suite of tests for cryptographic actions, that is database
+     * encryption, re-encryption, and decryption.
      *
      * @param framework Derby framework name
-     * @return A suite containing the test case for encryption
+     * @return A suite containing the test cases for cryptographic operations
      * incarnated for the three security levels no authentication,
      * authentication, and authentication plus sqlAuthorization, The
      * latter two has an instance for dbo, and one for an ordinary user,
      * so there are in all five incarnations of tests.
      */
-    private static Test dboEncryptionSuite(String framework)
+    private static Test dboCryptoSuite(String framework)
     {
         Test tests[] = new Test[SQLAUTHORIZATION+1]; // one per authLevel
 
@@ -337,10 +340,10 @@ public class DboPowersTest extends BaseJDBCTestCase
             new TestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
 
-        for (int tNo = 0; tNo < encryptionTests.length; tNo++) {
+        for (int tNo = 0; tNo < cryptoTests.length; tNo++) {
             noauthSuite.addTest(
                 TestConfiguration.singleUseDatabaseDecoratorNoShutdown(
-                    new DboPowersTest(encryptionTests[tNo], NOAUTHENTICATION,
+                    new DboPowersTest(cryptoTests[tNo], NOAUTHENTICATION,
                                       "foo", "bar")));
         }
 
@@ -351,7 +354,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         for (int autLev = AUTHENTICATION;
              autLev <= SQLAUTHORIZATION ; autLev++) {
 
-            tests[autLev] = wrapEncryptionUserTests(autLev);
+            tests[autLev] = wrapCryptoUserTests(autLev);
         }
 
         TestSuite suite = new TestSuite("dboPowers:"+framework);
@@ -377,7 +380,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      * @param autLev security context to use
      */
 
-    private static Test wrapEncryptionUserTests(int autLev)
+    private static Test wrapCryptoUserTests(int autLev)
     {
         // add decorator for different users authenticated
         TestSuite usersSuite =
@@ -388,9 +391,9 @@ public class DboPowersTest extends BaseJDBCTestCase
         // use of no teardown / no shutdown decorator variants:
         // Necessary since framework doesnt know bootPassword
         for (int userNo = 0; userNo < users.length; userNo++) {
-            for (int tNo = 0; tNo < encryptionTests.length; tNo++) {
+            for (int tNo = 0; tNo < cryptoTests.length; tNo++) {
                 Test test = TestConfiguration.changeUserDecorator
-                    (new DboPowersTest(encryptionTests[tNo],
+                    (new DboPowersTest(cryptoTests[tNo],
                                        autLev,
                                        users[autLev-1][0], // dbo
                                        users[autLev-1][0].concat(pwSuffix)),
@@ -412,9 +415,10 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-     * Enumerates the encryption tests
+     * Enumerates the cryptographic tests.
      */
-    final static String[] encryptionTests = { "testEncrypt", "testReEncrypt" };
+    final static String[] cryptoTests = {
+        "testEncrypt", "testReEncrypt", "testDecrypt"};
 
     /**
      * Test database encryption for an already created
@@ -446,12 +450,12 @@ public class DboPowersTest extends BaseJDBCTestCase
         JDBCDataSource.setBeanProperty(ds, "user", user);
         JDBCDataSource.setBeanProperty(ds, "password", password);
 
-        Connection con = null;
+        Connection con;
         try {
             con = ds.getConnection();
-            vetEncryptionAttempt(user, null);
+            vetCryptoAttempt(ENCRYPT, user, null);
         } catch (SQLException e) {
-            vetEncryptionAttempt(user, e);
+            vetCryptoAttempt(ENCRYPT, user, e);
             bringDbDown();
             return;
         }
@@ -505,9 +509,9 @@ public class DboPowersTest extends BaseJDBCTestCase
 
         try {
             ds.getConnection();
-            vetEncryptionAttempt(user, null);
+            vetCryptoAttempt(ENCRYPT, user, null);
         } catch (SQLException e) {
-            vetEncryptionAttempt(user, e);
+            vetCryptoAttempt(ENCRYPT, user, e);
             bringDbDown();
             return;
         }
@@ -518,6 +522,47 @@ public class DboPowersTest extends BaseJDBCTestCase
         bringDbDown();
     }
 
+    /**
+     * Tests that only the DBO can decrypt a database.
+     */
+    public void testDecrypt()
+            throws SQLException {
+        println("testDecrypt: auth=" + this._authLevel +
+                " user=" + getTestConfiguration().getUserName());
+
+        // make sure db is created
+        getConnection().close();
+
+        // shut down database in preparation for encryption
+        bringDbDown();
+        String bootPassword = "conHippo08";
+        doEncrypt(bootPassword);
+        // shut down database in preparation for decryption
+        bringDbDown();
+
+        String user = getTestConfiguration().getUserName();
+        String password = getTestConfiguration().getUserPassword();
+        DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                                       "bootPassword=" + bootPassword +
+                                       ";decryptDatabase=true");
+        JDBCDataSource.setBeanProperty(ds, "user", user);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+
+        try {
+            ds.getConnection();
+            vetCryptoAttempt(DECRYPT, user, null);
+        } catch (SQLException sqle) {
+            vetCryptoAttempt(DECRYPT, user, sqle);
+            return;
+        } finally {
+            bringDbDown();
+        }
+
+        // we managed to decrypt: bring db up again to verify
+        bringDbUp(null);
+        bringDbDown();
+    }
 
     /**
      * Encrypt database, as owner (not testing encryption power here)
@@ -556,10 +601,10 @@ public class DboPowersTest extends BaseJDBCTestCase
 
 
     /**
-     * Boot database back up after encryption using current user,
-     * should succeed
+     * Boots database back up after cryptographic operation using current user,
+     * should succeed.
      *
-     * @param bootPassword Boot using this bootPassword
+     * @param bootPassword boot using this bootPassword, may be {@code null}
      * @throws SQLException
      */
     private void bringDbUp(String bootPassword) throws SQLException
@@ -567,23 +612,26 @@ public class DboPowersTest extends BaseJDBCTestCase
         String user = getTestConfiguration().getUserName();
         String password = getTestConfiguration().getUserPassword();
         DataSource ds = JDBCDataSource.getDataSource();
-        JDBCDataSource.setBeanProperty(
-            ds, "connectionAttributes", "bootPassword=" + bootPassword);
+        if (bootPassword != null) {
+            JDBCDataSource.setBeanProperty(
+                ds, "connectionAttributes", "bootPassword=" + bootPassword);
+        }
         JDBCDataSource.setBeanProperty(ds, "user", user);
         JDBCDataSource.setBeanProperty(ds, "password", password);
         ds.getConnection().close();
     }
 
     /**
-     * Decide if the result of trying to (re)encrypt the database is
-     * compliant with the semantics introduced by DERBY-2264.
+     * Decides if the result of trying to (re-)encrypt or decrypt the database
+     * is compliant with the semantics introduced by DERBY-2264.
      *
+     * @param encrypt whether we are (re-)encrypting or decrypting
      * @param user The db user under which we tried to encrypt
      * @param e    Exception caught during attempt, if any
      */
-    private void vetEncryptionAttempt (String user, SQLException e)
+    private void vetCryptoAttempt(boolean encrypt, String user, SQLException e)
     {
-        vetAttempt(user, e, "08004", "(re)encryption");
+        vetAttempt(user, e, "08004", encrypt ? "(re)encryption" : "decrypt");
     }
 
     /**
@@ -763,8 +811,10 @@ public class DboPowersTest extends BaseJDBCTestCase
                 assertEquals(operation + ", SQL authorization, db owner",
                              null, e);
             } else {
-                assertSQLState(operation +", SQL authorization, not db owner",
-                               state, e);
+                String msg = operation + ", SQL authorization, not db owner";
+                assertNotNull(
+                        msg + ": succeeded unexpectedly without exeption", e);
+                assertSQLState(msg, state, e);
             }
             break;
         default:
@@ -798,7 +848,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     public static void derby3038Proc() 
         throws SQLException {
 
-        // Before fixing DERNY-3038 this connect would fail.
+        // Before fixing DERBY-3038 this connect would fail.
         Connection con = java.sql.DriverManager.
             getConnection("jdbc:default:connection");
         con.close();

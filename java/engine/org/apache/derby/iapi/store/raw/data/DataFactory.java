@@ -284,6 +284,15 @@ public interface DataFactory extends Corruptable {
 		 throws StandardException ;
 
     /**
+     * Decrypts all the containers in the data segment.
+     *
+     * @param t the transaction that is decrypting the container
+     * @exception StandardException Standard Derby Error Policy
+	 */
+    void decryptAllContainers(RawTransaction t)
+            throws StandardException;
+
+    /**
 	 * Encrypt all the containers in the data segment.
      * @param t the transaction that is encrypting the containers.
      * @exception StandardException Standard Derby Error Policy

@@ -30,15 +30,11 @@ import org.apache.derby.iapi.services.property.PersistentSet;
 
 import org.apache.derby.iapi.store.access.TransactionInfo;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
-import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import java.util.Properties;
 import java.io.Serializable;
-import java.io.File;
 
 /**
     RawStoreFactory implements a single unit of transactional
@@ -111,6 +107,9 @@ public interface RawStoreFactory extends Corruptable {
         
     /** Derby Store Minor Version (4) **/
     public static final int DERBY_STORE_MINOR_VERSION_4    = 4;
+
+    /** Derby Store Minor Version (10) **/
+    public static final int DERBY_STORE_MINOR_VERSION_10   = 10;
 
     /** Derby 10 Store Major version */
     public static final int DERBY_STORE_MAJOR_VERSION_10   = 10;
@@ -358,11 +357,13 @@ public interface RawStoreFactory extends Corruptable {
         "OldEncryptedBootPassword";
 
 
-    /*
-     * Following property is used to track the status of the (re)encryption,
-     * required to bring the database back to state it was before the 
-     * (re) encryption started, id (re) encryption of the database 
-     * is aborted.
+    /**
+     * Tracks the status of any database-wide cryptographic operations.
+     * <p>
+     * The relevant operations are encryption, re-encryption and decryption.
+     * THe property is required to be able to bring the database back to state
+     * it was in before the cryptographic operation started in case the
+     * transformation of the database is aborted.
      */
     public static final String DB_ENCRYPTION_STATUS =
         "derby.storage.databaseEncryptionStatus";

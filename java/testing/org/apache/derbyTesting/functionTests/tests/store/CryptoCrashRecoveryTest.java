@@ -43,8 +43,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * the database.
  * <p>
  * Debug flags are used to simulate crashes during the encryption of an
- * un-encrypted database and re-encryption of an encrypted database with new
- * password/key.
+ * un-encrypted database, re-encryption of an encrypted database with new
+ * password/key, and decryption of an encrypted database.
  * <p>
  * Unlike the other recovery tests which do a setup and recovery as different
  * tests, crash/recovery for cryptographic operations can be simulated in one
@@ -84,10 +84,29 @@ public class CryptoCrashRecoveryTest
             suite = TestConfiguration.embeddedSuite(
                     CryptoCrashRecoveryTest.class);
         } else {
-            suite = new TestSuite("disabled due to non-debug build");
-            println("test disabled due to non-debug build");
+            suite = new TestSuite(
+                    "CryptoCrashRecovery disabled due to non-debug build");
+            println("CryptoCrashRecoveryTest disabled due to non-debug build");
         }
         return suite;
+    }
+
+	public void testDecryptionWithBootPassword()
+            throws Exception {
+        String db = "wombat_pwd_de";
+        // Crash recovery during decryption (with password mechanism).
+        DataSource ds = JDBCDataSource.getDataSource(db);
+        runCrashRecoveryTestCases(ds, OP_DECRYPT, USE_ENC_PWD);
+        assertDirectoryDeleted(new File("system", db));
+    }
+
+    public void testDecryptionWithEncryptionKey()
+            throws Exception {
+        String db = "wombat_key_de";
+        // Crash recovery during database decryption (with encryption key).
+        DataSource ds = JDBCDataSource.getDataSource(db);
+        runCrashRecoveryTestCases(ds, OP_DECRYPT, USE_ENC_KEY);
+        assertDirectoryDeleted(new File("system", db));
     }
 
 	public void testEncryptionWithBootPassword()
@@ -99,7 +118,7 @@ public class CryptoCrashRecoveryTest
         assertDirectoryDeleted(new File("system", db));
     }
 
-	public void testEncryptionWitEncryptionKey()
+	public void testEncryptionWithEncryptionKey()
             throws Exception {
         String db = "wombat_key_en";
         // Crash recovery during database encryption using the encryption key.
@@ -138,12 +157,18 @@ public class CryptoCrashRecoveryTest
     private void runCrashRecoveryTestCases(DataSource ds, int operation,
                                            boolean useEncPwd)
             throws SQLException {
-        verifyOperation(operation);
-        Connection con;
-        if (operation == OP_REENCRYPT) {
-            con = createEncryptedDatabase(ds, useEncPwd);
-        } else {
-            con = createDatabase(ds);
+        Connection con = null; // silence the compiler
+        switch (operation) {
+            case OP_DECRYPT:
+                // Fall through.
+            case OP_REENCRYPT:
+                con = createEncryptedDatabase(ds, useEncPwd);
+                break;
+            case OP_ENCRYPT:
+                con = createDatabase(ds);
+                break;
+            default:
+                fail("unsupported operation: " + operation);
         }
 
         createTable(con, TEST_TABLE_NAME);
@@ -153,7 +178,7 @@ public class CryptoCrashRecoveryTest
         con.close();
         JDBCDataSource.shutdownDatabase(ds);
 
-        // Following cases of (re-)encryption should be rolled back.
+        // Following cases of cryptographic operations should be rolled back.
         Boolean useNewCredential =
                 (operation == OP_REENCRYPT ? Boolean.FALSE : null);
 
@@ -171,7 +196,7 @@ public class CryptoCrashRecoveryTest
         crash(ds, operation, useEncPwd, TEST_REENCRYPT_CRASH_AFTER_COMMT);
         crashInRecovery(ds, useEncPwd, useNewCredential,
                      TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE);
-        // retry (re)encryption and crash.
+        // Retry operation and crash.
         crash(ds, operation, useEncPwd, TEST_REENCRYPT_CRASH_AFTER_COMMT);
 
         crash(ds, operation, useEncPwd,
@@ -187,24 +212,26 @@ public class CryptoCrashRecoveryTest
                 TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
         crashInRecovery(ds, useEncPwd, useNewCredential,
                      TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
-        // Retry (re-)encryption and crash.
+        // Retry operation and crash.
         crash(ds, operation, useEncPwd,
                 TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
         crashInRecovery(ds, useEncPwd, useNewCredential,
                      TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
 
-        // Rollowing cases of (re-)encryption should be successful, only
-        // cleanup is pending.
-
-        // Crash after database is (re-)encrypted, but before cleanup.
+        // Following cases should be successful, only cleanup is pending.
+        // Crash after the cryptographic operation has been performed, but
+        // before cleanup.
         // If re-encryption is complete, database should be bootable with the
-        // new password.
+        // new password. If decryption is complete, database should be bootable
+        // without specifying a boot password / key.
         useNewCredential =
                 (operation == OP_REENCRYPT ? Boolean.TRUE : Boolean.FALSE);
         crash(ds, operation, useEncPwd, TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT);
         crashInRecovery(ds, useEncPwd, useNewCredential,
                      TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
-
+        if (operation == OP_DECRYPT) {
+            useNewCredential = null;
+        }
         recover(ds, useEncPwd, useNewCredential);
         JDBCDataSource.shutdownDatabase(ds);
     }
@@ -225,10 +252,18 @@ public class CryptoCrashRecoveryTest
         setDebugFlag(debugFlag);
 
         try {
-            if (operation == OP_REENCRYPT) {
-                reEncryptDatabase(ds, useEncPwd);
-            } else {
-                encryptDatabase(ds, useEncPwd);
+            switch (operation) {
+                case OP_REENCRYPT:
+                    reEncryptDatabase(ds, useEncPwd);
+                    break;
+                case OP_ENCRYPT:
+                    encryptDatabase(ds, useEncPwd);
+                    break;
+                case OP_DECRYPT:
+                    decryptDatabase(ds, useEncPwd);
+                    break;
+                default:
+                    fail("unsupported operation");
             }
             fail("crypto operation didn't crash as expected");
         } catch (SQLException sqle) {
@@ -548,6 +583,32 @@ public class CryptoCrashRecoveryTest
     }
 
     /**
+     * Decrypts an encrypted database.
+     *
+     * @param ds database
+     * @param useEncPwd whether to use boot password or encryption key
+     * @throws SQLException if any database exception occurs
+     */
+    private Connection decryptDatabase(DataSource ds, boolean useEncPwd)
+        throws SQLException {
+        String connAttrs = "decryptDatabase=true;";
+        if (useEncPwd) {
+            connAttrs += "bootPassword=" + OLD_PASSWORD;
+        } else {
+            connAttrs += "encryptionKey=" + OLD_KEY;
+        }
+
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes", connAttrs);
+        println("decrypting " + db(ds) + " with " + connAttrs);
+        //Decrypt the existing database.
+        try {
+            return ds.getConnection();
+        } finally {
+            JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+        }
+    }
+
+    /**
      * Boots the database.
      *
      * @param ds database
@@ -581,18 +642,6 @@ public class CryptoCrashRecoveryTest
             return ds.getConnection();
         } finally {
             JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
-        }
-    }
-
-    /** Verifies if the operation constant is a known operation. */
-    private static void verifyOperation(int operation) {
-        switch (operation) {
-            case OP_ENCRYPT:
-            //case OP_DECRYPT:
-            case OP_REENCRYPT:
-                return;
-            default:
-                fail("unknown operation constant: " + operation);
         }
     }
 

@@ -2099,8 +2099,14 @@ public class BaseDataFileFactory
                 ciphertext, offset, length, cleartext, outputOffset);
 	}
 
-
+    /** {@inheritDoc} */
+    public void decryptAllContainers(RawTransaction t)
+            throws StandardException {
+        containerEncrypter = new EncryptOrDecryptData(this);
+        containerEncrypter.decryptAllContainers(t);
+    }
     
+    /** {@inheritDoc} */
     public void encryptAllContainers(RawTransaction t) throws StandardException
     {
         containerEncrypter = new EncryptOrDecryptData(this);

@@ -322,12 +322,15 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	}
 
     /**
-     * Update the page array with container header if the page is a first alloc
-     * page and encrypt the page data if the database is encrypted.  
+     * Updates the page array with container header if the page is a first
+     * allocation page and encrypts the page data if the database is encrypted.
+     *
      * @param pageNumber the page number of the page
      * @param pageData  byte array that has the actual page data.
-     * @param encryptionBuf buffer that is used to store encryted version of the
-     * page.
+     * @param encryptionBuf buffer that is used to store encrypted version of
+     *      the page, or {@code null} if encryption is to be skipped
+     * @param encryptWithNewEngine whether to use the new encryption engine for
+     *      encryption (only considered if {@code encryptionBuf != null})
      * @return byte array of the the page data as it should be on the disk.
      */
     protected byte[] updatePageArray(long pageNumber, 
@@ -358,7 +361,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         } 
         else 
         {
-            if (dataFactory.databaseEncrypted() || encryptWithNewEngine) 
+            if (encryptionBuf != null &&
+                    (dataFactory.databaseEncrypted() || encryptWithNewEngine))
             {
                 return encryptPage(pageData, 
                                    pageSize, 
@@ -1209,17 +1213,18 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * Creates encrypted or decrypted version of the container.
      *
      * Reads all the pages of the container from the original container
-     * through the page cache, then either encrypts each page data with the new
-     * encryption mechanism or decrypts the page data, and finally writes the
-     * data to the specified new container file.
+     * through the page cache, then either encrypts page data with the new
+     * encryption mechanism or leaves the page data un-encrypted, and finally
+     * writes the data to the specified new container file.
      * <p>
      * The encryption and decryption engines used to carry out the
      * cryptographic operation(s) are configured through the raw store, and
-     * accessed via the data factory.
+     * accessed via the data factory. Note that the pages have already been
+     * decrypted before being put into the page cache.
      *
      * @param handle the container handle
      * @param newFilePath file to store the new version of the container in
-     * @param doEncrypt tells whether to encrypt or decrypt
+     * @param doEncrypt tells whether to encrypt or not
      * @exception StandardException Derby Standard error policy
      */
     protected void encryptOrDecryptContainer(BaseContainerHandle handle,
@@ -1227,10 +1232,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                                              boolean doEncrypt)
         throws StandardException 
     {
-        // TEMPORARY FOR DERBY-5792
-        if (!doEncrypt) {
-            throw new UnsupportedOperationException("not yet implemented");
-        }
         BasePage page = null; 
         StorageFile newFile = 
             dataFactory.getStorageFactory().newStorageFile(newFilePath);
@@ -1241,19 +1242,21 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             newRaf = privGetRandomAccessFile(newFile);
 
             byte[] encryptionBuf = null;
-            encryptionBuf = new byte[pageSize];
+            if (doEncrypt) {
+                encryptionBuf = new byte[pageSize];
+            }
 
-            // copy all the pages from the current container to the 
-            // new container file after encryting the pages. 
+            // Copy all the pages from the current container to the new
+            // container file after processing the pages.
             for (long pageNumber = FIRST_ALLOC_PAGE_NUMBER; 
                  pageNumber <= lastPageNumber; pageNumber++) 
             {
 
                 page = getLatchedPage(handle, pageNumber);
                         
-                // update the page array before writing to the disk 
-                // with container header and encrypt it.
-                        
+                // Update the page array before writing to the disk.
+                // An update consists of adding the container header, or
+                // (re-)encrypting the data.
                 byte[] dataToWrite = updatePageArray(pageNumber, 
                                                      page.getPageArray(), 
                                                      encryptionBuf, 
@@ -1275,7 +1278,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                                     SQLState.FILE_CONTAINER_EXCEPTION, ioe,
                                     getIdentity() != null ?
                                         getIdentity().toString() : "unknown",
-                                    "encrypt", newFilePath);
+                                    doEncrypt ? "encrypt" : "decrypt",
+                                    newFilePath);
         } finally {
 
             if (page != null) {
@@ -1293,8 +1297,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                                     SQLState.FILE_CONTAINER_EXCEPTION, ioe,
                                     getIdentity() != null ?
                                         getIdentity().toString() : "unknown",
-                                    "encrypt-close", newFilePath);
-                    
+                                    doEncrypt ?
+                                        "encrypt-close" : "decrypt-close",
+                                    newFilePath);
                 }
             }
         }

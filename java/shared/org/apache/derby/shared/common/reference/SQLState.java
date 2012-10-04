@@ -249,6 +249,8 @@ public interface SQLState {
     String DATABASE_ENCRYPTION_FAILED                 = "XBCXU.S";
     String DATABASE_REENCRYPTION_FAILED               = "XBCXV.S";
     String DIGEST_NO_SUCH_ALGORITHM                   = "XBCXW.S";
+    String DATABASE_DECRYPTION_FAILED                 = "XBCXX.S";
+    String DATABASE_DECRYPTION_DENIED                 = "XBCXY.S";
 
 	/*
 	** Cache Service
@@ -1656,6 +1658,7 @@ public interface SQLState {
     String AUTH_DATABASE_CREATE_MISSING_PERMISSION          = "08004.C.11";
     String NET_CONNECT_SECMEC_INCOMPATIBLE_SCHEME           = "08004.C.12";
     String AUTH_EMPTY_CREDENTIALS                                  = "08004.C.13";
+    String AUTH_DECRYPT_NOT_DB_OWNER                        = "08004.C.14";
 
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
