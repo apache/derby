@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.DerbyDistribution;
 import org.apache.derbyTesting.junit.DerbyVersion;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.ServerSetup;
@@ -118,10 +119,13 @@ public class _Suite
      * @return A default suite of compatibility tests.
      */
     public static Test suite() {
-        // DERBY-5889: Disabling tests on Windonws while investigating.
-        if (isWindowsPlatform()) {
-            return new TestSuite(
-                    "tests.compatibility disabled on Windows, see DERBY-5889");
+        // DERBY-5889: Disabling tests on Windows where the old releases are
+        // run off of UNC paths (network drives).
+        if (suffersFromDerby5889()) {
+            String msg = ("tests.compatibility disabled on Windows " +
+                    "with UNC paths, see DERBY-5889");
+            println(msg);
+            return new TestSuite(msg);
         }
         if (!Derby.hasClient() || !Derby.hasServer()) {
             return new TestSuite("Compatibility tests skipped because " +
@@ -137,5 +141,25 @@ public class _Suite
                 VersionCombinationConfigurator.class.getName().
                     replaceAll("\\.", "/") + ".policy",
                 true);
+    }
+
+    /**
+     * Tells if we are running in an environment that suffers from DERBY-5889.
+     * <p>
+     * Description: operating system is Windows and the old Derby releases are
+     * residing on an UNC path (network drive).
+     */
+    public static boolean suffersFromDerby5889() {
+        if (!isWindowsPlatform()) {
+            return false;
+        }
+        DerbyDistribution[] dists =
+                TestConfiguration.getReleaseRepository().getDistributions();
+        for (int i=0; i < dists.length; i++) {
+            if (dists[i].getDerbyEngineJarPath().startsWith("\\\\")) {
+                return true;
+            }
+        }
+        return false;
     }
 }
