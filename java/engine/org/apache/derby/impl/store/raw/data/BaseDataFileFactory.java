@@ -509,7 +509,7 @@ public class BaseDataFileFactory
 
 		long shutdownTime = System.currentTimeMillis();
 		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
-		istream.println(LINE);
+		logMsg(LINE);
 		logMsg("\n" + new Date() +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
