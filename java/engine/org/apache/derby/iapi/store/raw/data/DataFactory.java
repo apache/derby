@@ -32,7 +32,6 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Corruptable;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -301,13 +300,10 @@ public interface DataFactory extends Corruptable {
         throws StandardException;
 
     /**
-     * Remove old versions of the containers after (re)encryption 
-     * of the  database. 
-     * @param inRecovery  <code> true </code>, if cleanup is 
-     *                    happening during recovery.
-     * @exception StandardException Standard Derby Error Policy
+     * Removes old versions of the containers after a cryptographic operation
+     * on the database.
      */
-    public void removeOldVersionOfContainers(boolean inRecovery) 
+    public void removeOldVersionOfContainers()
         throws StandardException;
 
     /**

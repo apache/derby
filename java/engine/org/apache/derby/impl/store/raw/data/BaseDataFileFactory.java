@@ -198,9 +198,6 @@ public class BaseDataFileFactory
 
 	private Hashtable postRecoveryRemovedFiles;
 
-    private EncryptOrDecryptData containerEncrypter;
-
-
     // PrivilegedAction actions
     private int actionCode;
     private static final int REMOVE_TEMP_DIRECTORY_ACTION           = 2;
@@ -2102,39 +2099,23 @@ public class BaseDataFileFactory
     /** {@inheritDoc} */
     public void decryptAllContainers(RawTransaction t)
             throws StandardException {
-        containerEncrypter = new EncryptOrDecryptData(this);
-        containerEncrypter.decryptAllContainers(t);
+        EncryptOrDecryptData containerDecrypter = new EncryptOrDecryptData(this);
+        containerDecrypter.decryptAllContainers(t);
     }
-    
+
     /** {@inheritDoc} */
-    public void encryptAllContainers(RawTransaction t) throws StandardException
-    {
-        containerEncrypter = new EncryptOrDecryptData(this);
-        // encrypt all the containers in the database
+    public void encryptAllContainers(RawTransaction t)
+            throws StandardException {
+        EncryptOrDecryptData containerEncrypter = new EncryptOrDecryptData(this);
         containerEncrypter.encryptAllContainers(t);
     }
-
-
-    /*
-     * Remover old versions of the containers after (re)encryption 
-     * of the  database. 
-     * @param inRecovery  <code> true </code>, if cleanup is 
-     *                     happening during recovery.
-     */
-    public void removeOldVersionOfContainers(boolean inRecovery) 
-        throws StandardException
-    {
-        // check if old containers are being during recovery 
-        // because of a crash after successful completion of 
-        // (re)encryption of the  dataabase, but before the 
-        // (re)encryption cleanup  was complete. 
-        if (inRecovery) {
-            containerEncrypter = new EncryptOrDecryptData(this);
-        }
-        containerEncrypter.removeOldVersionOfContainers(inRecovery);
-        containerEncrypter = null;
-    }
  
+    /** {@inheritDoc} */
+    public void removeOldVersionOfContainers()
+            throws StandardException {
+        EncryptOrDecryptData containerCryptoOp = new EncryptOrDecryptData(this);
+        containerCryptoOp.removeOldVersionOfContainers();
+    }
     
     /**
      * Return a jar file by asking the class's 

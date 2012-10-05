@@ -63,9 +63,6 @@ public class EncryptOrDecryptData implements PrivilegedAction {
 
     private BaseDataFileFactory dataFactory;
     private StorageFactory storageFactory;
-    private StorageFile[] oldFiles;
-    private int noOldFiles = 0;
-
 
     /* privileged actions */
     private static final int STORAGE_FILE_EXISTS_ACTION = 1;
@@ -118,8 +115,6 @@ public class EncryptOrDecryptData implements PrivilegedAction {
         // simply reading the list of files in seg0.
         String[] files = dataFactory.getContainerNames();
         if (files != null) {
-            oldFiles = new StorageFile[files.length];
-            noOldFiles = 0;
             long segmentId = 0;
 
             // Loop through all the files in seg0 and
@@ -141,18 +136,18 @@ public class EncryptOrDecryptData implements PrivilegedAction {
 
                 ContainerKey ckey = new ContainerKey(segmentId,
                                                      containerId);
-                oldFiles[noOldFiles++] =
-                        encryptOrDecryptContainer(t, ckey, doEncrypt);
+                encryptOrDecryptContainer(t, ckey, doEncrypt);
             }
 
             // Old versions of the container files will
             // be removed after the (re)encryption of database
             // is completed.
-        } else
-        {
-            if (SanityManager.DEBUG)
-                SanityManager.THROWASSERT("encryption process is unable to" +
-                                          "read container names in seg0");
+        } else {
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT(
+                        (doEncrypt ? "encryption" : "decryption") +
+                        " process is unable to read container names in seg0");
+            }
         }
 
     }
@@ -164,12 +159,11 @@ public class EncryptOrDecryptData implements PrivilegedAction {
      * @param t transaction that used to perform the cryptographic operation
      * @param ckey the key of the container that is being encrypted/decrypted
      * @param doEncrypt tells whether to encrypt or decrypt
-     * @return File handle to the old copy of the container.
      * @exception StandardException Standard Derby error policy
      */
-    private StorageFile encryptOrDecryptContainer(RawTransaction t,
-                                                  ContainerKey ckey,
-                                                  boolean doEncrypt)
+    private void encryptOrDecryptContainer(RawTransaction t,
+                                           ContainerKey ckey,
+                                           boolean doEncrypt)
         throws StandardException
     {
 
@@ -247,8 +241,6 @@ public class EncryptOrDecryptData implements PrivilegedAction {
                              newFile, currentFile);
 
         }
-
-        return oldFile ;
     }
 
 
@@ -275,14 +267,9 @@ public class EncryptOrDecryptData implements PrivilegedAction {
         return sb.toString();
     }
 
-    private boolean isOldContainerFile(String fileName)
-    {
-        // all old versions of the conatainer files
-        // start with prefix "o" and ends with ".dat"
-        if (fileName.startsWith("o") && fileName.endsWith(".dat"))
-            return true;
-        else
-            return false;
+    private boolean isOldContainerFile(String fileName) {
+        // Old versions start with prefix "o" and ends with ".dat".
+        return (fileName.startsWith("o") && fileName.endsWith(".dat"));
     }
 
     private StorageFile getFile(String ctrFileName)
@@ -353,59 +340,29 @@ public class EncryptOrDecryptData implements PrivilegedAction {
     }
 
 
-    /*
-     * Remove all the old version (encrypted with old key or
-     * un-encrypted) of the containers stored in the data directory .
-     *
-     * @param inRecovery  <code> true </code>, if cleanup is
-     *                    happening during recovery.
-     * @exception StandardException Standard Derby Error Policy
+    /**
+     * Removes old versions of the containers after a cryptographic operation
+     * on the database.
      */
-    public void removeOldVersionOfContainers(boolean inRecovery)
-        throws StandardException
-    {
-
-        if (inRecovery)
-        {
-            // find the old version of the container files
-            // and delete them
-            String[] files = dataFactory.getContainerNames();
-            if (files != null)
-            {
-                // loop through all the files in seg0 and
-                // delete all old copies of the containers.
-                for (int i = files.length-1; i >= 0 ; i--)
-                {
-                    // if it is a old version of the container file
-                    // delete it.
-                    if (isOldContainerFile(files[i]))
-                    {
-                        StorageFile oldFile = getFile(files[i]);
-                        if (!privDelete(oldFile))
-                        {
-                            throw StandardException.newException(
-                                          SQLState.FILE_CANNOT_REMOVE_FILE,
-                                          oldFile);
-                        }
+    public void removeOldVersionOfContainers()
+            throws StandardException {
+        // Find the old version of the container files and delete them.
+        String[] files = dataFactory.getContainerNames();
+        if (files != null) {
+            // Loop through all the files in seg0 and
+            // delete all old copies of the containers.
+            for (int i = files.length-1; i >= 0 ; i--) {
+                if (isOldContainerFile(files[i])) {
+                    StorageFile oldFile = getFile(files[i]);
+                    if (!privDelete(oldFile)) {
+                        throw StandardException.newException(
+                                      SQLState.FILE_CANNOT_REMOVE_FILE,
+                                      oldFile);
                     }
-                }
-            }
-        }else
-        {
-            // delete all the old version of the containers.
-            for (int i = 0 ; i < noOldFiles ; i++)
-            {
-                if (!privDelete(oldFiles[i]))
-                {
-                    throw StandardException.newException(
-                                   SQLState.FILE_CANNOT_REMOVE_FILE,
-                                   oldFiles[i]);
                 }
             }
         }
     }
-
-
 
     private synchronized boolean privExists(StorageFile file)
     {

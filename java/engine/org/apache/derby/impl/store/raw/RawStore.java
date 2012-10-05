@@ -1836,7 +1836,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             // database is (re)encrypted successfuly, 
             // remove the old version of the container files.
-            dataFactory.removeOldVersionOfContainers(false);
+            dataFactory.removeOldVersionOfContainers();
                 
             if (decryptDatabase) {
                 // By now we can remove all cryptographic properties.
@@ -2047,7 +2047,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (dbEncryptionStatus == RawStoreFactory.DB_ENCRYPTION_IN_CLEANUP)
         {
             // remove all the old versions of the  containers. 
-            dataFactory.removeOldVersionOfContainers(true);
+            dataFactory.removeOldVersionOfContainers();
         }
         
         if (SanityManager.DEBUG) {
