@@ -665,7 +665,7 @@ public class TernaryOperatorNode extends OperatorNode
 		}
 
 		/*
-		 * Is there a ? paramter for the third arg.  It will be an int.
+		 * Is there a ? parameter for the third arg.  It will be an int.
 		 */
 		if( rightOperand.requiresTypeFromContext())
 		{

@@ -927,7 +927,7 @@ public interface RawStoreFactory extends Corruptable {
     public void createFinished() throws StandardException;
 
     /**
-     * Get JBMS properties relavent to raw store
+     * Get JBMS properties relevant to raw store
      *
      * @exception StandardException Standard Derby exception policy.
      */

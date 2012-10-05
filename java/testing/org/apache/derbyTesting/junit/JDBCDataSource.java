@@ -49,7 +49,7 @@ public class JDBCDataSource {
     
     /**
      * Return a new DataSource corresponding to the current
-     * configuration except that the databse name is different.
+     * configuration except that the database name is different.
      */
     public static javax.sql.DataSource getDataSource(String dbName)
     {

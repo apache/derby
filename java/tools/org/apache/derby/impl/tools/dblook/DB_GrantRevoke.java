@@ -37,7 +37,7 @@ public class DB_GrantRevoke {
 	 * Generate Grant & Revoke statements if sqlAuthorization is on
 	 * 
 	 * @param conn Connection to use
-	 * @param at10_6 True if the databse level is 10.6 or higher
+	 * @param at10_6 True if the database level is 10.6 or higher
 	 */
 	public static void doAuthorizations(Connection conn, boolean at10_6)
 		throws SQLException {

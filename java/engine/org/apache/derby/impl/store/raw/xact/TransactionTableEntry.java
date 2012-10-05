@@ -39,7 +39,7 @@ import java.io.ObjectInput;
 import java.io.IOException;
 
 /**
-	Transaction table entry is used to store all relavent information of a
+	Transaction table entry is used to store all relevant information of a
 	transaction into the transaction table for the use of checkpoint, recovery,
 	Transaction management during Quiesce state, and for dumping transaction table.  Only works
 	with the following classes: TransactionTable, XactFactory, Xact

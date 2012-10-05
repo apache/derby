@@ -33,7 +33,7 @@ import java.util.Hashtable;
 	database shared, update and exclusive locks. 
 	<P>
 	The lock manager uses this ordered protocol to determine if a lock request on a
-	Lockable <TT> L </TT> with qualifier <TT> Q1 </TT> in compatiblity space
+	Lockable <TT> L </TT> with qualifier <TT> Q1 </TT> in compatibility space
 	<TT> CS1 </TT> can be granted:
 	<OL>
 	<LI>If no locks are held on <TT> L </TT> in any compatability space then the
@@ -63,7 +63,7 @@ import java.util.Hashtable;
 	object then its equals() method must reflect that, e.g. by testing equality
 	of its fields. In this case the first Lockable to be locked will be kept
 	by lock manager as the key for the lock. Thus even after the first caller
-	unlocks the obejct, its reference will still be kept by the lock manager.
+	unlocks the object, its reference will still be kept by the lock manager.
 	Thus Lockable's that per value equality must be designed so that they
 	are never re-used for different lockable concepts.
 	<BR>
@@ -117,7 +117,7 @@ public interface Lockable {
 
 	/**
 		If this lockable object wants to participate in a diagnostic virtual
-		lock table, then put any relavent attributes of this lock into the
+		lock table, then put any relevant attributes of this lock into the
 		attributes list (the attribute must be an immutable object).  The list
 		of attributes of interest to the virtual lock table can be found in
 		VirtualLockTable. The toString method will be called by the VirtualTable
@@ -127,8 +127,8 @@ public interface Lockable {
 		interested in this kind of lockable object.  The bits are defined in
 		VirtualLockTable.  For instance, the user may only ask
 		for TABLE_AND_ROWLOCK and if this is not a table or row lock, then
-		don't paritipate. 
-		@param attributes if this decides to participate, put all relavent
+		don't participate.
+		@param attributes if this decides to participate, put all relevant
 		attributes into the Hashtable.  The complete list of interesting
 		attributes is listed in VirtualLockTable.
 		The following attributes must be present for all participating

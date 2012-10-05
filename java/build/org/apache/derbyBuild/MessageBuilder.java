@@ -753,9 +753,9 @@ public class MessageBuilder extends Task
 
     /**
      * Replace a substring with some equivalent. For example, we would
-     * like to replace "<" with "&lt;" in the error messages.
+     * like to replace "&lt;" with "&amp;lt;" in the error messages.
      * Add any substrings you would like to replace in the code below.
-     * Be aware that the first paramter to the replaceAll() method is
+     * Be aware that the first parameter to the replaceAll() method is
      * interpreted as a regular expression.
      *
      * @param input 

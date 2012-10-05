@@ -169,11 +169,11 @@ public class ClassInspector
 	 * Find a public method that implements a given signature.
 	 * The signature is given using the full Java class names of the types.
 	 <BR>
-	 * A untyped null paramter is indicated by passing in an empty string ("")
+	 * A untyped null parameter is indicated by passing in an empty string ("")
 	 * as its class name.
 	 <BR>
-	 If receiverType respresents an interface then the methods of java.lang.Object
-	 arer included in the candidate list.
+	 If receiverType represents an interface then the methods of java.lang.Object
+	 are included in the candidate list.
 	 <BR>
 	 If the caller is simply checking to see that a public method with the
 	 specified name exists, regardless of the signature, exists, then the
@@ -203,7 +203,7 @@ public class ClassInspector
 	 * @param isParam		Array of booleans telling whether parameter is a ?.
 	 * @param staticMethod	Find a static method.
 	   @param repeatLastParameter If true the last parameter may be repeated any number of times (total count must be greater than one).
-	   If false the laste parameter is matched as usual. This also requires an exact match on the last parameter type.
+	   If false the last parameter is matched as usual. This also requires an exact match on the last parameter type.
 	 *
 	 * @return	A Member representing the matching method.  Returns null
 	 *			if no such method.
@@ -319,7 +319,7 @@ public class ClassInspector
 
 	/**
 	 * Find a public field  for a class.
-	   This follows the sematics of the java compiler for locating a field.
+	   This follows the semantics of the java compiler for locating a field.
 	   This means if a field fieldName exists in the class with package, private or
 	   protected then an error is raised. Even if the field hides a field fieldName
 	   in a super-class/super--interface. See the JVM spec on fields.
@@ -404,7 +404,7 @@ public class ClassInspector
 	 * Find a public constructor that implements a given signature.
 	 * The signature is given using the full Java class names of the types.
 	 <BR>
-	 * A untyped null paramter is indicated by passing in an empty string ("")
+	 * A untyped null parameter is indicated by passing in an empty string ("")
 	 * as its class name. 
 	 *
 	 * @param receiverType	The class name of the receiver

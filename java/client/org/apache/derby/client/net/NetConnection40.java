@@ -162,7 +162,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      * applied to the database operation.
      * @return true if the connection is valid, false otherwise
      * @exception SQLException if the parameter value is illegal or if a
-     * database error has occured
+     * database error has occurred
      */
     public boolean isValid(int timeout) throws SQLException {
         // Validate that the timeout has a legal value
@@ -253,8 +253,8 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 
     /**
      * <code>setClientInfo</code> will throw a
-     * <code>SQLClientInfoException</code> uless the <code>properties</code>
-     * paramenter is empty, since Derby does not support any
+     * <code>SQLClientInfoException</code> unless the <code>properties</code>
+     * parameter is empty, since Derby does not support any
      * properties. All the property keys in the
      * <code>properties</code> parameter are added to failedProperties
      * of the exception thrown, with REASON_UNKNOWN_PROPERTY as the

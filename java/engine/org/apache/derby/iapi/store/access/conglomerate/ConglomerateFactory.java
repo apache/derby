@@ -54,7 +54,7 @@ public interface ConglomerateFactory extends MethodFactory
      * Code which names conglomerates depends on this range currently, but
      * could be easily changed to handle larger ranges.   One hex digit seemed
      * reasonable for the number of conglomerate types currently implemented
-     * (heap, btree) and those that might be implmented in the future: gist, 
+     * (heap, btree) and those that might be implemented in the future: gist,
      * gist btree, gist rtree, hash, others? ).
      * <p>
      *

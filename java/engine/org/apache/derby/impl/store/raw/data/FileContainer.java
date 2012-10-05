@@ -455,7 +455,7 @@ abstract class FileContainer
 		else
 		{
 			// we don't need to completely re-initialize the header
-			// just re-initialize the relavent fields
+			// just re-initialize the relevant fields
 			initContainerHeader(false);
 		}
 
@@ -1086,7 +1086,7 @@ abstract class FileContainer
 
 		byte[] array = byteArray.getArray();
 		
-		// now extract the relavent information from array - basically 
+		// now extract the relevant information from array - basically
 		// duplicate the code in readHeaderFromArray 
 		ArrayInputStream inStream = new ArrayInputStream(array);
 

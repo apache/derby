@@ -951,7 +951,7 @@ public class TransactionTable implements Formatable
 
 		@param id transaction Id
 		@param tran the transaction that was made to assume the transactionID
-		and all other relavent information stored in the transaction table
+		and all other relevant information stored in the transaction table
 		@return true if transaction can be found, false otherwise
 	*/
 	boolean findAndAssumeTransaction(

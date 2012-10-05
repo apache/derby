@@ -172,7 +172,7 @@ class DRDAResultSet
     }
 
     /**
-     * get resultset /out paramter precision
+     * get resultset /out parameter precision
      * @param index -starting with 1
      * @return precision of column
      */
@@ -197,7 +197,7 @@ class DRDAResultSet
     }
 
     /**
-     * get resultset /out paramter scale
+     * get resultset /out parameter scale
      * @param index -starting with 1
      * @return scale of column
      */

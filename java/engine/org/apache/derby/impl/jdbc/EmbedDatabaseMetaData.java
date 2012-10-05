@@ -1731,7 +1731,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		//then the "if" statement below will use those types values
 		//for ?s. If there are still some ?s in the IN list that are left 
 		//with unassigned values, then we will set those ? to NULL.
-		// So paramter 4 will be "T" for TABLE, 5 will be "V" for VIEW, 6 will be
+		// So parameter 4 will be "T" for TABLE, 5 will be "V" for VIEW, 6 will be
 		// "A" for SYNONYM, 7 will be "S" for system table in 
 		//TABLETYPE IN (?, ?, ?, ?)
 		// If the user hasn't asked for any specific table types then all

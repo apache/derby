@@ -4517,7 +4517,7 @@ public final class	DataDictionaryImpl
 			 *is with NOCOMPILE option of create statement/boot time SPS,
 			 *SPS statement is not compiled to find out the parameter info.
 			 *Because of the parameter info was not inserted at SPSDescriptor 
-			 *creation time. As this is the first time we are compiling paramter
+			 *creation time. As this is the first time we are compiling parameter
 			 *infor should be inserted instead of the update.
 			 */
 			addSPSParams(spsd, tc);

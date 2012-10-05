@@ -763,7 +763,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 					if (parameterType.endsWith("[]")) {
 
-						// constructor  - setting up correct paramter type info
+						// constructor  - setting up correct parameter type info
 						MethodBuilder constructor = acb.getConstructor();
 						acb.pushThisAsActivation(constructor);
 						constructor.callMethod(VMOpcode.INVOKEINTERFACE, null,
@@ -1168,7 +1168,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 				MethodBuilder constructor = acb.getConstructor();
 
-				// constructor  - setting up correct paramter type info
+				// constructor  - setting up correct parameter type info
 				acb.pushThisAsActivation(constructor);
 				constructor.callMethod(VMOpcode.INVOKEINTERFACE, null,
 									"getParameterValueSet", ClassName.ParameterValueSet, 0);

@@ -142,7 +142,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public void setTruncationLWM(UUID name, LogInstant instant) throws StandardException
 	{
@@ -155,7 +155,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public void removeTruncationLWM(UUID name,
 							 RawStoreFactory rawStoreFactory, 
@@ -171,7 +171,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public LogInstant getTruncationLWM(UUID name) throws StandardException
 	{
@@ -183,7 +183,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public void removeTruncationLWM(UUID name) throws StandardException
 	{
@@ -195,7 +195,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public ScanHandle openFlushedScan(DatabaseInstant i, int groupsIWant)
 		 throws StandardException
@@ -208,7 +208,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	*/
 	public LogScan openForwardsScan(LogInstant startAt,LogInstant stopAt)
 		 throws StandardException
@@ -238,7 +238,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-	  @exception StandardException functionality not implmented
+	  @exception StandardException functionality not implemented
 	  */
 	public LogScan openForwardsFlushedScan(LogInstant startAt)
 		 throws StandardException
@@ -279,7 +279,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**
-		Get JBMS properties relavent to the log factory
+		Get JBMS properties relevant to the log factory
 	 */
 	public void getLogFactoryProperties(PersistentSet set) 
 	{

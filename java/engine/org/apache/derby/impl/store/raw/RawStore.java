@@ -1219,7 +1219,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 	/**
-	 * Get JBMS properties relavent to raw store
+	 * Get JBMS properties relevant to raw store
 	 * @exception StandardException Standard Derby Error Policy
 	 */
 	public void getRawStoreProperties(PersistentSet set)

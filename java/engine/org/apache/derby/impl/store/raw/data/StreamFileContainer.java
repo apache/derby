@@ -914,7 +914,7 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
         {
 
 			// an exception during the restore of a user column, this doesn't
-			// make the databse corrupt, just that this field is inaccessable
+			// make the database corrupt, just that this field is inaccessable
 			if (inUserCode) 
             { 
 
@@ -959,7 +959,7 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
 			}
 
 			// an exception during the restore of a user column, this doesn't
-			// make the databse corrupt, just that this field is inaccessable
+			// make the database corrupt, just that this field is inaccessable
 			throw StandardException.newException(
                 SQLState.DATA_STORABLE_READ_MISSING_CLASS, cnfe, 
                 logicalDataIn.getErrorInfo());

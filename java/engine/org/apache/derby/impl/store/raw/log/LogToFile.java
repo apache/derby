@@ -432,7 +432,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     private boolean inReplicationSlaveMode = false;
     /** If this exception is set while in replication slave mode, the 
      * exception will be thrown by the thread doing recovery will. 
-     * Effectively, this whill shut down the database */
+     * Effectively, this will shut down the database. */
     private volatile StandardException replicationSlaveException = null;
 
     /** True if the database has been booted in replication slave pre
@@ -527,7 +527,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * transaction is on disk. With out write  sync , log is written to the 
 	 * disk and then fsync() is used on commits to make log is written to the 
 	 * disk for sure. On most of the OS , fsync() calls are expensive. 
-	 * On heavey commit oriented systems , file sync make the system run slow. 
+	 * On heavy commit oriented systems, file sync make the system run slow.
 	 * This problem is solved by using write sync on preallocated log file. 
 	 * write sync is much faster than doing write and file sync to a file. 
 	 * File should be preallocated for write syncs to perform better than
@@ -570,7 +570,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 
 	/**
-		Once the log factory is makred as corrupt then the raw sto
+     * Once the log factory is marked as corrupt then the raw store will
+     * shut down.
 	*/
 	public StandardException markCorrupt(StandardException originalError) {
 
@@ -4309,7 +4310,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      *
      * <P>MT - synchronization provided by caller - RawStore boot,
      * This method is called while re-encrypting the database 
-     * at databse boot time. 
+     * at database boot time.
      */
     public void startNewLogFile() throws StandardException
     {
@@ -4852,7 +4853,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	public static final String TEST_LOG_SWITCH_LOG = SanityManager.DEBUG ? "TEST_LOG_SWITCH_LOG" : null ;
 
 	/**
-	  Set to true if we want the up comming log record to be only partially
+	  Set to true if we want the upcoming log record to be only partially
 	  written.  The database is corrupted if not immediately shutdown.
 	  Set TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES to the number of bytes to write
 	  out, default is 1 byte.
@@ -5363,20 +5364,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * Attribute.RESTORE_FROM (Delete the whole database if it exists and then 
      * restore it from backup)
 	 * Attribute.ROLL_FORWARD_RECOVERY_FROM:(Perform Rollforward Recovery;
-	 * except for the log directory everthing else is replced  by the copy  from
+	 * except for the log directory everything else is replaced by the copy from
 	 * backup. log files in the backup are copied to the existing online log 
      * directory.
 	 *
-	 * In cases of RESTORE_FROM whole databases directoy is 
+	 * In case of RESTORE_FROM, the whole database directory
 	 * is removed in Directory.java while restoring service.properties
 	 * so even the log directory is removed.
-	 * In case of CREATE_FROM , log directoy will not exist if 
-	 * we came so far bacause it should fail if a database already exists.
-	 * In case ROLL_FORWARD_RECOVERY_FROM log directotry should not be removed.
+	 * In case of CREATE_FROM, log directory will not exist if
+	 * we came so far because it should fail if a database already exists.
+	 * In case ROLL_FORWARD_RECOVERY_FROM log directory should not be removed.
 	 * So only thing that needs to be done here is create a
 	 * a log directory if it does not exists and copy the 
 	 * log files(including control files) that exists in the backup from which 
-     * we are are trying to restore the database to the onlie log directory.
+     * we are are trying to restore the database to the online log directory.
 	 */
 	private boolean restoreLogs(Properties properties) throws StandardException
 	{

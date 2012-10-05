@@ -2110,7 +2110,7 @@ public class BaseDataFileFactory
     public void encryptAllContainers(RawTransaction t) throws StandardException
     {
         containerEncrypter = new EncryptOrDecryptData(this);
-        // encrypt all the conatiners in the databse
+        // encrypt all the containers in the database
         containerEncrypter.encryptAllContainers(t);
     }
 

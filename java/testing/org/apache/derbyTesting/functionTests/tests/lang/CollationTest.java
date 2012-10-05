@@ -1993,7 +1993,7 @@ private void dropTable(Statement s) throws SQLException {
  * @param query          string with the query to execute.
  * @param expectedResult Null for this means that the passed query is 
  * expected to return an empty resultset. If not empty, then the resultset
- * from the query should match this paramter
+ * from the query should match this parameter
  *
  * @throws SQLException
  */

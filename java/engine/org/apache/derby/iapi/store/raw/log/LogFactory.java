@@ -224,7 +224,7 @@ public interface LogFactory extends Corruptable {
         public boolean inReplicationMasterMode();
 
 	/**
-		Get JBMS properties relavent to the log factory
+		Get JBMS properties relevant to the log factory
 		@exception StandardException Standard Derby Error Policy
 	 */
 	public void getLogFactoryProperties(PersistentSet set) 
@@ -336,7 +336,7 @@ public interface LogFactory extends Corruptable {
      *
      * <P>MT - synchronization provided by caller - RawStore boot,
      * This method is called while re-encrypting the database 
-     * at databse boot time. 
+     * at database boot time.
      */
     public void startNewLogFile() throws StandardException;
 
