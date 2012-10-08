@@ -532,7 +532,8 @@ public class BaseDataFileFactory
 
 		if (isReadOnly())		// do enough to close all files, then return 
         {
-            storageFactory.shutdown();
+			if (storageFactory != null)
+				storageFactory.shutdown();
 			return;
         }
 
@@ -1629,15 +1630,18 @@ public class BaseDataFileFactory
 	*/
 	private synchronized void removeStubs()
 	{
-        actionCode = REMOVE_STUBS_ACTION;
-        try
+        if( storageFactory != null) 
         {
-            AccessController.doPrivileged( this);
+            actionCode = REMOVE_STUBS_ACTION;
+            try
+            {
+                AccessController.doPrivileged( this);
+            }
+            catch (PrivilegedActionException pae)
+            {
+                // removeStubs does not throw an exception
+            } 
         }
-        catch (PrivilegedActionException pae)
-        {
-            // removeStubs does not throw an exception
-        } 
 	}
 
 	/**
