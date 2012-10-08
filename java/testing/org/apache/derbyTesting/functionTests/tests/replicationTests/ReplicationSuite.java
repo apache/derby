@@ -85,8 +85,9 @@ public class ReplicationSuite extends BaseTestCase
 
             suite.addTest(ReplicationRun_Local_Derby4910.suite());
 
-            suite.addTest(Derby5937SlaveShutdownTest.suite());
         }
+
+        suite.addTest(Derby5937SlaveShutdownTest.suite());
 
 		return suite;
 	}

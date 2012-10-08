@@ -24,12 +24,11 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
+import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -64,19 +63,14 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        if (JDBC.vmSupportsJDBC3()) {
-            Class klass = Derby5937SlaveShutdownTest.class;
-            // The default security policy doesn't allow derby.jar to do
-            // networking, which is needed for replication, so install a custom
-            // policy for this test.
-            return new SecurityManagerSetup(
-                TestConfiguration.singleUseDatabaseDecorator(
-                    TestConfiguration.embeddedSuite(klass), MASTER_DB),
-                klass.getName().replace('.', '/') + ".policy", true);
-        } else {
-            // The test doesn't run on J2ME.
-            return new TestSuite("Derby5937SlaveShutdownTest - skipped");
-        }
+        Class klass = Derby5937SlaveShutdownTest.class;
+        // The default security policy doesn't allow derby.jar to do
+        // networking, which is needed for replication, so install a custom
+        // policy for this test.
+        return new SecurityManagerSetup(
+            TestConfiguration.singleUseDatabaseDecorator(
+                TestConfiguration.embeddedSuite(klass), MASTER_DB),
+            klass.getName().replace('.', '/') + ".policy", true);
     }
 
     public void testSlaveFailoverLeak() throws Exception {
@@ -94,23 +88,25 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         PrivilegedFileOpsForTests.copy(new File(masterDb), new File(slaveDb));
 
         // And start the slave.
-        SlaveThread slave = new SlaveThread(config);
+        DataSource startSlaveDS = JDBCDataSource.getDataSource(SLAVE_DB);
+        JDBCDataSource.setBeanProperty(startSlaveDS, "connectionAttributes",
+                "startSlave=true;slaveHost=" + config.getHostName() +
+                ";slavePort=" + config.getPort());
+        SlaveThread slave = new SlaveThread(startSlaveDS);
         slave.start();
-
-        Properties p = new Properties();
-        p.setProperty("startMaster", "true");
-        p.setProperty("slaveHost", config.getHostName());
-        p.setProperty("slavePort", String.valueOf(config.getPort()));
 
         // Start the master. This will fail until the slave is up, so do
         // it in a loop until successful or time runs out.
+        DataSource startMasterDS = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(startMasterDS, "connectionAttributes",
+                "startMaster=true;slaveHost=" + config.getHostName() +
+                ";slavePort=" + config.getPort());
         long giveUp =
             System.currentTimeMillis() + NetworkServerTestSetup.getWaitTime();
         Connection c = null;
         while (c == null) {
             try {
-                c = config.openPhysicalConnection(masterDb,
-                        config.getUserName(), config.getUserPassword(), p);
+                c = startMasterDS.getConnection();
             } catch (SQLException sqle) {
                 slave.checkError(); // Exit early if the slave has failed
                 if (System.currentTimeMillis() > giveUp) {
@@ -129,11 +125,11 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         slave.checkError();
 
         // Perform fail-over.
-        p.clear();
-        p.setProperty("failover", "true");
+        DataSource failoverDS = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(
+                failoverDS, "connectionAttributes", "failover=true");
         try {
-            config.openPhysicalConnection(masterDb,
-                    config.getUserName(), config.getUserPassword(), p);
+            failoverDS.getConnection();
             fail("failover should receive exception");
         } catch (SQLException sqle) {
             assertSQLState(FAILOVER_SUCCESS, sqle);
@@ -143,12 +139,12 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         // complete, so do it in a loop until successful or time runs out.
         giveUp =
             System.currentTimeMillis() + NetworkServerTestSetup.getWaitTime();
-        p.clear();
-        p.setProperty("shutdown", "true");
+        DataSource slaveShutdownDS = JDBCDataSource.getDataSource(SLAVE_DB);
+        JDBCDataSource.setBeanProperty(
+                slaveShutdownDS, "shutdownDatabase", "shutdown");
         while (true) {
             try {
-                config.openPhysicalConnection(slaveDb,
-                        config.getUserName(), config.getUserPassword(), p);
+                slaveShutdownDS.getConnection();
                 fail("Shutdown of slave database didn't throw an exception");
             } catch (SQLException sqle) {
                 if (DB_SHUTDOWN_SUCCESS.equals(sqle.getSQLState())) {
@@ -175,11 +171,11 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
      */
     private class SlaveThread extends Thread {
 
-        private final TestConfiguration config;
+        private final DataSource ds;
         private volatile Throwable error;
 
-        SlaveThread(TestConfiguration config) {
-            this.config = config;
+        SlaveThread(DataSource ds) {
+            this.ds = ds;
         }
 
         public void run() {
@@ -193,14 +189,8 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         private void run_() throws Exception {
             println("Slave thread started.");
 
-            Properties p = new Properties();
-            p.setProperty("startSlave", "true");
-            p.setProperty("slaveHost", config.getHostName());
-            p.setProperty("slavePort", String.valueOf(config.getPort()));
-
             try {
-                config.openPhysicalConnection(config.getDatabasePath(SLAVE_DB),
-                        config.getUserName(), config.getUserPassword(), p);
+                ds.getConnection();
                 fail("startSlave should throw exception");
             } catch (SQLException sqle) {
                 assertSQLState("XRE08", sqle);
