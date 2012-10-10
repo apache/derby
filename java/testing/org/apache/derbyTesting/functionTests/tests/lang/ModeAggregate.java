@@ -22,10 +22,16 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.derby.agg.Aggregator;
 
+/**
+ * <p>
+ * This is a mode aggregator for ints.
+ * </p>
+ */
 public  class   ModeAggregate    implements  Aggregator<Integer,Integer,ModeAggregate>
 {
     ///////////////////////////////////////////////////////////////////////////////////
@@ -64,15 +70,7 @@ public  class   ModeAggregate    implements  Aggregator<Integer,Integer,ModeAggr
 
     public  Integer terminate()
     {
-        int     numAccumulators = _accumulators.size();
-        if ( numAccumulators == 0 ) { return null; }
-        
-        Accumulator[]   accumulators = new Accumulator[ numAccumulators ];
-
-        accumulators = _accumulators.values().toArray( accumulators );
-        Arrays.sort( accumulators );
-        
-        return accumulators[ numAccumulators - 1 ].getValue();
+        return _accumulators.isEmpty() ? null : Collections.max( _accumulators.values() ).getValue();
     }
 
     private Accumulator   getAccumulator( Integer value )
@@ -112,8 +110,6 @@ public  class   ModeAggregate    implements  Aggregator<Integer,Integer,ModeAggr
         // Comparable behavior
         public  int compareTo( Accumulator that )
         {
-            if ( that == null ) { return 1; }
-
             int retval = this._count - that._count;
 
             if ( retval != 0 ) { return retval; }

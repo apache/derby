@@ -30,6 +30,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.UDTAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -149,6 +150,15 @@ public class CreateAliasNode extends DDLStatementNode
 				Object[] aggElements = (Object[]) aliasSpecificInfo;
                 TypeDescriptor  aggForType = bindUserCatalogType( (TypeDescriptor) aggElements[ AGG_FOR_TYPE ] );
                 TypeDescriptor  aggReturnType = bindUserCatalogType( (TypeDescriptor) aggElements[ AGG_RETURN_TYPE ] );
+
+                // XML not allowed because SQLXML support has not been implemented
+                if (
+                    (aggForType.getJDBCTypeId() == JDBC40Translation.SQLXML) ||
+                    (aggReturnType.getJDBCTypeId() == JDBC40Translation.SQLXML)
+                   )
+                {
+                    throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS );
+                }
 
 				aliasInfo = new AggregateAliasInfo( aggForType, aggReturnType );
 				implicitCreateSchema = true;

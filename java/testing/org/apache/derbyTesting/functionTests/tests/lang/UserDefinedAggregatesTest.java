@@ -28,11 +28,16 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.util.HashMap;
 
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
+
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 /**
  * <p>
@@ -55,6 +60,10 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String BAD_AGGREGATE_USAGE = "42903";
     public static final String BAD_ORDER_BY = "42Y35";
     public static final String INPUT_MISMATCH = "42Y22";
+    public static final String BAD_GEN_COL = "42XA1";
+    public static final String INPUT_OUTSIDE_BOUNDS = "42ZC6";
+    public static final String RETURN_OUTSIDE_BOUNDS = "42ZC7";
+    public static final String XML_TYPE = "42ZB3";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1016,6 +1025,749 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              );
         expectCompilationError( INPUT_MISMATCH, "select intMode_10( b ) from intMode_10_inputs" );
 
+        // aggregates not allowed in generated columns
+        expectCompilationError( BAD_GEN_COL, "create table t_shouldFail( a int, b int generated always as ( intMode_10( a ) ) )" );
+
+        //
+        // Input type not within bounds of aggregator class.
+        //
+        goodStatement
+            (
+             conn,
+             "create type Price_10 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_price_10( a int, b Price_10 )"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate priceMode_10 for Price_10\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'\n"
+             );
+        expectCompilationError( INPUT_OUTSIDE_BOUNDS, "select priceMode_10( b ) from t_price_10" );
+        expectCompilationError( INPUT_OUTSIDE_BOUNDS, "select a, priceMode_10( b ) from t_price_10 group by a" );
+
+        //
+        // Return type not within bounds of aggregator class.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_price_10_1( a int, b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate priceMode_10_1 for int returns Price_10\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'"
+             );
+        expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select priceMode_10_1( b ) from t_price_10_1" );
+        expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select a, priceMode_10_1( b ) from t_price_10_1 group by a" );
+    }
+
+    /**
+     * <p>
+     * Test datatype coverage. Verify that you can declare user-defined aggregates on all
+     * Derby data types except for XML.
+     * </p>
+     */
+    public void test_11_datatypes() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // if this fails, then we need to add a new data type to this test
+        vetDatatypeCount( conn, 22 );
+        
+        vetParameterizedAggregate
+            (
+             conn,
+             "booleanMode_11",
+             "boolean",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BooleanMode",
+             "( 1, false ), ( 1, true ), (1, false ), ( 2, true ), ( 2, true ), ( 3, false ), ( 3, true ), ( 3, true )",
+             new String[][]
+             {
+                 { "true" },
+             },
+             new String[][]
+             {
+                 { "1", "false" },
+                 { "2", "true" },
+                 { "3", "true" },
+             },
+             new String[][]
+             {
+                 { "true" },
+             },
+             new String[][]
+             {
+                 { "1", "true" },
+                 { "2", "true" },
+                 { "3", "true" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "bigintMode_11",
+             "bigint",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigintMode",
+             "( 1, 1 ), ( 1, 2 ), (1, 2 ), ( 2, 2 ), ( 2, 3 ), ( 3, 3 ), ( 3, 4 ), ( 3, 5 )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             },
+             new String[][]
+             {
+                 { "5" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "smallintMode_11",
+             "smallint",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode",
+             "( 1, 1 ), ( 1, 2 ), (1, 2 ), ( 2, 2 ), ( 2, 3 ), ( 3, 3 ), ( 3, 4 ), ( 3, 5 )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             },
+             new String[][]
+             {
+                 { "5" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "intMode_11",
+             "int",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode",
+             "( 1, 1 ), ( 1, 2 ), (1, 2 ), ( 2, 2 ), ( 2, 3 ), ( 3, 3 ), ( 3, 4 ), ( 3, 5 )",
+             new String[][]
+             {
+                 { "2" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             },
+             new String[][]
+             {
+                 { "5" },
+             },
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "decimalMode_11",
+             "decimal( 5, 2 )",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigDecimalMode",
+             "( 1, 1.11 ), ( 1, 2.22 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )",
+             new String[][]
+             {
+                 { "2.22" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             },
+             new String[][]
+             {
+                 { "5.55" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "numericMode_11",
+             "numeric( 5, 2 )",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigDecimalMode",
+             "( 1, 1.11 ), ( 1, 2.22 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )",
+             new String[][]
+             {
+                 { "2.22" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             },
+             new String[][]
+             {
+                 { "5.55" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "doubleMode_11",
+             "double",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$DoubleMode",
+             "( 1, 1.11 ), ( 1, 2.22 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )",
+             new String[][]
+             {
+                 { "2.22" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             },
+             new String[][]
+             {
+                 { "5.55" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "floatMode_11",
+             "float",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$DoubleMode",
+             "( 1, 1.11 ), ( 1, 2.22 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )",
+             new String[][]
+             {
+                 { "2.22" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             },
+             new String[][]
+             {
+                 { "5.55" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "realMode_11",
+             "real",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$RealMode",
+             "( 1, 1.11 ), ( 1, 2.22 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )",
+             new String[][]
+             {
+                 { "2.22" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             },
+             new String[][]
+             {
+                 { "5.55" },
+             },
+             new String[][]
+             {
+                 { "1", "2.22" },
+                 { "2", "3.33" },
+                 { "3", "5.55" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "charMode_11",
+             "char( 4 )",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode",
+             "( 1, 'aaaa' ), ( 1, 'abaa' ), ( 1, 'aaaa' ), ( 2, 'abaa' ), ( 2, 'abaa' ), ( 2, 'abca' ), ( 3, 'abaa' ), ( 3, 'abaa' ), ( 3, 'abcd' )",
+             new String[][]
+             {
+                 { "abaa" },
+             },
+             new String[][]
+             {
+                 { "1", "aaaa" },
+                 { "2", "abaa" },
+                 { "3", "abaa" },
+             },
+             new String[][]
+             {
+                 { "abcd" },
+             },
+             new String[][]
+             {
+                 { "1", "abaa" },
+                 { "2", "abca" },
+                 { "3", "abcd" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "varcharMode_11",
+             "varchar( 4 )",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode",
+             "( 1, 'aaaa' ), ( 1, 'abaa' ), ( 1, 'aaaa' ), ( 2, 'abaa' ), ( 2, 'abaa' ), ( 2, 'abca' ), ( 3, 'abaa' ), ( 3, 'abaa' ), ( 3, 'abcd' )",
+             new String[][]
+             {
+                 { "abaa" },
+             },
+             new String[][]
+             {
+                 { "1", "aaaa" },
+                 { "2", "abaa" },
+                 { "3", "abaa" },
+             },
+             new String[][]
+             {
+                 { "abcd" },
+             },
+             new String[][]
+             {
+                 { "1", "abaa" },
+                 { "2", "abca" },
+                 { "3", "abcd" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "longvarcharMode_11",
+             "long varchar",
+             "org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode",
+             "( 1, 'aaaa' ), ( 1, 'abaa' ), ( 1, 'aaaa' ), ( 2, 'abaa' ), ( 2, 'abaa' ), ( 2, 'abca' ), ( 3, 'abaa' ), ( 3, 'abaa' ), ( 3, 'abcd' )",
+             new String[][]
+             {
+                 { "abaa" },
+             },
+             new String[][]
+             {
+                 { "1", "aaaa" },
+                 { "2", "abaa" },
+                 { "3", "abaa" },
+             },
+             null,
+             null
+             );
+
+        goodStatement
+            (
+             conn,
+             "create function makeBlob_11( contents varchar( 32672 ) ) returns blob\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UserDefinedAggregatesTest.makeBlob'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "blobMode_11",
+             "blob",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$BlobMode",
+             "( 1, makeBlob_11( 'a' ) ),\n" +
+             "( 1, makeBlob_11( 'ab' ) ),\n" +
+             "( 1, makeBlob_11( 'ab' ) ),\n" +
+             "( 2, makeBlob_11( 'ab' ) ),\n" +
+             "( 2, makeBlob_11( 'abc' ) ),\n" +
+             "( 3, makeBlob_11( 'a' ) ),\n" +
+             "( 3, makeBlob_11( 'ab' ) ),\n" +
+             "( 3, makeBlob_11( 'abcd' ) )",
+             new String[][]
+             {
+                 { "6162" },
+             },
+             new String[][]
+             {
+                 { "1", "6162" },
+                 { "2", "616263" },
+                 { "3", "61626364" },
+             },
+             null,
+             null
+             );
+
+        goodStatement
+            (
+             conn,
+             "create function makeClob_11( contents varchar( 32672 ) ) returns clob\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UserDefinedAggregatesTest.makeClob'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "clobMode_11",
+             "clob",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$ClobMode",
+             "( 1, makeClob_11( 'a' ) ),\n" +
+             "( 1, makeClob_11( 'ab' ) ),\n" +
+             "( 1, makeClob_11( 'ab' ) ),\n" +
+             "( 2, makeClob_11( 'ab' ) ),\n" +
+             "( 2, makeClob_11( 'abc' ) ),\n" +
+             "( 3, makeClob_11( 'a' ) ),\n" +
+             "( 3, makeClob_11( 'ab' ) ),\n" +
+             "( 3, makeClob_11( 'abcd' ) )",
+             new String[][]
+             {
+                 { "ab" },
+             },
+             new String[][]
+             {
+                 { "1", "ab" },
+                 { "2", "abc" },
+                 { "3", "abcd" },
+             },
+             null,
+             null
+             );
+
+        goodStatement
+            (
+             conn,
+             "create function makeBinary_11( contents varchar( 32672 ) ) returns char( 4 ) for bit data\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UserDefinedAggregatesTest.makeBinary'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "binaryMode_11",
+             "char( 4 ) for bit data",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$BinaryMode",
+             "( 1, makeBinary_11( 'abaa' ) ),\n" +
+             "( 1, makeBinary_11( 'abaa' ) ),\n" +
+             "( 1, makeBinary_11( 'abca' ) ),\n" +
+             "( 2, makeBinary_11( 'abaa' ) ),\n" +
+             "( 2, makeBinary_11( 'abca' ) ),\n" +
+             "( 2, makeBinary_11( 'abaa' ) ),\n" +
+             "( 3, makeBinary_11( 'aaaa' ) ),\n" +
+             "( 3, makeBinary_11( 'abcd' ) ),\n" +
+             "( 3, makeBinary_11( 'abcd' ) )\n",
+             new String[][]
+             {
+                 { "61626161" },
+             },
+             new String[][]
+             {
+                 { "1", "61626161" },
+                 { "2", "61626161" },
+                 { "3", "61626364" },
+             },
+             new String[][]
+             {
+                 { "61626364" },
+             },
+             new String[][]
+             {
+                 { "1", "61626361" },
+                 { "2", "61626361" },
+                 { "3", "61626364" },
+             }
+             );
+
+        goodStatement
+            (
+             conn,
+             "create function makeVarbinary_11( contents varchar( 32672 ) ) returns varchar( 4 ) for bit data\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UserDefinedAggregatesTest.makeBinary'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "varbinaryMode_11",
+             "varchar( 4 ) for bit data",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$BinaryMode",
+             "( 1, makeVarbinary_11( 'abaa' ) ),\n" +
+             "( 1, makeVarbinary_11( 'abaa' ) ),\n" +
+             "( 1, makeVarbinary_11( 'abca' ) ),\n" +
+             "( 2, makeVarbinary_11( 'abaa' ) ),\n" +
+             "( 2, makeVarbinary_11( 'abca' ) ),\n" +
+             "( 2, makeVarbinary_11( 'abaa' ) ),\n" +
+             "( 3, makeVarbinary_11( 'aaaa' ) ),\n" +
+             "( 3, makeVarbinary_11( 'abcd' ) ),\n" +
+             "( 3, makeVarbinary_11( 'abcd' ) )\n",
+             new String[][]
+             {
+                 { "61626161" },
+             },
+             new String[][]
+             {
+                 { "1", "61626161" },
+                 { "2", "61626161" },
+                 { "3", "61626364" },
+             },
+             new String[][]
+             {
+                 { "61626364" },
+             },
+             new String[][]
+             {
+                 { "1", "61626361" },
+                 { "2", "61626361" },
+                 { "3", "61626364" },
+             }
+             );
+
+        goodStatement
+            (
+             conn,
+             "create function makeLongvarbinary_11( contents varchar( 32672 ) ) returns long varchar for bit data\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UserDefinedAggregatesTest.makeBinary'\n"
+             );
+        vetParameterizedAggregate
+            (
+             conn,
+             "longvarbinaryMode_11",
+             "long varchar for bit data",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$BinaryMode",
+             "( 1, makeLongvarbinary_11( 'abaa' ) ),\n" +
+             "( 1, makeLongvarbinary_11( 'abaa' ) ),\n" +
+             "( 1, makeLongvarbinary_11( 'abca' ) ),\n" +
+             "( 2, makeLongvarbinary_11( 'abaa' ) ),\n" +
+             "( 2, makeLongvarbinary_11( 'abca' ) ),\n" +
+             "( 2, makeLongvarbinary_11( 'abaa' ) ),\n" +
+             "( 3, makeLongvarbinary_11( 'aaaa' ) ),\n" +
+             "( 3, makeLongvarbinary_11( 'abcd' ) ),\n" +
+             "( 3, makeLongvarbinary_11( 'abcd' ) )\n",
+             new String[][]
+             {
+                 { "61626161" },
+             },
+             new String[][]
+             {
+                 { "1", "61626161" },
+                 { "2", "61626161" },
+                 { "3", "61626364" },
+             },
+             null,
+             null
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "dateMode_11",
+             "date",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$DateMode",
+             "( 1, date( '1994-02-23' ) ),\n" +
+             "( 1, date( '1994-02-23' ) ),\n" +
+             "( 1, date( '1995-02-23' ) ),\n" +
+             "( 2, date( '1995-02-23' ) ),\n" +
+             "( 2, date( '1995-02-23' ) ),\n" +
+             "( 2, date( '1996-02-23' ) ),\n" +
+             "( 3, date( '1993-02-23' ) ),\n" +
+             "( 3, date( '1993-02-23' ) ),\n" +
+             "( 3, date( '1995-02-23' ) )\n",
+             new String[][]
+             {
+                 { "1995-02-23" },
+             },
+             new String[][]
+             {
+                 { "1", "1994-02-23" },
+                 { "2", "1995-02-23" },
+                 { "3", "1993-02-23" },
+             },
+             new String[][]
+             {
+                 { "1996-02-23" },
+             },
+             new String[][]
+             {
+                 { "1", "1995-02-23" },
+                 { "2", "1996-02-23" },
+                 { "3", "1995-02-23" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "timestampMode_11",
+             "timestamp",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$TimestampMode",
+             "( 1, timestamp( '1994-02-23 03:20:20' ) ),\n" +
+             "( 1, timestamp( '1994-02-23 03:20:20' ) ),\n" +
+             "( 1, timestamp( '1995-02-23 03:20:20' ) ),\n" +
+             "( 2, timestamp( '1995-02-23 03:20:20' ) ),\n" +
+             "( 2, timestamp( '1995-02-23 03:20:20' ) ),\n" +
+             "( 2, timestamp( '1996-02-23 03:20:20' ) ),\n" +
+             "( 3, timestamp( '1993-02-23 03:20:20' ) ),\n" +
+             "( 3, timestamp( '1993-02-23 03:20:20' ) ),\n" +
+             "( 3, timestamp( '1995-02-23 03:20:20' ) )\n",
+             new String[][]
+             {
+                 { "1995-02-23 03:20:20.0" },
+             },
+             new String[][]
+             {
+                 { "1", "1994-02-23 03:20:20.0" },
+                 { "2", "1995-02-23 03:20:20.0" },
+                 { "3", "1993-02-23 03:20:20.0" },
+             },
+             new String[][]
+             {
+                 { "1996-02-23 03:20:20.0" },
+             },
+             new String[][]
+             {
+                 { "1", "1995-02-23 03:20:20.0" },
+                 { "2", "1996-02-23 03:20:20.0" },
+                 { "3", "1995-02-23 03:20:20.0" },
+             }
+             );
+
+        vetParameterizedAggregate
+            (
+             conn,
+             "timeMode_11",
+             "time",
+             "org.apache.derbyTesting.functionTests.tests.lang.LobMode$TimeMode",
+             "( 1, time( '03:20:20' ) ),\n" +
+             "( 1, time( '03:20:20' ) ),\n" +
+             "( 1, time( '04:20:20' ) ),\n" +
+             "( 2, time( '04:20:20' ) ),\n" +
+             "( 2, time( '04:20:20' ) ),\n" +
+             "( 2, time( '05:20:20' ) ),\n" +
+             "( 3, time( '04:20:20' ) ),\n" +
+             "( 3, time( '04:20:20' ) ),\n" +
+             "( 3, time( '06:20:20' ) )\n",
+             new String[][]
+             {
+                 { "04:20:20" },
+             },
+             new String[][]
+             {
+                 { "1", "03:20:20" },
+                 { "2", "04:20:20" },
+                 { "3", "04:20:20" },
+             },
+             new String[][]
+             {
+                 { "06:20:20" },
+             },
+             new String[][]
+             {
+                 { "1", "04:20:20" },
+                 { "2", "05:20:20" },
+                 { "3", "06:20:20" },
+             }
+             );
+
+        // XML is not a valid data type for UDA inputs and return values
+        expectCompilationError
+            (
+             XML_TYPE,
+             "create derby aggregate xmlMode_11 for xml\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LobMode'\n"
+             );
+    }
+
+   /** Blob-creating function */
+    public  static  Blob    makeBlob( String contents ) throws Exception
+    {
+        return new HarmonySerialBlob( makeBinary( contents ) );
+    }
+
+    private int vetDatatypeCount( Connection conn, int expectedTypeCount ) throws Exception
+    {
+        //
+        // If this fails, it means that we need to add another datatype to the
+        // calling test.
+        //
+        
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        int actualTypeCount = 0;
+        while ( rs.next() ) { actualTypeCount++; }
+        rs.close();
+
+        assertEquals( expectedTypeCount, actualTypeCount );
+
+        return actualTypeCount;
+    }
+    
+   /** Blob-creating function */
+    public  static  byte[]    makeBinary( String contents ) throws Exception
+    {
+        return contents.getBytes( "UTF-8" );
+    }
+
+   /** Clob-creating function */
+    public  static  Clob    makeClob( String contents ) throws Exception
+    {
+        return new HarmonySerialClob( contents );
     }
 
 }

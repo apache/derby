@@ -59,6 +59,8 @@ public class UserAggregateDefinition implements AggregateDefinition
     private static  final   int AGGREGATOR_TYPE = RETURN_TYPE + 1;
     private static  final   int AGGREGATOR_PARAM_COUNT = AGGREGATOR_TYPE + 1;
 
+    private static  final   String  DERBY_BYTE_ARRAY_NAME = "byte[]";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -133,8 +135,8 @@ public class UserAggregateDefinition implements AggregateDefinition
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
             DataTypeDescriptor  expectedReturnType = DataTypeDescriptor.getType( aai.getReturnType() );
-            Class       expectedInputClass = getJavaClass( expectedInputType );
-            Class       expectedReturnClass = getJavaClass( expectedReturnType );
+            Class       expectedInputClass = getJavaClass( classFactory, expectedInputType );
+            Class       expectedReturnClass = getJavaClass( classFactory, expectedReturnType );
 
             // the input operand must be the expected input type of the aggregate
             if ( !inputType.getTypeId().equals( expectedInputType.getTypeId() ) ) { return null; }
@@ -193,13 +195,20 @@ public class UserAggregateDefinition implements AggregateDefinition
     /**
      * Get the Java class corresponding to a Derby datatype.
      */
-    private Class   getJavaClass( DataTypeDescriptor dtd )
+    private Class   getJavaClass( ClassFactory classFactory, DataTypeDescriptor dtd )
         throws StandardException, ClassNotFoundException
     {
         JSQLType    jsqlType = new JSQLType( dtd );
         String  javaClassName = MethodCallNode.getObjectTypeName( jsqlType, null );
 
-        return Class.forName( javaClassName );
+        //
+        // The real class name of byte[] is [B. Class.forName( "byte[]" ) will throw a
+        // ClassNotFoundException.
+        //
+        if ( DERBY_BYTE_ARRAY_NAME.equals( javaClassName ) )
+        { javaClassName = byte[].class.getName(); }
+        
+        return classFactory.loadApplicationClass( javaClassName );
     }
 
     /**

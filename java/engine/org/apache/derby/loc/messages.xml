@@ -2926,7 +2926,7 @@ Guide.
 
             <msg>
                 <name>42ZB3</name>
-                <text>XML is not allowed as the datatype of a column returned by a table function.</text>
+                <text>XML is not allowed as the datatype of a user-defined aggregate or of a column returned by a table function.</text>
             </msg>
 
             <msg>

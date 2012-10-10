@@ -20,11 +20,18 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.derby.agg.Aggregator;
 
+/**
+ * <p>
+ * This is a generic mode aggregator for testing with many types.
+ * </p>
+ */
 public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V,V,GenericMode<V>>
 {
     ///////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +40,13 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public  static  final   class   BigDecimalMode extends GenericMode<BigDecimal> {}
+    public  static  final   class   BooleanMode extends GenericMode<Boolean> {}
+    public  static  final   class   ShortMode extends GenericMode<Short> {}
     public  static  final   class   IntMode extends GenericMode<Integer> {}
+    public  static  final   class   BigintMode extends GenericMode<Long> {}
+    public  static  final   class   DoubleMode extends GenericMode<Double> {}
+    public  static  final   class   RealMode extends GenericMode<Float> {}
     public  static  final   class   StringMode extends GenericMode<String> {}
     public  static  final   class   FullNameMode extends GenericMode<FullName> {}
     
@@ -71,20 +84,9 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
         }
     }
 
-    // Generic arrays can't be created, so we have to cast the value on the way out.
-    // Suppress the resulting compiler warning.
-    @SuppressWarnings("unchecked")
     public  V terminate()
     {
-        int     numAccumulators = _accumulators.size();
-        if ( numAccumulators == 0 ) { return null; }
-        
-        Accumulator[]   accumulators = new Accumulator[ numAccumulators ];
-
-        accumulators = _accumulators.values().toArray( accumulators );
-        Arrays.sort( accumulators );
-        
-        return (V) accumulators[ numAccumulators - 1 ].getValue();
+        return _accumulators.isEmpty() ? null : Collections.max( _accumulators.values() ).getValue();
     }
 
     private Accumulator<V>   getAccumulator( V value )
@@ -124,8 +126,6 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
         // Comparable behavior
         public  int compareTo( Accumulator<V> that )
         {
-            if ( that == null ) { return 1; }
-
             int retval = this._count - that._count;
 
             if ( retval != 0 ) { return retval; }
