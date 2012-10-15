@@ -611,7 +611,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		ColumnReference	newColumnRef;
 		ResultColumn	newRC;
 		ResultColumn	tmpRC;
-		ResultColumn	aggInputRC;
+		ResultColumn	aggResultRC;
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
 		ResultColumnList groupByRCL = resultColumns;
 		ResultColumnList aggRCL;
@@ -718,7 +718,11 @@ public class GroupByNode extends SingleChildResultSetNode
 			bottomRCL.addElement(newRC);
 			newRC.setVirtualColumnId(bottomRCL.size());
 			aggInputVColId = newRC.getVirtualColumnId();
-			aggInputRC = newRC;
+			aggResultRC = (ResultColumn) getNodeFactory().getNode(
+								C_NodeTypes.RESULT_COLUMN,
+								"##aggregate expression",
+								aggregate.getNewNullResultExpression(),
+								getContextManager());
 	
 			/*
 			** Add a reference to this column into the
@@ -755,7 +759,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			aggRCL = (ResultColumnList) getNodeFactory().getNode(
 					C_NodeTypes.RESULT_COLUMN_LIST,
 					getContextManager());
-			aggRCL.addElement(aggInputRC);
+			aggRCL.addElement(aggResultRC);
 
 			/*
 			** Note that the column ids in the row are 0 based

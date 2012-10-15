@@ -86,6 +86,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/FullName.java"/>
+      <exclude name="${this.dir}/LongMagnitude.java"/>
       <exclude name="${this.dir}/GenericMode.java"/>
       <exclude name="${this.dir}/ModeAggregate.java"/>
       <exclude name="${this.dir}/LobMode.java"/>
@@ -168,6 +169,7 @@
       </classpath>
       <include name="${this.dir}/FullName.java"/>
       <include name="${this.dir}/GenericMode.java"/>
+      <include name="${this.dir}/LongMagnitude.java"/>
       <include name="${this.dir}/ModeAggregate.java"/>
       <include name="${this.dir}/LobMode.java"/>
     </javac>

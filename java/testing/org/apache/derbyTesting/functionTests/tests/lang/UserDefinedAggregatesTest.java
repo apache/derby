@@ -1961,5 +1961,63 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         
     }
 
+    /**
+     * <p>
+     * Test aggregates whose input and return types are different.
+     * </p>
+     */
+    public void test_13_differentReturnType() throws Exception
+    {
+        Connection conn = getConnection();
 
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMagnitude_13 for int returns bigint\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LongMagnitude'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate stringMagnitude_13 for int returns varchar( 10 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LongMagnitude'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table intValues_13( a int, b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into intValues_13 values ( 1, 1 ), ( 2, -100 ), ( 1, 2 ), ( 2, -1234 )"
+             );
+
+        assertResults
+            (
+             conn,
+             "select intMagnitude_13( b ) from intValues_13",
+             new String[][]
+             {
+                 { "1234" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, intMagnitude_13( b ) from intValues_13 group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "1234" },
+             },
+             false
+             );
+
+        // the declared return type of the aggregate does not match the actual return type
+        expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select stringMagnitude_13( b ) from intValues_13" );
+        expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select a, stringMagnitude_13( b ) from intValues_13 group by a" );
+    }
+    
 }
