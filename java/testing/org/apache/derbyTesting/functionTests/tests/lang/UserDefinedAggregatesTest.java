@@ -64,6 +64,8 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String INPUT_OUTSIDE_BOUNDS = "42ZC6";
     public static final String RETURN_OUTSIDE_BOUNDS = "42ZC7";
     public static final String XML_TYPE = "42ZB3";
+    public static final String INT_TRUNCATION = "22003";
+    public static final String CAST_FAILURE = "22018";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1769,5 +1771,195 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     {
         return new HarmonySerialClob( contents );
     }
+
+    /**
+     * <p>
+     * Test implicit casts of input types.
+     * </p>
+     */
+    public void test_12_coercion() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create derby aggregate charMode_12 for char( 4 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table charMode_12_mode_inputs_small( a int, b char( 3 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into charMode_12_mode_inputs_small( a, b ) values ( 1, 'aaa' ), ( 1, 'aba' ), ( 1, 'aaa' ), ( 2, 'aba' ), ( 2, 'aba' ), ( 2, 'aba' ), ( 3, 'aba' ), ( 3, 'aba' ), ( 3, 'abc' )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table charMode_12_mode_inputs_big( a int, b char( 5 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into charMode_12_mode_inputs_big( a, b ) values ( 1, 'aaaaa' ), ( 1, 'abaaa' ), ( 1, 'aaaaa' ), ( 2, 'abaaa' ), ( 2, 'abaaa' ), ( 2, 'abcaa' ), ( 3, 'abaaa' ), ( 3, 'abaaa' ), ( 3, 'abcde' )"
+             );
+
+        // undersized char values are space-padded at the end
+        assertResults
+            (
+             conn,
+             "select charMode_12( b ) from charMode_12_mode_inputs_small",
+             new String[][]
+             {
+                 { "aba " },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, charMode_12( b ) from charMode_12_mode_inputs_small group by a",
+             new String[][]
+             {
+                 { "1", "aaa " },
+                 { "2", "aba " },
+                 { "3", "aba " },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select charMode_12( distinct b ) from charMode_12_mode_inputs_small",
+             new String[][]
+             {
+                 { "abc " },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, charMode_12( distinct b ) from charMode_12_mode_inputs_small group by a",
+             new String[][]
+             {
+                 { "1", "aba " },
+                 { "2", "aba " },
+                 { "3", "abc " },
+             },
+             false
+             );
+
+        // oversized char values raise truncation errors
+        expectExecutionError
+            ( conn, STRING_TRUNCATION, "select charMode_12( b ) from charMode_12_mode_inputs_big" );
+        expectExecutionError
+            ( conn, STRING_TRUNCATION, "select a, charMode_12( b ) from charMode_12_mode_inputs_big group by a" );
+        expectExecutionError
+            ( conn, STRING_TRUNCATION, "select charMode_12( distinct b ) from charMode_12_mode_inputs_big" );
+        expectExecutionError
+            ( conn, STRING_TRUNCATION, "select a, charMode_12( distinct b ) from charMode_12_mode_inputs_big group by a" );
+
+        // no problem running a BIGINT aggregator on INTs
+        goodStatement
+            (
+             conn,
+             "create derby aggregate bigintMode_12 for bigint\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigintMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table ints_12( a int, b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into ints_12( a, b ) values ( 1, 1 ), ( 1, 2 ), (1, 2 ), ( 2, 2 ), ( 2, 3 ), ( 3, 3 ), ( 3, 4 ), ( 3, 5 )"
+             );
+        assertResults
+            (
+             conn,
+             "select bigintMode_12( b ) from ints_12",
+             new String[][]
+             {
+                 { "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, bigintMode_12( b ) from ints_12 group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select bigintMode_12( distinct b ) from ints_12",
+             new String[][]
+             {
+                 { "5" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, bigintMode_12( distinct b ) from ints_12 group by a",
+             new String[][]
+             {
+                 { "1", "2" },
+                 { "2", "3" },
+                 { "3", "5" },
+             },
+             false
+             );
+
+        // but you can get runtime errors if you run an INT aggregate on oversized BIGINTs
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMode_12 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table bigints_12( a int, b bigint )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into bigints_12( a, b ) values ( 1, 1000000000001 ), ( 1, 1000000000002 ), (1, 1000000000002 ), ( 2, 1000000000002 ), ( 2, 1000000000003 ), ( 3, 1000000000003 ), ( 3, 1000000000004 ), ( 3, 1000000000005 )"
+             );
+        expectExecutionError
+            ( conn, INT_TRUNCATION, "select intMode_12( b ) from bigints_12" );
+        expectExecutionError
+            ( conn, INT_TRUNCATION, "select a, intMode_12( b ) from bigints_12 group by a" );
+        expectExecutionError
+            ( conn, INT_TRUNCATION, "select intMode_12( distinct b ) from bigints_12" );
+        expectExecutionError
+            ( conn, INT_TRUNCATION, "select a, intMode_12( distinct b ) from bigints_12 group by a" );
+
+        // implicit cast from char to int fails
+        expectCompilationError( INPUT_MISMATCH, "select intMode_12( b ) from charMode_12_mode_inputs_small" );
+
+        // explict cast from char to int can fail at runtime
+        expectExecutionError
+            ( conn, CAST_FAILURE, "select intMode_12( cast (b as int) ) from charMode_12_mode_inputs_small" );
+        
+    }
+
 
 }

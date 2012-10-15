@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -36,7 +37,9 @@ import org.apache.derby.iapi.types.JSQLType;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -109,6 +112,7 @@ public class UserAggregateDefinition implements AggregateDefinition
 			CompilerContext cc = (CompilerContext)
 				ContextService.getContext(CompilerContext.CONTEXT_ID);
             ClassFactory    classFactory = cc.getClassFactory();
+            TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 
             Class   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
             Class   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
@@ -138,8 +142,9 @@ public class UserAggregateDefinition implements AggregateDefinition
             Class       expectedInputClass = getJavaClass( classFactory, expectedInputType );
             Class       expectedReturnClass = getJavaClass( classFactory, expectedReturnType );
 
-            // the input operand must be the expected input type of the aggregate
-            if ( !inputType.getTypeId().equals( expectedInputType.getTypeId() ) ) { return null; }
+            // the input operand must be coercible to the expected input type of the aggregate
+            if ( !tcf.getTypeCompiler( expectedInputType.getTypeId() ).storable( inputType.getTypeId(), classFactory ) )
+            { return null; }
             
             //
             // Make sure that the declared input type of the UDA actually falls within
@@ -192,6 +197,26 @@ public class UserAggregateDefinition implements AggregateDefinition
 		catch (ClassNotFoundException cnfe) { throw aggregatorInstantiation( cnfe ); }
 	}
 
+	/**
+	 * Wrap the input operand in an implicit CAST node as necessary in order to
+     * coerce it the correct type for the aggregator. Return null if no cast is necessary.
+	 */
+	public final ValueNode	castInputValue
+        ( ValueNode inputValue, NodeFactory nodeFactory, ContextManager cm )
+        throws StandardException
+	{
+        AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
+        DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
+        DataTypeDescriptor  actualInputType = inputValue.getTypeServices();
+
+        // no cast needed if the types match exactly
+        if ( expectedInputType.isExactTypeAndLengthMatch( actualInputType ) ) { return null; }
+        else
+        {
+            return StaticMethodCallNode.makeCast( inputValue, expectedInputType, nodeFactory, cm );
+        }
+    }
+    
     /**
      * Get the Java class corresponding to a Derby datatype.
      */
@@ -227,5 +252,6 @@ public class UserAggregateDefinition implements AggregateDefinition
              t.getMessage()
              );
     }
+
     
 }

@@ -319,7 +319,7 @@ public class AggregateNode extends UnaryOperatorNode
 		instantiateAggDef();
 
         // if this is a user-defined aggregate
-        if ( (uad != null) && (uad instanceof UserAggregateDefinition) )
+        if ( isUserDefinedAggregate() )
         {
             AliasDescriptor ad = ((UserAggregateDefinition) uad).getAliasDescriptor();
 
@@ -422,6 +422,19 @@ public class AggregateNode extends UnaryOperatorNode
                  operand.getTypeId().getSQLTypeName()
                  );
 		}
+
+        // For user-defined aggregates, the input operand may need to be
+        // coerced to the expected input type of the aggregator.
+        if ( isUserDefinedAggregate() )
+        {
+            ValueNode   castNode = ((UserAggregateDefinition) uad).castInputValue
+                ( operand, getNodeFactory(), getContextManager() );
+
+            if ( castNode != null )
+            {
+                operand = castNode.bindExpression( fromList, subqueryList, aggregateVector );
+            }
+        }
 
 		checkAggregatorClassName(aggregatorClassName.toString());
 
@@ -707,10 +720,17 @@ public class AggregateNode extends UnaryOperatorNode
     public  String  getSQLName()
         throws StandardException
     {
-        if ( uad instanceof UserAggregateDefinition )
+        if ( isUserDefinedAggregate() )
         {
             return ((UserAggregateDefinition) uad).getAliasDescriptor().getQualifiedName();
         }
         else { return aggregateName; }
     }
+    
+    /** Return true if this is a user-defined aggregate */
+    private boolean isUserDefinedAggregate()
+    {
+        return ( (uad != null) && (uad instanceof UserAggregateDefinition) );
+    }
+
 }
