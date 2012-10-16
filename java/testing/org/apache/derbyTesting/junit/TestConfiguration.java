@@ -1046,7 +1046,7 @@ public final class TestConfiguration {
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.connectionAttributes = new Properties();
-        this.hostName = null;
+        this.hostName = DEFAULT_HOSTNAME;
         this.port = basePort;
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).
@@ -1927,5 +1927,17 @@ public final class TestConfiguration {
     public final String getPassword(String user)
     {
         return getPassword(user, passwordToken);
+    }
+
+    public final String getDatabasePath(String physicalDatabaseName)
+    {
+        String dbName = physicalDatabaseName.replace('/', File.separatorChar);
+        String dsh = BaseTestCase.getSystemProperty("derby.system.home");
+        if (dsh == null) {
+            Assert.fail("not implemented");
+        } else {
+            dbName = dsh + File.separator + dbName;
+        }
+        return dbName;
     }
 }

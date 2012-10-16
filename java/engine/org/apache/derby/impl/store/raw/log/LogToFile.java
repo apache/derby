@@ -1182,7 +1182,15 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 
 				if (theLog != null)
+                {
+                    if (logOut != null)
+                    {
+                        // Close the currently open log file, if there is
+                        // one. DERBY-5937.
+                        logOut.close();
+                    }
 					logOut = new LogAccessFile(this, theLog, logBufferSize);
+                }
 				
 				if(logSwitchRequired)
 					switchLogFile();
