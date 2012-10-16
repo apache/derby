@@ -480,6 +480,11 @@ public class CreateAliasNode extends DDLStatementNode
         {
             if ( NON_RESERVED_AGGREGATES[ i ].equals( unqualifiedName ) )  { throw illegalAggregate(); }
         }
+
+        // now bind the input and return types
+        AggregateAliasInfo  aai = (AggregateAliasInfo) aliasInfo;
+
+        aai.setCollationTypeForAllStringTypes( getSchemaDescriptor().getCollationType() );
     }
 
     /** Construct an exception flagging an illegal aggregate name */

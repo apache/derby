@@ -27,6 +27,7 @@ import java.io.ObjectOutput;
 
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 
@@ -92,6 +93,21 @@ public class AggregateAliasInfo implements AliasInfo, Formatable
 	public TypeDescriptor   getForType() { return _forType; }
     public TypeDescriptor   getReturnType() { return _returnType; }
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // BIND TIME LOGIC
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Set the collation type for string input and return types.
+     */
+    public void setCollationTypeForAllStringTypes( int collationType )
+    {
+        _forType = DataTypeDescriptor.getCatalogType( _forType, collationType );
+        _returnType = DataTypeDescriptor.getCatalogType( _returnType, collationType );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Formatable BEHAVIOR
