@@ -244,6 +244,18 @@ public interface DataValueFactory
                 int collationType) throws StandardException;
 
         /**
+         * Get a StringDataValue to represent a SQL CLOB with the
+         * passed in collationType. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new StringDataValue
+         * will be created and set to the value.
+         * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
+         * then the call is the equivalent of the overload without collationType.
+         */
+        StringDataValue getClobDataValue(Clob value, StringDataValue previous,
+                int collationType) throws StandardException;
+
+        /**
          * Get a User-defined data value with the given value and type name.
          * A null argument means get a SQL null value.  The second arg uses
          * the previous value (if non-null) hold the return value.

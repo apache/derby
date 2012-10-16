@@ -519,6 +519,22 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
             return previous;
         }
 
+        public StringDataValue getClobDataValue(Clob value,
+                StringDataValue previous, int collationType)
+            throws StandardException
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getClobDataValue(value, previous);
+            
+            if (previous == null)
+            {
+                return new CollatorSQLClob(value,
+                        getCharacterCollator(collationType));
+            }
+            
+            previous.setValue(value);
+            return previous;
+        }
     
         /**
          * Return a StringDataValue to represent a SQL CLOB

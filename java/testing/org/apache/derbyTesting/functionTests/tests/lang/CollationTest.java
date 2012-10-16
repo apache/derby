@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -36,6 +37,8 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
@@ -2149,5 +2152,35 @@ public void testMissingCollatorSupport() throws SQLException {
 		  ? Decorator.territoryCollatedCaseInsensitiveDatabase(suite, locale)
 		  : Decorator.territoryCollatedDatabase(suite, locale);
   }
+
+    /**
+     * Test for an overload which was missing.
+     */
+    public void test_5951() throws Exception
+    {
+        Statement s = createStatement();
+        
+        ResultSet rs = null;
+        s.execute("CREATE TABLE derby5951( a clob )");
+        s.execute
+            (
+             "create function makeClob( contents varchar( 32672 ) ) returns clob\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.makeClob'\n"
+             );
+        s.executeUpdate("INSERT INTO derby5951 VALUES( makeClob( 'a' ) )");
+        rs = s.executeQuery("select * from derby5591");
+        JDBC.assertFullResultSet(rs,
+                                 new String[][] {{"a"}});
+        
+        s.executeUpdate("DROP TABLE derby5591");
+        s.executeUpdate("DROP function makeClob");
+    }
+
+   /** Clob-creating function */
+    public  static  Clob    makeClob( String contents ) throws Exception
+    {
+        return new HarmonySerialClob( contents );
+    }
 
 }

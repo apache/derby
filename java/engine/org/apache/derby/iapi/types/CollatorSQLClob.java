@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.sql.Clob;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -61,6 +63,16 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
      * performs collation according to collatorForCharacterDatatypes 
      */
 	CollatorSQLClob(String val, RuleBasedCollator collatorForCharacterDatatypes)
+	{
+		super(val);
+        setCollator(collatorForCharacterDatatypes);
+	}
+
+    /**
+     * Create SQL CLOB value initially set to value that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+	CollatorSQLClob(Clob val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
         setCollator(collatorForCharacterDatatypes);
@@ -136,7 +148,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		CollatorSQLClob result = new CollatorSQLClob(null,
+		CollatorSQLClob result = new CollatorSQLClob((String) null,
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
 	}
