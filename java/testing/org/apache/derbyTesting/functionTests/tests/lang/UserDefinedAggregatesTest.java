@@ -33,6 +33,8 @@ import java.sql.Clob;
 import java.util.HashMap;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -101,7 +103,28 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        return TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class);
+        TestSuite       suite = new TestSuite( "UserDefinedAggregatesTest" );
+
+        suite.addTest( TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class) );
+        suite.addTest( collatedSuite( "en" ) );
+
+        return suite;
+    }
+
+    /**
+     * Return a suite that uses a single use database with
+     * a primary fixture from this test plus potentially other
+     * fixtures.
+     * @param locale Locale to use for the database
+     * @param baseFixture Base fixture from this test.
+     * @return suite of tests to run for the given locale
+     */
+    private static Test collatedSuite(String locale)
+    {
+        TestSuite suite = new TestSuite( "UserDefinedAggregatesTest:territory=" + locale );
+        suite.addTest( TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class) );
+
+        return Decorator.territoryCollatedDatabase( suite, locale );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
