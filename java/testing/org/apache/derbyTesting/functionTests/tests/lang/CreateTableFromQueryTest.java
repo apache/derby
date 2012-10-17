@@ -264,10 +264,6 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     public void testInvalidDataType() throws Exception
     {
-        // BOOLEAN
-        assertStatementError("42X71", stmt,
-            "create table t as select systemalias from sys.sysaliases with no data");
-
         // USER (Java Object)
         assertStatementError("42X71", stmt,
             "create table t as select aliasinfo from sys.sysaliases with no data");
