@@ -68,6 +68,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String XML_TYPE = "42ZB3";
     public static final String INT_TRUNCATION = "22003";
     public static final String CAST_FAILURE = "22018";
+    public static final String AGG_IN_GROUP_BY = "42Y26";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -2040,6 +2041,32 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         // the declared return type of the aggregate does not match the actual return type
         expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select stringMagnitude_13( b ) from intValues_13" );
         expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select a, stringMagnitude_13( b ) from intValues_13 group by a" );
+    }
+    
+    /**
+     * <p>
+     * Verify that user-defined aggregates are not allowed in GROUP BY clauses.
+     * </p>
+     */
+    public void test_14_inGroupBy() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMode_14 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table intMode_14_mode_inputs( a int, b int )"
+             );
+
+        expectCompilationError
+            ( AGG_IN_GROUP_BY,
+              "select intMode_14( b ) from intMode_14_mode_inputs group by intMode_14( b )" );
     }
     
 }

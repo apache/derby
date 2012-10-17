@@ -10147,6 +10147,20 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
 		{
 			throw StandardException.newException(SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST);
 		}
+
+        // Look for user-defined aggregates too. At the parsing stage,
+        // they appear as function calls. Look for function calls
+        // inside the expression and mark them so that at bind() time
+        // we can reject them if they turn out to be user-defined aggregates
+        // rather than ordinary function calls.
+        CollectNodesVisitor  functionSniffer = new CollectNodesVisitor( StaticMethodCallNode.class );
+        columnExpression.accept( functionSniffer );
+        Vector    functionNodes = functionSniffer.getList();
+        for ( int i = 0; i < functionNodes.size(); i++ )
+        {
+            ((StaticMethodCallNode) functionNodes.elementAt( i )).setAppearsInGroupBy();
+        }
+
 		if (columnExpression.isParameterNode()) 
 	    	{
 			throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "?");

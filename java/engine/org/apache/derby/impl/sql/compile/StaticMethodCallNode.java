@@ -133,6 +133,8 @@ public class StaticMethodCallNode extends MethodCallNode
 
     private AggregateNode   resolvedAggregate;
 
+    private boolean appearsInGroupBy = false;
+
 
 	/**
 	 * Intializer for a NonStaticMethodCallNode
@@ -156,6 +158,9 @@ public class StaticMethodCallNode extends MethodCallNode
      * Get the aggregate, if any, which this method call resolves to.
      */
     public  AggregateNode   getResolvedAggregate() { return resolvedAggregate; }
+
+    /** Flag that this function invocation appears in a GROUP BY clause */
+    public  void    setAppearsInGroupBy() { appearsInGroupBy = true; }
     
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
@@ -216,6 +221,13 @@ public class StaticMethodCallNode extends MethodCallNode
                      getContextManager()
                      );
 
+                // The parser may have noticed that this aggregate is invoked in a
+                // GROUP BY clause. That is not allowed.
+                if ( appearsInGroupBy )
+                {
+                    throw StandardException.newException(SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST);
+                }
+                
                 return this;
             }
 

@@ -119,7 +119,7 @@ public class CollectNodesVisitor implements Visitor
 	//
 	////////////////////////////////////////////////
 	/**
-	 * Reset the status so it can be run again.
+	 * Return the list of matching nodes.
 	 *
 	 */
 	public Vector getList()
