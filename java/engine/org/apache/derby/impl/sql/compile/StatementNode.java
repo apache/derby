@@ -301,10 +301,10 @@ public abstract class StatementNode extends QueryTreeNode
 
         /*
          * Generate the code to execute this statement.
-         * Two methods are generated here: execute() and
+         * Two methods are generated here: doExecute() and
          * fillResultSet().
          * <BR>
-         * execute is called for every execution of the
+         * doExecute() is called for every execution of the
          * Activation. Nodes may add code to this using
          * ActivationClassBuilder.getExecuteMethod().
          * This code will be executed every execution.
@@ -315,12 +315,8 @@ public abstract class StatementNode extends QueryTreeNode
          * <P>
          * The generated code is equivalent to:
          * <code>
-         * public ResultSet execute() {
+         * protected ResultSet doExecute() {
          * 
-         *    // these two added by ActivationClassBuilder
-         *    throwIfClosed("execute");
-         *    startExecution();
-         *    
          *    [per-execution code added by nodes]
          *    
          *    if (resultSet == null)
@@ -346,26 +342,33 @@ public abstract class StatementNode extends QueryTreeNode
         mbWorker.methodReturn();
         mbWorker.complete();
 
+        // Get the value of the resultSet field.
 		executeMethod.pushThis();
 		executeMethod.getField(ClassName.BaseActivation, "resultSet",
                 ClassName.ResultSet);
-        
+
+        // Keep a copy of the field value on the stack so we don't need
+        // to look it up again if it's non-null.
+        executeMethod.dup();
 		executeMethod.conditionalIfNull();
-        
+
+            // The field was null, so we won't use the value that's on the
+            // stack. Forget about it.
+            executeMethod.pop();
+
             // Generate the result set tree and store the
             // resulting top-level result set into the resultSet
             // field, as well as returning it from the execute method.
-			
+
+            // Push this onto the stack twice, as both callMethod() and
+            // putField() take the instance as first operand.
 			executeMethod.pushThis();
+            executeMethod.dup();
 			executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null,
 									 "fillResultSet", ClassName.ResultSet, 0);
-            executeMethod.pushThis();
-            executeMethod.swap();
             executeMethod.putField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
             
 		executeMethod.startElseCode(); // this is here as the compiler only supports ? :
-			executeMethod.pushThis();
-			executeMethod.getField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
 		executeMethod.completeConditional();
 
    		// wrap up the activation class definition

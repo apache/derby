@@ -21,40 +21,14 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.ClassBuilder;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.reference.ClassName;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.CodeGeneration;
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.lang.reflect.Modifier;
-
-import java.io.PrintWriter;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Hashtable;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.sql.compile.CodeGeneration;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 /**
  * ActivationClassBuilder
@@ -108,8 +82,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 * <pre>
 	 *    public class #className extends #superClass {
 	 *		// public void reset() { return; }
-	 *		public ResultSet execute() throws StandardException {
-	 *			throwIfClosed("execute");
+	 *		protected ResultSet doExecute() throws StandardException {
 	 *			// statements must be added here
 	 *		}
 	 *		public #className() { super(); }
@@ -192,8 +165,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/**
 	 * By the time this is done, it has generated the following code
 	 * <pre>
-	 *		public ResultSet execute() throws StandardException {
-	 *			throwIfClosed("execute");
+	 *		protected ResultSet doExecute() throws StandardException {
 	 *			// statements must be added here
 	 *		}
 	 *    }
@@ -222,24 +194,13 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 		// mb.complete(); // there is nothing else.
 
 
-		// This method is an implementation of the interface method
-		// Activation - ResultSet execute()
+		// This method is an implementation of the abstract method
+		// BaseActivation - ResultSet doExecute()
 
 		// create an empty execute method
-		MethodBuilder mb = cb.newMethodBuilder(Modifier.PUBLIC,
-			ClassName.ResultSet, "execute");
+		MethodBuilder mb = cb.newMethodBuilder(Modifier.PROTECTED,
+			ClassName.ResultSet, "doExecute");
 		mb.addThrownException(ClassName.StandardException);
-
-		// put a 'throwIfClosed("execute");' statement into the execute method.
-		mb.pushThis(); // instance
-		mb.push("execute");
-		mb.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "throwIfClosed", "void", 1);
-
-		// call this.startExecution(), so the parent class can know an execution
-		// has begun.
-
-		mb.pushThis(); // instance
-		mb.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "startExecution", "void", 0);
 
 		return	mb;
 	}

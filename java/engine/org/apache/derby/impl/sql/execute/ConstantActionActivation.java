@@ -57,14 +57,11 @@ public final class ConstantActionActivation extends BaseActivation
         return null;
     }
 
-	public ResultSet execute() throws StandardException {
-
-		throwIfClosed("execute");
-		startExecution();
-
+	protected ResultSet doExecute() throws StandardException {
 		if (resultSet == null)
 			resultSet = getResultSetFactory().getDDLResultSet(this);
 		return resultSet;
 	}
+
 	public void postConstructor(){}
 }

@@ -258,6 +258,27 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	// Activation interface
 	//
 
+    public final ResultSet execute() throws StandardException {
+        throwIfClosed("execute");
+
+        // Determine if we should check row counts during this execution.
+        checkRowCounts = shouldWeCheckRowCounts();
+
+        // If we are to check row counts, clear the hash table of row counts
+        // we have checked.
+        if (checkRowCounts) {
+            rowCountsCheckedThisExecution.clear();
+        }
+
+        return doExecute();
+    }
+
+    /**
+     * Abstract method overridden by generated classes, containing the
+     * body of the {@link #execute()} method.
+     */
+    protected abstract ResultSet doExecute() throws StandardException;
+
 	public final ExecPreparedStatement getPreparedStatement() {
 		return preStmt;
 	}
@@ -1043,22 +1064,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			}
 		}
 
-	}
-
-	/**
-	 * The subclass calls this method when it begins an execution.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void startExecution() throws StandardException
-	{
-		// determine if we should check row counts during this execution
-        checkRowCounts = shouldWeCheckRowCounts();
-
-		// If we are to check row counts, clear the hash table of row counts
-		// we have checked.
-		if (checkRowCounts)
-			rowCountsCheckedThisExecution.clear();
 	}
 
 	/**
