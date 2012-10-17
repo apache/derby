@@ -1812,9 +1812,6 @@ public final class DataTypeDescriptor implements Formatable
      *
      * Three examples are:
      *
-     *  BOOLEAN: A user can select boolean columns from system tables, but
-     *   s/he is not allowed to create such a column him/herself.
-     *
      *  JAVA_OBJECT: A user can select columns of various java object types
      *   from system tables, but s/he is not allowed to create such a column
      *   him/herself.
@@ -1831,8 +1828,6 @@ public final class DataTypeDescriptor implements Formatable
     {
         switch (typeId.getJDBCTypeId())
         {
-            case Types.BOOLEAN:
-                return false;
             case Types.JAVA_OBJECT:
             	return getTypeId().getBaseTypeId().isAnsiUDT();
             case Types.DECIMAL:
