@@ -1893,6 +1893,31 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         rs.close();
     }
 
+    /**
+     * Verify that you can use CREATE TABLE AS SELECT to create
+     * empty tables with BOOLEAN columns.
+     */
+    public void test_5918() throws Exception
+    {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table derby5918_1(b boolean)");
+        s.execute("create table derby5918_2 as select * from derby5918_1 with no data");
+        s.executeUpdate("insert into derby5918_2 values ( true )");
+        
+        assertResults
+            (
+             getConnection(),
+             "select * from derby5918_2",
+             new String[][]
+             {
+                 { "true" },
+             },
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
