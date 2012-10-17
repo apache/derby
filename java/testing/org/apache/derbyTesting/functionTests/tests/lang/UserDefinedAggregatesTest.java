@@ -116,7 +116,6 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
      * a primary fixture from this test plus potentially other
      * fixtures.
      * @param locale Locale to use for the database
-     * @param baseFixture Base fixture from this test.
      * @return suite of tests to run for the given locale
      */
     private static Test collatedSuite(String locale)
