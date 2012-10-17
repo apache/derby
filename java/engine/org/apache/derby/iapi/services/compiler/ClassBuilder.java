@@ -166,6 +166,11 @@ public interface ClassBuilder {
 	 * <p>
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
+     * <p>
+     * If the modifiers include static, the returned method builder is for
+     * a class or interface initialization method. Otherwise, the builder is
+     * for an instance initialization method.
+     * <p>
 	 *
 	 * @param modifiers the | of the Modifier
 	 *	constants representing the visibility and control of this
@@ -175,18 +180,4 @@ public interface ClassBuilder {
 	 * @see java.lang.reflect.Modifier
 	 */
 	MethodBuilder newConstructorBuilder(int modifiers);
-
-	/**
-		Create a new private field and its getter and setter methods.
-
-		@param getter getter for field
-		@param setter setter for field
-		@param methodModifier modifier for method
-		@param staticField true if the field is static
-		@param type type of the field, return type of the get method and
-		parameter type of the set method.
-
-	*/
-	void newFieldWithAccessors(String getter, String setter, int methodModifier,
-		boolean staticField, String type);
 }

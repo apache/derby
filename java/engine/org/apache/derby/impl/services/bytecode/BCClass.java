@@ -21,33 +21,20 @@
 
 package org.apache.derby.impl.services.bytecode;
 
-import org.apache.derby.iapi.services.compiler.ClassBuilder;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.classfile.ClassHolder;
-import org.apache.derby.iapi.services.classfile.ClassMember;
-import org.apache.derby.iapi.services.classfile.ClassFormatOutput;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.security.AccessController;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.lang.reflect.Modifier;
-import java.security.AccessController;
-
+import org.apache.derby.iapi.services.classfile.ClassFormatOutput;
+import org.apache.derby.iapi.services.classfile.ClassHolder;
+import org.apache.derby.iapi.services.classfile.ClassMember;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.classfile.VMDescriptor;
-
-import org.apache.derby.impl.services.bytecode.GClass;
-
-import java.io.IOException;
+import org.apache.derby.iapi.util.ByteArray;
 
 /**
  * ClassBuilder is used to construct a java class's byte array
@@ -276,6 +263,11 @@ class BCClass extends GClass {
 	 * <p>
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
+     * <p>
+     * If the modifiers include static, the returned method builder is for
+     * a class or interface initialization method. Otherwise, the builder is
+     * for an instance initialization method.
+     * <p>
 	 *
 	 * See Modifiers
 	 * @param modifiers the | of the Modifiers
@@ -285,13 +277,8 @@ class BCClass extends GClass {
 	 * @return the method builder for the constructor.
 	 */
 	public MethodBuilder newConstructorBuilder(int modifiers) {
-
-		BCMethod m = new BCMethod(this, "void", "<init>", 
-									modifiers,
-									(String []) null,
-									factory);
-
-		return m;
+        String method = Modifier.isStatic(modifiers) ? "<clinit>" : "<init>";
+        return new BCMethod(this, "void", method, modifiers, null, factory);
 	}
   	//
 	// class interface
@@ -357,70 +344,6 @@ class BCClass extends GClass {
 		return cf;
 	}
 
-	public void newFieldWithAccessors(String getter, String setter,
-		int methodModifers,
-		boolean staticField, String type) {
-
-		String vmType = factory.type(type).vmName();
-		methodModifers |= Modifier.FINAL;
-
-
-		// add a field, field has same name as get method
-		int fieldModifiers = Modifier.PRIVATE;
-		if (staticField)
-			fieldModifiers |= Modifier.STATIC;
-
-		ClassMember field = classHold.addMember(getter, vmType, fieldModifiers);
-		int cpi = classHold.addFieldReference(field);
-
-		/*
-		** add the get method
-		*/
-
-		String sig = BCMethodDescriptor.get(BCMethodDescriptor.EMPTY, vmType, factory);
-
-		ClassMember method = classHold.addMember(getter, sig, methodModifers);
-
-		CodeChunk chunk = new CodeChunk(this);
-
-		// load 'this' if required
-		if (!staticField)
-			chunk.addInstr(VMOpcode.ALOAD_0); // this
-		
-		// get the field value
-		chunk.addInstrU2((staticField ? VMOpcode.GETSTATIC : VMOpcode.GETFIELD), cpi);
-
-		// and return it
-		short vmTypeId = BCJava.vmTypeId(vmType);
-
-		chunk.addInstr(CodeChunk.RETURN_OPCODE[vmTypeId]);
-
-		int typeWidth = Type.width(vmTypeId);
-		chunk.complete(null, classHold, method, typeWidth, 1);
-
-		/*
-		** add the set method
-		*/
-		String[] pda = new String[1];
-		pda[0] = vmType;
-		sig = new BCMethodDescriptor(pda, VMDescriptor.VOID, factory).toString();
-		method = classHold.addMember(setter, sig, methodModifers);
-		chunk = new CodeChunk(this);
-
-		// load 'this' if required
-		if (!staticField)
-			chunk.addInstr(VMOpcode.ALOAD_0); // this
-		// push the only parameter
-		chunk.addInstr((short) (CodeChunk.LOAD_VARIABLE_FAST[vmTypeId] + 1));
-		
-		// and set the field
-		chunk.addInstrU2((staticField ? VMOpcode.PUTSTATIC : VMOpcode.PUTFIELD), cpi);
-
-		chunk.addInstr(VMOpcode.RETURN);
-
-		chunk.complete(null, classHold, method, typeWidth + (staticField ? 0 : 1), 1 + typeWidth);
-	}
-	
 	/**
 	 * Add the fact that some class limit was exceeded while generating
 	 * the class. We create a set of them and report at the end, this

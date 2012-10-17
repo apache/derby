@@ -161,6 +161,17 @@ public interface MethodBuilder {
 	*/
 	public void getField(LocalField field);
 
+    /**
+     * Push the contents of the static field onto the stack.
+     * <pre>
+     * Stack ... =>
+     *       ...,field_value
+     * </pre>
+     *
+     * @param field a static field
+     */
+    public void getStaticField(LocalField field);
+
 	/**
 		Push the contents of the described field onto the stack.
 		This call requires the instance (reference) to be pushed by the caller.
@@ -193,6 +204,17 @@ public interface MethodBuilder {
 	</PRE>
 	*/
 	public void setField(LocalField field);
+
+    /**
+     * Pop the top stack value and store it in the static field.
+     * <pre>
+     * Stack ...,value =>
+     *       ...
+     * </pre>
+     *
+     * @param field a static field
+     */
+    public void setStaticField(LocalField field);
 
 	/**
 		Pop the top stack value and store it in the local field. 

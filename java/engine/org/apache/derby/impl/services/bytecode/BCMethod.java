@@ -675,8 +675,7 @@ class BCMethod implements MethodBuilder {
 			growStack(rw, rt);
 		else
 		{
-			if (stackDepth == 0)
-				overflowMethodCheck();
+            overflowMethodCheck();
 		}
 		return cpi;
 	}
@@ -736,8 +735,7 @@ class BCMethod implements MethodBuilder {
 			growStack(rw, rt);
 		else
 		{
-			if (stackDepth == 0)
-				overflowMethodCheck();
+            overflowMethodCheck();
 		}
 		// Check the declared type of the method
 		if (SanityManager.DEBUG) {
@@ -887,6 +885,12 @@ class BCMethod implements MethodBuilder {
 
 	}
 
+    public void getStaticField(LocalField field) {
+        BCLocalField lf = (BCLocalField) field;
+        myCode.addInstrU2(VMOpcode.GETSTATIC, lf.cpi);
+        growStack(lf.type);
+    }
+
 	public void getField(String declaringClass, String fieldName, String fieldType) {
 		Type dt = popStack();
 
@@ -918,13 +922,16 @@ class BCMethod implements MethodBuilder {
 	 */
 	public void setField(LocalField field) {
 		BCLocalField lf = (BCLocalField) field;
-		Type lt = lf.type;
-
 		putField(lf.type, lf.cpi, false);
-
-		if (stackDepth == 0)
-			overflowMethodCheck();
+        overflowMethodCheck();
 	}
+
+    public void setStaticField(LocalField field) {
+        BCLocalField lf = (BCLocalField) field;
+        myCode.addInstrU2(VMOpcode.PUTSTATIC, lf.cpi);
+        popStack();
+        overflowMethodCheck();
+    }
 
 	/**
 		Upon entry the top word(s) on the stack is
@@ -947,8 +954,6 @@ class BCMethod implements MethodBuilder {
 	*/
 	public void putField(LocalField field) {
 		BCLocalField lf = (BCLocalField) field;
-		Type lt = lf.type;
-
 		putField(lf.type, lf.cpi, true);
 	}
 
@@ -1072,8 +1077,7 @@ class BCMethod implements MethodBuilder {
 
 		myCode.addInstr(toPop.width() == 2  ? VMOpcode.POP2 : VMOpcode.POP);
 		
-		if (stackDepth == 0)
-			overflowMethodCheck();
+        overflowMethodCheck();
 	}	
 
 	public void endStatement() {
@@ -1271,6 +1275,11 @@ class BCMethod implements MethodBuilder {
 	 */
 	private void overflowMethodCheck()
 	{
+        if (stackDepth != 0) {
+            // Can only overflow to new method if the stack is empty.
+            return;
+        }
+
 		if (handlingOverflow)
 			return;
 		

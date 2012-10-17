@@ -27,6 +27,7 @@ import java.sql.SQLWarning;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import	org.apache.derby.catalog.Dependable;
@@ -870,6 +871,35 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		}
 	}
 
+    /**
+     * This class holds row count statistics for a query.
+     */
+    protected static class RowCountStats {
+        /**
+         * Stale plan check interval tells how often the row counts should be
+         * checked. Cached here so that we don't need to query the database
+         * properties on each execution.
+         */
+        private int stalePlanCheckInterval;
+        /** The number of times this query has been executed. */
+        private int executionCount;
+        /** List with row count estimates for each table in the query. */
+        private final List rowCounts;
+
+        public RowCountStats() {
+            rowCounts = new ArrayList();
+        }
+    }
+
+    /**
+     * Get the object holding row count statistics for this activation.
+     *
+     * It may return {@code null} if row count statistics are not maintained
+     * for the activation. In that case, {@link #shouldWeCheckRowCounts()}
+     * must return {@code false}.
+     */
+    protected abstract RowCountStats getRowCountStats();
+
 	/**
 		@see Activation#informOfRowCount
 		@exception StandardException	Thrown on error
@@ -889,15 +919,10 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			/* Check each result set only once per execution */
 			if (rowCountsCheckedThisExecution.add(rsn))
 			{
-				synchronized (getPreparedStatement())
+                final RowCountStats stats = getRowCountStats();
+                synchronized (stats)
 				{
-					Vector rowCountCheckVector = getRowCountCheckVector();
-
-					if (rowCountCheckVector == null) {
-						rowCountCheckVector = new Vector();
-						setRowCountCheckVector(rowCountCheckVector);
-					}
-
+                    final List rowCountCheckVector = stats.rowCounts;
 					Long firstRowCount = null;
 
 					/*
@@ -906,11 +931,14 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 					if (resultSetNumber < rowCountCheckVector.size())
 					{
 						firstRowCount =
-							(Long) rowCountCheckVector.elementAt(resultSetNumber);
+                            (Long) rowCountCheckVector.get(resultSetNumber);
 					}
 					else
 					{
-						rowCountCheckVector.setSize(resultSetNumber + 1);
+                        int newSize = resultSetNumber + 1;
+                        while (rowCountCheckVector.size() < newSize) {
+                            rowCountCheckVector.add(null);
+                        }
 					}
 
 					if (firstRowCount != null)
@@ -1001,11 +1029,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 					}
 					else
 					{
-						firstRowCount = new Long(currentRowCount);
-						rowCountCheckVector.setElementAt(
-														firstRowCount,
-														resultSetNumber
-														);
+                        rowCountCheckVector.set(
+                            resultSetNumber, new Long(currentRowCount));
 
 					}
 				}
@@ -1028,7 +1053,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	public void startExecution() throws StandardException
 	{
 		// determine if we should check row counts during this execution
-		shouldWeCheckRowCounts();
+        checkRowCounts = shouldWeCheckRowCounts();
 
 		// If we are to check row counts, clear the hash table of row counts
 		// we have checked.
@@ -1160,15 +1185,22 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		return targetVTI;
 	}
 
-	private void shouldWeCheckRowCounts() throws StandardException
+    /**
+     * Find out if it's time to check the row counts of the tables involved
+     * in this query.
+     * @return true if the row counts should be checked, false otherwise
+     */
+	protected boolean shouldWeCheckRowCounts() throws StandardException
 	{
+        final RowCountStats stats = getRowCountStats();
+
 		/*
 		** Check the row count only every N executions.  OK to check this
 		** without synchronization, since the value of this number is not
 		** critical.  The value of N is determined by the property
 		** derby.language.stalePlanCheckInterval.
 		*/
-		int executionCount = getExecutionCount() + 1;
+        int executionCount = ++stats.executionCount;
 
 		/*
 		** Always check row counts the first time, to establish the
@@ -1181,16 +1213,16 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 		if (executionCount == 1)
 		{
-			checkRowCounts = true;
+            return true;
 		}
 		else if (executionCount <
 								Property.MIN_LANGUAGE_STALE_PLAN_CHECK_INTERVAL)
 		{
-			checkRowCounts = false;
+            return false;
 		}
 		else
 		{
-			int stalePlanCheckInterval = getStalePlanCheckInterval();
+            int stalePlanCheckInterval = stats.stalePlanCheckInterval;
 
 			/*
 			** Only query the database property once.  We can tell because
@@ -1208,43 +1240,13 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 							Integer.MAX_VALUE,
 							Property.DEFAULT_LANGUAGE_STALE_PLAN_CHECK_INTERVAL
 							);
-				setStalePlanCheckInterval(stalePlanCheckInterval);
+                stats.stalePlanCheckInterval = stalePlanCheckInterval;
 			}
 
-			checkRowCounts = (executionCount % stalePlanCheckInterval) == 1;
-
+            return (executionCount % stalePlanCheckInterval) == 1;
 
 		}
-
-		setExecutionCount(executionCount);
 	}
-
-	/*
-	** These accessor methods are provided by the sub-class to help figure
-	** out whether to check row counts during this execution.
-	*/
-	abstract protected int getExecutionCount();
-
-	abstract protected void setExecutionCount(int newValue); 
-
-	/*
-	** These accessor methods are provided by the sub-class to help figure
-	** out whether the row count for a particular result set has changed
-	** enough to force recompilation.
-	*/
-	abstract protected Vector getRowCountCheckVector();
-
-	abstract protected void setRowCountCheckVector(Vector newValue);
-
-	/*
-	** These accessor methods are provided by the sub-class to remember the
-	** value of the stale plan check interval property, so that we only
-	** have to query the database properties once (there is heavyweight
-	** synchronization around the database properties).
-	*/
-	abstract protected int getStalePlanCheckInterval();
-
-	abstract protected void setStalePlanCheckInterval(int newValue);
 
 	public final boolean getScrollable() {
 		return scrollable;

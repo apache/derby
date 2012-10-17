@@ -42,15 +42,20 @@ import java.util.Vector;
  */
 public final class ConstantActionActivation extends BaseActivation
 {
+    /**
+     * Always return false since constant actions don't need recompilation
+     * when the row counts change.
+     */
+    protected boolean shouldWeCheckRowCounts() {
+        return false;
+    }
 
-	public int getExecutionCount() { return 0;}
-	public void setExecutionCount(int count) {}
-
-	public Vector getRowCountCheckVector() {return null;}
-	public void setRowCountCheckVector(Vector v) {}
-
-	public int getStalePlanCheckInterval() { return Integer.MAX_VALUE; }
-	public void setStalePlanCheckInterval(int count) {}
+    /**
+     * Always return null since constant actions never check row counts.
+     */
+    protected RowCountStats getRowCountStats() {
+        return null;
+    }
 
 	public ResultSet execute() throws StandardException {
 

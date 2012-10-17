@@ -61,6 +61,7 @@ public interface ClassName
 
 	String BaseActivation = "org.apache.derby.impl.sql.execute.BaseActivation";
 	String BaseExpressionActivation = "org.apache.derby.impl.sql.execute.BaseExpressionActivation";
+    String RowCountStats = "org.apache.derby.impl.sql.execute.BaseActivation$RowCountStats";
 
 	String CursorActivation = "org.apache.derby.impl.sql.execute.CursorActivation";
 
