@@ -634,9 +634,6 @@ public class CursorNode extends DMLStatementNode
 		// result set of the statement.
 		resultSet.markStatementResultSet();
 
-		generateAuthorizeCheck(acb, mb,
-				org.apache.derby.iapi.sql.conn.Authorizer.SQL_SELECT_OP);
-
 		// this will generate an expression that will be a ResultSet
 	    resultSet.generate(acb, mb);
 

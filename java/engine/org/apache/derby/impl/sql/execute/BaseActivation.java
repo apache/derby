@@ -276,13 +276,19 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
         // Create the result set tree on the first execution.
         if (resultSet == null) {
-             resultSet = createResultSet();
-             if (isCursorActivation()) {
-                 ((NoPutResultSet) resultSet).markAsTopResultSet();
-             }
+             resultSet = decorateResultSet();
         }
 
         return resultSet;
+    }
+
+    /**
+     * Create the ResultSet tree for this statement, and possibly perform
+     * extra checks or initialization required by specific sub-classes.
+     * @return the root of the ResultSet tree for this statement
+     */
+    ResultSet decorateResultSet() throws StandardException {
+        return createResultSet();
     }
 
     /**

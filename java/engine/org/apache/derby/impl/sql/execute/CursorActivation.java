@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+
 /**
  *
  * In the family of activation support classes,
@@ -46,4 +51,17 @@ public abstract class CursorActivation
 	{
 		return true;
 	}
+
+    /** @see BaseActivation#decorateResultSet */
+    ResultSet decorateResultSet() throws StandardException {
+        // CursorActivation means it's a query that returns rows. Check that
+        // the caller is authorized to run SQL read operations.
+        getLanguageConnectionContext().getAuthorizer().authorize(
+                this, Authorizer.SQL_SELECT_OP);
+
+        // The top-level result set should be marked as such.
+        NoPutResultSet rs = (NoPutResultSet) createResultSet();
+        rs.markAsTopResultSet();
+        return rs;
+    }
 }
