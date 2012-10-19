@@ -60,7 +60,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String MISSING_FUNCTION = "42Y03";
     public static final String MISSING_SCHEMA = "42Y07";
     public static final String BAD_AGGREGATE_USAGE = "42903";
-    public static final String BAD_ORDER_BY = "42Y35";
+    public static final String BAD_AGG_PLACEMENT = "42Y35";
     public static final String INPUT_MISMATCH = "42Y22";
     public static final String BAD_GEN_COL = "42XA1";
     public static final String INPUT_OUTSIDE_BOUNDS = "42ZC6";
@@ -69,6 +69,11 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String INT_TRUNCATION = "22003";
     public static final String CAST_FAILURE = "22018";
     public static final String AGG_IN_GROUP_BY = "42Y26";
+    public static final String NESTED_AGGS = "42Y33";
+    public static final String UNTYPED_NULL = "42Y83";
+    public static final String MISSING_CLASS = "42ZC8";
+    public static final String AGG_IN_ON_CLAUSE = "42Z07";
+    public static final String BAD_CONSTRAINT = "42Y01";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -466,7 +471,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
         expectCompilationError( BAD_AGGREGATE_USAGE, "select * from mode_05_inputs where app.mode_05( distinct b ) = 4" );
 
         // negative test: can't put an aggregate in an ORDER BY list unless it's in the SELECT list too
-        expectCompilationError( BAD_ORDER_BY, "select * from mode_05_inputs order by mode_05( b )" );
+        expectCompilationError( BAD_AGG_PLACEMENT, "select * from mode_05_inputs order by mode_05( b )" );
 
         // various other syntactically correct placements of user-defined aggregates
         assertResults
@@ -1091,6 +1096,48 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              );
         expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select priceMode_10_1( b ) from t_price_10_1" );
         expectCompilationError( RETURN_OUTSIDE_BOUNDS, "select a, priceMode_10_1( b ) from t_price_10_1 group by a" );
+
+        // aggregates not allowed inside aggregates
+        expectCompilationError( NESTED_AGGS, "select max( intMode_10( columnnumber ) ) from sys.syscolumns" );
+        expectCompilationError( NESTED_AGGS, "select intMode_10( max( columnnumber ) ) from sys.syscolumns" );
+
+        // untyped nulls not allowed as args to an aggregate
+        expectCompilationError( UNTYPED_NULL, "select intMode_10( null ) from sys.syscolumns" );
+
+        // missing Aggregator class
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMode_missing_10 for int external name 'missing.Missing'"
+             );
+        expectCompilationError( MISSING_CLASS, "select intMode_missing_10( columnnumber ) from sys.syscolumns" );
+
+        // invalid context for an aggregate
+        expectCompilationError( BAD_AGGREGATE_USAGE, "select * from sys.syscolumns where intMode_10( columnnumber ) = 1" );
+        expectCompilationError
+            ( BAD_AGG_PLACEMENT,
+              "select case when columnnumber = 1 then 1 else intMode_10( columnnumber ) end from sys.syscolumns" );
+        expectCompilationError
+            ( BAD_AGG_PLACEMENT,
+              "select case when columnnumber = 1 then intMode_10( columnnumber ) else 1 end from sys.syscolumns" );
+        expectCompilationError
+            ( BAD_AGG_PLACEMENT,
+              "select case when columnnumber = intMode_10( columnnumber ) then 0 else 1 end from sys.syscolumns" );
+        expectCompilationError
+            ( BAD_AGGREGATE_USAGE, "values ( intMode_10( 1 ) )" );
+        expectCompilationError
+            ( BAD_CONSTRAINT,
+              "create table badTable( a int, b int check ( intMode_10( b ) > 1 ) )" );
+
+        // aggregates not permitted in ON clause
+        expectCompilationError
+            ( AGG_IN_ON_CLAUSE,
+              "select * from sys.syscolumns l join sys.syscolumns r on intMode_10( r.columnnumber ) = l.columnnumber" );
+
+        // aggregates not allowed in the SET clause of an UPDATE statement
+        goodStatement( conn, "create table intMode_10_inputs_1( a int, b int )" );
+        expectCompilationError
+            ( BAD_AGG_PLACEMENT, "update intMode_10_inputs_1 set b = intMode_10( b )" );
     }
 
     /**

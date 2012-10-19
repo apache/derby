@@ -217,10 +217,12 @@ public class ConditionalNode extends ValueNode
 		ValueNode thenNode =
 			((ValueNode)thenElseList.elementAt(0)).bindExpression(
 				fromList, subqueryList, aggregateVector);
+        thenElseList.setElementAt( thenNode, 0 );
 
 		ValueNode elseNode =
 			((ValueNode)thenElseList.elementAt(1)).bindExpression(
 				fromList, subqueryList, aggregateVector);
+        thenElseList.setElementAt( elseNode, 1 );
 
 		DataTypeDescriptor thenType = thenNode.getTypeServices();
 		DataTypeDescriptor elseType = elseNode.getTypeServices();

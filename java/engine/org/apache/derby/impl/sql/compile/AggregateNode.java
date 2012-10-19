@@ -354,8 +354,11 @@ public class AggregateNode extends UnaryOperatorNode
 			operand.accept(visitor);
 			if (visitor.hasNode())
 			{
-				throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_CONTAINS_AGGREGATE, 
-						aggregateName);
+				throw StandardException.newException
+                    (
+                     SQLState.LANG_USER_AGGREGATE_CONTAINS_AGGREGATE, 
+                     getSQLName()
+                    );
 			}
 
 			// Also forbid any window function inside an aggregate unless in
@@ -402,7 +405,8 @@ public class AggregateNode extends UnaryOperatorNode
 			*/
 			if (operand instanceof UntypedNullConstantNode)
 			{
-				throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_BAD_TYPE_NULL, aggregateName);
+				throw StandardException.newException
+                    (SQLState.LANG_USER_AGGREGATE_BAD_TYPE_NULL, getSQLName());
 			}
 		}
 
@@ -469,7 +473,7 @@ public class AggregateNode extends UnaryOperatorNode
 		{
 			throw StandardException.newException(SQLState.LANG_BAD_AGGREGATOR_CLASS2, 
 													className, 
-													aggregateName,
+													getSQLName(),
 													operand.getTypeId().getSQLTypeName());
 		}
 	}
@@ -696,7 +700,7 @@ public class AggregateNode extends UnaryOperatorNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "aggregateName: " + aggregateName + "\n" +
+			return "aggregateName: " + getSQLName() + "\n" +
 				"distinct: " + distinct + "\n" +
 				super.toString();
 		}
@@ -718,11 +722,15 @@ public class AggregateNode extends UnaryOperatorNode
 
     /** Get the SQL name of the aggregate */
     public  String  getSQLName()
-        throws StandardException
     {
         if ( isUserDefinedAggregate() )
         {
-            return ((UserAggregateDefinition) uad).getAliasDescriptor().getQualifiedName();
+            try {
+                return ((UserAggregateDefinition) uad).getAliasDescriptor().getQualifiedName();
+            } catch (StandardException se)
+            {
+                return aggregateName;
+            }
         }
         else { return aggregateName; }
     }
