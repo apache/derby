@@ -94,7 +94,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	ActivationClassBuilder (String superClass, CompilerContext cc) throws StandardException
 	{
 		super( superClass, (String) null, cc );
-		executeMethod = beginExecuteMethod();
 	}
 
 	///////////////////////////////////////////////////////////////////////
@@ -162,49 +161,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	//
 	///////////////////////////////////////////////////////////////////////
 
-	/**
-	 * By the time this is done, it has generated the following code
-	 * <pre>
-	 *		protected ResultSet doExecute() throws StandardException {
-	 *			// statements must be added here
-	 *		}
-	 *    }
-	 * </pre>
-	 *
-	 * @exception StandardException thrown on failure
-	 */
-	private	MethodBuilder	beginExecuteMethod()
-		throws StandardException
-	{
-		// create a reset method that does nothing.
-		// REVISIT: this might better belong in the Activation
-		// superclasses ?? not clear yet what it needs to do.
-
-		// don't yet need a reset method here. when we do,
-		// it will need to call super.reset() as well as
-		// whatever it does.
-		// mb = cb.newMethodBuilder(
-		// 	Modifier.PUBLIC, "void", "reset");
-		// mb.addStatement(javaFac.newStatement(
-		//		javaFac.newSpecialMethodCall(
-		//			thisExpression(),
-		//			BaseActivation.CLASS_NAME,
-		//			"reset", "void")));
-		// mb.addStatement(javaFac.newReturnStatement());
-		// mb.complete(); // there is nothing else.
-
-
-		// This method is an implementation of the abstract method
-		// BaseActivation - ResultSet doExecute()
-
-		// create an empty execute method
-		MethodBuilder mb = cb.newMethodBuilder(Modifier.PROTECTED,
-			ClassName.ResultSet, "doExecute");
-		mb.addThrownException(ClassName.StandardException);
-
-		return	mb;
-	}
-
 	MethodBuilder startResetMethod() {
 		MethodBuilder mb = cb.newMethodBuilder(Modifier.PUBLIC,
 			"void", "reset");
@@ -225,23 +181,12 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 
 	   Upon entry the only word on the stack is the result set expression
 	 */
-	void finishExecuteMethod(boolean genMarkAsTopNode) {
+	void finishExecuteMethod() {
 
-		/* We only call markAsTopResultSet() for selects.
-		 * Non-select DML marks the top NoPutResultSet in the constructor.
-		 * Needed for closing down resultSet on an error.
-		 */
-		if (genMarkAsTopNode)
-		{
-			// dup the result set to leave one for the return and one for this call
-			executeMethod.dup();
-			executeMethod.cast(ClassName.NoPutResultSet);
-			executeMethod.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "markAsTopResultSet", "void", 0);
-		}
-
-		/* return resultSet */
-		executeMethod.methodReturn();
-		executeMethod.complete();
+        if (executeMethod != null) {
+            executeMethod.methodReturn();
+            executeMethod.complete();
+        }
 
         // Create and initialize a static field that holds row count statistics.
         LocalField rowCountField = newFieldDeclaration(
@@ -397,8 +342,10 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 		//    to tell cdt to restart:
 		//	  cdt.forget();
 
-		executeMethod.getField(lf);
-		executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, "forget", "void", 0);
+        MethodBuilder execute = getExecuteMethod();
+        execute.getField(lf);
+        execute.callMethod(
+                VMOpcode.INVOKEVIRTUAL, (String) null, "forget", "void", 0);
 
 		return lf;
 	}

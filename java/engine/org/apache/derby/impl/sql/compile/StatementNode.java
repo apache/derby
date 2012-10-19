@@ -299,40 +299,13 @@ public abstract class StatementNode extends QueryTreeNode
 										superClass, 
 										getCompilerContext());
 
-        /*
-         * Generate the code to execute this statement.
-         * Two methods are generated here: doExecute() and
-         * fillResultSet().
-         * <BR>
-         * doExecute() is called for every execution of the
-         * Activation. Nodes may add code to this using
-         * ActivationClassBuilder.getExecuteMethod().
-         * This code will be executed every execution.
-         * <BR>
-         * fillResultSet is called by execute if the BaseActivation's
-         * resultSet field is null and the returned ResultSet is
-         * set into the the resultSet field.
-         * <P>
-         * The generated code is equivalent to:
-         * <code>
-         * protected ResultSet doExecute() {
-         * 
-         *    [per-execution code added by nodes]
-         *    
-         *    if (resultSet == null)
-         *        resultSet = fillResultSet();
-         *    
-         *    return resultSet;
-         * }
-         * </code>
-         */
-
-        MethodBuilder executeMethod = generatingClass.getExecuteMethod();
-
+        // Create the method that generates the ResultSet tree used when
+        // executing this statement. Implements the abstract method
+        // BaseActivation.createResultSet().
         MethodBuilder mbWorker = generatingClass.getClassBuilder().newMethodBuilder(
-                Modifier.PRIVATE,
+                Modifier.PROTECTED,
                 ClassName.ResultSet,
-                "fillResultSet");
+                "createResultSet");
         mbWorker.addThrownException(ClassName.StandardException);
         
         // Generate the complete ResultSet tree for this statement.
@@ -341,35 +314,6 @@ public abstract class StatementNode extends QueryTreeNode
         generate(generatingClass, mbWorker);
         mbWorker.methodReturn();
         mbWorker.complete();
-
-        // Get the value of the resultSet field.
-		executeMethod.pushThis();
-		executeMethod.getField(ClassName.BaseActivation, "resultSet",
-                ClassName.ResultSet);
-
-        // Keep a copy of the field value on the stack so we don't need
-        // to look it up again if it's non-null.
-        executeMethod.dup();
-		executeMethod.conditionalIfNull();
-
-            // The field was null, so we won't use the value that's on the
-            // stack. Forget about it.
-            executeMethod.pop();
-
-            // Generate the result set tree and store the
-            // resulting top-level result set into the resultSet
-            // field, as well as returning it from the execute method.
-
-            // Push this onto the stack twice, as both callMethod() and
-            // putField() take the instance as first operand.
-			executeMethod.pushThis();
-            executeMethod.dup();
-			executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null,
-									 "fillResultSet", ClassName.ResultSet, 0);
-            executeMethod.putField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
-            
-		executeMethod.startElseCode(); // this is here as the compiler only supports ? :
-		executeMethod.completeConditional();
 
    		// wrap up the activation class definition
 		// generate on the tree gave us back the newExpr
@@ -380,7 +324,7 @@ public abstract class StatementNode extends QueryTreeNode
 		// the activation class builder takes care of constructing it
 		// for us, given the resultSetExpr to use.
 		//   return (this.resultSet = #resultSetExpr);
-		generatingClass.finishExecuteMethod(this instanceof CursorNode);
+		generatingClass.finishExecuteMethod();
 
 		// wrap up the constructor by putting a return at the end of it
 		generatingClass.finishConstructor();

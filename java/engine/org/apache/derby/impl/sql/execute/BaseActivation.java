@@ -270,14 +270,36 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
             rowCountsCheckedThisExecution.clear();
         }
 
-        return doExecute();
+        // Reinitialize data structures in the generated class before
+        // each execution.
+        reinit();
+
+        // Create the result set tree on the first execution.
+        if (resultSet == null) {
+             resultSet = createResultSet();
+             if (isCursorActivation()) {
+                 ((NoPutResultSet) resultSet).markAsTopResultSet();
+             }
+        }
+
+        return resultSet;
     }
 
     /**
-     * Abstract method overridden by generated classes, containing the
-     * body of the {@link #execute()} method.
+     * Create the ResultSet tree for this statement.
+     * @return the root of the ResultSet tree for this statement
      */
-    protected abstract ResultSet doExecute() throws StandardException;
+    protected abstract ResultSet createResultSet() throws StandardException;
+
+    /**
+     * Reinitialize data structures added by the sub-classes before each
+     * execution of the statement. The default implementation does nothing.
+     * Sub-classes should override this method if they need to perform
+     * operations before each execution.
+     */
+    protected void reinit() throws StandardException {
+        // Do nothing by default. Overridden by sub-classes that need it.
+    }
 
 	public final ExecPreparedStatement getPreparedStatement() {
 		return preStmt;

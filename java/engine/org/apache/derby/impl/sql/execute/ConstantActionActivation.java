@@ -22,10 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.ResultSet;
-
-import java.util.Vector;
 
 /**
 	A pre-compiled activation that supports a single ResultSet with
@@ -57,11 +54,9 @@ public final class ConstantActionActivation extends BaseActivation
         return null;
     }
 
-	protected ResultSet doExecute() throws StandardException {
-		if (resultSet == null)
-			resultSet = getResultSetFactory().getDDLResultSet(this);
-		return resultSet;
-	}
+    protected ResultSet createResultSet() throws StandardException {
+        return getResultSetFactory().getDDLResultSet(this);
+    }
 
 	public void postConstructor(){}
 }

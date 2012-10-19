@@ -799,8 +799,8 @@ public final class UpdateNode extends DMLModStatementNode
 		// If the DML is on the temporary table, generate the code to
 		// mark temporary table as modified in the current UOW. After
 		// DERBY-827 this must be done in execute() since
-		// fillResultSet() will only be called once.
-		generateCodeForTemporaryTable(acb, acb.getExecuteMethod());
+		// createResultSet() will only be called once.
+		generateCodeForTemporaryTable(acb);
 
 		/* generate the parameters */
 		if(!isDependentTable)

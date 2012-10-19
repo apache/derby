@@ -161,16 +161,16 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * If yes, we will remove all the data from the temporary table
 	 *
 	 * @param acb	The ActivationClassBuilder for the class being built
-	 * @param mb	The execute() method to be built
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected void generateCodeForTemporaryTable(ActivationClassBuilder acb, MethodBuilder mb)
+	protected void generateCodeForTemporaryTable(ActivationClassBuilder acb)
 		throws StandardException
 	{
 		if (targetTableDescriptor != null && targetTableDescriptor.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE &&
 			targetTableDescriptor.isOnRollbackDeleteRows() == true)
 		{
+            MethodBuilder mb = acb.getExecuteMethod();
 			mb.pushThis();
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Activation,
 									"getLanguageConnectionContext", ClassName.LanguageConnectionContext, 0);
