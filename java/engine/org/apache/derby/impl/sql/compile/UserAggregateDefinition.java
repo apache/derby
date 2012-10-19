@@ -114,8 +114,8 @@ public class UserAggregateDefinition implements AggregateDefinition
             ClassFactory    classFactory = cc.getClassFactory();
             TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 
-            Class   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
             Class   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
+            Class   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
 
             Class[][]   typeBounds = classFactory.getClassInspector().getTypeBounds
                 ( derbyAggregatorInterface, userAggregatorClass );

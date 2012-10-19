@@ -176,7 +176,9 @@ final class JarLoader extends SecureClassLoader {
         // number of classes it has to check for.
         if (className.startsWith("org.apache.derby.")
                 && !className.startsWith("org.apache.derby.jdbc.")
-                && !className.startsWith("org.apache.derby.vti."))
+                && !className.startsWith("org.apache.derby.vti.")
+                && !className.startsWith("org.apache.derby.agg.")
+            )
         {
             ClassNotFoundException cnfe = new ClassNotFoundException(className);
             //cnfe.printStackTrace(System.out);

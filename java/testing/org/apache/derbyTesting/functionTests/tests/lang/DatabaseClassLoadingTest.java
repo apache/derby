@@ -108,6 +108,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 "testLoadDerbyClassIndirectly",
                 "testIndirectLoading",
                 "testTableFunctionInJar",
+                "testUDAInJar",
                 "test_5352",
             };
             
@@ -143,6 +144,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    "functionTests/tests/lang/dcl_ot3.jar",
                    "functionTests/tests/lang/dcl_id.jar",
                    "functionTests/tests/lang/dummy_vti.jar",
+                   "functionTests/tests/lang/median_uda.jar",
                    });
            
            }
@@ -1082,6 +1084,83 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
         // drop the useless function
         s.executeUpdate( "drop function dummyVTI2\n" );
+
+        setDBClasspath(null);
+        
+        s.close();
+    }
+    
+    /**
+     * Test that user-defined aggregates can be invoked from inside jar files stored in
+     * the database.
+     */
+    public void testUDAInJar() throws SQLException, MalformedURLException
+    {
+        // skip this test if vm is pre Java 6. This is because the jar file was
+        // compiled by a modern compiler and the jar file won't load on
+        // old vms.
+        if ( JVMInfo.J2ME || (JVMInfo.JDK_ID < JVMInfo.J2SE_16 ) ) { return; }
+        
+        String jarName = "EMC.MEDIAN_UDA";
+
+        installJar( "median_uda.jar", jarName );
+
+        setDBClasspath( jarName );
+
+        Statement s = createStatement();
+
+        // register the user-defined aggregate
+        s.executeUpdate
+            ( "create derby aggregate intMedian for int external name 'Median'\n" );
+
+        // register another user-defined aggregate in a class which doesn't exist
+        s.executeUpdate
+            (
+             "create derby aggregate missingAggregate for int external name 'MissingAggregate'\n"
+             );
+
+        // create a table with some values
+        s.execute( "create table intValues( a int, b int )" );
+        s.execute( "insert into intValues values ( 1, 1 ), ( 1, 10 ), ( 1, 100 ), ( 1, 1000 ), ( 2, 5 ), ( 2, 50 ), ( 2, 500 ), ( 2, 5000 )" );
+
+        // invoke the user-defined aggregate
+        JDBC.assertFullResultSet
+            (
+             s.executeQuery
+             (
+              "select intMedian( b ) from intValues"
+              ),
+             new String[][]
+             {
+                 { "100" },
+             }
+             );
+        JDBC.assertFullResultSet
+            (
+             s.executeQuery
+             (
+              "select a, intMedian( b ) from intValues group by a"
+              ),
+             new String[][]
+             {
+                 { "1", "100" },
+                 { "2", "500" },
+             }
+             );
+
+        // verify that a missing class raises an exception
+        try {
+            s.executeQuery
+                (
+                 "select missingAggregate( b ) from intValues"
+                 );
+            fail( "Should have seen a ClassNotFoundException." );
+        } catch (SQLException e) {
+            assertSQLState("XJ001", e);
+        }
+
+        // drop the useless aggregate
+        s.executeUpdate( "drop derby aggregate missingAggregate restrict" );
 
         setDBClasspath(null);
         
