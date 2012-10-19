@@ -2116,4 +2116,103 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
               "select intMode_14( b ) from intMode_14_mode_inputs group by intMode_14( b )" );
     }
     
+    /**
+     * <p>
+     * Verify precision mismatches.
+     * </p>
+     */
+    public void test_15_precisionMismatch() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // truncating string types
+        goodStatement
+            (
+             conn,
+             "create derby aggregate varcharMode_15 for varchar( 4 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$StringMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table varcharMode_15_mode_inputs_big( a int, b varchar( 5 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into varcharMode_15_mode_inputs_big( a, b ) values ( 1, 'aaaaa' ), ( 1, 'abaaa' ), ( 1, 'aaaaa' ), ( 2, 'abaaa' ), ( 2, 'abaaa' ), ( 2, 'abcaa' ), ( 3, 'abaaa' ), ( 3, 'abaaa' ), ( 3, 'abcda' )"
+             );
+
+        expectExecutionError
+            ( conn, STRING_TRUNCATION, "select varcharMode_15( b ) from varcharMode_15_mode_inputs_big" );
+
+        // truncating numeric precision
+        goodStatement
+            (
+             conn,
+             "create derby aggregate numericMode_15_bigger for numeric( 5, 3 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigDecimalMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate numericMode_15 for numeric( 5, 1 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$BigDecimalMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table numericMode_15_mode_inputs_big( a int, b numeric( 5, 2 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into numericMode_15_mode_inputs_big( a, b ) values ( 1, 1.11 ), ( 1, 1.12 ), ( 1, 1.13 ), ( 1, 2.12 ), (1, 2.22 ), ( 2, 2.22 ), ( 2, 3.33 ), ( 3, 3.33 ), ( 3, 4.44 ), ( 3, 5.55 )"
+             );
+        assertResults
+            (
+             conn,
+             "select numericMode_15_bigger( b ) from numericMode_15_mode_inputs_big",
+             new String[][]
+             {
+                 { "3.330" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select numericMode_15( b ) from numericMode_15_mode_inputs_big",
+             new String[][]
+             {
+                 { "1.1" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, numericMode_15_bigger( b ) from numericMode_15_mode_inputs_big group by a",
+             new String[][]
+             {
+                 { "1", "2.220" },
+                 { "2", "3.330" },
+                 { "3", "5.550" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select a, numericMode_15( b ) from numericMode_15_mode_inputs_big group by a",
+             new String[][]
+             {
+                 { "1", "1.1" },
+                 { "2", "3.3" },
+                 { "3", "5.5" },
+             },
+             false
+             );
+    }
+    
 }

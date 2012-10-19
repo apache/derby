@@ -725,6 +725,14 @@ public class AggregateNode extends UnaryOperatorNode
     {
         if ( isUserDefinedAggregate() )
         {
+            //
+            // In theory, we could incur a StandardException while looking up the schema
+            // descriptor. In practice that would mean a seriously corrupted database and
+            // we would expect the schema resolution problem to have surfaced long before
+            // we got to this code. But, just in case, if we can't find the schema, we will return
+            // a different handle for the user-defined aggregate, in order to give the user
+            // some information.
+            //
             try {
                 return ((UserAggregateDefinition) uad).getAliasDescriptor().getQualifiedName();
             } catch (StandardException se)
