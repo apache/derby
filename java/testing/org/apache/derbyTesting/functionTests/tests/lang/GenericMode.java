@@ -32,7 +32,7 @@ import org.apache.derby.agg.Aggregator;
  * This is a generic mode aggregator for testing with many types.
  * </p>
  */
-public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V,V,GenericMode<V>>
+public  class   GenericMode<B extends Comparable<B>>    implements  Aggregator<B,B,GenericMode<B>>
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -56,7 +56,7 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private HashMap<V,Accumulator<V>>  _accumulators;
+    private HashMap<B,Accumulator<B>>  _accumulators;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -68,33 +68,33 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
     
     public  void    init()
     {
-        _accumulators = new HashMap<V,Accumulator<V>>();
+        _accumulators = new HashMap<B,Accumulator<B>>();
     }
-    public  void    accumulate( V value )
+    public  void    accumulate( B value )
     {
         getAccumulator( value ).add( 1 );
     }
-    public  void    merge( GenericMode<V> otherAggregator )
+    public  void    merge( GenericMode<B> otherAggregator )
     {
-        HashMap<V,Accumulator<V>>  otherAccumulators = otherAggregator._accumulators;
+        HashMap<B,Accumulator<B>>  otherAccumulators = otherAggregator._accumulators;
         
-        for ( V value : otherAccumulators.keySet() )
+        for ( B value : otherAccumulators.keySet() )
         {
             getAccumulator( value ).add( otherAccumulators.get( value ).getCount() );
         }
     }
 
-    public  V terminate()
+    public  B terminate()
     {
         return _accumulators.isEmpty() ? null : Collections.max( _accumulators.values() ).getValue();
     }
 
-    private Accumulator<V>   getAccumulator( V value )
+    private Accumulator<B>   getAccumulator( B value )
     {
-        Accumulator<V>   retval = _accumulators.get( value );
+        Accumulator<B>   retval = _accumulators.get( value );
         if ( retval == null )
         {
-            retval = new Accumulator<V>( value );
+            retval = new Accumulator<B>( value );
             _accumulators.put( value, retval );
         }
 
@@ -107,12 +107,12 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public  static  final   class   Accumulator<V extends Comparable<V>> implements  Comparable<Accumulator<V>>
+    public  static  final   class   Accumulator<B extends Comparable<B>> implements  Comparable<Accumulator<B>>
     {
-        private V _value;
+        private B _value;
         private int         _count;
 
-        public  Accumulator( V value )
+        public  Accumulator( B value )
         {
             _value = value;
             _count = 0;
@@ -120,11 +120,11 @@ public  class   GenericMode<V extends Comparable<V>>    implements  Aggregator<V
 
         public  void    add( int increment ) { _count += increment; }
 
-        public  V getValue() { return _value; }
+        public  B getValue() { return _value; }
         public  int     getCount() { return _count; }
 
         // Comparable behavior
-        public  int compareTo( Accumulator<V> that )
+        public  int compareTo( Accumulator<B> that )
         {
             int retval = this._count - that._count;
 

@@ -136,6 +136,10 @@ public class UserAggregateDefinition implements AggregateDefinition
                      );
             }
 
+            Class[]   genericParameterTypes = classFactory.getClassInspector().getGenericParameterTypes
+                ( derbyAggregatorInterface, userAggregatorClass );
+            if ( genericParameterTypes == null ) { genericParameterTypes = new Class[ AGGREGATOR_PARAM_COUNT ]; }
+
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
             DataTypeDescriptor  expectedReturnType = DataTypeDescriptor.getType( aai.getReturnType() );
@@ -153,19 +157,13 @@ public class UserAggregateDefinition implements AggregateDefinition
             Class[] inputBounds = typeBounds[ INPUT_TYPE ];
             for ( int i = 0; i < inputBounds.length; i++ )
             {
-                Class   inputBound = inputBounds[ i ];
-                
-                if ( !inputBound.isAssignableFrom( expectedInputClass ) )
-                {
-                    throw StandardException.newException
-                        (
-                         SQLState.LANG_UDA_WRONG_INPUT_TYPE,
-                         _alias.getSchemaName(),
-                         _alias.getName(),
-                         expectedInputClass.toString(),
-                         inputBound.toString()
-                         );
-                }
+                vetCompatibility
+                    ( inputBounds[ i ], expectedInputClass, SQLState.LANG_UDA_WRONG_INPUT_TYPE );
+            }
+            if ( genericParameterTypes[ INPUT_TYPE ] != null )
+            {
+                vetCompatibility
+                    ( genericParameterTypes[ INPUT_TYPE ], expectedInputClass, SQLState.LANG_UDA_WRONG_INPUT_TYPE );
             }
 
             //
@@ -175,19 +173,13 @@ public class UserAggregateDefinition implements AggregateDefinition
             Class[] returnBounds = typeBounds[ RETURN_TYPE ];
             for ( int i = 0; i < returnBounds.length; i++ )
             {
-                Class   returnBound = returnBounds[ i ];
-                
-                if ( !returnBound.isAssignableFrom( expectedReturnClass ) )
-                {
-                    throw StandardException.newException
-                        (
-                         SQLState.LANG_UDA_WRONG_RETURN_TYPE,
-                         _alias.getSchemaName(),
-                         _alias.getName(),
-                         expectedReturnClass.toString(),
-                         returnBound.toString()
-                     );
-                }
+                vetCompatibility
+                    ( returnBounds[ i ], expectedReturnClass, SQLState.LANG_UDA_WRONG_RETURN_TYPE );
+            }
+            if ( genericParameterTypes[ RETURN_TYPE ] != null )
+            {
+                vetCompatibility
+                    ( genericParameterTypes[ RETURN_TYPE ], expectedReturnClass, SQLState.LANG_UDA_WRONG_RETURN_TYPE );
             }
 
             aggregatorClass.append( ClassName.UserDefinedAggregator );
@@ -196,6 +188,25 @@ public class UserAggregateDefinition implements AggregateDefinition
 		}
 		catch (ClassNotFoundException cnfe) { throw aggregatorInstantiation( cnfe ); }
 	}
+
+    /**
+     * Verify that an actual type is compatible with the expected type.
+     */
+    private void    vetCompatibility( Class actualClass, Class expectedClass, String sqlState )
+        throws StandardException
+    {
+        if ( !actualClass.isAssignableFrom( expectedClass ) )
+        {
+            throw StandardException.newException
+                (
+                 sqlState,
+                 _alias.getSchemaName(),
+                 _alias.getName(),
+                 expectedClass.toString(),
+                 actualClass.toString()
+                 );
+        }
+    }
 
 	/**
 	 * Wrap the input operand in an implicit CAST node as necessary in order to

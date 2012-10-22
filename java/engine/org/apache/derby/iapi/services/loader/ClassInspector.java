@@ -495,6 +495,17 @@ public class ClassInspector
     }
     
 	/**
+	 * Given an implementation of a parameterized interface, return
+     * the actual types of the interface type variables. This method raises an exception if the
+     * JVM does not support generics. May return null or an array of nulls if type resolution fails.
+	 */
+    public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
+        throws StandardException
+	{
+		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
+    }
+    
+	/**
 	 * Get the parameter types for a method described by a Member as a String[].
 	 *
 	 * @param method	A Member describing a method

@@ -2215,4 +2215,47 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Verify that types fit within the most exact bound possible.
+     * </p>
+     */
+    public void test_16_exactBound() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // input bounds
+        goodStatement
+            (
+             conn,
+             "create derby aggregate bigintMode_16 for bigint\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table bigintMode_16_mode_inputs( a int, b bigint )"
+             );
+        expectCompilationError
+            ( INPUT_OUTSIDE_BOUNDS,
+              "select bigintMode_16( b ) from bigintMode_16_mode_inputs" );
+
+        // return bounds
+        goodStatement
+            (
+             conn,
+             "create derby aggregate intMode_16 for int returns varchar( 10 )\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode$IntMode'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table intMode_16_mode_inputs( a int, b int )"
+             );
+        expectCompilationError
+            ( RETURN_OUTSIDE_BOUNDS,
+              "select intMode_16( b ) from intMode_16_mode_inputs" );
+        
+    }
+
 }

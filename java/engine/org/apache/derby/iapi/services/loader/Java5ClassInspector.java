@@ -62,7 +62,7 @@ public class Java5ClassInspector extends ClassInspector
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // BEHAVIOR
+    // PUBLIC BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -100,6 +100,36 @@ public class Java5ClassInspector extends ClassInspector
         // couldn't find the interface we're looking for. check our superclass.
         return getTypeBounds( parameterizedInterface, implementation.getSuperclass() );
     }
+
+    @Override
+    public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
+        throws StandardException
+	{
+        // construct the inheritance chain stretching from the parameterized type
+        // down to the concrete implemention
+        ArrayList<Class<?>>    chain = getTypeChain( parameterizedType, implementation );
+
+        // walk the chain, filling in a map of generic types to their resolved types
+        HashMap<Type,Type>  resolvedTypes = getResolvedTypes( chain );
+
+        // compose the resolved types together in order to compute the actual
+        // classes which are plugged into the variables of the parameterized type
+        ArrayList<Class<?>>    parameterTypes = getParameterTypes( parameterizedType, resolvedTypes );
+
+        // turn the list into an array
+        if ( parameterTypes == null ) { return null; }
+
+        Class[] result = new Class[ parameterTypes.size() ];
+        parameterTypes.toArray( result );
+
+        return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS FOR getTypeBounds()
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Get the type bounds for all of the type variables of the given
@@ -148,6 +178,119 @@ public class Java5ClassInspector extends ClassInspector
         else { return null; }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS FOR getGenericParameterTypes()
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Construct an inheritance chain of types stretching from a supertype down
+     * to a concrete implementation.
+     */
+    private ArrayList<Class<?>>    getTypeChain( Class<?> chainEnd, Class<?> start )
+    {
+        ArrayList<Class<?>>    result = null;
+        
+        if ( start == null ) { return null; }
+        if ( !chainEnd.isAssignableFrom(  start ) ) { return null; }
+
+        if ( start == chainEnd )    { result = new ArrayList<Class<?>>(); }
+        if ( result == null )
+        {
+            result = getTypeChain( chainEnd, start.getSuperclass() );
+        
+            if ( result == null )
+            {
+                for ( Class<?> iface : start.getInterfaces() )
+                {
+                    result = getTypeChain( chainEnd, iface );
+                    if ( result != null ) { break; }
+                }
+            }
+        }
+
+        if ( result != null ) { result.add( start ); }
+
+        return result;
+    }
+
+    /**
+     * Given an inheritance chain of types, stretching from a superclass down
+     * to a terminal concrete class, construct a map of generic types to their
+     * resolved types.
+     */
+    private HashMap<Type,Type>  getResolvedTypes( ArrayList<Class<?>> chain )
+    {
+        if ( chain ==  null ) { return null; }
+        
+        HashMap<Type,Type>  resolvedTypes = new HashMap<Type,Type>();
+
+        for ( Class<?> klass : chain )
+        {
+            addResolvedTypes( resolvedTypes, klass.getGenericSuperclass() );
+
+            for ( Type iface : klass.getGenericInterfaces() )
+            {
+                addResolvedTypes( resolvedTypes, iface );
+            }
+        }
+
+        return resolvedTypes;
+    }
+
+    /**
+     * Given a generic type, add its parameter types to an evolving
+     * map of resolved types. Some of the resolved types may be
+     * generic type variables which will need further resolution from
+     * other generic types.
+     */
+    private void    addResolvedTypes
+        ( HashMap<Type,Type> resolvedTypes, Type genericType )
+    {
+        if ( genericType == null ) { return; }
+
+        if ( genericType instanceof ParameterizedType )
+        {
+            ParameterizedType   pt = (ParameterizedType) genericType;
+            Class       rawType = (Class) pt.getRawType();
+            
+            Type[] actualTypeArguments = pt.getActualTypeArguments();
+            TypeVariable[] typeParameters = rawType.getTypeParameters();
+            for (int i = 0; i < actualTypeArguments.length; i++)
+            {
+                resolvedTypes.put(typeParameters[i], actualTypeArguments[i]);
+            }
+        }
+    }
+
+    /**
+     * Given a map of resolved types, compose them together in order
+     * to resolve the actual concrete types that are plugged into the
+     * parameterized type.
+     */
+    private ArrayList<Class<?>>    getParameterTypes
+        ( Class<?> parameterizedType, HashMap<Type,Type> resolvedTypes )
+    {
+        if ( resolvedTypes == null ) { return null; }
+        
+        Type[] actualTypeArguments = parameterizedType.getTypeParameters();
+
+        ArrayList<Class<?>> result = new ArrayList<Class<?>>();
+        
+        // resolve types by composing type variables.
+        for (Type baseType: actualTypeArguments)
+        {
+            while ( resolvedTypes.containsKey( baseType ) )
+            {
+                baseType = resolvedTypes.get(baseType);
+            }
+            
+            result.add( getRawType( baseType ) );
+        }
+        
+        return result;
+    }
 
 }
 
