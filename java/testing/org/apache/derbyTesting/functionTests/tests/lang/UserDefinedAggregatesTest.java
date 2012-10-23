@@ -74,6 +74,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
     public static final String MISSING_CLASS = "42ZC8";
     public static final String AGG_IN_ON_CLAUSE = "42Z07";
     public static final String BAD_CONSTRAINT = "42Y01";
+    public static final String DEPENDENCY_VIOLATION = "X0Y30";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -2256,6 +2257,56 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
             ( RETURN_OUTSIDE_BOUNDS,
               "select intMode_16( b ) from intMode_16_mode_inputs" );
         
+    }
+
+    /**
+     * <p>
+     * Verify that you can't drop a user-defined type if a user-defined aggregate depends on it.
+     * </p>
+     */
+    public void test_17_udtDependencies() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create type Price_17 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             conn,
+             "create type Price_17_2 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             conn,
+             "create derby aggregate priceMode_17 for Price_17 returns Price_17_2\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'\n"
+             );
+
+        // can't drop the types because the aggregate depends on them
+        expectExecutionError
+            ( conn, DEPENDENCY_VIOLATION, "drop type Price_17 restrict" );
+        expectExecutionError
+            ( conn, DEPENDENCY_VIOLATION, "drop type Price_17_2 restrict" );
+
+        // once you drop the aggregate, you can drop the types
+        goodStatement
+            (
+             conn,
+             "drop derby aggregate priceMode_17 restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "drop type Price_17 restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "drop type Price_17_2 restrict"
+             );
     }
 
 }

@@ -328,4 +328,115 @@ public class UDAPermsTest extends GeneratedColumnsHelper
              );
     }
     
+   /**
+     * <p>
+     * Test that you need USAGE privilege on user-defined types in order to use them in
+     * user-defined aggregates.
+     * </p>
+     */
+    public  void    test_003_typePrivs()
+        throws Exception
+    {
+        Connection  ruthConnection = openUserConnection( RUTH );
+        Connection  aliceConnection = openUserConnection( ALICE );
+
+        // can't revoke USAGE on a type if an aggregate's input/return depends on it
+        goodStatement
+            (
+             ruthConnection,
+             "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+
+        String grantUsage = "grant usage on type Price to public";
+        String revokeUsage = "revoke usage on type Price from public restrict";
+        String createStatement =
+            "create derby aggregate priceMode for ruth.Price\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'\n";
+        String dropStatement = "drop derby aggregate priceMode restrict";
+        String badRevokeSQLState = ROUTINE_DEPENDS_ON_TYPE;
+
+        verifyRevokePrivilege
+            (
+             ruthConnection,
+             aliceConnection,
+             grantUsage,
+             revokeUsage,
+             createStatement,
+             dropStatement,
+             badRevokeSQLState
+             );
+        
+        // can't revoke USAGE on a type if an aggregate's input depends on it
+        goodStatement
+            (
+             ruthConnection,
+             "create type Price_input external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create type Price_return external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "grant usage on type Price_return to public"
+             );
+
+        grantUsage = "grant usage on type Price_input to public";
+        revokeUsage = "revoke usage on type Price_input from public restrict";
+        createStatement =
+            "create derby aggregate priceMode for ruth.Price_input returns ruth.Price_return\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'\n";
+        dropStatement = "drop derby aggregate priceMode restrict";
+        badRevokeSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        
+        verifyRevokePrivilege
+            (
+             ruthConnection,
+             aliceConnection,
+             grantUsage,
+             revokeUsage,
+             createStatement,
+             dropStatement,
+             badRevokeSQLState
+             );
+        
+        // can't revoke USAGE on a type if an aggregate's return value depends on it
+        goodStatement
+            (
+             ruthConnection,
+             "create type Price_input_2 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create type Price_return_2 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "grant usage on type Price_input_2 to public"
+             );
+
+        grantUsage = "grant usage on type Price_return_2 to public";
+        revokeUsage = "revoke usage on type Price_return_2 from public restrict";
+        createStatement =
+            "create derby aggregate priceMode for ruth.Price_input_2 returns ruth.Price_return_2\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.GenericMode'\n";
+        dropStatement = "drop derby aggregate priceMode restrict";
+        badRevokeSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        
+        verifyRevokePrivilege
+            (
+             ruthConnection,
+             aliceConnection,
+             grantUsage,
+             revokeUsage,
+             createStatement,
+             dropStatement,
+             badRevokeSQLState
+             );
+    }
+    
 }
