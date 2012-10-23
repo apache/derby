@@ -182,7 +182,7 @@ public final class AliasDescriptor
 	 * @return	A String containing the name of the schema that the alias
 	 *		lives in.
 	 */
-	public String	getSchemaName() throws StandardException
+	public String getSchemaName()
 	{
 		return schemaDescriptor.getSchemaName();
 	}
@@ -192,7 +192,7 @@ public final class AliasDescriptor
 	 *
 	 * @return	A String containing the name of the table.
 	 */
-	public String	getQualifiedName() throws StandardException
+	public String getQualifiedName()
 	{
         return IdUtil.mkQualifiedName(getSchemaName(), aliasName);
 	}

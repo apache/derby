@@ -251,7 +251,6 @@ public class UserAggregateDefinition implements AggregateDefinition
      * Make a "Could not instantiate aggregator" exception.
      */
     private StandardException   aggregatorInstantiation( Throwable t )
-        throws StandardException
     {
         return StandardException.newException
             (
