@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -238,39 +239,5 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         // And we should only get one exception. (One transaction should be
         // picked as victim, the other ones should be able to complete.)
         assertEquals("Number of victims", 1, exceptions.size());
-    }
-
-    /**
-     * In the absence of java.util.concurrent.CyclicBarrier on many of the
-     * platforms we test, create our own barrier class. This class allows
-     * threads to wait for one another on specific locations, so that they
-     * know they're all in the expected state.
-     */
-    private static class Barrier {
-        /** Number of threads to wait for at the barrier. */
-        int numThreads;
-
-        /** Create a barrier for the specified number of threads. */
-        Barrier(int numThreads) {
-            this.numThreads = numThreads;
-        }
-
-        /**
-         * Wait until {@code numThreads} have called {@code await()} on this
-         * barrier, then proceed.
-         */
-        synchronized void await() throws InterruptedException {
-            assertTrue("Too many threads reached the barrier", numThreads > 0);
-
-            if (--numThreads <= 0) {
-                // All threads have reached the barrier. Go ahead!
-                notifyAll();
-            }
-
-            // Some threads haven't reached the barrier yet. Let's wait.
-            while (numThreads > 0) {
-                wait();
-            }
-        }
     }
 }

@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -29,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -130,43 +132,75 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
      */
     public void testDeadlockTimeout()
             throws SQLException, InterruptedException {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
+
+        // Make the main transaction (T1) lock row 1 exclusively
         Statement s = createStatement();
         assertUpdateCount(s, 1, "update t set text='xxx' where id=1");
 
-        // start another transaction that needs to wait for the first one
+        // Start another transaction (T2) that locks row 2 exclusively
         Connection c2 = openDefaultConnection();
         c2.setAutoCommit(false);
-        final Statement s2 = c2.createStatement();
+        Statement s2 = c2.createStatement();
         assertUpdateCount(s2, 1, "update t set text='yyy' where id=2");
+
+        // Prepare statements for T1 to lock row 2 (shared), and for T2 to
+        // lock row 1 (shared).
+        PreparedStatement ps1 = prepareStatement("select * from t where id=2");
+        final PreparedStatement ps2 =
+                c2.prepareStatement("select * from t where id=1");
+
+        // Create a barrier for the two threads to synchronize.
+        final Barrier barrier = new Barrier(2);
+
         final SQLException[] holder = new SQLException[2];
+        final Throwable[] unexpected = new Throwable[1];
         Thread t = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        // will wait since the other transaction has locked the
-                        // row exclusively
-                        JDBC.assertDrainResults(
-                            s2.executeQuery("select * from t where id=1"));
+                        // Let the main thread know the helper thread has
+                        // started. The race for the locks can start.
+                        barrier.await();
+
+                        // This statement will be blocked because T1 holds
+                        // an exclusive lock on the row we want.
+                        JDBC.assertDrainResults(ps2.executeQuery());
                     } catch (SQLException e) {
                         holder[0] = e;
+                    } catch (Throwable t) {
+                        unexpected[0] = t;
                     }
                 }
             });
         t.start();
 
-        // Execute a query that needs to wait for c2 to finish. Now, c1 is
-        // waiting for c2, and c2 is waiting for c1.
+        // Wait until the helper thread has started. Once the call returns,
+        // both threads are ready, and the race for the locks can start.
+        barrier.await();
+
+        // This statement will be blocked because T2 holds an exclusive lock
+        // on the row we want. So now we have T1 waiting for T2, and T2 waiting
+        // for T1, and one of the transactions should be terminated because of
+        // the deadlock.
         try {
-            JDBC.assertDrainResults(
-                s.executeQuery("select * from t where id=2"));
+            JDBC.assertDrainResults(ps1.executeQuery());
         } catch (SQLException e) {
             holder[1] = e;
         }
 
+        // Wait for the helper thread to complete.
         t.join();
 
+        // If the helper thread failed with something other than an
+        // SQLException, report it.
+        if (unexpected[0] != null) {
+            fail("Helper thread failed unexpectedly", unexpected[0]);
+        }
+
+        // Check that exactly one of the threads failed, and that the failure
+        // was caused by a deadlock. It is not deterministic which of the two
+        // threads will be terminated.
         String msg;
-        // check that only one of the transactions failed
         if (holder[0] != null) {
             assertSQLState("Not a deadlock", "40001", holder[0]);
             assertNull("Only one of the waiters should be aborted", holder[1]);

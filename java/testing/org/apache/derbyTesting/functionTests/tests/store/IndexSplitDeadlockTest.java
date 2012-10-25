@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -831,40 +832,6 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
             thread.join();
             if (error != null) {
                 throw error;
-            }
-        }
-    }
-
-    /**
-     * A poor man's substitute for java.util.concurrent.CyclicBarrier.
-     */
-    private static class Barrier {
-        /** The number of parties that still haven't reached the barrier. */
-        private int n;
-
-        /**
-         * Create a barrier that blocks until the specified number of threads
-         * have reached the barrier point.
-         *
-         * @param parties the number of parties to wait for at the barrier
-         */
-        Barrier(int parties) {
-            n = parties;
-        }
-
-        /**
-         * Wait until all parties have reached the barrier.
-         *
-         * @throws InterruptedException if the thread is interrupted
-         */
-        synchronized void await() throws InterruptedException {
-            assertTrue("Too many parties at barrier", n > 0);
-
-            n--;
-            notifyAll();
-
-            while (n > 0) {
-                wait();
             }
         }
     }
