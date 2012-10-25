@@ -25,7 +25,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import org.apache.derby.io.StorageRandomAccessFile;
 
 /**
@@ -43,19 +42,19 @@ public class VirtualRandomAccessFile
     /** Current position / file pointer. */
     private long fp;
     /** Stream used to read from the source entry. */
-    private BlockedByteArrayInputStream bIn;
+    private final BlockedByteArrayInputStream bIn;
     /** Data input stream on top of the source input stream. */
-    private DataInputStream dIs;
+    private final DataInputStream dIs;
     /**
      * Stream used to write into the source entry. Will be {@code null} if the
      * file is opened in read-only mode.
      */
-    private BlockedByteArrayOutputStream bOut;
+    private final BlockedByteArrayOutputStream bOut;
     /**
      * Data output stream on top of the source output stream. Will be
      * {@code null} if the file is opened in read-only mode.
      */
-    private DataOutputStream dOs;
+    private final DataOutputStream dOs;
 
     /**
      * Creates a new virtual random access file.
@@ -85,11 +84,9 @@ public class VirtualRandomAccessFile
 
     public void close() throws IOException {
         dIs.close();
-        dIs = null;
         // If opened in read-only mode, the output streams are null.
         if (dOs != null) {
             dOs.close();
-            dOs = null;
         }
         fp = Long.MIN_VALUE;
     }

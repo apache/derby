@@ -41,7 +41,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
  * </ul>
  * <p>
  * When a method that requires access to the file data or to know if the file
- * exists or not, the assoicated data store is consulted.
+ * exists or not, the associated data store is consulted.
  */
 public class VirtualFile
         implements StorageFile {

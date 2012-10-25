@@ -336,6 +336,19 @@ public class VirtualFileTest
         assertTrue(vf.isDirectory());
     }
 
+    /**
+     * Verify that the close() method of VirtualRandomAccessFile can be
+     * called more than once.
+     */
+    public void testCloseIdempotent() throws IOException {
+        DataStore store = getStore();
+        VirtualFile f = new VirtualFile("afile", store);
+        StorageRandomAccessFile raf = f.getRandomAccessFile("rw");
+        raf.close();
+        // The second close() used to throw NullPointerException (DERBY-5960)
+        raf.close();
+    }
+
     public static Test suite() {
         return new TestSuite(VirtualFileTest.class);
     }
