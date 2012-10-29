@@ -77,6 +77,9 @@ connect 'jdbc:derby:;shutdown=true';
 -- a new boot password, it should fail.
 connect 'jdbc:derby:jar:(ina.jar)jdb1;dataEncryption=true;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
 
+-- Decrypting a read-only db should also fail.
+connect 'jdbc:derby:jar:(ina.jar)jdb1;bootPassword=xyz1234abc;decryptDatabase=true';
+
 -- testing (re) encryption of a database 
 -- when the log arhive mode enabled -----
 
@@ -127,6 +130,10 @@ connect 'jdbc:derby:wombat;shutdown=true';
 -- attempt to re-encrypt the database , with log archive mode enabled.
 -- it should fail.
 connect 'jdbc:derby:wombat;dataEncryption=true;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+
+-- Attempt to decrypt the database with log archive mode enabled.
+-- It should fail.
+connect 'jdbc:derby:wombat;bootPassword=xyz1234abc;decryptDatabase=true';
 
 -- reboot the db and disable the log archive mode
 connect 'jdbc:derby:wombat;bootPassword=xyz1234abc';
@@ -183,7 +190,14 @@ connect 'jdbc:derby:wombat;shutdown=true';
 connect 'jdbc:derby:wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
 select * from t1;
 select count(*) from emp;
+disconnect;
+connect 'jdbc:derby:wombat;shutdown=true';
 
+-- Finally, decrypt the database with log archive mode disabled.
+-- It should pass.
+connect 'jdbc:derby:wombat;encryptionKey=5666768616263646;decryptDatabase=true';
+select * from t1;
+select count(*) from emp;
 disconnect;
 connect 'jdbc:derby:wombat;shutdown=true';
 

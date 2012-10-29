@@ -241,16 +241,10 @@ public interface SQLState {
     String ENCRYPTION_INVALID_EXKEY_LENGTH          = "XBCXM.S";
     String ENCRYPTION_ILLEGAL_EXKEY_CHARS           = "XBCXN.S";
     String ENCRYPTION_PREPARED_XACT_EXIST             = "XBCXO.S";
-    String REENCRYPTION_PREPARED_XACT_EXIST           = "XBCXP.S";
     String CANNOT_ENCRYPT_READONLY_DATABASE           = "XBCXQ.S";
-    String CANNOT_REENCRYPT_READONLY_DATABASE         = "XBCXR.S";
     String CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE       = "XBCXS.S";
-    String CANNOT_REENCRYPT_LOG_ARCHIVED_DATABASE     = "XBCXT.S";
     String DATABASE_ENCRYPTION_FAILED                 = "XBCXU.S";
-    String DATABASE_REENCRYPTION_FAILED               = "XBCXV.S";
     String DIGEST_NO_SUCH_ALGORITHM                   = "XBCXW.S";
-    String DATABASE_DECRYPTION_FAILED                 = "XBCXX.S";
-    String DATABASE_DECRYPTION_DENIED                 = "XBCXY.S";
 
 	/*
 	** Cache Service

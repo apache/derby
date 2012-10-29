@@ -3764,43 +3764,22 @@ Guide.
 
             <msg>
                 <name>XBCXO.S</name>
-                <text>Cannot encrypt the database when there is a global transaction in the prepared state.</text>
-            </msg>
-
-            <msg>
-                <name>XBCXP.S</name>
-                <text>Cannot re-encrypt the database with a new boot password or an external encryption key when there is a global transaction in the prepared state.</text>
+                <text>Cannot encrypt, re-encrypt or decrypt the database when there is a global transaction in the prepared state.</text>
             </msg>
 
             <msg>
                 <name>XBCXQ.S</name>
-                <text>Cannot configure a read-only database for encryption.</text>
-            </msg>
-
-            <msg>
-                <name>XBCXR.S</name>
-                <text>Cannot re-encrypt a read-only database with a new boot password or an external encryption key .</text>
+                <text>Cannot encrypt, re-encrypt or decrypt a read-only database.</text>
             </msg>
 
             <msg>
                 <name>XBCXS.S</name>
-                <text>Cannot configure a database for encryption, when database is in the log archive mode.</text>
-            </msg>
-
-            <msg>
-                <name>XBCXT.S</name>
-                <text>Cannot re-encrypt a database with a new boot password or an external encryption key, when database is in the log archive mode.</text>
+                <text>Cannot encrypt, re-encrypt or decrypt a database when it is in the log archive mode.</text>
             </msg>
 
             <msg>
                 <name>XBCXU.S</name>
-                <text>Encryption of an un-encrypted database failed: {0}</text>
-                <arg>failureMessage</arg>
-            </msg>
-
-            <msg>
-                <name>XBCXV.S</name>
-                <text>Encryption of an encrypted database with a new key or a new password failed: {0}</text>
+                <text>Encryption, re-encryption or decryption of a database failed: {0}</text>
                 <arg>failureMessage</arg>
             </msg>
 
@@ -3810,17 +3789,6 @@ Guide.
                 <arg>algorithmName</arg>
             </msg>
 
-            <msg>
-                <name>XBCXX.S</name>
-                <text>Database decryption failed: {0}</text>
-                <arg>failureMessage</arg>
-            </msg>
-
-            <msg>
-                <name>XBCXY.S</name>
-                <text>Cannot decrypt database because of the database state: {0}</text>
-                <arg>databaseState</arg>
-            </msg>
         </family>
 
 

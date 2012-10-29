@@ -99,6 +99,10 @@ connect 'jdbc:derby:;shutdown=true';
 -- after recovery.
 connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
 
+-- Attempt to decrypt the database.
+-- This should fail because of the global transaction in the prepared state.
+connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc;decryptDatabase=true';
+
 -- now reboot the db and commit the transaction in the prepared state. 
 connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc';
 disconnect;

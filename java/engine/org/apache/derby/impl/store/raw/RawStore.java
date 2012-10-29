@@ -1318,23 +1318,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // connection URL by mistake on an already encrypted database,
             // it is ignored.
 
-            // Prevent attempt to (re)encrypt a read-only database.
-            if (encryptDatabase) {
-                if (isReadOnly()) {
-                    if (reEncrypt) {
-                        throw StandardException.newException(
-                                 SQLState.CANNOT_REENCRYPT_READONLY_DATABASE);
-                    } else {
-                        throw StandardException.newException(
-                                 SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
-                    }
-                }
-            }
-            // Prevent attempt to decrypt a read-only database.
-            if (decryptDatabase && isReadOnly()) {
+            // Prevent attempts to (re)encrypt or decrypt a read-only database.
+            if ((encryptDatabase || decryptDatabase) && isReadOnly()) {
                 throw StandardException.newException(
-                        SQLState.DATABASE_DECRYPTION_DENIED,
-                        "read-only");
+                        SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
             }
         }
 
@@ -1581,8 +1568,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             if (SanityManager.DEBUG_ON(debugFlag))
             {
                StandardException se = StandardException.newException(
-                                      (reEncrypt ? SQLState.DATABASE_REENCRYPTION_FAILED :
-                                      SQLState.DATABASE_ENCRYPTION_FAILED),
+                                      SQLState.DATABASE_ENCRYPTION_FAILED,
                                       debugFlag);
                markCorrupt(se);
                throw se;
@@ -1868,15 +1854,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             transaction.close(); 
 
         } catch (StandardException se) {
-            String sqlState;
-            if (decryptDatabase) {
-                sqlState = SQLState.DATABASE_DECRYPTION_FAILED;
-            } else if (reEncrypt) {
-                sqlState = SQLState.DATABASE_REENCRYPTION_FAILED;
-            } else {
-                sqlState = SQLState.DATABASE_ENCRYPTION_FAILED;
-            }
-            throw StandardException.newException(sqlState, se, se.getMessage());
+            throw StandardException.newException(
+                SQLState.DATABASE_ENCRYPTION_FAILED, se, se.getMessage());
         } finally {
             // clear the new encryption engines.
             newDecryptionEngine = null;   
@@ -2145,17 +2124,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // be read once database is reconfigure with new encryption 
         // key.
         if (xactFactory.hasPreparedXact()) {
-            if (decrypt) {
-                throw StandardException.newException(
-                        SQLState.DATABASE_DECRYPTION_DENIED,
-                        "prepared global transaction");
-            } else if (reEncrypt) {
-                throw StandardException.newException(
-                       SQLState.REENCRYPTION_PREPARED_XACT_EXIST);
-            } else {
-                throw StandardException.newException(
-                       SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
-            }
+            throw StandardException.newException(
+                    SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
         }
 
 
@@ -2168,17 +2138,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // when rollforward recovery is performed. 
     
         if (logFactory.logArchived()) {
-            if (decrypt) {
-                throw StandardException.newException(
-                        SQLState.DATABASE_DECRYPTION_DENIED,
-                        "log archived");
-            } else if (reEncrypt) {
-                throw StandardException.newException(
-                       SQLState.CANNOT_REENCRYPT_LOG_ARCHIVED_DATABASE);
-            } else {
-                throw StandardException.newException(
-                       SQLState.CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE);
-            }
+            throw StandardException.newException(
+                   SQLState.CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE);
         }
     }
 
