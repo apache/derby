@@ -446,7 +446,6 @@ final class StorageFactoryService implements PersistentService
                                 fileReadMeDB = fileReadMe.getRandomAccessFile( "rw");
                                 fileReadMeDB.writeUTF(MessageService.getTextMessage(
                                     MessageId.README_AT_DB_LEVEL));
-                                fileReadMeDB.close();
                             }
                             catch (IOException ioe)
                             {

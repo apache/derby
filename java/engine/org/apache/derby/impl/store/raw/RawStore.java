@@ -149,6 +149,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private static final int STORAGE_FILE_GET_CANONICALPATH_ACTION = 16;
     private static final int COPY_STORAGE_FILE_TO_STORAGE_ACTION = 17;
     private static final int STORAGE_FILE_DELETE_ACTION = 18;
+    private String activePerms;
 
 	public RawStore() {
 	}
@@ -2371,6 +2372,21 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
     }
 
+    private synchronized StorageRandomAccessFile privRandomAccessFile(StorageFile file, String perms)
+        throws IOException
+    {
+        actionCode = REGULAR_FILE_EXISTS_ACTION;
+        actionStorageFile = file;
+        activePerms = perms;
+        try
+        {
+            return (StorageRandomAccessFile) java.security.AccessController.doPrivileged(this);
+        }
+        catch (java.security.PrivilegedActionException pae)
+        {
+            throw (IOException) pae.getException();
+        }
+    }
 
     private synchronized boolean privDelete( File file)
     {
@@ -2777,26 +2793,28 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             "seg0",
             PersistentService.DB_README_FILE_NAME);
         StorageRandomAccessFile fileReadMeDB=null;
-        try {
-            fileReadMeDB = fileReadMe.getRandomAccessFile("rw");
-            fileReadMeDB.writeUTF(MessageService.getTextMessage(
-                MessageId.README_AT_SEG_LEVEL));
-            fileReadMeDB.close();
-        }
-        catch (IOException ioe)
-        {
-        }
-        finally
-        {
-            if (fileReadMeDB != null)
+        
+        if (privExists(fileReadMe)) {
+            try {
+                fileReadMeDB = privRandomAccessFile(fileReadMe, "rw");
+                fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                    MessageId.README_AT_LOG_LEVEL));
+            }
+            catch (IOException ioe)
             {
-                try
+            }
+            finally
+            {
+                if (fileReadMeDB != null)
                 {
-                    fileReadMeDB.close();
-                }
-                catch (IOException ioe)
-                {
-                    // Ignore exception on close
+                    try
+                    {
+                        fileReadMeDB.close();
+                    }
+                    catch (IOException ioe)
+                    {
+                        // Ignore exception on close
+                    }
                 }
             }
         }

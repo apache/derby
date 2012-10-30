@@ -8428,10 +8428,10 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <text>
 # *************************************************************************
 # ***              Do not touch files in this directory!                ***
-# *** FILES IN THIS DIRECTORY AND SUB-DIRECTORIES CONSTITUES DERBY      ***
-# *** DATABASE WHICH INCLUDES THE DATA(USER AND SYSTEM) AND THE         ***
+# *** FILES IN THIS DIRECTORY AND SUB-DIRECTORIES CONSTITUE DERBY       ***
+# *** DATABASE WHICH INCLUDES THE DATA (USER AND SYSTEM) AND THE        ***
 # *** NECESSARY FILES FOR DATABASE RECOVERY.                            ***
-# *** EDITING, ADDITING OR DELETING ANY OF THESE FILES MAY CAUSE DATA   ***
+# *** EDITING, ADDING OR DELETING ANY OF THESE FILES MAY CAUSE DATA   ***
 # *** CORRUPTION AND LEAVE THE DATABASE IN NON-RECOVERABLE STATE.       ***
 # *************************************************************************</text>
                 <comment>Translators: Please translate the ALL CAPS words.</comment>

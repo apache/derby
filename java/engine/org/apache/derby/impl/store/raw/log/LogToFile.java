@@ -2738,27 +2738,28 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             StorageFile fileReadMe = logStorageFactory.newStorageFile(
                 LogFactory.LOG_DIRECTORY_NAME,
                 PersistentService.DB_README_FILE_NAME);
-            StorageRandomAccessFile fileReadMeDB=null;
-            try {
-                fileReadMeDB = fileReadMe.getRandomAccessFile("rw");
-                fileReadMeDB.writeUTF(MessageService.getTextMessage(
-                    MessageId.README_AT_LOG_LEVEL));
-                fileReadMeDB.close();
-            }
-            catch (IOException ioe)
-            {
-            }
-            finally
-            {
-                if (fileReadMeDB != null)
+            if (privExists(fileReadMe)) {
+                StorageRandomAccessFile fileReadMeDB=null;
+                try {
+                    fileReadMeDB = privRandomAccessFile(fileReadMe, "rw");
+                    fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                        MessageId.README_AT_LOG_LEVEL));
+                }
+                catch (IOException ioe)
                 {
-                    try
+                }
+                finally
+                {
+                    if (fileReadMeDB != null)
                     {
-                        fileReadMeDB.close();
-                    }
-                    catch (IOException ioe)
-                    {
-                        // Ignore exception on close
+                        try
+                        {
+                            fileReadMeDB.close();
+                        }
+                        catch (IOException ioe)
+                        {
+                            // Ignore exception on close
+                        }
                     }
                 }
             }
