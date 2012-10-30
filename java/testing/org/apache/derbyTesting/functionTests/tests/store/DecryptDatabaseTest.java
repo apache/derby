@@ -148,6 +148,15 @@ public class DecryptDatabaseTest
         } catch (SQLException sqle) {
             assertSQLState("XBM06", sqle);
         }
+        
+        // Bad setting for decryptDatabase
+        try {
+            connect( false, BOOTPW, "decryptDatabase=fred" );
+            fail( "bad decryptDatabase setting not detected" );
+        } catch (SQLException sqle) {
+            assertSQLState("XJ05B", sqle);
+        }
+
         connect(false, BOOTPW, null);
     }
 

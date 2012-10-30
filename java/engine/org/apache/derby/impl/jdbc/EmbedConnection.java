@@ -770,9 +770,11 @@ public class EmbedConnection implements EngineConnection
      * @return {@code true} if a boot will perform a cryptographic operation on
      *      the database.
      */
-    private boolean isCryptoBoot(Properties p) {
+    private boolean isCryptoBoot(Properties p)
+        throws SQLException
+    {
         return (isTrue(p, Attribute.DATA_ENCRYPTION) ||
-                isTrue(p, Attribute.DECRYPT_DATABASE) ||
+                vetTrue(p, Attribute.DECRYPT_DATABASE) ||
                 isSet(p, Attribute.NEW_BOOT_PASSWORD) ||
                 isSet(p, Attribute.NEW_CRYPTO_EXTERNAL_KEY));
 	}
@@ -847,6 +849,22 @@ public class EmbedConnection implements EngineConnection
     /** Tells if the attribute/property has the value {@code true}. */
     private static boolean isTrue(Properties p, String attribute) {
         return Boolean.valueOf(p.getProperty(attribute)).booleanValue();
+    }
+
+    /**
+     * Returns true if the attribute exists and is set to true.
+     * Raises an exception if the attribute exists and is set to something else.
+     */
+    private static boolean vetTrue(Properties p, String attribute)
+        throws SQLException
+    {
+        String  value = p.getProperty( attribute );
+        if ( value == null ) { return false; }
+
+        if ( Boolean.valueOf( value ).booleanValue() ) { return true; }
+
+        throw newSQLException
+            ( SQLState.INVALID_ATTRIBUTE, attribute, value, Boolean.TRUE.toString() );
     }
 
     private String getReplicationOperation(Properties p) 
@@ -3168,14 +3186,17 @@ public class EmbedConnection implements EngineConnection
         return Util.getExceptionFactory();
     }
 
-	protected SQLException newSQLException(String messageId) {
+	protected static SQLException newSQLException(String messageId) {
 		return Util.generateCsSQLException(messageId);
 	}
-	protected SQLException newSQLException(String messageId, Object arg1) {
+	protected static SQLException newSQLException(String messageId, Object arg1) {
 		return Util.generateCsSQLException(messageId, arg1);
 	}
-	protected SQLException newSQLException(String messageId, Object arg1, Object arg2) {
+	protected static SQLException newSQLException(String messageId, Object arg1, Object arg2) {
 		return Util.generateCsSQLException(messageId, arg1, arg2);
+	}
+	protected static SQLException newSQLException(String messageId, Object arg1, Object arg2, Object arg3) {
+		return Util.generateCsSQLException(messageId, arg1, arg2, arg3);
 	}
 
 	/////////////////////////////////////////////////////////////////////////
