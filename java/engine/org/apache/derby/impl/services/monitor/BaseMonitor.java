@@ -1824,6 +1824,12 @@ nextModule:
 
 			instance = ts.bootModule(create, null, serviceKey, serviceProperties);
 
+            //Put a readme file in database directory, alerting users to not 
+            // touch or remove any of the files there 
+            if (create) {
+                provider.createDataWarningFile(usProperties.getStorageFactory());
+            }
+			
 			if (create || inRestore) {
 				// remove all the in-memory properties
 				provider.saveServiceProperties(serviceName, usProperties.getStorageFactory(),

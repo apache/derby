@@ -35,6 +35,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
+import org.apache.derby.io.StorageRandomAccessFile;
 
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
@@ -424,6 +425,53 @@ final class StorageFactoryService implements PersistentService
         catch( PrivilegedActionException pae) { throw (StandardException) pae.getException();}
 	} // end of saveServiceProperties
 
+	
+    /** @see PersistentService#createDataWarningFile */
+    public void createDataWarningFile(StorageFactory sf) throws StandardException {
+        if( ! (sf instanceof WritableStorageFactory))
+            throw StandardException.newException(SQLState.READ_ONLY_SERVICE);
+        final WritableStorageFactory storageFactory = (WritableStorageFactory) sf;
+        try
+        {
+            AccessController.doPrivileged(
+            	    new PrivilegedExceptionAction()
+            	    {
+            	        public Object run() throws StandardException
+            	        {
+            	            StorageRandomAccessFile fileReadMeDB=null;
+            	            try 
+            	            {
+            	                StorageFile fileReadMe = storageFactory.newStorageFile(
+            	                    PersistentService.DB_README_FILE_NAME);
+                                fileReadMeDB = fileReadMe.getRandomAccessFile( "rw");
+                                fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                                    MessageId.README_AT_DB_LEVEL));
+                                fileReadMeDB.close();
+                            }
+                            catch (IOException ioe)
+                            {
+                            }
+                            finally
+                            {
+                                if (fileReadMeDB != null)
+                                {
+                                    try
+                                    {
+                                        fileReadMeDB.close();
+                                    }
+                                    catch (IOException ioe)
+                                    {
+                                        // Ignore exception on close
+                                    }
+                                }
+                            }
+                            return null;
+                        }
+                    }
+                );
+        }
+        catch( PrivilegedActionException pae) { throw (StandardException) pae.getException();}
+    } // end of createDataWarningFile
 
     /**
      * Save service.properties during backup

@@ -1149,6 +1149,12 @@ public abstract class RAMAccessManager
         // db would fail when trying to create this first file in seg0.
         xactProperties = new PropertyConglomerate(tc, create, startParams, pf);
 
+        //Put a readme file in seg0 directory, alerting users to not 
+        // touch or remove any of the files there 
+        if(create) {
+            rawstore.createDataWarningFile();
+        }
+
         // see if there is any properties that raw store needs to know
         // about
         rawstore.getRawStoreProperties(tc);

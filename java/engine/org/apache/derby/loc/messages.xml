@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE messages SYSTEM "messages.dtd">
 
 <!-- 
@@ -8421,6 +8421,46 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <name>M004</name>
                 <text>Failed to delete leftover service properties backup file, delete it manually: {0}</text>
                 <arg>servicePropertiesBackupFile</arg>
+            </msg>
+
+            <msg>
+                <name>M005</name>
+                <text>
+# *************************************************************************
+# ***              Do not touch files in this directory!                ***
+# *** FILES IN THIS DIRECTORY AND SUB-DIRECTORIES CONSTITUES DERBY      ***
+# *** DATABASE WHICH INCLUDES THE DATA(USER AND SYSTEM) AND THE         ***
+# *** NECESSARY FILES FOR DATABASE RECOVERY.                            ***
+# *** EDITING, ADDITING OR DELETING ANY OF THESE FILES MAY CAUSE DATA   ***
+# *** CORRUPTION AND LEAVE THE DATABASE IN NON-RECOVERABLE STATE.       ***
+# *************************************************************************</text>
+                <comment>Translators: Please translate the ALL CAPS words.</comment>
+            </msg>
+
+            <msg>
+                <name>M006</name>
+                <text>
+# *************************************************************************
+# ***              Do not touch files in this directory!                ***
+# *** FILES IN THIS DIRECTORY ARE USED BY THE DERBY DATABASE RECOVERY   ***
+# *** SYSTEM. EDITING, ADDING OR DELETING FILES IN THIS DIRECTORY WILL  ***
+# *** CAUSE THE DERBY RECOVERY SYSTEM TO FAIL LEADING TO UNRECOVERABLE  ***
+# *** CORRUPT DATABASES.                                                ***
+# *************************************************************************</text>
+                <comment>Translators: Please translate the ALL CAPS words.</comment>
+            </msg>
+
+            <msg>
+                <name>M007</name>
+                <text>
+# *************************************************************************
+# ***              Do not touch files in this directory!                ***
+# *** FILES IN THIS DIRECTORY ARE USED BY THE DERBY DATABASE TO STORE   *** 
+# *** USER AND SYSTEM DATA. EDITING, ADDING, OR DELETING FILES IN THIS  ***
+# *** DIRECTORY WILL CORRUPT THE ASSOCIATED DERBY DATABASE, AND WILL    ***
+# *** NOT BE RECOVERABLE.                                               ***
+# *************************************************************************</text>
+                <comment>Translators: Please translate the ALL CAPS words.</comment>
             </msg>
 
             <msg>

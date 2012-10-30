@@ -2732,8 +2732,38 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 throw StandardException.newException(
                     SQLState.LOG_SEGMENT_NOT_EXIST, logDir.getPath());
             }
+            
+            //Put a readme file in the log directory, alerting users to not 
+            // touch or remove any of the files there 
+            StorageFile fileReadMe = logStorageFactory.newStorageFile(
+                LogFactory.LOG_DIRECTORY_NAME,
+                PersistentService.DB_README_FILE_NAME);
+            StorageRandomAccessFile fileReadMeDB=null;
+            try {
+                fileReadMeDB = fileReadMe.getRandomAccessFile("rw");
+                fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                    MessageId.README_AT_LOG_LEVEL));
+                fileReadMeDB.close();
+            }
+            catch (IOException ioe)
+            {
+            }
+            finally
+            {
+                if (fileReadMeDB != null)
+                {
+                    try
+                    {
+                        fileReadMeDB.close();
+                    }
+                    catch (IOException ioe)
+                    {
+                        // Ignore exception on close
+                    }
+                }
+            }
         }
-	}
+    }
 
 	/*
 		Return the directory the log should go.

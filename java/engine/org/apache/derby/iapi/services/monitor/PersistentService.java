@@ -82,6 +82,11 @@ public interface PersistentService {
 
     /** Service stored in memory only (not persistent), virtual file memory. */
     public static final String INMEMORY = "memory";
+    /**
+        The readme file cautioning users against touching the files in
+        the database directory 
+    */
+    public static final String DB_README_FILE_NAME = "README_DONT_TOUCH_FILES.txt";
 
 	/**
 		The typical name for the service's properties file.
@@ -115,6 +120,17 @@ public interface PersistentService {
 		The service name returned by the Enumeration must be in its canonical form.
 	*/
 	public Enumeration getBootTimeServices();
+
+    /**
+        Put a readme file in database directory which will caution users
+        against touching any files in the directory. This file will be
+        created at database creation time.
+
+        @param sf StorageFactory will be used to create the file
+
+        @exception StandardException File can't be created
+    */
+    public void createDataWarningFile(StorageFactory sf) throws StandardException;
 
 	/**
 		For a service return its service properties, typically from the service.properties

@@ -214,6 +214,12 @@ public interface MessageId {
     String SERVICE_PROPERTIES_BACKUP_DELETED                = "M003";
     /** Informational message, service properties backup deletion failed. */
     String SERVICE_PROPERTIES_BACKUP_DEL_FAILED             = "M004";
+    /** Tell user not to edit/delete any files in the directory. */
+    String README_AT_DB_LEVEL                                = "M005";
+    /** Tell user not to edit/delete any files in the log directory. */
+    String README_AT_LOG_LEVEL                               = "M006";
+    /** Tell user not to edit/delete any files in the seg directory. */
+    String README_AT_SEG_LEVEL                               = "M007";
 
     /*
      * Misc

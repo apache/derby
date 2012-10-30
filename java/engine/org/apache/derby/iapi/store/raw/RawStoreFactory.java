@@ -1037,4 +1037,13 @@ public interface RawStoreFactory extends Corruptable {
     int     requiredMinorVersion, 
     String  feature) 
         throws StandardException;
+    
+    /**
+     *  Use the available storage factory handle to create a readme
+     *   file in "seg0" directory warning users to not edit/delete
+     *   any files in the directory to avoid database corruption.
+     * 
+     * @throws StandardException
+     */
+    public void createDataWarningFile() throws StandardException;
 }

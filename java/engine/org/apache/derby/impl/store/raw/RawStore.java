@@ -54,6 +54,7 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
 
 import org.apache.derby.io.StorageFactory;
+import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
@@ -2768,5 +2769,36 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     /** Tells if the attribute/property has been set to {@code true}. */
     private static boolean isTrue(Properties p, String attribute) {
         return Boolean.valueOf(p.getProperty(attribute)).booleanValue();
+    }
+
+    /** @see RawStoreFactory#createDataWarningFile */
+    public void createDataWarningFile() throws StandardException {
+        StorageFile fileReadMe = storageFactory.newStorageFile(
+            "seg0",
+            PersistentService.DB_README_FILE_NAME);
+        StorageRandomAccessFile fileReadMeDB=null;
+        try {
+            fileReadMeDB = fileReadMe.getRandomAccessFile("rw");
+            fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                MessageId.README_AT_SEG_LEVEL));
+            fileReadMeDB.close();
+        }
+        catch (IOException ioe)
+        {
+        }
+        finally
+        {
+            if (fileReadMeDB != null)
+            {
+                try
+                {
+                    fileReadMeDB.close();
+                }
+                catch (IOException ioe)
+                {
+                    // Ignore exception on close
+                }
+            }
+        }
     }
 }

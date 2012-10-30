@@ -109,4 +109,10 @@ public class StorelessService implements PersistentService {
     protected int getEngineType() {
         return EngineType.STORELESS_ENGINE;
     }
+
+    /** @see PersistentService#createDataWarningFile */
+    public void createDataWarningFile(StorageFactory sf) 
+            throws StandardException {
+        // Auto-generated method stub
+    }
 }
