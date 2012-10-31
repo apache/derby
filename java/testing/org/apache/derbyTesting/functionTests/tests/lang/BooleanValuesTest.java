@@ -1525,6 +1525,151 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         goodStatement( conn, "drop table alumnus" );
         goodStatement( conn, "drop table livenessChange" );
     }
+
+    /**
+     * Test that the binary operators return the expected values for all
+     * possible combinations of operands.
+     */
+    public void test_22_binary_operators() throws SQLException {
+        setAutoCommit(false);
+
+        // Create a table with two columns containing all combinations of
+        // legal boolean values.
+        Statement s = createStatement();
+        s.execute("create table combos(b1 boolean, b2 boolean)");
+        assertUpdateCount(s, 9,
+                "insert into combos select * from "
+                + "(values true, false, cast(null as boolean)) v1, "
+                + "(values true, false, cast(null as boolean)) v2");
+
+        // Equals operator (=)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 = b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "true"  },
+                    { "false", "true" , "false" },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "false" },
+                    { "true" , "true" , "true"  },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // Not equals operator (<>)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 <> b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "false" },
+                    { "false", "true" , "true"  },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "true"  },
+                    { "true" , "true" , "false" },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // Less than operator (<)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 < b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "false" },
+                    { "false", "true" , "true"  },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "false" },
+                    { "true" , "true" , "false" },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // Greater than operator (>)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 > b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "false" },
+                    { "false", "true" , "false" },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "true"  },
+                    { "true" , "true" , "false" },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // Less than or equals operator (<=)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 <= b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "true"  },
+                    { "false", "true" , "true"  },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "false" },
+                    { "true" , "true" , "true"  },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // Greater than or equals operator (>=)
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 >= b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "true"  },
+                    { "false", "true" , "false" },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "true"  },
+                    { "true" , "true" , "true"  },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false",  null   },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // AND operator
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, b1 and b2 from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "false" },
+                    { "false", "true" , "false" },
+                    { "false",  null  , "false" },
+                    { "true" , "false", "false" },
+                    { "true" , "true" , "true"  },
+                    { "true" ,  null  ,  null   },
+                    {  null  , "false", "false" },
+                    {  null  , "true" ,  null   },
+                    {  null  ,  null  ,  null   },
+                });
+
+        // OR operator
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select b1, b2, (b1 or b2) from combos order by 1, 2"),
+                new String[][] {
+                    { "false", "false", "false" },
+                    { "false", "true" , "true"  },
+                    { "false",  null  ,  null   },
+                    { "true" , "false", "true"  },
+                    { "true" , "true" , "true"  },
+                    { "true" ,  null  , "true"  },
+                    {  null  , "false",  null   },
+                    {  null  , "true" , "true"  },
+                    {  null  ,  null  ,  null   },
+                });
+    }
     
     /**
      * <p>

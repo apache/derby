@@ -1002,28 +1002,6 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * Return a false truth value.
-	 *
-	 *
-	 * @return	A SQLBoolean representing the FALSE truth value
-	 */
-	public static SQLBoolean falseTruthValue()
-	{
-		return BOOLEAN_FALSE;
-	}
-
-	/**
-	 * Return a true truth value.
-	 *
-	 *
-	 * @return	A SQLBoolean representing the TRUE truth value
-	 */
-	public static SQLBoolean trueTruthValue()
-	{
-		return BOOLEAN_TRUE;
-	}
-	
-	/**
 	 * Determine whether this SQLBoolean contains the given boolean value.
 	 *
 	 * This method is used by generated code to determine when to do
