@@ -26,11 +26,12 @@ URL Attribute [dataEncryption=true]
    Attribute is a duplicate.
 URL Attribute [dataEncryption=false]
    Attribute is a duplicate.
-ij(CONNECTION3)> -- Perform case check.
+ERROR XJ05B: JDBC attribute 'dataEncryption' has an invalid value 'false', valid values are 'true'.
+ij(CONNECTION2)> -- Perform case check.
 connect 'jdbc:derby:wombat;dataencryption=true';
 URL Attribute [dataencryption=true]
    Attribute is unknown to Derby.
-ij(CONNECTION4)> -- Check for true/false.
+ij(CONNECTION3)> -- Check for true/false.
 connect 'jdbc:derby:wombat;dataEncryption=x';
 ERROR XJ05B: JDBC attribute 'dataEncryption' has an invalid value 'x', valid values are '{true|false}'.
-ij(CONNECTION4)> 
+ij(CONNECTION3)> 

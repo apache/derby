@@ -773,7 +773,7 @@ public class EmbedConnection implements EngineConnection
     private boolean isCryptoBoot(Properties p)
         throws SQLException
     {
-        return (isTrue(p, Attribute.DATA_ENCRYPTION) ||
+        return (vetTrue(p, Attribute.DATA_ENCRYPTION) ||
                 vetTrue(p, Attribute.DECRYPT_DATABASE) ||
                 isSet(p, Attribute.NEW_BOOT_PASSWORD) ||
                 isSet(p, Attribute.NEW_CRYPTO_EXTERNAL_KEY));
