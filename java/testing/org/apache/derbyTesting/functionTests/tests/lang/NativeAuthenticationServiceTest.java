@@ -30,7 +30,6 @@ import java.sql.SQLWarning;
 import java.util.Properties;
 import javax.sql.DataSource;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.ClasspathSetup;
@@ -41,6 +40,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.TimeZoneTestSetup;
 
 /**
  * <p>
@@ -375,7 +375,10 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         suite.addTest( allConfigurations( false ) );
         if ( !JDBC.vmSupportsJSR169() ) { suite.addTest( allConfigurations( true ) ); }
 
-        return suite;
+        // DERBY-5966: Run the test in the GMT time zone to avoid instabilities
+        // around transition to or from DST. Once DERBY-5974 has been fixed, it
+        // should be OK to run in the local time zone.
+        return new TimeZoneTestSetup(suite, "GMT");
     }
     private static  boolean onWindows()
     {
