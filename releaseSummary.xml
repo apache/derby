@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.8.1.2</previousReleaseID>
+<previousReleaseID>10.8.2.2</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,16 +47,25 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Windows XP Professional Version 2002 Service Pack 3</machine>
+  <machine>Cygwin on Windows 7 Service Pack 1 </machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
   <antVersion>Apache Ant version 1.7.0 compiled on December 13 2006.</antVersion>
 
   <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
-  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2) Classic VM (build 1.4.2, J2RE 1.4.2 IBM Windows 32 build cn142ifx-20110211 (SR13 FP8+PM31983)).</jdk1.4>
+  <jdk1.4> Classic VM (build 1.4.2, J2RE 1.4.2 IBM Windows 32 build cn142ifx-20110211 (SR13 FP8+PM31983) (JIT enabled: jitc))
+</jdk1.4>
 
   <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6>Java(TM) SE Runtime Environment (build pwi3260sr9fp1-2011-0208_03(SR9 FP1) IBM J9 VM (build 2.4, JRE 1.6.0 IBM J9 2.4 Windows XP x86-32 jvmwi3260sr9-20110203_74623).</java6>
+  <java6>
+java version "1.6.0"
+Java(TM) SE Runtime Environment (build pwi3260sr9fp1-20110208_03(SR9 FP1))
+IBM J9 VM (build 2.4, JRE 1.6.0 IBM J9 2.4 Windows 7 x86-32 jvmwi3260sr9-20110203_74623 (JIT enabled, AOT enabled)
+J9VM - 20110203_074623
+JIT  - r9_20101028_17488ifx3
+GC   - 20101027_AA)
+JCL  - 20110203_01
+</java6>
 
   <!--
          Say which compilers you used.
@@ -65,14 +74,14 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.6.0-b105 javac was used to compile all classes.</compilers>
+  <compilers>The IBM javac 1.6.0  javac was used to compile all classes.</compilers>
 
   <!--
          Say here whether you built the Java ME support and, if so, which
          tookit you used.
          E.g.: Java ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>Java ME support was built using libraries from IBM's j9 jvm from WEME 6.2.</jsr169>
+  <jsr169> Java ME support was built using libraries from IBM's j9 jvm from WEME 6.2.</jsr169>
 
 </buildInfo>
 
