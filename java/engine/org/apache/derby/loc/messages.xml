@@ -235,6 +235,11 @@ Guide.
                 <arg>databaseName</arg>
             </msg>
 
+            <msg>
+                <name>01J17</name>
+                <text>You cannot encrypt, re-encrypt, or decrypt a database which is already booted. You must shutdown the database before attempting these operations.</text>
+            </msg>
+
         </family>
 
         <family>

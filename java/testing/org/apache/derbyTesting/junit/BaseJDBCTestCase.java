@@ -887,6 +887,27 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Assert that a warning is chained to the connection.
+     *
+     * @param conn  the connection
+     * @param expected the expected SQLState of the warning
+     */
+    public static void assertWarning( Connection conn, String expected )
+        throws SQLException
+    {
+        SQLWarning  firstWarning = conn.getWarnings();
+        assertNotNull( firstWarning );
+
+        for ( SQLWarning warning = firstWarning; warning != null; warning = warning.getNextWarning() )
+        {
+            if ( expected.equals( warning.getSQLState() ) ) { return; }
+        }
+
+        fail( "Expected to see a SQLWarning with the SQLState " + expected );
+    }
+
+
+    /**
      * Assert that SQLState is as expected.
      *
      * @param expected the expected SQLState.

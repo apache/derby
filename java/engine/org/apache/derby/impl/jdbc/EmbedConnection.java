@@ -251,6 +251,13 @@ public class EmbedConnection implements EngineConnection
 			// see if database is already booted
 			Database database = (Database) Monitor.findService(Property.DATABASE_MODULE, tr.getDBName());
 
+            // encryption, re-encryption and decryption are not allowed on an already booted database.
+            // see DERBY-5969.
+            if ( (database != null) && isCryptoBoot( info ) )
+            {
+                addWarning( SQLWarningFactory.newSQLWarning( SQLState.AUTH_ENCRYPT_ALREADY_BOOTED ) );
+            }
+
 			// See if user wants to create a new database.
 			boolean	createBoot = createBoot(info);	
 

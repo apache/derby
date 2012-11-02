@@ -16,6 +16,7 @@ ij> --
 --
 -- Use a valid attribute, but do not display message.
 connect 'jdbc:derby:wombat;dataEncryption=true';
+WARNING 01J17: You cannot encrypt, re-encrypt, or decrypt a database which is already booted. You must shutdown the database before attempting these operations.
 ij(CONNECTION1)> -- Find an unknown attribute.
 connect 'jdbc:derby:wombat;unknown=x';
 URL Attribute [unknown=x]

@@ -51,6 +51,7 @@ public class DecryptDatabaseTest
 
     private static final String TABLE = "DECRYPTTABLE";
     private static final String BOOTPW = "Thursday";
+    private static final String ALREADY_BOOTED = "01J17";
     /** Current encryption algorithm, used when re-encrypting during set up. */
     private static String encryptionAlgorithm;
 
@@ -207,6 +208,15 @@ public class DecryptDatabaseTest
     public void testDecryptOnBootedDatabase()
             throws SQLException {
         getConnection();
+
+        // These connection attempts should succeed but raise a warning
+        // that encryption change is not possible while the database is booted.
+        println( "Test warning " + ALREADY_BOOTED );
+        vetChangeWarning( connect( false, BOOTPW, "dataEncryption=true" ) );
+        vetChangeWarning( connect( false, BOOTPW, "newBootPassword=foo" ) );
+        vetChangeWarning( connect( false, BOOTPW, "newEncryptionKey=foo" ) );
+        vetChangeWarning( connect( false, BOOTPW, "decryptDatabase=true" ) );
+        
         // Connect to decrypt the database. We expect this to fail since the
         // database is already booted. In this case fail means ignored...
         connect(true, BOOTPW, null).close();
@@ -218,6 +228,13 @@ public class DecryptDatabaseTest
             assertSQLState("XBM06", sqle);
         }
     }
+    private void    vetChangeWarning( Connection conn )
+        throws SQLException
+    {
+        assertWarning( conn, ALREADY_BOOTED );
+        conn.close();
+    }
+
 
     /**
      * Tests that asking to decrypt an un-encrypted doesn't fail.
