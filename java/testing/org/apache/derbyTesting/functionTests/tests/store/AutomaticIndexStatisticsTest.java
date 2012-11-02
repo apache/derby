@@ -44,6 +44,7 @@ import org.apache.derbyTesting.junit.IndexStatsUtil.IdxStats;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.TimeZoneTestSetup;
 import org.apache.derbyTesting.junit.Utilities;
 
 /**
@@ -75,7 +76,14 @@ public class AutomaticIndexStatisticsTest
 
     public static Test suite() {
         TestSuite suite = new TestSuite(AutomaticIndexStatisticsTest.class);
-        return TestConfiguration.additionalDatabaseDecorator(suite, MASTERDB);
+        // DERBY-5964: The test needs to check the timestamp stored in
+        // SYSSTATISTICS, which is in the local timezone. Since those
+        // timestamps may be ambiguous around the transition to or from DST,
+        // run this test in a timezone that doesn't observe DST. The
+        // TimeZoneTestSetup can probably be removed once DERBY-5974 is fixed.
+        return new TimeZoneTestSetup(
+                TestConfiguration.additionalDatabaseDecorator(suite, MASTERDB),
+                "GMT");
     }
 
     /** Initialize the default statistics helper object. */
