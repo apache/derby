@@ -1302,6 +1302,11 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                 // 4.0
                 return "Java SE 7 - JDBC 4.0";
             }
+            else if (javaVersion.equals("1.8")) {
+                // We don't have full JDBC 4.1 support yet, so still print JDBC
+                // 4.0
+                return "Java SE 8 - JDBC 4.0";
+            }
             else
                 return "?-?";
         } catch (Exception e) {
