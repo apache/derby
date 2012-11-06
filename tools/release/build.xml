@@ -308,7 +308,7 @@
       <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
       <!-- docs -->
-      <tarfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif"
+      <tarfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif,**/*.css"
 		          prefix="${derby.bin}/docs/html"/>
       <tarfileset dir="${docs.root}/out" includes="**/*.pdf"
 	              prefix="${derby.bin}/docs/pdf"/>
