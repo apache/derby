@@ -1670,6 +1670,21 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                     {  null  ,  null  ,  null   },
                 });
     }
+
+    /**
+     * Verify that SELECT DISTINCT works as expected on boolean columns.
+     */
+    public void test_23_select_distinct() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        assertUpdateCount(s, 6, "insert into boolean_table(boolean_col) "
+                + "values true, true, false, false, null, null");
+
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select distinct boolean_col from boolean_table"),
+            new String[][] { {"true"}, {"false"}, {null} });
+    }
     
     /**
      * <p>
