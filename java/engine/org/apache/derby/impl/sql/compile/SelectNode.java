@@ -176,11 +176,13 @@ public class SelectNode extends ResultSetNode
 
 		if (resultColumns != null) {
 
-			// Collect window functions used in result columns, and check them
-			// for any <in-line window specification>s.
+            // Collect simply contained window functions (note: *not*
+            // any inside nested SELECTs) used in result columns, and
+            // check them for any <in-line window specification>s.
 
 			CollectNodesVisitor cnvw =
-				new CollectNodesVisitor(WindowFunctionNode.class);
+                new CollectNodesVisitor(WindowFunctionNode.class,
+                                        SelectNode.class);
 			resultColumns.accept(cnvw);
 			windowFuncCalls = cnvw.getList();
 
