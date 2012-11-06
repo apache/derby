@@ -48,6 +48,8 @@ public abstract class JVMInfo
 		<LI> 5 - J2SE_142 - JDK 1.4.2
 		<LI> 6 - J2SE_15 - JDK 1.5
 		<LI> 7 - J2SE_16 - JDK 1.6
+        <LI> 8 - J2SE_17 - JDK 1.7
+        <LI> 9 - J2SE_18 - JDK 1.8
 		</UL>
 	*/
 	public static final int JDK_ID;
@@ -57,6 +59,7 @@ public abstract class JVMInfo
 	public static final int J2SE_15 = 6; // aka J2SE 5.0
 	public static final int J2SE_16 = 7; // Java SE 6, not J2SE
 	public static final int J2SE_17 = 8;
+    public static final int J2SE_18 = 9;
 
 	public static final boolean J2ME;
 
@@ -136,6 +139,9 @@ public abstract class JVMInfo
 			{
 			    id = J2SE_17;
 			}
+            else if (javaVersion.equals("1.8")) {
+                id = J2SE_18;
+            }
 			else
 			{
 				// aussme our lowest support unless the java spec
@@ -144,8 +150,8 @@ public abstract class JVMInfo
 
 				try {
 
-					if (Float.parseFloat(javaVersion) > 1.6f)
-						id = J2SE_16;
+                    if (Float.parseFloat(javaVersion) > 1.8f)
+                        id = J2SE_18;
 				} catch (NumberFormatException nfe) {
 				}
 			}
@@ -178,6 +184,7 @@ public abstract class JVMInfo
 		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
 		case J2SE_16: return "Java SE 6 - JDBC 4.0";
 		case J2SE_17: return "Java SE 7 - JDBC 4.0";
+        case J2SE_18: return "Java SE 8 - JDBC 4.0";
 		default: return "?-?";
 		}
 	}
