@@ -305,6 +305,23 @@ public class OLAPTest extends BaseJDBCTestCase {
 									  {"4", "4"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 
+        // Subquery in SELECT list. DERBY-5954
+        rs = s.executeQuery(
+            "SELECT rn_t1, (" +
+            "     SELECT rn_t2 FROM (" +
+            "         SELECT row_number() over() as rn_t2 FROM t2) " +
+            "         as T_2" +
+            "         where T_2.rn_t2 = T_1.rn_t1 + 1  ) " +
+            "     as rn_outer" +
+            "     FROM (SELECT row_number() over() as rn_t1 from t2) as T_1");
+
+        expectedRows = new String[][]{{"1", "2"},
+                                      {"2", "3"},
+                                      {"3", "4"},
+                                      {"4", "5"},
+                                      {"5", null}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
 
 		/*
 		 * Group by and having
