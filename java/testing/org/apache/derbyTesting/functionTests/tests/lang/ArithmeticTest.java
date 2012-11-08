@@ -20,6 +20,7 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -33,6 +34,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test case for arithmetic.sql. It tests the arithmetic operators. 
  */
 public class ArithmeticTest extends BaseJDBCTestCase {
+
+    private static final String BIGINT = "bigint";
+    private static final String DECIMAL = "decimal(31,0)";
 
     public ArithmeticTest(String name) {
         super(name);
@@ -48,13 +52,23 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     public void testTypes() throws SQLException {
-        String[] tableNames = { "smallint_r", "t", "bigint_r" };
-        String[] types = { "smallint", "int", "bigint", };
-        long[] positiveBoundaries = {32767, 2147483647, 9223372036854775807L};
+        String[] tableNames = { "smallint_r", "t", "bigint_r", "decimal_r" };
+        String[] types = { "smallint", "int", BIGINT, DECIMAL };
+        BigInteger[][] boundaries = {
+            { BigInteger.valueOf(Short.MIN_VALUE),
+              BigInteger.valueOf(Short.MAX_VALUE) },
+            { BigInteger.valueOf(Integer.MIN_VALUE),
+              BigInteger.valueOf(Integer.MAX_VALUE) },
+            { BigInteger.valueOf(Long.MIN_VALUE),
+              BigInteger.valueOf(Long.MAX_VALUE) },
+            { new BigInteger("-9999999999999999999999999999999", 10),
+              new BigInteger("9999999999999999999999999999999", 10) },
+        };
 
         for (int i = 0; i < types.length; i++) {
-            doBasically(tableNames[i], types[i], positiveBoundaries[i]);
-            doOverflow(tableNames[i], types[i], positiveBoundaries[i]);
+            doBasically(tableNames[i], types[i]);
+            doOverflow(tableNames[i], types[i],
+                    boundaries[i][0], boundaries[i][1]);
 
             dropTable(tableNames[i]);
         }
@@ -70,12 +84,10 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      *                it will be dropped.
      * @param type
      *                the type to test. i.e. "smallint" or "bigint".
-     * @param positiveBoundary
-     *                for "smallint", it's 32767; for "bigint", it's 9223372036854775807.
      * @throws SQLException 
      */
-    private void doBasically(String tableName, String type,
-        long positiveBoundary) throws SQLException{
+    private void doBasically(String tableName, String type)
+            throws SQLException {
         String sql = "create table " + tableName + "(i " + 
             type + ", j " + type + ")";
         Statement st = createStatement();
@@ -192,6 +204,12 @@ public class ArithmeticTest extends BaseJDBCTestCase {
                     {"1", "101", "0", "0", "10"},
                     {"-2", "-102", "0", "0", "-10"}
                 };
+        if (type.equals(DECIMAL)) {
+            // With DECIMAL, the fraction part won't be truncated from i/j.
+            result[1][3] = "0.100000000000000000000";
+            result[2][3] = "0.099009900990099009900";
+            result[3][3] = "-0.098039215686274509803";
+        }
         JDBC.assertFullResultSet(st.executeQuery(sql), 
             result);
 
@@ -269,12 +287,16 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      *                it will be dropped.
      * @param type
      *                the type to test. i.e. "smallint" or "bigint".
+     * @param negativeBoundary
+     *                the negative boundary for the data type
      * @param positiveBoundary
-     *                for "smallint", it's 32767; for "bigint", it's 9223372036854775807.
+     *                the positive boundary for the data type
      * @throws SQLException 
      */
     private void doOverflow(String tableName, String type,
-        long positiveBoundary) throws SQLException{
+            BigInteger negativeBoundary, BigInteger positiveBoundary)
+        throws SQLException
+    {
         dropTable(tableName);
         String sql = "create table " + tableName
                 + " (i " + type + ", j " + type + ")";
@@ -284,7 +306,7 @@ public class ArithmeticTest extends BaseJDBCTestCase {
         long i = 1L;
         sql = "insert into " + tableName + " values (" 
                 + i + "," + positiveBoundary + ")";
-        assertEquals(1, st.executeUpdate(sql));
+        assertUpdateCount(st, 1, sql);
 
         sql = "select i + j from " + tableName;
         assertStatementError("22003", st, sql);
@@ -299,27 +321,47 @@ public class ArithmeticTest extends BaseJDBCTestCase {
         assertStatementError("22003", st, sql);
 
         sql = "insert into " + tableName + " values "
-                + "(" + (-positiveBoundary - 1) + ", 0)";
-        assertEquals(1, st.executeUpdate(sql));
+                + "(" + negativeBoundary + ", 0)";
+        assertUpdateCount(st, 1, sql);
+
+        // Check if the boundaries of the data type are asymmetric and
+        // allow more negative values than positive values.
+        final boolean asymmetricTowardsNegative =
+                negativeBoundary.negate().compareTo(positiveBoundary) > 0;
 
         sql = "select -i from " + tableName;
-        assertStatementError("22003", st, sql);
+        if (asymmetricTowardsNegative) {
+            // For most numeric data types, the legal range is not symmetric
+            // around zero, so negating the negative boundary will make the
+            // resulting value out of range. Expect failure.
+            assertStatementError("22003", st, sql);
+        } else {
+            // For DECIMAL, the boundaries are symmetric around zero, so
+            // expect the query to succeed.
+            JDBC.assertFullResultSet(st.executeQuery(sql),
+                    new String[][] {
+                        { "-1" },
+                        { negativeBoundary.negate().toString() },
+                    });
+        }
 
         sql = "select -j from " + tableName;
         JDBC.assertFullResultSet(st.executeQuery(sql),
                 new String[][] {
-                { "" + (-positiveBoundary) }, { "0" }, }
+                { positiveBoundary.negate().toString() }, { "0" }, }
         );
 
         sql = "select j / 2 * 2 from " + tableName;
         JDBC.assertFullResultSet(st.executeQuery(sql), 
                 new String[][] {
-                { "" + (positiveBoundary - 1) }, { "0" }, }
+                    { positiveBoundary.subtract(BigInteger.ONE).toString() },
+                    { "0" },
+                }
         );
 
-        // when type is not bigint, it won't overflow.
+        // When type is not BIGINT or DECIMAL, it won't overflow.
         // Just like testMixedType().
-        if (type.equals("bigint")) {
+        if (type.equals(BIGINT) || type.equals(DECIMAL)) {
             sql = "select 2 * (" + positiveBoundary + " / 2 + 1) from "
                     + tableName;
             assertStatementError("22003", st, sql);
@@ -336,8 +378,35 @@ public class ArithmeticTest extends BaseJDBCTestCase {
                     + tableName;
             assertStatementError("22003", st, sql);
 
+            // Check if the negative boundary is even, in which case the
+            // arithmetic operation below won't lose precision when dividing
+            // by two.
+            final boolean negativeBoundaryIsEven = !negativeBoundary.testBit(0);
+
             //different from arithmetic. This can support better test.
             sql = "select i / 2 * 2 - 1 from " + tableName;
+            if (negativeBoundaryIsEven) {
+                // Since the negative boundary is even, dividing by two and
+                // subsequently multiplying by two will result in the same
+                // value, and subtracting one from that value will make the
+                // result out of range (less than negative boundary).
+                assertStatementError("22003", st, sql);
+            } else {
+                // If the negative boundary is odd, dividing by two and
+                // subsequently multiplying by two will result in a value
+                // that is one above the negative boundary, because the
+                // fraction part is lost in the intermediate result. Result
+                // will still be in valid range, also after the subtraction.
+                JDBC.assertFullResultSet(st.executeQuery(sql),
+                        new String[][] {
+                            { "-1" },
+                            { negativeBoundary.toString() },
+                        });
+            }
+
+            // Same test case as above, but subtract two to force error
+            // also when the negative boundary is odd.
+            sql = "select i / 2 * 2 - 2 from " + tableName;
             assertStatementError("22003", st, sql);
         }
     }
@@ -354,47 +423,48 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException 
      */
     private void doMixedTypeImpl(String tableName, String type,
-        int i) throws SQLException{
+        BigInteger i) throws SQLException{
         String sql = "create table " + tableName 
             + " (y "  + type+ ")" ;
         Statement st = createStatement();
         st.executeUpdate(sql);
 
-        long y = 2L;
+        BigInteger y = BigInteger.valueOf(2);
         sql = "insert into " + tableName + " values (" + y + ")";
         assertEquals(1, st.executeUpdate(sql));
 
         sql = "select " + i + " + y from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (i + y));    
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                i.add(y).toString());
 
         sql = "select y + " + i + " from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (y + i));    
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                y.add(i).toString());
 
         sql = "select y - " + i + " from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (y - i));
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                y.subtract(i).toString());
 
         sql = "select " + i + " - y from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (i - y));
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                i.subtract(y).toString());
 
         sql = "select " + i + " * y from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (i * y));
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                i.multiply(y).toString());
 
         sql = "select y * " + i + " from "+ tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (y * i));
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                y.multiply(i).toString());
 
         sql = "select " + i + " / y from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (i / y));
+        String fraction = type.equals(DECIMAL) ? ".000000000000" : "";
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                i.divide(y) + fraction);
 
         sql = "select y / " + i + " from " + tableName;
-        JDBC.assertSingleValueResultSet(st.executeQuery(sql), 
-            "" + (y / i));    
+        JDBC.assertSingleValueResultSet(st.executeQuery(sql),
+                y.divide(i).toString());
 
         st.close();
     }
@@ -404,13 +474,16 @@ public class ArithmeticTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testMixedType() throws SQLException{
-        String[] types = {"smallint", "bigint",};
-        String[] tableNames = {"smallint_r", "bigint_r"};
-        int[]positiveBoundaries = {65535, 2147483647,};
+        String[] types = {"smallint", BIGINT, DECIMAL};
+        String[] tableNames = {"smallint_r", "bigint_r", "decimal_r"};
+        BigInteger[] testValues = {
+                BigInteger.valueOf(65535),
+                BigInteger.valueOf(Integer.MAX_VALUE),
+                BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE),
+        };
 
         for(int i = 0; i < types.length; i++){
-            doMixedTypeImpl(tableNames[i], types[i],
-                positiveBoundaries[i]);
+            doMixedTypeImpl(tableNames[i], types[i], testValues[i]);
             dropTable(tableNames[i]);
         }
     }
