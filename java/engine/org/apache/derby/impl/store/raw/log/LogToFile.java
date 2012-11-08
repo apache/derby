@@ -96,6 +96,7 @@ import org.apache.derby.iapi.util.InterruptDetectedException;
 
 import java.io.File; // Plain files are used for backups
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.SyncFailedException;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -2738,11 +2739,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             StorageFile fileReadMe = logStorageFactory.newStorageFile(
                 LogFactory.LOG_DIRECTORY_NAME,
                 PersistentService.DB_README_FILE_NAME);
-            if (privExists(fileReadMe)) {
-                StorageRandomAccessFile fileReadMeDB=null;
+            if (!privExists(fileReadMe)) {
+                OutputStreamWriter osw = null;
                 try {
-                    fileReadMeDB = privRandomAccessFile(fileReadMe, "rw");
-                    fileReadMeDB.writeUTF(MessageService.getTextMessage(
+                    osw = privGetOutputStreamWriter(fileReadMe);
+                    osw.write(MessageService.getTextMessage(
                         MessageId.README_AT_LOG_LEVEL));
                 }
                 catch (IOException ioe)
@@ -2750,11 +2751,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 }
                 finally
                 {
-                    if (fileReadMeDB != null)
+                    if (osw != null)
                     {
                         try
                         {
-                            fileReadMeDB.close();
+                            osw.close();
                         }
                         catch (IOException ioe)
                         {
@@ -5688,6 +5689,21 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
     }
 
+    private synchronized OutputStreamWriter privGetOutputStreamWriter(StorageFile file)
+        throws IOException
+    {
+        action = 10;
+        activeFile = file;
+        try
+        {
+            return (OutputStreamWriter) java.security.AccessController.doPrivileged(this);
+        }
+        catch (java.security.PrivilegedActionException pae)
+        {
+            throw (IOException) pae.getException();
+        }
+    }
+
     protected boolean privCanWrite(StorageFile file)
     {
 		return runBooleanAction(3, file);
@@ -5841,6 +5857,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             return toFile.list();
         case 9:
             return ReuseFactory.getBoolean(FileUtil.copyFile( logStorageFactory, toFile, activeFile));
+        case 10:
+        	return(new OutputStreamWriter(activeFile.getOutputStream(),"UTF8"));
 
 		default:
 			return null;

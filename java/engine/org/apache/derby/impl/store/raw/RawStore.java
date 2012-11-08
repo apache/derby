@@ -75,7 +75,7 @@ import java.io.Serializable;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -149,7 +149,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private static final int STORAGE_FILE_GET_CANONICALPATH_ACTION = 16;
     private static final int COPY_STORAGE_FILE_TO_STORAGE_ACTION = 17;
     private static final int STORAGE_FILE_DELETE_ACTION = 18;
-    private String activePerms;
+    private static final int README_FILE_OUTPUTSTREAM_WRITER_ACTION = 19;
 
 	public RawStore() {
 	}
@@ -2372,15 +2372,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
     }
 
-    private synchronized StorageRandomAccessFile privRandomAccessFile(StorageFile file, String perms)
+    private synchronized OutputStreamWriter privGetOutputStreamWriter(StorageFile file)
         throws IOException
     {
-        actionCode = REGULAR_FILE_EXISTS_ACTION;
+        actionCode = README_FILE_OUTPUTSTREAM_WRITER_ACTION;
         actionStorageFile = file;
-        activePerms = perms;
         try
         {
-            return (StorageRandomAccessFile) java.security.AccessController.doPrivileged(this);
+            return (OutputStreamWriter) java.security.AccessController.doPrivileged(this);
         }
         catch (java.security.PrivilegedActionException pae)
         {
@@ -2773,6 +2772,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         case STORAGE_FILE_GET_CANONICALPATH_ACTION:
             // SECURITY PERMISSION - MP1
             return (String)(actionStorageFile.getCanonicalPath());
+        case README_FILE_OUTPUTSTREAM_WRITER_ACTION:
+        	return(new OutputStreamWriter(actionStorageFile.getOutputStream(),"UTF8"));
         }
         return null;
     } // end of run
@@ -2792,24 +2793,24 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         StorageFile fileReadMe = storageFactory.newStorageFile(
             "seg0",
             PersistentService.DB_README_FILE_NAME);
-        StorageRandomAccessFile fileReadMeDB=null;
-        
-        if (privExists(fileReadMe)) {
+        OutputStreamWriter osw = null;
+
+        if (!privExists(fileReadMe)) {
             try {
-                fileReadMeDB = privRandomAccessFile(fileReadMe, "rw");
-                fileReadMeDB.writeUTF(MessageService.getTextMessage(
-                    MessageId.README_AT_LOG_LEVEL));
+                osw = privGetOutputStreamWriter(fileReadMe);
+                osw.write(MessageService.getTextMessage(
+                    MessageId.README_AT_SEG_LEVEL));
             }
             catch (IOException ioe)
             {
             }
             finally
             {
-                if (fileReadMeDB != null)
+                if (osw != null)
                 {
                     try
                     {
-                        fileReadMeDB.close();
+                        osw.close();
                     }
                     catch (IOException ioe)
                     {

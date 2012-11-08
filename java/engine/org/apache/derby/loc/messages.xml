@@ -8436,7 +8436,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 # *** FILES IN THIS DIRECTORY AND SUB-DIRECTORIES CONSTITUTE DERBY      ***
 # *** DATABASE WHICH INCLUDES THE DATA (USER AND SYSTEM) AND THE        ***
 # *** NECESSARY FILES FOR DATABASE RECOVERY.                            ***
-# *** EDITING, ADDING OR DELETING ANY OF THESE FILES MAY CAUSE DATA   ***
+# *** EDITING, ADDING OR DELETING ANY OF THESE FILES MAY CAUSE DATA     ***
 # *** CORRUPTION AND LEAVE THE DATABASE IN NON-RECOVERABLE STATE.       ***
 # *************************************************************************</text>
                 <comment>Translators: Please translate the ALL CAPS words.</comment>

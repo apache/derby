@@ -435,28 +435,28 @@ final class StorageFactoryService implements PersistentService
         {
             AccessController.doPrivileged(
             	    new PrivilegedExceptionAction()
-            	    {
-            	        public Object run() throws StandardException
-            	        {
-            	            StorageRandomAccessFile fileReadMeDB=null;
-            	            try 
-            	            {
-            	                StorageFile fileReadMe = storageFactory.newStorageFile(
-            	                    PersistentService.DB_README_FILE_NAME);
-                                fileReadMeDB = fileReadMe.getRandomAccessFile( "rw");
-                                fileReadMeDB.writeUTF(MessageService.getTextMessage(
-                                    MessageId.README_AT_DB_LEVEL));
+                    {
+                        public Object run() throws StandardException
+                        {
+                            OutputStreamWriter osw=null; 
+                            try 
+                            {
+                                StorageFile fileReadMe = storageFactory.newStorageFile(
+                                    PersistentService.DB_README_FILE_NAME);
+                                osw = new OutputStreamWriter(fileReadMe.getOutputStream(),"UTF8");
+                                osw.write(MessageService.getTextMessage(
+                                        MessageId.README_AT_DB_LEVEL));
                             }
                             catch (IOException ioe)
                             {
                             }
                             finally
                             {
-                                if (fileReadMeDB != null)
+                                if (osw != null)
                                 {
                                     try
                                     {
-                                        fileReadMeDB.close();
+                                        osw.close();
                                     }
                                     catch (IOException ioe)
                                     {
