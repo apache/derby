@@ -25,19 +25,11 @@ import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.UserDataValue;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
@@ -299,12 +291,6 @@ public class UserType extends DataType
 	 *										is not found
 	 */
 	public void readExternal(ObjectInput in) 
-        throws IOException, ClassNotFoundException
-	{
-		/* RESOLVE: Sanity check for right class */
-		value = in.readObject();
-	}
-	public void readExternalFromArray(ArrayInputStream in) 
         throws IOException, ClassNotFoundException
 	{
 		/* RESOLVE: Sanity check for right class */

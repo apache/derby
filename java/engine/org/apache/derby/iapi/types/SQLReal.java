@@ -23,22 +23,12 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.types.NumberDataType;
-import org.apache.derby.iapi.types.SQLBoolean;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
@@ -237,12 +227,6 @@ public final class SQLReal
 
 	/** @see java.io.Externalizable#readExternal */
 	public void readExternal(ObjectInput in) throws IOException {
-        // setValue(in.readFloat()); // can throw StandardException which we can't pass on
-        // assume we wrote the value, so we can read it without problem, for now.
-        value = in.readFloat();
-        isnull = false;
-	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException {
         // setValue(in.readFloat()); // can throw StandardException which we can't pass on
         // assume we wrote the value, so we can read it without problem, for now.
         value = in.readFloat();

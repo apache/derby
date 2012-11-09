@@ -23,8 +23,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.db.DatabaseContext;
@@ -201,12 +199,6 @@ public final class SQLDate extends DataType
 	public void readExternal(ObjectInput in) throws IOException
 	{
 		encodedDate = in.readInt();
-
-	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException
-	{
-		encodedDate = in.readInt();
-
 	}
 
 	/*

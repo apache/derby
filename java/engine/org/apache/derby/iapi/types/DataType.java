@@ -23,10 +23,11 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -258,6 +259,20 @@ public abstract class DataType
     public DataValueDescriptor recycle() {
         restoreToNull();
         return this;
+    }
+
+    /**
+     * Read the DataValueDescriptor from the stream. The default implementation
+     * calls {@code readExternal()}, which accesses the {@code ArrayInputStream}
+     * as a generic stream. If sub-classes can implement it more efficiently
+     * by accessing the array, they should override this method.
+     *
+     * @see DataValueDescriptor#readExternalFromArray
+     * @see java.io.Externalizable#readExternal
+     */
+    public void readExternalFromArray(ArrayInputStream in)
+            throws IOException, ClassNotFoundException {
+        readExternal(in);
     }
 
 	/*

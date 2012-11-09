@@ -23,8 +23,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -33,11 +31,9 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.lang.Math;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.io.ObjectOutput;
@@ -501,29 +497,6 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		}
 		in.readFully(rawData);
 
-	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException 
-	{
-		// clear the previous value to ensure that the
-		// rawData value will be used
-		value = null;
-
-		rawScale = in.readUnsignedByte();
-		int size = in.readUnsignedByte();
-
-		/*
-		** Allocate a new array if the data to read
-		** is larger than the existing array, or if
-		** we don't have an array yet.
-
-        Need to use readFully below and NOT just read because read does not
-        guarantee getting size bytes back, whereas readFully does (unless EOF).
-        */
-		if ((rawData == null) || size != rawData.length)
-		{
-			rawData = new byte[size];
-		}
-		in.readFully(rawData);
 	}
 
 	/**

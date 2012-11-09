@@ -21,19 +21,7 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.types.Orderable;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -41,8 +29,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.catalog.TypeDescriptor;
 
-import org.apache.derby.iapi.types.DataType;
-import org.apache.derby.iapi.types.RefDataValue;
 import org.apache.derby.iapi.services.cache.ClassSize;
 
 import java.io.ObjectOutput;
@@ -144,10 +130,6 @@ public class SQLRef extends DataType implements RefDataValue
 	 *										be SQLRef).
 	 */
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
-	{
-		value = (RowLocation) in.readObject();
-	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException, ClassNotFoundException
 	{
 		value = (RowLocation) in.readObject();
 	}

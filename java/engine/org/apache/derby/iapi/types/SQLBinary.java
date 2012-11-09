@@ -27,8 +27,6 @@ import org.apache.derby.iapi.reference.ContextId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.context.ContextService;
@@ -429,26 +427,6 @@ abstract class SQLBinary
 		else
 		{
 			readFromStream((InputStream) in);
-		}
-	}
-	public final void readExternalFromArray(ArrayInputStream in) throws IOException
-	{
-		// need to clear stream first, in case this object is reused, and
-		// stream is set by previous use.  Track 3794.
-		stream = null;
-		streamValueLength = -1;
-        _blobValue = null;
-
-		int len = SQLBinary.readBinaryLength(in);
-
-		if (len != 0)
-		{
-			dataValue = new byte[len];
-			in.readFully(dataValue);
-		}
-		else
-		{
-			readFromStream(in);
 		}
 	}
 

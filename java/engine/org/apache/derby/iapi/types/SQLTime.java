@@ -23,8 +23,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -203,11 +201,6 @@ public final class SQLTime extends DataType
 	 * @exception IOException	Thrown on error reading the object
 	 */
 	public void readExternal(ObjectInput in) throws IOException
-	{
-		encodedTime = in.readInt();
-		encodedTimeFraction = in.readInt();
-	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException
 	{
 		encodedTime = in.readInt();
 		encodedTimeFraction = in.readInt();

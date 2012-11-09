@@ -30,7 +30,6 @@ import java.sql.Types;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -639,27 +638,6 @@ return divide(dividend, divisor, result, -1);
 		in.readFully(data2c);
 
 	}
-	public void readExternalFromArray(ArrayInputStream in) throws IOException 
-	{
-		sqlScale = in.readUnsignedByte();
-		int size = in.readUnsignedByte();
-
-		/*
-		** Allocate a new array if the data to read
-		** is larger than the existing array, or if
-		** we don't have an array yet.
-
-        Need to use readFully below and NOT just read because read does not
-        guarantee getting size bytes back, whereas readFully does (unless EOF).
-        */
-		if ((data2c == null) || size != data2c.length)
-		{
-			data2c = new byte[size];
-		}
-		in.readFully(data2c);
-	}
-
-
 
 	public final int getLength()
 	{

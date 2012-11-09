@@ -29,7 +29,6 @@ import java.util.Properties;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -1188,7 +1187,7 @@ public class Heap
      *
      * @see java.io.Externalizable#readExternal
      **/
-	private final void localReadExternal(ObjectInput in)
+    public void readExternal(ObjectInput in)
 		throws IOException, ClassNotFoundException
 	{
 
@@ -1237,17 +1236,5 @@ public class Heap
                     "Unexpected format id: " + conglom_format_id);
             }
         }
-    }
-
-	public void readExternal(ObjectInput in)
-		throws IOException, ClassNotFoundException
-	{
-        localReadExternal(in);
-    }
-
-	public void readExternalFromArray(ArrayInputStream in)
-		throws IOException, ClassNotFoundException
-	{
-        localReadExternal(in);
     }
 }

@@ -28,8 +28,6 @@ import java.util.Properties;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -1137,7 +1135,7 @@ public class B2I extends BTree
      *
      * @see java.io.Externalizable#readExternal
      **/
-	private final void localReadExternal(ObjectInput in)
+    public void readExternal(ObjectInput in)
 		throws IOException, ClassNotFoundException
 	{
 		super.readExternal(in);
@@ -1200,15 +1198,4 @@ public class B2I extends BTree
             setUniqueWithDuplicateNulls(in.readBoolean());
         }
 	}
-
-	public void readExternal(ObjectInput in)
-		throws IOException, ClassNotFoundException
-	{
-        localReadExternal(in);
-    }
-	public void readExternalFromArray(ArrayInputStream in)
-		throws IOException, ClassNotFoundException
-	{
-        localReadExternal(in);
-    }
 }

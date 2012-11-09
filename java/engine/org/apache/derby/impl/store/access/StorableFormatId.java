@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.access;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -108,11 +107,6 @@ public class StorableFormatId extends DataType
     {
         format_id = FormatIdUtil.readFormatIdInteger(in);
     }
-	public void readExternalFromArray(ArrayInputStream in) throws IOException
-    {
-        format_id = FormatIdUtil.readFormatIdInteger(in);
-    }
-
 
     public void restoreToNull()
     {

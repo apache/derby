@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.access.btree;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -685,27 +684,6 @@ public abstract class BTree extends GenericConglomerate
 
 		id = new ContainerKey(segmentid, containerid);
 	}
-
-	public void readExternalFromArray(ArrayInputStream in) 
-        throws IOException, ClassNotFoundException
-	{
-        // read in the conglomerate format id.
-        conglom_format_id = FormatIdUtil.readFormatIdInteger(in);
-
-		// XXX (nat) need to improve error handling
-		long containerid         = in.readLong();
-		int segmentid			= in.readInt();
-		nKeyFields          = in.readInt();
-		nUniqueColumns      = in.readInt();
-		allowDuplicates     = in.readBoolean();
-		maintainParentLinks = in.readBoolean();
-
-        // read in the array of format id's
-        format_ids = ConglomerateUtil.readFormatIdArray(this.nKeyFields, in);
-
-		id = new ContainerKey(segmentid, containerid);
-	}
-
 	
 	/**
 	Store the stored representation of the column value in the stream.
