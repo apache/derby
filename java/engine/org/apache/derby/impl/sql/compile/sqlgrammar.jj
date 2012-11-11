@@ -5334,7 +5334,7 @@ derivedColumn(ResultColumnList resultColumns) throws StandardException :
 	String		columnName = null;
 }
 {
-	columnExpression = orExpression( null )
+	columnExpression = valueExpression()
 			[ columnName = asClause() ]
 	{ 
 		/*
@@ -6090,7 +6090,7 @@ methodParameter(Vector parameterList) throws StandardException :
 	ValueNode	parameter;
 }
 {
-	parameter = orExpression(null)
+	parameter = valueExpression()
 	{
 		parameterList.addElement(parameter);
 	}
@@ -8575,7 +8575,7 @@ updateSource(String columnName) throws StandardException :
 	ValueNode	valueNode;
 }
 {
-	valueNode = orExpression(null) 
+	valueNode = valueExpression()
 	{
 		return valueNode;
 	}
@@ -8830,7 +8830,7 @@ rowValueConstructorElement(ResultColumnList resultColumns) throws StandardExcept
 	ValueNode	value;
 }
 {
-	value = orExpression(null)
+	value = valueExpression()
 	{
 		resultColumns.addResultColumn(
 			(ResultColumn) nodeFactory.getNode(
@@ -12738,8 +12738,7 @@ whenThenExpression() throws StandardException :
 	ValueNode	   elseExpr;
 }
 {
-	<WHEN> expr = orExpression(null) 
-		   (<OR> expr = orExpression(expr) )*
+	<WHEN> expr = valueExpression()
 	<THEN> thenExpr = thenElseExpression()
 	elseExpr = caseExpression()
 	{

@@ -59,6 +59,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     private static final String ILLEGAL_INSERT = "42821";
     private static final String BAD_DEFAULT = "42894";
     private static final String ILLEGAL_UPDATE = "XCL12";
+    private static final String NON_BOOLEAN_OPERAND = "42Y94";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -2076,6 +2077,66 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
              },
              false
              );
+    }
+
+    /**
+     * Verify that you can use AND and OR expressions as BOOLEAN values.
+     * Regression test case for DERBY-5972.
+     */
+    public void test_5972() throws SQLException {
+        // Disable auto-commit so that tearDown() can roll back any changes.
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        // Test boolean expressions in select list. Used to fail with syntax
+        // errors with OR expressions.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select true and false from sysibm.sysdummy1"),
+                "false");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select true or false from sysibm.sysdummy1"),
+                "true");
+        assertCompileError(NON_BOOLEAN_OPERAND,
+                "select 1 and 2 from sysibm.sysdummy1");
+        assertCompileError(NON_BOOLEAN_OPERAND,
+                "select 1 or 2 from sysibm.sysdummy1");
+
+        // Test boolean expressions in VALUES statements. Used to fail with
+        // syntax errors with OR expressions.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("values true and false"), "false");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("values true or false"), "true");
+        assertCompileError(NON_BOOLEAN_OPERAND, "values 1 and 2");
+        assertCompileError(NON_BOOLEAN_OPERAND, "values 1 or 2");
+
+        // Test boolean expressions as parameters in function calls. Used to
+        // result in syntax errors with OR expressions.
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values booleanValue(true and false)"), "False value");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values booleanValue(true or false)"), "True value");
+        assertCompileError(NON_BOOLEAN_OPERAND, "values booleanValue(1 and 2)");
+        assertCompileError(NON_BOOLEAN_OPERAND, "values booleanValue(1 or 2)");
+
+        // Test boolean expressions in UPDATE statements. Used to fail with
+        // syntax errors with OR expressions.
+        s.execute("create table d5972(b boolean)");
+        assertUpdateCount(s, 0, "update d5972 set b = true and false");
+        assertUpdateCount(s, 0, "update d5972 set b = true or false");
+        assertCompileError(NON_BOOLEAN_OPERAND, "update d5972 set b = 1 and 2");
+        assertCompileError(NON_BOOLEAN_OPERAND, "update d5972 set b = 1 or 2");
+
+        // Used to work correctly. Verify for completeness.
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case when true and false then 1 else 0 end"), "0");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case when true or false then 1 else 0 end"), "1");
+        assertCompileError(NON_BOOLEAN_OPERAND,
+                "values case when 1 and 2 then 1 else 0 end");
+        assertCompileError(NON_BOOLEAN_OPERAND,
+                "values case when 1 or 2 then 1 else 0 end");
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
