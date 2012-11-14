@@ -3032,9 +3032,16 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
     boolean absolute)
         throws StandardException
 	{
+        String retvalType  = ClassName.Qualifier + "[][]";
+
+        // If there are no qualifiers, return null.
+        if (numberOfQualifiers == 0) {
+            mb.pushNull(retvalType);
+            return;
+        }
+
 		ExpressionClassBuilder  acb         = (ExpressionClassBuilder) acbi;
 
-		String                  retvalType  = ClassName.Qualifier + "[][]";
 		MethodBuilder           consMB      = acb.getConstructor();
 		MethodBuilder           executeMB   = acb.getExecuteMethod();
 
@@ -3070,52 +3077,44 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
             VMOpcode.INVOKESTATIC, 
             acb.getBaseClassName(), "reinitializeQualifiers", "void", 1);
 
-		/*
-		** Initialize the Qualifier array to a new Qualifier[][] if
-		** there are any qualifiers.  It is automatically initialized to
-		** null if it isn't explicitly initialized.
-		*/
-		if (numberOfQualifiers != 0)
-		{
-            if (SanityManager.DEBUG)
+        if (SanityManager.DEBUG)
+        {
+            if (numberOfQualifiers > size())
             {
-                if (numberOfQualifiers > size())
-                {
-                    SanityManager.THROWASSERT(
-                        "numberOfQualifiers(" + numberOfQualifiers + 
-                        ") > size(" + size() + ")." + ":" +  this.hashCode());
-                }
+                SanityManager.THROWASSERT(
+                    "numberOfQualifiers(" + numberOfQualifiers +
+                    ") > size(" + size() + ")." + ":" +  this.hashCode());
             }
+        }
 
-            // Determine number of leading AND qualifiers, and subsequent
-            // trailing OR qualifiers.
-            int num_of_or_conjunctions = 0;
-            for (int i = 0; i < numberOfQualifiers; i++)
+        // Determine number of leading AND qualifiers, and subsequent
+        // trailing OR qualifiers.
+        int num_of_or_conjunctions = 0;
+        for (int i = 0; i < numberOfQualifiers; i++)
+        {
+            if (((Predicate) elementAt(i)).isOrList())
             {
-                if (((Predicate) elementAt(i)).isOrList())
-                {
-                    num_of_or_conjunctions++;
-                }
+                num_of_or_conjunctions++;
             }
+        }
 
-            
-			/* Assign the initializer to the Qualifier[] field */
-			consMB.pushNewArray(
-                ClassName.Qualifier + "[]", (int) num_of_or_conjunctions + 1);
-			consMB.setField(qualField);
 
-            // Allocate qualifiers[0] which is an entry for each of the leading
-            // AND clauses.
+        /* Assign the initializer to the Qualifier[] field */
+        consMB.pushNewArray(
+            ClassName.Qualifier + "[]", (int) num_of_or_conjunctions + 1);
+        consMB.setField(qualField);
 
-			consMB.getField(qualField);             // 1st arg allocateQualArray
-			consMB.push((int) 0);                   // 2nd arg allocateQualArray
-			consMB.push((int) numberOfQualifiers - num_of_or_conjunctions);  // 3rd arg allocateQualArray
+        // Allocate qualifiers[0] which is an entry for each of the leading
+        // AND clauses.
 
-			consMB.callMethod(
-                VMOpcode.INVOKESTATIC, 
-                acb.getBaseClassName(), 
-                "allocateQualArray", "void", 3);
-		}
+        consMB.getField(qualField);             // 1st arg allocateQualArray
+        consMB.push((int) 0);                   // 2nd arg allocateQualArray
+        consMB.push((int) numberOfQualifiers - num_of_or_conjunctions);  // 3rd arg allocateQualArray
+
+        consMB.callMethod(
+            VMOpcode.INVOKESTATIC,
+            acb.getBaseClassName(),
+            "allocateQualArray", "void", 3);
 
 		/* Sort the qualifiers by "selectivity" before generating.
 		 * We want the qualifiers ordered by selectivity with the
@@ -3129,10 +3128,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 * by (column #, selectivity) once the store does just in time
 		 * instantiation.
 		 */
-		if (numberOfQualifiers > 0)
-		{
-			orderQualifiers();
-		}
+        orderQualifiers();
 
 		/* Generate each of the qualifiers, if any */
 
