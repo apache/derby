@@ -33,6 +33,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
 
@@ -301,8 +302,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     
     private void startWithCommand() throws Exception
     {
-        final TestConfiguration config = TestConfiguration.getCurrent();
-        
         // start the server through the command line
         // arguments using a new thread to do so.
         new Thread(
@@ -320,14 +319,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private SpawnedProcess startSeparateProcess() throws Exception
     {
         ArrayList       al = new ArrayList();
-        String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
         boolean         skipHostName = false;
 
-        al.add( BaseTestCase.getJavaExecutableName() );
-        al.add( "-Demma.verbosity.level=silent" );
-        al.add( "-classpath" );
-        al.add( classpath );
-        
         // Loading from classes need to work-around the limitation of the
         // default policy file doesn't work with classes.  Similarly, if we are
         // running with Emma we don't run with the security manager, as the
@@ -377,48 +370,13 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             if ( HOST_OPTION.equals( startupArgs[ i ] ) ) { skipHostName = true; }
         }
 
-        String[]    defaultArgs = getDefaultStartupArgs( skipHostName );
-
-        count = defaultArgs.length;
-        for ( int i = 0; i < count; i++ )
-        {
-            al.add( defaultArgs[ i ] );
-        }
-
-        count = startupArgs.length;
-        for ( int i = 0; i < count; i++ )
-        {
-            al.add( startupArgs[ i ] );
-        }
+        al.addAll(Arrays.asList(getDefaultStartupArgs(skipHostName)));
+        al.addAll(Arrays.asList(startupArgs));
 
         final   String[]  command = new String[ al.size() ];
         al.toArray(command);
 
-        String startcommand ="";
-        for (int i = 0 ; i < command.length ; i++) {
-        	startcommand += command[i] + " ";
-        }
-
-        BaseTestCase.println("XXX server startup command = " +
-	startcommand + "\n");
-
-        Process serverProcess;
-        
-        try {
-            serverProcess = (Process)
-                AccessController.doPrivileged
-                (
-                 new PrivilegedExceptionAction()
-                 {
-                     public Object run() throws IOException
-                     {
-                         return Runtime.getRuntime().exec(command);
-                     }
-                 }
-                );
-        } catch (PrivilegedActionException e) {
-            throw e.getException();
-        }
+        Process serverProcess = BaseTestCase.execJavaCmd(command);
 
         return new SpawnedProcess(serverProcess, "SpawnedNetworkServer");
     }
