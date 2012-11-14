@@ -440,6 +440,34 @@ public class PrivilegedFileOpsForTests {
     }
 
     /**
+     * Checks if the specified file is empty.
+     *
+     * @param f the file
+     * @return true if the file is empty
+     */
+    public static boolean isFileEmpty(final File f) 
+            throws FileNotFoundException {
+        if (f == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return((Boolean)AccessController.doPrivileged (new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    FileInputStream fis = new FileInputStream(f);
+                    int result = fis.read();
+                    fis.close();
+                    if(result == -1)
+                        return Boolean.valueOf(true);
+                    else
+                        return Boolean.valueOf(false);
+                }
+            })).booleanValue();
+        } catch (PrivilegedActionException pae) {
+            throw (FileNotFoundException)pae.getCause();
+        }
+    }
+
+    /**
      * Obtains information about the specified file.
      *
      * @param f the file
