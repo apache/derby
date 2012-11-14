@@ -70,8 +70,7 @@ public class ReadMeFilesTest extends BaseJDBCTestCase {
     private void lookForReadmeFile(String path) throws IOException {
         File readmeFile = new File(path,
             DB_README_FILE_NAME);
-        PrivilegedFileOpsForTests.exists(readmeFile);
-        PrivilegedFileOpsForTests.isFileEmpty(readmeFile);
+        assertTrue(readmeFile + "doesn't exist", PrivilegedFileOpsForTests.exists(readmeFile));
     }
 }
  
