@@ -86,7 +86,7 @@ public interface PersistentService {
         The readme file cautioning users against touching the files in
         the database directory 
     */
-    public static final String DB_README_FILE_NAME = "README_DONT_TOUCH_FILES.txt";
+    public static final String DB_README_FILE_NAME = "README_DO_NOT_TOUCH_FILES.txt";
 
 	/**
 		The typical name for the service's properties file.

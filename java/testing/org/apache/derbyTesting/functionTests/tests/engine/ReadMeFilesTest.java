@@ -40,14 +40,14 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *   1)at the db level directory, 
  *   2)in seg0 directory and 
  *   3)in the log directocy.
- * All the three readme files are named README_DONT_TOUCH_FILES.txt
+ * All the three readme files are named README_DO_NOT_TOUCH_FILES.txt
  */
 public class ReadMeFilesTest extends BaseJDBCTestCase {
     /**
     The readme file cautioning users against touching the files in
     the database directory 
     */
-    private static final String DB_README_FILE_NAME = "README_DONT_TOUCH_FILES.txt";
+    private static final String DB_README_FILE_NAME = "README_DO_NOT_TOUCH_FILES.txt";
 
     public ReadMeFilesTest(String name) {
         super(name);
