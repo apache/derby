@@ -52,6 +52,7 @@ public class _Suite extends BaseTestCase  {
         if (!(isIBMJVM() && isJava7()))
             suite.addTest(RestrictiveFilePermissionsTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
+        suite.addTest(ReadMeFilesTest.suite());
 
         return suite;
     }
