@@ -8432,12 +8432,12 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <name>M005</name>
                 <text>
 # *************************************************************************
-# ***              Do not touch files in this directory!                ***
-# *** FILES IN THIS DIRECTORY AND SUB-DIRECTORIES CONSTITUTE DERBY      ***
-# *** DATABASE WHICH INCLUDES THE DATA (USER AND SYSTEM) AND THE        ***
-# *** NECESSARY FILES FOR DATABASE RECOVERY.                            ***
-# *** EDITING, ADDING OR DELETING ANY OF THESE FILES MAY CAUSE DATA     ***
-# *** CORRUPTION AND LEAVE THE DATABASE IN NON-RECOVERABLE STATE.       ***
+# ***              DO NOT TOUCH FILES IN THIS DIRECTORY!                ***
+# *** FILES IN THIS DIRECTORY AND SUBDIRECTORIES CONSTITUTE A DERBY     ***
+# *** DATABASE, WHICH INCLUDES THE DATA (USER AND SYSTEM) AND THE       ***
+# *** FILES NECESSARY FOR DATABASE RECOVERY.                            ***
+# *** EDITING, ADDING, OR DELETING ANY OF THESE FILES MAY CAUSE DATA    ***
+# *** CORRUPTION AND LEAVE THE DATABASE IN A NON-RECOVERABLE STATE.     ***
 # *************************************************************************</text>
                 <comment>Translators: Please translate the ALL CAPS words.</comment>
             </msg>
@@ -8446,11 +8446,11 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <name>M006</name>
                 <text>
 # *************************************************************************
-# ***              Do not touch files in this directory!                ***
+# ***              DO NOT TOUCH FILES IN THIS DIRECTORY!                ***
 # *** FILES IN THIS DIRECTORY ARE USED BY THE DERBY DATABASE RECOVERY   ***
-# *** SYSTEM. EDITING, ADDING OR DELETING FILES IN THIS DIRECTORY WILL  ***
-# *** CAUSE THE DERBY RECOVERY SYSTEM TO FAIL LEADING TO UNRECOVERABLE  ***
-# *** CORRUPT DATABASES.                                                ***
+# *** SYSTEM. EDITING, ADDING, OR DELETING FILES IN THIS DIRECTORY      ***
+# *** WILL CAUSE THE DERBY RECOVERY SYSTEM TO FAIL, LEADING TO          ***
+# *** NON-RECOVERABLE CORRUPT DATABASES.                                ***
 # *************************************************************************</text>
                 <comment>Translators: Please translate the ALL CAPS words.</comment>
             </msg>
@@ -8459,11 +8459,11 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <name>M007</name>
                 <text>
 # *************************************************************************
-# ***              Do not touch files in this directory!                ***
+# ***              DO NOT TOUCH FILES IN THIS DIRECTORY!                ***
 # *** FILES IN THIS DIRECTORY ARE USED BY THE DERBY DATABASE TO STORE   *** 
 # *** USER AND SYSTEM DATA. EDITING, ADDING, OR DELETING FILES IN THIS  ***
-# *** DIRECTORY WILL CORRUPT THE ASSOCIATED DERBY DATABASE, AND WILL    ***
-# *** NOT BE RECOVERABLE.                                               ***
+# *** DIRECTORY WILL CORRUPT THE ASSOCIATED DERBY DATABASE AND MAKE     ***
+# *** IT NON-RECOVERABLE.                                               ***
 # *************************************************************************</text>
                 <comment>Translators: Please translate the ALL CAPS words.</comment>
             </msg>
