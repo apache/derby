@@ -48,6 +48,18 @@ public class ReplicationSuite extends BaseTestCase
 
 		TestSuite suite = new TestSuite("ReplicationSuite");
 
+        // DERBY-5998: The replication code uses javax.net.ServerSocketFactory
+        // to set up communication channels between the master and the slave.
+        // That class is only available in an optional part of the Foundation
+        // Profile API. Skip the replication tests if it is not available.
+        try {
+            Class.forName("javax.net.ServerSocketFactory");
+        } catch (ClassNotFoundException cnfe) {
+            println("Skipping replication tests since "
+                    + "javax.net.ServerSocketFactory is not available");
+            return suite;
+        }
+
         // The tests require both DriverManager and ClientDataSource. None
         // of those classes are available in JSR-169, so only run the test
         // on platforms that support JDBC3 and higher. The tests also require
