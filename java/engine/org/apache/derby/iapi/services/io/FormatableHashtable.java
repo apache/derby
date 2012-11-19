@@ -21,11 +21,6 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.Hashtable;
@@ -165,15 +160,6 @@ public class FormatableHashtable extends Hashtable implements Formatable
 	 * @exception ClassNotFoundException		thrown on error
 	 */
 	public void readExternal(ObjectInput in)
-		throws IOException, ClassNotFoundException
-	{
-		int size = in.readInt();
-		for (; size > 0; size--)
-		{
-			super.put(in.readObject(), in.readObject());
-		}
-	}
-	public void readExternal(ArrayInputStream in)
 		throws IOException, ClassNotFoundException
 	{
 		int size = in.readInt();

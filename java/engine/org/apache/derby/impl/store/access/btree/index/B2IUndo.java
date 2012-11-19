@@ -23,8 +23,6 @@ package org.apache.derby.impl.store.access.btree.index;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.Formatable;
@@ -318,11 +316,6 @@ public class B2IUndo implements LogicalUndo, Formatable
 	@see java.io.Externalizable#readExternal
 	*/
 	public void readExternal(ObjectInput in)
-		throws IOException, ClassNotFoundException
-	{
-        return;
-	}
-	public void readExternal(ArrayInputStream in)
 		throws IOException, ClassNotFoundException
 	{
         return;

@@ -21,12 +21,6 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -139,11 +133,6 @@ public class FormatableIntHolder implements Formatable
 	 * @exception IOException					thrown on error
 	 */
 	public void readExternal(ObjectInput in)
-		throws IOException
-	{
-		theInt = in.readInt();
-	}
-	public void readExternal(ArrayInputStream in)
 		throws IOException
 	{
 		theInt = in.readInt();

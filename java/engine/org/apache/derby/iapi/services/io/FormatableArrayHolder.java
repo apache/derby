@@ -21,13 +21,6 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.ObjectOutput;
@@ -164,13 +157,6 @@ public class FormatableArrayHolder implements Formatable
 		array = new Object[ArrayUtil.readArrayLength(in)];
 		ArrayUtil.readArrayItems(in, array);
 	}
-	public void readExternal(ArrayInputStream in)
-		throws IOException, ClassNotFoundException
-	{
-		array = new Formatable[ArrayUtil.readArrayLength(in)];
-		ArrayUtil.readArrayItems(in, array);
-	}
-	
 	
 	/**
 	 * Get the formatID which corresponds to this class.

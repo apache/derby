@@ -21,12 +21,6 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -125,16 +119,6 @@ public class FormatableProperties extends Properties implements Formatable
 		}
 	}
 
-	public void readExternal(ArrayInputStream in)
-		throws IOException
-	{
-		int size = in.readInt();
-		for (; size > 0; size--)
-		{
-			put(in.readUTF(), in.readUTF());
-		}
-	}
-	
 	/**
 	 * Get the formatID which corresponds to this class.
 	 *
