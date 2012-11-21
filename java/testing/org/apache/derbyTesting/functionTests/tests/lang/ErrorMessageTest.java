@@ -200,17 +200,19 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
         // Check that exactly one of the threads failed, and that the failure
         // was caused by a deadlock. It is not deterministic which of the two
         // threads will be terminated.
-        String msg;
-        if (holder[0] != null) {
-            assertSQLState("Not a deadlock", "40001", holder[0]);
-            assertNull("Only one of the waiters should be aborted", holder[1]);
-            msg = holder[0].getMessage();
-        } else {
-            assertSQLState("Not a deadlock", "40001", holder[1]);
-            msg = holder[1].getMessage();
+        assertFalse("No deadlock", holder[0] == null && holder[1] == null);
+        if (holder[0] != null && holder[1] != null) {
+            // Both threads failed. Print some more information to the log
+            // so we can see what's going on.
+            printStackTrace(holder[0]);
+            printStackTrace(holder[1]);
+            fail("Only one of the waiters should be aborted");
         }
 
-        String[] lines = msg.split("\n");
+        SQLException deadlock = holder[0] == null ? holder[1] : holder[0];
+        assertSQLState("Not a deadlock", "40001", deadlock);
+
+        String[] lines = deadlock.getMessage().split("\n");
         assertEquals("Unexpected number of lines in message", 8, lines.length);
 
         Pattern[] patterns = new Pattern[] {
