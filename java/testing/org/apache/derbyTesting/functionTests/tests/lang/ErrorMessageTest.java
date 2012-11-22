@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.Test;
@@ -47,30 +46,38 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
      * embedded driver.
      */
     public static Test suite() {
+        TestSuite suite = new TestSuite("ErrorMessageTest");
 
         if (JDBC.vmSupportsJSR169()) {
             // Foundation 1.1 doesn't support the regex classes. Return an
             // empty test suite.
-            return new TestSuite("ErrorMessageTest");
+            return suite;
         }
 
-        Test test = new TestSuite(ErrorMessageTest.class, "ErrorMessageTest");
+        // Set a short wait timeout so that the expected timeout exception
+        // is thrown faster.
+        suite.addTest(DatabasePropertyTestSetup.setLockTimeouts(
+                new ErrorMessageTest("testWaitTimeout"), 1, 2));
+
+        // Set a short deadlock timeout so that the expected deadlock is
+        // found faster. Keep the lock timeout high to prevent false lock
+        // timeouts from being reported because the deadlock detector cannot
+        // resolve the deadlock fast enough (DERBY-6001).
+        suite.addTest(DatabasePropertyTestSetup.setLockTimeouts(
+                new ErrorMessageTest("testDeadlockTimeout"), 1, 60));
+
+        // testWaitTimeout wants more detailed error messages on timeout.
+        Test test = DatabasePropertyTestSetup.singleProperty(
+                suite, "derby.locks.deadlockTrace", "true");
+
         // create some data to work on
-        test = new CleanDatabaseTestSetup(test) {
+        return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
                 s.executeUpdate("create table t (id int primary key, " +
                                 "text varchar(10))");
                 s.executeUpdate("insert into t (id) values 1, 2");
             }
         };
-        Properties prop = new Properties();
-        // set timeouts so that the tests finish sooner
-        prop.setProperty("derby.locks.waitTimeout", "4");
-        prop.setProperty("derby.locks.deadlockTimeout", "2");
-        // make sure lock table is dumped on wait timeout
-        prop.setProperty("derby.locks.deadlockTrace", "true");
-        test = new DatabasePropertyTestSetup(test, prop);
-        return test;
     }
 
     /**
