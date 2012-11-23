@@ -28,9 +28,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
-import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
@@ -75,7 +73,6 @@ public class HashScanResultSet extends ScanResultSet
     // life of object.
     private long conglomId;
     protected StaticCompiledOpenConglomInfo scoci;
-	private GeneratedMethod resultRowAllocator;
 	private GeneratedMethod startKeyGetter;
 	private int startSearchOperator;
 	private GeneratedMethod stopKeyGetter;
@@ -159,8 +156,6 @@ public class HashScanResultSet extends ScanResultSet
 					"stopKeyGetter expected to be null when sameStartStopPosition is true");
 			}
 		}
-
-        this.resultRowAllocator = resultRowAllocator;
 
 		this.startKeyGetter = startKeyGetter;
 		this.startSearchOperator = startSearchOperator;

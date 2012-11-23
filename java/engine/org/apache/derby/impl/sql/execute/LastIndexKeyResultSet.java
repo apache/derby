@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -41,10 +40,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	// set in constructor and not altered during
 	// life of object.
 	protected long conglomId;
-	protected GeneratedMethod resultRowAllocator;
-	protected GeneratedMethod startKeyGetter;
 	protected int startSearchOperator;
-	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
 	public String tableName;
@@ -120,7 +116,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 			SanityManager.ASSERT( resultRowAllocator!= null, "this scan must get row allocator");
 		}
 
-		this.resultRowAllocator = resultRowAllocator;
 		this.tableName = tableName;
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;

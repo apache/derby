@@ -22,22 +22,14 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ParameterValueSet; 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -78,8 +70,6 @@ class VTIResultSet extends NoPutResultSetImpl
 	public int rowsReturned;
 	public String javaClassName;
 
-    private boolean next;
-	private ClassInspector classInspector;
     private GeneratedMethod row;
     private GeneratedMethod constructor;
 	private PreparedStatement userPS;
@@ -470,7 +460,6 @@ class VTIResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
-	    	next = false;
 
 			/* close the user ResultSet.  We have to eat any exception here
 			 * since our close() method cannot throw an exception.

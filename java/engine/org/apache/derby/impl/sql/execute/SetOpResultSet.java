@@ -23,11 +23,9 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
@@ -57,7 +55,6 @@ class SetOpResultSet extends NoPutResultSetImpl
     private DataValueDescriptor[] prevCols; /* Used to remove duplicates in the EXCEPT DISTINCT case.
                                              * It is equal to the previously output columns.
                                              */
-    private int rightDuplicateCount; // Number of duplicates of the current row from the right input
     private ExecRow leftInputRow;
     private ExecRow rightInputRow;
 

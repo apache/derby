@@ -91,10 +91,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	protected long conglomId;
     protected DynamicCompiledOpenConglomInfo heapDcoci;
     protected StaticCompiledOpenConglomInfo heapScoci;
-	protected GeneratedMethod resultRowAllocator;
-	protected GeneratedMethod startKeyGetter;
 	protected int startSearchOperator;
-	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
 	public String tableName;
@@ -103,7 +100,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	protected boolean runTimeStatisticsOn;
 	public int rowsPerRead;
 	public boolean forUpdate;
-	private boolean sameStartStopPosition;
 
 	// Run time statistics
 	private Properties scanProperties;
@@ -169,20 +165,15 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT( activation!=null, "table scan must get activation context");
 			SanityManager.ASSERT( resultRowAllocator!= null, "table scan must get row allocator");
-			if (sameStartStopPosition)
-			{
-				SanityManager.ASSERT(stopKeyGetter == null,
-					"stopKeyGetter expected to be null when sameStartStopPosition is true");
-			}
+
+            // This ResultSet doesn't use start or stop keys, so expect them
+            // to be null.
+            SanityManager.ASSERT(startKeyGetter == null, "start key not null");
+            SanityManager.ASSERT(stopKeyGetter == null, "stop key not null");
 		}
 
-        this.resultRowAllocator = resultRowAllocator;
-
-		this.startKeyGetter = startKeyGetter;
 		this.startSearchOperator = startSearchOperator;
-		this.stopKeyGetter = stopKeyGetter;
 		this.stopSearchOperator = stopSearchOperator;
-		this.sameStartStopPosition = sameStartStopPosition;
 		this.qualifiers = qualifiers;
 		this.tableName = tableName;
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
