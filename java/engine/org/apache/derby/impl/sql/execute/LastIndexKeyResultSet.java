@@ -273,7 +273,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	 * This result set has its row from the last fetch done. 
 	 * If the cursor is closed, a null is returned.
 	 *
-	 * @see CursorResultSet
+	 * @see org.apache.derby.iapi.sql.execute.CursorResultSet
 	 *
 	 * @return the last row returned;
 	 * @exception StandardException thrown on failure.
