@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.util.ByteArray;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -72,6 +73,8 @@ import org.apache.derby.iapi.services.loader.GeneratedClass;
 
 import java.sql.Timestamp;
 import java.sql.SQLWarning;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -177,6 +180,12 @@ public class GenericPreparedStatement
      * Incremented for each (re)compile.
      */
     private long versionCounter;
+
+    /**
+     * Holder for row counts and execution count. Used for determining
+     * whether the statement should be recompiled.
+     */
+    private RowCountStatistics rowCountStats = new RowCountStatistics();
 
 	//
 	// constructors
@@ -1002,7 +1011,7 @@ recompileOutOfDatePlan:
 		}
 		isValid = true;
 
-		return;
+        rowCountStats.reset();
 	}
 
 	public GeneratedClass getActivationClass()
@@ -1189,6 +1198,7 @@ recompileOutOfDatePlan:
 		clone.updateColumns = updateColumns;
 		clone.updateMode = updateMode;	
 		clone.needsSavepoint = needsSavepoint;
+        clone.rowCountStats = rowCountStats;
 
 		return clone;
 	}
@@ -1253,5 +1263,108 @@ recompileOutOfDatePlan:
 
     public final void incrementVersionCounter() {
         ++versionCounter;
+    }
+
+    // Stale plan checking.
+
+    /**
+     * This class holds information about stale plan check interval,
+     * execution count and row count statistics for a GenericPreparedStatement.
+     *
+     * The fields and methods should ideally live in GenericPreparedStatement,
+     * not in a separate class. However, triggers clone the GPS on each
+     * execution, which means the statistics would be reset on each execution
+     * if they lived directly inside GPS. Instead, keep the statistics in an
+     * object that can be shared between multiple GPS instances when they
+     * are cloned.
+     */
+    private static class RowCountStatistics {
+        private int stalePlanCheckInterval;
+        private int executionCount;
+        private ArrayList rowCounts;
+
+        // No synchronization for executionCount. Since it's accessed on
+        // every execution, we want to avoid synchronization. Nothing serious
+        // happens if the execution count is off, we just risk checking for
+        // stale plans at a different frequency than specified by
+        // derby.language.stalePlanCheckInterval.
+        //
+        // We might want to use a java.util.concurrent.atomic.AtomicInteger
+        // and its atomic incrementAndGet() method once support for pre-Java 5
+        // JVMs is dropped.
+
+        /** @see ExecPreparedStatement#incrementExecutionCount() */
+        int incrementExecutionCount() {
+            return ++executionCount;
+        }
+
+        /** @see ExecPreparedStatement#getInitialRowCount(int, long) */
+        synchronized long getInitialRowCount(int rsNum, long rowCount) {
+            // Allocate the list of row counts lazily.
+            if (rowCounts == null) {
+                rowCounts = new ArrayList();
+            }
+
+            // Make sure the list is big enough to hold the row count for
+            // the specified result set number.
+            if (rsNum >= rowCounts.size()) {
+                int newSize = rsNum + 1;
+                rowCounts.addAll(
+                        Collections.nCopies(newSize - rowCounts.size(), null));
+            }
+
+            // Get the initial row count for the specified result set, and
+            // set it if it is not already set.
+            Long initialCount = (Long) rowCounts.get(rsNum);
+            if (initialCount == null) {
+                rowCounts.set(rsNum, ReuseFactory.getLong(rowCount));
+                return rowCount;
+            } else {
+                return initialCount.longValue();
+            }
+        }
+
+        // No synchronization for stale plan check interval. Same reason as
+        // stated above for executionCount. Since int accesses are guaranteed
+        // atomic, the worst that could happen is that one thread sees it as
+        // uninitialized (zero) when another thread in fact has initialized it,
+        // and we end up doing the initialization work twice.
+
+        /** @see ExecPreparedStatement#setStalePlanCheckInterval(int) */
+        void setStalePlanCheckInterval(int interval) {
+            stalePlanCheckInterval = interval;
+        }
+
+        /** @see ExecPreparedStatement#getStalePlanCheckInterval() */
+        int getStalePlanCheckInterval() {
+            return stalePlanCheckInterval;
+        }
+
+        /** Reset all the row count statistics. */
+        synchronized void reset() {
+            stalePlanCheckInterval = 0;
+            executionCount = 0;
+            rowCounts = null;
+        }
+    }
+
+    /** @see ExecPreparedStatement#incrementExecutionCount() */
+    public int incrementExecutionCount() {
+        return rowCountStats.incrementExecutionCount();
+    }
+
+    /** @see ExecPreparedStatement#setStalePlanCheckInterval(int) */
+    public void setStalePlanCheckInterval(int interval) {
+        rowCountStats.setStalePlanCheckInterval(interval);
+    }
+
+    /** @see ExecPreparedStatement#getStalePlanCheckInterval() */
+    public int getStalePlanCheckInterval() {
+        return rowCountStats.getStalePlanCheckInterval();
+    }
+
+    /** @see ExecPreparedStatement#getInitialRowCount(int, long) */
+    public long getInitialRowCount(int rsNum, long currentRowCount) {
+        return rowCountStats.getInitialRowCount(rsNum, currentRowCount);
     }
 }

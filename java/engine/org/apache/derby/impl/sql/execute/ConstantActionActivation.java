@@ -47,13 +47,6 @@ public final class ConstantActionActivation extends BaseActivation
         return false;
     }
 
-    /**
-     * Always return null since constant actions never check row counts.
-     */
-    protected RowCountStats getRowCountStats() {
-        return null;
-    }
-
     protected ResultSet createResultSet() throws StandardException {
         return getResultSetFactory().getDDLResultSet(this);
     }

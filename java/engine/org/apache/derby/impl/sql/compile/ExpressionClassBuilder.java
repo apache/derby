@@ -72,7 +72,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	protected int nextNonFastExpr;
 	protected int nextFieldNum;
 	protected MethodBuilder constructor;
-    protected MethodBuilder staticInitializer;
 	CompilerContext myCompCtx;
 	MethodBuilder executeMethod; // to find it fast
 
@@ -169,13 +168,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		return constructor;
 	}
 
-    MethodBuilder getStaticInitializer() {
-        if (staticInitializer == null) {
-            staticInitializer = cb.newConstructorBuilder(Modifier.STATIC);
-        }
-        return staticInitializer;
-    }
-
 	ClassBuilder getClassBuilder() {
 		return cb;
 	}
@@ -247,17 +239,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		constructor.methodReturn();
 		constructor.complete();
 	}
-
-    /**
-     * Finish the static initializer, if there is one, by putting a return
-     * at the end of it.
-     */
-    void finishStaticInitializer() throws StandardException {
-        if (staticInitializer != null) {
-            staticInitializer.methodReturn();
-            staticInitializer.complete();
-        }
-    }
 
 	/**
 	 * Generate the assignment for row = new ExecRow[numResultSets]

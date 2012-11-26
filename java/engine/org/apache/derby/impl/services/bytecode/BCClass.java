@@ -264,10 +264,6 @@ class BCClass extends GClass {
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
      * <p>
-     * If the modifiers include static, the returned method builder is for
-     * a class or interface initialization method. Otherwise, the builder is
-     * for an instance initialization method.
-     * <p>
 	 *
 	 * See Modifiers
 	 * @param modifiers the | of the Modifiers
@@ -277,8 +273,7 @@ class BCClass extends GClass {
 	 * @return the method builder for the constructor.
 	 */
 	public MethodBuilder newConstructorBuilder(int modifiers) {
-        String method = Modifier.isStatic(modifiers) ? "<clinit>" : "<init>";
-        return new BCMethod(this, "void", method, modifiers, null, factory);
+        return new BCMethod(this, "void", "<init>", modifiers, null, factory);
 	}
   	//
 	// class interface

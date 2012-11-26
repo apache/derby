@@ -179,5 +179,35 @@ public interface ExecPreparedStatement
 	 *         the database does not use SQL standard authorization
 	 */
 	List getRequiredPermissionsList();
-}
 
+    // Methods for stale plan checking.
+
+    /**
+     * Increment and return the execution count for this statement.
+     * @return execution count for this statement after the last compilation
+     */
+    int incrementExecutionCount();
+
+    /**
+     * Get the initial row count of the specified result set. If the initial
+     * row count has not yet been set, initialize it with the value of the
+     * current row count.
+     * @param rsNum the result set to get the initial row count for
+     * @param currentRowCount the current row count for the result set
+     * @return the row count from the first execution of the result set
+     */
+    long getInitialRowCount(int rsNum, long currentRowCount);
+
+    /**
+     * Set the stale plan check interval.
+     * @param interval the stale plan check interval
+     */
+    void setStalePlanCheckInterval(int interval);
+
+    /**
+     * Get the stale plan check interval.
+     * @return the stale plan check interval, or zero if it has not been
+     * initialized yet
+     */
+    int getStalePlanCheckInterval();
+}

@@ -885,12 +885,6 @@ class BCMethod implements MethodBuilder {
 
 	}
 
-    public void getStaticField(LocalField field) {
-        BCLocalField lf = (BCLocalField) field;
-        myCode.addInstrU2(VMOpcode.GETSTATIC, lf.cpi);
-        growStack(lf.type);
-    }
-
 	public void getField(String declaringClass, String fieldName, String fieldType) {
 		Type dt = popStack();
 
@@ -925,13 +919,6 @@ class BCMethod implements MethodBuilder {
 		putField(lf.type, lf.cpi, false);
         overflowMethodCheck();
 	}
-
-    public void setStaticField(LocalField field) {
-        BCLocalField lf = (BCLocalField) field;
-        myCode.addInstrU2(VMOpcode.PUTSTATIC, lf.cpi);
-        popStack();
-        overflowMethodCheck();
-    }
 
 	/**
 		Upon entry the top word(s) on the stack is

@@ -27,7 +27,6 @@ import java.sql.SQLWarning;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
 import	org.apache.derby.catalog.Dependable;
@@ -920,35 +919,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		}
 	}
 
-    /**
-     * This class holds row count statistics for a query.
-     */
-    protected static class RowCountStats {
-        /**
-         * Stale plan check interval tells how often the row counts should be
-         * checked. Cached here so that we don't need to query the database
-         * properties on each execution.
-         */
-        private int stalePlanCheckInterval;
-        /** The number of times this query has been executed. */
-        private int executionCount;
-        /** List with row count estimates for each table in the query. */
-        private final List rowCounts;
-
-        public RowCountStats() {
-            rowCounts = new ArrayList();
-        }
-    }
-
-    /**
-     * Get the object holding row count statistics for this activation.
-     *
-     * It may return {@code null} if row count statistics are not maintained
-     * for the activation. In that case, {@link #shouldWeCheckRowCounts()}
-     * must return {@code false}.
-     */
-    protected abstract RowCountStats getRowCountStats();
-
 	/**
 		@see Activation#informOfRowCount
 		@exception StandardException	Thrown on error
@@ -968,121 +938,90 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			/* Check each result set only once per execution */
 			if (rowCountsCheckedThisExecution.add(rsn))
 			{
-                final RowCountStats stats = getRowCountStats();
-                synchronized (stats)
-				{
-                    final List rowCountCheckVector = stats.rowCounts;
-					Long firstRowCount = null;
+                long n1 = getPreparedStatement()
+                        .getInitialRowCount(resultSetNumber, currentRowCount);
 
-					/*
-					** Check whether this resultSet has been seen yet.
-					*/
-					if (resultSetNumber < rowCountCheckVector.size())
-					{
-						firstRowCount =
-                            (Long) rowCountCheckVector.get(resultSetNumber);
-					}
-					else
-					{
-                        int newSize = resultSetNumber + 1;
-                        while (rowCountCheckVector.size() < newSize) {
-                            rowCountCheckVector.add(null);
+                /*
+                ** Has the row count changed significantly?
+                */
+                if (currentRowCount != n1)
+                {
+                    if (n1 >= TEN_PERCENT_THRESHOLD)
+                    {
+                        /*
+                        ** For tables with more than
+                        ** TEN_PERCENT_THRESHOLD rows, the
+                        ** threshold is 10% of the size of the table.
+                        */
+                        long changeFactor = n1 / (currentRowCount - n1);
+                        if (Math.abs(changeFactor) <= 10) {
+                            significantChange = true;
                         }
-					}
+                    }
+                    else
+                    {
+                        /*
+                        ** For tables with less than
+                        ** TEN_PERCENT_THRESHOLD rows, the threshold
+                        ** is non-linear.  This is because we want
+                        ** recompilation to happen sooner for small
+                        ** tables that change size.  This formula
+                        ** is for a second-order equation (a parabola).
+                        ** The derivation is:
+                        **
+                        **   c * n1 = (difference in row counts) ** 2
+                        **				- or -
+                        **   c * n1 = (currentRowCount - n1) ** 2
+                        **
+                        ** Solving this for currentRowCount, we get:
+                        **
+                        **   currentRowCount = n1 + sqrt(c * n1)
+                        **
+                        **				- or -
+                        **
+                        **   difference in row counts = sqrt(c * n1)
+                        **
+                        **				- or -
+                        **
+                        **   (difference in row counts) ** 2 =
+                        **					c * n1
+                        **
+                        ** Which means that we should recompile when
+                        ** the current row count exceeds n1 (the first
+                        ** row count) by sqrt(c * n1), or when the
+                        ** square of the difference exceeds c * n1.
+                        ** A good value for c seems to be 4.
+                        **
+                        ** We don't use this formula when c is greater
+                        ** than TEN_PERCENT_THRESHOLD because we never
+                        ** want to recompile unless the number of rows
+                        ** changes by more than 10%, and this formula
+                        ** is more sensitive than that for values of
+                        ** n1 greater than TEN_PERCENT_THRESHOLD.
+                        */
+                        long changediff = currentRowCount - n1;
 
-					if (firstRowCount != null)
-					{
-						/*
-						** This ResultSet has been seen - has the row count
-						** changed significantly?
-						*/
-						long n1 = firstRowCount.longValue();
-
-						if (currentRowCount != n1)
-						{
-							if (n1 >= TEN_PERCENT_THRESHOLD)
-							{
-								/*
-								** For tables with more than
-								** TEN_PERCENT_THRESHOLD rows, the
-								** threshold is 10% of the size of the table.
-								*/
-								long changeFactor = n1 / (currentRowCount - n1);
-								if (Math.abs(changeFactor) <= 10)
-									significantChange = true;
-							}
-							else
-							{
-								/*
-								** For tables with less than
-								** TEN_PERCENT_THRESHOLD rows, the threshold
-								** is non-linear.  This is because we want
-								** recompilation to happen sooner for small
-								** tables that change size.  This formula
-								** is for a second-order equation (a parabola).
-								** The derivation is:
-								**
-								**   c * n1 = (difference in row counts) ** 2
-								**				- or - 
-								**   c * n1 = (currentRowCount - n1) ** 2
-								**
-								** Solving this for currentRowCount, we get:
-								**
-								**   currentRowCount = n1 + sqrt(c * n1)
-								**
-								**				- or -
-								**
-								**   difference in row counts = sqrt(c * n1)
-								**
-								**				- or -
-								**
-								**   (difference in row counts) ** 2 =
-								**					c * n1
-								**
-								** Which means that we should recompile when
-								** the current row count exceeds n1 (the first
-								** row count) by sqrt(c * n1), or when the
-								** square of the difference exceeds c * n1.
-								** A good value for c seems to be 4.
-								**
-								** We don't use this formula when c is greater
-								** than TEN_PERCENT_THRESHOLD because we never
-								** want to recompile unless the number of rows
-								** changes by more than 10%, and this formula
-								** is more sensitive than that for values of
-								** n1 greater than TEN_PERCENT_THRESHOLD.
-								*/
-								long changediff = currentRowCount - n1;
-
-								/*
-								** Square changediff rather than take the square
-								** root of (4 * n1), because multiplying is
-								** faster than taking a square root.  Also,
-								** check to be sure that squaring changediff
-								** will not cause an overflow by comparing it
-								** with the square root of the maximum value
-								** for a long (this square root is taken only
-								** once, when the class is loaded, or during
-								** compilation if the compiler is smart enough).
-								*/
-								if (Math.abs(changediff) <= MAX_SQRT)
-								{
-									if ((changediff * changediff) >
-															Math.abs(4 * n1))
-									{
-										significantChange = true;
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-                        rowCountCheckVector.set(
-                            resultSetNumber, new Long(currentRowCount));
-
-					}
-				}
+                        /*
+                        ** Square changediff rather than take the square
+                        ** root of (4 * n1), because multiplying is
+                        ** faster than taking a square root.  Also,
+                        ** check to be sure that squaring changediff
+                        ** will not cause an overflow by comparing it
+                        ** with the square root of the maximum value
+                        ** for a long (this square root is taken only
+                        ** once, when the class is loaded, or during
+                        ** compilation if the compiler is smart enough).
+                        */
+                        if (Math.abs(changediff) <= MAX_SQRT)
+                        {
+                            if ((changediff * changediff) >
+                                                    Math.abs(4 * n1))
+                            {
+                                significantChange = true;
+                            }
+                        }
+                    }
+                }
 			}
 
 			/* Invalidate outside of the critical section */
@@ -1225,7 +1164,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
      */
 	protected boolean shouldWeCheckRowCounts() throws StandardException
 	{
-        final RowCountStats stats = getRowCountStats();
+        final ExecPreparedStatement ps = getPreparedStatement();
 
 		/*
 		** Check the row count only every N executions.  OK to check this
@@ -1233,7 +1172,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		** critical.  The value of N is determined by the property
 		** derby.language.stalePlanCheckInterval.
 		*/
-        int executionCount = ++stats.executionCount;
+        int executionCount = ps.incrementExecutionCount();
 
 		/*
 		** Always check row counts the first time, to establish the
@@ -1255,7 +1194,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		}
 		else
 		{
-            int stalePlanCheckInterval = stats.stalePlanCheckInterval;
+            int stalePlanCheckInterval = ps.getStalePlanCheckInterval();
 
 			/*
 			** Only query the database property once.  We can tell because
@@ -1273,7 +1212,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 							Integer.MAX_VALUE,
 							Property.DEFAULT_LANGUAGE_STALE_PLAN_CHECK_INTERVAL
 							);
-                stats.stalePlanCheckInterval = stalePlanCheckInterval;
+
+                ps.setStalePlanCheckInterval(stalePlanCheckInterval);
 			}
 
             return (executionCount % stalePlanCheckInterval) == 1;

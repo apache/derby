@@ -167,10 +167,6 @@ public interface ClassBuilder {
 	 * This is used to start a constructor as well; pass in
 	 * null for the returnType when used in that manner.
      * <p>
-     * If the modifiers include static, the returned method builder is for
-     * a class or interface initialization method. Otherwise, the builder is
-     * for an instance initialization method.
-     * <p>
 	 *
 	 * @param modifiers the | of the Modifier
 	 *	constants representing the visibility and control of this

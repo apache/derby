@@ -329,9 +329,6 @@ public abstract class StatementNode extends QueryTreeNode
 		// wrap up the constructor by putting a return at the end of it
 		generatingClass.finishConstructor();
 
-        // wrap up the static initializer by putting a return at the end of it
-        generatingClass.finishStaticInitializer();
-
 		try {
 			// cook the completed class into a real class
 			// and stuff it into activationClass

@@ -188,24 +188,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
             executeMethod.complete();
         }
 
-        // Create and initialize a static field that holds row count statistics.
-        LocalField rowCountField = newFieldDeclaration(
-                Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL,
-                ClassName.RowCountStats);
-        MethodBuilder init = getStaticInitializer();
-        init.pushNewStart(ClassName.RowCountStats);
-        init.pushNewComplete(0);
-        init.setStaticField(rowCountField);
-
-        // Create a method that returns the row count statistics.
-        MethodBuilder getRowCountStats = cb.newMethodBuilder(
-                Modifier.PROTECTED | Modifier.FINAL,
-                ClassName.RowCountStats,
-                "getRowCountStats");
-        getRowCountStats.getStaticField(rowCountField);
-        getRowCountStats.methodReturn();
-        getRowCountStats.complete();
-
 		if (closeActivationMethod != null) {
 			closeActivationMethod.methodReturn();
 			closeActivationMethod.complete();
