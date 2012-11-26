@@ -90,6 +90,13 @@ class DropDatabaseSetup extends BaseTestSetup {
             dbName = dsh + File.separator + dbName;
         }
         removeDirectory(dbName);
+        //DERBY-5995 (Add a test case to check the 3 readme files get created 
+        // even when log directory has been changed with jdbc url attribute 
+        // logDevice )
+        String logDevice = config.getConnectionAttributes().getProperty("logDevice");
+        if (logDevice != null) {
+            removeDirectory(logDevice);
+        }
     }
 
 

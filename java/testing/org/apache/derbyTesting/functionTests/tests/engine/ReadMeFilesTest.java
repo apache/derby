@@ -27,9 +27,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -48,14 +51,37 @@ public class ReadMeFilesTest extends BaseJDBCTestCase {
     the database directory 
     */
     private static final String DB_README_FILE_NAME = "README_DO_NOT_TOUCH_FILES.txt";
+    static String logDir = BaseTestCase.getSystemProperty("derby.system.home")+File.separator+"abcs";
 
     public ReadMeFilesTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        Test suite = TestConfiguration.embeddedSuite(ReadMeFilesTest.class);
-        return TestConfiguration.singleUseDatabaseDecorator(suite);
+    	TestSuite suite = new TestSuite("ReadMeFilesTest");
+
+        //DERBY-5232 (Put a stern README file in log and seg0 directories 
+        // to warn users of corrpution they will cause if they touch files 
+        // there)
+        //Test the existence of readme files for a default embedded config
+        // which means that "log" directory is under the database directory
+        // along with "seg0" directory
+        suite.addTest(TestConfiguration.singleUseDatabaseDecorator(
+            TestConfiguration.embeddedSuite(ReadMeFilesTest.class)));
+
+        //DERBY-5995 (Add a test case to check the 3 readme files get created 
+        // even when log directory has been changed with jdbc url attribute 
+        // logDevice )
+        //Test the existence of readme files for a database configuration
+        // where "log" directory may not be under the database directory.
+        // It's location is determined by jdbc url attribute logDevice.
+        logDir = BaseTestCase.getSystemProperty("derby.system.home")+
+            File.separator+"abcs";
+        suite.addTest(
+            Decorator.logDeviceAttributeDatabase(
+                TestConfiguration.embeddedSuite(ReadMeFilesTest.class),
+                logDir));
+        return suite;
     }
 
     public void testReadMeFilesExist() throws IOException, SQLException {
@@ -64,13 +90,19 @@ public class ReadMeFilesTest extends BaseJDBCTestCase {
         String dbPath = currentConfig.getDatabasePath(currentConfig.getDefaultDatabaseName());
         lookForReadmeFile(dbPath);
         lookForReadmeFile(dbPath+File.separator+"seg0");
-        lookForReadmeFile(dbPath+File.separator+"log");
+
+        String logDevice = currentConfig.getConnectionAttributes().getProperty("logDevice");
+        if (logDevice != null) {
+            lookForReadmeFile(logDir+File.separator+"log");
+        } else {
+            lookForReadmeFile(dbPath+File.separator+"log");
+        }
     }
 
     private void lookForReadmeFile(String path) throws IOException {
         File readmeFile = new File(path,
             DB_README_FILE_NAME);
-        assertTrue(readmeFile + "doesn't exist", PrivilegedFileOpsForTests.exists(readmeFile));
+        assertTrue(readmeFile + "doesn't exist", 
+            PrivilegedFileOpsForTests.exists(readmeFile));
     }
 }
- 

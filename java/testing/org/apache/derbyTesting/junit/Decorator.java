@@ -170,7 +170,22 @@ public class Decorator {
         
         return attributesDatabase(attributes, test);
     }
-    
+
+    /**
+     * Decorate a set of tests to use a single use database with
+     *  logDevice pointing a log directory to non-default location  
+     */
+    public static Test logDeviceAttributeDatabase(Test test, final String logDevice)
+    {
+        Properties attributes = new Properties();
+        if (logDevice != null) {
+            attributes.setProperty("logDevice",logDevice);
+        }
+
+        test = TestConfiguration.singleUseDatabaseDecorator(test);
+        return attributesDatabase(attributes, test);
+    }
+
     /**
      * Decorate a set of tests to use an single
      * use database with TERRITORY_BASED:SECONDARY collation
