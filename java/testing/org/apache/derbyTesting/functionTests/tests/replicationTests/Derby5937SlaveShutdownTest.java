@@ -27,8 +27,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.functionTests.tests.store.BootLockTest;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
