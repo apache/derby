@@ -34,6 +34,17 @@
   <property file="${properties.dir}/sane${sanity}.properties"/>
 
 
+<!-- These properties are used by the Release build process. -->
+  <condition property="isWindows">
+    <os family="windows"/>
+  </condition>
+
+  <condition property="isUnix">
+    <not>
+      <os family="windows"/>
+    </not>
+  </condition>
+
 <!-- Targets -->
 
   <target
@@ -2094,8 +2105,17 @@
 
    </target>
 
+   <!-- Targets used to specify the correct ant executable -->
+   <target name="ant-exec-windows" unless="isUnix">
+     <property name="ant.exec" value="ant.bat"/>
+   </target>
+
+   <target name="ant-exec-unix" unless="isWindows">
+     <property name="ant.exec" value="ant"/>
+   </target>
+
    <!-- Build the user documentation -->
-   <target name="builduserdocs" depends="checkdocsroot">
+   <target name="builduserdocs" depends="ant-exec-windows,ant-exec-unix,checkdocsroot">
 
      <property file="${properties.dir}/release.properties"/>
 
@@ -2103,7 +2123,7 @@
 
      <ant dir="${docs.root}" target="clobber"/>
 
-     <exec executable="ant" dir="${docs.root}">
+     <exec executable="${ant.exec}" dir="${docs.root}">
        <env key="ANT_OPTS" value="-Xmx512m"/>
        <env key="CLASSPATH" path="${docs.root}/lib/fop.jar"/>
        <arg value="-Drelease.id.short=${eversion}"/>
