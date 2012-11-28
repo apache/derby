@@ -3542,7 +3542,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 				case Types.JAVA_OBJECT:
 				case Types.OTHER:
 				{
-					cti = TypeId.getUserDefinedTypeId(rsmd.getColumnTypeName(index), false);
+                    cti = TypeId.getUserDefinedTypeId(
+                            rsmd.getColumnTypeName(index));
 					break;
 				}
 				default:

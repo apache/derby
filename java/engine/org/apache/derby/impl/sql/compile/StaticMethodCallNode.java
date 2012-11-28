@@ -505,7 +505,7 @@ public class StaticMethodCallNode extends MethodCallNode
 							break;
 					}
 
-					typeId = TypeId.getUserDefinedTypeId(arrayType, false);
+					typeId = TypeId.getUserDefinedTypeId(arrayType);
 				}
 
 				// this is the type descriptor of the require method parameter
@@ -665,10 +665,8 @@ public class StaticMethodCallNode extends MethodCallNode
 
 			if (sigParameterCount != parameterCount) {
 
-				TypeId typeId = TypeId.getUserDefinedTypeId("java.sql.ResultSet[]", false);
-
 				DataTypeDescriptor dtd = new DataTypeDescriptor(
-						typeId,
+						TypeId.getUserDefinedTypeId("java.sql.ResultSet[]"),
 						0,
 						0,
 						false,

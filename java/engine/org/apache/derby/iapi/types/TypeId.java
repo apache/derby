@@ -417,13 +417,12 @@ public final class TypeId
         }
     }
 
-        public static TypeId getUserDefinedTypeId(String className, boolean delimitedIdentifier)
-            throws StandardException
-        {
-                return new TypeId(StoredFormatIds.USERDEFINED_TYPE_ID_V3,
-                                        new UserDefinedTypeIdImpl(className), delimitedIdentifier
-                                        );
-        }
+    public static TypeId getUserDefinedTypeId(String className)
+        throws StandardException
+    {
+        return new TypeId(StoredFormatIds.USERDEFINED_TYPE_ID_V3,
+                                new UserDefinedTypeIdImpl(className));
+    }
 
     /**
      * This factory  method is used for ANSI UDTs. If the className argument is null,
@@ -546,7 +545,7 @@ public final class TypeId
                         ** It's a non-primitive type (a class) that does not correspond
                         ** to a SQL built-in type, so treat it as a user-defined type.
                         */
-                        return TypeId.getUserDefinedTypeId(javaTypeName, false);
+                        return TypeId.getUserDefinedTypeId(javaTypeName);
                 }
         }
 
@@ -666,7 +665,6 @@ public final class TypeId
         private int                             formatId;
 
         /* Set in setTypeIdSpecificInstanceVariables() as needed */
-        private boolean                 classNameWasDelimitedIdentifier;
         private boolean                 isBitTypeId;
         private boolean                 isLOBTypeId;
         private boolean                 isBooleanTypeId;
@@ -696,22 +694,6 @@ public final class TypeId
         {
                 this.formatId = formatId;
                 this.baseTypeId = baseTypeId;
-                setTypeIdSpecificInstanceVariables();
-        }
-        /**
-         * Constructor for a TypeId for user defined types
-         *
-         * @param formatId                                                      Format id of specific type id.
-         * @param baseTypeId                                            The Base type id
-         * @param classNameWasDelimitedIdentifier       Whether or not the class name
-         *                                                                                      was a delimited identifier
-         */
-        public TypeId(int formatId, BaseTypeIdImpl baseTypeId,
-                                                 boolean classNameWasDelimitedIdentifier)
-        {
-                this.formatId = formatId;
-                this.baseTypeId = baseTypeId;
-                this.classNameWasDelimitedIdentifier = classNameWasDelimitedIdentifier;
                 setTypeIdSpecificInstanceVariables();
         }
 
@@ -1014,17 +996,6 @@ public final class TypeId
                                                         (UserDefinedTypeIdImpl) baseTypeId;
                 typePrecedence = USER_PRECEDENCE;
                 javaTypeName = baseUserTypeId.getClassName();
-        }
-
-        /**
-         * For user types, tell whether or not the class name was a
-         * delimited identifier. For all other types, return false.
-         *
-         * @return Whether or not the class name was a delimited identifier.
-         */
-        public boolean getClassNameWasDelimitedIdentifier()
-        {
-                return classNameWasDelimitedIdentifier;
         }
 
         /**

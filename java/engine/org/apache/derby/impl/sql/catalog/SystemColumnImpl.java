@@ -134,7 +134,7 @@ class SystemColumnImpl implements SystemColumn
         throws StandardException
     {
 
-        TypeId typeId = TypeId.getUserDefinedTypeId(javaClassName, false);
+        TypeId typeId = TypeId.getUserDefinedTypeId(javaClassName);
 
         DataTypeDescriptor dtd = new DataTypeDescriptor(typeId, nullability);
         return new SystemColumnImpl(name, dtd);
