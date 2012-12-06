@@ -208,11 +208,11 @@ public class Changes10_10 extends UpgradeChange
     {
         Statement st = createStatement();
 
-        String  createVarargsProc = "create procedure varargsderbystyle ( a int ... ) language java parameter style derby no sql external name 'Foo.foo'";
-        String  createVarargsFunc = "create function varargsderbystyle ( a int ... ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
-        String  createVarargsTableFunc = "create function varargstablefunction ( a int ... ) returns table ( b int ) language java parameter style derby_jdbc_result_set no sql external name 'Foo.foo'";
-        String  createNonVarargsProcDerbyStyle = "create procedure nonvarargsderbystyle ( a int ) language java parameter style derby no sql external name 'Foo.foo'";
-        String  createNonVarargsFuncDerbyStyle = "create function nonvarargsderbystyle ( a int ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
+        String  createVarargsProc = "create procedure vds ( a int ... ) language java parameter style derby no sql external name 'Foo.foo'";
+        String  createVarargsFunc = "create function vds ( a int ... ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
+        String  createVarargsTableFunc = "create function vtf ( a int ... ) returns table ( b int ) language java parameter style derby_jdbc_result_set no sql external name 'Foo.foo'";
+        String  createNonVarargsProcDerbyStyle = "create procedure nvds ( a int ) language java parameter style derby no sql external name 'Foo.foo'";
+        String  createNonVarargsFuncDerbyStyle = "create function nvds ( a int ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
 
         // table functions were introduced by 10.4
         boolean tableFunctionsOK = oldAtLeast( 10, 4 );       
