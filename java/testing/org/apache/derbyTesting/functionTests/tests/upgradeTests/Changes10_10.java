@@ -59,6 +59,7 @@ public class Changes10_10 extends UpgradeChange
 
     private static  final   String  SYNTAX_ERROR = "42X01";
     private static  final   String  HARD_UPGRADE_REQUIRED = "XCL47";
+    private static  final   String  NEEDS_JAVA_STYLE = "42ZCA";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -194,6 +195,53 @@ public class Changes10_10 extends UpgradeChange
         case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
             st.execute( createUDA );
             st.execute( dropUDA );
+            break;
+        }
+        
+        st.close();
+    }
+    
+    /**
+     * Verify upgrade behavior for vararg routines.
+     */
+    public  void    testVarargss()  throws Exception
+    {
+        Statement st = createStatement();
+
+        String  createVarargsProc = "create procedure varargsderbystyle ( a int ... ) language java parameter style derby no sql external name 'Foo.foo'";
+        String  createVarargsFunc = "create function varargsderbystyle ( a int ... ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
+        String  createVarargsTableFunc = "create function varargstablefunction ( a int ... ) returns table ( b int ) language java parameter style derby_jdbc_result_set no sql external name 'Foo.foo'";
+        String  createNonVarargsProcDerbyStyle = "create procedure nonvarargsderbystyle ( a int ) language java parameter style derby no sql external name 'Foo.foo'";
+        String  createNonVarargsFuncDerbyStyle = "create function nonvarargsderbystyle ( a int ) returns integer language java parameter style derby no sql external name 'Foo.foo'";
+
+        // table functions were introduced by 10.4
+        boolean tableFunctionsOK = oldAtLeast( 10, 4 );       
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            assertStatementError( SYNTAX_ERROR, st, createVarargsProc );
+            assertStatementError( SYNTAX_ERROR, st, createVarargsFunc );
+            if ( tableFunctionsOK ) { assertStatementError( SYNTAX_ERROR, st, createVarargsTableFunc ); }
+            assertStatementError( SYNTAX_ERROR, st, createNonVarargsProcDerbyStyle );
+            assertStatementError( SYNTAX_ERROR, st, createNonVarargsFuncDerbyStyle );
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, createVarargsProc );
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, createVarargsFunc );
+            if ( tableFunctionsOK ) { assertStatementError( HARD_UPGRADE_REQUIRED, st, createVarargsTableFunc ); }
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, createNonVarargsProcDerbyStyle );
+            assertStatementError( HARD_UPGRADE_REQUIRED, st, createNonVarargsFuncDerbyStyle );
+            break;
+            
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            st.execute( createVarargsProc );
+            st.execute( createVarargsFunc );
+            st.execute( createVarargsTableFunc );
+            assertStatementError( NEEDS_JAVA_STYLE, st, createNonVarargsProcDerbyStyle );
+            assertStatementError( NEEDS_JAVA_STYLE, st, createNonVarargsFuncDerbyStyle );
             break;
         }
         

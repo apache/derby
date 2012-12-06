@@ -244,30 +244,30 @@ public final class	DataDictionaryImpl
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
-        {"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "true", "DOUBLE"},
-			{"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)",  "true", "DOUBLE"},
-			{"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)",  "true", "DOUBLE"},
-            {"ATAN2", "DOUBLE", "java.lang.StrictMath", "atan2(double,double)",  "true", "DOUBLE", "DOUBLE"},
-			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)",  "true", "DOUBLE"},
-			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)",  "true", "DOUBLE"},
-			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)",  "true", "DOUBLE"},
-            {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", "true"},
-            {"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "true", "DOUBLE"},
-			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)",  "true", "DOUBLE"},
-			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "DOUBLE"},
-			{"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "DOUBLE"}, // Same as LN
-			{"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)",  "true", "DOUBLE"},
-			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)",  "true", "DOUBLE"},
-			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "DOUBLE"},
-			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "DOUBLE"}, // Same as CEIL
-			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)",  "true", "DOUBLE"},
-			{"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)",  "true", "DOUBLE"},
-            {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()",  "false" },
-			{"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)",  "false", "INTEGER"}, // Escape function spec.
-			{"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)",  "true", "DOUBLE"},
-			{"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)",  "true", "DOUBLE"},
-			{"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)",  "true", "DOUBLE"},
-			{"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)",  "true", "DOUBLE"}
+        {"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "true", "false", "DOUBLE" },
+        {"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)",  "true", "false", "DOUBLE" },
+        {"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)",  "true", "false", "DOUBLE" },
+        {"ATAN2", "DOUBLE", "java.lang.StrictMath", "atan2(double,double)",  "true", "false", "DOUBLE", "DOUBLE" },
+        {"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)",  "true", "false", "DOUBLE" },
+        {"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)",  "true", "false", "DOUBLE" },
+        {"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)",  "true", "false", "DOUBLE" },
+        {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", "false", "true" },
+        {"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "true", "false", "DOUBLE" },
+        {"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)",  "true", "false", "DOUBLE" },
+        {"LN", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "false", "DOUBLE" },
+        {"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "false", "DOUBLE" }, // Same as LN
+        {"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)",  "true", "false", "DOUBLE" },
+        {"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)",  "true", "false", "DOUBLE" },
+        {"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "false", "DOUBLE" },
+        {"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "false", "DOUBLE" }, // Same as CEIL
+        {"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)",  "true", "false", "DOUBLE" },
+        {"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)",  "true", "false", "DOUBLE" },
+        {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()",  "false", "false" },
+        {"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)",  "false", "false", "INTEGER" }, // Escape function spec.
+        {"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)",  "true", "false", "DOUBLE" },
+        {"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)",  "true", "false", "DOUBLE" },
+        {"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)",  "true", "false", "DOUBLE" },
+        {"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)",  "true", "false", "DOUBLE" }
 	};
 	
 
@@ -278,10 +278,16 @@ public final class	DataDictionaryImpl
     private static final int SYSFUN_DETERMINISTIC_INDEX =  4;
 
     /**
+     * Index into SYSFUN_FUNCTIONS of the VARARGS indicator.
+     * Used to determine whether the system function has VARARGS
+     */
+    private static final int SYSFUN_VARARGS_INDEX =  5;
+
+    /**
      * The index of the first parameter in entries in the SYSFUN_FUNCTIONS
      * table. Used to determine the parameter count (zero to many).
      */
-    private static final int SYSFUN_FIRST_PARAMETER_INDEX =  5;
+    private static final int SYSFUN_FIRST_PARAMETER_INDEX =  6;
 
 	/**
 	 * Runtime definition of the functions from SYSFUN_FUNCTIONS.
@@ -2686,6 +2692,7 @@ public final class	DataDictionaryImpl
              oldRai.getParameterStyle(),
              oldRai.getSQLAllowed(),
              oldRai.isDeterministic(),
+             oldRai.hasVarargs(),
              oldRai.hasDefinersRights(),
              oldRai.calledOnNullInput(),
              newReturnType
@@ -7809,6 +7816,7 @@ public final class	DataDictionaryImpl
 						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]).getCatalogType();
 
                     boolean isDeterministic = Boolean.valueOf( details[ SYSFUN_DETERMINISTIC_INDEX ] ).booleanValue();
+                    boolean hasVarargs = Boolean.valueOf( details[ SYSFUN_VARARGS_INDEX ] ).booleanValue();
                     
                     // Determine the number of arguments (could be zero).
                     int paramCount = details.length - SYSFUN_FIRST_PARAMETER_INDEX;
@@ -7827,7 +7835,7 @@ public final class	DataDictionaryImpl
 					RoutineAliasInfo ai = new RoutineAliasInfo(details[3],
 							paramCount, paramNames,
 							pt, paramModes, 0,
-                            RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL, isDeterministic,
+                            RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL, isDeterministic, hasVarargs,
                             false, /* hasDefinersRights */
 							false, rt);
 
@@ -10727,6 +10735,7 @@ public final class	DataDictionaryImpl
 	int						num_result_sets,
     short                   routine_sql_control,
     boolean               isDeterministic,
+    boolean               hasVarargs,
     TypeDescriptor          return_type,
     HashSet               newlyCreatedRoutines,
     TransactionController   tc,
@@ -10774,6 +10783,7 @@ public final class	DataDictionaryImpl
                                                     //  CONTAINS_SQL
                                                     //  NO_SQL
                 isDeterministic,             // whether the procedure/function is DETERMINISTIC
+                hasVarargs,             // whether the procedure/function has VARARGS
                 false,                              // not definer's rights
                 true,                               // true - calledOnNullInput
                 return_type);
@@ -10846,6 +10856,7 @@ public final class	DataDictionaryImpl
     int                     num_result_sets,
     short                   routine_sql_control,
     boolean               isDeterministic,
+    boolean               hasVarargs,
     TypeDescriptor          return_type,
     HashSet               newlyCreatedRoutines,
     TransactionController   tc)
@@ -10853,7 +10864,7 @@ public final class	DataDictionaryImpl
     {
         UUID routine_uuid = createSystemProcedureOrFunction(routine_name,
         schema_uuid, arg_names, arg_types,
-        num_out_param, num_result_sets, routine_sql_control, isDeterministic,
+        num_out_param, num_result_sets, routine_sql_control, isDeterministic, hasVarargs,
         return_type, newlyCreatedRoutines, tc, "org.apache.derby.catalog.SystemProcedures");
         return routine_uuid;
     }
@@ -10913,6 +10924,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -10941,6 +10953,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -10956,6 +10969,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -10973,6 +10987,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -10988,6 +11003,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11013,6 +11029,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11041,6 +11058,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11062,6 +11080,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11085,6 +11104,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11106,6 +11126,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11138,6 +11159,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 newlyCreatedRoutines,
@@ -11164,6 +11186,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 TypeDescriptor.INTEGER,
                 newlyCreatedRoutines,
                 tc);
@@ -11180,6 +11203,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
@@ -11223,6 +11247,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11247,6 +11272,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11269,6 +11295,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11309,6 +11336,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11346,6 +11374,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
                false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11388,6 +11417,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11433,6 +11463,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11469,6 +11500,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11568,6 +11600,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11598,6 +11631,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11630,6 +11664,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11660,6 +11695,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11693,6 +11729,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11728,6 +11765,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11760,6 +11798,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11794,6 +11833,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11826,6 +11866,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11865,6 +11906,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11903,6 +11945,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11929,6 +11972,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -11966,6 +12010,7 @@ public final class	DataDictionaryImpl
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -11981,6 +12026,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -12140,6 +12186,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12190,6 +12237,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12220,6 +12268,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -12252,6 +12301,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -12286,6 +12336,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -12324,6 +12375,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 TypeDescriptor.INTEGER,
                 newlyCreatedRoutines,
                 tc,
@@ -12342,6 +12394,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 null,
                 newlyCreatedRoutines,
@@ -12368,6 +12421,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 newlyCreatedRoutines,
@@ -12393,6 +12447,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 newlyCreatedRoutines,
@@ -12412,6 +12467,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
@@ -12437,6 +12493,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR,
@@ -12466,6 +12523,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 null,
                 newlyCreatedRoutines,
                 tc,
@@ -12489,6 +12547,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 null,
                 newlyCreatedRoutines,
                 tc,
@@ -12510,6 +12569,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 TypeDescriptor.INTEGER,
                 newlyCreatedRoutines,
                 tc,
@@ -12528,6 +12588,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 null,
                 newlyCreatedRoutines,
@@ -12554,6 +12615,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 newlyCreatedRoutines,
@@ -12579,6 +12641,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 newlyCreatedRoutines,
@@ -12600,6 +12663,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
@@ -12625,6 +12689,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY,
@@ -12654,6 +12719,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 null,
                 newlyCreatedRoutines,
                 tc,
@@ -12676,6 +12742,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 false,
                 null,
                 newlyCreatedRoutines,
@@ -12719,6 +12786,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12756,6 +12824,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12772,6 +12841,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 TypeDescriptor.INTEGER,
                 newlyCreatedRoutines,
@@ -12798,6 +12868,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12813,6 +12884,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 false,
                 CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 newlyCreatedRoutines,
@@ -12887,6 +12959,7 @@ public final class	DataDictionaryImpl
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
                false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12929,6 +13002,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -12969,6 +13043,7 @@ public final class	DataDictionaryImpl
                0,
                RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
+                false,
                (TypeDescriptor) null,
                 newlyCreatedRoutines,
                tc);
@@ -13016,6 +13091,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -13032,6 +13108,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.NO_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -13052,6 +13129,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
+                false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
@@ -13070,6 +13148,7 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 newlyCreatedRoutines,
                 tc);
@@ -13085,6 +13164,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.NO_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -13133,6 +13213,7 @@ public final class	DataDictionaryImpl
                  0,
                  RoutineAliasInfo.MODIFIES_SQL_DATA,
                  false,
+                false,
                  (TypeDescriptor) null,
                  newlyCreatedRoutines,
                  tc
@@ -13164,6 +13245,7 @@ public final class	DataDictionaryImpl
                  0,
                  RoutineAliasInfo.MODIFIES_SQL_DATA,
                  false,
+                false,
                  (TypeDescriptor) null,
                  newlyCreatedRoutines,
                  tc
@@ -13194,6 +13276,7 @@ public final class	DataDictionaryImpl
                  0,
                  RoutineAliasInfo.MODIFIES_SQL_DATA,
                  false,
+                false,
                  (TypeDescriptor) null,
                  newlyCreatedRoutines,
                  tc
@@ -13224,6 +13307,7 @@ public final class	DataDictionaryImpl
                  0,
                  RoutineAliasInfo.MODIFIES_SQL_DATA,
                  false,
+                false,
                  (TypeDescriptor) null,
                  newlyCreatedRoutines,
                  tc
@@ -13253,6 +13337,7 @@ public final class	DataDictionaryImpl
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
+                false,
                 DataTypeDescriptor.getCatalogType( Types.BIGINT ),
                 newlyCreatedRoutines,
                 tc);
@@ -13279,6 +13364,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
@@ -13310,6 +13396,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.NO_SQL,
+                false,
                 false,
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,

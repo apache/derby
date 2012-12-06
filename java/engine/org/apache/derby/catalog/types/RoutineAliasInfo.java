@@ -54,12 +54,14 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	/** PARAMETER STYLE DERBY_JDBC_RESULT_SET */
 	public static final short PS_DERBY_JDBC_RESULT_SET = PS_JAVA + 1;
 
+	/** PARAMETER STYLE DERBY */
+	public static final short PS_DERBY = PS_DERBY_JDBC_RESULT_SET + 1;
+
     /** Masks for the sqlOptions field */
     private static final short SQL_ALLOWED_MASK = (short) 0xF;
     private static final short DETERMINISTIC_MASK = (short) 0x10;
-
-    /** Mask for the SECURITY INVOKER/DEFINER field */
-    private static final short SECURITY_DEFINER_MASK = (short) 0x20;
+    private static final short SECURITY_DEFINER_MASK = (short) 0x20; // Mask for the SECURITY INVOKER/DEFINER field
+    private static final short VARARGS_MASK = (short) 0x40;
 
 	private int parameterCount;
 
@@ -121,10 +123,20 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	/**
 		Create a RoutineAliasInfo for an internal PROCEDURE.
 	*/
-	public RoutineAliasInfo(String methodName, int parameterCount, String[] parameterNames,
-                            TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed,
-                            boolean isDeterministic ) {
-
+	public RoutineAliasInfo
+        (
+         String methodName,
+         int parameterCount,
+         String[] parameterNames,
+         TypeDescriptor[]	parameterTypes,
+         int[] parameterModes,
+         int dynamicResultSets,
+         short parameterStyle,
+         short sqlAllowed,
+         boolean isDeterministic,
+         boolean hasVarargs
+         )
+    {
         this(methodName,
              parameterCount,
              parameterNames,
@@ -134,6 +146,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
              parameterStyle,
              sqlAllowed,
              isDeterministic,
+             hasVarargs,
              false /* definersRights*/,
              true,
              (TypeDescriptor) null);
@@ -151,6 +164,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
                             short parameterStyle,
                             short sqlAllowed,
                             boolean isDeterministic,
+                            boolean hasVarargs,
                             boolean definersRights,
                             boolean calledOnNullInput,
                             TypeDescriptor returnType)
@@ -165,6 +179,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		this.parameterStyle = parameterStyle;
 		this.sqlOptions = (short) (sqlAllowed & SQL_ALLOWED_MASK);
         if ( isDeterministic ) { this.sqlOptions = (short) (sqlOptions | DETERMINISTIC_MASK); }
+        if ( hasVarargs ) { this.sqlOptions = (short) (sqlOptions | VARARGS_MASK); }
 
         if (definersRights) {
             this.sqlOptions = (short) (sqlOptions | SECURITY_DEFINER_MASK);
@@ -249,6 +264,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
     public boolean isDeterministic()
     {
         return ( (sqlOptions & DETERMINISTIC_MASK) != 0 );
+    }
+
+    public boolean hasVarargs()
+    {
+        return ( (sqlOptions & VARARGS_MASK) != 0 );
     }
 
     public boolean hasDefinersRights()
@@ -392,6 +412,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			sb.append(' ');
 			sb.append(parameterTypes[i].getSQLstring());
 		}
+        if ( hasVarargs() ) { sb.append( " ... " ); }
 		sb.append(')');
 
 		if (returnType != null) {
@@ -405,6 +426,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		{
 		    case PS_JAVA:    sb.append( "JAVA " ); break;
 		    case PS_DERBY_JDBC_RESULT_SET:    sb.append( "DERBY_JDBC_RESULT_SET " ); break;
+		    case PS_DERBY:    sb.append( "DERBY " ); break;
 		}
         
         if ( isDeterministic() )

@@ -79,6 +79,8 @@ create procedure p_not_deterministic() language java not deterministic parameter
 
 create procedure p_definers_rights() language java  parameter style java modifies sql data external name 'foo.bar.wibble' external security definer;
 
+create procedure varargsDerbyStyle( a int ... ) language java parameter style derby no sql external name 'Foo.foo';
+
 -- ----------------------------------------------
 -- Functions.
 -- ----------------------------------------------
@@ -94,6 +96,10 @@ create function f_deterministic() returns int language java parameter style java
 create function f_not_deterministic() returns int language java parameter style java no sql not deterministic external name 'foo.bar.wibble';
 
 create function f_definers_rights() returns int language java parameter style java no sql not deterministic external name 'foo.bar.wibble' external security definer;
+
+create function varargsDerbyStyle( a int ... ) returns int parameter style derby language java no sql external name 'Foo.foo';
+
+create function varargsTableFunction( a int ... ) returns table( b int ) language java parameter style derby_jdbc_result_set no sql external name 'Foo.foo';
 
 
 -- ----------------------------------------------

@@ -171,17 +171,20 @@ public class SQLParser
 
     /* Keep in synch with CreateAliasNode's index constants */
     private static final String[] ROUTINE_CLAUSE_NAMES =
-        {null,
-         "SPECIFIC",
-         "RESULT SET",
-         "LANGUAGE",
-         "EXTERNAL NAME",
-         "PARAMETER STYLE",
-         "SQL",
-         "DETERMINISTIC",
-         "ON NULL INPUT",
-         "RETURN TYPE",
-         "EXTERNAL SECURITY"};
+        {
+            null,
+            "SPECIFIC",
+            "RESULT SET",
+            "LANGUAGE",
+            "EXTERNAL NAME",
+            "PARAMETER STYLE",
+            "SQL",
+            "DETERMINISTIC",
+            "ON NULL INPUT",
+            "RETURN TYPE",
+            "EXTERNAL SECURITY",
+            null,
+         };
 	/**
 	   Clauses required for Java routines. Numbers correspond
 	   to offsets in ROUTINE_CLAUSE_NAMES.
@@ -2696,6 +2699,7 @@ TOKEN :
 |	<RIGHT_BRACKET: "]">
 |	<CONCATENATION_OPERATOR: "||">
 |	<FIELD_REFERENCE: "->">
+|	<ELLIPSIS: "...">
 }
 
 TOKEN :
@@ -10764,7 +10768,7 @@ procedureDefinition() throws StandardException :
 }
 {
 		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-		procedureElements[0] = procedureParameterList()
+		procedureElements[0] = procedureParameterList( procedureElements )
 		( routineElement(true, false, procedureElements) ) +
 		{
 		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, procedureElements);
@@ -10908,22 +10912,33 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 
 	      return ReuseFactory.getShort(RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET);
 	  }
+|
+	  <DERBY>
+	  {
+          checkVersion(DataDictionary.DD_VERSION_DERBY_10_10, "DERBY");
+
+	      return ReuseFactory.getShort( RoutineAliasInfo.PS_DERBY );
+	  }
 }
 
 Object[]
-procedureParameterList() throws StandardException :
+procedureParameterList( Object[] procedureElements ) throws StandardException :
 {
 	Vector[] list = new Vector[3];
 	list[0] = new Vector(); // name
 	list[1] = new Vector(); // type
 	list[2] = new Vector(); // in/out
+    Boolean ellipsis = null;
 }
 {
 	<LEFT_PAREN>
 		[ procedureParameterDefinition(list)
-				( <COMMA> procedureParameterDefinition(list) )* ]
+				( <COMMA> procedureParameterDefinition(list) )*
+          [ ellipsis = ellipsis() ]
+        ]
 	<RIGHT_PAREN>
 	{
+        procedureElements[ CreateAliasNode.VARARGS ] = ellipsis;
 		return list;
 	}
 }
@@ -10992,7 +11007,7 @@ functionDefinition() throws StandardException :
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-		functionElements[0] = functionParameterList()
+		functionElements[0] = functionParameterList( functionElements )
 		<RETURNS> returnType = functionReturnDataType() 
 		( routineElement(false, returnType.isRowMultiSet(), functionElements) ) +
 		{
@@ -11008,21 +11023,36 @@ functionDefinition() throws StandardException :
 }
 
 Object[]
-functionParameterList() throws StandardException :
+functionParameterList( Object[] functionElements ) throws StandardException :
 {
 	Vector[] list = new Vector[3];
 	list[0] = new Vector(); // name
 	list[1] = new Vector(); // type
 	list[2] = new Vector(); // in/out - ALWAYS IN
+    Boolean ellipsis = null;
 }
 {
 	<LEFT_PAREN>
 		[ functionParameterDefinition(list)
-				( <COMMA> functionParameterDefinition(list) )* ]
+				( <COMMA> functionParameterDefinition(list) )*
+          [ ellipsis = ellipsis() ]
+        ]
 	<RIGHT_PAREN>
 	{
+        functionElements[ CreateAliasNode.VARARGS ] = ellipsis;
 		return list;
 	}
+}
+
+Boolean
+ellipsis() throws StandardException :
+{}
+{
+    <ELLIPSIS>
+    {
+        checkVersion( DataDictionary.DD_VERSION_DERBY_10_10, "..." );
+        return Boolean.TRUE;
+    }
 }
 
 /*

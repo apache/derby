@@ -60,12 +60,12 @@ public class CreateAliasNode extends DDLStatementNode
     public static final int NULL_ON_NULL_INPUT = DETERMINISTIC + 1;
     public static final int RETURN_TYPE = NULL_ON_NULL_INPUT + 1;
     public static final int ROUTINE_SECURITY_DEFINER = RETURN_TYPE + 1;
+    public static final int VARARGS = ROUTINE_SECURITY_DEFINER + 1;
 
     // Keep ROUTINE_ELEMENT_COUNT last (determines set cardinality).
     // Note: Remember to also update the map ROUTINE_CLAUSE_NAMES in
     // sqlgrammar.jj when elements are added.
-    public static final int ROUTINE_ELEMENT_COUNT =
-        ROUTINE_SECURITY_DEFINER + 1;
+    public static final int ROUTINE_ELEMENT_COUNT = VARARGS + 1;
 
     //
     // These are the names of 1-arg builtin functions which are represented in the
@@ -265,6 +265,9 @@ public class CreateAliasNode extends DDLStatementNode
 				Boolean isDeterministicO = (Boolean) routineElements[DETERMINISTIC];
                 boolean isDeterministic = (isDeterministicO == null) ? false : isDeterministicO.booleanValue();
 
+				Boolean hasVarargsO = (Boolean) routineElements[ VARARGS ];
+                boolean hasVarargs = (hasVarargsO == null) ? false : hasVarargsO.booleanValue();
+
                 Boolean definersRightsO =
                     (Boolean) routineElements[ROUTINE_SECURITY_DEFINER];
                 boolean definersRights  =
@@ -300,6 +303,7 @@ public class CreateAliasNode extends DDLStatementNode
                     ((Short) routineElements[PARAMETER_STYLE]).shortValue(),
                     sqlAllowed,
                     isDeterministic,
+                    hasVarargs,
                     definersRights,
                     calledOnNullInput,
                     returnType );
@@ -362,14 +366,42 @@ public class CreateAliasNode extends DDLStatementNode
 		//Are we dealing with user defined function or procedure?
 		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR ||
 				aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR) {
+
+            RoutineAliasInfo    rai = (RoutineAliasInfo)aliasInfo;
             
             // Set the collation for all string types in parameters
             // and return types including row multi-sets to be that of
             // the schema the routine is being defined in.
-            ((RoutineAliasInfo)aliasInfo).setCollationTypeForAllStringTypes(
+            rai.setCollationTypeForAllStringTypes(
                     getSchemaDescriptor().getCollationType());
 
             bindParameterTypes( (RoutineAliasInfo)aliasInfo );
+
+            if ( rai.hasVarargs() )
+            {
+                switch ( rai.getParameterStyle() )
+                {
+                case RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET:
+                case RoutineAliasInfo.PS_DERBY:
+                    break;
+
+                default:
+                    throw StandardException.newException( SQLState.LANG_VARARGS_PARAMETER_STYLE );
+                }
+
+                if ( rai.getMaxDynamicResultSets() > 0 )
+                {
+                    throw StandardException.newException( SQLState.LANG_VARARGS_RETURN_RESULT_SETS );
+                }
+            }
+
+            if (
+                (rai.getParameterStyle() == RoutineAliasInfo.PS_DERBY) &&
+                !rai.hasVarargs()
+                )
+            {
+                throw StandardException.newException( SQLState.LANG_DERBY_PARAMETER_STYLE );
+            }
 		}
         
         // validity checking for UDTs

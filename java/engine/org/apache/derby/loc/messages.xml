@@ -3016,6 +3016,21 @@ Guide.
                 <arg>detailedMessage</arg>
             </msg>
 
+            <msg>
+                <name>42ZC9</name>
+                <text>A varargs routine must have parameter style DERBY or DERBY_JDBC_RESULT_SET.</text>
+            </msg>
+
+            <msg>
+                <name>42ZCA</name>
+                <text>Parameter style DERBY is only allowed for varargs routines.</text>
+            </msg>
+
+            <msg>
+                <name>42ZCB</name>
+                <text>A varargs procedure may not return result sets.</text>
+            </msg>
+
         </family>
 
 

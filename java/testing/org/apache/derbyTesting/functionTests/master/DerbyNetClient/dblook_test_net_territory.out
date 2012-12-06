@@ -173,6 +173,36 @@ false
 <systemname>
 -----
 <systemid>
+VARARGSDERBYSTYLE
+APP
+Foo
+F
+F
+false
+foo("A" INTEGER ... ) RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE DERBY NO SQL CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
+VARARGSDERBYSTYLE
+APP
+Foo
+P
+P
+false
+foo(IN "A" INTEGER ... ) LANGUAGE JAVA PARAMETER STYLE DERBY NO SQL
+<systemname>
+-----
+<systemid>
+VARARGSTABLEFUNCTION
+APP
+Foo
+F
+F
+false
+foo("A" INTEGER ... ) RETURNS TABLE ( "B" INTEGER ) LANGUAGE JAVA PARAMETER STYLE DERBY_JDBC_RESULT_SET NO SQL CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
 func "'
 schema "'
 java.lang.Integer
