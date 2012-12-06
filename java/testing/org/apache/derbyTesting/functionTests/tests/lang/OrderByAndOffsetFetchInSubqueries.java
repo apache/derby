@@ -309,6 +309,21 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
             s.executeQuery("select * from t4496"),
             new String[][]{{"Y"}});
 
+        // DERBY-6006. INSERT INTO ... SELECT FROM could fail with a
+        // NullPointerException in insane builds, or XSCH5 or assert in sane
+        // builds, if the SELECT had an ORDER BY column that was not referenced
+        // in the select list, and if normalization was required because the
+        // types in the select list didn't exactly match the types in the
+        // target table.
+        //
+        // In the test case below, the select list has an INT (the literal 1),
+        // whereas the target type is DOUBLE. Also, the ORDER BY column (X) is
+        // not in the select list.
+        s.execute("create table t6006(x double)");
+        assertUpdateCount(s, 6, "insert into t6006 values 1,2,3,4,5,6");
+        assertUpdateCount(s, 6,
+                "insert into t6006 select 1 from t6006 order by x");
+
         rollback();
     }
 

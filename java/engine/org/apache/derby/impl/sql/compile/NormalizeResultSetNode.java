@@ -605,6 +605,8 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 		rsn.setResultColumns(rcl.copyListAndObjects());
 		// Remove any columns that were generated.
 		prRCList.removeGeneratedGroupingColumns();
+        // And also columns that were added for ORDER BY (DERBY-6006).
+        prRCList.removeOrderByColumns();
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
