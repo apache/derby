@@ -105,7 +105,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     MultiProbeTableScanResultSet(long conglomId,
         StaticCompiledOpenConglomInfo scoci, Activation activation, 
-        GeneratedMethod resultRowAllocator, 
+        int resultRowTemplate,
         int resultSetNumber,
         GeneratedMethod startKeyGetter, int startSearchOperator,
         GeneratedMethod stopKeyGetter, int stopSearchOperator,
@@ -135,7 +135,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
         super(conglomId,
             scoci,
             activation,
-            resultRowAllocator,
+            resultRowTemplate,
             resultSetNumber,
             startKeyGetter,
             startSearchOperator,

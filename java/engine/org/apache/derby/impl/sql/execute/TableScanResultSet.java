@@ -67,7 +67,6 @@ class TableScanResultSet extends ScanResultSet
 	protected long conglomId;
     protected DynamicCompiledOpenConglomInfo dcoci;
     protected StaticCompiledOpenConglomInfo scoci;
-	protected GeneratedMethod resultRowAllocator;
 	protected GeneratedMethod startKeyGetter;
 	protected int startSearchOperator;
 	protected GeneratedMethod stopKeyGetter;
@@ -126,7 +125,7 @@ class TableScanResultSet extends ScanResultSet
     TableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
 		Activation activation, 
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		int resultSetNumber,
 		GeneratedMethod startKeyGetter, int startSearchOperator,
 		GeneratedMethod stopKeyGetter, int stopSearchOperator,
@@ -150,7 +149,7 @@ class TableScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
-				resultRowAllocator,
+				resultRowTemplate,
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -167,15 +166,12 @@ class TableScanResultSet extends ScanResultSet
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT( activation!=null, "table scan must get activation context");
-			SanityManager.ASSERT( resultRowAllocator!= null, "table scan must get row allocator");
 			if (sameStartStopPosition)
 			{
 				SanityManager.ASSERT(stopKeyGetter == null,
 					"stopKeyGetter expected to be null when sameStartStopPosition is true");
 			}
 		}
-
-        this.resultRowAllocator = resultRowAllocator;
 
 		this.startKeyGetter = startKeyGetter;
 		this.startSearchOperator = startSearchOperator;
@@ -734,8 +730,6 @@ class TableScanResultSet extends ScanResultSet
 	 */
 	public ExecRow getCurrentRow() throws StandardException 
 	{
-	    ExecRow result = null;
-
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(isOpen, "TSRS expected to be open");
 
@@ -766,13 +760,12 @@ class TableScanResultSet extends ScanResultSet
 			}
 		}
 
-		result = (ExecRow) resultRowAllocator.invoke(activation);
-		currentRow = 
-            getCompactRow(result, accessedCols, isKeyed);
+        resultRowBuilder.reset(candidate);
+        currentRow = getCompactRow(candidate, accessedCols, isKeyed);
 
         try
         {
-            scanController.fetchWithoutQualify(result.getRowArray());
+            scanController.fetchWithoutQualify(candidate.getRowArray());
         }
         catch (StandardException se)
         {
@@ -789,7 +782,7 @@ class TableScanResultSet extends ScanResultSet
             }
         }
 
-		setCurrentRow(result);
+        setCurrentRow(candidate);
 	    return currentRow;
 	}
 

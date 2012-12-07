@@ -51,7 +51,7 @@ class DistinctScanResultSet extends HashScanResultSet
     //
     DistinctScanResultSet(long conglomId, 
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		int resultSetNumber,
 		int hashKeyItem,
 		String tableName,
@@ -66,7 +66,7 @@ class DistinctScanResultSet extends HashScanResultSet
 		double optimizerEstimatedCost)
 			throws StandardException
     {
-		super(conglomId, scoci, activation, resultRowAllocator, resultSetNumber,
+		super(conglomId, scoci, activation, resultRowTemplate, resultSetNumber,
 			  (GeneratedMethod) null, // startKeyGetter
 			  0,					  // startSearchOperator
 			  (GeneratedMethod) null, // stopKeyGetter

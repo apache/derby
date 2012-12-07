@@ -79,7 +79,6 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 	 * @param innerTable
 	 * @param predList
 	 * @param acbi
-	 * @param resultRowAllocator
 	 * @throws StandardException
 	 */
 	void fillInScanArgs1(
@@ -88,7 +87,7 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 								Optimizable innerTable,
 								OptimizablePredicateList predList,
 								ExpressionClassBuilderInterface acbi,
-								MethodBuilder resultRowAllocator
+								int resultRowTemplate
 								)
 					throws StandardException {
 		boolean				   sameStartStopPosition = predList.sameStartStopPosition();
@@ -103,7 +102,7 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
 
-		acb.pushMethodReference(mb, resultRowAllocator);
+        mb.push(resultRowTemplate);
 		mb.push(innerTable.getResultSetNumber());
 
 		predList.generateStartKey(acb, mb, innerTable);

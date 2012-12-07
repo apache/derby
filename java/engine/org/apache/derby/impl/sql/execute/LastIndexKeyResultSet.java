@@ -22,9 +22,9 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -60,10 +60,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	 * @param activation 		the activation for this result set,
 	 *		which provides the context for the row allocation operation.
 	 * @param resultSetNumber	The resultSetNumber for the ResultSet
-	 * @param resultRowAllocator a reference to a method in the activation
-	 * 						that creates a holder for the result row of the scan.  May
-	 *						be a partial row.  <verbatim>
-	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
+     * @param resultRowTemplate The saved item for result row template
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
 	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
@@ -87,7 +84,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	(
 		Activation activation, 
 		int	resultSetNumber,
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		long conglomId, 
 		String tableName,
 		String userSuppliedOptimizerOverrides,
@@ -102,7 +99,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	{
 		super(activation,
 				resultSetNumber,
-				resultRowAllocator,
+				resultRowTemplate,
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -113,7 +110,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 		if (SanityManager.DEBUG) 
 		{
 			SanityManager.ASSERT( activation!=null, "this scan must get activation context");
-			SanityManager.ASSERT( resultRowAllocator!= null, "this scan must get row allocator");
 		}
 
 		this.tableName = tableName;

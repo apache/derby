@@ -21,36 +21,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
-
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.reference.ClassName;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -64,8 +51,6 @@ import org.apache.derby.vti.DeferModification;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.impl.sql.execute.FKInfo;
 
 import java.lang.reflect.Modifier;
@@ -78,7 +63,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
@@ -100,7 +84,6 @@ public class DeleteNode extends DMLModStatementNode
 
 	/* Filled in by bind. */
 	protected boolean				deferred;
-	protected ExecRow				emptyHeapRow;
 	protected FromTable				targetTable;
 	protected FKInfo				fkInfo;
 	protected FormatableBitSet readColsBitSet;
@@ -269,11 +252,6 @@ public class DeleteNode extends DMLModStatementNode
 				{
 					readColsBitSet = null;
 				}
-
-				/*
-				** Construct an empty heap row for use in our constant action.
-				*/
-				emptyHeapRow = targetTableDescriptor.getEmptyExecRow();
 
 				/* Generate the RowLocation column */
 				rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
@@ -473,7 +451,6 @@ public class DeleteNode extends DMLModStatementNode
 				  indicesToMaintain,
 				  indexConglomerateNumbers,
 				  indexSCOCIs,
-				  emptyHeapRow,
 				  deferred,
 				  false,
 				  targetTableDescriptor.getUUID(),

@@ -28,9 +28,9 @@ import java.sql.Types;
 import java.text.RuleBasedCollator;
 
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
+import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
@@ -1775,8 +1775,21 @@ public final class DataTypeDescriptor implements Formatable
 		 throws IOException, ClassNotFoundException
 	{
 		typeDescriptor = (TypeDescriptorImpl) in.readObject();
-        
-        typeId = TypeId.getBuiltInTypeId(this.getTypeName());
+
+        // Restore typeId from the type descriptor. User-defined types and
+        // built-in types have different methods for getting the type id.
+        if (typeDescriptor.isUserDefinedType()) {
+            try {
+                typeId = TypeId.getUserDefinedTypeId(
+                    ((UserDefinedTypeIdImpl) typeDescriptor.getTypeId())
+                        .getClassName());
+            } catch (StandardException se) {
+                throw (IOException)
+                        new IOException(se.getMessage()).initCause(se);
+            }
+        } else {
+            typeId = TypeId.getBuiltInTypeId(this.getTypeName());
+        }
         
         collationDerivation = in.readInt();
 	}

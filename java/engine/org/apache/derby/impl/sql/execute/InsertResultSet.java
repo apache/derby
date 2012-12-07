@@ -55,6 +55,7 @@ import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
@@ -128,7 +129,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	protected TableDescriptor			td;
 		
 	private ExecIndexRow[]			indexRows;
-	private ExecRow					fullTemplate;
+    private final int               fullTemplateId;
 	private	long[]					sortIds;
 	private RowLocationRetRowSource[]
                                     rowSources;
@@ -319,6 +320,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
     InsertResultSet(NoPutResultSet source, 
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
+                           int fullTemplate,
 						   Activation activation)
 		throws StandardException
     {
@@ -327,6 +329,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		constants = (InsertConstantAction) constantAction;
         this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
+        this.fullTemplateId = fullTemplate;
 		heapConglom = constants.conglomId;
 
         tc = activation.getTransactionController();
@@ -452,7 +455,14 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		{
 			// Notify the source that we are the target
 			sourceResultSet.setTargetResultSet(this);
-			long baseTableConglom = bulkInsertCore(lcc, heapConglom);
+
+            ExecRow fullTemplate =
+                ((ExecRowBuilder) activation.getPreparedStatement().
+                    getSavedObject(fullTemplateId)).build(
+                        activation.getExecutionFactory());
+
+            long baseTableConglom =
+                    bulkInsertCore(lcc, fullTemplate, heapConglom);
 
 			if (hasBeforeStatementTrigger)
 			{	
@@ -488,7 +498,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				}
 			}
 			
-			bulkValidateForeignKeys(tc, lcc.getContextManager());
+            bulkValidateForeignKeys(tc, lcc.getContextManager(), fullTemplate);
 	
 			// if we have an AFTER trigger, let 'er rip
 			if ((triggerInfo != null) && 
@@ -1252,10 +1262,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 	// Do the work for a bulk insert
 	private long bulkInsertCore(LanguageConnectionContext lcc,
+                                ExecRow fullTemplate,
 								long oldHeapConglom)
 		throws StandardException
 	{
-		fullTemplate = constants.getEmptyHeapRow(lcc);
 		bulkHeapCC = tc.openCompiledConglomerate(
                                 false,
                                 TransactionController.OPENMODE_FORUPDATE,
@@ -1407,7 +1417,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	/**
 	** Bulk Referential Integrity Checker
 	*/
-	private void bulkValidateForeignKeys(TransactionController tc, ContextManager cm)
+    private void bulkValidateForeignKeys(
+            TransactionController tc, ContextManager cm, ExecRow fullTemplate)
 		throws StandardException
 	{
 		FKInfo 			fkInfo;
@@ -1505,7 +1516,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					}
 					bulkValidateForeignKeysCore(
 							tc, cm, fkInfoArray[i], fkConglom, pkConglom, 
-							fkInfo.fkConstraintNames[index]);
+							fkInfo.fkConstraintNames[index], fullTemplate);
 				}
 			}
 			else
@@ -1525,7 +1536,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 										new Long(fkInfo.fkConglomNumbers[0]));
 				bulkValidateForeignKeysCore(
 						tc, cm, fkInfoArray[i], fkConglom.longValue(),
-						fkInfo.refConglomNumber, fkInfo.fkConstraintNames[0]);
+						fkInfo.refConglomNumber, fkInfo.fkConstraintNames[0],
+                        fullTemplate);
 			}
 		}
 	}
@@ -1533,7 +1545,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private void bulkValidateForeignKeysCore(
 						TransactionController tc, ContextManager cm, 
 						FKInfo fkInfo, long fkConglom, long pkConglom,
-						String fkConstraintName)
+                        String fkConstraintName, ExecRow fullTemplate)
 		throws StandardException
 	{
 		ExecRow 		            template;
@@ -2429,7 +2441,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                     conglomId,
                     tc.getStaticCompiledConglomInfo(conglomId),
                     activation,
-                    new MyRowAllocator(fullTemplate),	// result row allocator
+                    fullTemplateId,
                     0,						// result set number
                     (GeneratedMethod)null, 	// start key getter
                     0, 						// start search operator
@@ -2477,21 +2489,4 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		sourceResultSet.finish();
 		super.finish();
 	}
-
-
-	// inner class to be our row template constructor
-	class MyRowAllocator implements GeneratedMethod
-	{
-		private ExecRow row;
-		MyRowAllocator(ExecRow row)
-		{
-			this.row = row;
-		}
-
-		public Object invoke(Object ref)
-		{
-			return row.getClone();
-		}
-	}
 }
-

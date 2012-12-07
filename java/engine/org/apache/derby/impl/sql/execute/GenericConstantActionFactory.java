@@ -31,20 +31,14 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.ResultDescription;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -449,7 +443,6 @@ public class GenericConstantActionFactory
 	 *  @param irgs					Index descriptors
 	 *  @param indexCIDS			Conglomerate IDs of indices
 	 *	@param indexSCOCIs	StaticCompiledOpenConglomInfos for indexes.
-	 *  @param emptyHeapRow			Template for heap row.
 	 *	@param deferred				True means deferred delete
 	 *  @param tableIsPublished		true if table is published
 	 *  @param tableID				table id
@@ -485,7 +478,6 @@ public class GenericConstantActionFactory
 								IndexRowGenerator[]	irgs,
 								long[]				indexCIDS,
 								StaticCompiledOpenConglomInfo[] indexSCOCIs,
-								ExecRow				emptyHeapRow,
 								boolean				deferred,
 								boolean				tableIsPublished,
 								UUID				tableID,
@@ -516,7 +508,6 @@ public class GenericConstantActionFactory
 										irgs,
 										indexCIDS,
 										indexSCOCIs,
-										emptyHeapRow,
 										deferred,
 										tableID,
 										lockMode,
@@ -864,7 +855,6 @@ public class GenericConstantActionFactory
 	 *  @param irgs					Index descriptors
 	 *  @param indexCIDS			Conglomerate IDs of indices
 	 *	@param indexSCOCIs	StaticCompiledOpenConglomInfos for indexes.
-	 *  @param emptyHeapRow			Template for heap row.
 	 *	@param deferred				True means deferred update
 	 *	@param targetUUID			UUID of target table
 	 *	@param lockMode				The lock mode to use
@@ -893,7 +883,6 @@ public class GenericConstantActionFactory
 								long[]				indexCIDS,
 								StaticCompiledOpenConglomInfo[] indexSCOCIs,
 								String[]			indexNames,	
-								ExecRow				emptyHeapRow,
 								boolean				deferred,
 								UUID				targetUUID,
 								int					lockMode,
@@ -919,7 +908,6 @@ public class GenericConstantActionFactory
 										indexCIDS,
 										indexSCOCIs,
 										indexNames,
-										emptyHeapRow,
 										deferred,
 										targetUUID,
 										lockMode,

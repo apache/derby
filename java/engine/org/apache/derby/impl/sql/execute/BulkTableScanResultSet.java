@@ -85,7 +85,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 	 */
     BulkTableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		int resultSetNumber,
 		GeneratedMethod startKeyGetter, int startSearchOperator,
 		GeneratedMethod stopKeyGetter, int stopSearchOperator,
@@ -111,7 +111,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 		super(conglomId,
 			scoci,
 			activation,
-			resultRowAllocator,
+			resultRowTemplate,
 			resultSetNumber,
 			startKeyGetter,
 			startSearchOperator,

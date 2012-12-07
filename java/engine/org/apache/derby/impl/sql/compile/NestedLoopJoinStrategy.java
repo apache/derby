@@ -37,8 +37,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -203,7 +201,7 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 							OptimizablePredicateList nonStoreRestrictionList,
 							ExpressionClassBuilderInterface acbi,
 							int bulkFetch,
-							MethodBuilder resultRowAllocator,
+							int resultRowTemplate,
 							int colRefItem,
 							int indexColItem,
 							int lockMode,
@@ -253,7 +251,7 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 										innerTable,
 										storeRestrictionList,
 										acb,
-										resultRowAllocator);
+										resultRowTemplate);
 
 		if (genInListVals)
 			((PredicateList)storeRestrictionList).generateInListValues(acb, mb);

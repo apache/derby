@@ -113,11 +113,13 @@ public interface ResultSetFactory {
 			be inserted into the target table.
 		@param generationClauses	The code to compute column generation clauses if any
 		@param checkGM	The code to enforce the check constraints, if any
+        @param fullTemplate Saved item for a row template used by bulk insert,
+                            or -1 if this is not a bulk insert
 		@return the insert operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
 	ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
-								 GeneratedMethod checkGM)
+                                 GeneratedMethod checkGM, int fullTemplate)
         throws StandardException;
 
 	/**
@@ -688,11 +690,7 @@ public interface ResultSetFactory {
 			which provides the context for the row allocation operation.
 		@param conglomId the conglomerate of the table to be scanned.
 		@param scociItem The saved item for the static conglomerate info.
-		@param resultRowAllocator a reference to a method in the activation
-			that creates a holder for the rows from the scan.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+        @param resultRowTemplate The saved item for result row template.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
@@ -743,7 +741,7 @@ public interface ResultSetFactory {
 			                    Activation activation,
 								long conglomId,
 								int scociItem,						
-								GeneratedMethod resultRowAllocator,
+								int resultRowTemplate,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
 								int startSearchOperator,
@@ -779,11 +777,7 @@ public interface ResultSetFactory {
 			which provides the context for the row allocation operation.
 		@param conglomId the conglomerate of the table to be scanned.
 		@param scociItem The saved item for the static conglomerate info.
-		@param resultRowAllocator a reference to a method in the activation
-			that creates a holder for the rows from the scan.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+        @param resultRowTemplate The saved item for result row template.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param hashKeyColumn	The 0-based column # for the hash key.
 		@param tableName		The full name of the table
@@ -809,7 +803,7 @@ public interface ResultSetFactory {
 			                    Activation activation,
 								long conglomId,
 								int scociItem,			
-								GeneratedMethod resultRowAllocator,
+								int resultRowTemplate,
 								int resultSetNumber,
 								int hashKeyColumn,
 								String tableName,
@@ -838,12 +832,7 @@ public interface ResultSetFactory {
 		@param scociItem The saved item for the static conglomerate info.
 		@param activation the activation for this result set,
 			which provides the context for the row allocation operation.
-		@param resultRowAllocator a reference to a method in the activation
-			that creates a holder for the result row of the scan.  May
-			be a partial row.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+        @param resultRowTemplate The saved item for result row template.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
@@ -891,7 +880,7 @@ public interface ResultSetFactory {
 			                    Activation activation,
 								long conglomId,
 								int scociItem,
-								GeneratedMethod resultRowAllocator,
+								int resultRowTemplate,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
 								int startSearchOperator,
@@ -928,12 +917,7 @@ public interface ResultSetFactory {
 		@param scociItem The saved item for the static conglomerate info.
 		@param activation the activation for this result set,
 			which provides the context for the row allocation operation.
-		@param resultRowAllocator a reference to a method in the activation
-			that creates a holder for the result row of the scan.  May
-			be a partial row.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+        @param resultRowTemplate The saved item for result row template.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
@@ -984,7 +968,7 @@ public interface ResultSetFactory {
 			                    Activation activation,
 								long conglomId,
 								int scociItem,
-								GeneratedMethod resultRowAllocator,
+								int resultRowTemplate,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
 								int startSearchOperator,
@@ -1028,7 +1012,7 @@ public interface ResultSetFactory {
 			                    Activation activation,
 								long conglomId,
 								int scociItem,
-								GeneratedMethod resultRowAllocator,
+								int resultRowTemplate,
 								int resultSetNumber,
 								GeneratedMethod startKeyGetter,
 								int startSearchOperator,
@@ -1487,10 +1471,7 @@ public interface ResultSetFactory {
 	 * @param activation 		the activation for this result set,
 	 *		which provides the context for the row allocation operation.
 	 * @param resultSetNumber	The resultSetNumber for the ResultSet
-	 * @param resultRowAllocator a reference to a method in the activation
-	 * 						that creates a holder for the result row of the scan.  May
-	 *						be a partial row.  <verbatim>
-	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
+     * @param resultRowTemplate The saved item for result row template
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
 	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
@@ -1516,7 +1497,7 @@ public interface ResultSetFactory {
 	(
 		Activation 			activation,
 		int 				resultSetNumber,
-		GeneratedMethod 	resultRowAllocator,
+        int                 resultRowTemplate,
 		long 				conglomId,
 		String 				tableName,
 		String 				userSuppliedOptimizerOverrides,
@@ -1532,7 +1513,7 @@ public interface ResultSetFactory {
 
 	/**
 		A Dependent table scan result set forms a result set on a scan
-		of a dependent table for the rows that got materilized 
+		of a dependent table for the rows that got materialized
 		on the scan of its parent table and if the row being deleted
 		on parent table has a reference in the dependent table.
 
@@ -1540,12 +1521,7 @@ public interface ResultSetFactory {
 			which provides the context for the row allocation operation.
 		@param conglomId the conglomerate of the table to be scanned.
 		@param scociItem The saved item for the static conglomerate info.
-		@param resultRowAllocator a reference to a method in the activation
-			that creates a holder for the result row of the scan.  May
-			be a partial row.
-			<verbatim>
-				ExecRow rowAllocator() throws StandardException;
-			</verbatim>
+        @param resultRowTemplate The saved item for result row template.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param startKeyGetter a reference to a method in the activation
 			that gets the start key indexable row for the scan.  Null
@@ -1584,8 +1560,8 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param parentResultSetId  Id to access the materlized temporary result
-                            	  set from the refence stored in the activation.
+		@param parentResultSetId  Id to access the materialized temporary result
+                            	  set from the reference stored in the activation.
 		@param fkIndexConglomId foreign key index conglomerate id.
 		@param fkColArrayItem  saved column array object  that matches the foreign key index
 		                       columns  and the resultset from the parent table.
@@ -1599,7 +1575,7 @@ public interface ResultSetFactory {
 			                        Activation activation,
 									long conglomId,
 									int scociItem,							
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,

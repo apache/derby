@@ -37,10 +37,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ProjectRestrictNode;
-import org.apache.derby.impl.sql.compile.Predicate;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -327,7 +323,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 							OptimizablePredicateList nonStoreRestrictionList,
 							ExpressionClassBuilderInterface acbi,
 							int bulkFetch,
-							MethodBuilder resultRowAllocator,
+							int resultRowTemplate,
 							int colRefItem,
 							int indexColItem,
 							int lockMode,
@@ -375,7 +371,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 										innerTable,
 										storeRestrictionList,
 										acb,
-										resultRowAllocator);
+										resultRowTemplate);
 
 		nonStoreRestrictionList.generateQualifiers(acb,	mb, innerTable, true);
 		mb.push(innerTable.initialCapacity());

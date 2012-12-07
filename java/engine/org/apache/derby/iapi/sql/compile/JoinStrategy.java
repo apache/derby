@@ -208,7 +208,7 @@ public interface JoinStrategy {
 	 * @param acb	The expression class builder for the activation class
 	 *				we're building
 	 * @param bulkFetch	The amount of bulk fetch to do
-	 * @param resultRowAllocator	A completed method to allocate the result row
+     * @param resultRowTemplate The saved object index of a result row template
 	 * @param colRefItem	The item number of the column reference bit map
 	 * @param lockMode		The lock mode to use when scanning the table
 	 *						(see TransactionController).
@@ -231,7 +231,7 @@ public interface JoinStrategy {
 							OptimizablePredicateList nonStoreRestrictionList,
 							ExpressionClassBuilderInterface acb,
 							int bulkFetch,
-							MethodBuilder resultRowAllocator,
+							int resultRowTemplate,
 							int colRefItem,
 							int indexColItem,
 							int lockMode,

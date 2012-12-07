@@ -112,7 +112,7 @@ public class HashScanResultSet extends ScanResultSet
     //
     HashScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		int resultSetNumber,
 		GeneratedMethod startKeyGetter, int startSearchOperator,
 		GeneratedMethod stopKeyGetter, int stopSearchOperator,
@@ -139,7 +139,7 @@ public class HashScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
-				resultRowAllocator,
+				resultRowTemplate,
 				lockMode, tableLocked, isolationLevel,
                 colRefItem,
 				optimizerEstimatedRowCount,
@@ -149,7 +149,6 @@ public class HashScanResultSet extends ScanResultSet
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT( activation!=null, "hash scan must get activation context");
-			SanityManager.ASSERT( resultRowAllocator!= null, "hash scan must get row allocator");
 			if (sameStartStopPosition)
 			{
 				SanityManager.ASSERT(stopKeyGetter == null,

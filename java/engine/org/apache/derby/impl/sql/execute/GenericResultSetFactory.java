@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -68,12 +67,13 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
-										GeneratedMethod checkGM)
+                                        GeneratedMethod checkGM, int fullTemplate)
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
-		return new InsertResultSet(source, generationClauses, checkGM, activation );
+        return new InsertResultSet(
+                source, generationClauses, checkGM, fullTemplate, activation);
 	}
 
 	/**
@@ -483,7 +483,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                         			Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,
@@ -517,7 +517,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
 								startSearchOperator,
@@ -553,7 +553,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                          			Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									int hashKeyColumn,
 									String tableName,
@@ -574,7 +574,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								hashKeyColumn,
 								tableName,
@@ -598,7 +598,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                         			Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,
@@ -627,7 +627,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
 								startSearchOperator,
@@ -660,7 +660,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                        			    Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,
@@ -698,7 +698,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
 								startSearchOperator,
@@ -739,7 +739,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,
@@ -771,7 +771,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
 								startSearchOperator,
@@ -1145,10 +1145,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 * @param activation 		the activation for this result set,
 	 *		which provides the context for the row allocation operation.
 	 * @param resultSetNumber	The resultSetNumber for the ResultSet
-	 * @param resultRowAllocator a reference to a method in the activation
-	 * 						that creates a holder for the result row of the scan.  May
-	 *						be a partial row.  <verbatim>
-	 *		ExecRow rowAllocator() throws StandardException; </verbatim>
+     * @param resultRowTemplate The saved item for result row template
 	 * @param conglomId 		the conglomerate of the table to be scanned.
 	 * @param tableName			The full name of the table
 	 * @param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
@@ -1174,7 +1171,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	(
 		Activation 			activation,
 		int 				resultSetNumber,
-		GeneratedMethod 	resultRowAllocator,
+        int                 resultRowTemplate,
 		long 				conglomId,
 		String 				tableName,
 		String 				userSuppliedOptimizerOverrides,
@@ -1190,7 +1187,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new LastIndexKeyResultSet(
 					activation,
 					resultSetNumber,
-					resultRowAllocator,
+					resultRowTemplate,
 					conglomId,
 					tableName,
 					userSuppliedOptimizerOverrides,
@@ -1214,7 +1211,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			                        Activation activation,
 									long conglomId,
 									int scociItem,
-									GeneratedMethod resultRowAllocator,
+									int resultRowTemplate,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
 									int startSearchOperator,
@@ -1247,7 +1244,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								conglomId,
 								scoci,
 								activation,
-								resultRowAllocator,
+								resultRowTemplate,
 								resultSetNumber,
 								startKeyGetter,
 								startSearchOperator,

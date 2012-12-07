@@ -21,35 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-
-import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-
-import org.apache.derby.catalog.UUID;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
-import java.io.Serializable;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
-import java.util.Properties;
 
 /**
  *	This class  describes compiled constants that are passed into
@@ -105,7 +77,6 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
 			  0,
 			  null,	
 			  null,
-			  (ExecRow)null, // never need to pass in a heap row
 			  null,
 			  null,
 			  null,

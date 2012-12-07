@@ -21,20 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
@@ -92,7 +82,6 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param indexCIDS	Conglomerate IDs of indices
 	 *	@param indexSCOCIs	StaticCompiledOpenConglomInfos for indexes.
 	 *  @param indexNames	Names of indices on this table for error reporting.
-	 *  @param emptyHeapRow	Template for heap row.
 	 *  @param deferred		True means process as a deferred update.
 	 *	@param targetUUID	UUID of target table
 	 *	@param lockMode		The lock mode to use
@@ -116,7 +105,6 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 								long[]				indexCIDS,
 								StaticCompiledOpenConglomInfo[] indexSCOCIs,
 								String[]			indexNames,
-								ExecRow				emptyHeapRow,
 								boolean				deferred,
 								UUID				targetUUID,
 								int					lockMode,
@@ -143,7 +131,6 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 			lockMode,
 			fkInfo,
 			triggerInfo,
-			emptyHeapRow,
 			baseRowReadList,
 			baseRowReadMap,
 			streamStorableHeapColIds,

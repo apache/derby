@@ -117,7 +117,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
 		Activation activation, 
-		GeneratedMethod resultRowAllocator, 
+		int resultRowTemplate,
 		int resultSetNumber,
 		GeneratedMethod startKeyGetter, int startSearchOperator,
 		GeneratedMethod stopKeyGetter, int stopSearchOperator,
@@ -142,7 +142,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		int rltItem
 		)	throws StandardException
 	{
-		super(activation, resultSetNumber, resultRowAllocator,
+		super(activation, resultSetNumber, resultRowTemplate,
 			  lockMode, tableLocked,
 			  //Because the scan for the tables in this result set are done
 			  //internally for delete cascades, isolation should be set to
@@ -164,7 +164,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT( activation!=null, "table scan must get activation context");
-			SanityManager.ASSERT( resultRowAllocator!= null, "table scan must get row allocator");
 
             // This ResultSet doesn't use start or stop keys, so expect them
             // to be null.

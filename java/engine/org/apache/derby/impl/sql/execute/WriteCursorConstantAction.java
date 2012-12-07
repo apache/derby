@@ -33,12 +33,8 @@ import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
 
@@ -82,7 +78,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	private	FKInfo[]					fkInfo;
 	private TriggerInfo					triggerInfo;
 
-	private ExecRow						emptyHeapRow;
 	private FormatableBitSet baseRowReadList;
 	private int[] baseRowReadMap;
 	private int[] streamStorableHeapColIds;
@@ -112,7 +107,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *	@param lockMode		The lock mode to use on the target table
 	 *	@param fkInfo	Structure containing foreign key info, if any (may be null)
 	 *	@param triggerInfo	Structure containing trigger info, if any (may be null)
-	 *  @param emptyHeapRow	an empty heap row
 	 *  @param baseRowReadMap	BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param singleRowSource		Whether or not source is a single row source
@@ -130,7 +124,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 								int					lockMode,
 								FKInfo[]			fkInfo,
 								TriggerInfo			triggerInfo,
-								ExecRow				emptyHeapRow,
 								FormatableBitSet				baseRowReadList,
 								int[]               baseRowReadMap,
 								int[]               streamStorableHeapColIds,
@@ -147,7 +140,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 		this.targetProperties = targetProperties;
 		this.targetUUID = targetUUID;
 		this.lockMode = lockMode;
-		this.emptyHeapRow = emptyHeapRow;
 		this.fkInfo = fkInfo;
 		this.triggerInfo = triggerInfo;
 		this.baseRowReadList = baseRowReadList;
@@ -299,33 +291,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 * @return the conglomerate id.
 	 */
 	public long getConglomerateId() { return conglomId; }
-		
-	/**
-	 *	Get emptyHeapRow
-	 *
-	 * @param lcc	The LanguageConnectionContext to use.
-	 *
-	 * @return	an empty base table row for the table being updated.
-	 *
-	 * @exception StandardException on error
-	 */
-	public ExecRow getEmptyHeapRow(LanguageConnectionContext lcc) throws StandardException
-	{
-		DataDictionary dd;
-		TableDescriptor td;
-
-		if (emptyHeapRow == null)
-		{
-
-			dd = lcc.getDataDictionary();
-	
-			td = dd.getTableDescriptor(targetUUID);
-	
-			emptyHeapRow = td.getEmptyExecRow();
-		}
-
-		return emptyHeapRow.getClone();
-	}
 
 	/**
 	 * Get the targetProperties from the constant action.

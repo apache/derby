@@ -150,7 +150,6 @@ public class InsertConstantAction extends WriteCursorConstantAction
 			  lockMode,
 			  fkInfo,	
 			  triggerInfo,
-			  (ExecRow)null, // never need to pass in a heap row
 			  null,
 			  null,
 			  streamStorableHeapColIds,

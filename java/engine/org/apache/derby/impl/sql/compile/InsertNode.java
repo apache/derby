@@ -21,12 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.services.compiler.JavaFactory;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
@@ -35,23 +29,17 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.reference.ClassName;
 
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -60,7 +48,6 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -77,6 +64,7 @@ import org.apache.derby.impl.sql.execute.FKInfo;
 import java.util.Properties;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
@@ -889,6 +877,8 @@ public final class InsertNode extends DMLModStatementNode
 
         if ( targetProperties.getProperty( key ) == null )
         { targetProperties.put( key, value ); }
+
+        bulkInsert = true;
     }
 
 	/**
@@ -933,7 +923,23 @@ public final class InsertNode extends DMLModStatementNode
 			// arg 3 generate code to evaluate CHECK CONSTRAINTS
 			generateCheckConstraints( checkConstraints, acb, mb );
 
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertResultSet", ClassName.ResultSet, 3);
+            // arg 4 row template used by bulk insert
+            if (bulkInsert) {
+                ColumnDescriptorList cdl =
+                        targetTableDescriptor.getColumnDescriptorList();
+                ExecRowBuilder builder =
+                        new ExecRowBuilder(cdl.size(), false);
+                for (int i = 0; i < cdl.size(); i++) {
+                    ColumnDescriptor cd = (ColumnDescriptor) cdl.get(i);
+                    builder.setColumn(i + 1, cd.getType());
+                }
+                mb.push(acb.addItem(builder));
+            } else {
+                mb.push(-1);
+            }
+
+            mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
+                    "getInsertResultSet", ClassName.ResultSet, 4);
 		}
 		else
 		{

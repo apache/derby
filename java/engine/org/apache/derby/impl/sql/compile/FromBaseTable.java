@@ -3403,7 +3403,7 @@ public class FromBaseTable extends FromTable
 
 		acb.pushThisAsActivation(mb);
 		mb.push(getResultSetNumber());
-		resultColumns.generateHolder(acb, mb, referencedCols, (FormatableBitSet) null);
+        mb.push(acb.addItem(resultColumns.buildRowTemplate(referencedCols)));
 		mb.push(cd.getConglomerateNumber());
 		mb.push(tableDescriptor.getName());
 		//User may have supplied optimizer overrides in the sql
@@ -3496,7 +3496,7 @@ public class FromBaseTable extends FromTable
      	acb.pushThisAsActivation(mb);
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
- 		resultColumns.generateHolder(acb, mb, referencedCols, (FormatableBitSet) null);
+        mb.push(acb.addItem(resultColumns.buildRowTemplate(referencedCols)));
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
 		mb.push(tableDescriptor.getName());
@@ -3568,11 +3568,9 @@ public class FromBaseTable extends FromTable
 										  MethodBuilder mb)
 		throws StandardException
 	{
-        // get a function to allocate scan rows of the right shape and size
-   	    MethodBuilder resultRowAllocator =
-						resultColumns.generateHolderMethod(acb,
-													referencedCols,
-													(FormatableBitSet) null);
+        // Put the result row template in the saved objects.
+        int resultRowTemplate =
+                acb.addItem(resultColumns.buildRowTemplate(referencedCols));
 
 		// pass in the referenced columns on the saved objects
 		// chain
@@ -3623,7 +3621,7 @@ public class FromBaseTable extends FromTable
 											nonStoreRestrictionList,
 											acb,
 											bulkFetch,
-											resultRowAllocator,
+											resultRowTemplate,
 											colRefItem,
 											indexColItem,
 											getTrulyTheBestAccessPath().

@@ -42,8 +42,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -53,6 +51,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -1511,6 +1510,43 @@ public class ResultColumnList extends QueryTreeNodeVector
 		return	row;
 	}
 
+    /**
+     * Build an {@code ExecRowBuilder} instance that produces a row of the
+     * same shape as this result column list.
+     *
+     * @param referencedCols a bit map that tells which columns in the
+     * source result set that are used, or {@code null} if all are used
+     * @return an instance that produces rows of the same shape as this
+     * result column list
+     */
+    ExecRowBuilder buildRowTemplate(FormatableBitSet referencedCols)
+            throws StandardException
+    {
+        int columns = (referencedCols == null) ?
+                size() : referencedCols.getNumBitsSet();
+
+        ExecRowBuilder builder = new ExecRowBuilder(columns, indexRow);
+
+        int colNum = (referencedCols == null) ? 0 : referencedCols.anySetBit();
+
+        for (int i = 0; i < size(); i++) {
+            ResultColumn rc = (ResultColumn) elementAt(i);
+
+            if (rc.getExpression() instanceof CurrentRowLocationNode) {
+                builder.setColumn(colNum + 1, newRowLocationTemplate());
+            } else {
+                builder.setColumn(colNum + 1, rc.getType());
+            }
+
+            if (referencedCols == null) {
+                colNum++;
+            } else {
+                colNum = referencedCols.anySetBit(colNum);
+            }
+        }
+
+        return builder;
+    }
 
 	/**
 		Generates a row with the size and shape of the ResultColumnList.
@@ -1630,37 +1666,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 			 */
 			if (rc.getExpression() instanceof CurrentRowLocationNode)
 			{
-				ConglomerateController cc = null;
-				int savedItem;
-				RowLocation rl;
-				
-				LanguageConnectionContext lcc = getLanguageConnectionContext();
-				DataDictionary dd = lcc.getDataDictionary();
-				
-				int isolationLevel = (dd.getCacheMode() == DataDictionary.DDL_MODE) ? 
-						TransactionController.ISOLATION_READ_COMMITTED : TransactionController.ISOLATION_NOLOCK;
+                int savedItem = acb.addItem(newRowLocationTemplate());
 
-				cc = lcc.getTransactionCompile().openConglomerate(
-						conglomerateId,
-                        false,
-						0,
-						TransactionController.MODE_RECORD,
-						isolationLevel);
-
-				try
-				{
-					rl = cc.newRowLocationTemplate();
-				}
-				finally
-				{
-					if (cc != null)
-					{
-						cc.close();
-					}
-				}
-
-				savedItem = acb.addItem(rl);
-								
 				// get the RowLocation template
 				exprFun.getField(lf); // instance for setColumn
 				exprFun.push(highestColumnNumber + 1); // first arg
@@ -1770,6 +1777,33 @@ public class ResultColumnList extends QueryTreeNodeVector
 		 */
 		cb.statementNumHitLimit(1);		// ignore return value
 	}
+
+    /**
+     * Create a row location template of the right type for the source
+     * conglomerate.
+     */
+    private RowLocation newRowLocationTemplate() throws StandardException {
+        LanguageConnectionContext lcc = getLanguageConnectionContext();
+        DataDictionary dd = lcc.getDataDictionary();
+
+        int isolationLevel = (dd.getCacheMode() == DataDictionary.DDL_MODE) ?
+                TransactionController.ISOLATION_READ_COMMITTED :
+                TransactionController.ISOLATION_NOLOCK;
+
+        ConglomerateController cc =
+            lcc.getTransactionCompile().openConglomerate(
+                conglomerateId,
+                false,
+                0,
+                TransactionController.MODE_RECORD,
+                isolationLevel);
+
+        try {
+            return cc.newRowLocationTemplate();
+        } finally {
+            cc.close();
+        }
+    }
 
 	/**
 	 * Make a ResultDescription for use in a ResultSet.

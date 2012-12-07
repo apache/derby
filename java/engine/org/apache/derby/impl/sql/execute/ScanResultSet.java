@@ -21,10 +21,11 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -71,6 +72,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     /** The scan isolation level. */
     int isolationLevel;
 
+    /** Object used to create and reset the candidate row. */
+    final ExecRowBuilder resultRowBuilder;
+
     /** The candidate row, matches the shape of the rows in
      * the underlying object to be scanned.
      */
@@ -88,7 +92,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      *
      * @param activation the activation
      * @param resultSetNumber number of the result set (unique within statement)
-     * @param resultRowAllocator method which generates rows
+     * @param resultRowTemplate identifier of saved object for row template
      * @param lockMode lock mode (record or table)
      * @param tableLocked true if marked as table locked in SYS.SYSTABLES
      * @param isolationLevel language isolation level for the result set
@@ -98,7 +102,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      * @param optimizerEstimatedCost estimated cost
      */
     ScanResultSet(Activation activation, int resultSetNumber,
-                  GeneratedMethod resultRowAllocator,
+                  int resultRowTemplate,
                   int lockMode, boolean tableLocked, int isolationLevel,
                   int colRefItem,
                   double optimizerEstimatedRowCount,
@@ -121,12 +125,15 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         this.isolationLevel =
             translateLanguageIsolationLevel(isolationLevel);
 
-        /* Only call row allocators once */
-        candidate = (ExecRow) resultRowAllocator.invoke(activation);
-        
+        ExecPreparedStatement ps = activation.getPreparedStatement();
+
+        // Create a candidate row.
+        resultRowBuilder =
+                (ExecRowBuilder) ps.getSavedObject(resultRowTemplate);
+        candidate = resultRowBuilder.build(activation.getExecutionFactory());
+
         this.accessedCols = colRefItem != -1 ?
-            (FormatableBitSet)(activation.getPreparedStatement().
-                getSavedObject(colRefItem)) : null;      
+            (FormatableBitSet) ps.getSavedObject(colRefItem) : null;
     }
 
     /**

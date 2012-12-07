@@ -84,7 +84,6 @@ public final class UpdateNode extends DMLModStatementNode
 	//Note: These are public so they will be visible to
 	//the RepUpdateNode.
 	public int[]				changedColumnIds;
-	public ExecRow				emptyHeapRow;
 	public boolean				deferred;
 	public ValueNode			checkConstraints;
 	public FKInfo				fkInfo;
@@ -486,11 +485,6 @@ public final class UpdateNode extends DMLModStatementNode
 
 		if (targetVTI == null)
 		{
-			/*
-			** Construct an empty heap row for use in our constant action.
-			*/
-			emptyHeapRow = targetTableDescriptor.getEmptyExecRow();
-
 			/* Append the list of "after" columns to the list of "before" columns,
 			 * preserving the afterColumns list.  (Necessary for binding
 			 * check constraints.)
@@ -723,7 +717,6 @@ public final class UpdateNode extends DMLModStatementNode
 			  indexConglomerateNumbers,
 			  indexSCOCIs,
 			  indexNames,
-			  emptyHeapRow,
 			  deferred,
 			  targetTableDescriptor.getUUID(),
 			  lockMode,
