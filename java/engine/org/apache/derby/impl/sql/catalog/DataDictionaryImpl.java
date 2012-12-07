@@ -4429,6 +4429,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param spsd	The descriptor to add
 	 * @param tc			The transaction controller
+     * @param recompile Whether to recompile or invalidate
 	 * @param updateParamDescriptors If true, will update the
 	 *						parameter descriptors in SYS.SYSCOLUMNS.
 	 * @param firstCompilation  true, if Statement is getting compiled for first
@@ -4472,7 +4473,12 @@ public final class	DataDictionaryImpl
 		}
 		else 
 		{
-			updCols = new int[]	{SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID} ;
+            // This is an invalidation request. Update the VALID column (to
+            // false) and clear the plan stored in the CONSTANTSTATE column.
+            updCols = new int[] {
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID,
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE,
+            };
 		}
 			
 		idOrderable = getIDValueAsCHAR(spsd.getUUID());

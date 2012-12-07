@@ -1011,6 +1011,7 @@ public class SPSDescriptor extends TupleDescriptor
 				if (valid == true)
 				{
 					valid = false;
+                    preparedStatement = null;
 					updateSYSSTATEMENTS(lcc, INVALIDATE, null);
 				}
 				dm.invalidateFor(this, dm.USER_RECOMPILE_REQUEST, lcc);

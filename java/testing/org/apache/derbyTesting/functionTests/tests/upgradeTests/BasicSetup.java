@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -100,34 +101,13 @@ public class BasicSetup extends UpgradeChange {
             		"VALUES(20)");
             break;
         case PH_SOFT_UPGRADE:
-            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
-    		"VALUES(20)");
-            break;
         case PH_POST_SOFT_UPGRADE:
-            // DERBY-5105: The post soft upgrade phase may fail with
-            // NoSuchMethodError if the old version suffers from DERBY-4835.
-            // Only execute this part of the test for versions that don't
-            // have this problem.
-            if (!oldSuffersFromDerby4835()) {
-                s.executeUpdate("INSERT INTO Trigger_t1(max_size) " +
-                                "VALUES(20)");
-            }
-            break;
         case PH_HARD_UPGRADE:
             s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
     		"VALUES(20)");
             break;
         }
         s.close();
-    }
-
-    /**
-     * Check if the old version from which we upgrade suffers from DERBY-4835.
-     */
-    private boolean oldSuffersFromDerby4835() {
-        // DERBY-4835 exists on 10.5 and 10.6 prior to 10.5.3.2 and 10.6.2.3.
-        return (oldAtLeast(10, 5) && oldLessThan(10, 5, 3, 2)) ||
-                (oldAtLeast(10, 6) && oldLessThan(10, 6, 2, 3));
     }
 
     /**
@@ -285,7 +265,32 @@ public class BasicSetup extends UpgradeChange {
             break;
         }
     }  
-    
+
+    /**
+     * Test case that drops all trigger plans. Should be run at the end of
+     * soft upgrade if the old version suffers from DERBY-4835 or DERBY-5289.
+     * Otherwise, the database may fail to boot again with the old version.
+     */
+    public void dropAllTriggerPlans() throws Exception {
+        Statement s = createStatement();
+        s.execute("create procedure clear_sps_plans() language java "
+                + "parameter style java external name '"
+                + getClass().getName()
+                + ".clearSPSPlans'");
+        s.execute("call clear_sps_plans()");
+        s.execute("drop procedure clear_sps_plans");
+    }
+
+    /**
+     * Stored procedure that clears all SPS plans in the database. It does
+     * the same as SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS, but we
+     * need to create our own procedure since the built-in procedure might
+     * not be available in soft upgrade.
+     */
+    public static void clearSPSPlans() throws SQLException {
+        SystemProcedures.SYSCS_INVALIDATE_STORED_STATEMENTS();
+    }
+
     /**
      * DERBY-5249 table created with primary and foreign key can't be dropped
      * Test currently disabled. Remove the x from the name to enable the 
@@ -1842,12 +1847,6 @@ public class BasicSetup extends UpgradeChange {
             return;
         }
 
-        if (getPhase() == PH_POST_SOFT_UPGRADE && oldSuffersFromDerby4835()) {
-            // DERBY-5263: Executing the trigger will fail after soft upgrade
-            // in all the versions that suffer from DERBY-4835. Skip the test.
-            return;
-        }
-
         Statement s = createStatement();
 
         if (getPhase() == PH_CREATE) {
@@ -1899,11 +1898,6 @@ public class BasicSetup extends UpgradeChange {
      * @throws SQLException
      */
     public void testDERBY5289TriggerUpgradeFormat() throws SQLException {
-        // if the old version suffers from DERBY-4835 we 
-        // cannot run this test because the database won't boot
-        // on soft upgrade and none of the fixtures will run.
-        if (oldSuffersFromDerby4835())
-            return;
         Statement s = createStatement();
         switch (getPhase())
         {
@@ -1924,21 +1918,7 @@ public class BasicSetup extends UpgradeChange {
                 assertDERBY5289ResultsAndDelete();
                 break;
             case PH_SOFT_UPGRADE:   
-                s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
-                s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa')");
-                s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
-                assertDERBY5289ResultsAndDelete();                
-                break;
             case PH_POST_SOFT_UPGRADE:
-                // If old version suffers from DERBY-5289, we can't run this part of the 
-                // DERBY-5289 won't go in until 10.8.2.0
-                if (! oldLessThan(10,8,2,0)) {
-                    s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
-                    s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa') ");
-                    s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
-                    assertDERBY5289ResultsAndDelete();
-                }
-                break;
             case PH_HARD_UPGRADE:
                 s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
                 s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa') ");

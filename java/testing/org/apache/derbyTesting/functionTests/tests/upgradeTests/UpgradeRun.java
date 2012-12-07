@@ -230,8 +230,39 @@ class UpgradeRun extends UpgradeClassLoader
         {
             suite.addTest(new BasicSetup("noConnectionAfterHardUpgrade"));
         }
-                
+
+        if (phase == UpgradeChange.PH_SOFT_UPGRADE &&
+                suffersFromDerby4835or5289(version)) {
+            // If the old version suffers from DERBY-4835 or DERBY-5289,
+            // it may not be able to read the trigger plans after soft upgrade.
+            // Drop all trigger plans at the end of soft upgrade to prevent
+            // problems in the post soft upgrade phase.
+            suite.addTest(new BasicSetup("dropAllTriggerPlans"));
+        }
+
         return TestConfiguration.connectionDSDecorator(suite);
+    }
+
+    /**
+     * Check if a version suffers from DERBY-4835 or DERBY-5289.
+     */
+    private static boolean suffersFromDerby4835or5289(int[] version) {
+        // DERBY-4835 affects the 10.5 and 10.6 branches, and was fixed in
+        // 10.5.3.2 and 10.6.2.3.
+        // DERBY-5289 affects the 10.5, 10.6, 10.7 and 10.8 branches, and was
+        // fixed in 10.5.3.1, 10.6.2.2, 10.7.1.4 and 10.8.2.2.
+        return
+                (lessThan(new int[] { 10, 5, 0, 0 }, version) &&
+                 lessThan(version, new int[] { 10, 5, 3, 2 }))
+            ||
+                (lessThan(new int[] { 10, 6, 0, 0 }, version) &&
+                 lessThan(version, new int[] { 10, 6, 2, 3 }))
+            ||
+                (lessThan(new int[] { 10, 7, 0, 0 }, version) &&
+                 lessThan(version, new int[] { 10, 7, 1, 4 }))
+            ||
+                (lessThan(new int[] { 10, 8, 0, 0 }, version) &&
+                 lessThan(version, new int[] { 10, 8, 2, 2 }));
     }
     
     /**
