@@ -112,6 +112,16 @@ public interface AccessFactory
 	 */
 	public boolean isReadOnly();
 
+    /**
+     * DERBY-5996(Create readme files (cautioning users against modifying 
+     *  database files) at database hard upgrade time)
+     * This gets called during hard upgrade. It will create 3 readme files
+     *  one in database directory, one in "seg0" directory and one in log
+     *  directory. These readme files warn users against touching any of
+     *  files associated with derby database 
+     */
+    public void createReadMeFiles()
+        throws StandardException;
 
 
     /**************************************************************************

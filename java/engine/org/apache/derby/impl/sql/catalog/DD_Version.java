@@ -223,6 +223,13 @@ public	class DD_Version implements	Formatable
 			// real upgrade changes. Get user name of current user.
 			String userName = IdUtil.getUserNameFromURLProps(startParams);
 			doFullUpgrade(tc, dictionaryVersion.majorVersionNumber,IdUtil.getUserAuthorizationId(userName));
+            //DERBY-5996(Create readme files (cautioning users against 
+            // modifying database files) at database hard upgrade time)
+            //Following will create 3 readme files.
+            // one in database directory, one in "seg0" directory and one in 
+            // log directory. These readme files warn users against touching 
+            // any of files associated with derby database 
+			bootingDictionary.af.createReadMeFiles();
 		}
 
 		if (!minorOnly && !isReadOnly) {

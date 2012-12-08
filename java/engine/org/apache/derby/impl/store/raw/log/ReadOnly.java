@@ -76,6 +76,10 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 		return null;
 	}
 
+    /** Not applicable in readonly databases */
+    public void createDataWarningFile() throws StandardException {
+    }
+
 	/** Not applicable in readonly databases */
 	public void setRawStoreFactory(RawStoreFactory rsf) {
 	}

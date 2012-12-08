@@ -60,6 +60,13 @@ public interface LogFactory extends Corruptable {
 
 	public Logger getLogger();
 
+    /**
+     * Create readme file in log directory warning users against touching
+     *  any files in the directory
+     * @throws StandardException
+     */
+    public void createDataWarningFile() throws StandardException;
+
 	/**
 		Make log factory aware of which raw store factory it belongs to
 	*/

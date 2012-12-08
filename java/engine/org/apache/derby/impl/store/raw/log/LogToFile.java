@@ -2733,34 +2733,42 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 throw StandardException.newException(
                     SQLState.LOG_SEGMENT_NOT_EXIST, logDir.getPath());
             }
-            
-            //Put a readme file in the log directory, alerting users to not 
-            // touch or remove any of the files there 
-            StorageFile fileReadMe = logStorageFactory.newStorageFile(
-                LogFactory.LOG_DIRECTORY_NAME,
-                PersistentService.DB_README_FILE_NAME);
-            if (!privExists(fileReadMe)) {
-                OutputStreamWriter osw = null;
-                try {
-                    osw = privGetOutputStreamWriter(fileReadMe);
-                    osw.write(MessageService.getTextMessage(
-                        MessageId.README_AT_LOG_LEVEL));
-                }
-                catch (IOException ioe)
+            createDataWarningFile();
+        }
+    }
+	
+    /**
+     * Create readme file in log directory warning users against touching
+     *  any files in the directory
+     * @throws StandardException
+     */
+    public void createDataWarningFile() throws StandardException {
+        //Put a readme file in the log directory, alerting users to not 
+        // touch or remove any of the files there 
+        StorageFile fileReadMe = logStorageFactory.newStorageFile(
+            LogFactory.LOG_DIRECTORY_NAME,
+            PersistentService.DB_README_FILE_NAME);
+        if (!privExists(fileReadMe)) {
+            OutputStreamWriter osw = null;
+            try {
+                osw = privGetOutputStreamWriter(fileReadMe);
+                osw.write(MessageService.getTextMessage(
+                    MessageId.README_AT_LOG_LEVEL));
+            }
+            catch (IOException ioe)
+            {
+            }
+            finally
+            {
+                if (osw != null)
                 {
-                }
-                finally
-                {
-                    if (osw != null)
+                    try
                     {
-                        try
-                        {
-                            osw.close();
-                        }
-                        catch (IOException ioe)
-                        {
-                            // Ignore exception on close
-                        }
+                        osw.close();
+                    }
+                    catch (IOException ioe)
+                    {
+                        // Ignore exception on close
                     }
                 }
             }

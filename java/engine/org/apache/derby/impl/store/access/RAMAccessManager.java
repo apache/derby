@@ -32,6 +32,7 @@ import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -55,6 +56,8 @@ import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
+import org.apache.derby.iapi.store.raw.log.LogFactory;
+import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.catalog.UUID;
 
@@ -888,6 +891,30 @@ public abstract class RAMAccessManager
 		return rawstore.isReadOnly();
 	}
 
+    /**
+     * DERBY-5996(Create readme files (cautioning users against modifying 
+     *  database files) at database hard upgrade time)
+     * This gets called during hard upgrade. It will create 3 readme files
+     *  one in database directory, one in "seg0" directory and one in log
+     *  directory. These readme files warn users against touching any of
+     *  files associated with derby database 
+     */
+    public void createReadMeFiles()
+        throws StandardException
+    {
+        //creating readme in "seg0" directory
+        rawstore.createDataWarningFile();
+
+        //creating readme in log directory
+        LogFactory logFactory =(LogFactory) Monitor.findServiceModule(this, rawstore.getLogFactoryModule());
+        logFactory.createDataWarningFile();
+
+        //creating readme in root database directory
+        DataFactory dataFactory =(DataFactory) Monitor.findServiceModule(this, rawstore.getDataFactoryModule());
+        PersistentService ps = Monitor.getMonitor().getServiceType(rawstore);
+        ps.createDataWarningFile(dataFactory.getStorageFactory());
+    }
+	
 	private void addPropertySetNotification(PropertySetCallback who, TransactionController tc) {
 
 		pf.addPropertySetNotification(who);

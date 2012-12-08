@@ -21,6 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.io.File;
+import java.io.IOException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,6 +40,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.tests.upgradeTests.helpers.DisposableIndexStatistics;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -60,6 +62,11 @@ public class Changes10_10 extends UpgradeChange
     private static  final   String  SYNTAX_ERROR = "42X01";
     private static  final   String  HARD_UPGRADE_REQUIRED = "XCL47";
     private static  final   String  NEEDS_JAVA_STYLE = "42ZCA";
+    /**
+    The readme file cautioning users against touching the files in
+    the database directory 
+    */
+    private static final String DB_README_FILE_NAME = "README_DO_NOT_TOUCH_FILES.txt";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -246,6 +253,59 @@ public class Changes10_10 extends UpgradeChange
         }
         
         st.close();
+    }
+    
+    /**
+     * DERBY-5996(Create readme files (cautioning users against modifying 
+     *  database files) at database hard upgrade time)
+     * Simple test to make sure readme files are getting created
+     */
+    public void testReadMeFiles() throws SQLException, IOException
+    {
+        Statement s = createStatement();
+        s.close();
+        TestConfiguration currentConfig = TestConfiguration.getCurrent();
+        String dbPath = currentConfig.getDatabasePath(currentConfig.getDefaultDatabaseName());
+        switch (getPhase())
+        {
+        case PH_CREATE:
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            // DERBY-5995 Pre 10.10 databases would not have readme files
+            lookForReadmeFile(dbPath, false);
+            lookForReadmeFile(dbPath+File.separator+"seg0", false);
+            lookForReadmeFile(dbPath+File.separator+"log", false);
+            break;
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+            // DERBY-5995 Hard upgrade to 10.10 will create readme files
+            lookForReadmeFile(dbPath, true);
+            lookForReadmeFile(dbPath+File.separator+"seg0", true);
+            lookForReadmeFile(dbPath+File.separator+"log", true);
+            break;
+        }
+    }
+
+    /**
+     * For pre-10.10 database, fileShouldExist will be false. For hard upgraded
+     *  databases to 10.10, fileShouldExist will be true
+     * @param path - this can be root database directory, log or seg0 directory
+     * @param fileShouldExist
+     * @throws IOException
+     */
+    private void lookForReadmeFile(String path, boolean fileShouldExist) throws IOException {
+        File readmeFile = new File(path,
+            DB_README_FILE_NAME);
+        if (fileShouldExist)
+        {
+            assertTrue(readmeFile + "doesn't exist", 
+                PrivilegedFileOpsForTests.exists(readmeFile));
+        } else 
+        {
+            assertFalse(readmeFile + "exists", 
+                PrivilegedFileOpsForTests.exists(readmeFile));
+        
+        }
     }
     
 }
