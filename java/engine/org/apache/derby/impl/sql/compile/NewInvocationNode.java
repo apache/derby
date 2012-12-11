@@ -417,8 +417,11 @@ public class NewInvocationNode extends MethodCallNode
 
 		try
 		{
-			publicMethod = classInspector.findPublicMethod(javaClassName, methodName,
-											   parmTypeNames, null, isParam, staticMethod, false);
+			publicMethod = classInspector.findPublicMethod
+                (
+                 javaClassName, methodName,
+                 parmTypeNames, null, isParam, staticMethod, false, hasVarargs()
+                 );
 
 			/* If no match, then retry to match any possible combinations of
 			 * object and primitive types.
@@ -426,9 +429,11 @@ public class NewInvocationNode extends MethodCallNode
 			if (publicMethod == null)
 			{
 				String[] primParmTypeNames = getPrimitiveSignature(false);
-				publicMethod = classInspector.findPublicMethod(javaClassName, 
-										methodName, parmTypeNames,
-										primParmTypeNames, isParam, staticMethod, false);
+				publicMethod = classInspector.findPublicMethod
+                    (
+                     javaClassName, methodName, parmTypeNames,
+                     primParmTypeNames, isParam, staticMethod, false, hasVarargs()
+                     );
 			}
 		}
 		catch (ClassNotFoundException e)

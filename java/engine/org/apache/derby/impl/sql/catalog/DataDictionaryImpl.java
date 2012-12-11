@@ -240,7 +240,8 @@ public final class	DataDictionaryImpl
     *[2]    = Java class
     *[3]    = method name and signature
     *[4]    = "true" or "false" depending on whether the function is DETERMINSTIC
-    *[5..N] = arguments (optional, if not present zero arguments is assumed)
+    *[5]    = "true" or "false" depending on whether the function has VARARGS
+    *[6..N] = arguments (optional, if not present zero arguments is assumed)
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
@@ -251,7 +252,7 @@ public final class	DataDictionaryImpl
         {"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)",  "true", "false", "DOUBLE" },
         {"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)",  "true", "false", "DOUBLE" },
         {"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)",  "true", "false", "DOUBLE" },
-        {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", "false", "true" },
+        {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", "true", "false" },
         {"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "true", "false", "DOUBLE" },
         {"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)",  "true", "false", "DOUBLE" },
         {"LN", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "false", "DOUBLE" },

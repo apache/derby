@@ -186,4 +186,98 @@ public class VarargsTest  extends GeneratedColumnsHelper
               );
     }
 
+    /**
+     * <p>
+     * Simple invocations to verify that varargs routines can be invoked.
+     * </p>
+     */
+    public void test_02_simple() throws Exception
+    {
+        if ( !vmSupportsVarargs() ) { return; }
+        
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn,
+              "create function maximum( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.max'\n"
+              );
+        goodStatement
+            ( conn,
+              "create function formatMessage( message varchar( 32672 ),  args varchar( 32672 ) ... ) returns varchar( 32672 )\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.formatMessage'\n"
+              );
+
+        // 0 args
+        assertResults
+            (
+             conn,
+             "values maximum()",
+             new String[][]
+             {
+                 { null },
+             },
+             false
+             );
+        
+        // a null argument
+        assertResults
+            (
+             conn,
+             "values maximum( null )",
+             new String[][]
+             {
+                 { null },
+             },
+             false
+             );
+        
+        // one non-null argument
+        assertResults
+            (
+             conn,
+             "values maximum( 1 )",
+             new String[][]
+             {
+                 { "1" },
+             },
+             false
+             );
+         
+        // multiple arguments
+        assertResults
+            (
+             conn,
+             "values maximum( 1, 3, 2 )",
+             new String[][]
+             {
+                 { "3" },
+             },
+             false
+             );
+         
+        // verify that arguments are passed in the correct order
+        assertResults
+            (
+             conn,
+             "values formatMessage( 'First {0} then {1} then {2}', 'one', 'two', 'three' )",
+             new String[][]
+             {
+                 { "First one then two then three" },
+             },
+             false
+             );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Return true if the VM supports vararg methods */
+    private boolean vmSupportsVarargs() { return JDBC.vmSupportsJDBC3(); }
+
 }

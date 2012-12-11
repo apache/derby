@@ -21,6 +21,9 @@
 
 package org.apache.derby.iapi.services.loader;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -100,6 +103,15 @@ public class Java5ClassInspector extends ClassInspector
         // couldn't find the interface we're looking for. check our superclass.
         return getTypeBounds( parameterizedInterface, implementation.getSuperclass() );
     }
+    
+    @Override
+	public boolean  isVarArgsMethod( Member member )
+	{
+        if ( member instanceof Method ) { return ((Method) member).isVarArgs(); }
+        if ( member instanceof Constructor ) { return ((Constructor) member).isVarArgs(); }
+        else { return false; }
+    }
+    
 
     @Override
     public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )

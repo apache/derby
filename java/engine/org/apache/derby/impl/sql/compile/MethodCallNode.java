@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
+import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -55,6 +56,8 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import java.sql.ResultSet;
 import java.util.Enumeration;
@@ -512,6 +515,12 @@ abstract class MethodCallNode extends JavaValueNode
 		return this;
 	}
 
+    /** Return true if the routine has varargs */
+    public  boolean hasVarargs()
+    {
+        return (routineInfo == null ) ? false : routineInfo.hasVarargs();
+    }   
+
 	/**
 	 * Generate the parameters to the given method call
 	 *
@@ -529,56 +538,130 @@ abstract class MethodCallNode extends JavaValueNode
 	{
 		int				param;
 
-		String[] expectedTypes = methodParameterTypes;
-
-		ClassInspector classInspector = getClassFactory().getClassInspector();
+        int                 nonVarargCount = hasVarargs() ? routineInfo.getParameterCount() - 1 : methodParms.length;
+        int                 totalArgCount = hasVarargs() ? nonVarargCount + 1 : nonVarargCount;
 
 		/* Generate the code for each user parameter, generating the appropriate
 		 * cast when the passed type needs to get widened to the expected type.
 		 */
-		for (param = 0; param < methodParms.length; param++)
+		for ( param = 0; param < nonVarargCount; param++ )
 		{
-			generateOneParameter( acb, mb, param );
-
-			// type from the SQL-J expression
-			String argumentType = getParameterTypeName( methodParms[param] );
-
-			// type of the method
-			String parameterType = expectedTypes[param];
-
-			if (!parameterType.equals(argumentType))
-			{
-				// since we reached here through method resolution
-				// casts are only required for primitive types.
-				// In any other case the expression type must be assignable
-				// to the parameter type.
-				if (ClassInspector.primitiveType(parameterType)) {
-					mb.cast(parameterType);
-				} else {
-
-					// for a prodcedure
-					if (routineInfo != null) {
-						continue; // probably should be only for INOUT/OUT parameters.
-					}
-
-					if (SanityManager.DEBUG) {
-						SanityManager.ASSERT(classInspector.assignableTo(argumentType, parameterType),
-							"Argument type " + argumentType + " is not assignable to parameter " + parameterType);
-					}
-
-					/*
-					** Set the parameter type in case the argument type is narrower
-					** than the parameter type.
-					*/
-					mb.upCast(parameterType);
-
-				}
-			}
-
+            generateAndCastOneParameter( acb, mb, param, methodParameterTypes[ param ] );
 		}
 
-		return methodParms.length;
+        if ( hasVarargs() ) { generateVarargs( acb, mb ); }
+
+		return totalArgCount;
 	}
+
+    /**
+     * <p>
+     * Generate and cast one parameter, pushing the result onto the stack.
+     * </p>
+     */
+    private void    generateAndCastOneParameter
+        ( ExpressionClassBuilder acb, MethodBuilder mb, int param, String parameterType )
+        throws StandardException
+    {
+		ClassInspector classInspector = getClassFactory().getClassInspector();
+
+        generateOneParameter( acb, mb, param );
+
+        // type from the SQL-J expression
+        String argumentType = getParameterTypeName( methodParms[param] );
+
+        if (!parameterType.equals(argumentType))
+        {
+            // since we reached here through method resolution
+            // casts are only required for primitive types.
+            // In any other case the expression type must be assignable
+            // to the parameter type.
+            if (ClassInspector.primitiveType(parameterType))
+            {
+                mb.cast(parameterType);
+            } else
+            {
+                // for a procedure
+                if (routineInfo != null)
+                {
+                    return; // probably should be only for INOUT/OUT parameters.
+                }
+
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.ASSERT(classInspector.assignableTo(argumentType, parameterType),
+                                         "Argument type " + argumentType + " is not assignable to parameter " + parameterType);
+                }
+
+                /*
+                ** Set the parameter type in case the argument type is narrower
+                ** than the parameter type.
+                */
+                mb.upCast(parameterType);
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Generate the trailing routine arguments into a varargs array and
+     * push that array onto the stack.
+     * </p>
+     */
+    private void    generateVarargs
+        ( ExpressionClassBuilder acb, MethodBuilder mb )
+        throws StandardException
+    {
+        // the vararg is the last declared arg of the Java method. it is always
+        // an array type. right now we only support vararg static methods.
+        // if we have to support vararg constructors in the future, then this code
+        // will need adjustment.
+        Class[]     parameterTypes = ((Method) method).getParameterTypes();
+        int         firstVarargIdx = parameterTypes.length - 1;
+        Class       varargType = parameterTypes[ firstVarargIdx ].getComponentType();
+        
+        int         varargCount = methodParms.length - firstVarargIdx;
+        if ( varargCount < 0 ) { varargCount = 0; }
+
+        // allocate an array to hold the varargs
+		LocalField arrayField = acb.newFieldDeclaration( Modifier.PRIVATE, varargType.getName() + "[]" );
+		MethodBuilder cb = acb.getConstructor();
+		cb.pushNewArray( varargType.getName(), varargCount );
+		cb.setField( arrayField );
+
+        // now put the arguments into the array
+        for ( int i = 0; i < varargCount; i++ )
+        {
+			mb.getField( arrayField ); // push the array onto the stack
+            // evaluate the parameter and push it onto the stack
+            generateAndCastOneParameter( acb, mb, i + firstVarargIdx, methodParameterTypes[ firstVarargIdx ] );
+            mb.setArrayElement( i ); // move the parameter into the array, pop the stack
+        }
+        
+        // push the array onto the stack. it is the last parameter to the varargs routine.
+        mb.getField( arrayField );
+    }
+
+    /**
+     * <p>
+     * Get the offset into the routine arguments corresponding to the index
+     * of the invocation parameter. The two indexes may be different in the case of
+     * varargs methods. There may be more invocation args than declared routine args.
+     * For a varargs routine, all of the trailing invocation parameters correspond to the
+     * last argument declared by the CREATE FUNCTION/PROCEDURE statement.
+     * </p>
+     */
+    protected   int getRoutineArgIdx( int invocationArgIdx )
+    {
+        if ( routineInfo == null ) { return invocationArgIdx; }
+        if ( !routineInfo.hasVarargs() ) { return invocationArgIdx; }
+
+        // ok, this is a varargs routine
+        int         firstVarargIdx = routineInfo.getParameterCount() - 1;
+
+        return (firstVarargIdx < invocationArgIdx) ? firstVarargIdx : invocationArgIdx;
+    }
+    
 
 	static	public	String	getParameterTypeName( JavaValueNode param )
 		throws StandardException
@@ -642,9 +725,12 @@ abstract class MethodCallNode extends JavaValueNode
 		}
 	}
 
-	protected void resolveMethodCall(String javaClassName,
-									 boolean staticMethod) 
-				throws StandardException
+	protected void resolveMethodCall
+        (
+         String javaClassName,
+         boolean staticMethod
+         ) 
+        throws StandardException
 	{
 		// only allow direct method calls through routines and internal SQL.
 		if (routineInfo == null && !internalCall)
@@ -664,63 +750,77 @@ abstract class MethodCallNode extends JavaValueNode
 		String[]		primParmTypeNames = null;
 		boolean[]		isParam = getIsParam();
 
-		boolean hasDynamicResultSets = (routineInfo != null) && (count != 0) && (count != methodParms.length);
+		boolean hasDynamicResultSets = hasVarargs() ?
+            false :
+            (routineInfo != null) && (count != 0) && (count != methodParms.length);
 
         /*
         ** Find the matching method that is public.
         */
-
-        	int signatureOffset = methodName.indexOf('(');
+        int signatureOffset = methodName.indexOf('(');
         	
-            // support Java signatures by checking if the method name contains a '('
-            if (signatureOffset != -1) {
-               	parmTypeNames = parseValidateSignature(methodName, signatureOffset, hasDynamicResultSets);
-               methodName = methodName.substring(0, signatureOffset);
-               
-               // If the signature is specified then Derby resolves to exactly
-               // that method. Setting this flag to false disables the method
-               // resolution from automatically optionally repeating the last
-               // parameter as needed.
-               hasDynamicResultSets = false;
-              	 
-            }
-            else
-            {
-            	parmTypeNames = getObjectSignature();
-            }
+        // support Java signatures by checking if the method name contains a '('
+        if (signatureOffset != -1) {
+            parmTypeNames = parseValidateSignature(methodName, signatureOffset, hasDynamicResultSets);
+            methodName = methodName.substring(0, signatureOffset);
+            
+            // If the signature is specified then Derby resolves to exactly
+            // that method. Setting this flag to false disables the method
+            // resolution from automatically optionally repeating the last
+            // parameter as needed.
+            hasDynamicResultSets = false;
+        }
+        else
+        {
+            parmTypeNames = getObjectSignature();
+        }
+
+        // the actual type of the trailing Java varargs arg is an array
+        if ( hasVarargs() )
+        {
+            parmTypeNames[ count - 1 ] = parmTypeNames[ count - 1 ] + "[]";
+        }
+
         try
-        {                      	
-                method = classInspector.findPublicMethod(javaClassName,
-                                                    methodName,
-                                                    parmTypeNames,
-                                                    null,
-                                                    isParam,
-                                                    staticMethod,
-                                                    hasDynamicResultSets);
+        {
+            method = classInspector.findPublicMethod
+                (
+                 javaClassName,
+                 methodName,
+                 parmTypeNames,
+                 null,
+                 isParam,
+                 staticMethod,
+                 hasDynamicResultSets,
+                 hasVarargs()
+                 );
 
+            // DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
+            // and these are the only types that can map to a primitive or an object type according
+            // to SQL part 13. So we never have a second chance match.
+            // Also if the DDL specified a signature, then no alternate resolution
+            if (signatureOffset == -1 && routineInfo == null) {
 
-                // DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
-                // and these are the only types that can map to a primitive or an object type according
-                // to SQL part 13. So we never have a second chance match.
-                // Also if the DDL specified a signature, then no alternate resolution
-                if (signatureOffset == -1 && routineInfo == null) {
+                /* If no match, then retry with combinations of object and
+                 * primitive types.
+                 */
+                if (method == null)
+                {
+                    primParmTypeNames = getPrimitiveSignature(false);
 
-                    /* If no match, then retry with combinations of object and
-                     * primitive types.
-                     */
-                    if (method == null)
-                    {
-                        primParmTypeNames = getPrimitiveSignature(false);
-
-                        method = classInspector.findPublicMethod(javaClassName,
-                                                    methodName,
-                                                    parmTypeNames,
-                                                    primParmTypeNames,
-                                                    isParam,
-                                                    staticMethod,
-                                                    hasDynamicResultSets);
-                    }
+                    method = classInspector.findPublicMethod
+                        (
+                         javaClassName,
+                         methodName,
+                         parmTypeNames,
+                         primParmTypeNames,
+                         isParam,
+                         staticMethod,
+                         hasDynamicResultSets,
+                         hasVarargs()
+                         );
                 }
+            }
         }
         catch (ClassNotFoundException e)
         {

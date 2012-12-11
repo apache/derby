@@ -215,14 +215,18 @@ public class ClassInspector
 	 * @see	Member
 	 * @see Modifier
 	 */
-	public Member findPublicMethod(String receiverType,
-								String methodName,
-								String[] parmTypes,
-								String[] primParmTypes,
-								boolean[] isParam,
-								boolean staticMethod,
-								boolean repeatLastParameter)
-					throws ClassNotFoundException, StandardException
+	public Member findPublicMethod
+        (
+         String receiverType,
+         String methodName,
+         String[] parmTypes,
+         String[] primParmTypes,
+         boolean[] isParam,
+         boolean staticMethod,
+         boolean repeatLastParameter,
+         boolean hasVarargs
+         )
+        throws ClassNotFoundException, StandardException
 	{
 		Class receiverClass = getClass(receiverType);
 		if (receiverClass == null)
@@ -247,6 +251,10 @@ public class ClassInspector
 						continue;
 					}
 				}
+
+                // If the routine was declared to be varargs, then we eliminate
+                // all non-varargs methods from consideration
+                if ( hasVarargs && !isVarArgsMethod( methods[index] ) ) { continue; }
 
 				if (methodName.equals(methods[index].getName())) {
 					// We found a match
@@ -312,8 +320,12 @@ public class ClassInspector
 			}
 		}
 
-		return resolveMethod(receiverClass, methodName, paramClasses,
-						primParamClasses, isParam, staticMethod, repeatLastParameter, methodList);
+		return resolveMethod
+            (
+             receiverClass, methodName, paramClasses,
+             primParamClasses, isParam, staticMethod, repeatLastParameter, methodList,
+             hasVarargs
+             );
 	}
 
 
@@ -478,9 +490,13 @@ public class ClassInspector
 		}
 
 		// name is only used for debugging
-		return resolveMethod(receiverClass, "<init>", paramClasses, 
-							 primParamClasses, isParam, false, false,
-							 receiverClass.getConstructors());
+		return resolveMethod
+            (
+             receiverClass, "<init>", paramClasses, 
+             primParamClasses, isParam, false, false,
+             receiverClass.getConstructors(),
+             false
+             );
 	}
 
 	/**
@@ -492,6 +508,16 @@ public class ClassInspector
         throws StandardException
 	{
 		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
+    }
+    
+	/**
+	 * Return true if the method or constructor supports varargs.
+	 */
+	public boolean  isVarArgsMethod( Member member )
+	{
+        // Varargs were introduced by Java 5. So this 1.4 ClassInspector always
+        // return false;
+        return false;
     }
     
 	/**
@@ -574,16 +600,19 @@ public class ClassInspector
 	 *  @return	the matched method
 	 *
 	 **/
-	private Member resolveMethod(
-				Class receiverClass,
-				String methodName,
-				Class[] paramClasses,
-				Class[] primParamClasses,
-				boolean[] isParam,
-				boolean staticMethod,
-				boolean repeatLastParameter,
-				Member[] methods)
-			throws StandardException
+	private Member resolveMethod
+        (
+         Class receiverClass,
+         String methodName,
+         Class[] paramClasses,
+         Class[] primParamClasses,
+         boolean[] isParam,
+         boolean staticMethod,
+         boolean repeatLastParameter,
+         Member[] methods,
+         boolean hasVarargs
+         )
+        throws StandardException
 	{
 
 		if (SanityManager.DEBUG) {
@@ -653,6 +682,13 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 
 					/* Look only at methods that match the modifiers */
 					if (staticMethod && !Modifier.isStatic(currentMethod.getModifiers())) {
+						methods[i] = null; // remove non-applicable methods
+						continue;
+					}
+
+                    // If the routine was declared to be varargs, then we eliminate
+                    // all non-varargs methods from consideration
+					if ( hasVarargs && !isVarArgsMethod( currentMethod )) {
 						methods[i] = null; // remove non-applicable methods
 						continue;
 					}
