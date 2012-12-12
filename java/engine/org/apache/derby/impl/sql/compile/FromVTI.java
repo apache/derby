@@ -1661,8 +1661,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		acb.pushThisAsActivation(mb); // arg 1
 
-        // get a function to allocate scan rows of the right shape and size
-		resultColumns.generateHolder(acb, mb); // arg 2
+        // Get a row builder to allocate scan rows of the right shape and size.
+        mb.push(acb.addItem(resultColumns.buildRowTemplate(null))); // arg 2
 
 		// For a Version 2 VTI we never maintain the java.sql.PreparedStatement
 		// from compile time to execute time. This would rquire the PreparedStatement

@@ -35,9 +35,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
@@ -77,8 +74,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	 *		SavedObject off of the PreparedStatement that holds the
 	 *		AggregatorInfoList used by this routine. 
 	 * @param	a				activation
-	 * @param	ra				generated method to build an empty
-	 *	 	output row 
+	 * @param	ra				saved object that builds an empty output row
 	 * @param	resultSetNumber	The resultSetNumber for this result set
 	 *
 	 * @exception StandardException Thrown on error
@@ -88,7 +84,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 					int	aggregateItem,
 					int	orderingItem,
 					Activation a,
-					GeneratedMethod ra,
+					int ra,
 					int maxRowSize,
 					int resultSetNumber,
 					boolean singleInputRow,
@@ -133,8 +129,8 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "DistinctScalarResultSet already open");
 
-		sortResultRow = getExecutionFactory().getIndexableRow(sortTemplateRow.getClone());
-		sourceExecIndexRow = getExecutionFactory().getIndexableRow(sortTemplateRow.getClone());
+        sortResultRow = (ExecIndexRow) getRowTemplate().getClone();
+        sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
 
         source.openCore();
 
@@ -353,6 +349,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	{
 		SortController 			sorter;
 		ExecRow 				sourceRow;
+        ExecIndexRow            sortTemplateRow = getRowTemplate();
 		int						inputRowCountEstimate = (int) optimizerEstimatedRowCount;
 
 		TransactionController tc = getTransactionController();

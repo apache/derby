@@ -52,8 +52,7 @@ class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 	 *		SavedObject off of the PreparedStatement that holds the
 	 *		ColumOrdering array used by this routine
 	 * @param	a				activation
-	 * @param	ra				generated method to build an empty
-	 *	 	output row 
+	 * @param	ra				saved object that builds an empty output row
 	 * @param	maxRowSize		approx row size, passed to sorter
 	 * @param	resultSetNumber	The resultSetNumber for this result set
 	 *
@@ -64,7 +63,7 @@ class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 					int	aggregateItem,
 					int	orderingItem,
 					Activation a,
-					GeneratedMethod ra,
+					int ra,
 					int maxRowSize,
 					int resultSetNumber,
 					double optimizerEstimatedRowCount,

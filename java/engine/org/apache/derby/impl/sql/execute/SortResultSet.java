@@ -21,17 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-import org.apache.derby.iapi.services.io.Formatable;
-
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
@@ -44,10 +37,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -55,8 +44,7 @@ import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 
 import java.util.Properties;
-import java.util.Vector;
-import java.util.Enumeration;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 
 /**
  * Takes a source result set, sends it to the sorter,
@@ -122,7 +110,6 @@ class SortResultSet extends NoPutResultSetImpl
     // set in constructor and not altered during
     // life of object.
     public NoPutResultSet source;
-	private GeneratedMethod rowAllocator;
 	private ColumnOrdering[] order;
 	private ColumnOrdering[] savedOrder;
 	private SortObserver observer;
@@ -164,8 +151,7 @@ class SortResultSet extends NoPutResultSetImpl
 	 *		SavedObject off of the PreparedStatement that holds the
 	 *		ColumOrdering array used by this routine
 	 * @param	a				activation
-	 * @param	ra				generated method to build an empty
-	 *	 	output row 
+     * @param   ra              saved object that generates an empty row
 	 * @param	maxRowSize		approx row size, passed to sorter
 	 * @param	resultSetNumber	The resultSetNumber for this result set
 	 *
@@ -176,7 +162,7 @@ class SortResultSet extends NoPutResultSetImpl
 					boolean isInSortedOrder,
 					int	orderingItem,
 					Activation a,
-					GeneratedMethod ra,
+					int ra,
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
@@ -187,12 +173,15 @@ class SortResultSet extends NoPutResultSetImpl
 		this.isInSortedOrder = isInSortedOrder;
         source = s;
         originalSource = s;
-		rowAllocator = ra;
 		this.maxRowSize = maxRowSize;
-		sortTemplateRow = (ExecRow) rowAllocator.invoke(activation);
+
+        ExecPreparedStatement ps = a.getPreparedStatement();
+
+		sortTemplateRow = ((ExecRowBuilder) ps.getSavedObject(ra))
+                                .build(a.getExecutionFactory());
+
 		order = (ColumnOrdering[])
-					((FormatableArrayHolder)
-						(a.getPreparedStatement().getSavedObject(orderingItem)))
+					((FormatableArrayHolder) ps.getSavedObject(orderingItem))
 					.getArray(ColumnOrdering.class);
 
 		/* NOTE: We need to save order to another variable

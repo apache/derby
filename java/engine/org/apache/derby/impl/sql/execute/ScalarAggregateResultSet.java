@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
@@ -48,7 +47,6 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
     // set in constructor and not altered during
     // life of object.
 	public 		boolean 			singleInputRow;
-	protected 	ExecIndexRow 		sortTemplateRow;
 	protected 	boolean 			isInSortedOrder;		// true if source results in sorted order
 
 	// Cache ExecIndexRow for scalar aggregates
@@ -66,8 +64,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 *		SavedObject off of the PreparedStatement that holds the
 	 *		AggregatorInfoList used by this routine. 
 	 * @param	a				activation
-	 * @param	ra				generated method to build an empty
-	 *	 	output row 
+	 * @param	ra				saved object that builds an empty output row
 	 * @param	resultSetNumber	The resultSetNumber for this result set
 	 *
 	 * @exception StandardException Thrown on error
@@ -76,7 +73,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 					boolean isInSortedOrder,
 					int	aggregateItem,
 					Activation a,
-					GeneratedMethod ra,
+					int ra,
 					int resultSetNumber,
 					boolean singleInputRow,
 				    double optimizerEstimatedRowCount,
@@ -91,7 +88,6 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 			SanityManager.ASSERT(source != null,
 				"SARS(), source expected to be non-null");
 		}
-		sortTemplateRow = getExecutionFactory().getIndexableRow((ExecRow) rowAllocator.invoke(activation));
 		this.singleInputRow = singleInputRow;
 
 		if (SanityManager.DEBUG)
@@ -128,7 +124,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	    	SanityManager.ASSERT( ! isOpen, "ScalarAggregateResultSet already open");
 		}
 
-		sourceExecIndexRow = getExecutionFactory().getIndexableRow(sortTemplateRow);
+		sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
 
         source.openCore();
 

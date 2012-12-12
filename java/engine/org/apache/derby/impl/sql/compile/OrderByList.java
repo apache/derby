@@ -398,7 +398,7 @@ public class OrderByList extends OrderedColumnList
 		mb.push(orderItem);
 
 		// row allocator
-		child.getResultColumns().generateHolder(acb, mb);
+        mb.push(acb.addItem(child.getResultColumns().buildRowTemplate(null)));
 
 		mb.push(child.getResultColumns().getTotalColumnSize());
 

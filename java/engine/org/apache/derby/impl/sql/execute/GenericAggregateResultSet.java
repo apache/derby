@@ -27,11 +27,13 @@ import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 /**
@@ -41,16 +43,16 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 {
 	protected GenericAggregator[]		aggregates;	
-	protected GeneratedMethod			rowAllocator;
 	protected AggregatorInfoList	aggInfoList;	
 	public NoPutResultSet source;
 	protected	NoPutResultSet	originalSource; // used for run time stats only
+    private final ExecIndexRow rowTemplate;
 
 	/**
 	 * Constructor
 	 *
 	 * @param a activation
-	 * @param ra row allocator generated method
+	 * @param ra reference to a saved row allocator instance
 	 * @param resultSetNumber result set number
 	 * @param optimizerEstimatedRowCount optimizer estimated row count
 	 * @param optimizerEstimatedCost optimizer estimated cost
@@ -62,7 +64,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		NoPutResultSet s,
 		int	aggregateItem,
 		Activation 	a,
-		GeneratedMethod	ra,
+		int ra,
 		int 			resultSetNumber,
 		double 			optimizerEstimatedRowCount,
 		double 			optimizerEstimatedCost
@@ -73,13 +75,27 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		source = s;
 		originalSource = s;
 
+        ExecPreparedStatement ps = a.getPreparedStatement();
+        ExecutionFactory ef = a.getExecutionFactory();
 
-		rowAllocator = ra;
+        rowTemplate = ef.getIndexableRow(
+                ((ExecRowBuilder) ps.getSavedObject(ra)).build(ef));
 
-		aggInfoList = (AggregatorInfoList) (a.getPreparedStatement().getSavedObject(aggregateItem));
+		aggInfoList = (AggregatorInfoList) ps.getSavedObject(aggregateItem);
 		aggregates = getSortAggregators(aggInfoList, false, 
 				a.getLanguageConnectionContext(), s);
 	}
+
+    /**
+     * Get a template row of the right shape for sorting or returning results.
+     * The template is cached, so it may need to be cloned if callers use it
+     * for multiple purposes at the same time.
+     *
+     * @return a row template of the right shape for this result set
+     */
+    ExecIndexRow getRowTemplate() {
+        return rowTemplate;
+    }
 
 	/**
 	 * For each AggregatorInfo in the list, generate a
@@ -160,7 +176,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		*/ 
 		if (row == null)
 		{
-			row = getExecutionFactory().getIndexableRow((ExecRow) rowAllocator.invoke(activation));
+			row = getRowTemplate();
 		}
 
 		setCurrentRow(row);

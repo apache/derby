@@ -1088,7 +1088,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		mb.push(aggInfoItem);
 		mb.push(orderingItem);
 
-		resultColumns.generateHolder(acb, mb);
+        mb.push(acb.addItem(resultColumns.buildRowTemplate(null)));
 
 		mb.push(resultColumns.getTotalColumnSize());
 		mb.push(resultSetNumber);

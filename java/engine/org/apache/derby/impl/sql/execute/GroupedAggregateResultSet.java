@@ -28,7 +28,6 @@ import java.util.HashSet;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
@@ -85,7 +84,6 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
     // set in constructor and not altered during
     // life of object.
 	private ColumnOrdering[] order;
-	private ExecIndexRow sortTemplateRow;
 	public	boolean	hasDistinctAggregate;	// true if distinct aggregate
 	public	boolean isInSortedOrder;				// true if source results in sorted order
 	private	int numDistinctAggs = 0;
@@ -145,8 +143,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 *		SavedObject off of the PreparedStatement that holds the
 	 *		ColumOrdering array used by this routine
 	 * @param	a				activation
-	 * @param	ra				generated method to build an empty
-	 *	 	output row 
+	 * @param	ra				saved object that builds an empty output row
 	 * @param	maxRowSize		approx row size, passed to sorter
 	 * @param	resultSetNumber	The resultSetNumber for this result set
 	 *
@@ -157,7 +154,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 					int	aggregateItem,
 					int	orderingItem,
 					Activation a,
-					GeneratedMethod ra,
+					int ra,
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
@@ -168,7 +165,6 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		this.isInSortedOrder = isInSortedOrder;
 		rollup = isRollup;
 		finishedResults = new ArrayList();
-		sortTemplateRow = getExecutionFactory().getIndexableRow((ExecRow) rowAllocator.invoke(activation));
 		order = (ColumnOrdering[])
 					((FormatableArrayHolder)
 						(a.getPreparedStatement().getSavedObject(orderingItem)))
@@ -213,8 +209,8 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "GroupedAggregateResultSet already open");
 
-		sortResultRow = getExecutionFactory().getIndexableRow(sortTemplateRow.getClone());
-		sourceExecIndexRow = getExecutionFactory().getIndexableRow(sortTemplateRow.getClone());
+        sortResultRow = (ExecIndexRow) getRowTemplate().getClone();
+        sourceExecIndexRow = (ExecIndexRow) getRowTemplate().getClone();
 
         source.openCore();
 
@@ -282,9 +278,9 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		throws StandardException
 	{
 		SortController 			sorter;
-		ExecRow 				sourceRow;
 		ExecRow 				inputRow;
 		int						inputRowCountEstimate = (int) optimizerEstimatedRowCount;
+        ExecIndexRow            sortTemplateRow = getRowTemplate();
 
 		tc = getTransactionController();
 

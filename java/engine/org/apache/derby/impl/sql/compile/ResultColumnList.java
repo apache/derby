@@ -1561,25 +1561,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		@exception StandardException
 	 */
 	void generateHolder(ExpressionClassBuilder acb,
-								MethodBuilder mb)
-							throws StandardException 
-	{
-		generateHolder(acb, mb, (FormatableBitSet) null, (FormatableBitSet) null);
-	}
-
-	/**
-		Generates a row with the size and shape of the ResultColumnList.
-
-		Some structures, like FromBaseTable and DistinctNode,
-		need to generate rowAllocator functions to get a row
-		the size and shape of their ResultColumnList.  
-
-		We return the method pointer, which is a field access
-		in the generated class.
-
-		@exception StandardException
-	 */
-	void generateHolder(ExpressionClassBuilder acb,
 								MethodBuilder mb,
 								FormatableBitSet referencedCols,
 								FormatableBitSet propagatedCols)

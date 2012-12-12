@@ -26,7 +26,9 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
@@ -70,11 +72,10 @@ class VTIResultSet extends NoPutResultSetImpl
 	public int rowsReturned;
 	public String javaClassName;
 
-    private GeneratedMethod row;
     private GeneratedMethod constructor;
 	private PreparedStatement userPS;
 	private ResultSet userVTI;
-	private ExecRow allocatedRow;
+	private final ExecRow allocatedRow;
 	private FormatableBitSet referencedColumns;
 	private boolean version2;
 	private boolean reuseablePs;
@@ -107,7 +108,7 @@ class VTIResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    VTIResultSet(Activation activation, GeneratedMethod row, int resultSetNumber,
+    VTIResultSet(Activation activation, int row, int resultSetNumber,
 				 GeneratedMethod constructor,
 				 String javaClassName,
 				 Qualifier[][] pushedQualifiers,
@@ -127,7 +128,6 @@ class VTIResultSet extends NoPutResultSetImpl
 	{
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
-        this.row = row;
 		this.constructor = constructor;
 		this.javaClassName = javaClassName;
 		this.version2 = version2;
@@ -136,6 +136,11 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
 		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
+
+        ExecPreparedStatement ps = activation.getPreparedStatement();
+
+        this.allocatedRow = ((ExecRowBuilder) ps.getSavedObject(row))
+                .build(activation.getExecutionFactory());
 
         this.returnType = returnTypeNumber == -1 ? null :
             (TypeDescriptor)
@@ -592,11 +597,6 @@ class VTIResultSet extends NoPutResultSetImpl
 	private ExecRow getAllocatedRow()
 		throws StandardException
 	{
-		if (allocatedRow == null)
-		{
-			allocatedRow = (ExecRow) row.invoke(activation);
-		}
-
 		return allocatedRow;
 	}
 

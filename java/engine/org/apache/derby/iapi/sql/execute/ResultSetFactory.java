@@ -382,7 +382,7 @@ public interface ResultSetFactory {
 		@param distinct true if distinct SELECT list
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param orderItem entry in preparedStatement's savedObjects for order
-		@param rowAllocator a reference to a method in the activation
+		@param rowAllocator a reference to a saved object
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
 			size should be the maximum size of the sum of all the datatypes.
@@ -399,7 +399,7 @@ public interface ResultSetFactory {
 		boolean distinct, 
 		boolean isInSortedOrder,
 		int orderItem,
-		GeneratedMethod rowAllocator, 
+		int rowAllocator,
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
@@ -415,7 +415,7 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem		Ignored to allow same signature as getDistinctScalarAggregateResultSet
-		@param rowAllocator a reference to a method in the activation
+		@param rowAllocator     a reference to a saved object
 			that generates rows of the right size and shape for the source
 		@param rowSize			Ignored to allow same signature as getDistinctScalarAggregateResultSet
 		@param resultSetNumber	The resultSetNumber for the ResultSet
@@ -431,7 +431,7 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		GeneratedMethod rowAllocator, 
+		int rowAllocator,
 		int rowSize,
 		int resultSetNumber, 
 		boolean singleInputRow,
@@ -449,7 +449,7 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem entry in preparedStatement's savedObjects for order
-		@param rowAllocator a reference to a method in the activation
+		@param rowAllocator a reference to a saved object
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
 			size should be the maximum size of the sum of all the datatypes.
@@ -467,7 +467,7 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		GeneratedMethod rowAllocator, 
+		int rowAllocator,
 		int rowSize,
 		int resultSetNumber, 
 		boolean singleInputRow,
@@ -484,7 +484,7 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem		Ignored to allow same signature as getDistinctScalarAggregateResultSet
-		@param rowAllocator a reference to a method in the activation
+		@param rowAllocator     a reference to a saved object
 			that generates rows of the right size and shape for the source
 		@param rowSize			Ignored to allow same signature as getDistinctScalarAggregateResultSet
 		@param resultSetNumber	The resultSetNumber for the ResultSet
@@ -500,7 +500,7 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		GeneratedMethod rowAllocator, 
+		int rowAllocator,
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
@@ -518,7 +518,7 @@ public interface ResultSetFactory {
 		@param isInSortedOrder	true if the source result set is in sorted order
 		@param aggregateItem entry in preparedStatement's savedObjects for aggregates
 		@param orderingItem entry in preparedStatement's savedObjects for order
-		@param rowAllocator a reference to a method in the activation
+		@param rowAllocator a reference to a saved object
 			that generates rows of the right size and shape for the source
 		@param rowSize the size of the row that is allocated by rowAllocator.
 			size should be the maximum size of the sum of all the datatypes.
@@ -536,7 +536,7 @@ public interface ResultSetFactory {
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderingItem,
-		GeneratedMethod rowAllocator, 
+		int rowAllocator,
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
@@ -640,11 +640,8 @@ public interface ResultSetFactory {
 		@param activation the activation for this result set,
 			against which the row operation is performed to
 			create the result set.
-		@param row a reference to a method in the activation
+		@param row a reference to a saved object
 			that creates the expected row.
-			<verbatim>
-				ExecRow row() throws StandardException;
-			</verbatim>
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param constructor		The GeneratedMethod for the user's constructor
 		@param javaClassName	The java class name for the VTI
@@ -661,7 +658,7 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to create the
 			result set
 	 */
-	public NoPutResultSet getVTIResultSet(Activation activation, GeneratedMethod row,
+	public NoPutResultSet getVTIResultSet(Activation activation, int row,
 									 int resultSetNumber,
 									 GeneratedMethod constructor,
 									 String javaClassName,
@@ -1101,7 +1098,7 @@ public interface ResultSetFactory {
 	   <p>
 	   @param activation   Activation
 	   @param source       The result set input to this result set.
-	   @param rowAllocator A reference to a method in the activation
+	   @param rowAllocator A reference to a saved object
 			               that generates rows of the right size and
 						   shape for the source.
 	   @param resultSetNumber The resultSetNumber for the ResultSet
@@ -1118,7 +1115,7 @@ public interface ResultSetFactory {
 	public NoPutResultSet getWindowResultSet(
 								Activation activation,
 								NoPutResultSet source,
-								GeneratedMethod rowAllocator,
+								int rowAllocator,
 								int resultSetNumber,
 								int erdNumber,
 								GeneratedMethod restriction,

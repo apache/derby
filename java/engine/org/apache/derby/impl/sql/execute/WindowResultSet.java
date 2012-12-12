@@ -32,6 +32,8 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 
 /**
  * WindowResultSet
@@ -46,8 +48,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 class WindowResultSet extends NoPutResultSetImpl
 {
     private GeneratedMethod restriction = null;
-    private GeneratedMethod row;
-
 
     /**
      * Source result set,
@@ -56,7 +56,7 @@ class WindowResultSet extends NoPutResultSetImpl
 
 
     /**
-     * Cumulative time needed to evalute any restriction on this result set.
+     * Cumulative time needed to evaluate any restriction on this result set.
      */
     public long restrictionTime;
 
@@ -81,12 +81,13 @@ class WindowResultSet extends NoPutResultSetImpl
 
     WindowResultSet(Activation activation,
         NoPutResultSet         source,
-        GeneratedMethod        rowAllocator,
+        int                    rowAllocator,
         int                    resultSetNumber,
         int                    erdNumber,
         GeneratedMethod        restriction,
         double                 optimizerEstimatedRowCount,
         double                 optimizerEstimatedCost)
+      throws StandardException
     {
 
         super(activation,
@@ -103,14 +104,16 @@ class WindowResultSet extends NoPutResultSetImpl
 
         this.restriction = restriction;
         this.source = source;
-        this.row = rowAllocator;
-        this.allocatedRow = null;
         this.rownumber = 0;
+
+        ExecPreparedStatement ps = activation.getPreparedStatement();
+
+        this.allocatedRow = ((ExecRowBuilder) ps.getSavedObject(rowAllocator))
+                .build(activation.getExecutionFactory());
 
         if (erdNumber != -1) {
             this.referencedColumns =
-                (FormatableBitSet)(activation.getPreparedStatement().
-                                   getSavedObject(erdNumber));
+                (FormatableBitSet) ps.getSavedObject(erdNumber);
         }
 
         recordConstructorTime();
@@ -316,13 +319,7 @@ class WindowResultSet extends NoPutResultSetImpl
      *
      * @exception StandardException thrown on failure.
      */
-    private ExecRow getAllocatedRow()
-        throws StandardException {
-
-        if (allocatedRow == null) {
-            allocatedRow = (ExecRow) row.invoke(activation);
-        }
-
+    private ExecRow getAllocatedRow() throws StandardException {
         return allocatedRow;
     }
 }
