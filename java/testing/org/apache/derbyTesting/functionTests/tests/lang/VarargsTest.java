@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -48,6 +49,8 @@ public class VarargsTest  extends GeneratedColumnsHelper
     private static  final   String  NEEDS_DERBY_STYLE = "42ZC9";
     private static  final   String  NEEDS_JAVA_STYLE = "42ZCA";
     private static  final   String  RETURNS_RESULT_SETS = "42ZCB";
+    private static  final   String  AMBIGUOUS = "42X73";
+    private static  final   String  NO_SUCH_METHOD = "42X50";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -271,6 +274,278 @@ public class VarargsTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Misc tests for varargs routines.
+     * </p>
+     */
+    public void test_03_misc() throws Exception
+    {
+        if ( !vmSupportsVarargs() ) { return; }
+
+        Connection conn = getConnection();
+
+        // primitive and wrapper overloads make method resolution ambiguous
+
+        goodStatement
+            ( conn,
+              "create function ambiguousTypes( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.ambiguousTypes'\n"
+              );
+        expectCompilationError( AMBIGUOUS, "values ambiguousTypes( 1, 2, 3 )" );
+
+        // can resolve to a primitive-typed vararg
+        goodStatement
+            ( conn,
+              "create function maxInts( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.maxInts'\n"
+              );
+        assertResults
+            (
+             conn,
+             "values maxInts( 3 )",
+             new String[][]
+             {
+                 { "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values maxInts( 1, 2, 5, 4, 3 )",
+             new String[][]
+             {
+                 { "5" },
+             },
+             false
+             );
+
+        // error if the matching method isn't varargs
+        goodStatement
+            ( conn,
+              "create function nonVarargsMethod( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.nonVarargsMethod'\n"
+              );
+        expectCompilationError( NO_SUCH_METHOD, "values nonVarargsMethod( 3 )" );
+        
+        // correctly disambiguate similar varargs and non-varargs methods
+        goodStatement
+            ( conn,
+              "create function vnvr_vararg( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.vnvr'\n"
+              );
+        goodStatement
+            ( conn,
+              "create function vnvr_nonvararg( a int ) returns int\n" +
+              "language java parameter style java no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.vnvr'\n"
+              );
+        assertResults
+            (
+             conn,
+             "values vnvr_vararg( 3 )",
+             new String[][]
+             {
+                 { "3" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values vnvr_nonvararg( 3 )",
+             new String[][]
+             {
+                 { "-3" },
+             },
+             false
+             );
+        
+        // correctly disambiguate overloads with different numbers of leading non-vararg arguments
+        goodStatement
+            ( conn,
+              "create function lnv( a int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.lnv'\n"
+              );
+        goodStatement
+            ( conn,
+              "create function lnv_1( a int, b int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.lnv'\n"
+              );
+        goodStatement
+            ( conn,
+              "create function lnv_2( a int, b int, c int ... ) returns int\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.lnv'\n"
+              );
+        assertResults
+            (
+             conn,
+             "values lnv( 5, 4, 3, 2, 1 )",
+             new String[][]
+             {
+                 { "5" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values lnv_1( 5, 4, 3, 2, 1 )",
+             new String[][]
+             {
+                 { "4" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values lnv_2( 5, 4, 3, 2, 1 )",
+             new String[][]
+             {
+                 { "3" },
+             },
+             false
+             );
+    }
+    
+    /**
+     * <p>
+     * Test in, out, and in/out procedure arguments which are varargs.
+     * </p>
+     */
+    public void test_04_inOut() throws Exception
+    {
+        if ( !vmSupportsVarargs() ) { return; }
+
+        Connection conn = getConnection();
+        CallableStatement   cs =  null;
+
+        // one input vararg
+        goodStatement
+            ( conn,
+              "create procedure inVarargs( out result varchar( 32672 ), b int ... )\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.inVarargs'\n"
+              );
+        cs = chattyPrepareCall
+            ( conn, "call inVarargs( ?, ? )" );
+        cs.registerOutParameter( 1, java.sql.Types.VARCHAR );
+        cs.setInt( 2, 5 );
+        cs.execute();
+        assertEquals( "RESULT:  5", cs.getString( 1 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call inVarargs( ?, ?, ? )" );
+        cs.registerOutParameter( 1, java.sql.Types.VARCHAR );
+        cs.setInt( 2, 5 );
+        cs.setInt( 3, 4 );
+        cs.execute();
+        assertEquals( "RESULT:  5 4", cs.getString( 1 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call inVarargs( ?, ?, ?, ? )" );
+        cs.registerOutParameter( 1, java.sql.Types.VARCHAR );
+        cs.setInt( 2, 5 );
+        cs.setInt( 3, 4 );
+        cs.setInt( 4, 3 );
+        cs.execute();
+        assertEquals( "RESULT:  5 4 3", cs.getString( 1 ) );
+
+        // output vararg
+        goodStatement
+            ( conn,
+              "create procedure outVarargs( seed int, out b int ... )\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.outVarargs'\n"
+              );
+        cs = chattyPrepareCall
+            ( conn, "call outVarargs( ? )" );
+        cs.setInt( 1, 5 );
+        cs.execute();
+
+        cs = chattyPrepareCall
+            ( conn, "call outVarargs( ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.execute();
+        assertEquals( 5, cs.getInt( 2 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call outVarargs( ?, ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 3, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.execute();
+        assertEquals( 5, cs.getInt( 2 ) );
+        assertEquals( 6, cs.getInt( 3 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call outVarargs( ?, ?, ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 3, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 4, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.execute();
+        assertEquals( 5, cs.getInt( 2 ) );
+        assertEquals( 6, cs.getInt( 3 ) );
+        assertEquals( 7, cs.getInt( 4 ) );
+
+        // in/out vararg
+        goodStatement
+            ( conn,
+              "create procedure inoutVarargs( seed int, inout b int ... )\n" +
+              "language java parameter style derby no sql deterministic\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.inoutVarargs'\n"
+              );
+        cs = chattyPrepareCall
+            ( conn, "call inoutVarargs( ? )" );
+        cs.setInt( 1, 5 );
+        cs.execute();
+
+        cs = chattyPrepareCall
+            ( conn, "call inoutVarargs( ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.setInt( 2, 3 );
+        cs.execute();
+        assertEquals( 8, cs.getInt( 2 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call inoutVarargs( ?, ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 3, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.setInt( 2, 3 );
+        cs.setInt( 3, 10 );
+        cs.execute();
+        assertEquals( 8, cs.getInt( 2 ) );
+        assertEquals( 15, cs.getInt( 3 ) );
+
+        cs = chattyPrepareCall
+            ( conn, "call inoutVarargs( ?, ?, ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 3, java.sql.Types.INTEGER );
+        cs.registerOutParameter( 4, java.sql.Types.INTEGER );
+        cs.setInt( 1, 5 );
+        cs.setInt( 2, 3 );
+        cs.setInt( 3, 10 );
+        cs.setInt( 4, 100 );
+        cs.execute();
+        assertEquals( 8, cs.getInt( 2 ) );
+        assertEquals( 15, cs.getInt( 3 ) );
+        assertEquals( 105, cs.getInt( 4 ) );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

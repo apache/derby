@@ -373,17 +373,28 @@ abstract class MethodCallNode extends JavaValueNode
 	{
 		/* Put the parameter type names into a single string */
 		StringBuffer	parmTypes = new StringBuffer();
-		for (int i = 0; i < parmTypeNames.length; i++)
+        boolean hasVarargs = hasVarargs();
+        int     firstVarargIdx = getFirstVarargIdx();
+        int     paramCount = signature.length;
+		for (int i = 0; i < paramCount; i++)
 		{
-			if (i != 0)
-				parmTypes.append(", ");
+			if (i != 0) { parmTypes.append(", "); }
+            boolean isVararg = isVararg( i );
+
 			/* RESOLVE - shouldn't be using hard coded strings for output */
-			parmTypes.append( (parmTypeNames[i].length() != 0 ?
-								parmTypeNames[i] :
-								"UNTYPED"));
+            String  parmType = parmTypeNames[ i ];
+            if ( parmTypeNames [i ].length() == 0 ) { parmType = "UNTYPED"; }
+            else if ( isVararg ) { parmType = getVarargTypeName( parmType ); }
+
+            parmTypes.append( parmType );
+
 			if ((primParmTypeNames != null) &&
 				! primParmTypeNames[i].equals(parmTypeNames[i]))  // has primitive
-				parmTypes.append("(" + primParmTypeNames[i] + ")");
+            {
+                String  primTypeName = primParmTypeNames[ i ];
+                if ( isVararg ) { primTypeName = getVarargTypeName( primTypeName ); }
+				parmTypes.append("(" + primTypeName + ")");
+            }
 		}
 
 		throw StandardException.newException(SQLState.LANG_NO_METHOD_FOUND, 
@@ -391,6 +402,12 @@ abstract class MethodCallNode extends JavaValueNode
 												methodName,
 											 	parmTypes);
 	}
+
+    /** Turn an array type name into the corresponding vararg type name */
+    private String  getVarargTypeName( String arrayTypeName )
+    {
+        return stripOneArrayLevel( arrayTypeName ) + "...";
+    }
 
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
@@ -519,7 +536,20 @@ abstract class MethodCallNode extends JavaValueNode
     public  boolean hasVarargs()
     {
         return (routineInfo == null ) ? false : routineInfo.hasVarargs();
-    }   
+    }
+
+    /** Get the index of the first vararg if this is a varargs method */
+    public  int getFirstVarargIdx() { return signature.length - 1; }
+
+    /** Return true if the parameter is a vararg */
+    public  boolean isVararg( int parameterNumber )
+    {
+        if ( !hasVarargs() ) { return false; }
+        else
+        {
+            return ( parameterNumber >= getFirstVarargIdx() );
+        }
+    }
 
 	/**
 	 * Generate the parameters to the given method call
@@ -616,17 +646,27 @@ abstract class MethodCallNode extends JavaValueNode
         // an array type. right now we only support vararg static methods.
         // if we have to support vararg constructors in the future, then this code
         // will need adjustment.
-        Class[]     parameterTypes = ((Method) method).getParameterTypes();
-        int         firstVarargIdx = parameterTypes.length - 1;
-        Class       varargType = parameterTypes[ firstVarargIdx ].getComponentType();
-        
+        int         firstVarargIdx = getFirstVarargIdx();
+        String      arrayType = methodParameterTypes[ firstVarargIdx ];
+        String      cellType = stripOneArrayLevel( arrayType );
+        String      varargType = cellType;
+
+        // must strip another array level off of out and in/out parameters
+        if ( routineInfo != null )
+        {
+            if ( routineInfo.getParameterModes()[ firstVarargIdx ] != JDBC30Translation.PARAMETER_MODE_IN )
+            {
+                varargType = stripOneArrayLevel( varargType );
+            }
+        }
+
         int         varargCount = methodParms.length - firstVarargIdx;
         if ( varargCount < 0 ) { varargCount = 0; }
 
         // allocate an array to hold the varargs
-		LocalField arrayField = acb.newFieldDeclaration( Modifier.PRIVATE, varargType.getName() + "[]" );
+		LocalField arrayField = acb.newFieldDeclaration( Modifier.PRIVATE, arrayType );
 		MethodBuilder cb = acb.getConstructor();
-		cb.pushNewArray( varargType.getName(), varargCount );
+		cb.pushNewArray( cellType, varargCount );
 		cb.setField( arrayField );
 
         // now put the arguments into the array
@@ -634,7 +674,7 @@ abstract class MethodCallNode extends JavaValueNode
         {
 			mb.getField( arrayField ); // push the array onto the stack
             // evaluate the parameter and push it onto the stack
-            generateAndCastOneParameter( acb, mb, i + firstVarargIdx, methodParameterTypes[ firstVarargIdx ] );
+            generateAndCastOneParameter( acb, mb, i + firstVarargIdx, cellType );
             mb.setArrayElement( i ); // move the parameter into the array, pop the stack
         }
         
@@ -654,10 +694,14 @@ abstract class MethodCallNode extends JavaValueNode
     protected   int getRoutineArgIdx( int invocationArgIdx )
     {
         if ( routineInfo == null ) { return invocationArgIdx; }
-        if ( !routineInfo.hasVarargs() ) { return invocationArgIdx; }
+        else { return getRoutineArgIdx( routineInfo, invocationArgIdx ); }
+    }
+    protected   int getRoutineArgIdx( RoutineAliasInfo rai, int invocationArgIdx )
+    {
+        if ( !rai.hasVarargs() ) { return invocationArgIdx; }
 
         // ok, this is a varargs routine
-        int         firstVarargIdx = routineInfo.getParameterCount() - 1;
+        int         firstVarargIdx = rai.getParameterCount() - 1;
 
         return (firstVarargIdx < invocationArgIdx) ? firstVarargIdx : invocationArgIdx;
     }
@@ -929,13 +973,15 @@ abstract class MethodCallNode extends JavaValueNode
                 
 		methodParameterTypes = classInspector.getParameterTypes(method);
 
+        String methodParameter = null;
+        
 		for (int i = 0; i < methodParameterTypes.length; i++)
 		{
-			String methodParameter = methodParameterTypes[i];
+			methodParameter = methodParameterTypes[i];
 
 			if (routineInfo != null) {
 				if (i < routineInfo.getParameterCount()) {
-					int parameterMode = routineInfo.getParameterModes()[i];
+					int parameterMode = routineInfo.getParameterModes()[ getRoutineArgIdx( i ) ];
 
 					switch (parameterMode) {
 					case JDBC30Translation.PARAMETER_MODE_IN:
@@ -943,7 +989,7 @@ abstract class MethodCallNode extends JavaValueNode
 					case JDBC30Translation.PARAMETER_MODE_IN_OUT:
 						// we need to see if the type of the array is
 						// primitive, not the array itself.
-						methodParameter = methodParameter.substring(0, methodParameter.length() - 2);
+						methodParameter = stripOneArrayLevel( methodParameter );
 						break;
 
 					case JDBC30Translation.PARAMETER_MODE_OUT:
@@ -953,9 +999,42 @@ abstract class MethodCallNode extends JavaValueNode
 				}
 			}
 
+            //
+            // Strip off the array type if this is a varargs arg. We are only interested in
+            // whether we need to cast to the cell type.
+            //
+            if ( hasVarargs() && (i >= getFirstVarargIdx()) )
+            {
+                methodParameter = stripOneArrayLevel( methodParameter );
+            }
+
 			if (ClassInspector.primitiveType(methodParameter))
-				methodParms[i].castToPrimitive(true);
+            {
+                // varargs may be omitted, so there may not be an invocation argument
+                // corresponding to the vararg
+                if ( i < methodParms.length )
+                {
+                    methodParms[i].castToPrimitive(true);
+                }
+            }
 		}
+
+        // the last routine parameter may have been a varargs. if so,
+        // casting may be needed on the trailing varargs
+        if ( hasVarargs() )
+        {
+            int     firstVarargIdx = getFirstVarargIdx();
+            int     trailingVarargCount = methodParms.length - firstVarargIdx;
+
+            // the first vararg was handled in the preceding loop
+            for ( int i = 1; i < trailingVarargCount; i++ )
+            {
+                if (ClassInspector.primitiveType(methodParameter))
+                {
+                    methodParms[ i + firstVarargIdx ].castToPrimitive(true);
+                }
+            }
+        }
 
 		/* Set type info for any null parameters */
 		if ( someParametersAreNull() )
@@ -976,7 +1055,13 @@ abstract class MethodCallNode extends JavaValueNode
 		if (getCompilerContext().getReturnParameterFlag()) {
 			getCompilerContext().getParameterTypes()[0] = dts;
 		}
-  }
+    }
+
+    /** Strip the trailing [] from a type name */
+    protected String  stripOneArrayLevel( String typeName )
+    {
+        return typeName.substring( 0, typeName.length() - 2 );
+    }
 	
 	/**
 	 * Parse the user supplied signature for a method and validate

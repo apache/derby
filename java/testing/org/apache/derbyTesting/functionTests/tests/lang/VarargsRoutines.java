@@ -48,6 +48,12 @@ public  class   VarargsRoutines
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////
+    //
+    // SIMPLE ROUTINES
+    //
+    //////////////////
+
     /** Compute the maximum of a series of ints */
     public  static  Integer max( Integer... values )
     {
@@ -70,5 +76,117 @@ public  class   VarargsRoutines
     {
         return MessageFormat.format( message, args );
     }
+
+    //////////////////////////
+    //
+    // PRIMITIVES VS OBJECTS
+    //
+    //////////////////////////
+
+    public  static  String  ambiguousTypes( int... a )    { return "primitive";}
+    public  static  String  ambiguousTypes( Integer... a )    { return "wrapper";}
+
+    public  static  Integer maxInts( int... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        int     result = Integer.MIN_VALUE;
+
+        for ( int value : values )  { result = Math.max( result, value ); }
+
+        return result;
+    }
+
+    //////////////////////////
+    //
+    // NON-VARARGS METHODS
+    //
+    //////////////////////////
+
+    public  static  String  nonVarargsMethod( int a )    { return "shouldn't be resolved";}
+    public  static  String  nonVarargsMethod( int[] a )    { return "shouldn't be resolved";}
+
+    //////////////////////////
+    //
+    // VARARGS & NON-VARARGS RESOLUTIONS
+    //
+    //////////////////////////
+
+    public  static  Integer vnvr( int a )    { return -a;}
+    public  static  Integer vnvr( int... a )    { return maxInts( a );}
+
+    //////////////////////////
+    //
+    // LEADING NON-VARARGS
+    //
+    //////////////////////////
+
+    public  static  Integer lnv( int... a ) { return maxInts( a );}
+    public  static  Integer lnv( int first, int...a ) { return maxInts( a );}
+    public  static  Integer lnv( int first, int second, int...a ) { return maxInts( a );}
+
+    //////////////////////////
+    //
+    // IN, OUT, IN/OUT PARAMETERS
+    //
+    //////////////////////////
+
+    public  static  void    inVarargs( String[] result, int... values )
+    {
+        String  retval;
+        if ( values == null ) { retval = null; }
+        else if ( values.length == 0 ) { retval = null; }
+        else
+        {
+            StringBuilder   buffer = new StringBuilder();
+
+            buffer.append( "RESULT: " );
+            
+            for ( int value : values )
+            {
+                buffer.append( " " + Integer.toString( value ) );
+            }
+
+            retval = buffer.toString();
+        }
+
+        result[ 0 ] = retval;
+    }
+
+    public  static  void    outVarargs( int seed, int[]... values )
+        throws Exception
+    {
+        String  retval;
+        if ( values == null ) { return; }
+        else
+        {
+            for ( int i = 0; i < values.length; i++ )
+            {
+                values[ i ][ 0 ] = seed + i;
+            }
+        }
+    }
+
+    public  static  void    inoutVarargs( int seed, int[]... values )
+        throws Exception
+    {
+        String  retval;
+        if ( values == null ) { return; }
+        else
+        {
+            for ( int i = 0; i < values.length; i++ )
+            {
+                values[ i ][ 0 ] += seed;
+            }
+        }
+    }
+
+    ////////////////////////
+    //
+    // DATATYPE COVERAGE
+    //
+    ////////////////////////
+
 
 }

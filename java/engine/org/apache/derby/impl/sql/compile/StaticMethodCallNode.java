@@ -494,7 +494,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 
 				// if it's an OUT or INOUT parameter we need an array.
-				int parameterMode = routineInfo.getParameterModes()[p];
+				int parameterMode = routineInfo.getParameterModes()[ getRoutineArgIdx( routineInfo, p ) ];
 
 				if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
 
@@ -556,7 +556,7 @@ public class StaticMethodCallNode extends MethodCallNode
                         coerceMethodParameter
                             (
                              fromList, subqueryList, aggregateVector,
-                             parameterCount,
+                             methodParms.length,
                              paramdtd, parameterTypeId, parameterMode,
                              idx
                              );
@@ -567,7 +567,7 @@ public class StaticMethodCallNode extends MethodCallNode
                     coerceMethodParameter
                         (
                          fromList, subqueryList, aggregateVector,
-                         parameterCount,
+                         methodParms.length,
                          paramdtd, parameterTypeId, parameterMode,
                          p
                          );
@@ -868,7 +868,7 @@ public class StaticMethodCallNode extends MethodCallNode
 					// applicationParameterNumbers is only set up for a procedure.
 					int applicationParameterNumber = pn.getParameterNumber();
 
-					String parameterType = methodParameterTypes[parameterNumber];
+					String parameterType = methodParameterTypes[ getRoutineArgIdx( parameterNumber ) ];
 
 					if (parameterType.endsWith("[]")) {
 
@@ -916,12 +916,20 @@ public class StaticMethodCallNode extends MethodCallNode
 			// application could retain a reference to it and corrupt
 			// future calls with the same CallableStatement object.
 
-			String methodParameterType = methodParameterTypes[parameterNumber];
+			String methodParameterType = methodParameterTypes[ getRoutineArgIdx( parameterNumber ) ];
 			String arrayType = methodParameterType.substring(0, methodParameterType.length() - 2);
+
+            // if a varargs arg, then strip off the extra array dimension added by varargs
+            if ( isVararg( parameterNumber ) )
+            {
+                methodParameterType = stripOneArrayLevel( methodParameterType );
+                arrayType = stripOneArrayLevel( arrayType );
+            }
+            
 			LocalField lf = acb.newFieldDeclaration(Modifier.PRIVATE, methodParameterType);
 
 			if (outParamArrays == null)
-				outParamArrays = new LocalField[methodParms.length];
+            { outParamArrays = new LocalField[methodParms.length]; }
 
 			outParamArrays[parameterNumber] = lf;
 
@@ -1292,7 +1300,8 @@ public class StaticMethodCallNode extends MethodCallNode
 				int[] parameterModes = routineInfo.getParameterModes();
 				for (int i = 0; i < outParamArrays.length; i++) {
 
-					int parameterMode = parameterModes[i];
+					int parameterMode = parameterModes[ getRoutineArgIdx( i ) ];
+                    
 					if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
 
 						// must be a parameter if it is INOUT or OUT.
@@ -1323,7 +1332,11 @@ public class StaticMethodCallNode extends MethodCallNode
 						boolean isAnsiUDT = paramdtd.getTypeId().getBaseTypeId().isAnsiUDT();
 
 						// is the underlying type for the OUT/INOUT parameter primitive.
-						boolean isPrimitive = ((java.lang.reflect.Method) method).getParameterTypes()[i].getComponentType().isPrimitive();
+                        // if this is a varargs arg then we have to strip off another array level
+                        Class   cellType = ((java.lang.reflect.Method) method).getParameterTypes()[ getRoutineArgIdx( i ) ].
+                            getComponentType();
+                        if ( isVararg( i ) ) { cellType = cellType.getComponentType(); }
+						boolean isPrimitive = cellType.isPrimitive();
 
 						if (isNumericType) {
 							// need to up-cast as the setValue(Number) method only exists on NumberDataValue
