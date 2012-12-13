@@ -317,31 +317,31 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		HashMap germanOutputs = new HashMap();
 		germanOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
-				"---------- Sitzungsinformationen ---------------\n" + 
-				"Sitzungsnummer:2\n" + 
+				"---------- Sessioninformationen ---------------\n" + 
+				"Sessionnummer:2\n" + 
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
-				"Anzahl der Verbindungs-Threads: 1\n" + 
-				"Anzahl der aktiven Sitzungen: 1\n" + 
-				"Anzahl der wartenden Sitzungen: 0\n" + 
+				"Anzahl Verbindungsthreads: 1\n" + 
+				"Anzahl aktive Sessions: 1\n" + 
+				"Anzahl wartende Sessions: 0\n" + 
 				"\n" + 
-				"Gesamtspeicher: #####	Freier Speicher: #####");
+				"Speicher gesamt: #####	Freier Speicher: #####");
 		germanOutputs.put("RuntimeInfoAfterConnClose", 
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
-				"---------- Sitzungsinformationen ---------------\n" + 
-				"Sitzungsnummer:8\n" + 
+				"---------- Sessioninformationen ---------------\n" + 
+				"Sessionnummer:8\n" + 
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
-				"Anzahl der Verbindungs-Threads: 4\n" + 
-				"Anzahl der aktiven Sitzungen: 1\n" + 
-				"Anzahl der wartenden Sitzungen: 0\n" + 
+				"Anzahl Verbindungsthreads: 4\n" + 
+				"Anzahl aktive Sessions: 1\n" + 
+				"Anzahl wartende Sessions: 0\n" + 
 				"\n" + 
-				"Gesamtspeicher: #####	Freier Speicher: #####");
-		germanOutputs.put("sedMemorySearch", "Gesamtspeicher: [0-9]*	Freier Speicher: [0-9]*");
-		germanOutputs.put("sedMemoryReplace", "Gesamtspeicher: #####	Freier Speicher: #####");
-		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSitzungsnummer");
+				"Speicher gesamt: #####	Freier Speicher: #####");
+		germanOutputs.put("sedMemorySearch", "Speicher gesamt: [0-9]*	Freier Speicher: [0-9]*");
+		germanOutputs.put("sedMemoryReplace", "Speicher gesamt: #####	Freier Speicher: #####");
+		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSessionnummer");
 		
 		outputs = new HashMap();
 		outputs.put(englishLocale, englishOutputs);
