@@ -383,10 +383,10 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace { on|off } [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
         }, maxthreadsCmd3, 1);
         int maxValue = server.getMaxThreads();
@@ -433,10 +433,10 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace { on|off } [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",}, maxthreadsCmd6, 1);
 
 
@@ -522,10 +522,10 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace { on|off } [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]"}, timesliceCmd3, 1);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
@@ -569,10 +569,10 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                 "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
-                "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+                "trace { on|off } [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
                 "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]"}, timesliceCmd6, 1);
         timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);

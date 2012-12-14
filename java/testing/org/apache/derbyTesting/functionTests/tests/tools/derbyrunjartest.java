@@ -148,10 +148,10 @@ public class derbyrunjartest extends BaseTestCase {
             "ping [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "sysinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "runtimeinfo [-h <host>][-p <port number>] [-ssl <ssl mode>]",
-            "logconnections {on|off} [-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "logconnections { on|off } [-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "maxthreads <max>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "timeslice <milliseconds>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
-            "trace {on|off} [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
+            "trace { on|off } [-s <session id>][-h <host>][-p <port number>] [-ssl <ssl mode>]",
             "tracedirectory <trace directory>[-h <host>][-p <port number>] [-ssl <ssl mode>]",
         };
         runtool(cmd, output, 1);
