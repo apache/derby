@@ -204,10 +204,20 @@ public class CursorNode extends DMLStatementNode
 		{
 			super.printSubNodes(depth);
 
-			if (orderByList != null) {
-				printLabel(depth, "orderByList: "  + depth);
-				orderByList.treePrint(depth + 1);
-			}
+            if (orderByList != null) {
+                printLabel(depth, "orderByList: "  + depth);
+                orderByList.treePrint(depth + 1);
+            }
+
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
 		}
 	}
 

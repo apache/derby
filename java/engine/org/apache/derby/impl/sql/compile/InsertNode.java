@@ -215,6 +215,16 @@ public final class InsertNode extends DMLModStatementNode
 				orderByList.treePrint(depth + 1);
 			}
 
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
+
 			/* RESOLVE - need to print out targetTableDescriptor */
 		}
 	}

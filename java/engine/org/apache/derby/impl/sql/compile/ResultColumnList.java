@@ -2488,9 +2488,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 							")");
 			}
 
-            // Generated grouping columns should have been removed for the RCL
-            // of a SetOperatorNode, so that size and visible size are equal
-            // (DERBY-3764).
+            // Generated grouping columns and unselected ORDER BY columns
+            // should have been removed for the RCL of a SetOperatorNode, so
+            // that size and visible size are equal (DERBY-3764).
             SanityManager.ASSERT(size() == visibleSize(),
                                  "size() and visibleSize() should be equal");
 		}
@@ -2645,9 +2645,9 @@ public class ResultColumnList extends QueryTreeNodeVector
             // The visible size of the two RCLs must be equal.
             SanityManager.ASSERT(visibleSize() == otherRCL.visibleSize(),
                                  "visibleSize() should match");
-            // The generated grouping columns should have been removed from the
-            // RCL of the SetOperatorNode, so size and visible size should be
-            // equal (DERBY-3764).
+            // The generated grouping columns and unselected ORDER BY columns
+            // should have been removed from the RCL of the SetOperatorNode,
+            // so size and visible size should be equal (DERBY-3764).
             SanityManager.ASSERT(size() == visibleSize(),
                                  "size() and visibleSize() should match");
         }

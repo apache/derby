@@ -22,6 +22,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Arrays;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -101,8 +102,14 @@ public class SelectNode extends ResultSetNode
 	 */
 	private boolean wasGroupBy;
 	
-	/* List of columns in ORDER BY list */
-	OrderByList orderByList;
+    /**
+     * List of columns in ORDER BY list. Usually size 1, if size 2, we
+     * are a VALUES top node UNION node and element 2 has been passed
+     * from InterceptOrExceptNode to prepare for merge implementation
+     * of intersect or except.
+     */
+    OrderByList[] orderByLists = new OrderByList[1];
+
 	boolean		orderByQuery ;
 
     ValueNode   offset;  // OFFSET n ROWS, if given
@@ -330,10 +337,22 @@ public class SelectNode extends ResultSetNode
 				havingClause.treePrint(depth + 1);
 			}
 
-			if (orderByList != null) {
-				printLabel(depth, "orderByList:");
-				orderByList.treePrint(depth + 1);
+            if (orderByLists[0] != null) {
+                for (int i = 0; i < orderByLists.length; i++) {
+                    printLabel(depth, "orderByLists[" + i + "]:");
+                    orderByLists[i].treePrint(depth + 1);
+                }
 			}
+
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
 
 			if (preJoinFL != null)
 			{
@@ -519,6 +538,10 @@ public class SelectNode extends ResultSetNode
 		SanityManager.ASSERT(fromList != null && resultColumns != null,
 			"Both fromList and resultColumns are expected to be non-null");
 
+        if (orderByLists[0] != null) {
+            orderByLists[0].pullUpOrderByColumns(this);
+        }
+
 		/* NOTE - a lot of this code would be common to bindTargetExpression(),
 		 * so we use a private boolean to share the code instead of duplicating
 		 * it.  bindTargetExpression() is responsible for toggling the boolean.
@@ -690,7 +713,13 @@ public class SelectNode extends ResultSetNode
 		{
 			throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_MULTIPLE_DISTINCTS);
 		}
-	}
+
+        if (orderByLists[0] != null) {
+            orderByLists[0].bindOrderByColumns(this);
+        }
+
+        bindOffsetFetch(offset, fetchFirst);
+    }
 
 	/**
 	 * Bind the expressions in this ResultSetNode if it has tables.  This means binding the
@@ -933,7 +962,34 @@ public class SelectNode extends ResultSetNode
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
-		this.orderByList = orderByList;
+        if (orderByLists[0] != null) {
+            // A push down of an internal ordering from IntersectOrExceptNode
+            // on a SELECT that already has an ORDER BY. The following sanity
+            // check helps verify that this is indeed the case.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(
+                    orderByList.size() == resultColumns.visibleSize());
+                OrderByColumn obc = (OrderByColumn)orderByList.elementAt(0);
+                SanityManager.ASSERT(
+                    obc.getExpression() instanceof NumericConstantNode);
+                try {
+                    SanityManager.ASSERT(
+                            ((NumericConstantNode)obc.getExpression()).
+                            value.getInt() == 1);
+                } catch (Exception e) {
+                    SanityManager.THROWASSERT(e);
+                }
+            }
+
+            // Possible optimization: check to see if this extra ordering can
+            // be eliminated, i.e. the two orderings are the same.
+            OrderByList[] newOrderByLists = {
+                orderByLists[0],
+                orderByList};
+            orderByLists = newOrderByLists;
+        } else {
+            orderByLists[0] = orderByList;
+        }
 		// remember that there was an order by list
 		orderByQuery = true;
 	}
@@ -1107,23 +1163,25 @@ public class SelectNode extends ResultSetNode
 				performTransitiveClosure(numTables);
 			}
 
-			if (orderByList != null)
-			{
-				// Remove constant columns from order by list.  Constant
-				// columns are ones that have equality comparisons with
-				// constant expressions (e.g. x = 3)
-				orderByList.removeConstantColumns(wherePredicates);
-				/*
-				** It's possible for the order by list to shrink to nothing
-				** as a result of removing constant columns.  If this happens,
-				** get rid of the list entirely.
-				*/
-				if (orderByList.size() == 0)
-				{
-					orderByList = null;
-                    resultColumns.removeOrderByColumns();
-				}
-			}
+            for (int i = 0; i < orderByLists.length; i++) {
+                if (orderByLists[i] != null)
+                {
+                    // Remove constant columns from order by list.  Constant
+                    // columns are ones that have equality comparisons with
+                    // constant expressions (e.g. x = 3)
+                    orderByLists[i].removeConstantColumns(wherePredicates);
+                    /*
+                     ** It's possible for the order by list to shrink to
+                     ** nothing as a result of removing constant columns.  If
+                     ** this happens, get rid of the list entirely.
+                     */
+                    if (orderByLists[i].size() == 0)
+                    {
+                        orderByLists[i] = null;
+                        resultColumns.removeOrderByColumns();
+                    }
+                }
+            }
 		}
 
 		/* A valid group by without any aggregates or a having clause
@@ -1175,45 +1233,50 @@ public class SelectNode extends ResultSetNode
 				}
 			}
 
-			/* If we were unable to eliminate the distinct and we have
-			 * an order by then we can consider eliminating the sort for the
-			 * order by.  All of the columns in the order by list must
-			 * be ascending in order to do this.  There are 2 cases:
-			 *	o	The order by list is an in order prefix of the columns
-			 *		in the select list.  In this case the output of the
-			 *		sort from the distinct will be in the right order
-			 *		so we simply eliminate the order by list.
-			 *	o	The order by list is a subset of the columns in the
-			 *		the select list.  In this case we need to reorder the
-			 *		columns in the select list so that the ordering columns
-			 *		are an in order prefix of the select list and put a PRN
-			 *		above the select so that the shape of the result set
-			 *		is as expected.
-			 */
-			if (isDistinct && orderByList != null && orderByList.allAscending())
-			{
-				/* Order by list currently restricted to columns in select
-				 * list, so we will always eliminate the order by here.
-				 */
-				if (orderByList.isInOrderPrefix(resultColumns))
-				{
-					orderByList = null;
-				}
-				else 
-				{
-					/* Order by list is not an in order prefix of the select list
-					 * so we must reorder the columns in the the select list to
-					 * match the order by list and generate the PRN above us to
-					 * preserve the expected order.
-					 */
-					newTop = genProjectRestrictForReordering();
- 					orderByList.resetToSourceRCs();
-					resultColumns = orderByList.reorderRCL(resultColumns);
-					newTop.getResultColumns().removeOrderByColumns();
-					orderByList = null;
-				}
-				orderByAndDistinctMerged = true;
-			}
+            for (int i = 0; i < orderByLists.length; i++) {
+                /* If we were unable to eliminate the distinct and we have
+                 * an order by then we can consider eliminating the sort for
+                 * the order by.  All of the columns in the order by list must
+                 * be ascending in order to do this.  There are 2 cases:
+                 *  o   The order by list is an in order prefix of the columns
+                 *      in the select list.  In this case the output of the
+                 *      sort from the distinct will be in the right order
+                 *      so we simply eliminate the order by list.
+                 *  o   The order by list is a subset of the columns in the
+                 *      the select list.  In this case we need to reorder the
+                 *      columns in the select list so that the ordering columns
+                 *      are an in order prefix of the select list and put a PRN
+                 *      above the select so that the shape of the result set
+                 *      is as expected.
+                 */
+                if (isDistinct && orderByLists[i] != null &&
+                    orderByLists[i].allAscending())
+                {
+                    /* Order by list currently restricted to columns in select
+                     * list, so we will always eliminate the order by here.
+                     */
+                    if (orderByLists[i].isInOrderPrefix(resultColumns))
+                    {
+                        orderByLists[i] = null;
+                    }
+                    else
+                    {
+                        /* Order by list is not an in order prefix of the
+                         * select list so we must reorder the columns in the
+                         * the select list to match the order by list and
+                         * generate the PRN above us to preserve the expected
+                         * order.
+                         */
+                        newTop = genProjectRestrictForReordering();
+                        orderByLists[i].resetToSourceRCs();
+                        resultColumns =
+                            orderByLists[i].reorderRCL(resultColumns);
+                        newTop.getResultColumns().removeOrderByColumns();
+                        orderByLists[i] = null;
+                    }
+                    orderByAndDistinctMerged = true;
+                }
+            }
 		}
 
 		/*
@@ -1244,14 +1307,14 @@ public class SelectNode extends ResultSetNode
 		}
 
 
-		if (orderByList != null) {
+        if (orderByLists[0] != null) { // only relevant for first one
 
 			// Collect window function calls and in-lined window definitions
 			// contained in them from the orderByList.
 
 			CollectNodesVisitor cnvw =
 				new CollectNodesVisitor(WindowFunctionNode.class);
-			orderByList.accept(cnvw);
+            orderByLists[0].accept(cnvw);
 			Vector wfcInOrderBy = cnvw.getList();
 
 			for (int i=0; i < wfcInOrderBy.size(); i++) {
@@ -1426,8 +1489,8 @@ public class SelectNode extends ResultSetNode
 		}
 
 		/* Don't flatten if selectNode now has an order by */
-		if ((orderByList != null) &&
-			 (orderByList.size() > 0))
+        if ((orderByLists[0] != null) &&
+             (orderByLists[0].size() > 0))
 		{
 			return false;
 		}
@@ -1456,9 +1519,8 @@ public class SelectNode extends ResultSetNode
 	public ResultSetNode genProjectRestrict(int origFromListSize)
 				throws StandardException
 	{
-		boolean				eliminateSort = false;
-		PredicateList		restrictionList;
-		ResultColumnList	prRCList;
+        boolean[] eliminateSort = new boolean[orderByLists.length];
+
 		ResultSetNode		prnRSN;
 
 		prnRSN = (ResultSetNode) getNodeFactory().getNode(
@@ -1505,7 +1567,9 @@ public class SelectNode extends ResultSetNode
 			prnRSN  = gbn.getParent();
 
 			// Remember whether or not we can eliminate the sort.
-			eliminateSort = eliminateSort || gbn.getIsInSortedOrder();
+            for (int i=0; i < eliminateSort.length; i++ ) {
+                eliminateSort[i] = eliminateSort[i] || gbn.getIsInSortedOrder();
+            }
 		}
 
 
@@ -1598,8 +1662,10 @@ public class SelectNode extends ResultSetNode
 											getContextManager());
 				prnRSN.costEstimate = costEstimate.cloneMe();
 
-				// Remember whether or not we can eliminate the sort.
-				eliminateSort = eliminateSort || inSortedOrder;
+                // Remember whether or not we can eliminate the sort.
+                for (int i=0; i < eliminateSort.length; i++) {
+                    eliminateSort[i] = eliminateSort[i] || inSortedOrder;
+                }
 			}
 		}
 
@@ -1607,66 +1673,71 @@ public class SelectNode extends ResultSetNode
 		 * the order by.
 		 */
 
-		if (orderByList != null)
-		{
-			if (orderByList.getSortNeeded())
-			{
-				prnRSN = (ResultSetNode) getNodeFactory().getNode(
-												C_NodeTypes.ORDER_BY_NODE,
-												prnRSN,
-												orderByList,
-												null,
-												getContextManager());
-				prnRSN.costEstimate = costEstimate.cloneMe();
-			}
+        for (int i=0; i < orderByLists.length; i++) {
+            if (orderByLists[i] != null)
+            {
+                if (orderByLists[i].getSortNeeded())
+                {
+                    prnRSN = (ResultSetNode) getNodeFactory().getNode(
+                            C_NodeTypes.ORDER_BY_NODE,
+                            prnRSN,
+                            orderByLists[i],
+                            null,
+                            getContextManager());
+                    prnRSN.costEstimate = costEstimate.cloneMe();
+                }
 
-			// There may be columns added to the select projection list
-			// a query like:
-			// select a, b from t group by a,b order by a+b
-			// the expr a+b is added to the select list.  
-			int orderBySelect = this.getResultColumns().getOrderBySelect();
-			if (orderBySelect > 0)
-			{
-				// Keep the same RCL on top, since there may be references to
-				// its result columns above us, i.e. in this query:
-                //
-				// select sum(j),i from t group by i having i
-				//             in (select i from t order by j)
-				//
-				ResultColumnList topList = prnRSN.getResultColumns();
-				ResultColumnList newSelectList = topList.copyListAndObjects();
-				prnRSN.setResultColumns(newSelectList);
+                // There may be columns added to the select projection list
+                // a query like:
+                // select a, b from t group by a,b order by a+b
+                // the expr a+b is added to the select list.
+                int orderBySelect = this.getResultColumns().getOrderBySelect();
+                if (orderBySelect > 0)
+                {
+                    // Keep the same RCL on top, since there may be references
+                    // to its result columns above us, i.e. in this query:
+                    //
+                    // select sum(j),i from t group by i having i
+                    //             in (select i from t order by j)
+                    //
+                    ResultColumnList topList = prnRSN.getResultColumns();
+                    ResultColumnList newSelectList =
+                        topList.copyListAndObjects();
+                    prnRSN.setResultColumns(newSelectList);
 
-				topList.removeOrderByColumns();
-				topList.genVirtualColumnNodes(prnRSN, newSelectList);
-				prnRSN = (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
-								prnRSN,
-								topList,
-								null,
-								null,
-								null,
-								null,
-								null,
-								getContextManager());
-			}
-		}
+                    topList.removeOrderByColumns();
+                    topList.genVirtualColumnNodes(prnRSN, newSelectList);
+                    prnRSN = (ResultSetNode) getNodeFactory().getNode(
+                            C_NodeTypes.PROJECT_RESTRICT_NODE,
+                            prnRSN,
+                            topList,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            getContextManager());
+                }
+            }
 
-        if (offset != null || fetchFirst != null) {
-            // Keep the same RCL on top, since there may be references to
-            // its result columns above us.
-            ResultColumnList topList = prnRSN.getResultColumns();
-            ResultColumnList newSelectList = topList.copyListAndObjects();
-            prnRSN.setResultColumns(newSelectList);
-            topList.genVirtualColumnNodes(prnRSN, newSelectList);
-            prnRSN = (ResultSetNode)getNodeFactory().getNode(
-                C_NodeTypes.ROW_COUNT_NODE,
-                prnRSN,
-                topList,
-                offset,
-                fetchFirst,
-                Boolean.valueOf( hasJDBClimitClause ),
-                getContextManager());
+            // Do this only after the main ORDER BY; any extra added by
+            // IntersectOrExceptNode should sit on top of us.
+            if (i == 0 && (offset != null || fetchFirst != null)) {
+                // Keep the same RCL on top, since there may be references to
+                // its result columns above us.
+                ResultColumnList topList = prnRSN.getResultColumns();
+                ResultColumnList newSelectList = topList.copyListAndObjects();
+                prnRSN.setResultColumns(newSelectList);
+                topList.genVirtualColumnNodes(prnRSN, newSelectList);
+                prnRSN = (ResultSetNode)getNodeFactory().getNode(
+                        C_NodeTypes.ROW_COUNT_NODE,
+                        prnRSN,
+                        topList,
+                        offset,
+                        fetchFirst,
+                        Boolean.valueOf( hasJDBClimitClause ),
+                        getContextManager());
+            }
         }
 
 
@@ -1709,24 +1780,27 @@ public class SelectNode extends ResultSetNode
 						getContextManager());
 		}
 
-		if (!(orderByList != null && orderByList.getSortNeeded()) && orderByQuery)
-		{
-			// Remember whether or not we can eliminate the sort.
-			eliminateSort = true;
-		}
+        for (int i=0; i < orderByLists.length; i++) {
+            if (!(orderByLists[i] != null && orderByLists[i].getSortNeeded()) &&
+                orderByQuery)
+            {
+                // Remember whether or not we can eliminate the sort.
+                eliminateSort[i] = true;
+            }
 
-		/* If we were able to eliminate the sort during optimization then
-		 * we must tell the underlying tree.  At minimum, this means no
-		 * group fetch on an index under an IndexRowToBaseRow since that
-		 * that could lead to incorrect results.  (Bug 2347.)
-		 */
-		if (eliminateSort)
-		{
-			prnRSN.adjustForSortElimination(orderByList);
-		}
+            /* If we were able to eliminate the sort during optimization then
+             * we must tell the underlying tree.  At minimum, this means no
+             * group fetch on an index under an IndexRowToBaseRow since that
+             * that could lead to incorrect results.  (Bug 2347.)
+             */
+            if (eliminateSort[i])
+            {
+                prnRSN.adjustForSortElimination(orderByLists[i]);
+            }
 
-		/* Set the cost of this node in the generated node */
-		prnRSN.costEstimate = costEstimate.cloneMe();
+            /* Set the cost of this node in the generated node */
+            prnRSN.costEstimate = costEstimate.cloneMe();
+        }
 
 		return prnRSN;
 	}
@@ -1834,7 +1908,15 @@ public class SelectNode extends ResultSetNode
 		SanityManager.ASSERT(selectSubquerys != null,
 			"selectSubquerys is expected to be non-null");
 
-		/* If this select node is the child of an outer node that is
+        // If we have more than 1 ORDERBY columns, we may be able to
+        // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+        for (int i=0; i < orderByLists.length; i++) {
+            if (orderByLists[i] != null && orderByLists[i].size() > 1) {
+                orderByLists[i].removeDupColumns();
+            }
+        }
+
+        /* If this select node is the child of an outer node that is
 		 * being optimized, we can get here multiple times (once for
 		 * every permutation that is done for the outer node).  With
 		 * DERBY-805, we can add optimizable predicates to the WHERE
@@ -1914,7 +1996,7 @@ public class SelectNode extends ResultSetNode
 		optimizer = getOptimizer(fromList,
 								wherePredicates,
 								dataDictionary,
-								orderByList);
+                                orderByLists[0]); // use first one
 		optimizer.setOuterRows(outerRows);
 
 		/* Optimize this SelectNode */

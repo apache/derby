@@ -1080,4 +1080,154 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
         rollback();
     }
+
+
+    /**
+     * Test nesting inside set operands, cf. this production in SQL
+     * 2011, section 7.12:
+     * <pre>
+     * <query primary> ::=
+     *      <simple table>
+     *   |  <left paren> <query expression body>
+     *      [ <order by clause> ] [ <result offset clause> ]
+     *      [ <fetch first clause> ] <right paren>
+     * </pre>
+     * The corresponding production in {@code sqlgrammar.jj} is
+     * {@code nonJoinQueryPrimary}.
+     * Cf. DERBY-6008.
+     */
+    public void testNestingInsideSetOperation() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.executeUpdate("create table t1(i int, j int )");
+        s.executeUpdate("create table t2(i int, j int)");
+
+        s.executeUpdate("insert into t1 values (1,1),(4,8),(2,4)");
+        s.executeUpdate("insert into t2 values (10,10),(40,80),(20,40)");
+
+        ResultSet rs = s.executeQuery(
+            "(select i from t1 order by j desc offset 1 row) union " +
+            "(select i from t2 order by j desc offset 1 rows " +
+                                             "fetch next 1 row only)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"1"}, {"2"}, {"20"}});
+
+        // Without parentheses, expect syntax error
+        assertCompileError("42X01",
+                "select i from t1 order by j desc offset 1 row union " +
+                "(select i from t2 order by j desc offset 2 rows)");
+
+        // With VALUES (single) instead of SELECT:
+        // Single values exercise changes in RowResultSetNode
+        rs = s.executeQuery(
+            "(values 1 order by 1 fetch first 1 row only) union " +
+            "(select i from t2 order by j desc offset 2 rows)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"1"}, {"10"}});
+
+        // With VALUES (single) instead of SELECT and duplicate ordering key
+        rs = s.executeQuery(
+            "(values 1 order by 1,1 fetch first 1 row only) union " +
+            "(select i from t2 order by j desc offset 2 rows)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"1"}, {"10"}});
+
+        // With VALUES (multiple) instead of SELECT
+        // Multiples values exercise changes in SetOperatorNode when used in
+        // table value constructor context (UNION).
+        rs = s.executeQuery(
+            "(values 1,2 order by 1 desc offset 1 row " +
+            "                       fetch first 1 row only)" +
+            " union (select i from t2 order by j desc offset 2 rows)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"1"}, {"10"}});
+
+        // With VALUES (multiple) instead of SELECT plus duplicate ordering
+        // key
+        rs = s.executeQuery(
+            "(values 1,2 order by 1,1 offset 1 row fetch first 1 row only)" +
+            " union (select i from t2 order by j desc offset 2 rows)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"2"}, {"10"}});
+
+        // Intersect and except
+        s.executeUpdate(
+                "create table countries(name varchar(20), " +
+                "                       population int, " +
+                "                       area int)");
+
+        s.executeUpdate("insert into countries values" +
+                "('Norway', 5033675, 385252)," +
+                "('Sweden', 9540065, 449964)," +
+                "('Denmark', 5580413, 42894)," +
+                "('Iceland', 320060, 103001)," +
+                "('Liechtenstein', 36281, 160)");
+
+        rs = s.executeQuery(
+           "(select name from countries " +
+           "    order by population desc fetch first 2 rows only)" +
+           " intersect " +
+           "(select name from countries " +
+           "    order by area desc fetch first 2 rows only)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"Sweden"}});
+
+        rs = s.executeQuery(
+           "(values ('Norway', 5033675, 385252), " +
+           "        ('Sweden', 9540065, 449964)," +
+           "        ('Denmark', 5580413, 42894)," +
+           "        ('Iceland', 320060, 103001)," +
+           "        ('Liechtenstein', 36281, 160)" +
+           "    order by 2 desc fetch first 3 rows only)" +
+           " intersect " +
+           "(select * from countries " +
+           "    order by area desc fetch first 3 rows only)");
+        // Note: we use 3 rows here to check that both sorts work the way they
+        // should: at the lowest level, the "order by 2 desc", then the
+        // "fetch first" of only three of those rows, then on top the ascending
+        // sort on all columns to get the data ready for the intersect.
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"Norway", "5033675", "385252"},
+            {"Sweden", "9540065", "449964"}});
+
+        rs = s.executeQuery(
+           "(values ('Norway', 5033675, 385252)" +
+           "    order by 2 desc fetch first 3 rows only)" +
+           " intersect " +
+           "(values ('Norway', 5033675, 385252))");
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"Norway", "5033675", "385252"}});
+
+        rs = s.executeQuery(
+           "(select name from countries " +
+           "    order by population desc fetch first 2 rows only)" +
+           " except " +
+           "(select name from countries " +
+           "    order by area desc fetch first 2 rows only)");
+
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"Denmark"}});
+
+        rs = s.executeQuery(
+           "(values ('Norway', 5033675, 385252), " +
+           "        ('Sweden', 9540065, 449964)," +
+           "        ('Denmark', 5580413, 42894)," +
+           "        ('Iceland', 320060, 103001)," +
+           "        ('Liechtenstein', 36281, 160)" +
+           "    order by 2 desc fetch first 3 rows only)" +
+           " except " +
+           "(select * from countries " +
+           "    order by area desc fetch first 3 rows only)");
+        JDBC.assertFullResultSet(rs, new String[][]{
+            {"Denmark", "5580413", "42894"}});
+
+        rollback();
+    }
 }

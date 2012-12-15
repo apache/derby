@@ -123,6 +123,22 @@ public class RowResultSetNode extends FromTable
 				printLabel(depth, "subquerys: ");
 				subquerys.treePrint(depth + 1);
 			}
+
+            if (orderByList != null) {
+                printLabel(depth, "orderByList:");
+                orderByList.treePrint(depth + 1);
+            }
+
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
+
 		}
 	}
 
@@ -253,7 +269,14 @@ public class RowResultSetNode extends FromTable
 		}
 
 		SelectNode.checkNoWindowFunctions(resultColumns, "VALUES");
-	}
+
+        if (orderByList != null) {
+            orderByList.pullUpOrderByColumns(this);
+            orderByList.bindOrderByColumns(this);
+        }
+
+        bindOffsetFetch(offset, fetchFirst);
+    }
 
 	/**
 	 * Bind the expressions in this ResultSetNode if it has tables.  This means binding the
@@ -438,7 +461,17 @@ public class RowResultSetNode extends FromTable
 		/* Allocate a dummy referenced table map */ 
 		referencedTableMap = new JBitSet(numTables);
 		referencedTableMap.set(tableNumber);
-		return this;
+
+        // If we have more than 1 ORDERBY columns, we may be able to
+        // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+        // Well, not very likely here, since we're here:
+        //     VALUES x followed by ORDER BY 1,1,2
+        // but for completeness...
+        if (orderByList != null && orderByList.size() > 1) {
+            orderByList.removeDupColumns();
+        }
+
+        return this;
 	}
 	
 	/**

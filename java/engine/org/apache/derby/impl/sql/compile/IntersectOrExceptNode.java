@@ -151,16 +151,17 @@ public class IntersectOrExceptNode extends SetOperatorNode
          * cases it would be better to sort the inputs on a different sequence of columns, but it is hard to analyze
          * the input query expressions to see if a sort can be avoided.
          */
-        if( orderByList != null)
+        if( orderByLists[0] != null)
         {
             BitSet colsOrdered = new BitSet( intermediateOrderByColumns.length);
-            int orderByListSize = orderByList.size();
+            int orderByListSize = orderByLists[0].size();
             int intermediateOrderByIdx = 0;
             for( int i = 0; i < orderByListSize; i++)
             {
                 if( colsOrdered.get(i))
                     continue;
-                OrderByColumn orderByColumn = orderByList.getOrderByColumn(i);
+                OrderByColumn orderByColumn =
+                    orderByLists[0].getOrderByColumn(i);
                 intermediateOrderByDirection[intermediateOrderByIdx] = orderByColumn.isAscending() ? 1 : -1;
                 intermediateOrderByNullsLow[intermediateOrderByIdx] = orderByColumn.isNullsOrderedLow();
                 int columnIdx = orderByColumn.getResultColumn().getColumnPosition() - 1;
@@ -178,7 +179,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                     intermediateOrderByIdx++;
                 }
             }
-            orderByList = null; // It will be pushed down.
+            orderByLists[0] = null; // It will be pushed down.
         }
         else // The output of the intersect/except does not have to be ordered
         {
@@ -314,12 +315,12 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
         ResultSetNode treeTop = this;
 
-        if( orderByList != null) {
+        if( orderByLists[0] != null) {
             // Generate an order by node on top of the intersect/except
             treeTop = (ResultSetNode) getNodeFactory().getNode(
                 C_NodeTypes.ORDER_BY_NODE,
                 treeTop,
-                orderByList,
+                orderByLists[0],
                 tableProperties,
                 getContextManager());
         }
@@ -338,7 +339,6 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 Boolean.valueOf( hasJDBClimitClause ),
                 getContextManager());
         }
-
         return treeTop;
 
     } // end of addNewNodes

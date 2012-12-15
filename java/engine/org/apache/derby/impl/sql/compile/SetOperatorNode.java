@@ -60,7 +60,14 @@ abstract class SetOperatorNode extends TableOperatorNode
 	*/
 	boolean			all;
 
-	OrderByList orderByList;
+    /**
+     * List of columns in ORDER BY list. Usually size 1, if size 2, we
+     * are a VALUES top node UNION node and element 2 has been passed
+     * from InterceptOrExceptNode to prepare for merge implementation
+     * of intersect or except.
+     */
+    OrderByList[] orderByLists = new OrderByList[1];
+
     ValueNode   offset; // OFFSET n ROWS
     ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY
     boolean   hasJDBClimitClause; // were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
@@ -552,11 +559,22 @@ abstract class SetOperatorNode extends TableOperatorNode
 		{
 			super.printSubNodes(depth);
 
-			if (orderByList != null) {
-				printLabel(depth, "orderByList:");
-				orderByList.treePrint(depth + 1);
+            if (orderByLists[0] != null) {
+                for (int i = 0; i < orderByLists.length; i++) {
+                    printLabel(depth, "orderByLists[" + i + "]:");
+                    orderByLists[i].treePrint(depth + 1);
+                }
 			}
 
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
 		}
 	}
 	/**
@@ -648,6 +666,8 @@ abstract class SetOperatorNode extends TableOperatorNode
         // The generated grouping columns of the left result set should not be
         // part of the result from the set operation (DERBY-3764).
         resultColumns.removeGeneratedGroupingColumns();
+
+        resultColumns.removeOrderByColumns();
 
 		/* Create new expressions with the dominant types after verifying
 		 * union compatibility between left and right sides.
@@ -769,6 +789,18 @@ abstract class SetOperatorNode extends TableOperatorNode
 		}
 	}
 
+    public void bindExpressions(FromList fromList) throws StandardException {
+        // Actions for UnionNode qua top node of a multi-valued table value
+        // constructor
+        if (orderByLists[0] != null) {
+            orderByLists[0].bindOrderByColumns(this);
+            orderByLists[0].pullUpOrderByColumns(this);
+        }
+
+        bindOffsetFetch(offset, fetchFirst);
+        super.bindExpressions(fromList);
+    }
+
 	/**
 	 * Bind the expressions in the target list.  This means binding the
 	 * sub-expressions, as well as figuring out what the return type is
@@ -796,7 +828,32 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 */
 	void pushOrderByList(OrderByList orderByList)
 	{
-		this.orderByList = orderByList;
+        if (this.orderByLists[0] != null) {
+            // Presumably a push down order by from IntersectOrExceptNode
+            // on a VALUES clause that already has an ORDER BY.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(
+                    orderByList.size() == resultColumns.visibleSize());
+                OrderByColumn obc = (OrderByColumn)orderByList.elementAt(0);
+                SanityManager.ASSERT(
+                    obc.getExpression() instanceof NumericConstantNode);
+                try {
+                    SanityManager.ASSERT(
+                            ((NumericConstantNode)obc.getExpression())
+                            .value.getInt() == 1);
+                } catch (Exception e) {
+                    SanityManager.THROWASSERT(e);
+                }
+            }
+
+            // FIXME: Check to see if this extra ordering can be eliminated
+            OrderByList[] newOrderByLists = new OrderByList[2];
+            newOrderByLists[0] = orderByLists[0];
+            newOrderByLists[1] = orderByList;
+            this.orderByLists = newOrderByLists;
+        } else {
+            this.orderByLists[0] = orderByList;
+        }
 	}
 
     /**
@@ -869,28 +926,38 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 *		above the select so that the shape of the result set
 		 *		is as expected.
 		 */
-		if ((! all) && orderByList != null && orderByList.allAscending())
-		{
-			/* Order by list currently restricted to columns in select
-			 * list, so we will always eliminate the order by here.
-			 */
-			if (orderByList.isInOrderPrefix(resultColumns))
-			{
-				orderByList = null;
-			}
-			/* RESOLVE - We currently only eliminate the order by if it is
-			 * a prefix of the select list.  We do not currently do the 
-			 * elimination if the order by is not a prefix because the code
-			 * doesn't work.  The problem has something to do with the
-			 * fact that we generate additional nodes between the union
-			 * and the PRN (for reordering that we would generate here)
-			 * when modifying the access paths.  VCNs under the PRN can be
-			 * seen as correlated since their source resultset is the Union
-			 * which is no longer the result set directly under them.  This
-			 * causes the wrong code to get generated. (jerry - 11/3/98)
-			 * (bug 59)
-			 */
-		}
+        for (int i = 0; i < orderByLists.length; i++) {
+            if ((! all) && orderByLists[i] != null &&
+                orderByLists[i].allAscending())
+            {
+                /* Order by list currently restricted to columns in select
+                 * list, so we will always eliminate the order by here.
+                 */
+                if (orderByLists[i].isInOrderPrefix(resultColumns))
+                {
+                    orderByLists[i] = null;
+                }
+                /* RESOLVE - We currently only eliminate the order by if it is
+                 * a prefix of the select list.  We do not currently do the
+                 * elimination if the order by is not a prefix because the code
+                 * doesn't work.  The problem has something to do with the
+                 * fact that we generate additional nodes between the union
+                 * and the PRN (for reordering that we would generate here)
+                 * when modifying the access paths.  VCNs under the PRN can be
+                 * seen as correlated since their source resultset is the Union
+                 * which is no longer the result set directly under them.  This
+                 * causes the wrong code to get generated. (jerry - 11/3/98)
+                 * (bug 59)
+                 */
+            }
+
+            // UnionNode qua top of table value constructor with ordering
+            // If we have more than 1 ORDERBY columns, we may be able to
+            // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+            if (orderByLists[i] != null && orderByLists[i].size() > 1) {
+                orderByLists[i].removeDupColumns();
+            }
+        }
 
 		return newTop;
 	}
@@ -1150,5 +1217,4 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 		return rightOptPredicates;
 	}
-
 }

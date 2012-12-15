@@ -1978,6 +1978,14 @@ public class SQLParser
         }
     }
 
+    private static boolean hasSelectSuffixClause(
+        OrderByList orderBy, ValueNode[] offsetClauses)
+    {
+        return
+            orderBy != null ||
+            offsetClauses[OFFSET_CLAUSE] != null ||
+            offsetClauses[FETCH_FIRST_CLAUSE] != null;
+    }
 }
 
 PARSER_END(SQLParser)
@@ -5150,6 +5158,9 @@ ResultSetNode
 nonJoinQueryPrimary() throws StandardException :
 {
 	ResultSetNode	primary;
+    boolean     hasJDBClimitClause = false;
+    OrderByList orderCols = null;
+    ValueNode[] offsetClauses = new ValueNode[OFFSET_CLAUSE_COUNT];
 }
 {
 	primary = simpleTable()
@@ -5157,10 +5168,42 @@ nonJoinQueryPrimary() throws StandardException :
 		return primary;
 	}
 |
-	<LEFT_PAREN> primary = queryExpression(null, NO_SET_OP)
+    <LEFT_PAREN>
+    primary = queryExpression(null, NO_SET_OP)
+    [ orderCols = orderByClause() ]
+    hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	<RIGHT_PAREN>
 	{
-		return primary;
+        if (hasSelectSuffixClause(orderCols, offsetClauses)) {
+            if (primary instanceof SelectNode ||
+                primary instanceof UnionNode || // table value constructor
+                primary instanceof RowResultSetNode) {
+
+                primary.pushOrderByList(orderCols);
+                primary.pushOffsetFetchFirst(
+                    offsetClauses[OFFSET_CLAUSE],
+                    offsetClauses[FETCH_FIRST_CLAUSE],
+                    hasJDBClimitClause);
+            } else {
+                // shouldn't happen
+                String tokenName;
+
+                if (orderCols != null) {
+                    tokenName = "ORDER BY";
+                } else if (hasJDBClimitClause)  {
+                    tokenName = "LIMIT";
+                } else if (offsetClauses[OFFSET_CLAUSE] != null) {
+                    tokenName = "OFFSET";
+                } else {
+                    tokenName = "FETCH";
+                }
+
+                throw StandardException.newException(
+                    SQLState.LANG_SYNTAX_ERROR, tokenName);
+            }
+        }
+
+        return primary;
 	}
 }
 

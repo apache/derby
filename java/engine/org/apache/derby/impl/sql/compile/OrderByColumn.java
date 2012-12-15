@@ -586,4 +586,7 @@ public class OrderByColumn extends OrderedColumn {
 		}
 	}
 
+    ValueNode getExpression() {
+        return expression;
+    }
 }

@@ -471,30 +471,34 @@ public class UnionNode extends SetOperatorNode
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
-		if (orderByList != null)
-		{
-			treeTop = (ResultSetNode) getNodeFactory().getNode(
-											C_NodeTypes.ORDER_BY_NODE,
-											treeTop,
-											orderByList,
-											tableProperties,
-											getContextManager());
-		}
+        for (int i=0; i < orderByLists.length; i++) {
+            if (orderByLists[i] != null)
+            {
+                treeTop = (ResultSetNode) getNodeFactory().getNode(
+                        C_NodeTypes.ORDER_BY_NODE,
+                        treeTop,
+                        orderByLists[i],
+                        tableProperties,
+                        getContextManager());
+            }
 
+            // Do this only after the main ORDER BY; any extra added by
+            // IntersectOrExceptNode should sit on top of us.
+            if (i == 0 && (offset != null || fetchFirst != null)) {
+                ResultColumnList newRcl =
+                        treeTop.getResultColumns().copyListAndObjects();
+                newRcl.genVirtualColumnNodes(treeTop,
+                                             treeTop.getResultColumns());
 
-        if (offset != null || fetchFirst != null) {
-            ResultColumnList newRcl =
-                treeTop.getResultColumns().copyListAndObjects();
-            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
-
-            treeTop = (ResultSetNode)getNodeFactory().getNode(
-                C_NodeTypes.ROW_COUNT_NODE,
-                treeTop,
-                newRcl,
-                offset,
-                fetchFirst,
-                Boolean.valueOf( hasJDBClimitClause ),
-                getContextManager());
+                treeTop = (ResultSetNode)getNodeFactory().getNode(
+                        C_NodeTypes.ROW_COUNT_NODE,
+                        treeTop,
+                        newRcl,
+                        offset,
+                        fetchFirst,
+                        Boolean.valueOf( hasJDBClimitClause ),
+                        getContextManager());
+            }
         }
 
 		return treeTop;
