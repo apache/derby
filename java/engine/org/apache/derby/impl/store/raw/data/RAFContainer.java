@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.util.InterruptDetectedException;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -44,6 +45,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 
@@ -72,7 +74,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private static final int REMOVE_FILE_ACTION = 3;
     private static final int OPEN_CONTAINER_ACTION = 4;
     private static final int STUBBIFY_ACTION = 5;
-	private static final int BACKUP_CONTAINER_ACTION = 6;
     private static final int GET_RANDOM_ACCESS_FILE_ACTION = 7;
     private static final int REOPEN_CONTAINER_ACTION = 8;
     private ContainerKey actionIdentity;
@@ -81,8 +82,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private boolean actionTryAlternatePath;
     private StorageFile actionFile;
     private LogInstant actionInstant;
-	private String actionBackupLocation;
-	private BaseContainerHandle actionContainerHandle;
 
 	private boolean inBackup = false;
 	private boolean inRemove = false;
@@ -815,6 +814,50 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         finally{ actionIdentity = null; }
     } // end of createContainer
 
+    /**
+     * Copy the contents of a {@code StorageFile} to a {@code java.io.File}.
+     *
+     * @param from the file to copy from
+     * @param to the file to copy to
+     * @throws StandardException if the copying failed
+     */
+    private void copyFile(final StorageFile from, final File to)
+            throws StandardException {
+        Boolean success = (Boolean) AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() {
+                        return ReuseFactory.getBoolean(FileUtil.copyFile(
+                                dataFactory.getStorageFactory(), from, to));
+                    }
+                });
+
+        if (!success.booleanValue()) {
+            throw StandardException.newException(
+                    SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                    from, to);
+        }
+    }
+
+    /**
+     * Remove a file.
+     * @param file the file to remove
+     * @throws StandardException if the file could not be removed
+     */
+    private void removeFile(final File file) throws StandardException {
+        Boolean success = (Boolean) AccessController.doPrivileged(
+            new PrivilegedAction() {
+                public Object run() {
+                    return ReuseFactory.getBoolean(
+                            !file.exists() || file.delete());
+                }
+        });
+
+        if (!success.booleanValue()) {
+            throw StandardException.newException(
+                    SQLState.UNABLE_TO_DELETE_FILE, file);
+        }
+    }
+
 	synchronized boolean removeFile(StorageFile file)
         throws SecurityException, StandardException
     {
@@ -965,36 +1008,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         }
     }
 
-
-
-
-		
-    /**
-     * Backup the  container.
-     * 
-     * @param handle the container handle.
-     * @param backupLocation location of the backup container. 
-     * @exception StandardException Standard Derby error policy 
-     */
-	protected void backupContainer(BaseContainerHandle handle,	String backupLocation)
-	    throws StandardException 
-	{
-		actionContainerHandle = handle;
-        actionBackupLocation = backupLocation;
-        actionCode = BACKUP_CONTAINER_ACTION;
-        try
-        {
-            AccessController.doPrivileged(this);
-        }
-        catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
-        finally
-        {
-            actionContainerHandle = null;
-            actionBackupLocation = null;
-        }
-	}
-
-
     /**
      * Backup the  container.
      *
@@ -1032,8 +1045,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * @exception StandardException Derby Standard error policy
      *
      */
-    private void privBackupContainer(BaseContainerHandle handle,	
-                                     String backupLocation)
+    protected void backupContainer(BaseContainerHandle handle,
+                                   String backupLocation)
         throws StandardException 
     {
         boolean backupCompleted = false;
@@ -1067,18 +1080,12 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                 // create container at the backup location.
                 if (isStub) {
                     // get the stub ( it is a committted drop table container )
-                    StorageFile file = privGetFileName((ContainerKey)getIdentity(), 
+                    StorageFile file = getFileName((ContainerKey)getIdentity(),
                                                        true, false, true);
                     backupFile = new File(backupLocation, file.getName());
 
 					// directly copy the stub to the backup 
-					if(!FileUtil.copyFile(dataFactory.getStorageFactory(), 
-                                          file, backupFile))
-                    {
-                        throw StandardException.newException(
-                                              SQLState.RAWSTORE_ERROR_COPYING_FILE,
-                                              file, backupFile);
-                    }
+                    copyFile(file, backupFile);
                 }else {
                     // regular container file 
                     long lastPageNumber= getLastPageNumber(handle);
@@ -1094,12 +1101,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                     }
 
                     StorageFile file = 
-                        privGetFileName(
+                        getFileName(
                             (ContainerKey)getIdentity(), false, false, true);
 
                     backupFile = new File(backupLocation , file.getName());
-                    backupRaf  = new RandomAccessFile(backupFile,  "rw");
-                    FileUtil.limitAccessToOwner(backupFile);
+                    backupRaf  = getRandomAccessFile(backupFile);
 
                     byte[] encryptionBuf = null;
                     if (dataFactory.databaseEncrypted()) {
@@ -1194,13 +1200,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                         }
                     }
 
-                    if(backupFile.exists()) 
-                    {
-                        if (!backupFile.delete())
-                            throw StandardException.newException(
-                                                SQLState.UNABLE_TO_DELETE_FILE, 
-                                                backupFile);
-                    }
+                    removeFile(backupFile);
                 } 
             }
         }
@@ -1239,7 +1239,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         try {
             long lastPageNumber= getLastPageNumber(handle);
  
-            newRaf = privGetRandomAccessFile(newFile);
+            newRaf = getRandomAccessFile(newFile);
 
             byte[] encryptionBuf = null;
             if (doEncrypt) {
@@ -1305,8 +1305,33 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         }
     }
 
+    /**
+     * Get a RandomAccessFile for accessing a file in read-write mode.
+     * @param file the file to access
+     * @return a RandomAccessFile
+     * @throws FileNotFoundException if {@code file} cannot be opened in
+     * read-write mode
+     */
+    private RandomAccessFile getRandomAccessFile(final File file)
+            throws FileNotFoundException {
+        try {
+            return (RandomAccessFile) AccessController.doPrivileged(
+                new PrivilegedExceptionAction() {
+                    public Object run() throws FileNotFoundException {
+                        boolean preExisting = file.exists();
+                        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+                        if (!preExisting) {
+                            FileUtil.limitAccessToOwner(file);
+                        }
+                        return raf;
+                    }
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (FileNotFoundException) pae.getCause();
+        }
+    }
 
-    synchronized StorageRandomAccessFile privGetRandomAccessFile(StorageFile file)
+    synchronized StorageRandomAccessFile getRandomAccessFile(StorageFile file)
         throws SecurityException, StandardException
     {
         actionCode = GET_RANDOM_ACCESS_FILE_ACTION;
@@ -1664,11 +1689,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              dataFactory.stubFileToRemoveAfterCheckPoint(stub,actionInstant, getIdentity());
              return null;
          } // end of case STUBBIFY_ACTION
-		 
-		 case BACKUP_CONTAINER_ACTION: {
-			 privBackupContainer(actionContainerHandle, actionBackupLocation);
-			 return null;
-		 } // end of case BACKUP_CONTAINER_ACTION
 
          case GET_RANDOM_ACCESS_FILE_ACTION: {
              try
