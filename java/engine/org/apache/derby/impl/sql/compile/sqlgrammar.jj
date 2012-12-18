@@ -10960,6 +10960,9 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 	  {
           checkVersion(DataDictionary.DD_VERSION_DERBY_10_10, "DERBY");
 
+	      if ( isTableFunction )
+	      { throw StandardException.newException( SQLState.LANG_MUST_BE_DJRS ); }
+
 	      return ReuseFactory.getShort( RoutineAliasInfo.PS_DERBY );
 	  }
 }

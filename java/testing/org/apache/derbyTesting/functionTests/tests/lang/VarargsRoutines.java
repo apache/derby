@@ -21,7 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.SQLException;
+
 import java.text.MessageFormat;
+
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 /**
  * <p>
@@ -188,5 +200,254 @@ public  class   VarargsRoutines
     //
     ////////////////////////
 
+    public  static  String  add( String seed, int... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
 
+        int     result = 0;
+
+        for ( int value : values ) { result += value; }
+
+        return "int " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, long... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( long value : values ) { result += value; }
+
+        return "long " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, short... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        short     result = 0;
+
+        for ( short value : values ) { result += value; }
+
+        return "short " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, Blob... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( Blob value : values ) { result += addBytes( value.getBytes( 1L, (int) value.length() ) ); }
+
+        return "blob " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, boolean... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        int     result = 0;
+
+        for ( boolean value : values )  { if ( value ) {  result++; } }
+
+        return "boolean " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, String... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        String  result = "";
+
+        for ( String value : values )  { result += value; }
+
+        return "String " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, byte[]... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        int result = 0;
+
+        for ( byte[] value : values ) { result += addBytes( value ); }
+
+        return "byte[] " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, Clob... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        String  result = "";
+
+        for ( Clob value : values ) { result += value.getSubString( 1L, (int) value.length() ); }
+
+        return "clob " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, Date... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( Object value : values ) { result ++; }
+
+        return "date " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, Time... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( Object value : values ) { result ++; }
+
+        return "time " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, Timestamp... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( Object value : values ) { result ++; }
+
+        return "timestamp " + seed + " " + result;
+    }
+
+    public  static  String  add( String seed, BigDecimal... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( BigDecimal value : values ) { result += value.longValue(); }
+
+        return "bigdecimal " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, double... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        double     result = 0.0;
+
+        for ( double value : values ) { result += value; }
+
+        return "double " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, float... values )
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        float     result = 0.0F;
+
+        for ( float value : values ) { result += value; }
+
+        return "float " + seed + " " + result;
+    }
+    
+    public  static  String  add( String seed, Price... values )
+        throws SQLException
+    {
+        if ( values == null ) { return null; }
+        if ( values.length == 0 ) { return null; }
+
+        long     result = 0;
+
+        for ( Object value : values ) { result ++; }
+
+        return "Price " + seed + " " + result;
+    }
+
+    private static  int addChars( String value )
+    {
+        int result = 0;
+
+        for ( int i = 0; i < value.length(); i++ ) { result += value.charAt( i ); }
+
+        return result;
+    }
+
+    public  static  Blob    makeBlob( String contents )
+        throws SQLException
+    {
+        return new HarmonySerialBlob( makeBytes( contents ) );
+    }
+    public  static  byte[]    makeBytes( String contents )
+        throws SQLException
+    {
+        int count = contents.length();
+        byte[]  bytes = new byte[ count ];
+
+        for ( int i = 0; i < count; i++ ) { bytes[ i ] = (byte) (contents.charAt( i ) - '0'); }
+
+        return bytes;
+    }
+    public  static  Clob    makeClob( String contents )
+        throws SQLException
+    {
+        return new HarmonySerialClob( contents );
+    }
+
+    private static  int addBytes( byte[] value )
+    {
+        int result = 0;
+
+        for ( byte b : value ) { result += b; }
+
+        return result;
+    }
+    
+    //////////////////////////
+    //
+    // TABLE FUNCTIONS
+    //
+    //////////////////////////
+
+    public  static  ResultSet   oneColumnRows( String... values )
+    {
+        String[]    columnNames = new String[] { "COL1" };
+        String[][]  rows;
+
+        if ( (values == null) || (values.length == 0) ) { rows = new String[0][]; }
+        else
+        {
+            int count = values.length;
+
+            rows = new String[ count ][];
+            for ( int i = 0; i < count; i++ ) { rows[ i ] = new String[] { values[ i ] }; }
+        }
+
+        return new StringArrayVTI( columnNames, rows );
+    }
 }
