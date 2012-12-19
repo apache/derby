@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.iapi.error.ExceptionUtil;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 /**
  * Test decorator that starts the network server on startup
@@ -218,6 +220,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                         spawnedServer = null;
                     }
                     fail(msg);
+                    //DERBY-6012 print thread dump and java core
+                    fail(ExceptionUtil.dumpThreads());
+                    JVMInfo.javaDump();
                 }
             }
         }
