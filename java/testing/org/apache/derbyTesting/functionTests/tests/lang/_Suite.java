@@ -106,6 +106,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ScrollCursors2Test.suite());
         suite.addTest(NullIfTest.suite());
         suite.addTest(InListMultiProbeTest.suite());
+        suite.addTest(InPredicateTest.suite());
         suite.addTest(SecurityPolicyReloadingTest.suite());
         suite.addTest(CurrentOfTest.suite());
         suite.addTest(UnaryArithmeticParameterTest.suite());

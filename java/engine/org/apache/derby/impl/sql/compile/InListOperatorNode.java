@@ -279,6 +279,27 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 				if (judgeODV.equals(minODV, maxODV).equals(true))
 				{
+                    int judgePrecedence = judgeODV.typePrecedence();
+                    int leftPrecedence = leftOperand.getTypeServices()
+                            .getTypeId().typePrecedence();
+                    if (leftPrecedence != judgePrecedence &&
+                            minODV.typePrecedence() != judgePrecedence) {
+                        // DERBY-6017: If neither the minimum value nor the
+                        // left operand is of the dominant type, cast the
+                        // minimum value to the dominant type. Otherwise, the
+                        // equals operation will be performed using a different
+                        // type, which may not have the same ordering as the
+                        // type used to sort the list, and it could produce
+                        // unexpected results.
+                        CastNode cn = (CastNode) getNodeFactory().getNode(
+                                C_NodeTypes.CAST_NODE,
+                                minValue,
+                                targetType,
+                                getContextManager());
+                        cn.bindCastNodeOnly();
+                        minValue = cn;
+                    }
+
 					BinaryComparisonOperatorNode equal = 
 						(BinaryComparisonOperatorNode)getNodeFactory().getNode(
 							C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
