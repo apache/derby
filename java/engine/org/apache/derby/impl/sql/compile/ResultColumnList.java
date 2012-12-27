@@ -1516,10 +1516,13 @@ public class ResultColumnList extends QueryTreeNodeVector
      *
      * @param referencedCols a bit map that tells which columns in the
      * source result set that are used, or {@code null} if all are used
+     * @param skipPropagatedCols whether to skip virtual columns whose
+     * source is the immediate child result set
      * @return an instance that produces rows of the same shape as this
      * result column list
      */
-    ExecRowBuilder buildRowTemplate(FormatableBitSet referencedCols)
+    ExecRowBuilder buildRowTemplate(FormatableBitSet referencedCols,
+                                    boolean skipPropagatedCols)
             throws StandardException
     {
         int columns = (referencedCols == null) ?
@@ -1527,17 +1530,28 @@ public class ResultColumnList extends QueryTreeNodeVector
 
         ExecRowBuilder builder = new ExecRowBuilder(columns, indexRow);
 
+        // Get the index of the first column to set in the row template.
         int colNum = (referencedCols == null) ? 0 : referencedCols.anySetBit();
 
         for (int i = 0; i < size(); i++) {
             ResultColumn rc = (ResultColumn) elementAt(i);
 
-            if (rc.getExpression() instanceof CurrentRowLocationNode) {
+            ValueNode sourceExpr = rc.getExpression();
+
+            if (sourceExpr instanceof CurrentRowLocationNode) {
                 builder.setColumn(colNum + 1, newRowLocationTemplate());
+            } else if (skipPropagatedCols &&
+                    sourceExpr instanceof VirtualColumnNode) {
+                // Skip over those columns whose source is the immediate
+                // child result set. (No need to generate a wrapper
+                // for a SQL NULL when we are smart enough not to pass
+                // that wrapper to the store.)
+                continue;
             } else {
                 builder.setColumn(colNum + 1, rc.getType());
             }
 
+            // Get the index of the next column to set in the row template.
             if (referencedCols == null) {
                 colNum++;
             } else {
@@ -1548,180 +1562,12 @@ public class ResultColumnList extends QueryTreeNodeVector
         return builder;
     }
 
-	/**
-		Generates a row with the size and shape of the ResultColumnList.
-
-		Some structures, like FromBaseTable and DistinctNode,
-		need to generate rowAllocator functions to get a row
-		the size and shape of their ResultColumnList.  
-
-		We return the method pointer, which is a field access
-		in the generated class.
-
-		@exception StandardException
-	 */
-	void generateHolder(ExpressionClassBuilder acb,
-								MethodBuilder mb,
-								FormatableBitSet referencedCols,
-								FormatableBitSet propagatedCols)
-								throws StandardException {
-
-		// what we return is a pointer to the method.
-   	    acb.pushMethodReference(mb, generateHolderMethod(acb, referencedCols, propagatedCols));
-	}
-
-	MethodBuilder generateHolderMethod(ExpressionClassBuilder acb,
-								FormatableBitSet referencedCols,
-								FormatableBitSet propagatedCols)
-							throws StandardException {
-		int			numCols;
-		String		rowAllocatorMethod;
-		String		rowAllocatorType;
-		int			highestColumnNumber = -1;
-
-		if (referencedCols != null)
-		{
-			// Find the number of the last column referenced in the table
-			for (int i = referencedCols.anySetBit();
-				 i != -1;
-				 i = referencedCols.anySetBit(i))
-			{
-				highestColumnNumber = i;
-			}
-		}
-		else
-		{
-			highestColumnNumber = size() - 1;
-		}
-
-		// Within the constructor:
-		//	 fieldX = getExecutionFactory().getValueRow(# cols);
-		// The body of the new method:
-   		// { 
-   		//   fieldX.setColumn(1, col(1).generateColumn(ps)));
-   		//   ... and so on for each column ...
-   		//   return fieldX;
-   		// }
-   		// static Method exprN = method pointer to exprN;
-
-   		// this sets up the method and the static field
-   		MethodBuilder exprFun = acb.newExprFun();
-
-		// Allocate the right type of row, depending on
-		// whether we're scanning an index or a heap.
-		if (indexRow)
-		{
-			rowAllocatorMethod = "getIndexableRow";
-			rowAllocatorType = ClassName.ExecIndexRow;
-		}
-		else
-		{
-			rowAllocatorMethod = "getValueRow";
-			rowAllocatorType = ClassName.ExecRow;
-		}
-		numCols = size();
-
-		/* Declare the field */
-		LocalField lf = acb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecRow);
-		// Generate the code to create the row in the constructor
-		genCreateRow(acb, lf, rowAllocatorMethod, rowAllocatorType, highestColumnNumber + 1);
-
-		// now we fill in the body of the function
-
-		int colNum;
-
-		// If there is a referenced column map, the first column to fill
-		// in is the first one in the bit map - otherwise, it is
-		// column 0.
-		if (referencedCols != null)
-			colNum = referencedCols.anySetBit();
-		else
-			colNum = 0;
-
-		for (int index = 0; index < numCols; index++)
-		{
-			ResultColumn rc = ((ResultColumn) elementAt(index));
-
-			/* Special code generation for RID since expression is CurrentRowLocationNode.
-			 * Really need yet another node type that does its own code generation.
-			 */
-			if (rc.getExpression() instanceof CurrentRowLocationNode)
-			{
-                int savedItem = acb.addItem(newRowLocationTemplate());
-
-				// get the RowLocation template
-				exprFun.getField(lf); // instance for setColumn
-				exprFun.push(highestColumnNumber + 1); // first arg
-
-				exprFun.pushThis(); // instance for getRowLocationTemplate
-				exprFun.push(savedItem); // first arg
-				exprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Activation, "getRowLocationTemplate",
-									ClassName.RowLocation, 1);
-
-				exprFun.upCast(ClassName.DataValueDescriptor);
-				exprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "setColumn",
-											"void", 2);
-				continue;
-			}
-
-			/* Skip over those columns whose source is the immediate
-			 * child result set.  (No need to generate a wrapper
-			 * for a SQL NULL when we are smart enough not to pass
-			 * that wrapper to the store.)
-			 * NOTE: Believe it or not, we have to check for the case
-			 * where referencedCols is not null, but no bits are set.
-			 * This can happen when we need to get all of the columns
-			 * from the heap due to a check constraint.
-			 */
-			if (propagatedCols != null &&
-				propagatedCols.getNumBitsSet() != 0)
-			{
-				/* We can skip this RC if it is simply propagating 
-				 * a column from the source result set.
-				 */
-				ValueNode sourceExpr = rc.getExpression();
-
-				if (sourceExpr instanceof VirtualColumnNode)
-				{
-					// There is a referenced columns bit set, so use
-					// it to figure out what the next column number is.
-					// colNum = referencedCols.anySetBit(colNum);
-					continue;
-				}
-			}
-
-			// generate the column space creation call
-       		// generate statements of the form
-    		// r.setColumn(columnNumber, columnShape);
-    		//
-    		// This assumes that there are no "holes" in the column positions,
-    		// and that column positions reflect the stored format/order
-			exprFun.getField(lf); // instance
-			exprFun.push(colNum + 1); // first arg
-			rc.generateHolder(acb, exprFun);
-
-			exprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "setColumn", "void", 2);
-
-			// If there is a bit map of referenced columns, use it to
-			// figure out what the next column is, otherwise just go
-			// to the next column.
-			if (referencedCols != null)
-				colNum = referencedCols.anySetBit(colNum);
-			else
-				colNum++;
-    	}
-			
-		// generate:
-		// return fieldX;
-		// and add to the end of exprFun's body.
-		exprFun.getField(lf);
-		exprFun.methodReturn();
-
-		// we are done putting stuff in exprFun:
-		exprFun.complete();
-
-		return exprFun;
-	}
+    /**
+     * Shorthand for {@code buildRowTemplate(null, false)}.
+     */
+    ExecRowBuilder buildRowTemplate() throws StandardException {
+        return buildRowTemplate(null, false);
+    }
 
 	/**
 	 * Generate the code to create an empty row in the constructor.

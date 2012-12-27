@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
@@ -64,7 +65,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	// set in open() and not changed after that
 	private ConglomerateController	baseCC;
 	private boolean                 closeBaseCCHere;
-	private ExecRow					resultRow;
 	private boolean					forUpdate;
 	private DataValueDescriptor[]	rowArray;
 
@@ -87,7 +87,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 					int scociItem,
 					Activation a,
 					NoPutResultSet source,
-					GeneratedMethod resultRowAllocator,
+					int resultRowAllocator,
 					int resultSetNumber,
 					String indexName,
 					int heapColRefItem,
@@ -132,7 +132,8 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			 saved[indexColMapItem]).getReferencedColumnPositions();
 
 		/* Get the result row template */
-		resultRow = (ExecRow) resultRowAllocator.invoke(activation);
+        ExecRow resultRow = ((ExecRowBuilder) saved[resultRowAllocator])
+                                .build(a.getExecutionFactory());
 
 		// Note that getCompactRow will assign its return value to the
 		// variable compactRow which can be accessed through

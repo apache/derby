@@ -1077,7 +1077,7 @@ public interface ResultSetFactory {
 								long conglomId,
 								int scoci,
 								NoPutResultSet source,
-								GeneratedMethod resultRowAllocator,
+								int resultRowAllocator,
 								int resultSetNumber,
 								String indexName,
 								int heapColRefItem,

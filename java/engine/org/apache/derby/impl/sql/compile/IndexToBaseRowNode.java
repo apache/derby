@@ -237,7 +237,19 @@ public class IndexToBaseRowNode extends FromTable
 		
 		mb.upCast(ClassName.NoPutResultSet);
 
-		resultColumns.generateHolder(acb, mb,  heapReferencedCols, indexReferencedCols);
+        // Skip over the index columns that are propagated from the source
+        // result set, if there are such columns. We won't pass the SQL NULL
+        // wrappers down to store for those columns anyways, so no need to
+        // generate them in the row template.
+        // NOTE: We have to check for the case where indexReferencedCols is
+        // not null, but no bits are set. This can happen when we need to get
+        // all of the columns from the heap due to a check constraint.
+        boolean skipPropagatedCols =
+                indexReferencedCols != null &&
+                indexReferencedCols.getNumBitsSet() != 0;
+        mb.push(acb.addItem(resultColumns
+                .buildRowTemplate(heapReferencedCols, skipPropagatedCols)));
+
 		mb.push(resultSetNumber);
 		mb.push(source.getBaseTableName());
 		mb.push(heapColRefItem);

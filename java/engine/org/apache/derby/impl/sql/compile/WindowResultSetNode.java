@@ -410,7 +410,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         mb.upCast(ClassName.NoPutResultSet);
 
         /* row allocator */
-        mb.push(acb.addItem(resultColumns.buildRowTemplate(null))); // arg 3
+        mb.push(acb.addItem(resultColumns.buildRowTemplate())); // arg 3
 
         mb.push(resultSetNumber); //arg 4
 

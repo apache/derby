@@ -3403,7 +3403,8 @@ public class FromBaseTable extends FromTable
 
 		acb.pushThisAsActivation(mb);
 		mb.push(getResultSetNumber());
-        mb.push(acb.addItem(resultColumns.buildRowTemplate(referencedCols)));
+        mb.push(acb.addItem(
+            resultColumns.buildRowTemplate(referencedCols, false)));
 		mb.push(cd.getConglomerateNumber());
 		mb.push(tableDescriptor.getName());
 		//User may have supplied optimizer overrides in the sql
@@ -3496,7 +3497,8 @@ public class FromBaseTable extends FromTable
      	acb.pushThisAsActivation(mb);
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
-        mb.push(acb.addItem(resultColumns.buildRowTemplate(referencedCols)));
+        mb.push(acb.addItem(
+            resultColumns.buildRowTemplate(referencedCols, false)));
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
 		mb.push(tableDescriptor.getName());
@@ -3570,7 +3572,7 @@ public class FromBaseTable extends FromTable
 	{
         // Put the result row template in the saved objects.
         int resultRowTemplate =
-                acb.addItem(resultColumns.buildRowTemplate(referencedCols));
+            acb.addItem(resultColumns.buildRowTemplate(referencedCols, false));
 
 		// pass in the referenced columns on the saved objects
 		// chain

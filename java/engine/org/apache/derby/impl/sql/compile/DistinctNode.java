@@ -313,7 +313,7 @@ public class DistinctNode extends SingleChildResultSetNode
 		mb.push(true);
 		mb.push(inSortedOrder);
 		mb.push(orderItem);
-        mb.push(acb.addItem(resultColumns.buildRowTemplate(null)));
+        mb.push(acb.addItem(resultColumns.buildRowTemplate()));
 		mb.push(resultColumns.getTotalColumnSize());
 		mb.push(resultSetNumber);
 		mb.push(costEstimate.rowCount());

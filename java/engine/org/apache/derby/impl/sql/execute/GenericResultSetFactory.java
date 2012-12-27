@@ -804,7 +804,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								long conglomId,
 								int scociItem,
 								NoPutResultSet source,
-								GeneratedMethod resultRowAllocator,
+								int resultRowAllocator,
 								int resultSetNumber,
 								String indexName,
 								int heapColRefItem,
