@@ -141,11 +141,10 @@ final class Clock implements CacheManager, Serviceable {
 
 		@param holderFactory the cacheable object class
 		@param name the name of the cache
-		@param initialSize the initial number of cachable object this cache
-		holds.
+		@param initialSize the initial capacity of the cache
 		@param maximumSize the maximum size of the cache.  The cache may grow
 		from initialSize to maximumSize if the cache policy notices that there
-		is not enough free buffers availiable.  Once the cache hits maximumSize
+		are not enough free buffers available.  Once the cache hits maximumSize
 		it will not grow.  If the cache is full, an exception will be thrown
 
 	*/

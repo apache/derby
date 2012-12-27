@@ -32,7 +32,7 @@ public interface CacheFactory {
 
 		@param holderFactory The factory for the objects that are to be cached.
 		@param name			The name of the cache
-		@param initialSize	The number of initial holder objects that will be created
+		@param initialSize	The initial capacity of the cache
 		@param maximumSize  The maximum number of objects the cache will hold
  
 	*/
