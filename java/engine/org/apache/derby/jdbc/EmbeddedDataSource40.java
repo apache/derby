@@ -176,7 +176,10 @@ import org.apache.derby.impl.jdbc.Util;
 	</PRE>
 
 */
-public class EmbeddedDataSource40 extends EmbeddedDataSource {
+public class EmbeddedDataSource40 extends EmbeddedDataSource
+    implements javax.sql.DataSource /* compile-time check for 4.1 extension */
+{
+   private static final long serialVersionUID = 4472591890758954803L;
     
     public EmbeddedDataSource40() {
     }

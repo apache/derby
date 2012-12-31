@@ -225,18 +225,18 @@ public class EmbeddedDataSource extends ReferenceableDataSource
      * @return the created reference object for this data source
      * @exception NamingException cannot find named object
      */
-   public final Reference getReference() throws NamingException
+    public final Reference getReference() throws NamingException
 	{
-       // These fields will be set by the JNDI server when it decides to
-       // materialize a data source.
-       Reference ref = new Reference(
-               this.getClass().getName(),
-               "org.apache.derby.jdbc.ReferenceableDataSource",
-               null);
+        // These fields will be set by the JNDI server when it decides to
+        // materialize a data source.
+        Reference ref = new Reference(
+            this.getClass().getName(),
+            "org.apache.derby.jdbc.ReferenceableDataSource",
+            null);
 
         addBeanProperties(this, ref);
 
-       return ref;
+        return ref;
 	}
 
     /**
@@ -248,7 +248,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource
      * converted from the method name. E.g. traceDirectory for
      * traceDirectory.
      *
-      */
+     */
     private static void addBeanProperties(Object ths, Reference ref)
     {
         // Look for all the getXXX methods in the class that take no arguments.
