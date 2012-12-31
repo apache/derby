@@ -168,7 +168,7 @@ public class Driver40 extends Driver30 {
      * of EmbeddedDataSource.
      */
     protected PooledConnection getNewPooledConnection(
-        EmbeddedDataSource eds, String user, String password,
+        EmbeddedBaseDataSource eds, String user, String password,
         boolean requestPassword) throws SQLException
     {
         return new EmbedPooledConnection40(
@@ -177,17 +177,17 @@ public class Driver40 extends Driver30 {
 
     /**
      * Create and return an EmbedXAConnection from the received instance
-     * of EmbeddedDataSource.
+     * of EmbeddedBaseDataSource.
      */
     protected XAConnection getNewXAConnection(
-        EmbeddedDataSource eds, ResourceAdapter ra,
+        EmbeddedBaseDataSource eds, ResourceAdapter ra,
         String user, String password, boolean requestPassword)
         throws SQLException
     {
         return new EmbedXAConnection40(
             eds, ra, user, password, requestPassword);
     }
-    
+
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

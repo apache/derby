@@ -52,7 +52,11 @@ import org.apache.derby.impl.jdbc.Util;
 	<P>See EmbeddedDataSource40 for DataSource properties.
 
  */
-public class EmbeddedXADataSource40 extends EmbeddedXADataSource {
+public class EmbeddedXADataSource40 extends EmbeddedXADataSource
+    implements javax.sql.XADataSource /* compile-time check for 4.1 extension */
+{
+   private static final long serialVersionUID = 4048303427908481258L;
+
     /** Creates a new instance of EmbeddedXADataSource40 */
     public EmbeddedXADataSource40() {
         super();

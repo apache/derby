@@ -56,8 +56,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 	<P>See EmbeddedDataSource for DataSource properties.
 
  */
-public class EmbeddedXADataSource extends EmbeddedDataSource implements
-				javax.sql.XADataSource
+public class EmbeddedXADataSource extends EmbeddedDataSource implements EmbeddedXADataSourceInterface
 {
 
 	private static final long serialVersionUID = -5715798975598379738L;
@@ -88,7 +87,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 	public final XAConnection getXAConnection() throws SQLException
 	{
 		if (ra == null || !ra.isActive())
-			setupResourceAdapter(null, null, false);
+           ra = setupResourceAdapter(this, ra, null, null, false);
 
 		return createXAConnection (ra, getUser(), getPassword(), false);
 	}
@@ -106,91 +105,30 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 		 throws SQLException 
 	{
 		if (ra == null || !ra.isActive())
-			setupResourceAdapter(user, password, true);
-                return createXAConnection (ra, user, password, true);
+           ra = setupResourceAdapter(this, ra, user, password, true);
+
+        return createXAConnection (ra, user, password, true);
 	}
 	
 	/*
 	 * private method
 	 */
 
-	void update() {
+   protected void update() {
 		ra = null;
 		super.update();
 	}
 
-	private void setupResourceAdapter(String user, String password, boolean requestPassword) throws SQLException
-	{
-		synchronized(this)
-		{
-			if (ra == null || !ra.isActive())
-			{
-				// If it is inactive, it is useless.
-				ra = null;
-				
-				// DERBY-4907 make sure the database name sent to find service
-				// does not include attributes.
-				String dbName = getShortDatabaseName();
-				
-				if (dbName != null) {
-
-					// see if database already booted, if it is, then don't make a
-					// connection. 
-					Database database = null;
-
-					// if monitor is never setup by any ModuleControl, getMonitor
-					// returns null and no Derby database has been booted. 
-					if (Monitor.getMonitor() != null)
-						database = (Database)
-							Monitor.findService(Property.DATABASE_MODULE, dbName);
-
-					if (database == null)
-					{
-						// If database is not found, try connecting to it.  This
-						// boots and/or creates the database.  If database cannot
-						// be found, this throws SQLException.
-						if (requestPassword)
-							getConnection(user, password).close();
-						else
-							getConnection().close();
-
-						// now try to find it again
-						database = (Database)
-							Monitor.findService(Property.DATABASE_MODULE, dbName); 
-					}
-
-					if (database != null)
-						ra = (ResourceAdapter) database.getResourceAdapter();
-				}
-
-				if (ra == null)
-					throw new SQLException(MessageService.getTextMessage(MessageId.CORE_DATABASE_NOT_AVAILABLE),
-										   "08006",
-										   ExceptionSeverity.DATABASE_SEVERITY);
-
-
-				// If database is already up, we need to set up driver
-				// seperately. 
-				findDriver();
-
-				if (driver == null)
-					throw new SQLException(MessageService.getTextMessage(MessageId.CORE_DRIVER_NOT_AVAILABLE),
-										   "08006",
-										   ExceptionSeverity.DATABASE_SEVERITY);
-
-			}
-		}
-	}
         
     /**
-     * Intantiate and return an EmbedXAConnection from this instance
+     * Instantiate and return an EmbedXAConnection from this instance
      * of EmbeddedXADataSource.
      *
      * @param user 
      * @param password 
      * @return XAConnection
      */
-    protected XAConnection createXAConnection (ResourceAdapter ra, 
+    private XAConnection createXAConnection (ResourceAdapter ra,
         String user, String password, boolean requestPassword)
         throws SQLException
     {

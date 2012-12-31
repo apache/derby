@@ -179,7 +179,7 @@ public class JDBCDataSource {
             }
             return ds;
         } catch (Exception e) {
-            Assert.fail(e.toString());
+            BaseTestCase.fail("unexpected error", e);
             return null;
         }
     }

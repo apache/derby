@@ -25,8 +25,13 @@ import java.sql.SQLException;
 import java.util.Properties;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.jdbc.EmbeddedXADataSourceInterface;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 
 /**
@@ -38,7 +43,7 @@ class XADatabase extends Database {
 
 
     // XA Datasource used by all the XA connection requests
-    private EmbeddedXADataSource xaDataSource;
+    private EmbeddedXADataSourceInterface xaDataSource;
 
     private XAResource xaResource;
     private XAConnection xaConnection;

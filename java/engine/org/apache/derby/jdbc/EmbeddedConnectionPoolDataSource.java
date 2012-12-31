@@ -46,7 +46,7 @@ import javax.sql.PooledConnection;
 
  */
 public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
-		implements	javax.sql.ConnectionPoolDataSource
+    implements EmbeddedConnectionPoolDataSourceInterface
 {
 
 	private static final long serialVersionUID = 7852784308039674160L;
@@ -94,7 +94,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
      * Create and return an EmbedPooledConnection from this instance
      * of EmbeddedConnectionPoolDataSource.
      */
-    protected PooledConnection createPooledConnection (String user,
+    private PooledConnection createPooledConnection (String user,
         String password, boolean requestPassword) throws SQLException
     {
         /* This object (EmbeddedConnectionPoolDataSource) is a JDBC 2

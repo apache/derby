@@ -121,7 +121,7 @@ public class Driver30 extends Driver20 {
      * of EmbeddedDataSource.
      */
     protected PooledConnection getNewPooledConnection(
-        EmbeddedDataSource eds, String user, String password,
+        EmbeddedBaseDataSource eds, String user, String password,
         boolean requestPassword) throws SQLException
     {
         return new EmbedPooledConnection(
@@ -133,7 +133,7 @@ public class Driver30 extends Driver20 {
      * of EmbeddedDataSource.
      */
     protected XAConnection getNewXAConnection(
-        EmbeddedDataSource eds, ResourceAdapter ra,
+        EmbeddedBaseDataSource eds, ResourceAdapter ra,
         String user, String password, boolean requestPassword)
         throws SQLException
     {

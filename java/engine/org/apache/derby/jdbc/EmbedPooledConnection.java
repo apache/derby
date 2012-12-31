@@ -88,7 +88,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	BrokeredConnection currentConnectionHandle;
 
 	// set up once by the data source
-	final ReferenceableDataSource dataSource;
+   final EmbeddedBaseDataSource dataSource;
 	private final String username;
 	private final String password;
 	/**
@@ -106,7 +106,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
         return isActive;
     }
     
-    EmbedPooledConnection(ReferenceableDataSource ds, String u, String p,
+    EmbedPooledConnection(EmbeddedBaseDataSource ds, String u, String p,
             boolean requestPassword) throws SQLException
 	{
 		dataSource = ds;

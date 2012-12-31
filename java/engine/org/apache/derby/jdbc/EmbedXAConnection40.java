@@ -52,7 +52,7 @@ final class EmbedXAConnection40 extends EmbedXAConnection
      * @param password 
      * @param requestPassword 
      */
-    	EmbedXAConnection40 (EmbeddedDataSource ds, ResourceAdapter ra, 
+       EmbedXAConnection40 (EmbeddedBaseDataSource ds, ResourceAdapter ra,
                 String user, String password, 
                 boolean requestPassword) throws SQLException {
 		super(ds, ra, user, password, requestPassword);

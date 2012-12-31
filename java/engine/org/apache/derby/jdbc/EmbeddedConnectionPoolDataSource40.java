@@ -22,7 +22,6 @@ package org.apache.derby.jdbc;
 
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
-import javax.sql.ConnectionPoolDataSource;
 import org.apache.derby.impl.jdbc.Util;
 
 /** 
@@ -50,8 +49,10 @@ import org.apache.derby.impl.jdbc.Util;
 
  */
 public class EmbeddedConnectionPoolDataSource40 
-                                extends EmbeddedConnectionPoolDataSource 
-                                implements ConnectionPoolDataSource {    
+    extends EmbeddedConnectionPoolDataSource
+    implements javax.sql.ConnectionPoolDataSource // compile-time check for
+                                                  // 4.1 extension
+{
     
     ////////////////////////////////////////////////////////////////////
     //

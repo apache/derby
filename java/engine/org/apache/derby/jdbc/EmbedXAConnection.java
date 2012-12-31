@@ -48,7 +48,11 @@ class EmbedXAConnection extends EmbedPooledConnection
 
         private EmbedXAResource xaRes;
 
-	EmbedXAConnection(EmbeddedDataSource ds, ResourceAdapter ra, String u, String p, boolean requestPassword) throws SQLException
+   EmbedXAConnection(EmbeddedBaseDataSource ds,
+                      ResourceAdapter ra,
+                      String u,
+                      String p,
+                      boolean requestPassword) throws SQLException
 	{
 		super(ds, u, p, requestPassword);
                 xaRes = new EmbedXAResource (this, ra);
