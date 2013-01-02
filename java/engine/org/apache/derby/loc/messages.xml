@@ -3607,6 +3607,12 @@ Guide.
                 <arg>aggregateOrFunctionName</arg>
             </msg>
 
+            <msg>
+                <name>X0Y88.S</name>
+                <text>Unknown optional tool: '{0}'</text>
+                <arg>toolName</arg>
+            </msg>
+
         </family>
 
 

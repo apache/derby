@@ -1378,6 +1378,7 @@ public interface SQLState {
 	String LANG_UNKNOWN_SEQUENCE_PREALLOCATOR                                = "X0Y85.S";
 	String LANG_CANT_FLUSH_PREALLOCATOR                                = "X0Y86.S";
 	String LANG_BAD_UDA_OR_FUNCTION_NAME                                = "X0Y87.S";
+	String LANG_UNKNOWN_TOOL_NAME                                = "X0Y88.S";
 
 
 	// TEMPORARY EXECUTION RESTRICTIONS

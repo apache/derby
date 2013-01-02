@@ -13392,6 +13392,7 @@ public final class	DataDictionaryImpl
         throws StandardException
     {
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+        TypeDescriptor varchar32672Type = DataTypeDescriptor.getCatalogType( Types.VARCHAR, 32672 );
 
         // void SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
         {               
@@ -13408,6 +13409,37 @@ public final class	DataDictionaryImpl
                 (TypeDescriptor) null,
                 newlyCreatedRoutines,
                 tc);
+        }
+        
+        // void SYSCS_UTIL.SYSCS_REGISTER_TOOL
+        {               
+            // procedure argument names
+            String[] arg_names = { "toolName", "register", "optionalArgs" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    varchar32672Type,
+                    DataTypeDescriptor.getCatalogType( Types.BOOLEAN ),
+                    varchar32672Type,
+                };
+
+            createSystemProcedureOrFunction
+                (
+                 "SYSCS_REGISTER_TOOL",
+                 sysUtilUUID,
+                 arg_names,
+                 arg_types,
+                 0,
+                 0,
+                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                 false,
+                 true,
+                 (TypeDescriptor) null,
+                 newlyCreatedRoutines,
+                 tc,
+                 "org.apache.derby.catalog.Java5SystemProcedures"
+                 );
         }
         
     }

@@ -120,31 +120,30 @@ public class Changes10_10 extends UpgradeChange
     public  void    testProcsNewTo10_10()  throws Exception
     {
         Statement s = createStatement();
+        String  iss = "call syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS()";
+        String  rt = "call syscs_util.syscs_register_tool( 'foo', true )";
+        String  rtGoodSQLState = "X0Y88";
+        String  syntaxError = "42X01";
+        boolean atLeastJava5 = JDBC.vmSupportsJDBC3();
+        boolean oldSupportsBoolean = oldAtLeast( 10, 7 );
 
         switch ( getPhase() )
         {
         case PH_CREATE: // create with old version
-            vetProcs(s, "call syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS()", 
-            		false, 
-            		"syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS should not exist.");
-            break;
-            
         case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
-            vetProcs(s, "call syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS()", 
-            		false, 
-            		"syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS should not exist.");
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            vetProcs( s, iss, false, null );
+            if ( atLeastJava5 )
+            {
+                vetProcs
+                    ( s, rt, false,
+                      oldSupportsBoolean || (getPhase() == PH_SOFT_UPGRADE ) ? null : syntaxError );
+            }
             break;
             
-        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
-            vetProcs(s, "call syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS()", 
-            		false, 
-            		"syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS should not exist.");
-            break;
-
         case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
-            vetProcs(s, "call syscs_util.SYSCS_INVALIDATE_STORED_STATEMENTS()", 
-            		true, 
-            		null);
+            vetProcs( s, iss, true, null );
+            if ( atLeastJava5 ) { vetProcs( s, rt, true, rtGoodSQLState ); }
             break;
         }
         
@@ -152,27 +151,29 @@ public class Changes10_10 extends UpgradeChange
     	
     }
     
-    private void    vetProcs( Statement s, String procCall, 
-    		boolean shouldExist,
-    		String errorMessage) throws Exception
+    private void    vetProcs
+        (
+         Statement s,
+         String procCall, 
+         boolean shouldExist,
+         String sqlState
+         ) throws Exception
     {
         try {
             s.execute( procCall );
             
             if ( !shouldExist )
             {
-                fail( errorMessage );
+                fail( "Procedure should not exist!"  );
+            }
+            if ( sqlState != null )
+            {
+                fail( "Expected to fail with SQLState " + sqlState );
             }
         } catch (SQLException se )
         {
-            if ( shouldExist )
-            {
-                assertSQLState( "4251K", se );
-            }
-            else
-            {
-                assertSQLState( "42Y03", se );
-            }
+            if ( sqlState == null ) { sqlState = "42Y03"; }
+            assertSQLState( sqlState, se );
         }
     }
 
