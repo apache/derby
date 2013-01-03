@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE messages SYSTEM "messages.dtd">
 
 <!-- 
@@ -1467,6 +1467,11 @@ Guide.
             <msg>
                 <name>4287A</name>
                 <text>The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.</text>
+            </msg>
+
+            <msg>
+                <name>4287B</name>
+                <text>In this context, the ORDER BY clause may only specify a column number.</text>
             </msg>
 
 

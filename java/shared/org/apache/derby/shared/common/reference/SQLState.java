@@ -898,6 +898,7 @@ public interface SQLState {
         String LANG_UNION_ORDER_BY                                         = "42878";
 	String LANG_DISTINCT_ORDER_BY                                      = "42879";
 	String LANG_DISTINCT_ORDER_BY_EXPRESSION                           = "4287A";
+    String LANG_TABLE_VALUE_CTOR_RESTRICTION                           = "4287B";
 	String LANG_EMPTY_VALUES_CLAUSE                                    = "42X80";
 	String LANG_EMPTY_COLUMN_LIST                                      = "42X81";
 	String LANG_USING_CARDINALITY_VIOLATION                            = "42X82";

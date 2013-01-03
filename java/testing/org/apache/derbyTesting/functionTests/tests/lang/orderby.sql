@@ -904,3 +904,13 @@ drop table d3303;
 
 -- See also Derby5005.java which should be merged with this test when
 -- it gets converted to JUnit.
+
+-- DERBY-6009: forbid expression when using ORDER BY with VALUES
+values 1 order by 1+0;
+values 1,2 order by 1+0;
+(values 1 order by 1+0) union (values 1,2 order by 1);
+-- OK:
+(values 1 order by 1) union (values 1,2 order by 1);
+values (1,-1),(3,-3),(2,-2) order by 1;
+values (1,-1),(3,-3),(2,-2) order by 2;
+

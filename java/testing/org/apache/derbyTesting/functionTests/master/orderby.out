@@ -2320,5 +2320,30 @@ ij> drop table d3303;
 0 rows inserted/updated/deleted
 ij> -- See also Derby5005.java which should be merged with this test when
 -- it gets converted to JUnit.
-;
+
+-- DERBY-6009: forbid expression when using ORDER BY with VALUES
+values 1 order by 1+0;
+ERROR 4287B: In this context, the ORDER BY clause may only specify a column number.
+ij> values 1,2 order by 1+0;
+ERROR 4287B: In this context, the ORDER BY clause may only specify a column number.
+ij> (values 1 order by 1+0) union (values 1,2 order by 1);
+ERROR 4287B: In this context, the ORDER BY clause may only specify a column number.
+ij> -- OK:
+(values 1 order by 1) union (values 1,2 order by 1);
+1          
+-----------
+1          
+2          
+ij> values (1,-1),(3,-3),(2,-2) order by 1;
+1          |2          
+-----------------------
+1          |-1         
+2          |-2         
+3          |-3         
+ij> values (1,-1),(3,-3),(2,-2) order by 2;
+1          |2          
+-----------------------
+3          |-3         
+2          |-2         
+1          |-1         
 ij> 

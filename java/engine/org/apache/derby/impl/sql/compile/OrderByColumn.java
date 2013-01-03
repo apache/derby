@@ -233,6 +233,13 @@ public class OrderByColumn extends OrderedColumn {
 			}
 
 		}else{
+            if (list.isTableValueCtorOrdering()) {
+                // For VALUES, we only allow ordering by column number,
+                // SQL-92 style. This is a more general expression, so throw.
+                throw StandardException.newException(
+                        SQLState.LANG_TABLE_VALUE_CTOR_RESTRICTION);
+            }
+
 			/*checks for the conditions when using distinct*/
 			if (addedColumnOffset >= 0 &&
 					target instanceof SelectNode &&
