@@ -2422,7 +2422,14 @@ public class PreparedStatement extends Statement
     private void checkThatAllParametersAreSet() throws SqlException {
         if (parameterMetaData_ != null) {
             for (int i = 0; i < parameterMetaData_.columns_; i++) {
-                if (!parameterSet_[i] && !parameterRegistered_[i]) {
+                // Raise an exception if at least one of the parameters isn't
+                // set. It is OK that a parameter isn't set if it is registered
+                // as an output parameter. However, if it's an INOUT parameter,
+                // it must be set even if it has been registered (DERBY-2516).
+                if (!parameterSet_[i] &&
+                        (!parameterRegistered_[i] ||
+                         parameterMetaData_.sqlxParmmode_[i] ==
+                            java.sql.ParameterMetaData.parameterModeInOut)) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.LANG_MISSING_PARMS));
                 }

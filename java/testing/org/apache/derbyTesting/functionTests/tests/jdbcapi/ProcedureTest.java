@@ -815,6 +815,51 @@ public class ProcedureTest extends BaseJDBCTestCase {
              );
     }
 
+    /**
+     * Regression test case for DERBY-2516. If an INOUT parameter had been
+     * registered as an output parameter, but no input value had been assigned
+     * to it, the client driver would go ahead and execute the statement
+     * using null as input.
+     */
+    public void testInOutParamNotSet() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create procedure proc_2516 (inout i int) " +
+                  "language java parameter style java external name '" +
+                  getClass().getName() + ".proc_2516' no sql");
+
+        // Register an INOUT parameter, but don't set it. Expect failure.
+        // Client used to execute without error.
+        CallableStatement cs = prepareCall("call proc_2516(?)");
+        cs.registerOutParameter(1, Types.INTEGER);
+        assertStatementError("07000", cs);
+
+        // Should work if the parameter has been set.
+        cs.setInt(1, 0);
+        cs.execute();
+        assertEquals(10, cs.getInt(1));
+
+        // After clearing the parameters, execution should fail. Client used
+        // to succeed.
+        cs.clearParameters();
+        assertStatementError("07000", cs);
+
+        // Setting the parameter again should make it work.
+        cs.setInt(1, 1);
+        cs.execute();
+        assertEquals(10, cs.getInt(1));
+    }
+
+    /**
+     * Stored procedure used by the regression test case for DERBY-2516.
+     *
+     * @param i INOUT parameter that gets set to 10 by the procedure
+     */
+    public static void proc_2516(Integer[] i) {
+        i[0] = new Integer(10);
+    }
+
     // UTILITY METHODS
 
     /**

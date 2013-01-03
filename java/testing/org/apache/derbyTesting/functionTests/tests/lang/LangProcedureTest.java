@@ -1748,17 +1748,14 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertSQLState("07000", sqle);
         }
-        if (usingEmbedded()) {
-            // Do not run for client until DERBY-2516 is fixed
-            op.clearParameters();
-            op.setString(2, "2");
-            try {
-                // a not set
-                op.execute();
-                fail("FAIL - a  not set");
-            } catch (SQLException sqle) {
-                assertSQLState("07000", sqle);
-            }
+        op.clearParameters();
+        op.setString(2, "2");
+        try {
+            // a not set
+            op.execute();
+            fail("FAIL - a  not set");
+        } catch (SQLException sqle) {
+            assertSQLState("07000", sqle);
         }
         op.clearParameters();
         op.setBigDecimal(1, new BigDecimal("33"));
