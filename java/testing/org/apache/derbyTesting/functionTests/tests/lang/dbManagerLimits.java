@@ -533,8 +533,9 @@ public class dbManagerLimits
 			StringBuffer sbExecuteProcParams = new StringBuffer();
 			String tempString = new String();
 			int i = 0;
+            int oldDB2Limits = 90;
 
-			for (i = 0; i < Limits.DB2_MAX_PARAMS_IN_STORED_PROCEDURE-2; i++) {
+			for (i = 0; i < oldDB2Limits-2; i++) {
 				sbCreateProcParams.append("i" + i + " int, ");
 				sbExecuteProcParams.append("1, ");
 			}
@@ -552,19 +553,13 @@ public class dbManagerLimits
 			DatabaseMetaData met = conn.getMetaData();
 			getCount(met.getProcedureColumns("", "APP", "P2", null));
 
+            // This now succeeds because of the work done on DERBY-6033.
 			System.out.println("And finally create a procedure with more parameters that maximum allowed number of parameters");
 			tempString = "create procedure P3(" + sbCreateProcParams.toString() + "i" + i +
         " int, i" + (i+1) + " int, i" + (i+2) + " int) parameter style java language java external name \'org.apache.derbyTesting.functionTests.util.ProcedureTest.moreThanMaxAllowedParams\' NO SQL";
-			try {
-				s.executeUpdate(tempString);
-				System.out.println("FAIL - create procedure should have failed");
-			}
-			catch (SQLException e) {
-				if (e.getSQLState().equals("54023"))
-					System.out.println("expected exception " + e.getMessage());
-				else
-					dumpSQLExceptions(e);
-			}
+            s.executeUpdate(tempString);
+			getCount(met.getProcedureColumns("", "APP", "P3", null));
+            
 		} catch (SQLException sqle) {
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 			sqle.printStackTrace(System.out);

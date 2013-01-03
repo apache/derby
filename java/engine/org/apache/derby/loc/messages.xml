@@ -7484,14 +7484,6 @@ MessageId.java.
             </msg>
 
             <msg>
-                <name>54023</name>
-                <text>The limit for the number of parameters for a procedure has been exceeded. Limit is {0} and number of parameters for procedure {1} are {2}.</text>
-                <arg>number</arg>
-                <arg>procedureName</arg>
-                <arg>number</arg>
-            </msg>
-
-            <msg>
                 <name>54038</name>
                 <text>Maximum depth of nested triggers was exceeded.</text>
             </msg>

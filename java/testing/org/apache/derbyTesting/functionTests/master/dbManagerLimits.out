@@ -59,4 +59,4 @@ First create a procedure with one parameter less than maximum allowed number of 
 Next create a procedure with maximum allowed number of parameters
 Found 90 columns/parameters through meta data
 And finally create a procedure with more parameters that maximum allowed number of parameters
-expected exception The limit for the number of parameters for a procedure has been exceeded. Limit is 90 and number of parameters for procedure P3 are 91.
+Found 91 columns/parameters through meta data

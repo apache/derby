@@ -1141,7 +1141,6 @@ public interface SQLState {
 	String LANG_ALTER_TABLE_AUTOINCREMENT_COLUMN_NOT_ALLOWED           = "42601.S.372";
 	String LANG_TOO_MANY_INDEX_KEY_COLS                                = "54008";
 	String LANG_TRIGGER_RECURSION_EXCEEDED                             = "54038";
-	String LANG_TOO_MANY_PARAMETERS_FOR_STORED_PROC                    = "54023";
 
 	//following 1 does not match the DB2 sql state, it is a Derby specific behavior which is not compatible with DB2
 	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL51.S";

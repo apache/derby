@@ -211,10 +211,6 @@ public class CreateAliasNode extends DDLStatementNode
 				TypeDescriptor[] types = null;
 				int[] modes = null;
 				
-				if (paramCount > Limits.DB2_MAX_PARAMS_IN_STORED_PROCEDURE)
-					throw StandardException.newException(SQLState.LANG_TOO_MANY_PARAMETERS_FOR_STORED_PROC,
-							String.valueOf(Limits.DB2_MAX_PARAMS_IN_STORED_PROCEDURE), aliasName, String.valueOf(paramCount));
-
 				if (paramCount != 0) {
 
 					names = new String[paramCount];

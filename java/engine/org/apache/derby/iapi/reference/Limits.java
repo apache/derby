@@ -37,9 +37,6 @@ public interface Limits
 	/* Maximum number of columns in a view */
 	public static final int DB2_MAX_COLUMNS_IN_VIEW = 5000;
 
-	/* Maximum number of parameters in a stored procedure */
-	public static final int DB2_MAX_PARAMS_IN_STORED_PROCEDURE = 90;
-
 	/* Maximum number of elements in a select list */
 	public static final int DB2_MAX_ELEMENTS_IN_SELECT_LIST = 1012;
 	/* Maximum number of columns in a group by list */
