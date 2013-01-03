@@ -59,6 +59,7 @@ public  class   Java5SystemProcedures
     /** Mapping of tool names to their implementing classes for use by SYSCS_REGISTER_TOOL */
     private static  final   String[][]  OPTIONAL_TOOLS = new String[][]
     {
+        { "dbmd", "org.apache.derby.impl.tools.optional.DBMDWrapper" },
     };
 
     ///////////////////////////////////////////////////////////////////////////////////

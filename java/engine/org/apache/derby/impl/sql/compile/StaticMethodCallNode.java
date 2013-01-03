@@ -277,7 +277,12 @@ public class StaticMethodCallNode extends MethodCallNode
             // This is a simpler mechanism than analyzing all of
             // Derby's public static methods and ensuring they have
             // no Security holes.
-            if (javaClassName.startsWith("org.apache.derby."))
+            //
+            // A special exception is made for the optional tools methods.
+            if (
+                javaClassName.startsWith( "org.apache.derby." ) &&
+                !javaClassName.startsWith( "org.apache.derby.impl.tools.optional." )
+                )
             {
                 if (!sd.isSystemSchema())
                     throw StandardException.newException(

@@ -484,6 +484,7 @@ public class classlister {
 				|| className.startsWith("org.apache.derby.diag.")
 				|| className.startsWith("org.apache.derby.jdbc.")
 				|| className.startsWith("org.apache.derby.vti.")
+				|| className.startsWith("org.apache.derby.iapi.sql.dictionary.")
 				)
 			{
 				return;

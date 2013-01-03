@@ -198,7 +198,12 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(UserDefinedAggregatesTest.suite());
             suite.addTest(UDAPermsTest.suite());
         }
-        
+         // tests that require Java 6
+        if (JDBC.vmSupportsJDBC4())  
+        {
+            suite.addTest(OptionalToolsTest.suite());
+        }
+       
         suite.addTest(BigDataTest.suite());
         suite.addTest(MixedCaseExpressionTest.suite());
         suite.addTest(UpdateStatisticsTest.suite());

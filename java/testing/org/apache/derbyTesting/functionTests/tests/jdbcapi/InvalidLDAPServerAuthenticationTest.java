@@ -118,8 +118,11 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
             // with network server, the java.net.UnknownHostException will be in 
             // derby.log, the client only gets a 08004 and somewhat misleading
             // warning ('Reason: userid or password invalid')
+            println( "Saw SQLException with message = " + se.getMessage() );
             if (usingEmbedded())
+            {
                 assertTrue(se.getMessage().indexOf("java.net.UnknownHostException")>1);
+            }
         }
         // driver manager connection
         String url2 = TestConfiguration.getCurrent().getJDBCUrl(dbName);
