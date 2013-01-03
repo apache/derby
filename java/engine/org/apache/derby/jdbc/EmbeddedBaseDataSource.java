@@ -217,7 +217,7 @@ public abstract class EmbeddedBaseDataSource
      * means that the timeout is the default system timeout
      * if there is one; otherwise it means that there is no timeout.
      * When a data source object is created, the login timeout is
-     * initially zero. {@see #setLoginTimeout}.
+     * initially zero. See {@link #setLoginTimeout}.
      *
      * @return the data source login time limit
      * @exception SQLException if a database access error occurs.
