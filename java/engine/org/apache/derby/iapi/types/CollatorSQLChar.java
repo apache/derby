@@ -86,18 +86,12 @@ class CollatorSQLChar extends SQLChar implements CollationElementsInterface
 	{
 		return holderForCollationSensitiveInfo.getCollatorForCollation();
 	}
-	
-	/** @see CollationElementsInterface#getCollationElementsForString */
-	public int[] getCollationElementsForString() throws StandardException 
-	{
-		return holderForCollationSensitiveInfo.getCollationElementsForString();
-	}
 
-	/** @see CollationElementsInterface#getCountOfCollationElements */
-	public int getCountOfCollationElements()
-	{
-		return holderForCollationSensitiveInfo.getCountOfCollationElements();
-	}
+    // Implementation of CollationElementsInterface interface
+
+    public boolean hasSingleCollationElement() throws StandardException {
+        return holderForCollationSensitiveInfo.hasSingleCollationElement();
+    }
 
 	/*
 	 * DataValueDescriptor interface

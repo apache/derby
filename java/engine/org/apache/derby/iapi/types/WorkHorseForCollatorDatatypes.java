@@ -21,9 +21,6 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -57,21 +54,6 @@ final class WorkHorseForCollatorDatatypes
 	 * This SQLChar object is passed as a parameter to the constructor.
 	 */
 	private SQLChar stringData;
-	/**
-	 * Following is the array holding a series of collation elements for the
-	 * string. It will be used in the like method. This gets initialized when
-	 * the like method is first invoked. 
-	 */
-	private int[]	collationElementsForString;
-	/** 
-	 * Number of valid collation elements in the array above. Note that this 
-	 * might be smaller than the actual size of the array above. Gets 
-	 * initialized when the like method is first invoked.
-	 */
-	private int		countOfCollationElements;
-
-	// For null strings, cKey = null.
-	private CollationKey cKey; 
 
 	WorkHorseForCollatorDatatypes(
 			RuleBasedCollator collatorForCharacterDatatypes,
@@ -171,8 +153,7 @@ final class WorkHorseForCollatorDatatypes
 
 		CollationElementsInterface escapeCharacter = (CollationElementsInterface) escape;
 
-		if (escapeCharacter.getCollationElementsForString() != null && 
-				(escapeCharacter.getCountOfCollationElements() != 1))
+		if (!escapeCharacter.hasSingleCollationElement())
 		{
 			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
 					escapeCharacter.toString());
@@ -199,87 +180,23 @@ final class WorkHorseForCollatorDatatypes
 		return(collatorForCharacterDatatypes);
 	}
 
-	/**
-	 * This method returns the count of collation elements for SQLChar object.
-	 * It method will return the correct value only if method   
-	 * getCollationElementsForString has been called previously on the SQLChar
-	 * object. 
-	 *
-	 * @return count of collation elements for this instance of CollatorSQLChar
-	 */
-	int getCountOfCollationElements()
-	{
-		return countOfCollationElements;
-	}
+    /**
+     * Check if the string consists of a single collation element.
+     * @return {@code true} iff it's a single collation element
+     * @see CollationElementsInterface#hasSingleCollationElement()
+     */
+    boolean hasSingleCollationElement() throws StandardException {
+        if (stringData.isNull()) {
+            return false;
+        }
 
-	/**
-	 * This method translates the string into a series of collation elements.
-	 * These elements will get used in the like method.
-	 * 
-	 * @return an array of collation elements for the string
-	 * @throws StandardException
-	 */
-	int[] getCollationElementsForString()
-		throws StandardException
-	{
-		if (stringData.isNull())
-		{
-			return (int[]) null;
-		}
-
-
-
-        // Caching of collationElementsForString is not working properly, in 
-        // order to cache it needs to get invalidated everytime the container
-        // type's value is changed - through any interface, eg: readExternal, 
-        // setValue, ...  To get proper behavior, disabling caching, and will
-        // file a performance enhancement to implement correct caching.
-        collationElementsForString = null;
-        countOfCollationElements   = 0;
-
-
-		if (collationElementsForString != null)
-		{
-			return collationElementsForString;
-		}
-
-		// countOfCollationElements should always be 0 when 
-        // collationElementsForString is null
-		if (SanityManager.DEBUG)
-		{
-			if (countOfCollationElements != 0)
-			{
-				SanityManager.THROWASSERT(
-					"countOfCollationElements expected to be 0, not " + 
-                    countOfCollationElements);
-			}
-		}
-        
-
-		collationElementsForString = new int[stringData.getLength()];
-
-		CollationElementIterator cei = 
+        CollationElementIterator cei =
             collatorForCharacterDatatypes.getCollationElementIterator(
                 stringData.getString());
 
-		int nextInt;
-		while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
-		{
-			/* Believe it or not, a String might have more
-			 * collation elements than characters.
-			 * So, we handle that case by increasing the int array
-			 * by 5 and copying array elements.
-			 */
-			if (countOfCollationElements == collationElementsForString.length)
-			{
-				int[] expandedArray = new int[countOfCollationElements + 5];
-				System.arraycopy(collationElementsForString, 0, expandedArray, 
-						0, collationElementsForString.length);
-				collationElementsForString = expandedArray;
-			}
-			collationElementsForString[countOfCollationElements++] = nextInt;
-		}
-
-		return collationElementsForString;
-	}
+        // First call next() to see that there is at least one element, and
+        // then call next() to see that there is no more than one element.
+        return cei.next() != CollationElementIterator.NULLORDER &&
+                cei.next() == CollationElementIterator.NULLORDER;
+    }
 }

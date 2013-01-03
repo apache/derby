@@ -31,22 +31,13 @@ import org.apache.derby.iapi.error.StandardException;
  */
 interface CollationElementsInterface
 {
-	/**
-	 * This method translates the string into a series of collation elements.
-	 * These elements will get used in the like method.
-	 * 
-	 * @return an array of collation elements for the string
-	 * @throws StandardException
-	 */
-	public int[] getCollationElementsForString() throws StandardException; 
-
-	/**
-	 * This method returns the count of collation elements for this instance of
-	 * CollationElementsInterface. This method will return the correct value only if  
-	 * method getCollationElementsForString has been called previously on this 
-	 * instance of CollationElementsInterface. 
-	 *
-	 * @return count of collation elements for this instance of CollatorSQLChar
-	 */
-	public int getCountOfCollationElements();
+    /**
+     * Check if this instance represents a value that has a single
+     * collation element.
+     *
+     * @return {@code true} if the value has exactly one collation element,
+     * or {@code false} otherwise
+     * @throws StandardException if an error occurs when accessing the value
+     */
+    boolean hasSingleCollationElement() throws StandardException;
 }

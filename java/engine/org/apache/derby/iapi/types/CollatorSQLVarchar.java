@@ -88,17 +88,11 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 		return holderForCollationSensitiveInfo.getCollatorForCollation();
 	}
 	
-	/** @see CollationElementsInterface#getCollationElementsForString */
-	public int[] getCollationElementsForString() throws StandardException 
-	{
-		return holderForCollationSensitiveInfo.getCollationElementsForString();
-	}
+    // Implementation of CollationElementsInterface interface
 
-	/** @see CollationElementsInterface#getCountOfCollationElements */
-	public int getCountOfCollationElements()
-	{
-		return holderForCollationSensitiveInfo.getCountOfCollationElements();
-	}
+    public boolean hasSingleCollationElement() throws StandardException {
+        return holderForCollationSensitiveInfo.hasSingleCollationElement();
+    }
 
 	/*
 	 * DataValueDescriptor interface
