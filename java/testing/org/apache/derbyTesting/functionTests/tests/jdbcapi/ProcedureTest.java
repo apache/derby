@@ -26,6 +26,7 @@ import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -858,6 +859,137 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     public static void proc_2516(Integer[] i) {
         i[0] = new Integer(10);
+    }
+
+    /**
+     * Test that we create and execute stored procedures with as many
+     * parameters as the Java specification allows.
+     */
+    public void testMaxNumberOfParameters() throws SQLException {
+        // Test with the maximum number of parameters allowed by the
+        // Java Virtual Machine specification. That is, 255 parameters.
+        testMaxNumberOfParameters(255, true);
+
+        // Test with one more parameter than allowed. Since we have no way
+        // to declare a method with that many parameters, expect execution to
+        // fail gracefully. The DDL will work, however.
+        testMaxNumberOfParameters(256, false);
+
+        // Test with a very high number of parameters. Again, expect DDL to
+        // succeed and execution to fail gracefully.
+        testMaxNumberOfParameters(10000, false);
+    }
+
+    /**
+     * Create and execute a stored procedure backed by a Java method with the
+     * specified number of parameters.
+     *
+     * @param params the number of parameters
+     * @param methodExists whether or not a method called
+     * {@code procWithManyParams} with the specified number of parameters
+     * exists
+     */
+    private void testMaxNumberOfParameters(int params, boolean methodExists)
+            throws SQLException {
+        final String javaMethod = getClass().getName() + ".procWithManyParams";
+        final String sqlProc = "PROC_WITH_LOTS_OF_PARAMETERS";
+
+        // Disable auto-commit for easy cleanup with rollback().
+        setAutoCommit(false);
+
+        // Create a procedure with many parameters.
+
+        StringBuffer sb = new StringBuffer("create procedure ");
+        sb.append(sqlProc).append('(');
+        for (int i = 0; i < params; i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append('p').append(i).append(" int");
+        }
+        sb.append(") language java parameter style java external name '");
+        sb.append(javaMethod).append("' no sql");
+
+        Statement s = createStatement();
+        s.execute(sb.toString());
+
+        // Check that the database meta-data has correct information.
+        DatabaseMetaData dmd = getConnection().getMetaData();
+
+        JDBC.assertFullResultSet(
+            dmd.getProcedures(
+                null, null, sqlProc),
+            new Object[][] {{
+                "", "APP", sqlProc, null, null, null,
+                javaMethod,
+                Integer.valueOf(DatabaseMetaData.procedureNoResult),
+                new JDBC.GeneratedId()
+            }},
+            false);
+
+        JDBC.assertDrainResults(
+                dmd.getProcedureColumns(null, null, sqlProc, "%"),
+                params);
+
+        // Execute the procedure.
+        sb.setLength(0);
+        sb.append("call ").append(sqlProc).append('(');
+        for (int i = 0; i < params; i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(i);
+        }
+        sb.append(')');
+
+        if (methodExists) {
+            s.execute(sb.toString());
+        } else {
+            assertCallError("42X50", sb.toString());
+        }
+
+        rollback();
+    }
+
+    public static void procWithManyParams(
+        int p001, int p002, int p003, int p004, int p005, int p006, int p007,
+        int p008, int p009, int p010, int p011, int p012, int p013, int p014,
+        int p015, int p016, int p017, int p018, int p019, int p020, int p021,
+        int p022, int p023, int p024, int p025, int p026, int p027, int p028,
+        int p029, int p030, int p031, int p032, int p033, int p034, int p035,
+        int p036, int p037, int p038, int p039, int p040, int p041, int p042,
+        int p043, int p044, int p045, int p046, int p047, int p048, int p049,
+        int p050, int p051, int p052, int p053, int p054, int p055, int p056,
+        int p057, int p058, int p059, int p060, int p061, int p062, int p063,
+        int p064, int p065, int p066, int p067, int p068, int p069, int p070,
+        int p071, int p072, int p073, int p074, int p075, int p076, int p077,
+        int p078, int p079, int p080, int p081, int p082, int p083, int p084,
+        int p085, int p086, int p087, int p088, int p089, int p090, int p091,
+        int p092, int p093, int p094, int p095, int p096, int p097, int p098,
+        int p099, int p100, int p101, int p102, int p103, int p104, int p105,
+        int p106, int p107, int p108, int p109, int p110, int p111, int p112,
+        int p113, int p114, int p115, int p116, int p117, int p118, int p119,
+        int p120, int p121, int p122, int p123, int p124, int p125, int p126,
+        int p127, int p128, int p129, int p130, int p131, int p132, int p133,
+        int p134, int p135, int p136, int p137, int p138, int p139, int p140,
+        int p141, int p142, int p143, int p144, int p145, int p146, int p147,
+        int p148, int p149, int p150, int p151, int p152, int p153, int p154,
+        int p155, int p156, int p157, int p158, int p159, int p160, int p161,
+        int p162, int p163, int p164, int p165, int p166, int p167, int p168,
+        int p169, int p170, int p171, int p172, int p173, int p174, int p175,
+        int p176, int p177, int p178, int p179, int p180, int p181, int p182,
+        int p183, int p184, int p185, int p186, int p187, int p188, int p189,
+        int p190, int p191, int p192, int p193, int p194, int p195, int p196,
+        int p197, int p198, int p199, int p200, int p201, int p202, int p203,
+        int p204, int p205, int p206, int p207, int p208, int p209, int p210,
+        int p211, int p212, int p213, int p214, int p215, int p216, int p217,
+        int p218, int p219, int p220, int p221, int p222, int p223, int p224,
+        int p225, int p226, int p227, int p228, int p229, int p230, int p231,
+        int p232, int p233, int p234, int p235, int p236, int p237, int p238,
+        int p239, int p240, int p241, int p242, int p243, int p244, int p245,
+        int p246, int p247, int p248, int p249, int p250, int p251, int p252,
+        int p253, int p254, int p255)
+    {
     }
 
     // UTILITY METHODS
