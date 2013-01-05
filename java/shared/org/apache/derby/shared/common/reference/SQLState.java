@@ -942,6 +942,8 @@ public interface SQLState {
 	String LANG_NO_SUCH_METHOD_ALIAS                                   = "42Y03.S.0";
 	String LANG_NO_SUCH_PROCEDURE                                      = "42Y03.S.1";
 	String LANG_NO_SUCH_FUNCTION                                       = "42Y03.S.2";
+    String LANG_PROC_USED_AS_FUNCTION                                  = "42Y03.S.3";
+    String LANG_FUNCTION_USED_AS_PROC                                  = "42Y03.S.4";
 	String LANG_INVALID_FULL_STATIC_METHOD_NAME                        = "42Y04";
 	String LANG_NO_SUCH_FOREIGN_KEY                                    = "42Y05";
 	//String LANG_METHOD_ALIAS_NOT_FOUND                                 = "42Y06";

@@ -2278,6 +2278,18 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Y03.S.3</name>
+                <text>'{0}' is a procedure but it is being used as a function.</text>
+                <arg>statement</arg>
+            </msg>
+
+            <msg>
+                <name>42Y03.S.4</name>
+                <text>'{0}' is a function but it is being called as a procedure.</text>
+                <arg>statement</arg>
+            </msg>
+
+            <msg>
                 <name>42Y04</name>
                 <text>Cannot create a procedure or function with EXTERNAL NAME '{0}' because it is not a list separated by periods. The expected format is &lt;full java path&gt;.&lt;method name&gt;.</text>
                 <arg>name</arg>

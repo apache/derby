@@ -30,20 +30,25 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
-
+import java.util.Arrays;
+import java.util.Locale;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ProcedureTest;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Test the syntax for creating procedures.
+ * Test the syntax for creating procedures and semantics when
+ * executing them.
  */
 public class LangProcedureTest extends BaseJDBCTestCase {
+
+    private final static String LANG_STRING_TRUNCATION = "22001";
+    private final String thisClassName = getClass().getName();
 
     public LangProcedureTest(String name) {
         super(name);
@@ -57,10 +62,17 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      * Default suite for running this test (embedded and client).
      */
     public static Test suite() {
-        if (JDBC.vmSupportsJSR169())
-            return new TestSuite("Empty LangProcedureTest. JSR169 does not support jdbc:default:connection");
-        else
-            return TestConfiguration.defaultSuite(LangProcedureTest.class);
+        if (JDBC.vmSupportsJSR169()) {
+            return new TestSuite(
+                "Empty LangProcedureTest. " +
+                "JSR169 does not support jdbc:default:connection");
+        } else {
+            // fix locale since we need to check error messages
+            return TestConfiguration.singleUseDatabaseDecorator(
+                new LocaleTestSetup(
+                    TestConfiguration.defaultSuite(LangProcedureTest.class),
+                    Locale.ENGLISH));
+        }
     }
 
     /**
@@ -84,55 +96,62 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // The procedure name exceeds the max length.
         assertStatementError(
-                "42622",
-                s,
-                "create procedure a234567890123456789012345678901234567890123"
-                        + "456789012345678901234567890123456789012345678901234567890123"
-                        + "45678901234567890123456789() language java external name "
-                        + "'asdf.asdf' parameter style java");
+            "42622",
+            s,
+            "create procedure a234567890123456789012345678901234567890123"
+            + "456789012345678901234567890123456789012345678901234567890123"
+            + "45678901234567890123456789() language java external name "
+            + "'asdf.asdf' parameter style java");
 
         // "LANGUAGE C" is an incorrect language.
         assertStatementError(
-                "42X01",
-                s,
-                "CREATE PROCEDURE ASSEMBLY_PARTS (IN ASSEMBLY_NUM INTEGER, "
-                        + "OUT NUM_PARTS INTEGER, OUT COST DOUBLE) EXTERNAL NAME "
-                        + "'parts!assembly' DYNAMIC RESULT SETS 1 LANGUAGE C "
-                        + "PARAMETER STYLE GENERAL");
+            "42X01",
+            s,
+            "create procedure ASSEMBLY_PARTS (in ASSEMBLY_NUM integer, "
+            + "out NUM_PARTS integer, out COST DOUBLE) external name "
+            + "'parts!assembly' dynamic result sets 1 language C "
+            + "parameter style GENERAL");
 
         // Not allowed to create a routine in the SYS schema.
         assertStatementError(
-                "42X62",
-                s,
-                "create procedure sys.proc1() language java "
-                        + "external name 'java.lang.System.gc' parameter style java");
+            "42X62",
+            s,
+            "create procedure sys.proc1() language java "
+            + "external name 'java.lang.System.gc' parameter style java");
 
         // The 'LANGUAGE' clause has multiple or conflicting keywords ('java').
         assertStatementError(
-                "42613",
-                s,
-                "create procedure noclass() language java "
-                        + "external name 'asdf.asdf' parameter style java language java");
-        assertStatementError("42613", s,
-                "create procedure noclass() parameter style java language java "
-                        + "external name 'asdf.asdf' parameter style java");
+            "42613",
+            s,
+            "create procedure noclass() language java "
+            + "external name 'asdf.asdf' parameter style java language java");
+
         assertStatementError(
-                "42613",
-                s,
-                "create procedure noclass() external name 'asdf.xxxx' "
-                        + "language java external name 'asdf.asdf' parameter style java");
+            "42613", s,
+            "create procedure noclass() parameter style java language java "
+            + "external name 'asdf.asdf' parameter style java");
+
         assertStatementError(
-                "42X01",
-                s,
-                "create procedure noclass() parameter style java language java "
-                        + "external name 'asdf.asdf' parameter style derby_rs_collection");
+            "42613",
+            s,
+            "create procedure noclass() external name 'asdf.xxxx' "
+            + "language java external name 'asdf.asdf' parameter style java");
+
+        assertStatementError(
+            "42X01",
+            s,
+            "create procedure noclass() parameter style java language java "
+            + "external name 'asdf.asdf' parameter style derby_rs_collection");
 
         // The create statement is missing an element.
         assertStatementError("42X01", s, "create procedure missing01()");
         assertStatementError("42X01", s,
                 "create procedure missing02() language java");
-        assertStatementError("42X01", s,
-                "create procedure missing03() language java parameter style java");
+
+        assertStatementError(
+            "42X01", s,
+            "create procedure missing03() language java parameter style java");
+
         assertStatementError("42X01", s,
                 "create procedure missing04() language java "
                         + "external name 'foo.bar'");
@@ -150,46 +169,38 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // RETURNS NULL ON NULL INPUT isn't allowed in procedures.
         assertStatementError(
-                "42X01",
-                s,
-                "create procedure nullinput2() returns null on null input "
-                        + "language java parameter style java external name 'foo.bar'");
+            "42X01",
+            s,
+            "create procedure nullinput2() returns null on null input "
+            + "language java parameter style java external name 'foo.bar'");
 
-        // BLOB, CLOB, and long parameters aren't supported.
-        assertStatementError("42962", s,
-                "create procedure NO_BLOB(IN P1 BLOB(3k)) language java "
-                        + "parameter style java external name 'no.blob'");
-        assertStatementError("42962", s,
-                "create procedure NO_CLOB(IN P1 CLOB(3k)) language java "
-                        + "parameter style java external name 'no.clob'");
-        assertStatementError("42962", s,
-                "create procedure NO_LVC(IN P1 LONG VARCHAR) language java "
-                        + "parameter style java external name 'no.lvc'");
 
         // Duplicate parameter names.
         assertStatementError("42734", s, "create procedure DUP_P1"
-                + "(IN FRED INT, OUT RON CHAR(10), IN FRED INT) "
+                + "(in FRED int, out RON char(10), in FRED int) "
                 + "language java parameter style java external name 'no.dup1'");
         assertStatementError("42734", s, "create procedure D2.DUP_P2"
-                + "(IN \"FreD\" INT, OUT RON CHAR(10), IN \"FreD\" INT) "
+                + "(in \"FreD\" int, out RON char(10), in \"FreD\" int) "
                 + "language java parameter style java external name 'no.dup2'");
         assertStatementError("42734", s, "create procedure D3.DUP_P3"
-                + "(IN \"FRED\" INT, OUT RON CHAR(10), IN fred INT) "
+                + "(in \"FRED\" int, out RON char(10), in fred int) "
                 + "language java parameter style java external name 'no.dup3'");
 
         // This one should succeed.
-        s
-                .execute("create procedure DUP_POK"
-                        + "(IN \"FreD\" INT, OUT RON CHAR(10), IN fred INT) "
-                        + "language java parameter style java external name 'no.dupok'");
+        s.execute(
+            "create procedure DUP_POK"
+            + "(in \"FreD\" int, out RON char(10), in fred int) "
+            + "language java parameter style java external name 'no.dupok'");
+
         s.execute("drop procedure DUP_POK");
 
         // procedure not found with explicit schema name
-        assertStatementError("42Y03", s, "CALL APP.NSP(?, ?)");
+        assertStatementError("42Y03", s, "call APP.NSP(?, ?)");
 
         // Long ago this caused a null pointer exception.
-        assertStatementError("42X15", s,
-                "call syscs_util.syscs_set_database_property(\"foo\", \"bar\")");
+        assertStatementError(
+            "42X15", s,
+            "call syscs_util.syscs_set_database_property(\"foo\", \"bar\")");
 
         s.close();
     }
@@ -204,70 +215,70 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testMethodSignatureDerby258() throws SQLException {
         Statement s = createStatement();
 
-        // INT doesn't match String
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_A(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.load(java.lang.String)'");
+        // int doesn't match String
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_A(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.load(java.lang.String)'");
         assertStatementError("22005", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_A(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_A");
+                "call APP.SIGNATURE_BUG_DERBY_258_A(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_A");
 
         // Signature with too many arguments.
-        s.execute("CREATE FUNCTION SIGNATURE_BUG_DERBY_258_B(A INT) "
-                + "RETURNS VARCHAR(128) LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.Integer.toString(int, int)'");
+        s.execute("create function SIGNATURE_BUG_DERBY_258_B(A int) "
+                + "RETURNS varchar(128) language java parameter style java "
+                + "external name 'java.lang.Integer.toString(int, int)'");
         assertStatementError("46J02", s,
-                "VALUES APP.SIGNATURE_BUG_DERBY_258_B(4)");
-        s.execute("DROP FUNCTION SIGNATURE_BUG_DERBY_258_B");
+                "values APP.SIGNATURE_BUG_DERBY_258_B(4)");
+        s.execute("drop FUNCTION SIGNATURE_BUG_DERBY_258_B");
 
         // Signature with too few arguments.
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_C(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.gc()'");
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_C(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.gc()'");
         assertStatementError("46J02", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_C(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_C");
+                "call APP.SIGNATURE_BUG_DERBY_258_C(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_C");
 
         // Java method signature has only a leading parenthesis.
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_F(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.gc('");
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_F(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.gc('");
         assertStatementError("46J01", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_F(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_F");
+                "call APP.SIGNATURE_BUG_DERBY_258_F(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_F");
 
         // Java method signature of (,,)
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_G(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.gc(,,)'");
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_G(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.gc(,,)'");
         assertStatementError("46J01", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_G(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_G");
+                "call APP.SIGNATURE_BUG_DERBY_258_G(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_G");
 
         // Java method signature of (, ,)
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_H(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.gc(, ,)'");
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_H(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.gc(, ,)'");
         assertStatementError("46J01", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_H(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_H");
+                "call APP.SIGNATURE_BUG_DERBY_258_H(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_H");
 
         // Java method signature of (int,)
-        s.execute("CREATE PROCEDURE SIGNATURE_BUG_DERBY_258_I(IN A INT) "
-                + "LANGUAGE JAVA PARAMETER STYLE JAVA "
-                + "EXTERNAL NAME 'java.lang.System.gc(int ,)'");
+        s.execute("create procedure SIGNATURE_BUG_DERBY_258_I(in A int) "
+                + "language java parameter style java "
+                + "external name 'java.lang.System.gc(int ,)'");
         assertStatementError("46J01", s,
-                "CALL APP.SIGNATURE_BUG_DERBY_258_I(4)");
-        s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_I");
+                "call APP.SIGNATURE_BUG_DERBY_258_I(4)");
+        s.execute("drop PROCEDURE SIGNATURE_BUG_DERBY_258_I");
 
-        s.execute("CREATE PROCEDURE DERBY_3304() "
-                + " DYNAMIC RESULT SETS 1 LANGUAGE JAVA PARAMETER STYLE JAVA " 
-                + " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.DERBY_3304'"
-                + " MODIFIES SQL DATA");               
+        s.execute("create procedure DERBY_3304() "
+                + " dynamic result sets 1 language java parameter style java "
+                + " external name '" + getClass().getName() + ".DERBY_3304'"
+                + " modifies sql data");
         String[][] t1Results = { { "APP"} };
-        ResultSet rs = s.executeQuery("CALL APP.DERBY_3304()");
+        ResultSet rs = s.executeQuery("call APP.DERBY_3304()");
         JDBC.assertFullResultSet(rs, t1Results);
-        s.execute("DROP PROCEDURE DERBY_3304");
+        s.execute("drop PROCEDURE DERBY_3304");
 
         s.close();
     }
@@ -282,10 +293,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      */
     public static void DERBY_3304(ResultSet[] rs1) throws SQLException 
     {
-        Connection conn = null;
-        Statement stm = null;
-        conn = DriverManager.getConnection("jdbc:default:connection");
-        stm = conn.createStatement();
+        Connection conn =
+            DriverManager.getConnection("jdbc:default:connection");
+        Statement stm = conn.createStatement();
         conn.commit();
         ResultSet rs = stm.executeQuery("values current_user");
         rs1[0] = rs;
@@ -301,17 +311,23 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testDelayedClassChecking() throws SQLException {
         Statement s = createStatement();
 
-        s.execute("create procedure noclass() language java "
-                + "external name 'asdf.asdf' parameter style java");
-        s
-                .execute("create procedure nomethod() language java "
-                        + "external name 'java.lang.Integer.asdf' parameter style java");
-        s
-                .execute("create procedure notstatic() language java "
-                        + "external name 'java.lang.Integer.equals' parameter style java");
-        s
-                .execute("create procedure notvoid() language java "
-                        + "external name 'java.lang.Runtime.getRuntime' parameter style java");
+        s.execute(
+            "create procedure noclass() language java " +
+            "external name 'asdf.asdf' parameter style java");
+
+        s.execute(
+            "create procedure nomethod() language java " +
+            "external name 'java.lang.Integer.asdf' parameter style java");
+
+        s.execute(
+            "create procedure notstatic() language java " +
+            "external name 'java.lang.Integer.equals' parameter style java");
+
+        s.execute(
+            "create procedure notvoid() language java " +
+            "external name " +
+            "'java.lang.Runtime.getRuntime' parameter style java");
+
         assertCallError("42X51", "call noclass()");
         assertCallError("42X50", "call nomethod()");
         assertCallError("42X50", "call notstatic()");
@@ -334,29 +350,41 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         s.execute("create schema S1");
         s.execute("create schema S2");
 
-        s
-                .execute("create procedure PROCDUP() language java external name 'okAPP.ok0' parameter style java");
-        s
-                .execute("create procedure s1.PROCDUP() language java external name 'oks1.ok0' parameter style java");
-        s
-                .execute("create procedure s2.PROCDUP() language java external name 'oks2.ok0' parameter style java");
+        s.execute("create procedure    PROCDUP() language java " +
+                  "external name 'okAPP.ok0' parameter style java");
+
+        s.execute("create procedure s1.PROCDUP() language java " +
+                  "external name 'oks1.ok0' parameter style java");
+
+        s.execute("create procedure s2.PROCDUP() language java " +
+                  "external name 'oks2.ok0' parameter style java");
 
         assertStatementError(
-                "X0Y68",
-                s,
-                "create procedure PROCDUP() language java external name 'failAPP.fail0' parameter style java");
+            "X0Y68",
+            s,
+            "create procedure PROCDUP() language java " +
+            "external name 'failAPP.fail0' parameter style java");
+
         assertStatementError(
-                "X0Y68",
-                s,
-                "create procedure s1.PROCDUP() language java external name 'fails1.fail0' parameter style java");
+            "X0Y68",
+            s,
+            "create procedure s1.PROCDUP() language java " +
+            "external name 'fails1.fail0' parameter style java");
+
         assertStatementError(
-                "X0Y68",
-                s,
-                "create procedure s2.PROCDUP() language java external name 'fails2.fail0' parameter style java");
+            "X0Y68",
+            s,
+            "create procedure s2.PROCDUP() language java " +
+            "external name 'fails2.fail0' parameter style java");
+
         String[] sysAliasDefinition = {
-                "APP.PROCDUP AS okAPP.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA",
-                "S1.PROCDUP AS oks1.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA",
-                "S2.PROCDUP AS oks2.ok0() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+            "APP.PROCDUP AS okAPP.ok0() " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA",
+            "S1.PROCDUP AS oks1.ok0() " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA",
+            "S2.PROCDUP AS oks2.ok0() " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA"};
+
         String[] DBMetaDefinition = {
                 "APP.PROCDUP AS okAPP.ok0 type procedureNoResult",
                 "S1.PROCDUP AS oks1.ok0 type procedureNoResult",
@@ -365,9 +393,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 DBMetaDefinition, null);
 
         assertStatementError(
-                "0A000",
-                s,
-                "create procedure S1.NOTYET() SPECIFIC fred language java external name 'failAPP.fail0' parameter style java");
+            "0A000",
+            s,
+            "create procedure S1.NOTYET() SPECIFIC fred language java " +
+            "external name 'failAPP.fail0' parameter style java");
 
         s.execute("drop procedure s1.PROCDUP");
         s.execute("drop procedure s2.PROCDUP");
@@ -383,25 +412,32 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         // ambiguous resolution - with result sets
-        s
-                .execute("create procedure ambiguous01(p1 INTEGER, p2 CHAR(20)) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous1'");
+        s.execute("create procedure ambiguous01(p1 integer, p2 char(20)) " +
+                  "dynamic result sets 1 language java parameter style java " +
+                  "external name '" + thisClassName + ".ambiguous1'");
         assertCallError("42X73", "call AMBIGUOUS01(?, ?)");
         s.execute("drop procedure AMBIGUOUS01");
 
         // ambiguous in defined parameters
-        s
-                .execute("create procedure ambiguous02(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous2'");
+        s.execute("create procedure ambiguous02(p1 integer, p2 integer) " +
+                  "dynamic result sets 1 language java parameter style java " +
+                  "external name '" + thisClassName + ".ambiguous2'");
         assertCallError("42X50", "call AMBIGUOUS02(?, ?)");
         s.execute("drop procedure AMBIGUOUS02");
 
-        // verify we can find it with a Java signature
-        s
-                .execute("create procedure ambiguous03(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous2(int,java.lang.Integer)'");
-        s.execute("{call ambiguous03(1,NULL)}");
+        // After DERBY-3652  these are also ambiguous:
+        s.execute("create procedure ambiguous03(p1 integer, p2 integer) " +
+                "dynamic result sets 1 language java parameter style java " +
+                "external name '" + thisClassName +
+                ".ambiguous2(int,java.lang.Integer)'");
+        assertCallError("42X73", "{call ambiguous03(1,NULL)}");
         s.execute("drop procedure AMBIGUOUS03");
-        s
-                .execute("create procedure ambiguous04(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous2(java.lang.Integer,int)'");
-        s.execute("{call ambiguous04(NULL, 1)}");
+
+        s.execute("create procedure ambiguous04(p1 integer, p2 integer) " +
+                "dynamic result sets 1 language java parameter style java " +
+                "external name '" + thisClassName +
+                ".ambiguous2(java.lang.Integer,int)'");
+        assertCallError("42X73", "{call ambiguous04(NULL, 1)}");
         s.execute("drop procedure AMBIGUOUS04");
         s.close();
     }
@@ -416,9 +452,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         boolean saveAutoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
 
-        PreparedStatement ps = conn
-                .prepareStatement("select schemaname, alias, CAST (((javaclassname || '.' ) || CAST (aliasinfo AS VARCHAR(1000))) AS VARCHAR(2000)) AS SIGNATURE "
-                        + " from sys.sysaliases A, sys.sysschemas S where alias like ? and A.schemaid = S.schemaid ORDER BY 1,2,3");
+        PreparedStatement ps = conn.prepareStatement(
+            "select schemaname, alias, " +
+            "    cast (((javaclassname || '.' ) || " +
+            "    cast (aliasinfo as varchar(1000))) as varchar(2000))" +
+            "        as signature " +
+            "from sys.sysaliases A, sys.sysschemas S " +
+            "where alias like ? and A.schemaid = S.schemaid order by 1,2,3");
 
         ps.setString(1, procedureName);
 
@@ -461,8 +501,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
 
         Statement s = createStatement();
-        s
-                .execute("create procedure za() language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.zeroArg' parameter style java");
+        s.execute("create procedure za() language java external name '" +
+                  thisClassName + ".zeroArg' parameter style java");
 
         s.execute("call za()");
         assertUpdateCountForProcedureWithNoResults(s);
@@ -478,7 +518,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.close();
 
         try {
-            ps = prepareStatement("call za(?)");
+            prepareStatement("call za(?)");
             fail("FAIL - prepareStatement call za(?)");
         } catch (SQLException sqle) {
             assertSQLState("42Y03", sqle);
@@ -493,8 +533,15 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         cs.execute();
         assertUpdateCountForProcedureWithNoResults(cs);
         cs.close();
-        String[] sysAliasDefinition = { "APP.ZA AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.zeroArg() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        String[] dbMetadataDefinition = { "APP.ZA AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.zeroArg type procedureNoResult" };
+
+        String[] sysAliasDefinition = {
+            "APP.ZA AS " + thisClassName + ".zeroArg() " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA"};
+
+        String[] dbMetadataDefinition = {
+            "APP.ZA AS " + thisClassName + ".zeroArg " +
+            "type procedureNoResult"};
+
         checkMatchingProcedures(conn, "ZA", sysAliasDefinition,
                 dbMetadataDefinition, null);
         s.execute("drop procedure za");
@@ -509,26 +556,42 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Statement s = createStatement();
 
         s.execute("create table t1(i int not null primary key, b char(15))");
-        s
-                .execute("create procedure ir(p1 int) MODIFIES SQL DATA dynamic result sets 0 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertRow' parameter style java");
-        s
-                .execute("create procedure ir2(p1 int, p2 char(10)) language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertRow' MODIFIES SQL DATA parameter style java");
+        s.execute(
+                "create procedure ir(p1 int) " +
+                "modifies sql data dynamic result sets 0 language java " +
+                "external name '" + thisClassName + ".insertRow' " +
+                "parameter style java");
+        s.execute(
+                "create procedure ir2(p1 int, p2 char(10)) " +
+                " modifies sql data language java " +
+                "external name '" + thisClassName + ".insertRow' " +
+                "parameter style java");
 
-        String[] sysaliasDefinition = { "APP.IR AS org.apache.derbyTesting.functionTeststs.tests.lang.LangProcedureTest.insertRow(IN P1 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        String[] dbMetadataDefinition = { "APP.IR AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertRow type procedureNoResult" };
+        String[] sysaliasDefinition = {
+            "APP.IR AS " + thisClassName + ".insertRow" +
+            "(IN \"P1\" INTEGER) LANGUAGE JAVA " +
+            "PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+        String[] dbMetadataDefinition = {
+            "APP.IR AS " + thisClassName + ".insertRow" +
+                " type procedureNoResult" };
         String[] columnDefinition = { "procedureColumnIn P1 INTEGER" };
-        checkMatchingProcedures(conn, "IR1", sysaliasDefinition,
+        checkMatchingProcedures(conn, "IR", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        sysaliasDefinition = new String[] { "APP.IR2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertRow(IN P1 INTEGER,IN P2 CHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        dbMetadataDefinition = new String[] { "APP.IR2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertRow type procedureNoResult" };
+        sysaliasDefinition = new String[] {
+            "APP.IR2 AS " + thisClassName + ".insertRow" +
+            "(IN \"P1\" INTEGER,IN \"P2\" CHAR(10)) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+        dbMetadataDefinition = new String[] {
+            "APP.IR2 AS " + thisClassName + ".insertRow" +
+                " type procedureNoResult" };
         columnDefinition = new String[] { "procedureColumnIn P1 INTEGER",
                 "procedureColumnIn P2 CHAR" };
         checkMatchingProcedures(conn, "IR2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
-        assertCallError("42Y03", "CALL IR()");
+        assertCallError("42Y03", "call IR()");
 
-        CallableStatement ir1 = prepareCall("CALL IR(?)");
+        CallableStatement ir1 = prepareCall("call IR(?)");
 
         ir1.setInt(1, 1);
         ir1.execute();
@@ -547,11 +610,11 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         ir1.close();
 
-        ir1 = conn.prepareCall("CALL APP.IR(?)");
+        ir1 = conn.prepareCall("call APP.IR(?)");
         ir1.setInt(1, 7);
         ir1.execute();
 
-        CallableStatement ir2 = conn.prepareCall("CALL IR2(?, ?)");
+        CallableStatement ir2 = conn.prepareCall("call IR2(?, ?)");
 
         ir2.setInt(1, 4);
         ir2.setInt(2, 4);
@@ -562,14 +625,15 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ir2.execute();
 
         ir2.setInt(1, 6);
-        ir2.setString(2, "'012345678990'");
+        ir2.setString(2, "'012345678");
         ir2.execute();
 
         ir1.close();
         ir2.close();
 
-        if (!conn.getAutoCommit())
+        if (!conn.getAutoCommit()) {
             conn.commit();
+        }
 
         String[][] t1Results = { { "1", "int" }, { "2", "int" },
                 { "3", "int" }, { "7", "int" }, { "4", "4" }, { "5", "ir2" },
@@ -577,12 +641,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery("select * from t1");
         JDBC.assertFullResultSet(rs, t1Results);
 
-        if (!conn.getAutoCommit())
+        if (!conn.getAutoCommit()) {
             conn.commit();
+        }
 
-        assertCallError("38000", "CALL IR2(2, 'no way')");
-        assertCallError("07000", "CALL IR2(?, 'no way')");
-        assertCallError("07000", "CALL IR2(2, ?)");
+        assertCallError("38000", "call IR2(2, 'no way')");
+        assertCallError("07000", "call IR2(?, 'no way')");
+        assertCallError("07000", "call IR2(2, ?)");
 
         s.execute("drop procedure IR");
         s.execute("drop procedure IR2");
@@ -603,21 +668,33 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertStatementError(
                 "42X01",
                 s,
-                "create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets -1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows'");
+                "create procedure DRS(p1 int) " +
+                "parameter style java reads sql data dynamic result sets -1 " +
+                "language java external name '" +
+                thisClassName + ".selectRows'");
 
-        s
-                .execute("create procedure DRS(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows'");
+        s.execute("create procedure DRS(p1 int) " +
+                  "parameter style java reads sql data dynamic result sets 1 " +
+                  "language java external name '" +
+                  thisClassName + ".selectRows'");
 
-        String[] sysaliasDefinition = { "APP.DRS AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows(IN P1 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA DYNAMIC RESULT SETS 1" };
-        String[] dbMetadataDefinition = { "APP.DRS AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows type procedureNoResult" };
+        String[] sysaliasDefinition = {
+            "APP.DRS AS " + thisClassName + ".selectRows" +
+            "(IN \"P1\" INTEGER) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+            "READS SQL DATA DYNAMIC RESULT SETS 1" };
+
+        String[] dbMetadataDefinition = {"APP.DRS AS " + thisClassName +
+                                         ".selectRows type procedureNoResult" };
+
         String[] columnDefinition = { "procedureColumnIn P1 INTEGER" };
 
         checkMatchingProcedures(conn, "DRS", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
-        assertCallError("42Y03", "CALL DRS()");
-        assertCallError("42Y03","CALL DRS(?,?)");
+        assertCallError("42Y03", "call DRS()");
+        assertCallError("42Y03","call DRS(?,?)");
 
-        CallableStatement drs1 = prepareCall("CALL DRS(?)");
+        CallableStatement drs1 = prepareCall("call DRS(?)");
 
         drs1.setInt(1, 3);
         drs1.execute();
@@ -626,17 +703,29 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, drsResult);
         drs1.close();
 
-        s
-                .execute("create procedure DRS2(p1 int, p2 int) parameter style JAVA READS SQL DATA dynamic result sets 2 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows'");
-        sysaliasDefinition = new String[] { "APP.DRS2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows(IN P1 INTEGER,IN P2 INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA DYNAMIC RESULT SETS 2" };
-        dbMetadataDefinition = new String[] { "APP.DRS2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows type procedureNoResult" };
+        s.execute("create procedure DRS2(p1 int, p2 int) " +
+                  "parameter style java reads sql data " +
+                  "dynamic result sets 2 language java " +
+                  "external name '" + thisClassName + ".selectRows'");
+
+        sysaliasDefinition = new String[] {
+            "APP.DRS2 AS " + thisClassName + ".selectRows" +
+            "(IN \"P1\" INTEGER,IN \"P2\" INTEGER) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+            "READS SQL DATA DYNAMIC RESULT SETS 2" };
+
+        dbMetadataDefinition = new String[] {
+            "APP.DRS2 AS " +
+            thisClassName + ".selectRows type procedureNoResult" };
+
         columnDefinition = new String[] { "procedureColumnIn P1 INTEGER",
                 "procedureColumnIn P2 INTEGER" };
+
         checkMatchingProcedures(conn, "DRS2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
         CallableStatement drs2;
-        drs2 = conn.prepareCall("CALL DRS2(?, ?)");
+        drs2 = conn.prepareCall("call DRS2(?, ?)");
         drs2.setInt(1, 2);
         drs2.setInt(2, 6);
         drs2.execute();
@@ -695,10 +784,12 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
             lastResultSet = drs2.getResultSet();
 
-            if ((pass == 1) || (pass == 2))
+            if ((pass == 1) || (pass == 2)) {
                 assertNotNull("expected resultset pass " + pass, lastResultSet);
-            else if (pass == 3)
+            } else if (pass == 3) {
                 assertNull(lastResultSet);
+            }
+
             pass++;
 
         } while (drs2.getMoreResults() || lastResultSet != null);
@@ -721,42 +812,59 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         // check that a procedure with dynamic result sets can not resolve to a
         // method with no ResultSet argument.
-        s
-                .execute("create procedure irdrs(p1 int) dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.missingDynamicParameter' parameter style JAVA");
-        assertCallError("42X50", "CALL IRDRS(?)");
+        s.execute(
+            "create procedure irdrs(p1 int) dynamic result sets 1 " +
+            "language java parameter style java external name '" +
+            thisClassName + ".missingDynamicParameter'");
+
+        assertCallError("42X50", "call IRDRS(?)");
         s.execute("drop procedure irdrs");
 
         // check that a procedure with dynamic result sets can not resolve to a
         // method with an argument that is a ResultSet impl,
-        s
-                .execute("create procedure rsi(p1 int) dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter' parameter style JAVA");
-        assertCallError("42X50", "CALL rsi(?)");
+        s.execute(
+            "create procedure rsi(p1 int) dynamic result sets 1 " +
+            "language java parameter style java external name " +
+            "'org.apache.derbyTesting.functionTests.util." +
+            "ProcedureTest.badDynamicParameter'");
+
+        assertCallError("42X50", "call rsi(?)");
         s.execute("drop procedure rsi");
 
         // simple check for a no-arg method that has dynamic result sets but
         // does not return any
         // System.out.println("no dynamic result sets");
-        s
-                .execute("create procedure zadrs() dynamic result sets 4 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.zeroArgDynamicResult' parameter style  JAVA");
-        CallableStatement zadrs = conn.prepareCall("CALL ZADRS()");
+        s.execute(
+            "create procedure zadrs() dynamic result sets 4 " +
+            "language java parameter style java external name '" +
+            thisClassName + ".zeroArgDynamicResult'");
+
+        CallableStatement zadrs = conn.prepareCall("call ZADRS()");
         zadrs.execute();
+
         // DERBY-211
-        if (usingEmbedded())
+        if (usingEmbedded()) {
             assertEquals(0, zadrs.getUpdateCount());
-        else
+        } else {
             assertEquals(-1, zadrs.getUpdateCount());
+        }
         zadrs.close();
         s.execute("drop procedure ZADRS");
 
         // return too many result sets
 
-        s
-                .execute("create procedure way.toomany(p1 int, p2 int) READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.selectRows' parameter style  JAVA");
-        CallableStatement toomany = conn.prepareCall("CALL way.toomany(?, ?)");
+        s.execute(
+            "create procedure way.toomany(p1 int, p2 int) reads sql data " +
+            "dynamic result sets 1 language java parameter style java " +
+            "external name '" +
+            thisClassName + ".selectRows'");
+
+        CallableStatement toomany = conn.prepareCall("call way.toomany(?, ?)");
         toomany.setInt(1, 2);
         toomany.setInt(2, 6);
         toomany.execute();
         SQLWarning warn = toomany.getWarnings();
+
         // DERBY-159. Network Server does not get warning
         if (usingEmbedded()) {
             assertNotNull(warn);
@@ -777,79 +885,95 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         toomany.close();
         s.execute("drop procedure way.toomany");
 
-        //Run following test in embedded only until DERBY-3414 is fixed. As
-        //identified in DERBY-3414, the rollback inside the java procedure
-        //is not closing all the resultsets when run in network server mode.
+        // Run following test in embedded only until DERBY-3414 is fixed. As
+        // identified in DERBY-3414, the rollback inside the java procedure
+        // is not closing all the resultsets when run in network server mode.
         if (usingEmbedded()) {
             boolean oldAutoCommit = conn.getAutoCommit();
-            s.execute("create table dellater1(i int not null primary key, b char(15))");
-            s.executeUpdate("INSERT INTO dellater1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
-            s.executeUpdate("CREATE TABLE DELLATER2(c11 int)");
-            s.executeUpdate("INSERT INTO DELLATER2 VALUES(1),(2),(3),(4)");
+
+            s.execute(
+                "create table dellater1(i int not null primary key, " +
+                "                       b char(15))");
+
+            s.executeUpdate(
+                "insert into dellater1 " +
+                "    values(1,'a'),(2,'b'),(3,'c'),(4,'d')");
+
+            s.executeUpdate("create table dellater2(c11 int)");
+            s.executeUpdate("insert into dellater2 values(1),(2),(3),(4)");
+
             conn.setAutoCommit(false);
-            ResultSet rs1 = s.executeQuery("SELECT * FROM dellater2");
+
+            ResultSet rs1 = s.executeQuery("select * from dellater2");
             rs1.next();
 
             Statement s1 =
                 conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                     ResultSet.CONCUR_READ_ONLY,
                                     ResultSet.HOLD_CURSORS_OVER_COMMIT);
-            ResultSet resultSet = s1.executeQuery("VALUES (1, 2), (3, 4)");
+            ResultSet resultSet = s1.executeQuery("values (1, 2), (3, 4)");
             resultSet.next();
 
-            s
-            .execute("create procedure procWithRollback(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.rollbackInsideProc'");
-            drs1 = prepareCall("CALL procWithRollback(3)");
+            s.execute(
+                "create procedure procWithRollback(p1 int) " +
+                "parameter style java reads sql data dynamic result sets 1 " +
+                "language java external name '" +
+                thisClassName + ".rollbackInsideProc'");
+
+            drs1 = prepareCall("call procWithRollback(3)");
             drs1.execute();
-            //Following shows that the rollback inside the java procedure will
-            //cuase procedure to return no resultset (A procedure does
-            //not return closed resultsets). In 10.2 codeline though, java
-            //procedure returns a closed resultset if there is a rollback 
-            //inside the java procedure.
+            // Following shows that the rollback inside the java procedure will
+            // cause procedure to return no resultset (A procedure does
+            // not return closed resultsets). In 10.2 codeline though, java
+            // procedure returns a closed resultset if there is a rollback
+            // inside the java procedure.
             JDBC.assertNoMoreResults(drs1);
             JDBC.assertClosed(rs1);
             JDBC.assertClosed(resultSet);
 
-            //Following shows that the rollback inside the java procedure will 
-            //only close the resultset created before the rollback. The 
-            //resultset created after the rollback will remain open and if it
-            //is a resultset returned through the procedure then it will be
-            //available to the caller of the procedure. Notice that even though
-            //the procedure is defined to 2 return dynamic resultsets, only one
-            //is returned because the other one was closed as a result of 
-            //rollback.
-            s.execute("create procedure procWithRollbackAnd2Resulsets"+
-            		"(p1 int) parameter style JAVA READS SQL DATA dynamic "+
-            		"result sets 2 language java external name "+
-            		"'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.rollbackInsideProcWith2ResultSets'");
-            drs1 = prepareCall("CALL procWithRollbackAnd2Resulsets(3)");
+            // Following shows that the rollback inside the java procedure will
+            // only close the resultset created before the rollback. The
+            // resultset created after the rollback will remain open and if it
+            // is a resultset returned through the procedure then it will be
+            // available to the caller of the procedure. Notice that even though
+            // the procedure is defined to 2 return dynamic resultsets, only one
+            // is returned because the other one was closed as a result of
+            // rollback.
+            s.execute(
+                "create procedure procWithRollbackAnd2Resulsets"+
+                "(p1 int) parameter style java reads sql data dynamic "+
+                "result sets 2 language java external name "+
+                "'" + thisClassName + ".rollbackInsideProcWith2ResultSets'");
+
+            drs1 = prepareCall("call procWithRollbackAnd2Resulsets(3)");
             drs1.execute();
             rs = drs1.getResultSet();
             JDBC.assertDrainResults(rs);
             JDBC.assertNoMoreResults(drs1);
+
+            // Create a procedure which does an insert into a table. Then call
+            // it with parameters such that insert will fail because of
+            // duplicate key. The procedure also has couple select statements
+            // The exception thrown for duplicate key should close the
+            // resultsets associated with select statement and we should be
+            // able to drop the tables used in the select queries without
+            // running into locking issues.
+            s.execute(
+                    "create procedure insertCausingRollback"+
+                    "(p1 int, p2 char(20))  modifies sql data "+
+                    "dynamic result sets 1 language java external name '" +
+                    thisClassName + ".insertCausingRollback' "+
+                    "parameter style java");
             
-            //Create a procedure which does an insert into a table. Then call 
-            //it with parameters such that insert will fail because of 
-            //duplicate key. The procedure also has couple select statements
-            //The exception thrown for duplicate key should close the
-            //resultsets associated with select statement and we should be
-            //able to drop the tables used in the select queries without
-            //running into locking issues.
-            s
-            .execute("create procedure insertCausingRollback"+
-            		"(p1 int, p2 CHAR(20))  MODIFIES SQL DATA "+
-            		"dynamic result sets 1 language java external "+
-            		"name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertCausingRollback' "+
-            		"parameter style java");
-            s.executeUpdate("CREATE TABLE DELLATER3(c31 int)");
-            s.executeUpdate("INSERT INTO DELLATER3 VALUES(1),(2),(3),(4)");
+            s.executeUpdate("create table DELLATER3(c31 int)");
+            s.executeUpdate("insert into DELLATER3 values(1),(2),(3),(4)");
             conn.commit();
-            drs1 = prepareCall("CALL insertCausingRollback(3,'3')");
+            drs1 = prepareCall("call insertCausingRollback(3,'3')");
             assertStatementError("23505",drs1);
             JDBC.assertNoMoreResults(drs1);
-            s.execute("DROP TABLE DELLATER1");
-            s.execute("DROP TABLE DELLATER2");
-            s.execute("DROP TABLE DELLATER3");
+            s.execute("drop table DELLATER1");
+            s.execute("drop table DELLATER2");
+            s.execute("drop table DELLATER3");
 
             conn.setAutoCommit(oldAutoCommit);
         }
@@ -860,80 +984,97 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
 
     public void testResultSetsWithLobs() throws SQLException {
-            Connection conn = getConnection();
+        Connection conn = getConnection();
 
-                // Create objects.
-                Statement s = createStatement();
-                        
-                // Clob.
-                s.execute("create table lobCheckOne (c clob(30))");
-                s.execute("insert into lobCheckOne values (cast " +
-                                  "('yayorsomething' as clob(30)))");
-                s.execute("insert into lobCheckOne values (cast " +
-                                          "('yayorsomething2' as clob(30)))");
-                s.execute("create procedure clobproc () parameter style java " +
-                        "language java external name " +
-                                  "'org.apache.derbyTesting.functionTests.util.ProcedureTest.clobselect' " +
-                                  "dynamic result sets 3 reads sql data");
-                // Blob.
-                s.execute("create table lobCheckTwo (b blob(30))");
-                s.execute("insert into lobCheckTwo values (cast " + "(" + 
-                                  TestUtil.stringToHexLiteral("101010001101") +
-                                  " as blob(30)))");
-                s.execute("insert into lobCheckTwo values (cast " +
-                                  "(" +
-                                  TestUtil.stringToHexLiteral("101010001101") +
-                                  " as blob(30)))");
-                s.execute("create procedure blobproc () parameter style java " +
-                        "language java external name " +
-                        "'org.apache.derbyTesting.functionTests.util.ProcedureTest.blobselect' " +
-                        "dynamic result sets 1 reads sql data");
+        // Create objects.
+        Statement s = createStatement();
+
+        // Clob.
+        s.execute("create table lobCheckOne (c clob(30))");
+        s.execute("insert into lobCheckOne values (cast " +
+                "('yayorsomething' as clob(30)))");
+        s.execute("insert into lobCheckOne values (cast " +
+                "('yayorsomething2' as clob(30)))");
+        s.execute(
+                "create procedure clobproc () parameter style java " +
+                "language java dynamic result sets 3 reads sql data " +
+                "external name " +
+                "'org.apache.derbyTesting.functionTests.util." +
+                "ProcedureTest.clobselect'");
+
+        // Blob.
+        s.execute("create table lobCheckTwo (b blob(30))");
+        s.execute("insert into lobCheckTwo values (cast " + "(" +
+                TestUtil.stringToHexLiteral("101010001101") +
+                " as blob(30)))");
+        s.execute("insert into lobCheckTwo values (cast " +
+                "(" +
+                TestUtil.stringToHexLiteral("101010001101") +
+                " as blob(30)))");
+        s.execute("create procedure blobproc () parameter style java " +
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.util." +
+                "ProcedureTest.blobselect' " +
+                "dynamic result sets 1 reads sql data");
+
+        // Clobs.
+
+        CallableStatement cs = conn.prepareCall("call clobproc()");
+        cs.execute();
+        ResultSet rs = cs.getResultSet();
+        JDBC.assertFullResultSet(rs,
+                new String[][] {{"yayorsomething"},{"yayorsomething2"}});
+        cs.close();
+
+        // Blobs.
+
+        cs = conn.prepareCall("call blobproc()");
+        cs.execute();
+        rs = cs.getResultSet();
+        String [][] expectedRows =
+           {{"003100300031003000310030003000300031003100300031"},
+            {"003100300031003000310030003000300031003100300031"}};
+
+        JDBC.assertFullResultSet(rs, expectedRows);
+        cs.close();
+
+        // Clean up.
+        s.execute("drop table lobCheckOne");
+        s.execute("drop table lobCheckTwo");
+        s.execute("drop procedure clobproc");
+        s.execute("drop procedure blobproc");
+        s.close();
+    }
 
 
-                try {
+    /**
+     * Original harness results transcribed here:
+     -auto commit is true
+     -lock count before execution 0
+     -lock count after execution 1
+     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -lock count after first getMoreResults() 2
+     -lock count after next on second rs 7
+     -lock count after second getMoreResults() 0
 
-                        // Clobs.
+     -auto commit is false
+     -lock count before execution 0
+     -lock count after execution 1
+     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -lock count after first getMoreResults() 2
+     -lock count after next on second rs 7
+     -lock count after second getMoreResults() 7
 
-                        
-                        CallableStatement cs = conn.prepareCall("CALL clobproc()");
-                        cs.execute();
-                        ResultSet rs = cs.getResultSet();
-                        JDBC.assertFullResultSet(rs, new String[][] {{"yayorsomething"},{"yayorsomething2"}}); 
-                        cs.close();
-                        
-                        // Blobs.
-
-                        
-                        cs = conn.prepareCall("CALL blobproc()");
-                        cs.execute();
-                        rs = cs.getResultSet();
-                        String [][] expectedRows = {{"003100300031003000310030003000300031003100300031"},            
-                                                    {"003100300031003000310030003000300031003100300031"}};   
-                                
-                
-                        JDBC.assertFullResultSet(rs, expectedRows);
-                        cs.close();
-
-                } catch (Exception e) {
-                        System.out.println("FAIL: Encountered exception:");
-                        e.printStackTrace();
-                }
-
-                try {
-                // Clean up.
-                        s.execute("drop table lobCheckOne");
-                        s.execute("drop table lobCheckTwo");
-                        s.execute("drop procedure clobproc");
-                        s.execute("drop procedure blobproc");
-                        s.close();
-                } catch (Exception e) {
-                        System.out.println("FAIL: Cleanup for lob result sets test:");
-                        e.printStackTrace();
-                }
-
-                return;
-
-        }
+     -auto commit is true
+     -lock count before execution 0
+     -lock count after execution 1
+     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -executing statement to force auto commit on open call statement
+     -lock count after statement execution 0
+     -lock count after first getMoreResults() 0
+     -lock count after next on second rs 0
+     -lock count after second getMoreResults() 0
+    */
 
     private static void checkCommitWithMultipleResultSets(
             CallableStatement drs1, Connection conn2, String action)
@@ -941,8 +1082,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = drs1.getConnection();
 
         // Do not run with client until DERBY-2510 is fixed
-        if (usingDerbyNetClient())
+        if (usingDerbyNetClient()) {
             return;
+        }
+
         try {
             conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
         } catch (Exception e) {
@@ -955,16 +1098,19 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         boolean oldAutoCommit = conn.getAutoCommit();
 
-        if (action.equals("noautocommit"))
+        if (action.equals("noautocommit")) {
             conn.setAutoCommit(false);
-        else
+        } else {
             conn.setAutoCommit(true);
+        }
 
         conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        if (action.equals("noautocommit"))
+
+        if (action.equals("noautocommit")) {
             assertFalse(conn.getAutoCommit());
-        else
+        } else {
             assertTrue(conn.getAutoCommit());
+        }
 
         PreparedStatement psLocks = conn2
                 .prepareStatement("select count(*) from SYSCS_DIAG.LOCK_TABLE AS LT");
@@ -983,13 +1129,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         // lock count after next on first rs
         lrs = psLocks.executeQuery();
 
-        JDBC.assertFullResultSet(lrs, new String[][] { { "3" } });
+        JDBC.assertFullResultSet(lrs, new String[][] { { "2" } });
 
         boolean expectClosed = false;
 
         // execute another statement to ensure that the result sets close.
         if (action.equals("statement")) {
-            // executing statement to force auto commit on open CALL statement")
+            // executing statement to force auto commit on open call statement")
 
             conn.createStatement().executeQuery("values 1").next();
             expectClosed = true;
@@ -999,8 +1145,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
             try {
                 rs.next();
-                if (action.equals("autocommit"))
-                    fail("FAIL - result set open in auto commit mode after another statement execution");
+                if (action.equals("autocommit")) {
+                    fail("FAIL - result set open in auto commit mode after " +
+                         "another statement execution");
+                }
             } catch (SQLException sqle) {
                 assertSQLState("XCL16", sqle);
             }
@@ -1010,43 +1158,48 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertTrue("is there a second result", anyMore);
         lrs = psLocks.executeQuery();
 
-        if (action.equals("statement"))
+        if (action.equals("statement")) {
             JDBC.assertFullResultSet(lrs, new String[][] { { "0" } });
-        else
+        } else {
             JDBC.assertFullResultSet(lrs, new String[][] { { "2" } });
+        }
 
         if (anyMore) {
 
             rs = drs1.getResultSet();
             try {
                 rs.next();
-                if (expectClosed && !usingDerbyNetClient())
-                    fail("FAIL - result set open in auto commit mode after another statement execution");
+                if (expectClosed && !usingDerbyNetClient()) {
+                    fail("FAIL - result set open in auto commit mode " +
+                         "after another statement execution");
+                }
             } catch (SQLException sqle) {
-                if (expectClosed)
+                if (expectClosed) {
                     assertSQLState("XCL16", sqle);
-
-                else
+                } else {
                     throw sqle;
+                }
             }
 
             // lock count after next on second rs
             lrs = psLocks.executeQuery();
 
-            if (action.equals("statement"))
+            if (action.equals("statement")) {
                 JDBC.assertFullResultSet(lrs, new String[][] { { "0" } });
-            else
+            } else {
                 JDBC.assertFullResultSet(lrs, new String[][] { { "7" } });
+            }
 
             // should commit here since all results are closed
             boolean more = drs1.getMoreResults();
             assertFalse("more results (should be false) ", more);
             lrs = psLocks.executeQuery();
 
-            if (action.equals("autocommit") || action.equals("statement"))
+            if (action.equals("autocommit") || action.equals("statement")) {
                 JDBC.assertFullResultSet(lrs, new String[][] { { "0" } });
-            else
+             }else {
                 JDBC.assertFullResultSet(lrs, new String[][] { { "7" } });
+            }
 
             conn.setTransactionIsolation(oldIsolation);
             conn.setAutoCommit(oldAutoCommit);
@@ -1059,10 +1212,11 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             throws SQLException {
         // DERBY-211 Network Server returns no result sets for a procedure call
         // that returns no result
-        if (usingEmbedded())
+        if (usingEmbedded()) {
             assertEquals(0, s.getUpdateCount());
-        else
+        } else {
             assertEquals(-1, s.getUpdateCount());
+        }
     }
 
     static String TYPE(short type) {
@@ -1219,27 +1373,27 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public static void insertCausingRollback(int p1, String p2, ResultSet[] data) throws SQLException {
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
-        
-        //The resultset created here is a dynamic resultset and will be
-        //available to the caller of the java procedure (provided that there
-        //is no SQL exception thrown inside of this procedure. An exception 
-        //will cause Derby to close this resultset).
+
+        // The resultset created here is a dynamic resultset and will be
+        // available to the caller of the java procedure (provided that there
+        // is no SQL exception thrown inside of this procedure. An exception
+        // will cause Derby to close this resultset).
         PreparedStatement ps = conn.prepareStatement(
         		"select * from dellater2 where c11 = ?");
         ps.setInt(1, p1);
         data[0] = ps.executeQuery();
-        
-        //The resultset created here has the lifetime of this procedure
-        //and is not available to the caller of the procedure.
+
+        // The resultset created here has the lifetime of this procedure
+        // and is not available to the caller of the procedure.
         PreparedStatement ps1 = conn.prepareStatement(
         		"select * from dellater3 where c31 = ?");
         ps1.setInt(1, p1);
         ps1.executeQuery();
-        
-        //Depending on the value of p1, following may throw duplicate key 
-        //exception. If that happens, both the dynamic resultset and local
-        //resultset created above will get closed and locks held by them
-        //and insert statement will be released
+
+        // Depending on the value of p1, following may throw duplicate key
+        // exception. If that happens, both the dynamic resultset and local
+        // resultset created above will get closed and locks held by them
+        // and insert statement will be released
         PreparedStatement ps2 = conn
                 .prepareStatement("insert into dellater1 values (?, ?)");
         ps2.setInt(1, p1);
@@ -1248,7 +1402,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps2.close();
         conn.close();
     }
-    
+
     public static void selectRows(int p1, int p2, ResultSet[] data1,
             ResultSet[] data2) throws SQLException {
 
@@ -1265,8 +1419,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.setInt(1, p2);
         data2[0] = ps.executeQuery();
 
-        if (p2 == 99)
+        if (p2 == 99) {
             data2[0].close();
+        }
 
         // return no results
         if (p2 == 199) {
@@ -1292,7 +1447,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
         Statement stmt = conn.createStatement();
-        rs[0] = stmt.executeQuery("SELECT * FROM " + table);
+        rs[0] = stmt.executeQuery("select * FROM " + table);
         conn.close();
     }
 
@@ -1301,20 +1456,32 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
-        s
-                .execute("create table PT1(A INTEGER not null primary key, B CHAR(10), C VARCHAR(20))");
-        s
-                .execute("create procedure PT1(IN a int, IN b char(10), c varchar(20)) parameter style java dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter1' MODIFIES SQL DATA");
+        s.execute("create table PT1(A integer not null primary key, " +
+                  "                 B char(10), C varchar(20))");
+        s.execute(
+            "create procedure PT1(in a int, in b char(10), c varchar(20)) " +
+            "parameter style java dynamic result sets 1 language java " +
+            "modifies sql data " +
+            "external name '" + thisClassName + ".parameter1'");
 
-        String[] sysaliasDefinition = { "APP.PT1 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter1(IN A INTEGER,IN B CHAR(10),IN C VARCHAR(20)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 1" };
-        String[] dbMetadataDefinition = { "APP.PT1 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter1 type procedureNoResult" };
-        String[] columnDefinition = { "procedureColumnIn A INTEGER",
-                "procedureColumnIn B CHAR", "procedureColumnIn C VARCHAR" };
+        String[] sysaliasDefinition = {
+            "APP.PT1 AS " + thisClassName + ".parameter1" +
+            "(IN \"A\" INTEGER,IN \"B\" CHAR(10),IN \"C\" VARCHAR(20)) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+            "MODIFIES SQL DATA DYNAMIC RESULT SETS 1" };
+
+        String[] dbMetadataDefinition = {
+            "APP.PT1 AS " + thisClassName + ".parameter1 " +
+            "type procedureNoResult" };
+
+        String[] columnDefinition = {
+            "procedureColumnIn A INTEGER",
+            "procedureColumnIn B CHAR", "procedureColumnIn C VARCHAR" };
 
         checkMatchingProcedures(conn, "PT1", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        CallableStatement pt1 = conn.prepareCall("CALL PT1(?, ?, ?)");
+        CallableStatement pt1 = conn.prepareCall("call PT1(?, ?, ?)");
 
         pt1.setInt(1, 20);
         pt1.setString(2, "abc");
@@ -1331,14 +1498,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 "abc", "10", "efgh", "6" } });
 
         pt1.setInt(1, 40);
-        pt1
-                .setString(
-                        2,
-                        "abc                                                                           ");
-        pt1
-                .setString(
-                        3,
-                        "efgh                                                                             ");
+
+        // end blanks truncation of arguments
+        char[] c75 = new char[75]; Arrays.fill(c75, ' ');
+        char[] c77 = new char[77]; Arrays.fill(c77, ' ');
+        pt1.setString(2, "abc" + new String(c75));
+        pt1.setString(3, "efgh" + new String(c77));
+
         pt1.execute();
         JDBC.assertFullResultSet(pt1.getResultSet(), new String[][] { { "40",
                 "abc", "10", "efgh", "20" } });
@@ -1346,25 +1512,41 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         pt1.setInt(1, 50);
         pt1.setString(2, "0123456789X");
         pt1.setString(3, "efgh  ");
+        assertPreparedStatementError(LANG_STRING_TRUNCATION, pt1);
+
+        pt1.setInt(1, 50);
+        pt1.setString(2, "0123456789");
+        pt1.setString(3, "efgh  ");
         pt1.execute();
         JDBC.assertFullResultSet(pt1.getResultSet(), new String[][] { { "50",
                 "0123456789", "10", "efgh", "6" } });
         pt1.close();
 
-        s.execute("DROP procedure PT1");
+        s.execute("drop procedure PT1");
 
-        s
-                .execute("create procedure PT2(IN a int, IN b DECIMAL(4), c DECIMAL(7,3)) parameter style java dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter2' MODIFIES SQL DATA");
+        s.execute(
+            "create procedure PT2(in a int, in b DECIMAL(4), c DECIMAL(7,3)) " +
+            "parameter style java dynamic result sets 1 language java " +
+            "modifies sql data " +
+            "external name '" + thisClassName + ".parameter2'");
 
-        sysaliasDefinition = new String[] { "APP.PT2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter2(IN A INTEGER,IN B DECIMAL(4,0),IN C DECIMAL(7,3)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 1" };
-        dbMetadataDefinition = new String[] { "APP.PT2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.parameter2 type procedureNoResult" };
+        sysaliasDefinition = new String[] {
+            "APP.PT2 AS " + thisClassName + ".parameter2" +
+            "(IN \"A\" INTEGER,IN \"B\" DECIMAL(4,0),IN \"C\" DECIMAL(7,3)) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+            "MODIFIES SQL DATA DYNAMIC RESULT SETS 1" };
+
+        dbMetadataDefinition = new String[] {
+            "APP.PT2 AS " +
+            thisClassName + ".parameter2 type procedureNoResult" };
+
         columnDefinition = new String[] { "procedureColumnIn A INTEGER",
                 "procedureColumnIn B DECIMAL", "procedureColumnIn C DECIMAL" };
 
         checkMatchingProcedures(conn, "PT2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        CallableStatement pt2 = conn.prepareCall("CALL PT2(?, ?, ?)");
+        CallableStatement pt2 = conn.prepareCall("call PT2(?, ?, ?)");
 
         pt2.setInt(1, 60);
         pt2.setString(2, "34");
@@ -1401,12 +1583,28 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 new String[][] { { "80", "993", "1234.567" } });
         pt2.close();
 
-        s.execute("DROP procedure PT2");
+        s.execute("drop procedure PT2");
 
-        s
-                .execute("create procedure PTSMALLINT2(IN p_in SMALLINT, INOUT p_inout SMALLINT, OUT p_out SMALLINT) parameter style java dynamic result sets 0 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.pSMALLINT' NO SQL");
-        sysaliasDefinition = new String[] { "APP.PTSMALLINT2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.pSMALLINT(IN P_IN SMALLINT,INOUT P_INOUT SMALLINT,OUT P_OUT SMALLINT) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL" };
-        dbMetadataDefinition = new String[] { "APP.PTSMALLINT2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.pSMALLINT type procedureNoResult" };
+        s.execute(
+            "create procedure PTSMALLINT2(" +
+            "    in    p_in    SMALLINT, " +
+            "    inout p_inout SMALLINT, " +
+            "    out   p_out   SMALLINT) " +
+            "parameter style java dynamic result sets 0 language java " +
+            "no sql " +
+            "external name '" + thisClassName + ".pSMALLINT'");
+
+        sysaliasDefinition = new String[] {
+            "APP.PTSMALLINT2 AS " + thisClassName + ".pSMALLINT" +
+            "(IN \"P_IN\" SMALLINT," +
+            "INOUT \"P_INOUT\" SMALLINT," +
+            "OUT \"P_OUT\" SMALLINT) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL" };
+
+        dbMetadataDefinition = new String[] {
+            "APP.PTSMALLINT2 AS " +
+            thisClassName + ".pSMALLINT type procedureNoResult" };
+
         columnDefinition = new String[] { "procedureColumnIn P_IN SMALLINT",
                 "procedureColumnInOut P_INOUT SMALLINT",
                 "procedureColumnOut P_OUT SMALLINT" };
@@ -1414,7 +1612,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         checkMatchingProcedures(conn, "PT2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        CallableStatement ptsi = conn.prepareCall("CALL PTSMALLINT2(?, ?, ?)");
+        CallableStatement ptsi = conn.prepareCall("call PTSMALLINT2(?, ?, ?)");
         ptsi.registerOutParameter(2, Types.SMALLINT);
         ptsi.registerOutParameter(3, Types.SMALLINT);
 
@@ -1462,8 +1660,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         ptsi.close();
 
-        s.execute("DROP procedure PTSMALLINT2");
-        s.execute("DROP TABLE PT1");
+        s.execute("drop procedure PTSMALLINT2");
+        s.execute("drop table PT1");
 
         s.close();
     }
@@ -1472,43 +1670,50 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
-        s
-                .execute("create procedure OP1(OUT a int, IN b int) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.outparams1'");
+        s.execute("create procedure OP1(out a int, in b int) " +
+                "parameter style java language java " +
+                "external name '" + thisClassName + ".outparams1'");
 
-        String[] sysaliasDefinition = { "APP.OP1 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.outparams1(OUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        String[] dbMetadataDefinition = { "APP.OP1 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.outparams1 type procedureNoResult" };
+        String[] sysaliasDefinition = {
+            "APP.OP1 AS " + thisClassName + ".outparams1" +
+            "(OUT \"A\" INTEGER,IN \"B\" INTEGER) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+        String[] dbMetadataDefinition = {
+            "APP.OP1 AS " + thisClassName + ".outparams1 " +
+            "type procedureNoResult" };
         String[] columnDefinition = { "procedureColumnOut A INTEGER",
                 "procedureColumnIn B INTEGER" };
 
         checkMatchingProcedures(conn, "OP1", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        // check execute via a Statement fails for use of OUT parameter
+        // check execute via a Statement fails for use of out parameter
 
         try {
-            s.execute("CALL OP1(?, ?)");
-            fail("FAIL execute succeeded on OUT param with Statement");
+            s.execute("call OP1(?, ?)");
+            fail("FAIL execute succeeded on out param with Statement");
         } catch (SQLException sqle) {
             String expectedSQLState = "XJ009";
-            if (usingDerbyNetClient())
+            if (usingDerbyNetClient()) {
                 expectedSQLState = "07004";
+            }
             assertSQLState(expectedSQLState, sqle);
         }
 
-        // check execute via a PreparedStatement fails for use of OUT parameter
+        // check execute via a PreparedStatement fails for use of out parameter
         // DERBY-2512 Network client allows prepare of a stored procedure with
         // an output parameter using a PreparedStatement
-        if (usingEmbedded())
+        if (usingEmbedded()) {
             try {
-                prepareStatement("CALL OP1(?, ?)");
-                fail("FAIL prepare succeeded on OUT param with PreparedStatement");
+                prepareStatement("call OP1(?, ?)");
+                fail("FAIL prepare succeeded on out param " +
+                     "with PreparedStatement");
             } catch (SQLException sqle) {
                 String expectedSQLState = "XJ009";
                 assertSQLState(expectedSQLState, sqle);
-
             }
-
-        CallableStatement op = prepareCall("CALL OP1(?, ?)");
+        }
+        CallableStatement op = prepareCall("call OP1(?, ?)");
 
         op.registerOutParameter(1, Types.INTEGER);
         op.setInt(2, 7);
@@ -1519,10 +1724,19 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         op.close();
 
-        s
-                .execute("create procedure OP2(INOUT a int, IN b int) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams2'");
-        sysaliasDefinition = new String[] { "APP.OP2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams2(INOUT A INTEGER,IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        dbMetadataDefinition = new String[] { "APP.OP2 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams2 type procedureNoResult" };
+        s.execute("create procedure OP2(inout a int, in b int) " +
+            "parameter style java language java " +
+            "external name '" + thisClassName + ".inoutparams2'");
+
+        sysaliasDefinition = new String[] {
+            "APP.OP2 AS " + thisClassName + ".inoutparams2" +
+            "(INOUT \"A\" INTEGER,IN \"B\" INTEGER) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+
+        dbMetadataDefinition = new String[] {
+            "APP.OP2 AS " +
+            thisClassName + ".inoutparams2 type procedureNoResult"};
+
         columnDefinition = new String[] { "procedureColumnInOut A INTEGER",
                 "procedureColumnIn B INTEGER" };
 
@@ -1530,21 +1744,23 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 dbMetadataDefinition, columnDefinition);
 
         try {
-            s.execute("CALL OP2(?,?)");
-            fail("FAIL execute succeeded on INOUT param with Statement");
+            s.execute("call OP2(?,?)");
+            fail("FAIL execute succeeded on inout param with Statement");
         } catch (SQLException sqle) {
             String expectedSQLState = "XJ009";
-            if (usingDerbyNetClient())
+            if (usingDerbyNetClient()) {
                 expectedSQLState = "07004";
+            }
             assertSQLState(expectedSQLState, sqle);
         }
 
         if (!usingDerbyNetClient()) { // bug DERBY-2512
-            // check execute via a PreparedStatement fails for use of INOUT
+            // check execute via a PreparedStatement fails for use of inout
             // parameter
             try {
-                prepareStatement("CALL OP2(?, ?)");
-                fail("FAIL prepare succeeded on INOUT param with PreparedStatement");
+                prepareStatement("call OP2(?, ?)");
+                fail("FAIL prepare succeeded on inout param " +
+                     "with PreparedStatement");
             } catch (SQLException sqle) {
                 String expectedSQLState = "XJ009";
                 assertSQLState(expectedSQLState, sqle);
@@ -1552,7 +1768,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             }
         }
 
-        op = prepareCall("CALL OP2(?, ?)");
+        op = prepareCall("call OP2(?, ?)");
 
         op.registerOutParameter(1, Types.INTEGER);
         op.setInt(1, 3);
@@ -1562,11 +1778,13 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertFalse(op.wasNull());
         op.close();
 
-        // INOUT & OUT procedures with variable length
-        s
-                .execute("create procedure OP3(INOUT a CHAR(10), IN b int) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams3'");
+        // inout & out procedures with variable length
+        s.execute(
+            "create procedure OP3(inout a char(10), in b int) " +
+            "parameter style java language java " +
+            "external name '" + thisClassName + ".inoutparams3'");
 
-        op = prepareCall("CALL OP3(?, ?)");
+        op = prepareCall("call OP3(?, ?)");
 
         op.registerOutParameter(1, Types.CHAR);
         op.setString(1, "dan");
@@ -1576,18 +1794,28 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertFalse(op.wasNull());
         op.close();
 
-        // INOUT & OUT DECIMAL procedures with variable length
-        s
-                .execute("create procedure OP4(OUT a DECIMAL(4,2), IN b VARCHAR(255)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams4'");
-        sysaliasDefinition = new String[] { "APP.OP4 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams4(OUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
-        dbMetadataDefinition = new String[] { "APP.OP4 AS org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams4 type procedureNoResult" };
+        // inout & out DECIMAL procedures with variable length
+        s.execute(
+            "create procedure OP4(out a DECIMAL(4,2), in b varchar(255)) " +
+            "parameter style java language java " +
+            "external name '" + thisClassName + ".inoutparams4'");
+
+        sysaliasDefinition = new String[] {
+            "APP.OP4 AS " + thisClassName + ".inoutparams4" +
+            "(OUT \"A\" DECIMAL(4,2),IN \"B\" VARCHAR(255)) " +
+            "LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA" };
+
+        dbMetadataDefinition = new String[] {
+            "APP.OP4 AS " +
+            thisClassName + ".inoutparams4 type procedureNoResult"};
+
         columnDefinition = new String[] { "procedureColumnOut A DECIMAL",
                 "procedureColumnIn B VARCHAR", };
 
         checkMatchingProcedures(conn, "OP4", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        op = prepareCall("CALL OP4(?, ?)");
+        op = prepareCall("call OP4(?, ?)");
         op.registerOutParameter(1, Types.DECIMAL);
         op.setString(2, null);
         op.execute();
@@ -1626,32 +1854,32 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertSQLState("07000", sqle);
         }
-        // DERBY-2513 Network client allows OUT parameter to be set
+        // DERBY-2513 Network client allows out parameter to be set
         if (usingEmbedded()) {
-            // try to set an OUT param
+            // try to set an out param
             try {
                 op.setBigDecimal(1, new BigDecimal("22.32"));
-                fail("FAIL - set OUT param to value");
+                fail("FAIL - set out param to value");
             } catch (SQLException sqle) {
                 assertSQLState("XCL27", sqle);
             }
 
             try {
                 op.setBigDecimal(1, null);
-                fail("FAIL - set OUT param to null");
+                fail("FAIL - set out param to null");
             } catch (SQLException sqle) {
                 assertSQLState("XCL27", sqle);
             }
             try {
                 op.setNull(1, Types.DECIMAL);
-                fail("FAIL - set OUT param to null");
+                fail("FAIL - set out param to null");
             } catch (SQLException sqle) {
                 assertSQLState("XCL27", sqle);
 
             }
         }
 
-        // can we get an IN param?
+        // can we get an in param?
         op.setString(2, "49.345");
         op.execute();
         assertEquals("66.34", op.getBigDecimal(1).toString());
@@ -1662,32 +1890,37 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             fail("FAIL OP4 GET 49.345 >" + op.getString(2) + "< null ? "
                     + op.wasNull());
         } catch (SQLException sqle) {
-            if (usingDerbyNetClient())
+            if (usingDerbyNetClient()) {
                 assertSQLState("XJ091", sqle);
-            else
+            } else {
                 assertSQLState("XCL26", sqle);
+            }
         }
         op.close();
 
         // check to see that a registration is required first for the out
         // parameter.
-        op = conn.prepareCall("CALL OP4(?, ?)");
+        op = conn.prepareCall("call OP4(?, ?)");
         op.setString(2, "14");
         try {
             op.execute();
             fail("FAIL - execute succeeded without registration of out parameter");
         } catch (SQLException sqle) {
-            if (usingEmbedded())
+            if (usingEmbedded()) {
                 assertSQLState("07004", sqle);
-            else
+            } else {
                 assertSQLState("07000", sqle);
+            }
         }
         op.close();
 
-        s
-                .execute("create procedure OP4INOUT(INOUT a DECIMAL(4,2), IN b VARCHAR(255)) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams4'");
+        s.execute(
+            "create procedure OP4INOUT(" +
+            "    inout a DECIMAL(4,2), in b varchar(255)) " +
+            "parameter style java language java " +
+            "external name '" + thisClassName + ".inoutparams4'");
 
-        op = conn.prepareCall("CALL OP4INOUT(?, ?)");
+        op = conn.prepareCall("call OP4INOUT(?, ?)");
         op.registerOutParameter(1, Types.DECIMAL);
 
         op.setString(2, null);
@@ -1712,12 +1945,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         op.execute();
         assertEquals("32.50", op.getBigDecimal(1).toString());
 
-        if (usingEmbedded()) {
-            // Not run for client due to DERBY-2515
-            op.execute();
-            assertEquals("56.00", op.getBigDecimal(1).toString());
-            assertFalse(op.wasNull());
-        }
+        op.execute();
+        assertEquals("56.00", op.getBigDecimal(1).toString());
+        assertFalse(op.wasNull());
 
         op.setString(2, "67.99");
         op.setBigDecimal(1, new BigDecimal("32.01"));
@@ -1769,24 +1999,26 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         op.close();
 
-        op = conn.prepareCall("CALL OP4INOUT(?, ?)");
+        op = conn.prepareCall("call OP4INOUT(?, ?)");
         op.setString(2, "14");
         try {
             op.execute();
-            fail("FAIL - execute succeeded without registration of INOUT parameter");
+            fail("FAIL - execute succeeded without registration of " +
+                 "inout parameter");
         } catch (SQLException sqle) {
-            if (usingDerbyNetClient())
+            if (usingDerbyNetClient()) {
                 assertSQLState("07000", sqle);
-            else
+            } else {
                 assertSQLState("07004", sqle);
+            }
         }
         op.close();
 
-        s.execute("DROP PROCEDURE OP1");
-        s.execute("DROP PROCEDURE OP2");
-        s.execute("DROP PROCEDURE OP3");
-        s.execute("DROP PROCEDURE OP4");
-        s.execute("DROP PROCEDURE OP4INOUT");
+        s.execute("drop PROCEDURE OP1");
+        s.execute("drop PROCEDURE OP2");
+        s.execute("drop PROCEDURE OP3");
+        s.execute("drop PROCEDURE OP4");
+        s.execute("drop PROCEDURE OP4INOUT");
         s.close();
 
     }
@@ -1795,70 +2027,107 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
 
-        s.execute("CREATE SCHEMA SQLC");
-        s.execute("CREATE TABLE SQLC.SQLCONTROL_DML(I INT)");
-        s.execute("INSERT INTO SQLC.SQLCONTROL_DML VALUES 4");
+        s.execute("create schema SQLC");
+        s.execute("create table SQLC.SQLCONTROL_DML(I int)");
+        s.execute("insert into SQLC.SQLCONTROL_DML values 4");
 
-        String[] control = { "", "NO SQL", "CONTAINS SQL", "READS SQL DATA",
-                "MODIFIES SQL DATA" };
+        String[] control = { "", "no sql", "contains sql", "reads sql data",
+                "modifies sql data" };
 
         for (int i = 0; i < control.length; i++) {
 
-            StringBuffer cp = new StringBuffer(256);
-            cp.append("CREATE PROCEDURE SQLC.SQLCONTROL1_");
+            StringBuilder cp = new StringBuilder(256);
+            cp.append("create procedure sqlc.sqlcontrol1_");
             cp.append(i);
-            cp
-                    .append(" (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) ");
+            cp.append(
+                "(out e1 varchar(128), " +
+                " out e2 varchar(128), " +
+                " out e3 varchar(128), " +
+                " out e4 varchar(128), " +
+                " out e5 varchar(128), " +
+                " out e6 varchar(128), " +
+                " out e7 varchar(128)) ");
             cp.append(control[i]);
-            cp
-                    .append(" PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.sqlControl'");
+            cp.append(" parameter style java language java ");
+            cp.append("external name '");
+            cp.append(thisClassName);
+            cp.append(".sqlControl'");
 
             String cpsql = cp.toString();
 
             s.execute(cpsql);
 
             cp.setLength(0);
-            cp.append("CREATE PROCEDURE SQLC.SQLCONTROL2_");
+            cp.append("create procedure sqlc.sqlcontrol2_");
             cp.append(i);
-            cp
-                    .append(" (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) ");
+            cp.append(
+                "(out e1 varchar(128)," +
+                " out e2 varchar(128)," +
+                " out e3 varchar(128)," +
+                " out e4 varchar(128)," +
+                " out e5 varchar(128)," +
+                " out e6 varchar(128)," +
+                " out e7 varchar(128)) ");
             cp.append(control[i]);
-            cp
-                    .append(" PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.sqlControl2'");
+            cp.append(" parameter style java language java ");
+            cp.append("external name '");
+            cp.append(thisClassName);
+            cp.append(".sqlControl2'");
 
             cpsql = cp.toString();
 
             s.execute(cpsql);
 
             cp.setLength(0);
-            cp.append("CREATE PROCEDURE SQLC.SQLCONTROL3_");
+            cp.append("create procedure sqlc.sqlcontrol3_");
             cp.append(i);
-            cp
-                    .append(" (OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128)) ");
+            cp.append(
+                "(out e1 varchar(128)," +
+                " out e2 varchar(128)," +
+                " out e3 varchar(128)," +
+                " out e4 varchar(128)," +
+                " out e5 varchar(128)," +
+                " out e6 varchar(128)," +
+                " out e7 varchar(128)) ");
+
             cp.append(control[i]);
-            cp
-                    .append(" PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.sqlControl3'");
+            cp.append(" parameter style java language java ");
+            cp.append("external name '");
+            cp.append(thisClassName);
+            cp.append(".sqlControl3'");
 
             cpsql = cp.toString();
 
             s.execute(cpsql);
 
             cp.setLength(0);
-            cp.append("CREATE PROCEDURE SQLC.SQLCONTROL4_");
+            cp.append("create procedure sqlc.sqlcontrol4_");
             cp.append(i);
-            cp
-                    .append(" (IN SQLC INTEGER, OUT E1 VARCHAR(128), OUT E2 VARCHAR(128), OUT E3 VARCHAR(128), OUT E4 VARCHAR(128), OUT E5 VARCHAR(128), OUT E6 VARCHAR(128), OUT E7 VARCHAR(128), OUT E8 VARCHAR(128)) ");
+            cp.append(
+                "(in sqlc integer," +
+                " out e1 varchar(128)," +
+                " out e2 varchar(128)," +
+                " out e3 varchar(128)," +
+                " out e4 varchar(128)," +
+                " out e5 varchar(128)," +
+                " out e6 varchar(128)," +
+                " out e7 varchar(128)," +
+                " out e8 varchar(128)) ");
+
             cp.append(control[i]);
-            cp
-                    .append(" PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.sqlControl4'");
+            cp.append(" parameter style java language java ");
+            cp.append("external name '");
+            cp.append(thisClassName);
+            cp.append(".sqlControl4'");
 
             cpsql = cp.toString();
 
             s.execute(cpsql);
         }
 
-        if (!conn.getAutoCommit())
+        if (!conn.getAutoCommit()) {
             conn.commit();
+        }
 
         String[][] sqlControl_0 = /* sqlControl_0 */{
                 { "CREATE TABLE SQ-UPDATE 0-EXECUTE OK",
@@ -1944,12 +2213,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         String[][][] sqlControl = { sqlControl_0, sqlControl_1, sqlControl_2,
                 sqlControl_3, sqlControl_4 };
         for (int i = 0; i < control.length; i++) {
-            String type = control[i];
-            if (type.length() == 0)
-                type = "DEFAULT (MODIFIES SQL DATA)";
-            // System.out.print("/*sqlControl_" + i + "*/{");
             for (int k = 1; k <= 3; k++) {
-                CallableStatement cs = conn.prepareCall("CALL SQLC.SQLCONTROL"
+                CallableStatement cs = conn.prepareCall("call SQLC.SQLCONTROL"
                         + k + "_" + i + " (?, ?, ?, ?, ?, ?, ?)");
                 // System.out.println("{");
                 for (int rop = 1; rop <= 7; rop++) {
@@ -1972,14 +2237,20 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                  */
             }
 
+            if (control[i].length() == 0) {
+                // This default case (see test above) succeeds in
+                // creating the SQLCONTROL_DDL table, so remove it to
+                // avoid tripping the explicit "modifies sql data".
+                s.execute("drop table SQLCONTROL_DDL");
+            }
             // System.out.println("}");
         }
 
         // test procedures that call others, e.g. to ensure that within a READS
-        // SQL DATA procedure, a MODIFIES SQL DATA cannot be called.
+        // SQL DATA procedure, a "modifies sql data" cannot be called.
         // table was dropped by previous executions.
         String[][] dmlSqlControl_0 = /* dmlSqlControl_0 */{
-                { "CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-UPDATE 0-EXECUTE OK",
                         "DROP VIEW SQLCO-UPDATE 0-EXECUTE OK",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
@@ -1987,24 +2258,24 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-UPDATE 0-EXECUTE OK",
                         "DROP SCHEMA SQL-UPDATE 0-EXECUTE OK" },
-                { "CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38001", "DROP VIEW SQLCO-38001",
                         "LOCK TABLE SQLC-38001", "VALUES 1,2,3-38001",
                         "SET SCHEMA SQLC-38001", "CREATE SCHEMA S-38001",
                         "DROP SCHEMA SQL-38001" },
-                { "CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3-38004",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-UPDATE 0-EXECUTE OK",
                         "DROP VIEW SQLCO-UPDATE 0-EXECUTE OK",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
@@ -2014,73 +2285,73 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                         "DROP SCHEMA SQL-UPDATE 0-EXECUTE OK" } };
 
         String[][] dmlSqlControl_1 = /* dmlSqlControl_1 */{
-                { "CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38001", "null", "null", "null", "null", "null",
                         "null" }
 
         };
 
         String[][] dmlSqlControl_2 = /* dmlSqlControl_2 */{
-                { "CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38002", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38001", "DROP VIEW SQLCO-38001",
                         "LOCK TABLE SQLC-38001", "VALUES 1,2,3-38001",
                         "SET SCHEMA SQLC-38001", "CREATE SCHEMA S-38001",
                         "DROP SCHEMA SQL-38001" },
-                { "CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3-38004",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38004", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38002", "null", "null", "null", "null", "null",
                         "null" } };
 
         String[][] dmlSqlControl_3 = /* dmlSqlControl_3 */{
-                { "CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38002", "null", "null", "null", "null", "null",
                         "null" },
-                { "CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38001", "DROP VIEW SQLCO-38001",
                         "LOCK TABLE SQLC-38001", "VALUES 1,2,3-38001",
                         "SET SCHEMA SQLC-38001", "CREATE SCHEMA S-38001",
                         "DROP SCHEMA SQL-38001" },
-                { "CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3-38004",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
                         "STATE-38002", "null", "null", "null", "null", "null",
                         "null" } };
 
         String[][] dmlSqlControl_4 = /* dmlSqlControl_4 */{
-                { "CALL SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_0 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-UPDATE 0-EXECUTE OK",
                         "DROP VIEW SQLCO-UPDATE 0-EXECUTE OK",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
@@ -2088,24 +2359,24 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-UPDATE 0-EXECUTE OK",
                         "DROP SCHEMA SQL-UPDATE 0-EXECUTE OK" },
-                { "CALL SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_1 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38001", "DROP VIEW SQLCO-38001",
                         "LOCK TABLE SQLC-38001", "VALUES 1,2,3-38001",
                         "SET SCHEMA SQLC-38001", "CREATE SCHEMA S-38001",
                         "DROP SCHEMA SQL-38001" },
-                { "CALL SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_2 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3-38004",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_3 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-38002", "DROP VIEW SQLCO-38002",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
                         "VALUES 1,2,3- ROW(1)- ROW(2)- ROW(3)-EXECUTE OK",
                         "SET SCHEMA SQLC-UPDATE 0-EXECUTE OK",
                         "CREATE SCHEMA S-38002", "DROP SCHEMA SQL-38002" },
-                { "CALL SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
+                { "call SQLC.SQLCONTROL2_4 (?, ?, ?, ?, ?, ?, ?) ",
                         "CREATE VIEW SQL-UPDATE 0-EXECUTE OK",
                         "DROP VIEW SQLCO-UPDATE 0-EXECUTE OK",
                         "LOCK TABLE SQLC-UPDATE 0-EXECUTE OK",
@@ -2117,21 +2388,12 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         String[][][] dmlSqlControl = { dmlSqlControl_0, dmlSqlControl_1,
                 dmlSqlControl_2, dmlSqlControl_3, dmlSqlControl_4 };
 
-        s.execute("CREATE TABLE SQLC.SQLCONTROL_DML(I INT)");
-        s.execute("INSERT INTO SQLC.SQLCONTROL_DML VALUES 4");
+        s.execute("create table SQLC.SQLCONTROL_DML(I int)");
+        s.execute("insert into SQLC.SQLCONTROL_DML values 4");
         for (int i = 0; i < control.length; i++) {
-            String type = control[i];
-            if (type.length() == 0)
-                type = "DEFAULT (MODIFIES SQL DATA)";
-            // System.out.println("/* dmlSqlControl_" + i + "*/{");
-
             for (int t = 0; t < control.length; t++) {
-                String ttype = control[t];
-                if (ttype.length() == 0)
-                    ttype = "DEFAULT (MODIFIES SQL DATA)";
-                // System.out.println("{");
                 CallableStatement cs = conn
-                        .prepareCall("CALL SQLC.SQLCONTROL4_" + i
+                        .prepareCall("call SQLC.SQLCONTROL4_" + i
                                 + " (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 cs.setInt(1, t);
                 for (int rop = 2; rop <= 9; rop++) {
@@ -2146,8 +2408,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                      * if (p < 9) System.out.println(","); else
                      * System.out.println("}");
                      */
-                    if (so == null)
+                    if (so == null) {
                         continue;
+                    }
+
                     assertEquals(dmlSqlControl[i][t][p - 2], so);
                 }
                 /*
@@ -2161,20 +2425,73 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         // if params are not registered
         assertCallError(
                 usingEmbedded() ? "07004" : "07000",
-                "CALL SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)");
+                "call SQLC.SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)");
 
-        s.execute("DROP TABLE SQLC.SQLCONTROL_DML");
+        s.execute("drop table SQLC.SQLCONTROL_DML");
 
         for (int i = 0; i < control.length; i++) {
-            s.execute("DROP PROCEDURE SQLCONTROL1_" + i);
-            s.execute("DROP PROCEDURE SQLCONTROL2_" + i);
-            s.execute("DROP PROCEDURE SQLCONTROL4_" + i);
+            s.execute("drop PROCEDURE SQLC.SQLCONTROL1_" + i);
+            s.execute("drop PROCEDURE SQLC.SQLCONTROL2_" + i);
+            s.execute("drop PROCEDURE SQLC.SQLCONTROL3_" + i);
+            s.execute("drop PROCEDURE SQLC.SQLCONTROL4_" + i);
         }
-        s.execute("DROP TABLE SQLC.SQLCONTROL_DDL");
-        s.execute("SET SCHEMA APP");
-        s.execute("DROP SCHEMA SQLC RESTRICT");
+        s.execute("drop table SQLCONTROL_DDL");
+        s.execute("set schema APP");
+        s.execute("drop schema SQLC RESTRICT");
 
         s.close();
+    }
+
+
+    /**
+     * Better diagnostics when a function is being used as a procedure
+     * or vice versa
+     */
+    public void testDerby5945() throws SQLException {
+        setAutoCommit(false);
+        Connection c = getConnection();
+        Statement s = c.createStatement();
+        s.executeUpdate(
+            "create procedure PROC( inout ret int ) parameter style java" +
+            "    modifies sql data language java external name " +
+            "'" + thisClassName + ".PROC'");
+        s.executeUpdate(
+            "create function FUNC (i int) returns int parameter style java" +
+            "    reads sql data language java external name " +
+            "'" + thisClassName + ".FUNC'");
+
+
+        try {
+            CallableStatement cs = c.prepareCall("{?=call PROC(?)}");
+            fail();
+        } catch (SQLException e) {
+            assertEquals(
+                "'PROC' is a procedure but it is being used as a function.",
+                e.getMessage());
+            assertSQLState("42Y03", e);
+        }
+
+        ResultSet rs = s.executeQuery("values func(3)");
+        rs.next();
+        assertEquals(9, rs.getInt(1));
+
+        try {
+            s.executeUpdate("call func(3)");
+            fail();
+        } catch (SQLException e) {
+            assertEquals(
+                "'FUNC' is a function but it is being called as a procedure.",
+                e.getMessage());
+            assertSQLState("42Y03", e);
+        }
+
+        rollback();
+    }
+
+    public static void PROC(int[] i) {}
+
+    public static int FUNC(int i) {
+        return i*i;
     }
 
     public static void pSMALLINT(short in, short[] inout, short[] out)
@@ -2196,8 +2513,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.setString(3, c);
         ps.executeUpdate();
         ps.close();
-        ps = conn
-                .prepareStatement("select a,b, length(b), c, length(c) from PT1 where a = ?");
+        ps = conn.prepareStatement(
+            "select a,b, length(b), c, length(c) from PT1 where a = ?");
         ps.setInt(1, a);
         rs[0] = ps.executeQuery();
         conn.close();
@@ -2233,22 +2550,24 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public static void inoutparams3(String[] p1, int p2) {
 
-        if (p2 == 8)
+        if (p2 == 8) {
             p1[0] = "nad";
-        else if (p2 == 9)
+        } else if (p2 == 9) {
             p1[0] = null;
-        else if (p2 == 10)
+        } else if (p2 == 10) {
             p1[0] = "abcdefghijklmnopqrstuvwzyz";
+        }
     }
 
     public static void inoutparams4(java.math.BigDecimal[] p1, String p2) {
-        if (p2 == null)
+        if (p2 == null) {
             p1[0] = null;
-        else {
-            if (p1[0] == null)
+        } else {
+            if (p1[0] == null) {
                 p1[0] = new BigDecimal(p2).add(new BigDecimal("17"));
-            else
+            } else {
                 p1[0] = new BigDecimal(p2).add(p1[0]);
+            }
         }
     }
 
@@ -2308,8 +2627,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             String[] e4, String[] e5, String[] e6, String[] e7)
             throws SQLException {
 
-        Connection conn = DriverManager
-                .getConnection("jdbc:default:connection");
+        Connection conn =
+            DriverManager.getConnection("jdbc:default:connection");
 
         Statement s = conn.createStatement();
 
@@ -2334,7 +2653,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
 
-        String sql = "CALL SQLC.SQLCONTROL2_" + sqlc
+        String sql = "call SQLC.SQLCONTROL2_" + sqlc
                 + " (?, ?, ?, ?, ?, ?, ?) ";
 
         e1[0] = sql;
@@ -2354,16 +2673,20 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             e7[0] = cs1.getString(6);
             e8[0] = cs1.getString(7);
         } catch (SQLException sqle) {
-            StringBuffer sb = new StringBuffer(128);
+            StringBuilder sb = new StringBuilder(128);
             sb.append("STATE");
             do {
                 sb.append("-");
                 String ss = sqle.getSQLState();
-                if (ss == null)
+
+                if (ss == null) {
                     ss = "?????";
+                }
+
                 sb.append(ss);
                 sqle = sqle.getNextException();
             } while (sqle != null);
+
             e2[0] = sb.toString();
         }
 
@@ -2376,21 +2699,29 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     private static void executeStatement(Statement s, String sql,
             String[] result) {
 
-        StringBuffer sb = new StringBuffer(128);
+        StringBuilder sb = new StringBuilder(128);
 
         int len = sql.length();
-        if (len > 15)
+
+        if (len > 15) {
             len = 15;
+        }
 
         sb.append(sql.substring(0, len));
         try {
             if (s.execute(sql)) {
                 ResultSet rs = s.getResultSet();
-                while (rs.next())
-                    sb.append("- ROW(" + rs.getString(1) + ")");
+
+                while (rs.next()) {
+                    sb.append("- ROW(");
+                    sb.append(rs.getString(1));
+                    sb.append(")");
+                }
+
                 rs.close();
             } else {
-                sb.append("-UPDATE " + s.getUpdateCount());
+                sb.append("-UPDATE ");
+                sb.append(s.getUpdateCount());
             }
 
             sb.append("-EXECUTE OK");
@@ -2400,12 +2731,14 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             do {
                 sb.append("-");
                 String ss = sqle.getSQLState();
-                if (ss == null)
+
+                if (ss == null) {
                     ss = "?????";
+                }
+
                 sb.append(ss);
                 sqle = sqle.getNextException();
             } while (sqle != null);
-
         }
         result[0] = sb.toString();
     }
@@ -2423,5 +2756,4 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             ResultSet[] data2, ResultSet[] data3, ResultSet[] data4) {
 
     }
-
 }

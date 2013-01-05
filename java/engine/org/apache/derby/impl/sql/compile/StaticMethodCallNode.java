@@ -231,18 +231,65 @@ public class StaticMethodCallNode extends MethodCallNode
                 return this;
             }
 
-			if (ad == null && noSchema && !forCallStatement)
-			{
-				// Resolve to a built-in SYSFUN function but only
-				// if this is a function call and the call
-				// was not qualified. E.g. COS(angle). The
-				// SYSFUN functions are not in SYSALIASES but
-				// an in-memory table, set up in DataDictioanryImpl.
-				sd = getSchemaDescriptor("SYSFUN", true);
-				
-				resolveRoutine(fromList, subqueryList, aggregateVector, sd);
-			}
-	
+            SchemaDescriptor savedSd = sd;
+
+            if (ad == null && noSchema && !forCallStatement)
+            {
+                // Resolve to a built-in SYSFUN function but only
+                // if this is a function call and the call
+                // was not qualified. E.g. COS(angle). The
+                // SYSFUN functions are not in SYSALIASES but
+                // an in-memory table, set up in DataDictioanryImpl.
+                sd = getSchemaDescriptor("SYSFUN", true);
+
+                resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+            }
+
+            if (ad == null) {
+                // DERBY-2927. Check if a procedure is being used as a
+                // function, or vice versa.
+                sd = savedSd;
+
+                if (!forCallStatement) {
+                    // Procedure as function. We have JDBC escape syntax which
+                    // may entice users to try that:
+                    //      "{? = CALL <proc>}"
+                    //
+                    // but we don't currently support it (it's not std SQL
+                    // either). By resolving it as a procedure we can give a
+                    // better error message.
+                    //
+                    // Note that with the above escape syntax one *can* CALL a
+                    // function, though:
+                    //      "{? = CALL <func>}"
+                    //
+                    // but such cases have already been resolved above.
+
+                    forCallStatement = true; // temporarily: resolve
+                                             // as procedure
+                    resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+                    forCallStatement = false; // restore it
+
+                    if (ad != null) {
+                        throw StandardException.newException
+                            (SQLState.LANG_PROC_USED_AS_FUNCTION,
+                             procedureName);
+                    }
+                } else {
+                    // Maybe a function is being CALLed ?
+                    forCallStatement = false; // temporarily: resolve
+                                              // as function
+                    resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+                    forCallStatement = true; // restore it
+
+                    if (ad != null) {
+                        throw StandardException.newException
+                            (SQLState.LANG_FUNCTION_USED_AS_PROC,
+                             procedureName);
+                    }
+                }
+            }
+
 			/* Throw exception if no routine found */
 			if (ad == null)
 			{
