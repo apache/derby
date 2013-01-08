@@ -2761,6 +2761,26 @@ you should not have to do this.
 
     </target>
 
+    <!-- Prompt for branch id if it is missing -->
+    <target name="promptforbranch" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="branch.id"
+          prompt="Enter the name of the branch (e.g., 10.7) >  "
+        />
+
+    </target>
+
+    <!-- Prompt for location of binary zip distribution if it is missing -->
+    <target name="promptforbinaryzipdist" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="derby.release.binzip"
+          prompt="Enter the location of the binary zip distribution for the release (e.g., /Users/me/release/db-derby-10.7.1.0-bin.zip) >  "
+        />
+
+    </target>
+
     <!-- Prompt for root of documentation client if it is missing -->
     <target name="promptfordocsroot" depends="defineprompt">
 
@@ -2914,12 +2934,8 @@ you should not have to do this.
 <!-- ==================================================================== -->
 
     <!-- Repackage the docs for publication on the website -->
-    <target name="repackagedocs" depends="defineprompt">
+    <target name="repackagedocs" depends="promptforwebsite,promptforbranch,promptforbinaryzipdist">
 
-        <promptForProperty
-          propertyName="derby.release.binzip"
-          prompt="Enter the location of the binary zip distribution for the release (e.g., /Users/me/release/db-derby-10.7.1.0-bin.zip) >  "
-        />
         <fail message="Cannot repackage the docs. Cannot find ${derby.release.binzip}">
             <condition>
               <not>
@@ -2928,22 +2944,18 @@ you should not have to do this.
             </condition>
         </fail>
 
-        <promptForProperty
-          propertyName="branch.id"
-          prompt="Enter the name of the branch (e.g., 10.7) >  "
-        />
-
         <basename property="zipstub" file="${derby.release.binzip}" suffix=".zip"/>
         <echo message="${zipstub}"/>
 
         <property name="repackage.dir" value="${release.base}/repackagedocs"/>
         <property name="unpacked.dir" value="${repackage.dir}/unpacked"/>
-        <property name="pruned.dir" value="${repackage.dir}/pruned"/>
+        <property name="pruned.dir" value="${website.root}/build/site/docs/${branch.id}"/>
         <property name="pruned.docs.dir" value="${pruned.dir}/docs"/>
         <property name="pruned.publicapi.dir" value="${pruned.dir}/publishedapi"/>
 
         <delete dir="${repackage.dir}"/>
         <mkdir dir="${unpacked.dir}"/>
+        <mkdir dir="${pruned.dir}"/>
         <mkdir dir="${pruned.docs.dir}"/>
         <mkdir dir="${pruned.publicapi.dir}"/>
 
@@ -2963,10 +2975,9 @@ you should not have to do this.
         <move todir="${pruned.dir}"><fileset dir="${pruned.docs.dir}/html"/></move>
         <delete dir="${pruned.docs.dir}"/>
 
-        <zip destfile="${repackage.dir}/${branch.id}.zip" compress="true">
-          <zipfileset prefix="${branch.id}" dir="${pruned.dir}"/>
-        </zip>
-        <delete dir="${pruned.dir}"/>
+        <!-- Delete the obsolete Japanese and Brazilian variants -->
+        <delete dir="${pruned.dir}/ja_JP"/>
+        <delete dir="${pruned.dir}/pt_BR"/>
 
     </target>
 
@@ -2980,6 +2991,16 @@ you should not have to do this.
 
     <!-- Transform the release notes for publication on the website. This creates the download page for the release -->
     <target name="transformrelnotes" depends="promptforreleaseid,promptforwebsite">
+
+        <property name="relnotes.target.dir" value="${website.root}/src/documentation/content/xdocs/releases" />
+
+        <fail message="Cannot transform the release notes. The web site client does not look correct.">
+            <condition>
+              <not>
+                <available file="${relnotes.target.dir}"/>
+              </not>
+            </condition>
+        </fail>
 
         <property name="relnotes.src" value="${basedir}/RELEASE-NOTES.html" />
 
@@ -3010,15 +3031,6 @@ you should not have to do this.
           propertyName="website.root"
           prompt="Enter the root directory of your Derby website client (e.g. /Users/me/derby/site/trunk) >  "
         />
-        <property name="relnotes.target.dir" value="${website.root}/src/documentation/content/xdocs/releases" />
-
-        <fail message="Cannot transform the release notes. The web site client does not look correct.">
-            <condition>
-              <not>
-                <available file="${relnotes.target.dir}"/>
-              </not>
-            </condition>
-        </fail>
 
     </target>
 
