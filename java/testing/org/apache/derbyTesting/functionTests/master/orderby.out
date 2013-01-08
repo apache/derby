@@ -2346,4 +2346,30 @@ ij> values (1,-1),(3,-3),(2,-2) order by 2;
 3          |-3         
 2          |-2         
 1          |-1         
+ij> -- DERBY-6027: ORDER BY a cast expression gives NPE 
+values 1 order by int(1);
+ERROR 4287B: In this context, the ORDER BY clause may only specify a column number.
+ij> -- expect error
+values 1 order by 1;
+1          
+-----------
+1          
+ij> -- ok, order by column #
+
+-- check that int(1) doesn't do sorting with SELECT, it's just a constant expression
+create table d6027(i int);
+0 rows inserted/updated/deleted
+ij> insert into d6027 values (2,1,3);
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> select i from d6027 order by 1;
+I          
+-----------
+ij> -- OK, sort
+select i from d6027 order by int(1);
+I          
+-----------
+ij> -- OK, don't sort
+
+drop table d6027;
+0 rows inserted/updated/deleted
 ij> 

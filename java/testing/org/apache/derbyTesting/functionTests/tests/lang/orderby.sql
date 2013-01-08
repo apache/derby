@@ -914,3 +914,14 @@ values 1,2 order by 1+0;
 values (1,-1),(3,-3),(2,-2) order by 1;
 values (1,-1),(3,-3),(2,-2) order by 2;
 
+-- DERBY-6027: ORDER BY a cast expression gives NPE 
+values 1 order by int(1); -- expect error
+values 1 order by 1;      -- ok, order by column #
+
+-- check that int(1) doesn't do sorting with SELECT, it's just a constant expression
+create table d6027(i int);
+insert into d6027 values (2,1,3);
+select i from d6027 order by 1;      -- OK, sort
+select i from d6027 order by int(1); -- OK, don't sort
+
+drop table d6027;
