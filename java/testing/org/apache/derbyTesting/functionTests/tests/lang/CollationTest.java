@@ -23,16 +23,13 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 
 import java.text.Collator;
 import java.util.Locale;
-import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -42,15 +39,11 @@ import org.apache.derby.iapi.types.HarmonySerialClob;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
-import org.apache.derbyTesting.functionTests.tests.nist.NistScripts;
 import org.apache.derbyTesting.junit.XML;
-//import org.apache.derby.iapi.types.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCDataSource;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class CollationTest extends BaseJDBCTestCase {
@@ -70,7 +63,41 @@ public class CollationTest extends BaseJDBCTestCase {
             "\u015Amith",
             "aacorn",
     };
-    
+
+    /** Test cases to run with English case-sensitive collation. */
+    private final static String[] ENGLISH_CASE_SENSITIVE = {
+        "testEnglishCollation",
+        "testUsingClauseAndNaturalJoin",
+        "testNullColumnInInsert",
+        "test_5951",
+    };
+
+    /** Test cases to run with English case-insensitive collation. */
+    private final static String[] ENGLISH_CASE_INSENSITIVE = {
+        "testUsingClauseAndNaturalJoin",
+        "testNullColumnInInsert",
+    };
+
+    /** Test cases to run with Norwegian case-sensitive collation. */
+    private final static String[] NORWEGIAN_CASE_SENSITIVE = {
+        "testNorwayCollation",
+    };
+
+    /** Test cases to run with Polish case-sensitive collation. */
+    private final static String[] POLISH_CASE_SENSITIVE = {
+        "testPolishCollation",
+    };
+
+    /** Test cases to run with French case-sensitive collation. */
+    private final static String[] FRENCH_CASE_SENSITIVE = {
+        "testFrenchCollation",
+    };
+
+    /** Test cases to run with Swedish case-insensitive collation. */
+    private final static String[] SWEDISH_CASE_INSENSITIVE = {
+        "testSwedishCaseInsensitiveCollation",
+    };
+
   /**
    * Test order by with default collation
    * 
@@ -78,8 +105,7 @@ public class CollationTest extends BaseJDBCTestCase {
    */
 public void testDefaultCollation() throws SQLException {
 
-      Connection conn = getConnection();
-      conn.setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
       PreparedStatement ps;
       ResultSet rs;
@@ -343,7 +369,7 @@ private void compareAgrave(String dataType, int expectedMatchCountForEqual,
    */
 public void testPolishCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
       
       setUpTable(s);
@@ -416,7 +442,7 @@ public void testPolishCollation() throws SQLException {
    */
 public void testNorwayCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
 
       setUpTable(s);
@@ -537,7 +563,7 @@ public void testNullColumnInInsert() throws SQLException {
    * @throws SQLException
   */
 public void testUsingClauseAndNaturalJoin() throws SQLException {
-      getConnection().setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
       String collation; 
 
@@ -1169,7 +1195,7 @@ private void joinTesting(Statement s,
   */
 public void testEnglishCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
       setUpTable(s);
 
@@ -1233,7 +1259,7 @@ public void testEnglishCollation() throws SQLException {
   */
 public void testSwedishCaseInsensitiveCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+      setAutoCommit(false);
       Statement s = createStatement();
       setUpTable(s);
 
@@ -1982,12 +2008,6 @@ private void setUpTable(Statement s) throws SQLException {
     ps.close();
 }
 
-private void dropTable(Statement s) throws SQLException {
-	
-    s.execute("DROP TABLE APP.CUSTOMER");     
-    s.getConnection().commit();
-}
-
 /**
  * Execute the passed statement and compare the results against the
  * expectedResult 
@@ -2046,11 +2066,8 @@ public void testMissingCollatorSupport() throws SQLException {
 
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
-        suite.addTest(collatedSuite("en", false, "testEnglishCollation"));
-        suite.addTest(collatedSuite("en", true, "testUsingClauseAndNaturalJoin"));
-        suite.addTest(collatedSuite("en", false, "testUsingClauseAndNaturalJoin"));
-        suite.addTest(collatedSuite("en", true, "testNullColumnInInsert"));
-        suite.addTest(collatedSuite("en", false, "testNullColumnInInsert"));
+        suite.addTest(collatedSuite("en", false, ENGLISH_CASE_SENSITIVE));
+        suite.addTest(collatedSuite("en", true, ENGLISH_CASE_INSENSITIVE));
          
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
@@ -2074,16 +2091,16 @@ public void testMissingCollatorSupport() throws SQLException {
             }
         }
         if(norwegian) {
-            suite.addTest(collatedSuite("no", false, "testNorwayCollation"));
+            suite.addTest(collatedSuite("no", false, NORWEGIAN_CASE_SENSITIVE));
         }
         if(polish) {
-            suite.addTest(collatedSuite("pl", false, "testPolishCollation"));
+            suite.addTest(collatedSuite("pl", false, POLISH_CASE_SENSITIVE));
         }
         if(french) {
-            suite.addTest(collatedSuite("fr", false, "testFrenchCollation"));
+            suite.addTest(collatedSuite("fr", false, FRENCH_CASE_SENSITIVE));
         }
         if(swedish && !hasBuggySwedishLocale()) {
-            suite.addTest(collatedSuite("sv", true, "testSwedishCaseInsensitiveCollation"));
+            suite.addTest(collatedSuite("sv", true, SWEDISH_CASE_INSENSITIVE));
         }
         return suite;
     }
@@ -2105,35 +2122,26 @@ public void testMissingCollatorSupport() throws SQLException {
             return true;
         }
     }
-
-  /**
-     Load the appropriate driver for the current framework
-   */
-  private static void loadDriver()
-  {
-      String driverClass =
-          TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
-      try {
-          Class.forName(driverClass).newInstance();
-      } catch (Exception e) {
-          fail ("could not instantiate driver");
-      }
-  }
  
   /**
    * Return a suite that uses a single use database with
-   * a primary fixture from this test plus potentially other
-   * fixtures.
+   * a set of test cases from this class, plus potentially some other
+   * test cases.
+   *
    * @param locale Locale to use for the database
    * @param caseInsensitive Indicates if the database should use a case insensitive collation.
-   * @param baseFixture Base fixture from this test.
+   * @param testNames the tests to run in the specified locale
    * @return suite of tests to run for the given locale
    */
-  private static Test collatedSuite(String locale, boolean caseInsensitive, String baseFixture)
+  private static Test collatedSuite(
+          String locale, boolean caseInsensitive, String[] testNames)
   {
       TestSuite suite = new TestSuite("CollationTest:territory=" + locale);
-      suite.addTest(new CollationTest(baseFixture));
-      
+
+      for (int i = 0; i < testNames.length; i++) {
+          suite.addTest(new CollationTest(testNames[i]));
+      }
+
       // DMD.getTables() should not fail after the fix to DERBY-2896
       /*
        * The following check condition was added because it would be 
@@ -2160,7 +2168,6 @@ public void testMissingCollatorSupport() throws SQLException {
     {
         Statement s = createStatement();
         
-        ResultSet rs = null;
         s.execute("CREATE TABLE derby5951( a clob )");
         s.execute
             (
@@ -2169,11 +2176,10 @@ public void testMissingCollatorSupport() throws SQLException {
              "external name 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.makeClob'\n"
              );
         s.executeUpdate("INSERT INTO derby5951 VALUES( makeClob( 'a' ) )");
-        rs = s.executeQuery("select * from derby5591");
-        JDBC.assertFullResultSet(rs,
-                                 new String[][] {{"a"}});
+        ResultSet rs = s.executeQuery("select * from derby5951");
+        JDBC.assertSingleValueResultSet(rs, "a");
         
-        s.executeUpdate("DROP TABLE derby5591");
+        s.executeUpdate("DROP TABLE derby5951");
         s.executeUpdate("DROP function makeClob");
     }
 
