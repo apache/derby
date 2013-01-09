@@ -7,7 +7,7 @@ Expected exception java.sql.SQLException: The parameter position '0' is out of r
 Expected exception java.sql.SQLException: Return output parameters cannot be set.
 Expected exception java.sql.SQLException: Return output parameters cannot be set.
 Expected exception on setString() on a return output param: java.sql.SQLException: Return output parameters cannot be set.
-Expected exception on prepare of '? = call returnsNothing()': java.sql.SQLException: 'RETURNSNOTHING' is not recognized as a function or procedure.
+Expected exception on prepare of '? = call returnsNothing()': java.sql.SQLException: 'RETURNSNOTHING' is a procedure but it is being used as a function.
 ==============================================
 TESTING NULLS
 ==============================================
