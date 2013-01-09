@@ -29,13 +29,12 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
-import org.apache.derby.jdbc.ClientXADataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class ClientXAConnection extends ClientPooledConnection implements XAConnection {
     private static int rmIdSeed_ = 95688932; // semi-random starting value for rmId
 
-    private ClientXADataSource derbyds_ = null;
     private XAResource xares_ = null;
     private org.apache.derby.client.net.NetXAResource netXares_ = null;
     private boolean fFirstGetConnection_ = true;
@@ -43,12 +42,11 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     // This connection is used to access the indoubt table
     private NetXAConnection controlCon_ = null;
 
-    public ClientXAConnection(ClientXADataSource ds,
+    public ClientXAConnection(ClientBaseDataSourceRoot ds,
                               org.apache.derby.client.net.NetLogWriter logWtr,
                               String userId,
                               String password) throws SQLException {
         super(ds, logWtr, userId, password, getUnigueRmId());
-        derbyds_ = ds;
 
         // Have to instantiate a real connection here,
         // otherwise if XA function is called before the connect happens,
@@ -96,22 +94,16 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         return xares_;
     }
 
-    public ClientXADataSource getDataSource() throws SqlException {
-        if (logWriter_ != null) {
-            logWriter_.traceExit(this, "getDataSource", derbyds_);
-        }
 
-        return derbyds_;
-    }
+    public NetXAConnection createControlConnection(
+            NetLogWriter logWriter,
+            String user,
+            String password,
+            ClientBaseDataSourceRoot dataSource,
+            int rmId,
+            boolean isXAConn) throws SQLException {
 
-    public NetXAConnection createControlConnection(NetLogWriter logWriter,
-                                                   String user,
-                                                   String password,
-                                                   org.apache.derby.jdbc.ClientDataSource dataSource,
-                                                   int rmId,
-                                                   boolean isXAConn) throws SQLException {
-        try
-        {
+        try {
             controlCon_ = new NetXAConnection(logWriter,
                     user,
                     password,

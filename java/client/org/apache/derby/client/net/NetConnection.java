@@ -35,7 +35,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
 
@@ -190,10 +190,12 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         this.closeStatementsOnClose = true;
     }
 
-    public NetConnection(NetLogWriter netLogWriter,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
-                         String user,
-                         String password) throws SqlException {
+    public NetConnection(
+            NetLogWriter netLogWriter,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            String user,
+            String password) throws SqlException {
+
         super(netLogWriter, user, password, dataSource);
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
@@ -215,8 +217,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             throw netAgent_.exceptionOpeningSocket_;
         }
         checkDatabaseName();
-        String password = ClientBaseDataSource.getPassword(properties);
-        securityMechanism_ = ClientBaseDataSource.getSecurityMechanism(properties);
+        String password = ClientBaseDataSourceRoot.getPassword(properties);
+        securityMechanism_ =
+                ClientBaseDataSourceRoot.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
         if(!isConnectionNull())
             completeConnect();
@@ -228,7 +231,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public NetConnection(NetLogWriter netLogWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, user, password, isXAConn, dataSource);
@@ -241,7 +244,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public NetConnection(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, isXAConn, dataSource);
         this.pooledConnection_ = null;
@@ -280,7 +283,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public NetConnection(NetLogWriter netLogWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException {
@@ -292,7 +295,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     private void initialize(String password,
-                            org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                            ClientBaseDataSourceRoot dataSource,
                             int rmId,
                             boolean isXAConn) throws SqlException {
         securityMechanism_ = dataSource.getSecurityMechanism(password);
@@ -1402,7 +1405,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         // Define which userName takes precedence - If we have a dataSource
         // available here, it is posible that the userName has been
         // overriden by some defined as part of the connection attributes
-        // (see ClientBaseDataSource.updateDataSourceValues().
+        // (see ClientBaseDataSourceRoot.updateDataSourceValues().
         // We need to use the right userName as strong password
         // substitution depends on the userName when the substitute
         // password is generated; if we were not using the right userName

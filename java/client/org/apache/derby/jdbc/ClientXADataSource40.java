@@ -47,7 +47,10 @@ import org.apache.derby.shared.common.reference.SQLState;
  *
  * <P>See ClientDataSource40 for DataSource properties.</p>
  */
-public class ClientXADataSource40 extends ClientXADataSource {
+public class ClientXADataSource40 extends ClientXADataSource
+    implements javax.sql.XADataSource /* compile-time check for 4.1 extension */
+{
+   private static final long serialVersionUID = -3463444509507830926L;
 
     ////////////////////////////////////////////////////////////////////
     //

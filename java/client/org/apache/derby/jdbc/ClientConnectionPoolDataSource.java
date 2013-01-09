@@ -45,7 +45,8 @@ import org.apache.derby.shared.common.reference.MessageId;
  * </UL>
  */
 public class ClientConnectionPoolDataSource extends ClientDataSource 
-                                           implements ConnectionPoolDataSource {
+    implements ClientConnectionPoolDataSourceInterface
+{
     private static final long serialVersionUID = -539234282156481377L;
     /** Message utility used to obtain localized messages. */
     private static final MessageUtil msgUtil =
@@ -71,64 +72,13 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
 
     // Attempt to establish a physical database connection that can be used as a pooled connection.
     public PooledConnection getPooledConnection() throws SQLException {
-        LogWriter dncLogWriter = null;
-        try
-        {
-            updateDataSourceValues(
-                    tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
-            if (dncLogWriter != null) {
-                dncLogWriter.traceEntry(this, "getPooledConnection");
-            }
-            PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, getUser(), getPassword());
-            if (dncLogWriter != null) {
-                dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
-            }
-            return pooledConnection;
-        }
-        catch ( SqlException se )
-        {
-            // The method below may throw an exception.
-            handleConnectionException(dncLogWriter, se);
-            // If the exception wasn't handled so far, re-throw it.
-            throw se.getSQLException();
-        }
+        return getPooledConnectionMinion();
     }
 
     // Standard method that establishes the initial physical connection using CPDS properties.
     public PooledConnection getPooledConnection(String user, String password) throws SQLException {
-        LogWriter dncLogWriter = null;
-        try
-        {
-            updateDataSourceValues(
-                    tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
-            if (dncLogWriter != null) {
-                dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
-            }
-            PooledConnection pooledConnection = getPooledConnectionX(dncLogWriter, this, user, password);
-            if (dncLogWriter != null) {
-                dncLogWriter.traceExit(this, "getPooledConnection", pooledConnection);
-            }
-            return pooledConnection;
-        }
-        catch ( SqlException se )
-        {
-            // The method below may throw an exception.
-            handleConnectionException(dncLogWriter, se);
-            // If the exception wasn't handled so far, re-throw it.
-            throw se.getSQLException();
-        }
+        return getPooledConnectionMinion(user, password);
     }
-
-    //  method that establishes the initial physical connection
-    // using DS properties instead of CPDS properties.
-    private PooledConnection getPooledConnectionX(LogWriter dncLogWriter, 
-                        ClientBaseDataSource ds, String user, 
-                        String password) throws SQLException {
-            return ClientDriver.getFactory().newClientPooledConnection(ds,
-                    dncLogWriter, user, password);
-    }   
 
     /**
      * Specifies the maximum size of the statement cache.

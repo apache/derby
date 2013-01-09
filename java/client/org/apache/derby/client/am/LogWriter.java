@@ -23,16 +23,15 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Properties;
-import javax.naming.NamingException;
-import javax.naming.RefAddr;
-import javax.naming.Reference;
-import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -212,49 +211,60 @@ public class LogWriter {
         if (instance == null) // this prevents NPE from instance.getClass() used below
         {
             return null;
-        } else if (instance instanceof Connection && loggingEnabled(ClientDataSource.TRACE_CONNECTION_CALLS)) {
+        } else if (instance instanceof Connection && loggingEnabled(
+                ClientDataSourceInterface.TRACE_CONNECTION_CALLS)) {
             return "Connection";
-        } else if (instance instanceof ResultSet && loggingEnabled(ClientDataSource.TRACE_RESULT_SET_CALLS)) {
+        } else if (instance instanceof ResultSet && loggingEnabled(
+                ClientDataSourceInterface.TRACE_RESULT_SET_CALLS)) {
             return "ResultSet";
-        } else if (instance instanceof CallableStatement && loggingEnabled(ClientDataSource.TRACE_STATEMENT_CALLS)) {
+        } else if (instance instanceof CallableStatement && loggingEnabled(
+                ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
             return "CallableStatement";
-        } else if (instance instanceof PreparedStatement && loggingEnabled(ClientDataSource.TRACE_STATEMENT_CALLS)) {
+        } else if (instance instanceof PreparedStatement && loggingEnabled(
+                ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
             return "PreparedStatement";
-        } else if (instance instanceof Statement && loggingEnabled(ClientDataSource.TRACE_STATEMENT_CALLS)) {
+        } else if (instance instanceof Statement && loggingEnabled(
+                ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
             return "Statement";
         }
         // Not yet externalizing Blob tracing, except for trace_all
-        else if (instance instanceof Blob && loggingEnabled(ClientDataSource.TRACE_ALL)) // add a trace level for lobs !!
+        else if (instance instanceof Blob && loggingEnabled(
+                ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
+                                                      // lobs !!
         {
             return "Blob";
         }
         // Not yet externalizing Clob tracing, except for trace_all
-        else if (instance instanceof Clob && loggingEnabled(ClientDataSource.TRACE_ALL)) // add a trace level for bobs !!
+        else if (instance instanceof Clob && loggingEnabled(
+                ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
+                                                      // bobs !!
         {
             return "Clob";
         }
         // Not yet externalizing dbmd catalog call tracing, except for trace_all
-        else if (instance instanceof DatabaseMetaData && loggingEnabled(ClientDataSource.TRACE_ALL)) // add a trace level for dbmd ??
+        else if (instance instanceof DatabaseMetaData && loggingEnabled(
+                ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
+                                                      // dbmd ??
         {
             return "DatabaseMetaData";
         }
         // we don't use instanceof javax.transaction.XAResource to avoid dependency on j2ee.jar
-        else if (loggingEnabled(ClientDataSource.TRACE_XA_CALLS) &&
+        else if (loggingEnabled(ClientDataSourceInterface.TRACE_XA_CALLS) &&
                 instance.getClass().getName().startsWith("org.apache.derby.client.net.NetXAResource")) {
             return "NetXAResource";
-        } else if (loggingEnabled(ClientDataSource.TRACE_ALL) &&
+        } else if (loggingEnabled(ClientDataSourceInterface.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.client.ClientPooledConnection")) {
             return "ClientPooledConnection";
-        } else if (loggingEnabled(ClientDataSource.TRACE_ALL) &&
+        } else if (loggingEnabled(ClientDataSourceInterface.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientConnectionPoolDataSource")) {
             return "ClientConnectionPoolDataSource";
-        } else if (loggingEnabled(ClientDataSource.TRACE_ALL) &&
+        } else if (loggingEnabled(ClientDataSourceInterface.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.client.ClientXAConnection")) {
             return "ClientXAConnection";
-        } else if (loggingEnabled(ClientDataSource.TRACE_ALL) &&
+        } else if (loggingEnabled(ClientDataSourceInterface.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientDataSource")) {
             return "ClientDataSource";
-        } else if (loggingEnabled(ClientDataSource.TRACE_ALL) &&
+        } else if (loggingEnabled(ClientDataSourceInterface.TRACE_ALL) &&
                 instance.getClass().getName().equals("org.apache.derby.jdbc.ClientXADataSource")) {
             return "ClientXADataSource";
         } else {
@@ -845,7 +855,7 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (!loggingEnabled(ClientDataSource.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -858,7 +868,7 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (!loggingEnabled(ClientDataSource.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -872,7 +882,7 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (!loggingEnabled(ClientDataSource.TRACE_DIAGNOSTICS)) {
+        if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
         synchronized (printWriter_) {
@@ -887,7 +897,9 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (!loggingEnabled(ClientDataSource.TRACE_PARAMETER_META_DATA) || columnMetaData == null) {
+        if (!loggingEnabled(
+                ClientDataSourceInterface.TRACE_PARAMETER_META_DATA) ||
+                columnMetaData == null) {
             return;
         }
         synchronized (printWriter_) {
@@ -909,7 +921,9 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (!loggingEnabled(ClientDataSource.TRACE_RESULT_SET_META_DATA) || columnMetaData == null) {
+        if (!loggingEnabled(
+                ClientDataSourceInterface.TRACE_RESULT_SET_META_DATA) ||
+                columnMetaData == null) {
             return;
         }
         synchronized (printWriter_) {
@@ -990,14 +1004,15 @@ public class LogWriter {
     // Including protocol manager levels, and driver configuration
 
     // Jdbc 2
-    public void traceConnectEntry(ClientBaseDataSource dataSource) {
+    public void traceConnectEntry(ClientBaseDataSourceRoot dataSource) {
         if (traceSuspended()) {
             return;
         }
-        if (loggingEnabled(ClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
+        if (loggingEnabled(
+                ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc2();
         }
-        if (loggingEnabled(ClientDataSource.TRACE_CONNECTS)) {
+        if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsEntry(dataSource);
         }
     }
@@ -1010,21 +1025,24 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (loggingEnabled(ClientDataSource.TRACE_DRIVER_CONFIGURATION)) {
+        if (loggingEnabled(
+                ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc1();
         }
-        if (loggingEnabled(ClientDataSource.TRACE_CONNECTS)) {
+        if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsEntry(server, port, database, properties);
         }
     }
 
-    public void traceConnectResetEntry(Object instance, LogWriter logWriter, 
-                                        String user, ClientBaseDataSource ds) {
+    public void traceConnectResetEntry(
+            Object instance, LogWriter logWriter,
+            String user, ClientBaseDataSourceRoot ds) {
+
         if (traceSuspended()) {
             return;
         }
         traceEntry(instance, "reset", logWriter, user, "<escaped>", ds);
-        if (loggingEnabled(ClientDataSource.TRACE_CONNECTS)) {
+        if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsResetEntry(ds);
         }
     }
@@ -1033,7 +1051,7 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (loggingEnabled(ClientDataSource.TRACE_CONNECTS)) {
+        if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
         }
     }
@@ -1042,7 +1060,7 @@ public class LogWriter {
         if (traceSuspended()) {
             return;
         }
-        if (loggingEnabled(ClientDataSource.TRACE_CONNECTS)) {
+        if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsResetExit(connection);
         }
     }
@@ -1050,7 +1068,7 @@ public class LogWriter {
 
     // ---------------------- tracing connects -----------------------------------
 
-    private void traceConnectsResetEntry(ClientBaseDataSource dataSource) {
+    private void traceConnectsResetEntry(ClientBaseDataSourceRoot dataSource) {
         try {
             if (traceSuspended()) {
                 return;
@@ -1064,7 +1082,7 @@ public class LogWriter {
         }
     }
 
-    private void traceConnectsEntry(ClientBaseDataSource dataSource) {
+    private void traceConnectsEntry(ClientBaseDataSourceRoot dataSource) {
         try {
             if (traceSuspended()) {
                 return;
@@ -1245,38 +1263,17 @@ public class LogWriter {
     }
     
     /**
-     * Obtain a set of Properties for the ClientBaseDataSource
+     * Obtain a set of Properties for the client data source.
      */
-    private Properties getProperties(ClientBaseDataSource cds)
+    private Properties getProperties(ClientBaseDataSourceRoot cds)
     throws SqlException {
         
-        Properties properties = new Properties();
-        
-        try {
-            Reference ref = cds.getReference();
-            
-            for (Enumeration e = ref.getAll(); e.hasMoreElements();) {
+        Properties properties = ClientBaseDataSourceRoot.getProperties(cds);
 
-                RefAddr attribute = (RefAddr) e.nextElement();
-
-                String propertyKey = attribute.getType();
-                String value = (String) attribute.getContent();
-                
-                // Don't display the password or even its length
-                if (Attribute.PASSWORD_ATTR.equals(propertyKey)) {
-                    value = "********";
-                }
-                
-                if(value != null)
-                    properties.setProperty(propertyKey, value);
-            }
-        } catch (NamingException e) {
-            throw new SqlException(this, 
-                new ClientMessageId(SQLState.JAVA_EXCEPTION),
-                e.getClass().getName(), e.getMessage(), e);
+        if (properties.getProperty(Attribute.PASSWORD_ATTR) != null) {
+            properties.setProperty(Attribute.PASSWORD_ATTR, "********");
         }
-        
+
         return properties;
     }
-
 }

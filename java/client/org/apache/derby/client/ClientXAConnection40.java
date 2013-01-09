@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
-import org.apache.derby.jdbc.ClientXADataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 /**
  * jdbc4.0 implementation of XAConnection
@@ -49,7 +49,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * @param userId 
      * @param password 
      */
-    public ClientXAConnection40 (ClientXADataSource ds,
+    public ClientXAConnection40 (ClientBaseDataSourceRoot ds,
                               org.apache.derby.client.net.NetLogWriter logWtr,
                               String userId,
                               String password) throws SQLException {

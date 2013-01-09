@@ -53,7 +53,7 @@ import javax.transaction.xa.Xid;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
@@ -2356,7 +2356,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 PrivilegedFileOpsForTests.getAbsolutePath(traceFile));
         J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
         J2EEDataSource.setBeanProperty( ds, "traceLevel",
-                new Integer(ClientBaseDataSource.TRACE_ALL));
+                new Integer(ClientBaseDataSourceRoot.TRACE_ALL));
 
         // Obtain connection.
         PooledConnection physicalCon = null;

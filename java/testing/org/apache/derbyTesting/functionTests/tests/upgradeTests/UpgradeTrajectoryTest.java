@@ -37,8 +37,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBCClient;

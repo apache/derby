@@ -122,7 +122,7 @@ public class ClientDriver implements java.sql.Driver {
             String server = tokenizeServerName(urlTokenizer, url);    // "/server"
             int port = tokenizeOptionalPortNumber(urlTokenizer, url); // "[:port]/"
             if (port == 0) {
-                port = ClientDataSource.propertyDefault_portNumber;
+                port = ClientBaseDataSourceRoot.propertyDefault_portNumber;
             }
 
             // database is the database name and attributes.  This will be
@@ -133,7 +133,8 @@ public class ClientDriver implements java.sql.Driver {
 
             int traceLevel;
             try {
-                traceLevel = ClientDataSource.getTraceLevel(augmentedProperties);
+                traceLevel =
+                    ClientBaseDataSourceRoot.getTraceLevel(augmentedProperties);
             } catch (java.lang.NumberFormatException e) {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                 throw new SqlException(null, 
@@ -145,13 +146,17 @@ public class ClientDriver implements java.sql.Driver {
             // This log writer may be narrowed to the connection-level
             // This log writer will be passed to the agent constructor.
             org.apache.derby.client.am.LogWriter dncLogWriter =
-                    ClientDataSource.computeDncLogWriterForNewConnection(java.sql.DriverManager.getLogWriter(),
-                            ClientDataSource.getTraceDirectory(augmentedProperties),
-                            ClientDataSource.getTraceFile(augmentedProperties),
-                            ClientDataSource.getTraceFileAppend(augmentedProperties),
-                            traceLevel,
-                            "_driver",
-                            traceFileSuffixIndex_++);
+                ClientBaseDataSourceRoot.computeDncLogWriterForNewConnection(
+                    java.sql.DriverManager.getLogWriter(),
+                    ClientBaseDataSourceRoot.getTraceDirectory(
+                        augmentedProperties),
+                    ClientBaseDataSourceRoot.getTraceFile(
+                        augmentedProperties),
+                    ClientBaseDataSourceRoot.getTraceFileAppend(
+                        augmentedProperties),
+                    traceLevel,
+                    "_driver",
+                    traceFileSuffixIndex_++);
             
             
             conn = (org.apache.derby.client.net.NetConnection)getFactory().
@@ -224,8 +229,11 @@ public class ClientDriver implements java.sql.Driver {
         }
 
         driverPropertyInfo[0] =
-                new java.sql.DriverPropertyInfo(Attribute.USERNAME_ATTR,
-                        properties.getProperty(Attribute.USERNAME_ATTR, ClientDataSource.propertyDefault_user));
+            new java.sql.DriverPropertyInfo(
+                Attribute.USERNAME_ATTR,
+                properties.getProperty(
+                    Attribute.USERNAME_ATTR,
+                    ClientBaseDataSourceRoot.propertyDefault_user));
 
         driverPropertyInfo[1] =
                 new java.sql.DriverPropertyInfo(Attribute.PASSWORD_ATTR,
@@ -371,7 +379,9 @@ public class ClientDriver implements java.sql.Driver {
                 ((attributeIndex = url.indexOf(";")) != -1)) {
             attributeString = url.substring(attributeIndex);
         }
-        return ClientDataSource.tokenizeAttributes(attributeString, properties);
+
+        return ClientBaseDataSourceRoot.tokenizeAttributes(
+            attributeString, properties);
     }
     
     /**
@@ -387,7 +397,7 @@ public class ClientDriver implements java.sql.Driver {
     public static ClientJDBCObjectFactory getFactory() {
         if(factoryObject!=null)
             return factoryObject;
-        if(Configuration.supportsJDBC40()) {
+        if (Configuration.supportsJDBC40()) {
             factoryObject = createJDBC40FactoryImpl();
         } else {
             factoryObject = createDefaultFactoryImpl();

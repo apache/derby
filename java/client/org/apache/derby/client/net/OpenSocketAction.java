@@ -51,13 +51,14 @@ public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
-        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_BASIC:
+        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.SSL_BASIC:
             sf = NaiveTrustManager.getSocketFactory();
             break;
-        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_PEER_AUTHENTICATION:
+        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.
+                SSL_PEER_AUTHENTICATION:
             sf = (SocketFactory)SSLSocketFactory.getDefault();
             break;
-        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_OFF:
+        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.SSL_OFF:
             sf = SocketFactory.getDefault();
             break;
         default: 

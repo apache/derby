@@ -32,7 +32,7 @@ import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -92,7 +92,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @throws SQLException if creating the pooled connection fails due problems
      *      in the database, or problems communicating with the database
      */
-    public ClientPooledConnection(ClientBaseDataSource ds,
+    public ClientPooledConnection(ClientBaseDataSourceRoot ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
@@ -142,7 +142,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @throws SQLException if creating the pooled connection fails due problems
      *      in the database, or problems communicating with the database
      */
-    public ClientPooledConnection(ClientBaseDataSource ds,
+    public ClientPooledConnection(ClientBaseDataSourceRoot ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
                                   String password,
@@ -465,7 +465,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param rmId 
      * @return NetXAConnection
      */
-    protected NetXAConnection getNetXAConnection (ClientBaseDataSource ds,
+    protected NetXAConnection getNetXAConnection (ClientBaseDataSourceRoot ds,
                                   NetLogWriter logWriter,
                                   String user,
                                   String password,

@@ -42,7 +42,13 @@ import org.apache.derby.shared.common.reference.SQLState;
  * </UL>
  */
 public class ClientConnectionPoolDataSource40
-        extends ClientConnectionPoolDataSource {
+    extends ClientConnectionPoolDataSource
+    implements javax.sql.ConnectionPoolDataSource /* compile-time
+                                                   * check for 4.1
+                                                   * extension */
+{
+   private static final long serialVersionUID = 6313966728809326579L;
+
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

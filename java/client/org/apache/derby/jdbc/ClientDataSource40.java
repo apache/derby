@@ -100,7 +100,10 @@ import org.apache.derby.shared.common.reference.SQLState;
  * breaches.
  * <p/>
  */
-public class ClientDataSource40 extends ClientDataSource {
+public class ClientDataSource40 extends ClientDataSource
+    implements javax.sql.DataSource /* compile-time check for 4.1 extension */
+{
+   private static final long serialVersionUID = -3936981157692787843L;
     
     public ClientDataSource40() {
         super();

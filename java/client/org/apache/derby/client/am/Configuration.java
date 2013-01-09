@@ -28,6 +28,7 @@ import java.security.PrivilegedExceptionAction;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Configuration {
@@ -35,7 +36,7 @@ public class Configuration {
 
     public static int traceFileSuffixIndex__ = 0;
 
-    public static int traceLevel__ = org.apache.derby.jdbc.ClientBaseDataSource.TRACE_ALL;
+    public static int traceLevel__ = ClientDataSourceInterface.TRACE_ALL;
 
     public static String traceFile__ = null;
 

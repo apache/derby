@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEventListener;
 import javax.sql.StatementEvent;
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 /**
  *
@@ -47,7 +47,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
             statementEventListeners =
                     new CopyOnWriteArrayList<StatementEventListener>();
 
-    public ClientPooledConnection40(ClientBaseDataSource ds,
+    public ClientPooledConnection40(ClientBaseDataSourceRoot ds,
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
         String password) throws SQLException {
@@ -56,7 +56,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
     }
     
     
-    public ClientPooledConnection40(ClientBaseDataSource ds,
+    public ClientPooledConnection40(ClientBaseDataSourceRoot ds,
         org.apache.derby.client.am.LogWriter logWriter,
         String user,
         String password,

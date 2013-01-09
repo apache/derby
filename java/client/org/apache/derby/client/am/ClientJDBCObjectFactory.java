@@ -23,11 +23,10 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientXAConnection;
-import org.apache.derby.jdbc.ClientDataSource;
 import java.sql.SQLException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
-import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 /**
  *
@@ -44,25 +43,30 @@ public interface ClientJDBCObjectFactory {
      * ClientPooledConnection (or ClientPooledConnection40) class which
      * implements javax.sql.PooledConnection
      */
-    ClientPooledConnection newClientPooledConnection(ClientBaseDataSource ds,
-            LogWriter logWriter,String user,String password)
-            throws SQLException;
+    ClientPooledConnection newClientPooledConnection(
+            ClientBaseDataSourceRoot ds,
+            LogWriter logWriter,
+            String user,
+            String password) throws SQLException;
     
     /**
      * This method is used to return an instance of
      * ClientPooledConnection(or ClientPooledConnection40) class which
      * implements javax.sql.PooledConnection
      */
-    ClientPooledConnection newClientPooledConnection(ClientBaseDataSource ds,
-            LogWriter logWriter,String user,String password,int rmId)
-            throws SQLException;
+    ClientPooledConnection newClientPooledConnection(
+            ClientBaseDataSourceRoot ds,
+            LogWriter logWriter,
+            String user,
+            String password,
+            int rmId) throws SQLException;
     
     /**
      * This method is used to return an instance of
      * ClientXAConnection (or ClientXAConnection40) class which
      * implements javax.sql.XAConnection
      */
-    ClientXAConnection newClientXAConnection(ClientBaseDataSource ds,
+    ClientXAConnection newClientXAConnection(ClientBaseDataSourceRoot ds,
             LogWriter logWriter,String user,String password)
             throws SQLException;
     
@@ -223,7 +227,8 @@ public interface ClientJDBCObjectFactory {
      */
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,
-            org.apache.derby.jdbc.ClientBaseDataSource clientDataSource,String user,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot clientDataSource,
+            String user,
             String password) throws SqlException;
     
     /**
@@ -244,8 +249,10 @@ public interface ClientJDBCObjectFactory {
      */
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,
-            String user,String password,
-            org.apache.derby.jdbc.ClientBaseDataSource dataSource,int rmId,
+            String user,
+            String password,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            int rmId,
             boolean isXAConn) throws SqlException;
     
     /**
@@ -255,8 +262,10 @@ public interface ClientJDBCObjectFactory {
      * java.sql.Connection interface
      */
     org.apache.derby.client.am.Connection newNetConnection(
-            LogWriter netLogWriter,String ipaddr,
-            int portNumber,org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+            LogWriter netLogWriter,
+            String ipaddr,
+            int portNumber,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
             boolean isXAConn) throws SqlException;
     
     /**
@@ -283,7 +292,7 @@ public interface ClientJDBCObjectFactory {
     org.apache.derby.client.am.Connection newNetConnection(
             LogWriter netLogWriter,
             String user,String password,
-            org.apache.derby.jdbc.ClientBaseDataSource dataSource,int rmId,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,int rmId,
             boolean isXAConn,ClientPooledConnection cpc) throws SqlException;
     
     /**

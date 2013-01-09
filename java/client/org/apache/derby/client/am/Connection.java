@@ -29,8 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import org.apache.derby.client.net.NetXAResource;
-import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -170,10 +169,10 @@ public abstract class Connection
     public int xaHostVersion_ = 0;
 
     public int loginTimeout_;
-    public org.apache.derby.jdbc.ClientBaseDataSource dataSource_;
+    public org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource_;
     public String serverNameIP_;
     public int portNumber_;
-    public int clientSSLMode_ = ClientBaseDataSource.SSL_OFF;
+    public int clientSSLMode_ = ClientBaseDataSourceRoot.SSL_OFF;
 
     Hashtable<String, String> clientCursorNameCache_ =
             new Hashtable<String, String>();
@@ -186,30 +185,36 @@ public abstract class Connection
     //---------------------constructors/finalizer---------------------------------
 
     // For jdbc 2 connections
-    protected Connection(org.apache.derby.client.am.LogWriter logWriter,
-                         String user,
-                         String password,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
-                                                           throws SqlException {
+    protected Connection(
+            org.apache.derby.client.am.LogWriter logWriter,
+            String user,
+            String password,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
+
         this.user_ = user;
         initConnection(logWriter, dataSource);
     }
 
-    protected Connection(org.apache.derby.client.am.LogWriter logWriter,
-                         String user,
-                         String password,
-                         boolean isXAConn,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
-                                                           throws SqlException {
+    protected Connection(
+            org.apache.derby.client.am.LogWriter logWriter,
+            String user,
+            String password,
+            boolean isXAConn,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
+
         this.user_ = user;
         isXAConnection_ = isXAConn;
         initConnection(logWriter, dataSource);
     }
 
     // For jdbc 2 connections
-    protected void initConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                  org.apache.derby.jdbc.ClientBaseDataSource
-                                            dataSource) throws SqlException {
+    protected void initConnection(
+            org.apache.derby.client.am.LogWriter logWriter,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
+
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
@@ -247,7 +252,7 @@ public abstract class Connection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            ClientBaseDataSource.getSSLModeFromString(dataSource.getSsl());
+            ClientBaseDataSourceRoot.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -257,16 +262,19 @@ public abstract class Connection
     }
 
     // For jdbc 2 connections
-    protected Connection(org.apache.derby.client.am.LogWriter logWriter,
-                         boolean isXAConn,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
-                                                            throws SqlException {
+    protected Connection(
+            org.apache.derby.client.am.LogWriter logWriter,
+            boolean isXAConn,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
+
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
+
         isXAConnection_ = isXAConn;
 
-        user_ = ClientDataSource.propertyDefault_user;
+        user_ = ClientBaseDataSourceRoot.propertyDefault_user;
 
         // Extract common properties.
         databaseName_ = dataSource.getDatabaseName();
@@ -279,7 +287,7 @@ public abstract class Connection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            ClientBaseDataSource.getSSLModeFromString(dataSource.getSsl());
+            ClientBaseDataSourceRoot.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -323,13 +331,14 @@ public abstract class Connection
         databaseName_ = databaseName;
 
         // Extract common properties.
-        user_ = ClientDataSource.getUser(properties);
-        retrieveMessageText_ = ClientDataSource.getRetrieveMessageText(properties);
+        user_ = ClientBaseDataSourceRoot.getUser(properties);
+        retrieveMessageText_ =
+            ClientBaseDataSourceRoot.getRetrieveMessageText(properties);
 
         loginTimeout_ = driverManagerLoginTimeout;
         serverNameIP_ = serverName;
         portNumber_ = portNumber;
-        clientSSLMode_ = ClientDataSource.getClientSSLMode(properties);
+        clientSSLMode_ = ClientBaseDataSourceRoot.getClientSSLMode(properties);
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,

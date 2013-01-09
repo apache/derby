@@ -63,13 +63,15 @@ public class NetXAConnection {
      * @throws SqlException
      * 
      */
-    public NetXAConnection(NetLogWriter netLogWriter,
-                           String user,
-                           String password,
-                           org.apache.derby.jdbc.ClientBaseDataSource dataSource,
-                           int rmId,
-                           boolean isXAConn,
-                           ClientPooledConnection cpc) throws SqlException {
+    public NetXAConnection(
+            NetLogWriter netLogWriter,
+            String user,
+            String password,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            int rmId,
+            boolean isXAConn,
+            ClientPooledConnection cpc) throws SqlException {
+
         netCon = createNetConnection (netLogWriter, user, password, 
                 dataSource, rmId, isXAConn,cpc);
         checkPlatformVersion();
@@ -258,13 +260,15 @@ public class NetXAConnection {
      * @return NetConnection
      *
      */
-    protected NetConnection createNetConnection (NetLogWriter netLogWriter,
-                           String user,
-                           String password,
-                           org.apache.derby.jdbc.ClientBaseDataSource dataSource,
-                           int rmId,
-                           boolean isXAConn,
-                           ClientPooledConnection cpc) throws SqlException {        
+    protected NetConnection createNetConnection (
+            NetLogWriter netLogWriter,
+            String user,
+            String password,
+            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            int rmId,
+            boolean isXAConn,
+            ClientPooledConnection cpc) throws SqlException {
+
         return (NetConnection)ClientDriver.getFactory().newNetConnection
             (netLogWriter, user, password,dataSource, rmId, isXAConn,cpc);
     }

@@ -21,15 +21,6 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
-import org.apache.derby.shared.common.reference.SQLState;
-
 /**
  * ClientDataSource is a simple data source implementation
  * that can be used for establishing connections in a
@@ -101,7 +92,8 @@ import org.apache.derby.shared.common.reference.SQLState;
  * breaches.
  * <p/>
  */
-public class ClientDataSource extends ClientBaseDataSource implements DataSource {
+public class ClientDataSource extends ClientBaseDataSource {
+
     private final static long serialVersionUID = 1894299584216955553L;
     public static final String className__ = "org.apache.derby.jdbc.ClientDataSource";
 
@@ -149,106 +141,6 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         super();
     }
 
-
-    // ---------------------------interface methods-------------------------------
-
-    /**
-     * Attempt to establish a database connection in a non-pooling, non-distributed environment.
-     *
-     * @return a Connection to the database
-     *
-     * @throws java.sql.SQLException if a database-access error occurs.
-     */
-    public Connection getConnection() throws SQLException {
-        LogWriter dncLogWriter = null;
-        try {
-            updateDataSourceValues(
-                    tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
-            return getConnectionX(dncLogWriter, getUser(), getPassword());
-        } catch (SqlException se) {
-            // The method below may throw an exception.
-            handleConnectionException(dncLogWriter, se);
-            // If the exception wasn't handled so far, re-throw it.
-            throw se.getSQLException();
-        }
-    }
-
-    /**
-     * Attempt to establish a database connection in a non-pooling, non-distributed environment.
-     *
-     * @param user     the database user on whose behalf the Connection is being made
-     * @param password the user's password
-     *
-     * @return a Connection to the database
-     *
-     * @throws java.sql.SQLException if a database-access error occurs.
-     */
-    public Connection getConnection(String user, String password) throws SQLException {
-        // Jdbc 2 connections will write driver trace info on a
-        // datasource-wide basis using the jdbc 2 data source log writer.
-        // This log writer may be narrowed to the connection-level
-        // This log writer will be passed to the agent constructor.
-        
-        LogWriter dncLogWriter = null;
-        try
-        {
-            updateDataSourceValues(
-                    tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
-            return getConnectionX(dncLogWriter, user, password);
-        }
-        catch(SqlException se)
-        {
-            // The method below may throw an exception.
-            handleConnectionException(dncLogWriter, se);
-            // If the exception wasn't handled so far, re-throw it.
-            throw se.getSQLException();
-        }
-        
-    }
-
-    private Connection getConnectionX(LogWriter dncLogWriter,
-                                      String user, String password)
-            throws SqlException {
-        return ClientDriver.getFactory().newNetConnection(
-                (NetLogWriter)dncLogWriter, user, password, this, -1, false);
-
-    }
-
-    // JDBC 4.0 java.sql.Wrapper interface methods
-
-    /**
-     * Check whether this instance wraps an object that implements the interface
-     * specified by {@code iface}.
-     *
-     * @param iface a class defining an interface
-     * @return {@code true} if this instance implements {@code iface}, or
-     * {@code false} otherwise
-     * @throws SQLException if an error occurs while determining if this
-     * instance implements {@code iface}
-     */
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isInstance(this);
-    }
-
-    /**
-     * Returns {@code this} if this class implements the specified interface.
-     *
-     * @param  iface a class defining an interface
-     * @return an object that implements the interface
-     * @throws SQLException if no object is found that implements the
-     * interface
-     */
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        try {
-            return iface.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(null,
-                    new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                    iface).getSQLException();
-        }
-    }
 
 }
 

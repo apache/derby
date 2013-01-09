@@ -37,6 +37,7 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.FailedProperties40;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
@@ -59,7 +60,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     super(netLogWriter,databaseName,properties);
     }
     public NetConnection40(NetLogWriter netLogWriter,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          String user,
                          String password) throws SqlException {
     super(netLogWriter,dataSource,user,password);
@@ -75,7 +76,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
      public NetConnection40(NetLogWriter netLogWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException{
     super(netLogWriter,user,password,dataSource,rmId,isXAConn);
@@ -83,7 +84,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     public NetConnection40(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          boolean isXAConn) throws SqlException{
         super(netLogWriter,ipaddr,portNumber,dataSource,isXAConn);
     }
@@ -114,7 +115,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
     public NetConnection40(NetLogWriter netLogWriter,
                          String user,
                          String password,
-                         org.apache.derby.jdbc.ClientBaseDataSource dataSource,
+                         ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException{
