@@ -1093,6 +1093,84 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
         return actualTypeCount;
     }
     
+    /**
+     * Verify that if you wrap a RestrictedVTI in a view, selects
+     * from the view pass the restriction on to the RestrictedVTI.
+     * However, the projection is not passed through to the view so it
+     * is not passed on to the RestrictedVTI, as described on DERBY-6036.
+     * When that issue is addressed, we should adjust this test case.
+     */
+    public void test_12_6036() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create view v6036 as select * from table( integerList() ) s" );
+
+        // directly selecting from the vti pushes down both the projection and the restriction
+        assertResults
+            (
+             conn,
+             "select s_nr from table( integerList() ) s where ns_r = 3000",
+             new String[][]
+             {
+                { "2000" }
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values getLastProjection()",
+             new String[][]
+             {
+                { "[null, S_NR, NS_R, null]" }
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values getLastRestriction()",
+             new String[][]
+             {
+                { "\"NS_R\" = 3000" }
+             },
+             false
+             );
+
+        // directly selecting from the view only pushes down the restriction
+        assertResults
+            (
+             conn,
+             "select s_nr from v6036 where ns_r = 3000",
+             new String[][]
+             {
+                { "2000" }
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values getLastProjection()",
+             new String[][]
+             {
+                { "[S_R, S_NR, NS_R, NS_NR]" }
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values getLastRestriction()",
+             new String[][]
+             {
+                { "\"NS_R\" = 3000" }
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
