@@ -58,6 +58,7 @@
       <exclude name="${derby.dir}/vti/VTITemplate.java"/>
       <exclude name="${derby.dir}/vti/VTITemplateBase.java"/>
       <exclude name="${derby.dir}/vti/StringColumnVTI.java"/>
+      <exclude name="${derby.dir}/vti/ForeignTableVTI.java"/>
 
     </javac>
     <javac
@@ -80,6 +81,7 @@
     	<include name="${derby.dir}/vti/VTITemplate.java"/>
     	<include name="${derby.dir}/vti/VTITemplateBase.java"/>
     	<include name="${derby.dir}/vti/StringColumnVTI.java"/>
+    	<include name="${derby.dir}/vti/ForeignTableVTI.java"/>
     </javac>
   </target>
 

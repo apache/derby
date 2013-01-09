@@ -60,6 +60,7 @@ public  class   Java5SystemProcedures
     private static  final   String[][]  OPTIONAL_TOOLS = new String[][]
     {
         { "dbmd", "org.apache.derby.impl.tools.optional.DBMDWrapper" },
+        { "fdbv", "org.apache.derby.impl.tools.optional.ForeignDBViews" },
     };
 
     ///////////////////////////////////////////////////////////////////////////////////

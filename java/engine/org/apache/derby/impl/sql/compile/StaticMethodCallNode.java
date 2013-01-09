@@ -328,7 +328,8 @@ public class StaticMethodCallNode extends MethodCallNode
             // A special exception is made for the optional tools methods.
             if (
                 javaClassName.startsWith( "org.apache.derby." ) &&
-                !javaClassName.startsWith( "org.apache.derby.impl.tools.optional." )
+                !javaClassName.startsWith( "org.apache.derby.impl.tools.optional." ) &&
+                !javaClassName.startsWith( "org.apache.derby.vti." )
                 )
             {
                 if (!sd.isSystemSchema())

@@ -34,6 +34,8 @@ import java.util.HashMap;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
@@ -51,7 +53,17 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    protected static final    String NO_SUCH_TABLE_FUNCTION = "42ZB4";
+    protected   static  final   String  NO_SUCH_TABLE_FUNCTION = "42ZB4";
+    protected   static  final   String  UNEXPECTED_USER_EXCEPTION = "38000";
+    protected   static  final   String  MISSING_SCHEMA = "42Y07";
+
+    private static  final   String      TEST_DBO = "TEST_DBO";
+    private static  final   String      RUTH = "RUTH";
+    private static  final   String      ALICE = "ALICE";
+    private static  final   String      FRANK = "FRANK";
+    private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH, FRANK  };
+
+    private static  final   String      FOREIGN_DB = "foreignDB";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -85,11 +97,14 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite( "OptionalToolsTest" );
+        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(OptionalToolsTest.class);        
+        Test        test = DatabasePropertyTestSetup.builtinAuthentication
+            ( suite, LEGAL_USERS, "optionalToolsPermissions" );
 
-        suite.addTest( TestConfiguration.defaultSuite(OptionalToolsTest.class) );
+        test = TestConfiguration.sqlAuthorizationDecorator( test );
+        test = TestConfiguration.additionalDatabaseDecorator( test, FOREIGN_DB );
 
-        return suite;
+        return test;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -105,19 +120,31 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
      */
     public void test_01_dbmdWrapper() throws Exception
     {
-        Connection conn = getConnection();
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
         String  getTypeInfo = "select type_name, minimum_scale, maximum_scale from table( getTypeInfo() ) s";
 
+        // only the dbo can register tools
+        expectExecutionError
+            (
+             ruthConnection,
+             LACK_EXECUTE_PRIV,
+             "call syscs_util.syscs_register_tool( 'dbmd', true )"
+             );
+
+        // create a dummy table just to force the schema to be created
+        goodStatement( dboConnection, "create table t( a int )" );
+
         // the routines don't exist unless you register them
-        expectCompilationError( NO_SUCH_TABLE_FUNCTION, getTypeInfo );
+        expectCompilationError( dboConnection, NO_SUCH_TABLE_FUNCTION, getTypeInfo );
 
         // now register the database metadata wrappers
-        goodStatement( conn, "call syscs_util.syscs_register_tool( 'dbmd', true )" );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'dbmd', true )" );
 
         // now the routine exists
         assertResults
             (
-             conn,
+             dboConnection,
              getTypeInfo,
              new String[][]
              {
@@ -148,10 +175,202 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              );
 
         // now unregister the database metadata wrappers
-        goodStatement( conn, "call syscs_util.syscs_register_tool( 'dbmd', false )" );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'dbmd', false )" );
 
         // the routines don't exist anymore
-        expectCompilationError( NO_SUCH_TABLE_FUNCTION, getTypeInfo );
+        expectCompilationError( dboConnection, NO_SUCH_TABLE_FUNCTION, getTypeInfo );
+    }
+    
+    /**
+     * <p>
+     * Test the optional package of views on an external database.
+     * </p>
+     */
+    public void test_02_foreignDBViews() throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  foreignFrankConnection = getTestConfiguration().openConnection( FOREIGN_DB, FRANK, FRANK );
+        Connection  foreignAliceConnection = getTestConfiguration().openConnection( FOREIGN_DB, ALICE, ALICE );
+
+        //
+        // Create the foreign database.
+        //
+        goodStatement
+            (
+             foreignFrankConnection,
+             "create table employee\n" +
+             "(\n" +
+             "    firstName   varchar( 50 ),\n" +
+             "    lastName    varchar( 50 ),\n" +
+             "    employeeID  int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             foreignFrankConnection,
+             "insert into employee values ( 'Billy', 'Goatgruff', 1 )\n"
+             );
+        goodStatement
+            (
+             foreignFrankConnection,
+             "insert into employee values ( 'Mary', 'Hadalittlelamb', 2 )\n"
+             );
+        goodStatement
+            (
+             foreignAliceConnection,
+             "create table stars\n" +
+             "(\n" +
+             "    name   varchar( 50 ),\n" +
+             "    magnitude int,\n" +
+             "    starID  int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             foreignAliceConnection,
+             "insert into stars values ( 'Polaris', 100, 1 )\n"
+             );
+        
+        // now work in the database where we will create views
+        String      foreignURL = "jdbc:derby:" +
+            getTestConfiguration().getPhysicalDatabaseName( FOREIGN_DB ) +
+            ";user=" + TEST_DBO + ";password=" + TEST_DBO;
+        String      employeeSelect = "select * from frank.employee order by employeeID";
+        String      starSelect = "select * from alice.stars order by starID";
+        String[][]   employeeResult = new String[][]
+            {
+                { "Billy", "Goatgruff", "1" },
+                { "Mary", "Hadalittlelamb", "2" },
+            };
+        String[][]  starResult = new String[][]
+            {
+                { "Polaris", "100", "1" },
+            };
+
+        // wrong number of arguments
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'fdbv', true )"
+             );
+
+        // should fail because the view and its schema don't exist
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             employeeSelect
+             );
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             starSelect
+             );
+
+        // should work
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'fdbv', true, '" + foreignURL + "' )"
+             );
+
+        // views should have been created against the foreign database
+        assertResults
+            (
+             dboConnection,
+             employeeSelect,
+             employeeResult,
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             starSelect,
+             starResult,
+             false
+             );
+        
+        // wrong number of arguments
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'fdbv', false )"
+             );
+
+        // should work
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "' )"
+             );
+
+        // should fail because the view and its schema were dropped when the tool was unloaded
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             employeeSelect
+             );
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             starSelect
+             );
+
+        // unregistration should be idempotent
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "' )"
+             );
+
+        // register with a schema prefix
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'fdbv', true, '" + foreignURL + "', 'XYZ_' )"
+             );
+        employeeSelect = "select * from xyz_frank.employee order by employeeID";
+        starSelect = "select * from xyz_alice.stars order by starID";
+
+        // views should have been created against the foreign database
+        assertResults
+            (
+             dboConnection,
+             employeeSelect,
+             employeeResult,
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             starSelect,
+             starResult,
+             false
+             );
+
+        // drop the views
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "', 'XYZ_' )"
+             );
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             employeeSelect
+             );
+        expectCompilationError
+            (
+             dboConnection,
+             MISSING_SCHEMA,
+             starSelect
+             );
     }
     
 }
