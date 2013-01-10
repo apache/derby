@@ -100,6 +100,7 @@
       <exclude name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
       <exclude name="${this.dir}/_Suite.java"/>
       <exclude name="${this.dir}/VarargsRoutines.java"/>
+      <exclude name="${this.dir}/OptionalToolExample.java"/>
     </javac>
   </target>
   <target name="compilet2" depends="compilet1">
@@ -174,6 +175,7 @@
       <include name="${this.dir}/ModeAggregate.java"/>
       <include name="${this.dir}/LobMode.java"/>
       <include name="${this.dir}/VarargsRoutines.java"/>
+      <include name="${this.dir}/OptionalToolExample.java"/>
     </javac>
   </target> 
 

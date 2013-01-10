@@ -56,6 +56,8 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
     protected   static  final   String  NO_SUCH_TABLE_FUNCTION = "42ZB4";
     protected   static  final   String  UNEXPECTED_USER_EXCEPTION = "38000";
     protected   static  final   String  MISSING_SCHEMA = "42Y07";
+    protected   static  final   String  UNKNOWN_TOOL = "X0Y88";
+    protected   static  final   String  UNKNOWN_ROUTINE = "42Y03";
 
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
@@ -129,7 +131,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
             (
              ruthConnection,
              LACK_EXECUTE_PRIV,
-             "call syscs_util.syscs_register_tool( 'dbmd', true )"
+             "call syscs_util.syscs_register_tool( 'databaseMetaData', true )"
              );
 
         // create a dummy table just to force the schema to be created
@@ -139,7 +141,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         expectCompilationError( dboConnection, NO_SUCH_TABLE_FUNCTION, getTypeInfo );
 
         // now register the database metadata wrappers
-        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'dbmd', true )" );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'databaseMetaData', true )" );
 
         // now the routine exists
         assertResults
@@ -175,7 +177,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              );
 
         // now unregister the database metadata wrappers
-        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'dbmd', false )" );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'databaseMetaData', false )" );
 
         // the routines don't exist anymore
         expectCompilationError( dboConnection, NO_SUCH_TABLE_FUNCTION, getTypeInfo );
@@ -252,7 +254,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
             (
              dboConnection,
              UNEXPECTED_USER_EXCEPTION,
-             "call syscs_util.syscs_register_tool( 'fdbv', true )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', true )"
              );
 
         // should fail because the view and its schema don't exist
@@ -273,7 +275,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "call syscs_util.syscs_register_tool( 'fdbv', true, '" + foreignURL + "' )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', true, '" + foreignURL + "' )"
              );
 
         // views should have been created against the foreign database
@@ -297,14 +299,14 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
             (
              dboConnection,
              UNEXPECTED_USER_EXCEPTION,
-             "call syscs_util.syscs_register_tool( 'fdbv', false )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', false )"
              );
 
         // should work
         goodStatement
             (
              dboConnection,
-             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "' )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', false, '" + foreignURL + "' )"
              );
 
         // should fail because the view and its schema were dropped when the tool was unloaded
@@ -325,14 +327,14 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "' )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', false, '" + foreignURL + "' )"
              );
 
         // register with a schema prefix
         goodStatement
             (
              dboConnection,
-             "call syscs_util.syscs_register_tool( 'fdbv', true, '" + foreignURL + "', 'XYZ_' )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', true, '" + foreignURL + "', 'XYZ_' )"
              );
         employeeSelect = "select * from xyz_frank.employee order by employeeID";
         starSelect = "select * from xyz_alice.stars order by starID";
@@ -357,7 +359,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "call syscs_util.syscs_register_tool( 'fdbv', false, '" + foreignURL + "', 'XYZ_' )"
+             "call syscs_util.syscs_register_tool( 'foreignViews', false, '" + foreignURL + "', 'XYZ_' )"
              );
         expectCompilationError
             (
@@ -372,6 +374,144 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              starSelect
              );
     }
+
+    /**
+     * <p>
+     * Test loading custom, user-supplied tools.
+     * </p>
+     */
+    public void test_03_customTool() throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        // unknown tool name
+        expectExecutionError
+            (
+             dboConnection,
+             UNKNOWN_TOOL,
+             "call syscs_util.syscs_register_tool( 'uknownToolName', true )"
+             );
+
+        // no custom class name supplied
+        expectExecutionError
+            (
+             dboConnection,
+             UNKNOWN_TOOL,
+             "call syscs_util.syscs_register_tool( 'customTool', true )"
+             );
+
+        // supplied class does not implement OptionalTool
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'customTool', true, 'java.lang.String' )"
+             );
+
+        //
+        // Register a custom tool.
+        //
+
+        // first verify that the tool hasn't been run yet
+        expectCompilationError
+            (
+             dboConnection,
+             UNKNOWN_ROUTINE,
+             "values toString( 100 )"
+             );
+
+        // now register the tool
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'customTool', true, 'org.apache.derbyTesting.functionTests.tests.lang.OptionalToolExample' )"
+             );
+
+        // run it
+        assertResults
+            (
+             dboConnection,
+             "values toString( 100 )",
+             new String[][]
+             {
+                 { "100" },
+             },
+             false
+             );
+
+        // unregister the tool
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'customTool', false, 'org.apache.derbyTesting.functionTests.tests.lang.OptionalToolExample' )"
+             );
+
+        // verify that the tool was unregistered
+        expectCompilationError
+            (
+             dboConnection,
+             UNKNOWN_ROUTINE,
+             "values toString( 100 )"
+             );
+
+        //
+        // Register a custom tool with a custom parameter.
+        //
+
+        // first verify that the tool hasn't been run yet
+        expectCompilationError
+            (
+             dboConnection,
+             UNKNOWN_ROUTINE,
+             "values foobar( 100 )"
+             );
+
+        // now register the tool
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool\n" +
+             "(\n" +
+             "    'customTool',\n" +
+             "    true,\n" +
+             "    'org.apache.derbyTesting.functionTests.tests.lang.OptionalToolExample$VariableName',\n" +
+             "    'foobar'\n" +
+             ")\n"
+             );
+
+        // run it
+        assertResults
+            (
+             dboConnection,
+             "values foobar( 100 )",
+             new String[][]
+             {
+                 { "100" },
+             },
+             false
+             );
+
+        // unregister the tool
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool\n" +
+             "(\n" +
+             "    'customTool',\n" +
+             "    false,\n" +
+             "    'org.apache.derbyTesting.functionTests.tests.lang.OptionalToolExample$VariableName',\n" +
+             "    'foobar'\n" +
+             ")\n"
+             );
+
+        // verify that the tool was unregistered
+        expectCompilationError
+            (
+             dboConnection,
+             UNKNOWN_ROUTINE,
+             "values foobar( 100 )"
+             );
+
+    }
     
 }
-

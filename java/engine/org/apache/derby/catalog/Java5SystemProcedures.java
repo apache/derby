@@ -50,6 +50,9 @@ public  class   Java5SystemProcedures
     private static  final   int TOOL_NAME = 0;
     private static  final   int TOOL_CLASS_NAME = TOOL_NAME + 1;
 
+    /** Generic name for all user-supplied tools: the first optional arg is the tool class name */
+    private static  final   String  CUSTOM_TOOL_CLASS_NAME = "customTool";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -59,8 +62,8 @@ public  class   Java5SystemProcedures
     /** Mapping of tool names to their implementing classes for use by SYSCS_REGISTER_TOOL */
     private static  final   String[][]  OPTIONAL_TOOLS = new String[][]
     {
-        { "dbmd", "org.apache.derby.impl.tools.optional.DBMDWrapper" },
-        { "fdbv", "org.apache.derby.impl.tools.optional.ForeignDBViews" },
+        { "databaseMetaData", "org.apache.derby.impl.tools.optional.DBMDWrapper" },
+        { "foreignViews", "org.apache.derby.impl.tools.optional.ForeignDBViews" },
     };
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +74,9 @@ public  class   Java5SystemProcedures
 
     /**
      * <p>
-     * Load or unload an optional tool package.
+     * Load or unload an optional tool package. If the tool name is the special
+     * CUSTOM_TOOL_CLASS_NAME tool, then the first optionalArg is the name
+     * of a user-supplied class which implements OptionalTool.
      * </p>
      *
      * @param toolName  Name of the tool package.
@@ -90,7 +95,7 @@ public  class   Java5SystemProcedures
 			CompilerContext cc = (CompilerContext) ContextService.getContext( CompilerContext.CONTEXT_ID );
             ClassFactory    classFactory = cc.getClassFactory();
 
-            String              toolClassName = findToolClassName( toolName );            
+            String              toolClassName = findToolClassName( toolName, optionalArgs );            
             OptionalTool    tool = null;
 
             try {
@@ -100,20 +105,60 @@ public  class   Java5SystemProcedures
             catch (InstantiationException ie) { throw wrap( ie ); }
             catch (IllegalAccessException iae) { throw wrap( iae ); }
 
+            // Strip the custom tool class name from the optional args as necessary
+            if ( CUSTOM_TOOL_CLASS_NAME.equals( toolName ) )
+            {
+                optionalArgs = stripCustomClassName( optionalArgs );
+            }
+
             if ( register ) { tool.loadTool( optionalArgs ); }
             else { tool.unloadTool( optionalArgs ); }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
     }
     /** Lookup the class name corresponding to the name of an optional tool */
-    private static  String  findToolClassName( String toolName ) throws StandardException
+    private static  String  findToolClassName( String toolName, String... optionalArgs ) throws StandardException
     {
+        //
+        // For a user-supplied tool, the first optional arg is the name of a user-supplied class
+        // which implements OptionalTool
+        //
+        if ( CUSTOM_TOOL_CLASS_NAME.equals( toolName ) )
+        {
+            if ( (optionalArgs == null) || (optionalArgs.length == 0) )
+            {
+                throw badTool( "null" );
+            }
+            else { return optionalArgs[ 0 ]; }
+        }
+        
         for ( String[] descriptor : OPTIONAL_TOOLS )
         {
             if ( descriptor[ TOOL_NAME ].equals( toolName ) ) { return descriptor[ TOOL_CLASS_NAME ]; }
         }
 
-        throw StandardException.newException( SQLState.LANG_UNKNOWN_TOOL_NAME,  toolName );
+        throw badTool( toolName );
+    }
+    private static  StandardException   badTool( String toolName )
+    {
+        return StandardException.newException( SQLState.LANG_UNKNOWN_TOOL_NAME,  toolName );
+    }
+
+    /**
+     * <p>
+     * For a custom tool, we strip the first arg from the list of optional args. By
+     * the time we get to this method, it has already been determined that there is
+     * at least one arg and it is the name of a class which implements OptionalTool.
+     * </p>
+     */
+    private static  String[]    stripCustomClassName( String... optionalArgs )
+    {
+        int     count = optionalArgs.length - 1;
+        String[]    retval = new String[ count ];
+
+        for ( int i = 0; i < count; i++ ) { retval[ i ] = optionalArgs[ i + 1 ]; }
+
+        return retval;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
