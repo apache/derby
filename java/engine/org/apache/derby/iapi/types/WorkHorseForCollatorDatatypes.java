@@ -153,7 +153,8 @@ final class WorkHorseForCollatorDatatypes
 
 		CollationElementsInterface escapeCharacter = (CollationElementsInterface) escape;
 
-		if (!escapeCharacter.hasSingleCollationElement())
+        if (escape.getLength() != 1 ||
+                !escapeCharacter.hasSingleCollationElement())
 		{
 			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
 					escapeCharacter.toString());

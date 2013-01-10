@@ -81,6 +81,7 @@ public class CollationTest extends BaseJDBCTestCase {
     /** Test cases to run with Norwegian case-sensitive collation. */
     private final static String[] NORWEGIAN_CASE_SENSITIVE = {
         "testNorwayCollation",
+        "testLikeEscapeClauseLengthRestriction",
     };
 
     /** Test cases to run with Polish case-sensitive collation. */
@@ -97,6 +98,9 @@ public class CollationTest extends BaseJDBCTestCase {
     private final static String[] SWEDISH_CASE_INSENSITIVE = {
         "testSwedishCaseInsensitiveCollation",
     };
+
+    /** SQL state that signals invalid escape sequence in LIKE expressions. */
+    private final static String INVALID_ESCAPE = "22019";
 
   /**
    * Test order by with default collation
@@ -2189,4 +2193,49 @@ public void testMissingCollatorSupport() throws SQLException {
         return new HarmonySerialClob( contents );
     }
 
+    /**
+     * Regression test case for DERBY-6030. The escape sequence in a LIKE
+     * expression should consist of a single character and a single collation
+     * element. Before DERBY-6030, with non-literal escape sequences, Derby
+     * would only check that the sequence consisted of a single collation
+     * element, and might incorrectly accept escape sequences with more than
+     * one character.
+     */
+    public void testLikeEscapeClauseLengthRestriction() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6030" +
+                  "(x varchar(10), y varchar(10), z varchar(10))");
+        s.execute("insert into d6030 values ('a', 'b', 'c')");
+
+        PreparedStatement select = prepareStatement(
+            "select * from d6030 where x like y escape z");
+
+        PreparedStatement update = prepareStatement("update d6030 set z = ?");
+
+        // Escape clause 'c' is OK.
+        JDBC.assertEmpty(select.executeQuery());
+
+        // Sharp-s is NOT OK, as it has two collation elements.
+        update.setString(1, "\u00df");
+        assertUpdateCount(update, 1);
+        assertStatementError(INVALID_ESCAPE, select);
+
+        // 'aa' is NOT OK, as it has two characters. This used to succeed with
+        // Norwegian collation, which treats 'aa' as a single collation
+        // element. But it should fail since it's two characters.
+        update.setString(1, "aa");
+        assertUpdateCount(update, 1);
+        assertStatementError(INVALID_ESCAPE, select);
+
+        // Also test the same queries with literals in the escape clause.
+        // Those queries follow a different code path, and they produced the
+        // expected results even before the fix.
+        JDBC.assertEmpty(
+            s.executeQuery("select * from d6030 where x like y escape 'c'"));
+        assertStatementError(INVALID_ESCAPE, s,
+                "select * from d6030 where x like y escape '\u00df'");
+        assertStatementError(INVALID_ESCAPE, s,
+                "select * from d6030 where x like y escape 'aa'");
+    }
 }
