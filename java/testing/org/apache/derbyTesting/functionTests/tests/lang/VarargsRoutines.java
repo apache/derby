@@ -31,6 +31,8 @@ import java.sql.Timestamp;
 import java.sql.SQLException;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
@@ -450,4 +452,61 @@ public  class   VarargsRoutines
 
         return new StringArrayVTI( columnNames, rows );
     }
+
+    /**
+     * <p>
+     * This is a table function which creates a StringArrayVTI out of
+     * a space separated list of column names, and a varargs of rows.
+     * Each row is a space separated list of column values. Here is
+     * a sample usage:
+     * </p>
+     *
+     * <pre>
+     * connect 'jdbc:derby:memory:db;create=true';
+     * 
+     * create function leftTable
+     * (
+     *     columnNames varchar( 32672 ),
+     *     rowContents varchar( 32672 ) ...
+     * )
+     * returns table
+     * (
+     *     a   varchar( 5 ),
+     *     b   varchar( 5 )
+     * )
+     * language java parameter style derby_jdbc_result_set no sql
+     * external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.stringArrayTable';
+     * 
+     * select * from table( leftTable( 'A B', 'APP T', 'APP S' ) ) l;
+     * </pre>
+     */
+    public  static  ResultSet   stringArrayTable
+        (
+         String columnNames,
+         String... rows
+         )
+    {
+        ArrayList<String>   columnList = new ArrayList<String>();
+        StringTokenizer colToks = new StringTokenizer( columnNames );
+        while( colToks.hasMoreTokens() ) { columnList.add( colToks.nextToken()  ); }
+        String[]    colNameArg = new String[ columnList.size() ];
+        columnList.toArray( colNameArg );
+
+        ArrayList<String[]> rowList = new ArrayList<String[]>();
+        for ( String row : rows )
+        {
+            ArrayList<String>   valueList = new ArrayList<String>();
+            StringTokenizer valueToks = new StringTokenizer( row );
+            while( valueToks.hasMoreTokens() ) { valueList.add( valueToks.nextToken() ); }
+            String[]    valueRow = new String[ valueList.size() ];
+            valueList.toArray( valueRow );
+            rowList.add( valueRow );
+        }
+
+        String[][]  rowsArg = new String[ rowList.size() ][];
+        rowList.toArray( rowsArg );
+
+        return new StringArrayVTI( colNameArg, rowsArg );
+    }
+    
 }
