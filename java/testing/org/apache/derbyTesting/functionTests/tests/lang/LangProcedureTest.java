@@ -651,8 +651,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         s.execute("drop procedure IR");
         s.execute("drop procedure IR2");
-
-        s.close();
+        s.execute("drop table t1");
+        commit();
     }
 
     /**
@@ -677,6 +677,12 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                   "parameter style java reads sql data dynamic result sets 1 " +
                   "language java external name '" +
                   thisClassName + ".selectRows'");
+
+        // Create a test table with some data that can be accessed by the
+        // DRS procedure.
+        s.execute("create table t1(i int not null primary key, b char(15))");
+        s.execute("insert into t1 values (1, 'int'), (2, 'int'), (3, 'int'), "
+                + "(7, 'int'), (4, '4'), (5, 'ir2'), (6, '''012345678')");
 
         String[] sysaliasDefinition = {
             "APP.DRS AS " + thisClassName + ".selectRows" +
@@ -978,7 +984,11 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             conn.setAutoCommit(oldAutoCommit);
         }
 
-        s.close();
+        s.execute("drop procedure drs");
+        s.execute("drop procedure drs2");
+        s.execute("drop table t1");
+        commit();
+
         conn2.close();
     }
 
