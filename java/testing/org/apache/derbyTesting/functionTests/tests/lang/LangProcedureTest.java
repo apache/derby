@@ -398,6 +398,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             "create procedure S1.NOTYET() SPECIFIC fred language java " +
             "external name 'failAPP.fail0' parameter style java");
 
+        s.execute("drop procedure PROCDUP");
         s.execute("drop procedure s1.PROCDUP");
         s.execute("drop procedure s2.PROCDUP");
 
@@ -890,6 +891,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         JDBC.assertNoMoreResults(toomany);
         toomany.close();
         s.execute("drop procedure way.toomany");
+        s.execute("drop schema way restrict");
 
         // Run following test in embedded only until DERBY-3414 is fixed. As
         // identified in DERBY-3414, the rollback inside the java procedure
@@ -980,6 +982,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             s.execute("drop table DELLATER1");
             s.execute("drop table DELLATER2");
             s.execute("drop table DELLATER3");
+            s.execute("drop procedure insertCausingRollback");
 
             conn.setAutoCommit(oldAutoCommit);
         }
