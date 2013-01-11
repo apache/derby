@@ -955,7 +955,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             // it with parameters such that insert will fail because of
             // duplicate key. The procedure also has couple select statements
             // The exception thrown for duplicate key should close the
-            // resultsets associated with select statement and we should be
+            // dynamic result sets in the procedure, and we should be
             // able to drop the tables used in the select queries without
             // running into locking issues.
             s.execute(
@@ -1362,8 +1362,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      * A test case for DERBY-3304. The procedure is attempting to insert a
      * duplicate key into a table which causes an internal rollback (vs a
      * user-initiated rollback). This internal rollback should close the
-     * internal resultset associated with Java procedure along with closing
-     * the resulsets for 2 SELECT queries.
+     * internal CallStatementResultSet associated with the Java procedure
+     * and the dynamic result set.
      * 
      * @param p1
      * @param p2
@@ -1388,7 +1388,15 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         PreparedStatement ps1 = conn.prepareStatement(
         		"select * from dellater3 where c31 = ?");
         ps1.setInt(1, p1);
-        ps1.executeQuery();
+        ResultSet rs = ps1.executeQuery();
+
+        // DERBY-6038: When the procedure fails because of duplicate key
+        // exception below, all dynamic results set will be closed. Other
+        // open result sets will stay open until they have been garbage
+        // collected and finalized. Their staying open may cause problems
+        // later in the test, so close non-dynamic result sets before
+        // returning.
+        rs.close();
 
         // Depending on the value of p1, following may throw duplicate key
         // exception. If that happens, both the dynamic resultset and local
