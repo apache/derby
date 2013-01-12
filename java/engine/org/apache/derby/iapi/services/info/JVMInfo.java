@@ -254,4 +254,17 @@ public abstract class JVMInfo
             }
         }
     }
+
+    /**
+     * Determine whether we are running in a constrained environment.
+     * @return true if JNDI is available
+     */
+    public static boolean hasJNDI() {
+        try {
+            Class.forName("javax.naming.Referenceable");
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
 }

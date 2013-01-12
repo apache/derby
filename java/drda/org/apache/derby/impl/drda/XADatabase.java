@@ -62,9 +62,28 @@ class XADatabase extends Database {
     synchronized void makeConnection(Properties p) throws
  SQLException
     {
-        if (xaDataSource == null)
-        {
-            xaDataSource = new EmbeddedXADataSource();
+        if (xaDataSource == null) {
+            try {
+                if (JVMInfo.hasJNDI()) {
+                    xaDataSource =
+                        (EmbeddedXADataSourceInterface)Class.forName(
+                        "org.apache.derby.jdbc.EmbeddedXADataSource").
+                        newInstance();
+                } else {
+                    xaDataSource =
+                        (EmbeddedXADataSourceInterface)Class.forName(
+                        "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40").
+                        newInstance();
+                }
+            } catch (Exception e) {
+                SQLException ne = new SQLException(
+                        MessageService.getTextMessage(
+                            MessageId.CORE_DATABASE_NOT_AVAILABLE),
+                        "08006",
+                        ExceptionSeverity.DATABASE_SEVERITY);
+                ne.initCause(e);
+                throw ne;
+            }
         }
 
         xaDataSource.setDatabaseName(getShortDbName());

@@ -38,6 +38,7 @@ import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
+import org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -215,6 +216,13 @@ public class DataSourceTest extends BaseJDBCTestCase {
             dssimple = (DataSource)realdssimple;
             assertConnectionOK(
                 expectedValues, "SimpleDataSource", ds.getConnection());
+        }
+
+        if (JDBC.vmSupportsJDBC4()) {
+            NonJNDIEmbeddedDataSource40 nds = new NonJNDIEmbeddedDataSource40();
+            nds.setDatabaseName(dbName);
+            assertConnectionOK(
+                    expectedValues, "NonJNDIDataSource", nds.getConnection());
         }
     }            
     

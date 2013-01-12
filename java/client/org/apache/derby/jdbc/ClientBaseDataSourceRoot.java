@@ -52,7 +52,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 public abstract class ClientBaseDataSourceRoot implements
         Serializable, ClientDataSourceInterface {
 
-    static final long serialVersionUID = -7660172643035173693L;
+    private static final long serialVersionUID = -7660172643035173693L;
 
     // Spec requires DH algorithm with 32bytes prime to be used
     // Not all JCE implementations have support for this. E.g.
