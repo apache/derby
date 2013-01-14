@@ -1933,6 +1933,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         derby_4092();
         derby_5779();
+        derby_6040();
     }
     
     /**
@@ -2320,6 +2321,82 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "select contents\n" +
              "from table( lowerCaseRow( cast( t.tablename as varchar(32672)) ) ) s\n" +
              "where exists ( select tableid from sys.systables t )\n"
+             );
+    }
+    
+    /**
+     * <p>
+     * Make sure that ORDER BY columns are not mistakenly pruned
+     * when projection eliminates a column and one of the columns is
+     * compared to a constant.
+     * </p>
+     */
+    private void  derby_6040()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function leftTable\n" +
+             "(\n" +
+             "    columnNames varchar( 32672 ),\n" +
+             "    rowContents varchar( 32672 ) ...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "    a0   varchar( 5 ),\n" +
+             "    a1   varchar( 5 ),\n" +
+             "    a2   varchar( 5 ),\n" +
+             "    a3   varchar( 5 )\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.stringArrayTable'\n"
+             );
+        goodStatement
+            (
+             "create function rightTable\n" +
+             "(\n" +
+             "    columnNames varchar( 32672 ),\n" +
+             "    rowContents varchar( 32672 ) ...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "    b1   varchar( 5 ),\n" +
+             "    b2   varchar( 5 ),\n" +
+             "    b3   varchar( 5 )\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.VarargsRoutines.stringArrayTable'\n"
+             );
+        assertResults
+            (
+             "select l.a2 column0, r.b3 column1\n" +
+             "from\n" +
+             "    table( leftTable\n" +
+             "            (\n" +
+             "            'A0 A1 A2 A3',\n" +
+             "            'X APP T Z',\n" +
+             "            'X APP S Z'\n" +
+             "            ) ) l,\n" +
+             "    table( rightTable\n" +
+             "           (\n" +
+             "           'B1 B2 B3',\n" +
+             "           'APP T A',\n" +
+             "           'APP T B',\n" +
+             "           'APP S A',\n" +
+             "           'APP S B'\n" +
+             "           ) ) r\n" +
+             "where r.b2 = l.a2\n" +
+             "and l.a3 = 'Z'\n" +
+             "and r.b1 = l.a1\n" +
+             "order by column0, column1\n",
+             new String[][]
+             {
+                 { "S", "A" },
+                 { "S", "B" },
+                 { "T", "A" },
+                 { "T", "B" },
+             },
+             new int[] { Types.VARCHAR, Types.VARCHAR }
              );
     }
     

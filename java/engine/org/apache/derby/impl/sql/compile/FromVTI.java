@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
@@ -62,6 +63,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.RestrictedVTI;
@@ -1981,10 +1983,27 @@ public class FromVTI extends FromTable implements VTIEnvironment
         TypeDescriptor[] types = td.getRowTypes();
         for ( int i = 0; i < columnNames.length; i++ )
         {
-            resultColumns.addColumn( exposedName, columnNames[ i ],
-                    DataTypeDescriptor.getType(types[i]));
-        }
+            String          columnName = columnNames[ i ];
+            DataTypeDescriptor  dtd = DataTypeDescriptor.getType(types[i]);
+            ResultColumn    rc = resultColumns.addColumn
+                ( exposedName, columnName, dtd );
 
+            //
+            // Stuff a column descriptor into the ResultColumn. We do this so that
+            // getColumnPosition() will return the column position within the
+            // table function's shape. Later on, projection may remove columns
+            // from the ResultColumnList. We don't want getColumnPosition() to say
+            // that the column position is the index into the abbreviated ResultColumnList.
+            // See DERBY-6040.
+            //
+            ColumnDescriptor    coldesc = new ColumnDescriptor
+                (
+                 columnName, i+1, dtd,
+                 (DataValueDescriptor) null, (DefaultInfo) null, (UUID) null, (UUID) null,
+                 0L, 0L, 0L
+                 );
+            rc.setColumnDescriptor( null, coldesc );
+        }
     }
 
     /**

@@ -3466,9 +3466,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 
     /** 
      * Add a column to the list given a tablename, columnname, and datatype.
+     * Return the just-added column.
      *
      */
-    public void addColumn( TableName tableName, String columnName, DataTypeDescriptor dts )
+    public ResultColumn addColumn( TableName tableName, String columnName, DataTypeDescriptor dts )
         throws StandardException
     {
         ValueNode bcn = (ValueNode) getNodeFactory().getNode(
@@ -3484,6 +3485,8 @@ public class ResultColumnList extends QueryTreeNodeVector
                                                                   getContextManager());
         rc.setType(dts);
         addResultColumn(rc);
+
+        return rc;
     }
     
 	/**
