@@ -1076,7 +1076,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     }
     
     /**
-     * Verify that JVM has support for the Collator for the datbase's locale.
+     * Verify that JVM has support for the Collator for the database's locale.
      *
 	 * @param strength Collator strength or -1 for locale default.
      * @return Collator for database's locale
