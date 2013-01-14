@@ -325,7 +325,7 @@ public interface Attribute {
 		specified on the JDBC url at the database create time. This collation 
 		is what Derby 10.2 and prior have supported)
 		2)TERRITORY_BASED (the collation will be based on language 
-		region specified by the exisiting Derby attribute called territory. 
+       region specified by the existing Derby attribute called territory.
 		If the territory attribute is not specified at the database create 
 		time, Derby will use java.util.Locale.getDefault to determine the 
 		territory for the newly created database. 
