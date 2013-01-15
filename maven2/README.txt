@@ -64,7 +64,9 @@ Description of the required steps:
         again. You should encrypt your password(s), and to do that you have to
         edit/create two files in USER_HOME/.m2 (i.e. ~/.m2 on *nix systems).
         See http://maven.apache.org/guides/mini/guide-encryption.html
-        for how to do this the right way.
+        for how to do this the right way. The id to use in the server section
+        of settings.xml is specified in the ASF parent pom, and is currently
+        "apache.releases.https".
 
  c) 'mvn clean install'
     Generates the artifacts, uses GnuPG to generate signatures for the
@@ -96,9 +98,8 @@ Description of the required steps:
  d) 'mvn deploy' or 'mvn clean deploy'
     Deploys the artifacts, including signatures and checksum files, to the
     temporary Apache staging repository managed by Nexus.
-    Remember that you will need to specify your gpg passphrase here too.
-
-    For instance:
+    Remember that you will need to specify your gpg passphrase here too,
+    preferably by using a passphrase agent. Alternatively:
 
         mvn -Dgpg.passphrase="my secret passphrase" deploy
 
