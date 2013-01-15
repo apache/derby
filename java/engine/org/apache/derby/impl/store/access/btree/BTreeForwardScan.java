@@ -304,7 +304,7 @@ public class BTreeForwardScan extends BTreeScan
                 // row was marked deleted - the key value cannot change.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
-                        this, this.getConglomerate(), pos, 
+                        this, pos,
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
@@ -391,7 +391,6 @@ public class BTreeForwardScan extends BTreeScan
                             latch_released =
                                 !this.getLockingPolicy().lockScanRow(
                                     this, 
-                                    this.getConglomerate(), 
                                     pos, 
                                     init_lock_fetch_desc,
                                     pos.current_lock_template,

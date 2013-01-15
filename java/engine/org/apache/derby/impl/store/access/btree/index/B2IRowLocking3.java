@@ -201,7 +201,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * and then it will request a WAIT lock on the row.  
      * <p>
      *
-     * @param btree             The conglomerate we are locking.
      * @param current_leaf      Latched current leaf where "current" key is.
      * @param aux_leaf          If non-null, this leaf is unlatched if the 
      *                          routine has to wait on the lock.
@@ -222,7 +221,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 	 * @exception  StandardException  Standard exception policy.
      **/
     private boolean lockRowOnPage(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     LeafControlRow          aux_leaf,
     int                     current_slot,
@@ -245,14 +243,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                     "current_slot = " + current_slot +
                     "; current_leaf.getPage().recordCount() = " +
                         current_leaf.getPage().recordCount());
-            }
-
-
-            if (!(btree instanceof B2I))
-            {
-                SanityManager.THROWASSERT(
-                    "btree not instance of B2I, it is " +
-                    btree.getClass().getName());
             }
 
             SanityManager.ASSERT(lock_template != null, "template is null");
@@ -351,9 +341,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * @exception  StandardException  Standard exception policy.
      **/
     private boolean searchLeftAndLockPreviousKey(
-    B2I                     b2i,
     LeafControlRow          current_leaf,
-    int                     current_slot,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -406,7 +394,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                     
                     boolean ret_status = 
                         lockRowOnPage(
-                            b2i,
                             prev_leaf, 
                             current_leaf, 
                             prev_leaf.getPage().recordCount() - 1, 
@@ -520,7 +507,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
-     * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
      * @param request_row_lock  Whether to request the row lock, should
      *                          only be requested once per page in the scan.
@@ -534,7 +520,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      **/
     protected boolean _lockScanRow(
     OpenBTree               open_btree,
-    BTree                   btree,
     BTreeRowPosition        pos,
     boolean                 request_row_lock,
     FetchDescriptor         lock_fetch_desc,
@@ -546,7 +531,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 		throws StandardException
     {
         boolean latch_released = false;
-        B2I     b2i            = (B2I) btree;
 
         if (request_row_lock)
         {
@@ -568,7 +552,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 latch_released = 
                     !lockNonScanPreviousRow(
-                        btree,
                         pos.current_leaf,
                         1 /* lock row previous to row at slot 1 */, 
                         lock_fetch_desc,
@@ -598,7 +581,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 latch_released = 
                     !lockRowOnPage(
-                        btree,
                         pos.current_leaf, 
                         (LeafControlRow) null /* no other latch currently */,
                         pos.current_slot, 
@@ -697,7 +679,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
-     * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
@@ -707,7 +688,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      **/
     public boolean lockScanRow(
     OpenBTree               open_btree,
-    BTree                   btree,
     BTreeRowPosition        pos,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
@@ -720,7 +700,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         return(
             _lockScanRow(
                 open_btree,
-                btree,
                 pos,
                 true,  // request the row lock (always true for iso 3 )
                 lock_fetch_desc,
@@ -762,7 +741,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 	 * @exception  StandardException  Standard exception policy.
      **/
     public boolean lockNonScanPreviousRow(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     int                     current_slot,
     FetchDescriptor         lock_fetch_desc,
@@ -775,11 +753,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     {
         boolean          ret_status;
 
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT(btree instanceof B2I);
-        }
-
         if (current_slot > 1)
         {
             // Easy case, just lock the key previous to the current one.
@@ -788,7 +761,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
             ret_status = 
                 lockRowOnPage(
-                    btree,
                     current_leaf, (LeafControlRow) null, 
                     current_slot - 1,
                     null,
@@ -824,8 +796,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 // caller must research, get new locks if this routine 
                 // releases latches.
                 ret_status = this.searchLeftAndLockPreviousKey(
-                    (B2I) btree,
-                    current_leaf, current_slot,
+                    current_leaf,
                     lock_fetch_desc, lock_template, lock_row_loc,
                     open_btree, lock_operation, lock_duration);
             }
@@ -889,7 +860,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     }
 
     public boolean lockNonScanRowOnPage(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     int                     current_slot,
     FetchDescriptor         lock_fetch_desc,
@@ -900,7 +870,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     {
         return(
             lockRowOnPage(
-                btree,
                 current_leaf,
                 null,
                 current_slot,

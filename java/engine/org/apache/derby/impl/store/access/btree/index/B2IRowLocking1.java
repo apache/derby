@@ -104,7 +104,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      *
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
-     * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
@@ -114,7 +113,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      **/
     public boolean lockScanRow(
     OpenBTree               open_btree,
-    BTree                   btree,
     BTreeRowPosition        pos,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
@@ -129,7 +127,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
         return(
             _lockScanRow(
                  open_btree,
-                 btree,
                  pos,
                  (forUpdate && !previous_key_lock), // only get update row lock
                  lock_fetch_desc, lock_template, lock_row_loc,

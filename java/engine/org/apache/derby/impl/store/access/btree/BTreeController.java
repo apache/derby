@@ -593,7 +593,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         RowLocation lock_row_loc = 
             (RowLocation) scratch_template[scratch_template.length - 1];
         boolean latch_released = !getLockingPolicy().lockNonScanRowOnPage(
-                this.getConglomerate(), leaf, slot, lock_fetch_desc,template, 
+                leaf, slot, lock_fetch_desc, template,
                 lock_row_loc, ConglomerateController.LOCK_UPD);
         //if latch was released some other transaction was operating on this
         //record and might have changed the tree by now
@@ -737,7 +737,6 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
             latch_released = 
                 !this.getLockingPolicy().lockNonScanPreviousRow(
-                    this.getConglomerate(),
                     targetleaf, 
                     slot_after_previous, 
                     lock_fetch_desc,
@@ -792,7 +791,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
                     latch_released = 
                         !this.getLockingPolicy().lockNonScanRowOnPage(
-                            this.getConglomerate(), targetleaf, insert_slot, 
+                            targetleaf, insert_slot,
                             lock_fetch_desc, scratch_template, lock_row_loc,
                             ConglomerateController.LOCK_UPD);
 

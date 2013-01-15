@@ -132,7 +132,6 @@ public class B2INoLocking implements BTreeLockingPolicy
      **/
     public boolean lockScanRow(
     OpenBTree               open_btree,
-    BTree                   btree,
     BTreeRowPosition        pos,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
@@ -177,7 +176,6 @@ public class B2INoLocking implements BTreeLockingPolicy
 	 * @exception  StandardException  Standard exception policy.
      **/
     public boolean lockNonScanPreviousRow(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     int                     current_slot,
     FetchDescriptor         lock_fetch_desc,
@@ -211,7 +209,6 @@ public class B2INoLocking implements BTreeLockingPolicy
     }
 
     public boolean lockNonScanRowOnPage(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     int                     current_slot,
     FetchDescriptor         lock_fetch_desc,

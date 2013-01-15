@@ -432,7 +432,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             {
                 latch_released = 
                     !this.getLockingPolicy().lockScanRow(
-                        this, this.getConglomerate(), pos,
+                        this, pos,
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
@@ -1137,7 +1137,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 // the lock to X.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
-                        this, this.getConglomerate(), scan_position,
+                        this, scan_position,
                         init_lock_fetch_desc,
                         scan_position.current_lock_template,
                         scan_position.current_lock_row_loc,

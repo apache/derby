@@ -114,7 +114,6 @@ public interface BTreeLockingPolicy
      *
      * @param open_btree        The open_btree to associate latches with - 
      *                          used if routine has to scan backward.
-     * @param btree             the conglomerate info.
      * @param pos               Description of position of row to lock.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
@@ -131,7 +130,6 @@ public interface BTreeLockingPolicy
      **/
     abstract public boolean lockScanRow(
     OpenBTree               open_btree,
-    BTree                   btree,
     BTreeRowPosition        pos,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
@@ -202,7 +200,6 @@ public interface BTreeLockingPolicy
      * moved in the btree so caller must research to find the row.
      *
      *
-     * @param btree             The conglomerate we are locking.
      * @param current_leaf      Latched current leaf where "current" key is.
      * @param current_slot      The slot of row on "current_leaf" 
      * @param lock_template     Empty full template row, to read row into.
@@ -226,7 +223,6 @@ public interface BTreeLockingPolicy
 	 * @exception  StandardException  Standard exception policy.
      **/
     abstract public boolean lockNonScanPreviousRow(
-    BTree                   btree,
     LeafControlRow          current_leaf,
     int                     current_slot,
     FetchDescriptor         lock_fetch_desc,
@@ -291,7 +287,6 @@ public interface BTreeLockingPolicy
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
-     * @param btree             the conglomerate info.
      * @param leaf              The control row of the current leaf to lock.
      * @param slot              The slot position of the row to lock.
      * @param lock_template     A scratch area to use to read in rows.
@@ -306,7 +301,6 @@ public interface BTreeLockingPolicy
 	 * @exception  StandardException  Standard exception policy.
      **/
     abstract public boolean lockNonScanRowOnPage(
-    BTree                   btree,
     LeafControlRow          leaf,
     int                     slot,
     FetchDescriptor         lock_fetch_desc,
