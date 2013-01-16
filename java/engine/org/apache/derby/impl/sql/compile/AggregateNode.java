@@ -454,6 +454,10 @@ public class AggregateNode extends UnaryOperatorNode
         ( DataDictionary dd, SchemaDescriptor sd, String rawName )
         throws StandardException
     {
+        // if the schema has a null UUID, that means the schema has not
+        // been created yet. in that case, it doesn't have any aggregates in it.
+        if ( sd.getUUID() == null ) { return null; }
+        
 		java.util.List list = dd.getRoutineList
             ( sd.getUUID().toString(), rawName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
 

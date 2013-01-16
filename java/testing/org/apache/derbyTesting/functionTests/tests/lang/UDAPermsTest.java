@@ -60,7 +60,10 @@ public class UDAPermsTest extends GeneratedColumnsHelper
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
     private static  final   String      FRANK = "FRANK";
-    private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH, FRANK  };
+    private static  final   String      TONY = "TONY";
+    private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH, FRANK, TONY  };
+
+    private static  final   String      MISSING_ROUTINE = "42Y03";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -439,4 +442,18 @@ public class UDAPermsTest extends GeneratedColumnsHelper
              );
     }
     
+   /**
+     * <p>
+     * Test that we fixed an NPE in resolving function names when the
+     * schema hasn't been created yet.
+     * </p>
+     */
+    public  void    test_004_emptySchema()
+        throws Exception
+    {
+        Connection  tonyConnection = openUserConnection( TONY );
+
+        expectCompilationError( tonyConnection, MISSING_ROUTINE, "values toString( 100 )" );
+    }
+
 }
