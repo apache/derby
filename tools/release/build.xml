@@ -117,7 +117,7 @@
 -->
   <target name="genrelnotes"
       depends="missing-properties, maven-exec-windows, maven-exec-unix"
-      description="Generates the release notes. Takes the following properties: jira.user, jira.password, jira.filter.id, release.version, relnotes.src.reports">
+      description="Generates the release notes. Takes the following properties: jira.user, jira.password, release.version, relnotes.src.reports, jira.filter.id (optional), reportDisqualifications (optional)">
 
         <!-- Build the JIRA SOAP client -->
 	<exec executable="${mvn.exec}"
@@ -137,13 +137,10 @@
             classpath="${basedir}/tools/release/jirasoap/target/JiraSOAP-LATEST-jar-with-dependencies.jar"
         />
 
-        <!-- See if the user wants disqualified issues to be reported. -->
-        <condition property="reportDisqualifications_val" value="true">
-            <contains string="true" substring="${reportDisqualifications}" />
-        </condition>
-        <condition property="reportDisqualifications_val" value="false">
+        <!-- Set default for jira.filter.id (0 to use JQL). -->
+        <condition property="jira.filter.id" value="0">
           <not>
-              <isset property="${reportDisqualifications_val}" />
+              <isset property="${jira.filter.id}" />
           </not>
         </condition>
 
@@ -154,7 +151,7 @@
             releaseVersion="${release.version}"
             filterId="${jira.filter.id}"
             outputFile="${relnotes.src.buglist}"
-            reportDisqualifications="${reportDisqualifications_val}"
+            reportDisqualifications="${reportDisqualifications}"
         />
             
      <generateReleaseNotes
@@ -173,13 +170,13 @@
         <echo message="Make sure the following properties are set:"/>
         <echo message="  jira.user             = ${jira.user}"/>
         <echo message="  jira.password         = ${jira.password}"/>
-        <echo message="  jira.filter.id        = ${jira.filter.id}"/>
-        <echo message="                          (digits only, 0 for JQL)"/>
         <echo message="  release.version       = ${release.version}"/>
         <echo message="                          (i.e. 10.7.1.0)"/>
         <echo message="  relnotes.src.reports  = ${relnotes.src.reports}"/>
         <echo message="                          (specify a directory)"/>
         <echo message="*Optional* properties:"/>
+        <echo message="  jira.filter.id          = ${jira.filter.id}"/>
+        <echo message="                            (digits only, 0 for JQL)"/>
         <echo message="  reportDisqualifications = ${reportDisqualifications}"/>
         <echo message="                            (true|*false*)"/>
         <fail message="Build aborted due to missing system properties."/>
@@ -193,7 +190,6 @@
                 <isset property="jira.user"/>
                 <isset property="jira.password"/>
                 <isset property="release.version"/>
-                <isset property="jira.filter.id"/>
                 <isset property="relnotes.src.reports"/>
             </and>
         </condition>
