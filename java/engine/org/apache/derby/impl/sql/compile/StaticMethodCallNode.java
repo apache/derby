@@ -512,9 +512,9 @@ public class StaticMethodCallNode extends MethodCallNode
 
 			AliasDescriptor proc = (AliasDescriptor) list.get(i);
 
-			RoutineAliasInfo routineInfo = (RoutineAliasInfo) proc.getAliasInfo();
-			int parameterCount = routineInfo.getParameterCount();
-            boolean hasVarargs = routineInfo.hasVarargs();
+			RoutineAliasInfo rai = (RoutineAliasInfo) proc.getAliasInfo();
+			int parameterCount = rai.getParameterCount();
+            boolean hasVarargs = rai.hasVarargs();
 
             if ( hasVarargs )
             {
@@ -528,10 +528,10 @@ public class StaticMethodCallNode extends MethodCallNode
 			// pre-form the method signature. If it is a dynamic result set procedure
 			// then we need to add in the ResultSet array
 
-			TypeDescriptor[] parameterTypes = routineInfo.getParameterTypes();
+			TypeDescriptor[] parameterTypes = rai.getParameterTypes();
 
 			int sigParameterCount = parameterCount;
-			if (routineInfo.getMaxDynamicResultSets() > 0)
+			if (rai.getMaxDynamicResultSets() > 0)
             { sigParameterCount++; }
 
 			signature = new JSQLType[sigParameterCount];
@@ -547,7 +547,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 
 				// if it's an OUT or INOUT parameter we need an array.
-				int parameterMode = routineInfo.getParameterModes()[ getRoutineArgIdx( routineInfo, p ) ];
+				int parameterMode = rai.getParameterModes()[ getRoutineArgIdx( rai, p ) ];
 
 				if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
 
@@ -609,6 +609,7 @@ public class StaticMethodCallNode extends MethodCallNode
                         coerceMethodParameter
                             (
                              fromList, subqueryList, aggregateVector,
+                             rai,
                              methodParms.length,
                              paramdtd, parameterTypeId, parameterMode,
                              idx
@@ -620,6 +621,7 @@ public class StaticMethodCallNode extends MethodCallNode
                     coerceMethodParameter
                         (
                          fromList, subqueryList, aggregateVector,
+                         rai,
                          methodParms.length,
                          paramdtd, parameterTypeId, parameterMode,
                          p
@@ -641,7 +643,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 			}
 
-			this.routineInfo = routineInfo;
+			this.routineInfo = rai;
 			ad = proc;
 
 			// If a procedure is in the system schema and defined as executing
@@ -675,7 +677,8 @@ public class StaticMethodCallNode extends MethodCallNode
         (
          FromList fromList,
          SubqueryList subqueryList,
-         Vector aggregateVector, 
+         Vector aggregateVector,
+         RoutineAliasInfo rai,
          int    parameterCount, // number of declared routine args
          DataTypeDescriptor paramdtd,   // declared type of routine arg
          TypeId parameterTypeId,    // declared type id of routine arg
@@ -703,7 +706,7 @@ public class StaticMethodCallNode extends MethodCallNode
                     (
                      SQLState.LANG_DB2_PARAMETER_NEEDS_MARKER,
                      RoutineAliasInfo.parameterMode(parameterMode),
-                     routineInfo.getParameterNames()[p]
+                     rai.getParameterNames()[p]
                      );
             }
             isParameterMarker = false;

@@ -54,6 +54,7 @@ public class VarargsTest  extends GeneratedColumnsHelper
     private static  final   String  BAD_TIME_FORMAT = "22007";
     private static  final   String  BAD_BOOLEAN_FORMAT = "22018";
     private static  final   String  NEEDS_DJRS_STYLE = "42ZB2";
+    private static  final   String  NEEDS_PARAMETER_MARKER = "42886";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1157,6 +1158,28 @@ public class VarargsTest  extends GeneratedColumnsHelper
 
     }
 
+    /**
+     * <p>
+     * Test for NPE reported on DERBY-6047.
+     * </p>
+     */
+    public void test_07_6047() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn,
+              "create procedure PROC_6047( inout x int )\n" +
+              "parameter style java modifies sql data language java\n" +
+              "external name 'DUMMY.PROC_6047'\n"
+              );
+
+        expectCompilationError
+            ( NEEDS_PARAMETER_MARKER,
+              "call PROC_6047(1)"
+              );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
