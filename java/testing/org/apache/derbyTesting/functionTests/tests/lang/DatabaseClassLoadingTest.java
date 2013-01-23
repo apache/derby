@@ -800,8 +800,11 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
             getResourceTests(conn);
             
-            // Disabled due to DERBY-553
-            // signersTests(conn);
+            // DERBY-553: Disabled on Java 5 due to JVM bug
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6284489
+            if (!isJava5()) {
+                signersTests(conn);
+            }
             
             // ensure that a read-only database automatically gets table locking
             conn.setAutoCommit(false);
