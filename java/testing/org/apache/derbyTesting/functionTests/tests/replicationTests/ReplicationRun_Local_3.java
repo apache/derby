@@ -22,7 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /**
@@ -57,9 +58,19 @@ public class ReplicationRun_Local_3 extends ReplicationRun
     
 
     SQLException _failOver(String serverHost, int serverPort, String dbPath) 
+            throws Exception
     {
         util.DEBUG("BEGIN _failOver"); 
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds =  (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
@@ -80,10 +91,19 @@ public class ReplicationRun_Local_3 extends ReplicationRun
     SQLException _startSlaveTrueAndCreateTrue(String serverHost, 
             int serverPort,
             String dbPath) 
-        throws SQLException 
+        throws Exception
     {
         util.DEBUG("_startSlaveTrueAndCreateTrue");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
@@ -99,9 +119,19 @@ public class ReplicationRun_Local_3 extends ReplicationRun
     }
 
     SQLException _stopMaster(String masterServerHost, int masterServerPort, String dbPath) 
+            throws Exception
     {
         util.DEBUG("_stopMaster");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(masterServerHost);
         ds.setPortNumber(masterServerPort);

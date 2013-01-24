@@ -29,8 +29,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.jdbc.NonJNDIClientDataSource40;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -80,7 +82,8 @@ public class SimplePerfTest extends BaseJDBCTestCase
      * @throws SQLException, IOException, InterruptedException
      */
     public void testInserts()
-    throws SQLException, IOException, InterruptedException
+    throws SQLException, IOException, InterruptedException,
+        ClassNotFoundException, IllegalAccessException, InstantiationException
     {        
         String vc = "";
         for ( int i=0;i<20000;i++ )
@@ -123,7 +126,9 @@ public class SimplePerfTest extends BaseJDBCTestCase
         System.out.println("count: "+count);
     }
     public void verifyTestInserts()
-    throws SQLException, IOException, InterruptedException
+        throws SQLException, IOException, InterruptedException,
+            ClassNotFoundException, IllegalAccessException,
+            InstantiationException
     {
         Connection conn = clientConnection(masterHostName, masterPortNo, dbPath);
         
@@ -135,9 +140,18 @@ public class SimplePerfTest extends BaseJDBCTestCase
         // System.out.println("count: "+count);
     }
     private Connection clientConnection(String hostName, int portNo, String dbPath)
-            throws SQLException
+            throws SQLException, ClassNotFoundException, IllegalAccessException,
+            InstantiationException
     {
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+                    "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = new NonJNDIClientDataSource40();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(hostName);
         ds.setPortNumber(portNo);

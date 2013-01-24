@@ -45,9 +45,19 @@ public final class JDBCClient {
     static final JDBCClient EMBEDDED_40 = new JDBCClient(
             "Embedded_40", 
             "org.apache.derby.jdbc.EmbeddedDriver", 
-            "org.apache.derby.jdbc.EmbeddedDataSource40", 
-            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40",
-            "org.apache.derby.jdbc.EmbeddedXADataSource40",
+
+            JDBC.vmSupportsJNDI() ?
+            "org.apache.derby.jdbc.EmbeddedDataSource40":
+            "org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40",
+
+            JDBC.vmSupportsJNDI() ?
+            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40":
+            "org.apache.derby.jdbc.NonJNDIEmbeddedConnectionPoolDataSource40",
+
+            JDBC.vmSupportsJNDI() ?
+            "org.apache.derby.jdbc.EmbeddedXADataSource40":
+            "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40",
+
             "jdbc:derby:");
     
     /**
@@ -83,15 +93,25 @@ public final class JDBCClient {
     static final JDBCClient DERBYNETCLIENT= new JDBCClient(
             "DerbyNetClient",
             "org.apache.derby.jdbc.ClientDriver",
+
             JDBC.vmSupportsJDBC4() ?
+            (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientDataSource40" :
-            "org.apache.derby.jdbc.ClientDataSource",
+            "org.apache.derby.jdbc.NonJNDIClientDataSource40") :
+             "org.apache.derby.jdbc.ClientDataSource",
+
             JDBC.vmSupportsJDBC4() ?
+            (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource40" :
+            "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40") :
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource",
+
             JDBC.vmSupportsJDBC4() ?
+            (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientXADataSource40" :
+            "org.apache.derby.jdbc.NonJNDIClientXADataSource40") :
             "org.apache.derby.jdbc.ClientXADataSource",
+
             "jdbc:derby://");
     
     static final JDBCClient DERBYNETCLIENT_30 = new JDBCClient(

@@ -28,7 +28,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -220,9 +221,18 @@ public class ReplicationRun_Local_3_p6 extends ReplicationRun_Local_3
         
     private Connection _getConnection(String databasePath, String dbSubPath, 
             String dbName, String serverHost, int serverPort)
-        throws SQLException
+        throws Exception
     {
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(databasePath +FS+ dbSubPath +FS+ dbName);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);

@@ -150,7 +150,7 @@ class ij {
 		protocol = p.getProperty(PROTOCOL_PROPERTY);
 		String framework_property = p.getProperty(FRAMEWORK_PROPERTY);
 		
-		if (ij.JDBC20X() && ij.JTA() && ij.JNDI())
+       if (ij.JDBC20X() && ij.JTA())
 		{
 			try {
 				xahelper = (xaAbstractHelper) Class.forName("org.apache.derby.impl.tools.ij.xaHelper").newInstance();
@@ -218,7 +218,7 @@ class ij {
 	 *
 	 * @return true if JNDI extension classes can be loaded
 	 */
-	private static boolean JNDI()
+   public static boolean JNDI()
 	{
 		try
 		{

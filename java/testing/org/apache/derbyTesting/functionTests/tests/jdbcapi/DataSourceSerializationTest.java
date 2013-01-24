@@ -26,21 +26,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import javax.naming.Reference;
-import javax.naming.spi.ObjectFactory;
 import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 /**
  * Makes sure that old serialized data sources can be de-serialized with the
- * current version of the data souce.
+ * current version of the data source.
  * <p>
  * Serialized data source from old versions are expected to be found in
  * <tt>testData/serializedDataSources</tt>, with the following filename
@@ -49,7 +49,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  * <tt>ClientPooledConnectionDataSource-10_1.ser</tt>
  * <p>
  * A separation between JDBC 4.0 specific classes and the other classes is not
- * made.
+ * made before release 10.10.
  * <p>
  * This test should detect the typical incompatible changes in the current
  * data source implementations, for instance deleting a field or changing its
@@ -66,6 +66,9 @@ public class DataSourceSerializationTest
     private static final String VERSION_10_2_2_0 = "10_2_2_0";
     /** Constant for Derby version 10.3.2.1. */
     private static final String VERSION_10_3_2_1 = "10_3_2_1";
+    /** Constant for Derby version 10.10.1.0. */
+    private static final String VERSION_10_10_1_0 = "10_10_1_0";
+    private final String _40Suffix = "40";
 
     public DataSourceSerializationTest(String name) {
         super(name);
@@ -78,11 +81,19 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedDataSource()
             throws Exception {
-        final String EMBEDDED_CLASS = "EmbeddedDataSource";
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String EMBEDDED_CLASS = "EmbeddedDataSource";
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+        
+        final String EMBEDDED_CLASS = "NonJNDIEmbeddedDataSource40";
+        deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
+        
     }
 
     /**
@@ -92,11 +103,19 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedConnectionPoolDataSource()
             throws Exception {
-        final String EMBEDDED_CLASS = "EmbeddedConnectionPoolDataSource";
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String EMBEDDED_CLASS = "EmbeddedConnectionPoolDataSource";
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+
+        final String EMBEDDED_CLASS =
+                "NonJNDIEmbeddedConnectionPoolDataSource40";
+        deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
 
     /**
@@ -106,11 +125,18 @@ public class DataSourceSerializationTest
      */
     public void serTestEmbeddedXADataSource()
             throws Exception {
-        final String EMBEDDED_CLASS = "EmbeddedXADataSource";
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String EMBEDDED_CLASS = "EmbeddedXADataSource";
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_0_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+        
+        final String EMBEDDED_CLASS = "NonJNDIEmbeddedXADataSource40";
+        deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
 
     /**
@@ -120,11 +146,18 @@ public class DataSourceSerializationTest
      */
     public void serTestClientDataSource()
             throws Exception {
-        final String CLIENT_CLASS = "ClientDataSource";
-        // No client driver for Derby 10.0
-        deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String CLIENT_CLASS = "ClientDataSource";
+            // No client driver for Derby 10.0
+            deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+        
+        final String CLIENT_CLASS = "NonJNDIClientDataSource40";
+        deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
     /**
@@ -134,11 +167,18 @@ public class DataSourceSerializationTest
      */
     public void serTestClientConnectionPoolDataSource()
             throws Exception {
-        final String CLIENT_CLASS = "ClientConnectionPoolDataSource";
-        // No client driver for Derby 10.0
-        deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String CLIENT_CLASS = "ClientConnectionPoolDataSource";
+            // No client driver for Derby 10.0
+            deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+         
+        final String CLIENT_CLASS = "NonJNDIClientConnectionPoolDataSource40";
+        deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
     /**
@@ -148,11 +188,18 @@ public class DataSourceSerializationTest
      */
     public void serTestClientXADataSource()
             throws Exception {
-        final String CLIENT_CLASS = "ClientXADataSource";
-        // No client driver for Derby 10.0
-        deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0);
-        deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1);
+        if (JDBC.vmSupportsJNDI()) {
+            final String CLIENT_CLASS = "ClientXADataSource";
+            // No client driver for Derby 10.0
+            deSerializeDs(CLIENT_CLASS, VERSION_10_1_3_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_2_2_0, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_3_2_1, true);
+            deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, true);
+            deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
+        }
+         
+        final String CLIENT_CLASS = "NonJNDIClientXADataSource40";
+        deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
     /**
@@ -172,8 +219,15 @@ public class DataSourceSerializationTest
      *
      * @throws Exception on a number of error conditions
      */
-    private void deSerializeDs(String className, String version)
+    private void deSerializeDs(
+            String className, String version, boolean dsHasJNDI)
             throws Exception {
+
+        if (!JDBC.vmSupportsJDBC4() && className.contains("40")) {
+            // Running old Java, bail out if JDBC4
+            return;
+        }
+
         // Construct the filename
         final StringBuffer fname = new StringBuffer(className);
         fname.append('-');
@@ -198,7 +252,7 @@ public class DataSourceSerializationTest
         assertNotNull("FileInputStream is null", is);
         Object dsObj = null;
         DataSource ds = null;
-        Reference dsRef = null;
+        Object dsRef = null;
         // Used to preserve original error information in case of exception when 
         // closing the input stream.
         boolean testSequencePassed = false;
@@ -220,8 +274,10 @@ public class DataSourceSerializationTest
             ds.setLoginTimeout(newTimeout);
             assertEquals(newTimeout, ds.getLoginTimeout());
 
-            // Recreate the data source using reference.
-            dsRef = (Reference)ois.readObject();
+            if (dsHasJNDI) {
+                // Recreate the data source using reference.
+                dsRef = ois.readObject();
+            }
             ois.close();
             testSequencePassed = true;
         } finally {
@@ -236,15 +292,34 @@ public class DataSourceSerializationTest
             }
         }
 
-        String factoryClassName = dsRef.getFactoryClassName();
-        ObjectFactory factory =
-            (ObjectFactory)Class.forName(factoryClassName).newInstance();
-        Object recreatedDs =
-            factory.getObjectInstance(dsRef, null, null, null);
-        ds = (DataSource)recreatedDs;
-        assertTrue("Unexpected class instantiated by Reference: " +
-                dsObj.getClass().getName(),
-                dsObj.getClass().getName().indexOf(className) > 0);
+        if (dsHasJNDI) {
+            // Recreate ds via the Reference's factory class.  We use
+            // reflection here to make the test runnable for non JNDI
+            // environments. (Even though this code would not be executed in
+            // that environment, the VM will try to load the classes if
+            // reference directly in the source. So, resort to reflection...)
+            Method getFactoryClassName =
+                    Class.forName("javax.naming.Reference").getMethod(
+                    "getFactoryClassName", null);
+            String factoryClassName =
+                    (String)getFactoryClassName.invoke(dsRef, null);
+            Object factory =
+                    Class.forName(factoryClassName).newInstance();
+            Method getObjectInstance =
+                    factory.getClass().getMethod("getObjectInstance",
+                    new Class[] {
+                        Class.forName("java.lang.Object"),
+                        Class.forName("javax.naming.Name"),
+                        Class.forName("javax.naming.Context"),
+                        Class.forName( "java.util.Hashtable")});
+            Object recreatedDs =
+                    getObjectInstance.invoke(
+                    factory, new Object[] {dsRef, null, null, null});
+            ds = (DataSource)recreatedDs;
+            assertTrue("Unexpected class instantiated by Reference: " +
+                    dsObj.getClass().getName(),
+                    dsObj.getClass().getName().indexOf(className) > 0);
+        }
     }
 
     /**
@@ -304,6 +379,28 @@ public class DataSourceSerializationTest
                 filePrefix + "ClientDataSource-10_3_2_1.ser",
                 filePrefix + "ClientConnectionPoolDataSource-10_3_2_1.ser",
                 filePrefix + "ClientXADataSource-10_3_2_1.ser",
+
+                // 10.10 resources
+                filePrefix + "EmbeddedDataSource-10_10_1_0.ser",
+                filePrefix + "EmbeddedDataSource40-10_10_1_0.ser",
+                filePrefix + "EmbeddedConnectionPoolDataSource-10_10_1_0.ser",
+                filePrefix + "EmbeddedConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "EmbeddedXADataSource-10_10_1_0.ser",
+                filePrefix + "EmbeddedXADataSource40-10_10_1_0.ser",
+                filePrefix + "ClientDataSource-10_10_1_0.ser",
+                filePrefix + "ClientDataSource40-10_10_1_0.ser",
+                filePrefix + "ClientConnectionPoolDataSource-10_10_1_0.ser",
+                filePrefix + "ClientConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "ClientXADataSource-10_10_1_0.ser",
+                filePrefix + "ClientXADataSource40-10_10_1_0.ser",
+                filePrefix + "NonJNDIEmbeddedDataSource40-10_10_1_0.ser",
+                filePrefix +
+                    "NonJNDIEmbeddedConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "NonJNDIEmbeddedXADataSource40-10_10_1_0.ser",
+                filePrefix + "NonJNDIClientDataSource40-10_10_1_0.ser",
+                filePrefix +
+                    "NonJNDIClientConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "NonJNDIClientXADataSource40-10_10_1_0.ser",
             });
     }
 }

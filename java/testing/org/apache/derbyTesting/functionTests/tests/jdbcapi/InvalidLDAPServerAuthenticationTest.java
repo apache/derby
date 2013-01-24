@@ -110,32 +110,48 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
         // actual test. 
         // first, try datasource connection
         DataSource ds = JDBCDataSource.getDataSource(dbName);
+
         try {
             ds.getConnection();
             fail("expected java.net.UnknownHostException for datasource");
         } catch (SQLException se) {
-            assertSQLState("08004", se);
-            // with network server, the java.net.UnknownHostException will be in 
-            // derby.log, the client only gets a 08004 and somewhat misleading
-            // warning ('Reason: userid or password invalid')
-            println( "Saw SQLException with message = " + se.getMessage() );
-            if (usingEmbedded())
-            {
-                assertTrue(se.getMessage().indexOf("java.net.UnknownHostException")>1);
+            if (JDBC.vmSupportsJNDI()) {
+                assertSQLState("08004", se);
+                // with network server, the java.net.UnknownHostException will
+                // be in derby.log, the client only gets a 08004 and somewhat
+                // misleading warning ('Reason: userid or password invalid')
+                println( "Saw SQLException with message = " + se.getMessage() );
+
+                if (usingEmbedded()) {
+                    assertTrue(se.getMessage().
+                               indexOf("java.net.UnknownHostException") > 1);
+                }
+            } else {
+                // Expect boot to fail, LDAP authentication requires JNDI
+                assertSQLState("XJ040", se);
             }
         }
+
         // driver manager connection
         String url2 = TestConfiguration.getCurrent().getJDBCUrl(dbName);
+
         try {
             DriverManager.getConnection(url2,"user","password").close();
             fail("expected java.net.UnknownHostException for driver");
         } catch (SQLException se) {
-            assertSQLState("08004", se);
-            // with network server, the java.net.UnknownHostException will be in 
-            // derby.log, the client only gets a 08004 and somewhat misleading
-            // warning ('Reason: userid or password invalid')
-            if (usingEmbedded())
-                assertTrue(se.getMessage().indexOf("java.net.UnknownHostException")>1);
+            if (JDBC.vmSupportsJNDI()) {
+                assertSQLState("08004", se);
+                // with network server, the java.net.UnknownHostException will
+                // be in derby.log, the client only gets a 08004 and somewhat
+                // misleading warning ('Reason: userid or password invalid')
+                if (usingEmbedded()) {
+                    assertTrue(se.getMessage().
+                               indexOf("java.net.UnknownHostException") > 1);
+                }
+            } else {
+                // Expect boot to fail, LDAP authentication requires JNDI
+                assertSQLState("XJ040", se);
+            }
         }
         
         // we need to shutdown the system, or the failed connections

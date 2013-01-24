@@ -53,9 +53,9 @@ import javax.transaction.xa.Xid;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
-import org.apache.derby.jdbc.ClientXADataSource;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derby.jdbc.ClientXADataSourceInterface;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
@@ -2344,8 +2344,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         final int extraInvokations = invokeExtra ? 25 : 0;
         final int rowCount = 10;
-        final boolean isXA = ds instanceof ClientXADataSource;
-        final boolean isCP = ds instanceof ClientConnectionPoolDataSource;
+        final boolean isXA = ds instanceof XADataSource;
+        final boolean isCP = ds instanceof ConnectionPoolDataSource;
         // Generate trace file name and define trace behavior.
         String dsType = (isXA ? "xa_" : (isCP ? "cp_" : ""));
         String tbl = "ds_" + dsType +
@@ -2356,7 +2356,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 PrivilegedFileOpsForTests.getAbsolutePath(traceFile));
         J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
         J2EEDataSource.setBeanProperty( ds, "traceLevel",
-                new Integer(ClientBaseDataSourceRoot.TRACE_ALL));
+                new Integer(ClientDataSourceInterface.TRACE_ALL));
 
         // Obtain connection.
         PooledConnection physicalCon = null;
@@ -2365,7 +2365,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             physicalCon = ((XADataSource)ds).getXAConnection();
             con = physicalCon.getConnection();
         } else if (isCP) {
-            physicalCon = ((ClientConnectionPoolDataSource)ds).
+            physicalCon = ((ClientConnectionPoolDataSourceInterface)ds).
                     getPooledConnection();
             con = physicalCon.getConnection();
         } else {
@@ -2723,28 +2723,40 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testClientDSConnectionAttributes() throws SQLException {
+    public void testClientDSConnectionAttributes()
+            throws SQLException, ClassNotFoundException,
+            IllegalAccessException, InstantiationException {
         if (usingEmbedded())
             return;
 
         // now with ConnectionPoolDataSource
-        ClientConnectionPoolDataSource cpds = 
-            new ClientConnectionPoolDataSource();
+        ClientConnectionPoolDataSourceInterface cpds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientConnectionPoolDataSource").
+                    newInstance();
+        } else {
+            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40").
+                    newInstance();
+        }
+
         cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
         
         // ConnectionPoolDataSource - EMPTY
-        dsConnectionRequests(new String[]  
+        dsCPConnectionRequests(new String[]
             {"08001","08001","08001","08001",
              "08001","08001","08001","08001","08001"}, 
-            (ConnectionPoolDataSource)cpds);
+            cpds);
 
         // ConnectionPoolDataSource 
         // - connectionAttributes=databaseName=<valid dbname>
         cpds.setConnectionAttributes("databaseName=" + dbName);
-        dsConnectionRequests(new String[]  
+        dsCPConnectionRequests(new String[]
             {"08001","08001","08001","08001",
              "08001","08001","08001","08001","08001"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
         cpds.setConnectionAttributes(null);
 
         // Test that database name specified in connection attributes is 
@@ -2753,29 +2765,39 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // connectionAttributes=databaseName=kangaroo
         cpds.setConnectionAttributes("databaseName=kangaroo");
         cpds.setDatabaseName(dbName);
-        dsConnectionRequests(new String[]  
+        dsCPConnectionRequests(new String[]
             {"OK","08001","OK","OK","08001","08001","OK","OK","OK"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
         cpds.setConnectionAttributes(null);
         cpds.setDatabaseName(null);
 
         // now with XADataSource
-        ClientXADataSource xads = new ClientXADataSource();
+        ClientXADataSourceInterface xads;
         
+        if (JDBC.vmSupportsJNDI()) {
+            xads = (ClientXADataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.ClientXADataSource").
+                    newInstance();
+        } else {
+            xads = (ClientXADataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.NonJNDIClientXADataSource40").
+                    newInstance();
+        }
+
         xads.setPortNumber(TestConfiguration.getCurrent().getPort());
         
         // XADataSource - EMPTY
-        dsConnectionRequests(new String[]  
+        dsXAConnectionRequests(new String[]
             {"08001","08001","08001","08001",
              "08001","08001","08001","08001","08001"}, 
-            (XADataSource) xads);
+            xads);
 
         // XADataSource - connectionAttributes=databaseName=<valid dbname>
         xads.setConnectionAttributes("databaseName=wombat");
-        dsConnectionRequests(new String[]  
+        dsXAConnectionRequests(new String[]
             {"08001","08001","08001","08001",
              "08001","08001","08001","08001","08001"},
-            (XADataSource) xads);
+            xads);
         xads.setConnectionAttributes(null);
 
         // Test that database name specified in connection attributes is not used
@@ -2783,9 +2805,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // connectionAttributes=databaseName=kangaroo
         xads.setConnectionAttributes("databaseName=kangaroo");
         xads.setDatabaseName("wombat");
-        dsConnectionRequests(new String[]  
+        dsXAConnectionRequests(new String[]
             {"OK","08001","OK","OK","08001","08001","OK","OK","OK"},
-            (XADataSource) xads);
+            xads);
         xads.setConnectionAttributes(null);
         xads.setDatabaseName(null);
     } // End testClientDSConnectionAttributes
@@ -2872,26 +2894,26 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
               (ConnectionPoolDataSource) Class.forName(cpdsName).newInstance();
 
         // ConnectionPoolDataSource - EMPTY
-        dsConnectionRequests(new String[] {  
+        dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ004",
             "XJ004","XJ004","XJ004","XJ004","XJ004"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
 
         // ConnectionPoolDataSource - 
         // connectionAttributes=databaseName=wombat
         JDBCDataSource.setBeanProperty(cpds, "connectionAttributes", "databaseName=" + dbName);
-        dsConnectionRequests(new String[] {  
+        dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ004",
             "XJ004","XJ004","XJ004","XJ004","XJ004"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
         JDBCDataSource.clearStringBeanProperty(cpds, "connectionAttributes");
 
         // ConnectionPoolDataSource - attributesAsPassword=true
         JDBCDataSource.setBeanProperty(cpds, "attributesAsPassword", Boolean.TRUE);
-        dsConnectionRequests(new String[] {  
+        dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ028",
             "XJ028","XJ004","XJ004","XJ004","XJ004"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
         JDBCDataSource.setBeanProperty(cpds, "attributesAsPassword", Boolean.FALSE);
         
         // ensure the DS property password is not treated as a set of
@@ -2901,10 +2923,10 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(cpds, "attributesAsPassword", Boolean.TRUE);
         JDBCDataSource.setBeanProperty(cpds, "user", "fred");
         JDBCDataSource.setBeanProperty(cpds, "password", "databaseName=" + dbName + ";password=wilma");
-        dsConnectionRequests(new String[] {  
+        dsCPConnectionRequests(new String[] {
             "XJ004","XJ004","XJ004","XJ028",
             "XJ028","XJ004","XJ004","XJ004","XJ004"},
-            (ConnectionPoolDataSource)cpds);
+            cpds);
         JDBCDataSource.setBeanProperty(cpds, "attributesAsPassword", Boolean.FALSE);
         JDBCDataSource.clearStringBeanProperty(cpds, "user");
         JDBCDataSource.clearStringBeanProperty(cpds, "password");
@@ -2917,42 +2939,42 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 (XADataSource) Class.forName(xadsName).newInstance();
 
         // XADataSource - EMPTY
-        dsConnectionRequests(new String[] {  
+        dsXAConnectionRequests(new String[] {
             "08006","08006","08006","08006",
             "08006","08006","08006","08006","08006"},
-            (XADataSource) xads);
+            xads);
 
         // XADataSource - databaseName=wombat
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-        dsConnectionRequests(new String[] {  
+        dsXAConnectionRequests(new String[] {
             "08004","08004","08004","OK",
             "08004","08004","08004","08004","08004"},
-            (XADataSource) xads);
+            xads);
         JDBCDataSource.clearStringBeanProperty(xads, "databaseName");
 
         // XADataSource - connectionAttributes=databaseName=wombat");
         JDBCDataSource.setBeanProperty(xads, "connectionAttributes", "databaseName=" + dbName);
-        dsConnectionRequests(new String[] {  
+        dsXAConnectionRequests(new String[] {
             "08006","08006","08006","08006",
             "08006","08006","08006","08006","08006"},
-            (XADataSource) xads);
+            xads);
         JDBCDataSource.clearStringBeanProperty(xads, "connectionAttributes");
 
         // XADataSource - attributesAsPassword=true
         JDBCDataSource.setBeanProperty(xads, "attributesAsPassword", Boolean.TRUE);
-        dsConnectionRequests(new String[] {  
+        dsXAConnectionRequests(new String[] {
             "08006","08006","08006","08006",
             "08006","08006","08006","08006","08006"},
-            (XADataSource) xads);
+            xads);
         JDBCDataSource.setBeanProperty(xads, "attributesAsPassword", Boolean.FALSE);
 
         // XADataSource - databaseName=wombat, attributesAsPassword=true
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "attributesAsPassword", Boolean.TRUE);
-        dsConnectionRequests(new String[] {  
+        dsXAConnectionRequests(new String[] {
             "08004","08004","08004","XJ028",
             "XJ028","08004","08004","OK","08004"},
-            (XADataSource) xads);
+            xads);
         JDBCDataSource.setBeanProperty(xads, "attributesAsPassword", Boolean.FALSE);
         JDBCDataSource.clearStringBeanProperty(xads, "databaseName");
         
@@ -3039,12 +3061,25 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      *  
      * @throws SQLException
      */
-    public void testClientMessageTextConnectionAttribute() throws SQLException
+    public void testClientMessageTextConnectionAttribute()
+            throws SQLException, ClassNotFoundException, IllegalAccessException,
+            InstantiationException
     {
         String retrieveMessageTextProperty = "retrieveMessageText";
         // with ConnectionPoolDataSource
         // ConnectionPoolDataSource - retrieveMessageTextProperty
-        ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+        ClientConnectionPoolDataSourceInterface cpds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientConnectionPoolDataSource").
+                    newInstance();
+        } else {
+            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40").
+                    newInstance();
+        }
+
         cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
         
         cpds.setDatabaseName(dbName);
@@ -3061,7 +3096,16 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cpConn.close();
 
         // now with XADataSource
-        ClientXADataSource xads = new ClientXADataSource();
+        ClientXADataSourceInterface xads;
+        if (JDBC.vmSupportsJNDI()) {
+            xads = (ClientXADataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.ClientXADataSource").
+                    newInstance();
+        } else {
+            xads = (ClientXADataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.NonJNDIClientXADataSource40").
+                    newInstance();
+        }
         //XADataSource - retrieveMessageTextProperty
         xads.setPortNumber(TestConfiguration.getCurrent().getPort());
         xads.setDatabaseName(dbName);
@@ -3849,7 +3893,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
     }
     
-    private static void dsConnectionRequests(
+    private static void dsCPConnectionRequests(
         String[] expectedValues, ConnectionPoolDataSource ds) {
         try {
             ds.getPooledConnection();
@@ -3885,7 +3929,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
     }
         
-    private static void dsConnectionRequests(
+    private static void dsXAConnectionRequests(
         String[] expectedValues, XADataSource ds) {
         try {
             ds.getXAConnection();

@@ -31,10 +31,11 @@ import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -400,7 +401,11 @@ public class ReplicationRun extends BaseTestCase
         Thread.sleep(waitTime); // .... until stable...
         try
         {
-            ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
+            ClientDataSourceInterface ds = configureDataSource(
+                    fullDbPath,
+                    serverHost,
+                    serverPort,
+                    useEncryption(false) );
             Connection conn = ds.getConnection();
             conn.close();
         }
@@ -425,7 +430,8 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
-                ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
+                ClientDataSourceInterface ds = configureDataSource(
+                    fullDbPath, serverHost, serverPort, useEncryption(false) );
                 Connection conn = ds.getConnection();
                 util.DEBUG("Wait Got connection after " 
                         + (count-1) +" * "+ sleepTime + " ms.");
@@ -457,7 +463,11 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
-                ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
+                ClientDataSourceInterface ds = configureDataSource(
+                        fullDbPath,
+                        serverHost,
+                        serverPort,
+                        useEncryption(false) );
                 Connection conn = ds.getConnection();
                 // Should never get here!
                 conn.close();
@@ -1003,7 +1013,7 @@ public class ReplicationRun extends BaseTestCase
                         +";slaveHost="+slaveReplInterface
                         +";slavePort="+slaveReplPort
                         +useEncryption(false);
-                    ClientDataSource ds = configureDataSource
+                    ClientDataSourceInterface ds = configureDataSource
                         ( masterDbPath( dbName ), masterHost, masterServerPort, connectionAttributes );
                     conn = ds.getConnection();
                     
@@ -1192,7 +1202,8 @@ public class ReplicationRun extends BaseTestCase
                         Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                         conn = DriverManager.getConnection(URL);
                          */
-                        ClientDataSource ds = configureDataSource( fDbPath, fSlaveHost, fSlaveServerPort, fConnAttrs );
+                        ClientDataSourceInterface ds = configureDataSource(
+                            fDbPath, fSlaveHost, fSlaveServerPort, fConnAttrs );
                         conn = ds.getConnection();
                         conn.close();
                     }
@@ -1351,7 +1362,7 @@ public class ReplicationRun extends BaseTestCase
             // return;
         }
 
-        ClientDataSource ds = configureDataSource
+        ClientDataSourceInterface ds = configureDataSource
             ( slaveDbPath( replicatedDb ), slaveServerHost, slaveServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
             
@@ -1381,7 +1392,7 @@ public class ReplicationRun extends BaseTestCase
             // return;
         }
 
-        ClientDataSource ds = configureDataSource
+        ClientDataSourceInterface ds = configureDataSource
             ( masterDbPath( replicatedDb ), masterServerHost, masterServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
             
@@ -2770,11 +2781,13 @@ test.postStoppedSlaveServer.return=true
             int serverPort,
             String dbPath,
             int _noTuplesToInsert)
-        throws SQLException
+        throws SQLException, ClassNotFoundException, IllegalAccessException,
+            InstantiationException
     {
         util.DEBUG("_testInsertUpdateDeleteOnMaster: " + serverHost + ":" +
                    serverPort + "/" + dbPath + " " + _noTuplesToInsert);
-        ClientDataSource ds = configureDataSource( dbPath, serverHost, serverPort, useEncryption(false) );
+        ClientDataSourceInterface ds = configureDataSource(
+                dbPath, serverHost, serverPort, useEncryption(false) );
         Connection conn = ds.getConnection();
         
         PreparedStatement ps = conn.prepareStatement("create table t(i integer primary key, s varchar(64))");
@@ -2798,10 +2811,12 @@ test.postStoppedSlaveServer.return=true
             int serverPort,
             String dbPath,
             int _noTuplesInserted)
-        throws SQLException
+        throws SQLException, ClassNotFoundException, IllegalAccessException,
+               InstantiationException
     {
         util.DEBUG("_verifyDatabase: "+serverHost+":"+serverPort+"/"+dbPath);
-        ClientDataSource ds = configureDataSource( dbPath, serverHost, serverPort, useEncryption(false) );
+        ClientDataSourceInterface ds = configureDataSource(
+                dbPath, serverHost, serverPort, useEncryption(false) );
         Connection conn = ds.getConnection();
         
         _verify(conn,_noTuplesInserted);
@@ -3019,15 +3034,26 @@ test.postStoppedSlaveServer.return=true
      * Set up a data source.
      * </p>
      */
-    ClientDataSource    configureDataSource
+    ClientDataSourceInterface    configureDataSource
         (
          String dbName,
          String serverHost,
          int        serverPort,
          String     connectionAttributes
-         )
+         ) throws ClassNotFoundException, IllegalAccessException,
+             InstantiationException
     {
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.ClientDataSource").
+                    newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.NonJNDIClientDataSource40").
+                    newInstance();
+        }
 
         ds.setDatabaseName( dbName );
         ds.setServerName( serverHost );

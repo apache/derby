@@ -128,6 +128,17 @@ public class JDBC {
         HAVE_AUTO_CLOSEABLE_RESULT_SET = autoCloseable;
     }
 
+    private static final boolean HAVE_REFERENCEABLE;
+    static {
+        boolean ok = false;
+        try {
+            Class.forName("javax.naming.Referenceable");
+            ok = true;
+        } catch (Throwable t) {
+        }
+        HAVE_REFERENCEABLE = ok;
+    }
+
     /**
      * Can we load a specific class, use this to determine JDBC level.
      * @param className Class to attempt load on.
@@ -192,6 +203,13 @@ public class JDBC {
 		       && HAVE_SAVEPOINT;
 	}	
 	
+    /**
+     * @return {@code true} if JNDI is available.
+     */
+    public static boolean vmSupportsJNDI() {
+        return HAVE_REFERENCEABLE;
+    }
+
 	/**
 	 * Rollback and close a connection for cleanup.
 	 * Test code that is expecting Connection.close to succeed

@@ -24,7 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -172,9 +173,18 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
     
     private SQLException _connectToSlave(String slaveServerHost, 
             int slaveServerPort, 
-            String dbPath) {
+            String dbPath) throws Exception {
         util.DEBUG("_connectToSlave");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);
@@ -191,9 +201,18 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
 
     private SQLException _internal_stopSlave(String slaveServerHost, 
             int slaveServerPort, 
-            String dbPath) {
+            String dbPath) throws Exception {
         util.DEBUG("_internal_stopSlave");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);

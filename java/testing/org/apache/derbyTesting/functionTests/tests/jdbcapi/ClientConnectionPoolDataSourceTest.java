@@ -30,8 +30,8 @@ import java.sql.Statement;
 import javax.sql.PooledConnection;
 
 import junit.framework.Test;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
 
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
@@ -50,9 +50,18 @@ public class ClientConnectionPoolDataSourceTest
     /**
      * Verify that handling of the {@code maxStatements} property is working.
      */
-    public void testMaxStatementsProperty() {
-        ClientConnectionPoolDataSource cDs =
-                new ClientConnectionPoolDataSource();
+    public void testMaxStatementsProperty() throws Exception {
+        ClientConnectionPoolDataSourceInterface cDs;
+
+        if (JDBC.vmSupportsJNDI()) {
+            cDs = (ClientConnectionPoolDataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.ClientConnectionPoolDataSource")
+                    .newInstance();
+        } else {
+            cDs = (ClientConnectionPoolDataSourceInterface)Class.forName(
+                "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40")
+                    .newInstance();
+        }
         // Check the default value.
         assertEquals("Unexpected default value", 0, cDs.getMaxStatements());
         cDs.setMaxStatements(25);
@@ -79,8 +88,9 @@ public class ClientConnectionPoolDataSourceTest
      */
     public void testGetConnectionNoStatementPooling()
             throws SQLException {
-        ClientConnectionPoolDataSource cDs = (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
+        ClientConnectionPoolDataSourceInterface cDs =
+            (ClientConnectionPoolDataSourceInterface)J2EEDataSource.
+                getConnectionPoolDataSource();
         // Make sure statement pooling is disabled.
         cDs.setMaxStatements(0);
         assertEquals(0, cDs.getMaxStatements());
@@ -95,8 +105,9 @@ public class ClientConnectionPoolDataSourceTest
      */
     public void testGetConnectionWithStatementPooling()
             throws SQLException {
-        ClientConnectionPoolDataSource cDs = (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
+        ClientConnectionPoolDataSourceInterface cDs =
+            (ClientConnectionPoolDataSourceInterface)J2EEDataSource.
+                getConnectionPoolDataSource();
         // Enable statement pooling.
         cDs.setMaxStatements(27);
         assertTrue(cDs.getMaxStatements() > 0);
@@ -109,7 +120,7 @@ public class ClientConnectionPoolDataSourceTest
      * @param cDs data source to get connection from
      * @throws SQLException if a JDBC operation fails
      */
-    private void verifyConnection(ClientConnectionPoolDataSource cDs)
+    private void verifyConnection(ClientConnectionPoolDataSourceInterface cDs)
             throws SQLException {
         J2EEDataSource.setBeanProperty(cDs, "createDatabase", "create");
         PooledConnection pc = cDs.getPooledConnection();

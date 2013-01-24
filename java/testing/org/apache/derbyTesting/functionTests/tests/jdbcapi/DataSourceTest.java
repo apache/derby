@@ -28,15 +28,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Hashtable;
 import javax.sql.DataSource;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
@@ -267,11 +263,22 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testClientDSConnectionAttributes() throws SQLException {
+    public void testClientDSConnectionAttributes() throws Exception {
         if (usingEmbedded())
             return;
         
-        ClientDataSource ds = new ClientDataSource();
+        ClientDataSourceInterface ds = null;
+
+        if (JDBC.vmSupportsJNDI()) {
+            // Use reflection to avoid class not found in non-JNDI context
+            ds = (ClientDataSourceInterface)Class.forName(
+                    "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+                    "org.apache.derby.jdbc.NonJNDIClientDataSource40").
+                    newInstance();
+        }
+
         ds.setPortNumber(TestConfiguration.getCurrent().getPort());
         
         // DataSource - EMPTY; expect error 08001 in all cases
@@ -433,7 +440,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testClientMessageTextConnectionAttribute() throws SQLException
+    public void testClientMessageTextConnectionAttribute() throws Exception
     {
         if (usingEmbedded())
             return;
@@ -443,7 +450,17 @@ public class DataSourceTest extends BaseJDBCTestCase {
 
         // DataSource
         // DataSource - retrieveMessageTextProperty
-        ClientDataSource ds = new ClientDataSource();
+        ClientDataSourceInterface ds = null;
+
+        if (JDBC.vmSupportsJNDI()) {
+            // Use reflection to avoid class not found in non-JNDI context
+            ds = (ClientDataSourceInterface)Class.forName(
+              "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+              "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setPortNumber(TestConfiguration.getCurrent().getPort());
         ds.setDatabaseName(dbName);
         ds.setConnectionAttributes(retrieveMessageTextProperty + "=false");

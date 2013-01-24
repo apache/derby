@@ -26,7 +26,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -122,9 +123,18 @@ public class ReplicationRun_Local_1Indexing extends ReplicationRun
             String dbPath,
             int startVal,
             int _noTuplesToInsert)
-        throws SQLException
+        throws Exception
     {
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);

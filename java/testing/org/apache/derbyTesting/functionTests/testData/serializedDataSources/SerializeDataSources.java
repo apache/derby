@@ -28,10 +28,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.Referenceable;
 import javax.sql.DataSource;
 
 import org.apache.derby.tools.sysinfo;
@@ -63,16 +63,28 @@ public class SerializeDataSources {
     private static final String[] KNOWN_EMBEDDED_DATA_SOURCES ={
             "org.apache.derby.jdbc.EmbeddedDataSource",
             "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource",
-            "org.apache.derby.jdbc.EmbeddedXADataSource"
+            "org.apache.derby.jdbc.EmbeddedXADataSource",
+            "org.apache.derby.jdbc.EmbeddedDataSource40",
+            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.EmbeddedXADataSource40",
+            "org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40",
+            "org.apache.derby.jdbc.NonJNDIEmbeddedConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40"
         };
 
     /** List of known data sources in the client driver. */
     private static final String[] KNOWN_CLIENT_DATA_SOURCES ={
             "org.apache.derby.jdbc.ClientDataSource",
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource",
-            "org.apache.derby.jdbc.ClientXADataSource"
+            "org.apache.derby.jdbc.ClientXADataSource",
+            "org.apache.derby.jdbc.ClientDataSource40",
+            "org.apache.derby.jdbc.ClientConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.ClientXADataSource40",
+            "org.apache.derby.jdbc.NonJNDIClientDataSource40",
+            "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.NonJNDIClientXADataSource40"
         };
-    
+
     /**
      * Serialize and write data sources to file.
      * 
@@ -92,8 +104,14 @@ public class SerializeDataSources {
                                             String buildNumber,
                                             String[] dataSourceClasses)
             throws ClassNotFoundException, InstantiationException,
-                   IllegalAccessException, IOException, NamingException {
-        String modifiedVersionString = versionString.replaceAll("\\.", "_");
+                   IllegalAccessException, IOException, NamingException,
+                   NoSuchMethodException, InvocationTargetException {
+        String modifiedVersionString = versionString.replaceAll(
+                "\\.", "_");
+        modifiedVersionString = modifiedVersionString.replaceAll(
+                " alpha", "");
+        modifiedVersionString = modifiedVersionString.replaceAll(
+                "_0_0", "_1_0");
         int dsCount = 0;
         for (String dsClassName : dataSourceClasses) {
             Class dsClass;
@@ -113,13 +131,18 @@ public class SerializeDataSources {
             System.out.println("\twriting " + serialized.getName());
             OutputStream os = new FileOutputStream(serialized);
             ObjectOutputStream oos = new ObjectOutputStream(os);
-            // Wrote version string, build number, the data source object and finally
-            // a {@link javax.naming.Reference} for the data source.
+            // Wrote version string, build number, the data source
+            // object and finally a {@link javax.naming.Reference} for
+            // the data source (if non a non-JNDI data source).
             oos.writeUTF(versionString);
             oos.writeUTF(buildNumber);
             oos.writeObject(ds);
-            Reference dsRef = ((Referenceable)ds).getReference(); 
-            oos.writeObject(dsRef);
+            if (!(dsClassName.contains("NonJNDI"))) {
+                Method getRef = Class.forName("javax.naming.Referenceable").
+                        getMethod("getReference");
+                Object dsRef = getRef.invoke(ds);
+                oos.writeObject(dsRef);
+            }
             oos.flush();
             oos.close();
             dsCount++;
@@ -157,8 +180,10 @@ public class SerializeDataSources {
             System.out.println("\tbuild  : " + buildNr);
             Object obj = ois.readObject();
             System.out.println("\tobject : " + obj);
-            obj = ois.readObject();
-            System.out.println("\tobject : " + obj);
+            if (!(obj.getClass().getName().indexOf("NonJNDI") > 0)) {
+                obj = ois.readObject();
+                System.out.println("\tobject : " + obj);
+            }
         } catch (Exception e) {
             System.out.println("\t!! De-serialization failed: " + e.getMessage());
             e.printStackTrace();

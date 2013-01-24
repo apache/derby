@@ -70,8 +70,8 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        // Only run this test if we have a JDBC 4 JVM.
-        if (JDBC.vmSupportsJDBC4())
+        // Only run this test if we have a JDBC 4 JVM on full SE
+        if (JDBC.vmSupportsJDBC4() && JDBC.vmSupportsJNDI())
         {
             return TestConfiguration.forceJDBC3Suite(
                 JDBC4FromJDBC3DataSourceTest.class);

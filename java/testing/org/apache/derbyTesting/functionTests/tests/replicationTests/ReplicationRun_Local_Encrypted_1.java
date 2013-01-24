@@ -24,7 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -218,10 +219,19 @@ public class ReplicationRun_Local_Encrypted_1 extends ReplicationRun
     
     SQLException _connectToSlave(String slaveServerHost, int slaveServerPort,
             String dbPath) 
-        throws SQLException
+        throws Exception
     {
         util.DEBUG("_connectToSlave");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ClientDataSourceInterface ds;
+
+        if (JDBC.vmSupportsJNDI()) {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+        } else {
+            ds = (ClientDataSourceInterface)Class.forName(
+               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+        }
+
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);

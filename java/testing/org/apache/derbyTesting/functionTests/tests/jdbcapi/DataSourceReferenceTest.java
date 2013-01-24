@@ -143,9 +143,10 @@ public class DataSourceReferenceTest
      */
     public static Test suite() {
        Test suite;
-       if (JDBC.vmSupportsJSR169()) {
-            // Referenceable is not supported with JSR169
-            suite = new TestSuite("DatasourceTest cannot run with JSR169");
+       if (JDBC.vmSupportsJSR169() || !JDBC.vmSupportsJNDI()) {
+            // Referenceable is not supported with JSR169 or without JNDI
+            suite = new TestSuite(
+                    "DatasourceReferenceTest cannot run with JSR169");
         } else {
             suite = TestConfiguration.defaultSuite(
                                                 DataSourceReferenceTest.class);
