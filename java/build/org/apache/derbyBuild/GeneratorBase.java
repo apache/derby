@@ -54,6 +54,7 @@ public class GeneratorBase extends Task {
     private static final String BOLD = "b";
     private static final String BORDER = "border";
     private static final String COLUMN = "td";
+    private static final String COLUMN_HEADER = "th";
     private static final String HORIZONTAL_LINE = "hr";
     protected static final String HTML = "html";
     private static final String DIVISION = "div";
@@ -299,6 +300,39 @@ public class GeneratorBase extends Task {
     }
 
     /**
+     * Wraps the text content of the given node inside a div tag.
+     *
+     * @param node node currently containing the text
+     * @return The new div-element which has been appended to {@code node}.
+     * @throws DOMException 
+     */
+    private static Element wrapTextContentInDiv(Element node)
+            throws DOMException {
+        Document doc = node.getOwnerDocument();
+        Element div = doc.createElement(DIVISION);
+        div.setTextContent(node.getTextContent());
+        node.setTextContent("");
+        node.appendChild(div);
+        return div;
+    }
+
+    /**
+     * Sets/overwrites the specified attribute.
+     *
+     * @param node target node
+     * @param name attribute name
+     * @param value attribute value
+     * @throws DOMException 
+     */
+    private static void setAttribute(Element node, String name, String value)
+            throws DOMException {
+        Node attr = node.getOwnerDocument().createAttribute(name);
+        attr.setNodeValue(value);
+
+        node.getAttributes().setNamedItem(attr);
+    }
+    
+    /**
      * Create an html text element.
      * @param doc
      * @param tag
@@ -517,21 +551,34 @@ public class GeneratorBase extends Task {
         Document doc = parent.getOwnerDocument();
         Element table = doc.createElement(TABLE);
         Element headingRow = insertRow(table);
-        int count = columnHeadings.length;
 
         parent.appendChild(table);
         table.setAttribute(BORDER, Integer.toString(borderWidth));
 
-        for (int i = 0; i < count; i++) {
-            Element headingColumn = insertColumn(headingRow);
-            Element boldText = boldText(doc, columnHeadings[i]);
-
-            headingColumn.appendChild(boldText);
+        for (String headerText : columnHeadings) {
+            Element headingColumn = insertColumnHeader(headingRow);
+            headingColumn.setTextContent(headerText);
         }
 
         return table;
     }
 
+    /**
+     * Sets the width of the first column in the given table.
+     *
+     * @param table target table
+     * @throws DOMException
+     */
+    protected void fixWidthOfFirstColumn(Element table)
+            throws DOMException {
+        NodeList headers = table.getElementsByTagName(COLUMN_HEADER);
+        // Just fail if someone removes the th-elements.
+        Element th = (Element)headers.item(0);
+        Element div = wrapTextContentInDiv(th);
+        setAttribute(div, "style", "width:110px;");
+        th.appendChild(div);
+    }
+    
     /**
      * Insert a row at the end of a table
      * @param table
@@ -540,12 +587,7 @@ public class GeneratorBase extends Task {
      */
     public static Element insertRow(Element table)
             throws Exception {
-        Document doc = table.getOwnerDocument();
-        Element row = doc.createElement(ROW);
-
-        table.appendChild(row);
-
-        return row;
+        return insertTableElement(table, ROW);
     }
 
     /**
@@ -556,12 +598,36 @@ public class GeneratorBase extends Task {
      */
     public static Element insertColumn(Element row)
             throws Exception {
-        Document doc = row.getOwnerDocument();
-        Element column = doc.createElement(COLUMN);
+        return insertTableElement(row, COLUMN);
+    }
 
-        row.appendChild(column);
+    /**
+     * Insert a header column at the end of the row.
+     * @param row
+     * @return Created column Element
+     * @throws DOMException
+     */
+    public static Element insertColumnHeader(Element row)
+            throws DOMException {
+        return insertTableElement(row, COLUMN_HEADER);
+    }
 
-        return column;
+    /**
+     * Inserts the specified element to the parent element.
+     *
+     * @param parent enclosing element, typically a table or a row
+     * @param type type of the new element to be inserted, typically a
+     *      column value or a row
+     * @return The newly inserted element.
+     * @throws DOMException if modifying the DOM fails
+     */
+    private static Element insertTableElement(Element parent, String type)
+            throws DOMException {
+        Document doc = parent.getOwnerDocument();
+        Element newElement = doc.createElement(type);
+        parent.appendChild(newElement);
+
+        return newElement;
     }
 
     /**

@@ -332,6 +332,9 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         Element table = createTable
             (bugListSection, DEFAULT_TABLE_BORDER_WIDTH,
             new String[] { ISSUE_ID_HEADLINE, DESCRIPTION_HEADLINE });
+        // If we don't fix the width of the first column, the string
+        // "DERBY-XXXX" is often broken up at the hyphen by some browsers.
+        fixWidthOfFirstColumn(table);
 
         for ( Iterator i=bugList.iterator(); i.hasNext(); ) {
             JiraIssue issue = (JiraIssue) i.next();
