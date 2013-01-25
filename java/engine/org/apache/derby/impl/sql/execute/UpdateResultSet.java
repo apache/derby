@@ -300,7 +300,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		boolean firstOpen = (rowChanger == null);
 
-		rowCount = 0;
+		rowCount = 0L;
 		
 		/* Cache query plan text for source, before it gets blown away */
 		if (lcc.getRunTimeStatisticsMode())

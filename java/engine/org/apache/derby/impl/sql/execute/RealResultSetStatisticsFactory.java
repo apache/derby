@@ -243,7 +243,7 @@ public class RealResultSetStatisticsFactory
 			InsertResultSet irs = (InsertResultSet) rs;
 
 			retval = new RealInsertResultSetStatistics(
-									irs.rowCount,
+                                    (int) irs.rowCount,
 									irs.constants.deferred,
 									irs.constants.irgs.length,
 									irs.userSpecifiedBulkInsert,
@@ -261,7 +261,7 @@ public class RealResultSetStatisticsFactory
 			InsertVTIResultSet iVTIrs = (InsertVTIResultSet) rs;
 
 			retval = new RealInsertVTIResultSetStatistics(
-									iVTIrs.rowCount,
+                                    (int) iVTIrs.rowCount,
 									iVTIrs.constants.deferred,
 									iVTIrs.getExecuteTime(), 
 									getResultSetStatistics(iVTIrs.savedSource)
@@ -274,7 +274,7 @@ public class RealResultSetStatisticsFactory
 			UpdateResultSet urs = (UpdateResultSet) rs;
 
 			retval = new RealUpdateResultSetStatistics(
-									urs.rowCount,
+                                    (int) urs.rowCount,
 									urs.constants.deferred,
 									urs.constants.irgs.length,
 									urs.constants.lockMode ==
@@ -310,7 +310,7 @@ public class RealResultSetStatisticsFactory
 			}
 
 			retval = new RealDeleteCascadeResultSetStatistics(
-									dcrs.rowCount,
+                                    (int) dcrs.rowCount,
 									dcrs.constants.deferred,
 									dcrs.constants.irgs.length,
 									dcrs.constants.lockMode ==
@@ -327,7 +327,7 @@ public class RealResultSetStatisticsFactory
 			DeleteResultSet drs = (DeleteResultSet) rs;
 
 			retval = new RealDeleteResultSetStatistics(
-									drs.rowCount,
+									(int) drs.rowCount,
 									drs.constants.deferred,
 									drs.constants.irgs.length,
 									drs.constants.lockMode ==
@@ -343,7 +343,7 @@ public class RealResultSetStatisticsFactory
 			DeleteVTIResultSet dVTIrs = (DeleteVTIResultSet) rs;
 
 			retval = new RealDeleteVTIResultSetStatistics(
-									dVTIrs.rowCount,
+									(int) dVTIrs.rowCount,
 									dVTIrs.getExecuteTime(), 
 									getResultSetStatistics(dVTIrs.savedSource)
 									);

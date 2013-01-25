@@ -584,7 +584,7 @@ implements NoPutResultSet
 	 */
 	 public boolean	returnsRows() { return true; }
 
-	public final int	modifiedRowCount() { return 0; }
+	public final long	modifiedRowCount() { return 0; }
 
 	/**
      * Clean up on error

@@ -250,7 +250,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			activation.clearIndexScanInfo();
 		}
 
-        rowCount = 0;
+        rowCount = 0L;
         if(!cascadeDelete)
 			row = getNextRowCore(source);
 

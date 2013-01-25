@@ -769,7 +769,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		return true;
 	}
 
-	public int modifiedRowCount() { return 0;};
+	public long modifiedRowCount() { return 0L;};
 
 	/**
 	 * Returns a ResultDescription object, which describes the results

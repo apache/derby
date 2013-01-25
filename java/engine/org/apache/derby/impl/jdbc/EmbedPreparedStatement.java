@@ -312,7 +312,7 @@ public class EmbedPreparedStatement
             } catch(SQLException sqle) {
                 checkStatementValidity(sqle);
             }
-            return updateCount;
+            return (int) updateCount;
         }
 
     /**
