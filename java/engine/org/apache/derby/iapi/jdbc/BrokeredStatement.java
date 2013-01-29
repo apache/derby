@@ -624,6 +624,10 @@ public class BrokeredStatement implements EngineStatement
     //
     ////////////////////////////////////////////////////////////////////
 
+    public  long[] executeLargeBatch() throws SQLException
+    {
+        return ((EngineStatement) getStatement()).executeLargeBatch();
+    }
     public  long executeLargeUpdate( String sql ) throws SQLException
     {
         return ((EngineStatement) getStatement()).executeLargeUpdate( sql );

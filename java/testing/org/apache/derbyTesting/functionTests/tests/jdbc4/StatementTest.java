@@ -380,6 +380,9 @@ public class StatementTest
 
         largeUpdateTest( sw, (long) Integer.MAX_VALUE );
         largeUpdateTest( sw, 0L);
+
+        largeBatchTest( sw, (long) Integer.MAX_VALUE );
+        largeBatchTest( sw, 0L);
     }
     private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
         throws Exception
@@ -433,6 +436,46 @@ public class StatementTest
         assertEquals( (int) expected, sw.getWrappedStatement().getUpdateCount() );
         assertEquals( longAnswer, sw.getLargeUpdateCount() );
     }
+    private static  void    largeBatchTest( StatementWrapper sw, long rowCountBase )
+        throws Exception
+    {
+        println( "Large batch test with rowCountBase = " + rowCountBase );
+        
+        // poke the rowCountBase into the engine. all returned row counts will be
+        // increased by this amount
+        sw.getWrappedStatement().clearBatch();
+        sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+
+        long[]  expectedResult = new long[] { rowCountBase + 1L, rowCountBase + 1L, rowCountBase + 2L };
+
+        createBatch( sw );
+        assertEquals( sw.getWrappedStatement().executeBatch(), squashLongs( expectedResult ) );
+
+        createBatch( sw );
+        assertEquals( sw.executeLargeBatch(), expectedResult );
+    }
+    private static  void    createBatch( StatementTest.StatementWrapper sw )
+        throws Exception
+    {
+        sw.getWrappedStatement().clearBatch();
+        truncate( sw );
+        sw.getWrappedStatement().addBatch( "insert into bigintTable( col2 ) values ( 1 )" );
+        sw.getWrappedStatement().addBatch( "update bigintTable set col2 = 2" );
+        sw.getWrappedStatement().addBatch( "insert into bigintTable( col2 ) values ( 3 ), ( 4 )" );
+    }
+    private static  void    truncate( StatementTest.StatementWrapper sw )
+        throws Exception
+    {
+        sw.getWrappedStatement().execute( "truncate table bigintTable" );
+    }
+    private static  int[]   squashLongs( long[] longs )
+    {
+        int count = (longs == null) ? 0 : longs.length;
+        int[]   ints = new int[ count ];
+        for ( int i = 0; i < count; i++ ) { ints[ i ] = (int) longs[ i ]; }
+
+        return ints;
+    }
     
     /**
      * Create test suite for StatementTest.
@@ -471,6 +514,15 @@ public class StatementTest
         public  Statement   getWrappedStatement() { return _wrappedStatement; }
 
         // New methods added by JDBC 4.2
+        public  long[] executeLargeBatch() throws SQLException
+        {
+            return ((long[]) invoke
+                (
+                 "executeLargeBatch",
+                 new Class[] {},
+                 new Object[] {}
+                 ));
+        }
         public  long executeLargeUpdate( String sql ) throws SQLException
         {
             return ((Long) invoke

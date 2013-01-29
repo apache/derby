@@ -334,6 +334,24 @@ public abstract class Util  {
                 StandardException.getSeverityFromIdentifier(SQLState.TYPE_MISMATCH));
 	}
 
+    /** Create the correct BatchUpdateException depending on whether this is Java 8 or lower */
+    static  SQLException    newBatchUpdateException
+        ( String message, String sqlState, int errorCode, long[] updateCounts )
+    {
+        return new java.sql.BatchUpdateException
+            ( message, sqlState, errorCode, squashLongs( updateCounts ) );
+    }
+
+    /** Squash an array of longs into an array of ints */
+    public static  int[]   squashLongs( long[] longs )
+    {
+        int count = (longs == null) ? 0 : longs.length;
+        int[]   ints = new int[ count ];
+        for ( int i = 0; i < count; i++ ) { ints[ i ] = (int) longs[ i ]; }
+
+        return ints;
+    }
+
     /**
      * Create an {@code IOException} that wraps another {@code Throwable}.
      *

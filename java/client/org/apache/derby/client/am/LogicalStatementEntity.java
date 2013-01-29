@@ -283,6 +283,10 @@ abstract class LogicalStatementEntity
     //
     ////////////////////////////////////////////////////////////////////
 
+    public  long[] executeLargeBatch() throws SQLException
+    {
+        return ((org.apache.derby.client.am.Statement) getPhysStmt()).executeLargeBatch();
+    }
     public  long executeLargeUpdate( String sql ) throws SQLException
     {
         return ((org.apache.derby.client.am.Statement) getPhysStmt()).executeLargeUpdate( sql );

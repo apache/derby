@@ -468,6 +468,34 @@ public abstract class BaseTestCase
     }
     
     /**
+     * <p>
+     * Assert the equivalence of two int arrays.
+     * </p>
+     */
+    public  static  void    assertEquals( int[] expected, int[] actual )
+    {
+        assertEquals( expected.length, actual.length );
+        for ( int i = 0; i < expected.length; i++ )
+        {
+            assertEquals( Integer.toString( i ), expected[ i ], actual[ i ] );
+        }
+    }
+
+    /**
+     * <p>
+     * Assert the equivalence of two long arrays.
+     * </p>
+     */
+    public  static  void    assertEquals( long[] expected, long[] actual )
+    {
+        assertEquals( expected.length, actual.length );
+        for ( int i = 0; i < expected.length; i++ )
+        {
+            assertEquals( Integer.toString( i ), expected[ i ], actual[ i ] );
+        }
+    }
+
+    /**
      * Assert that two files in the filesystem are identical.
      * 
      * @param file1 the first file to compare

@@ -1015,10 +1015,21 @@ public class EmbedStatement extends ConnectionChild
      * driver does not support batch statements
      */
     public int[] executeBatch() throws SQLException {
+        return Util.squashLongs( executeLargeBatch() );
+    }
+    
+    /**
+     * JDBC 4.2
+     * 
+     * Submit a batch of commands to the database for execution.
+     * This method is optional. For use with
+     * statements which may touch more than Integer.MAX_VALUE rows.
+     */
+    public long[] executeLargeBatch() throws SQLException {
 		checkExecStatus();
 		synchronized (getConnectionSynchronization()) 
 		{
-                        setupContextStack();
+            setupContextStack();
 			int i = 0;
 			// As per the jdbc 2.0 specs, close the statement object's current resultset
 			// if one is open.
@@ -1035,7 +1046,7 @@ public class EmbedStatement extends ConnectionChild
 			else
 				size = stmts.size();
 
-			int[] returnUpdateCountForBatch = new int[size];
+			long[] returnUpdateCountForBatch = new long[size];
 
 			SQLException sqle;
 			try {
@@ -1048,7 +1059,7 @@ public class EmbedStatement extends ConnectionChild
                     InterruptStatus.throwIf(lcc);
 					if (executeBatchElement(stmts.get(i)))
 						throw newSQLException(SQLState.RESULTSET_RETURN_NOT_ALLOWED);
-					returnUpdateCountForBatch[i] = getUpdateCount();
+					returnUpdateCountForBatch[ i ] = getLargeUpdateCount();
 				}
 
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
@@ -1067,12 +1078,11 @@ public class EmbedStatement extends ConnectionChild
 				restoreContextStack();
 			}
 
-			int successfulUpdateCount[] = new int[i];
+			long[] successfulUpdateCount = new long[ i ];
             System.arraycopy(returnUpdateCountForBatch, 0, successfulUpdateCount, 0, i);
 
-			SQLException batch =
-			new java.sql.BatchUpdateException(sqle.getMessage(), sqle.getSQLState(),
-									sqle.getErrorCode(), successfulUpdateCount);
+			SQLException batch = Util.newBatchUpdateException
+                ( sqle.getMessage(), sqle.getSQLState(),sqle.getErrorCode(), successfulUpdateCount );
 
 			batch.setNextException(sqle);
 			batch.initCause(sqle);
