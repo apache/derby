@@ -2334,6 +2334,10 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void  derby_6040()
         throws Exception
     {
+        // this test uses varargs routines, which aren't available unless the VM
+        // is at least at level 5
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
         goodStatement
             (
              "create function leftTable\n" +
