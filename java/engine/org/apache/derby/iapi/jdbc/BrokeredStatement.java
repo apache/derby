@@ -640,5 +640,9 @@ public class BrokeredStatement implements EngineStatement
     {
         return ((EngineStatement) getStatement()).executeLargeUpdate( sql, columnNames );
     }
+    public  long getLargeUpdateCount() throws SQLException
+    {
+        return ((EngineStatement) getStatement()).getLargeUpdateCount();
+    }
 
 }

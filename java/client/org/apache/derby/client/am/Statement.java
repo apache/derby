@@ -41,7 +41,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     ResultSet resultSet_;
 
     // Use -1, if there is no update count returned, ie. when result set is returned. 0 is a valid update count for DDL.
-    int updateCount_ = -1;
+    long updateCount_ = -1L;
     int returnValueFromProcedure_;
 
     // Enumeration of the flavors of statement execute call used.
@@ -232,7 +232,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         warnings_ = null;
         //section_ = null;
         resultSet_ = null;
-        updateCount_ = -1;
+        updateCount_ = -1L;
         returnValueFromProcedure_ = 0;
         openOnClient_ = true;
         openOnServer_ = false;
@@ -482,7 +482,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
                 }
-                int updateValue = executeUpdateX(sql);
+                int updateValue = (int) executeUpdateX(sql);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -495,7 +495,28 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    private int executeUpdateX(String sql) throws SqlException {
+    // Added by JDBC 4.2
+    public long executeLargeUpdate(String sql) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql);
+                }
+                long updateValue = executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    private long executeUpdateX(String sql) throws SqlException {
         flowExecute(executeUpdateMethod__, sql);
         return updateCount_;
     }
@@ -937,7 +958,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
                 }
-                return updateCount_;
+                return (int) updateCount_;
             }
         }
         catch ( SqlException se )
@@ -946,6 +967,27 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
+    // Added by JDBC 4.2
+    public long getLargeUpdateCount() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getUpdateCount");
+                }
+                checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getUpdateCount", updateCount_);
+                }
+                return updateCount_;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+    
     public boolean getMoreResults() throws SQLException {
         try
         {
@@ -1120,11 +1162,11 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeBatch");
                 }
-                int[] updateCounts = executeBatchX();
+                long[] updateCounts = executeBatchX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
                 }
-                return updateCounts;
+                return Utils.squashLongs( updateCounts );
             }
         }
         catch ( SqlException se )
@@ -1133,14 +1175,14 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    private int[] executeBatchX() throws SqlException, BatchUpdateException {
+    private long[] executeBatchX() throws SqlException, BatchUpdateException {
         checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
         clearWarningsX(); // Per jdbc spec 0.7, and getWarnings() javadoc
         resultSetList_ = null;
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
         // read any more replies
-        int[] updateCounts = new int[batch_.size()];
+        long[] updateCounts = new long[batch_.size()];
         Arrays.fill(updateCounts, -3);
         flowExecuteBatch(updateCounts);
         return updateCounts;
@@ -1186,7 +1228,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     private boolean getMoreResultsX(int current) throws SqlException {
         checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
         boolean resultIsResultSet;
-        updateCount_ = -1;
+        updateCount_ = -1L;
         if (resultSetList_ == null) {
             if (resultSet_ != null) {
                 if (current != KEEP_CURRENT_RESULT) {
@@ -1247,7 +1289,29 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                     agent_.logWriter_.traceEntry(this, "executeUpdate", sql, autoGeneratedKeys);
                 }
                 autoGeneratedKeys_ = autoGeneratedKeys;
-                int updateValue = executeUpdateX(sql);
+                int updateValue = (int) executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Added by JDBC 4.2
+    public long executeLargeUpdate(String sql, int autoGeneratedKeys) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql, autoGeneratedKeys);
+                }
+                autoGeneratedKeys_ = autoGeneratedKeys;
+                long updateValue = executeUpdateX(sql);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1270,7 +1334,31 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 if (columnIndexes != null && columnIndexes.length > 0)
                     autoGeneratedKeys_ = Statement.RETURN_GENERATED_KEYS;
                 generatedKeysColumnIndexes_ = columnIndexes;
-                int updateValue = executeUpdateX(sql);
+                int updateValue = (int) executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Added by JDBC 4.2
+    public long executeLargeUpdate(String sql, int columnIndexes[]) throws SQLException {
+        try
+        {
+            synchronized (connection_) {  
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnIndexes);
+                }
+                if (columnIndexes != null && columnIndexes.length > 0)
+                    autoGeneratedKeys_ = Statement.RETURN_GENERATED_KEYS;
+                generatedKeysColumnIndexes_ = columnIndexes;
+                long updateValue = executeUpdateX(sql);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1293,7 +1381,31 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 if (columnNames != null && columnNames.length > 0)
                     autoGeneratedKeys_ = Statement.RETURN_GENERATED_KEYS;
                 generatedKeysColumnNames_ = columnNames;
-                int updateValue = executeUpdateX(sql);
+                int updateValue = (int) executeUpdateX(sql);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
+                }
+                return updateValue;
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    // Added by JDBC 4.2
+    public long executeLargeUpdate(String sql, String columnNames[]) throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeUpdate", sql, columnNames);
+                }
+                if (columnNames != null && columnNames.length > 0)
+                    autoGeneratedKeys_ = Statement.RETURN_GENERATED_KEYS;
+                generatedKeysColumnNames_ = columnNames;
+                long updateValue = executeUpdateX(sql);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -1612,7 +1724,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             // sometime for call statement, protocol will return updateCount_, we will always set that to 0
             // sqlMode_ is not set for statements, only for prepared statements
             if (sqlMode_ == isCall__) {
-                updateCount_ = -1;
+                updateCount_ = -1L;
                 returnValueFromProcedure_ = sqlca.getSqlErrd()[0];  ////what is this for??
             }
             // Sqlcode 466 indicates a call statement has issued and result sets returned.
@@ -1628,7 +1740,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
 
-    public void setUpdateCount(int updateCount) {
+    public void setUpdateCount(long updateCount) {
         updateCount_ = updateCount;
     }
 
@@ -1991,9 +2103,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         parseSqlAndSetSqlModes(sql);
         checkAutoGeneratedKeysParameters();
         if (sqlMode_ == isUpdate__) {
-            updateCount_ = 0;
+            updateCount_ = 0L;
         } else {
-            updateCount_ = -1;
+            updateCount_ = -1L;
         }
 
         checkForAppropriateSqlMode(executeType, sqlMode_);
@@ -2191,12 +2303,12 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
         // The JDBC spec says that executeUpdate() should return 0
         // when no row count is returned.
-        if (executeType == executeUpdateMethod__ && updateCount_ < 0) {
-            updateCount_ = 0;
+        if (executeType == executeUpdateMethod__ && updateCount_ < 0L) {
+            updateCount_ = 0L;
         }
     }
 
-    void flowExecuteBatch(int[] updateCounts) throws SqlException, BatchUpdateException {
+    void flowExecuteBatch(long[] updateCounts) throws SqlException, BatchUpdateException {
         SqlException chainBreaker = null;
         boolean isCallCataloguedBestGuess = true;
         agent_.beginBatchedWriteChain(this);
@@ -2245,7 +2357,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                     invalidSQLCaughtByClient = e;
                 }
                 if (invalidSQLCaughtByClient == null) {
-                    updateCount_ = -1;
+                    updateCount_ = -1L;
                     if (sqlMode_ != isCall__) {
                         readExecuteImmediateForBatch(sql);
                     } else {

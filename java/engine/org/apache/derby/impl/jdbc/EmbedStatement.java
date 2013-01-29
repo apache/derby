@@ -801,6 +801,19 @@ public class EmbedStatement extends ConnectionChild
 	}
 
     /**
+     * JDBC 4.2
+     *
+     *  getLargeUpdateCount returns the current result as an update count;
+     *  if the result is a ResultSet or there are no more results -1
+     *  is returned.  It should only be called once per result. For use with
+     * statements which may touch more than Integer.MAX_VALUE rows.
+     */
+	public final long getLargeUpdateCount()	throws SQLException  {
+		checkStatus();
+		return updateCount;
+	}
+
+    /**
      * getMoreResults moves to a Statement's next result.  It returns true if
      * this result is a ResultSet.  getMoreResults also implicitly
      * closes any current ResultSet obtained with getResultSet.

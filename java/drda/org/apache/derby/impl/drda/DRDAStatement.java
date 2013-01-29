@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -75,7 +76,7 @@ class DRDAStatement
     protected long rowCount;            // Number of rows we have processed
     protected byte [] rslsetflg;        // Result Set Flags
     protected int maxrslcnt;            // Maximum Result set count
-    protected PreparedStatement ps;     // Prepared statement
+    protected EnginePreparedStatement ps;     // Prepared statement
     protected ParameterMetaData stmtPmeta; // param metadata
     protected boolean isCall;
     protected String procName;          // callable statement's method name
@@ -86,7 +87,7 @@ class DRDAStatement
         
     protected static int NOT_OUTPUT_PARAM = -100000;
     protected boolean outputExpected;   // expect output from a callable statement
-    private Statement stmt;             // SQL statement
+    private EngineStatement stmt;             // SQL statement
 
 
     private DRDAResultSet currentDrdaRs;  // Current ResultSet
@@ -339,7 +340,7 @@ class DRDAStatement
     protected void setStatement(Connection conn)
         throws SQLException
     {
-        stmt = conn.createStatement();
+        stmt = (EngineStatement) conn.createStatement();
         //beetle 3849 -  see  prepareStatement for details
         if (cursorName != null)
             stmt.setCursorName(cursorName);
@@ -350,7 +351,7 @@ class DRDAStatement
      * @return statement
      * @exception SQLException
      */
-    protected Statement getStatement() 
+    protected EngineStatement getStatement() 
         throws SQLException
     {
         return stmt;
@@ -659,13 +660,13 @@ class DRDAStatement
         if (isCallableSQL(sqlStmt))
         {
             isCall = true;
-            ps = database.getConnection().prepareCall(
+            ps = (EnginePreparedStatement) database.getConnection().prepareCall(
                 sqlStmt, scrollType, concurType, withHoldCursor);
             setupCallableStatementParams((CallableStatement)ps);
         }
         else
         {
-            ps = database.getConnection().prepareStatement(
+            ps = (EnginePreparedStatement) database.getConnection().prepareStatement(
                 sqlStmt, scrollType, concurType, withHoldCursor);
         }
 
@@ -688,7 +689,7 @@ class DRDAStatement
      *
      * @return prepared statement
      */
-    protected PreparedStatement getPreparedStatement() throws SQLException
+    protected EnginePreparedStatement getPreparedStatement() throws SQLException
     {
         return ps;
     }

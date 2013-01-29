@@ -258,12 +258,22 @@ public final class Utils {
         return sqlca.getSqlCode();
     }
 
-    static public int getUpdateCountFromSqlcard(Sqlca sqlca) {
+    static public long getUpdateCountFromSqlcard(Sqlca sqlca) {
         if (sqlca == null) {
             return 0;
         } else {
             return sqlca.getUpdateCount();
         }
+    }
+
+    /** Squash an array of longs into an array of ints */
+    public static  int[]   squashLongs( long[] longs )
+    {
+        int count = (longs == null) ? 0 : longs.length;
+        int[]   ints = new int[ count ];
+        for ( int i = 0; i < count; i++ ) { ints[ i ] = (int) longs[ i ]; }
+
+        return ints;
     }
 
     // latestException is assumed to be non-null, accumulatedExceptions can be null

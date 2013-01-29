@@ -27,6 +27,13 @@ import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Sqlca {
+
+    // Indexes into sqlErrd_
+    public  static  final   int HIGH_ORDER_ROW_COUNT = 0;
+    public  static  final   int LOW_ORDER_ROW_COUNT = 1;
+    public  static  final   int LOW_ORDER_UPDATE_COUNT = 2;
+    public  static  final   int HIGH_ORDER_UPDATE_COUNT = 3;
+    public  static  final   int SQL_ERR_LENGTH = 6;
     transient protected Connection connection_;
     SqlException exceptionThrownOnStoredProcInvocation_;
     boolean messageTextRetrievedContainsTokensOnly_ = true;
@@ -215,7 +222,7 @@ public abstract class Sqlca {
             return sqlErrd_;
         }
 
-        sqlErrd_ = new int[6]; // create an int array.
+        sqlErrd_ = new int[ SQL_ERR_LENGTH ]; // create an int array.
         return sqlErrd_;
     }
 
@@ -469,15 +476,18 @@ public abstract class Sqlca {
         return new String(bytes, offset, length, Typdef.UTF8ENCODING);
     }
 
-    public int getUpdateCount() {
+    public long getUpdateCount() {
         if (sqlErrd_ == null) {
-            return 0;
+            return 0L;
         }
-        return sqlErrd_[2];
+        long    result = sqlErrd_[ LOW_ORDER_UPDATE_COUNT ];
+        result &= 0xFFFFFFFFL;
+        result |= ((long) sqlErrd_[ HIGH_ORDER_UPDATE_COUNT ] << 32);
+        return result;
     }
 
     public long getRowCount() throws org.apache.derby.client.am.DisconnectException {
-        return ((long) sqlErrd_[0] << 32) + sqlErrd_[1];
+        return ((long) sqlErrd_[ HIGH_ORDER_ROW_COUNT ] << 32) + sqlErrd_[ LOW_ORDER_ROW_COUNT ];
     }
 
     public void setContainsSqlcax(boolean containsSqlcax) {

@@ -32,7 +32,7 @@ import java.sql.PreparedStatement;
  * PreparedStatement and Brokered PreparedStatements.
  * (DERBY-1015)
  */
-public interface EnginePreparedStatement extends PreparedStatement {
+public interface EnginePreparedStatement extends PreparedStatement, EngineStatement {
     
     public void setBinaryStream(int parameterIndex, InputStream x)
         throws SQLException; 

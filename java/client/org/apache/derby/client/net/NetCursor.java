@@ -662,7 +662,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
 
         //   SQLERRD1 to SQLERRD6; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
-        int[] sqlerrd = new int[6];
+        int[] sqlerrd = new int[ NetSqlca.SQL_ERR_LENGTH ];
         for (int i = 0; i < sqlerrd.length; i++) {
             sqlerrd[i] = readFdocaInt();
         }

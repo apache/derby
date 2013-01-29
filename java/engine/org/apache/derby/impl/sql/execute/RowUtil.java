@@ -36,6 +36,8 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
   */
 public class RowUtil
 {
+    /** Row count base added for testing JDBC 4.2 */
+    public  static  long    rowCountBase = 0L;
 
  	/**
 	  Get an empty ExecRow.

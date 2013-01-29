@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class XA40Test
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.XA40Test
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -177,6 +177,15 @@ public class XA40Test extends BaseJDBCTestCase {
         assertTrue("CallableStatement must be poolable", cs.isPoolable());
     }
 
+    /**
+     * <p>
+     * Test the JDBC 4.2 statement additions to brokered and logical statements.
+     * </p>
+     */
+    public void testLargeUpdate_jdbc4_2() throws Exception
+    {
+        StatementTest.largeUpdate_jdbc4_2( con );
+    }
 
     /**
      * Create test suite for XA40Test.

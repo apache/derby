@@ -252,7 +252,7 @@ public abstract class Agent {
         checkForExceptions();
     }
 
-    public final void endBatchedReadChain(int[] updateCounts, SqlException accumulatedExceptions) throws BatchUpdateException {
+    public final void endBatchedReadChain(long[] updateCounts, SqlException accumulatedExceptions) throws BatchUpdateException {
         disableBatchedExceptionTracking();
         for (int i = 0; i < batchedExceptionGenerated_.length; i++) {
             if (batchedExceptionGenerated_[i]) {
@@ -267,7 +267,7 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
-            throw new BatchUpdateException(logWriter_,
+            throw BatchUpdateException.newBatchUpdateException(logWriter_,
                 new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
                 null, updateCounts, accumulatedExceptions);
         }

@@ -20,6 +20,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import org.apache.derby.vti.VTITemplate;
+import org.apache.derby.impl.sql.execute.RowUtil;
+
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
@@ -28,6 +31,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.*;
 
 /**
@@ -348,6 +353,88 @@ public class StatementTest
     }
 
     /**
+     * Test the large update methods added by JDBC 4.2.
+     */
+    public void testLargeUpdate_jdbc4_2() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        largeUpdate_jdbc4_2( conn );
+    }
+
+    public  static  void    largeUpdate_jdbc4_2( Connection conn )
+        throws Exception
+    {
+        conn.prepareStatement
+            (
+             "create procedure setRowCountBase( newBase bigint )\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.StatementTest.setRowCountBase'\n"
+             ).execute();
+        conn.prepareStatement
+            (
+             "create table bigintTable( col1 int generated always as identity, col2 bigint )"
+             ).execute();
+
+        StatementWrapper  sw = new StatementWrapper( conn.createStatement() );
+
+        largeUpdateTest( sw, (long) Integer.MAX_VALUE );
+        largeUpdateTest( sw, 0L);
+    }
+    private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
+        throws Exception
+    {
+        // poke the rowCountBase into the engine. all returned row counts will be
+        // increased by this amount
+        sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+
+        largeUpdateTest( sw, rowCountBase, 1L );
+        largeUpdateTest( sw, rowCountBase, 3L );
+    }
+    private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase, long rowCount )
+        throws Exception
+    {
+        StringBuffer    buffer = new StringBuffer();
+        buffer.append( "insert into bigintTable( col2 ) values " );
+        for ( long i = 0L; i < rowCount; i++ )
+        {
+            if ( i > 0L ) { buffer.append( ", " ); }
+            buffer.append( "( " + i + " )" );
+        }
+        String  text = buffer.toString();
+
+        long    expectedResult = rowCountBase + rowCount;
+
+        vetUpdateSize( sw, (int) expectedResult,
+                       sw.getWrappedStatement().executeUpdate( text ), expectedResult );
+        vetUpdateSize( sw, (int) expectedResult,
+                       sw.getWrappedStatement().executeUpdate( text, Statement.RETURN_GENERATED_KEYS ), expectedResult );
+        vetUpdateSize( sw, (int) expectedResult,
+                       sw.getWrappedStatement().executeUpdate( text, new int[] { 1 } ), expectedResult );
+        vetUpdateSize( sw, (int) expectedResult,
+                       sw.getWrappedStatement().executeUpdate( text, new String[] { "COL1" } ), expectedResult );
+
+        vetUpdateSize( sw, expectedResult, sw.executeLargeUpdate( text ), expectedResult );
+        vetUpdateSize( sw, expectedResult, sw.executeLargeUpdate( text, Statement.RETURN_GENERATED_KEYS ), expectedResult );
+        vetUpdateSize( sw, expectedResult, sw.executeLargeUpdate( text, new int[] { 1 } ), expectedResult );
+        vetUpdateSize( sw, expectedResult, sw.executeLargeUpdate( text, new String[] { "COL1" } ), expectedResult );
+    }
+    private static  void    vetUpdateSize( StatementWrapper sw, int expected, int actual, long longAnswer )
+        throws Exception
+    {
+        assertEquals( expected, actual );
+        assertEquals( expected, sw.getWrappedStatement().getUpdateCount() );
+        assertEquals( longAnswer, sw.getLargeUpdateCount() );
+    }
+    private static  void    vetUpdateSize( StatementWrapper sw, long expected, long actual, long longAnswer )
+        throws Exception
+    {
+        assertEquals( expected, actual );
+        assertEquals( (int) expected, sw.getWrappedStatement().getUpdateCount() );
+        assertEquals( longAnswer, sw.getLargeUpdateCount() );
+    }
+    
+    /**
      * Create test suite for StatementTest.
      */
     public static Test suite() {
@@ -359,5 +446,106 @@ public class StatementTest
             new StatementTestSetup(new TestSuite(StatementTest.class))));
         return suite;
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED JDBC 4.2 WRAPPER AROUND A Statement
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * This wrapper is used to expose JDBC 4.2 methods which can run on
+     * VM rev levels lower than Java 8.
+     * </p>
+     */
+    public  static  final   class   StatementWrapper
+    {
+        private Statement   _wrappedStatement;
+
+        public  StatementWrapper( Statement wrappedStatement )
+        {
+            _wrappedStatement = wrappedStatement;
+        }
+
+        public  Statement   getWrappedStatement() { return _wrappedStatement; }
+
+        // New methods added by JDBC 4.2
+        public  long executeLargeUpdate( String sql ) throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "executeLargeUpdate",
+                 new Class[] { String.class },
+                 new Object[] { sql }
+                 )).longValue();
+        }
+        public  long executeLargeUpdate( String sql, int autoGeneratedKeys) throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "executeLargeUpdate",
+                 new Class[] { String.class, Integer.TYPE },
+                 new Object[] { sql, new Integer( autoGeneratedKeys ) }
+                 )).longValue();
+        }
+        public  long executeLargeUpdate( String sql, int[] columnIndexes ) throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "executeLargeUpdate",
+                 new Class[] { String.class, columnIndexes.getClass() },
+                 new Object[] { sql, columnIndexes }
+                 )).longValue();
+        }
+        public  long executeLargeUpdate( String sql, String[] columnNames ) throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "executeLargeUpdate",
+                 new Class[] { String.class, columnNames.getClass() },
+                 new Object[] { sql, columnNames }
+                 )).longValue();
+        }
+        public  long getLargeUpdateCount() throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "getLargeUpdateCount",
+                 new Class[] {},
+                 new Object[] {}
+                 )).longValue();
+        }
+
+
+        // Reflection minion
+        private Object  invoke( String methodName, Class[] argTypes, Object[] argValues )
+            throws SQLException
+        {
+            try {
+                Method  method = _wrappedStatement.getClass().getMethod( methodName, argTypes );
+
+                return method.invoke( _wrappedStatement, argValues );
+            }
+            catch (NoSuchMethodException nsme) { throw wrap( nsme ); }
+            catch (SecurityException se) { throw wrap( se ); }
+            catch (IllegalAccessException iae) { throw wrap( iae ); }
+            catch (IllegalArgumentException iare) { throw wrap( iare ); }
+            catch (InvocationTargetException ite) { throw wrap( ite ); }
+        }
+        private SQLException    wrap( Throwable t ) { return new SQLException( t.getMessage(), t ); }
+    }
     
+    ////////////////////////////////////////////////////////////////////////
+    //
+    // PROCEDURE FOR BUMPING THE RETURNED ROW COUNT, FOR TESTING JDBC 4.2.
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /** Set the base which is used for returned row counts */
+    public  static  void    setRowCountBase( long newBase )
+    {
+        RowUtil.rowCountBase = newBase;
+    }
+
 } // End class StatementTest

@@ -399,7 +399,7 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeUpdate");
                 }
-                int updateValue = executeUpdateX();
+                int updateValue = (int) executeUpdateX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeUpdate", updateValue);
                 }
@@ -412,7 +412,7 @@ public class PreparedStatement extends Statement
         }
     }
 
-    private int executeUpdateX() throws SqlException {
+    private long executeUpdateX() throws SqlException {
         flowExecute(executeUpdateMethod__);
         return updateCount_;
     }
@@ -1654,13 +1654,13 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "executeBatch");
                 }
-                int[] updateCounts = null;
+                long[] updateCounts = null;
                 updateCounts = executeBatchX(false);
 
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "executeBatch", updateCounts);
                 }
-                return updateCounts;
+                return Utils.squashLongs( updateCounts );
             }
         }
         catch ( SqlException se )
@@ -2191,7 +2191,7 @@ public class PreparedStatement extends Statement
             }
     }
 
-    public int[] executeBatchX(boolean supportsQueryBatchRequest) 
+    public long[] executeBatchX(boolean supportsQueryBatchRequest) 
         throws SqlException, SQLException, BatchUpdateException {
         synchronized (connection_) {
             checkForClosedStatement(); // Per jdbc spec (see Statement.close() javadoc)
@@ -2201,11 +2201,11 @@ public class PreparedStatement extends Statement
     }
 
 
-    private int[] executeBatchRequestX(boolean supportsQueryBatchRequest)
+    private long[] executeBatchRequestX(boolean supportsQueryBatchRequest)
             throws SqlException, BatchUpdateException {
         SqlException chainBreaker = null;
         int batchSize = batch_.size();
-        int[] updateCounts = new int[batchSize];
+        long[] updateCounts = new long[batchSize];
         int numInputColumns;
         try {
             numInputColumns = parameterMetaData_ == null ? 0 : parameterMetaData_.getColumnCount();
@@ -2223,7 +2223,7 @@ public class PreparedStatement extends Statement
         // and the values 0 and 0xffff are reserved as special values. So
         // that imposes an upper limit on the batch size we can support:
         if (batchSize > 65534)
-            throw new BatchUpdateException(agent_.logWriter_, 
+            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
                 65534, updateCounts);
 
@@ -2235,11 +2235,11 @@ public class PreparedStatement extends Statement
         }
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
-            throw new BatchUpdateException(agent_.logWriter_, 
+            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), updateCounts);
         }
         if (supportsQueryBatchRequest && sqlMode_ != isQuery__) {
-            throw new BatchUpdateException(agent_.logWriter_, 
+            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
                 updateCounts);
         }
@@ -2288,7 +2288,7 @@ public class PreparedStatement extends Statement
                         chainAutoCommit || (i != batchSize - 1));  // more statements to chain
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
-                throw new BatchUpdateException(agent_.logWriter_, 
+                throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
                     updateCounts);
             } else {

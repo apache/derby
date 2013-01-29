@@ -35,6 +35,30 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
     private static final MessageUtil msgutil_ =
         SqlException.getMessageUtil();
 
+    //
+    // Factory methods to handle new constructor added by JDBC 4.2
+    //
+    public  static  BatchUpdateException    newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, Object[] args, long[] updateCounts, SqlException cause )
+    {
+        return new BatchUpdateException( logWriter, msgid, args, Utils.squashLongs( updateCounts ), cause );
+    }
+    public static   BatchUpdateException newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, Object[] args, long[] updateCounts )
+    {
+        return new BatchUpdateException( logWriter, msgid, args, Utils.squashLongs( updateCounts ) );
+    }
+    public static   BatchUpdateException newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, long[] updateCounts )
+    {
+        return new BatchUpdateException( logWriter, msgid, Utils.squashLongs( updateCounts ) );
+    }
+    public static   BatchUpdateException newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, Object arg1, long[] updateCounts)
+    {
+        return new BatchUpdateException( logWriter, msgid, arg1, Utils.squashLongs( updateCounts ) );
+    }
+
     public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         Object[] args, int[] updateCounts, SqlException cause)
     {

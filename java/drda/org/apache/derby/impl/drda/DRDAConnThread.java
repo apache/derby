@@ -53,6 +53,7 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.Attribute;
@@ -186,7 +187,7 @@ class DRDAConnThread extends Thread {
     private static final byte[] eod00000 = { '0', '0', '0', '0', '0' };
     private static final byte[] eod02000 = { '0', '2', '0', '0', '0' };
     private static final byte[] nullSQLState = { ' ', ' ', ' ', ' ', ' ' };
-    private static final byte[] errD4_D6 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // 12x0 
+    private static final byte[] errD5_D6 = { 0, 0, 0, 0, 0, 0, 0, 0 }; // 8x0 
     private static final byte[] warn0_warnA = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };  // 11x ' '
 
     private final static String AUTHENTICATION_PROVIDER_BUILTIN_CLASS =
@@ -755,7 +756,7 @@ class DRDAConnThread extends Thread {
                     break;
                 case CodePoint.EXCSQLIMM:
                     try {
-                        int updateCount = parseEXCSQLIMM();
+                        long updateCount = parseEXCSQLIMM();
                         // RESOLVE: checking updateCount is not sufficient
                         // since it will be 0 for creates, we need to know when
                         // any logged changes are made to the database
@@ -4387,7 +4388,7 @@ class DRDAConnThread extends Thread {
         // are ready to send resultset info.
         stmt.finishParams();
             
-        PreparedStatement ps = stmt.getPreparedStatement();
+        EnginePreparedStatement ps = stmt.getPreparedStatement();
         int rsNum = 0;
         do {
         if (hasResultSet)
@@ -4417,7 +4418,7 @@ class DRDAConnThread extends Thread {
         }
         else  if (! sendSQLDTARD)
         {
-            int updateCount = ps.getUpdateCount();
+            long updateCount = ps.getLargeUpdateCount();
 
             // The protocol wants us to send RDBUPDRM here, but we don't do
             // that because it used to cause protocol errors. DERBY-5847 has
@@ -4640,7 +4641,7 @@ class DRDAConnThread extends Thread {
     private void parseSQLDTA_work(DRDAStatement stmt) throws DRDAProtocolException,SQLException
     {
         String strVal;
-        PreparedStatement ps = stmt.getPreparedStatement();
+        EnginePreparedStatement ps = stmt.getPreparedStatement();
         int codePoint;
         ParameterMetaData pmeta = null;
 
@@ -4728,7 +4729,7 @@ class DRDAConnThread extends Thread {
                             }
                             rtnParam = true;
                         }
-                        ps = cs;
+                        ps = (EnginePreparedStatement) cs;
                         stmt.ps = ps;
                     }
 
@@ -5348,7 +5349,7 @@ class DRDAConnThread extends Thread {
      * @throws DRDAProtocolException
      * @throws SQLException
      */
-    private int parseEXCSQLIMM() throws DRDAProtocolException,SQLException
+    private long parseEXCSQLIMM() throws DRDAProtocolException,SQLException
     {
         int codePoint;
         reader.markCollection();
@@ -5383,13 +5384,13 @@ class DRDAConnThread extends Thread {
         // initialize statement for reuse
         drdaStmt.initialize();
         String sqlStmt = parseEXECSQLIMMobjects();
-        Statement statement = drdaStmt.getStatement();
+        EngineStatement statement = drdaStmt.getStatement();
         statement.clearWarnings();
         if (pendingStatementTimeout >= 0) {
             statement.setQueryTimeout(pendingStatementTimeout);
             pendingStatementTimeout = -1;
         }
-        int updCount = statement.executeUpdate(sqlStmt);
+        long updCount = statement.executeLargeUpdate(sqlStmt);
         return updCount;
     }
 
@@ -6057,13 +6058,13 @@ class DRDAConnThread extends Thread {
         reader.skipBytes();
     }
 
-    private void writeSQLCARDs(SQLException e, int updateCount)
+    private void writeSQLCARDs(SQLException e, long updateCount)
                                     throws DRDAProtocolException
     {
         writeSQLCARDs(e, updateCount, false);
     }
 
-    private void writeSQLCARDs(SQLException e, int updateCount, boolean sendSQLERRRM)
+    private void writeSQLCARDs(SQLException e, long updateCount, boolean sendSQLERRRM)
                                     throws DRDAProtocolException
     {
 
@@ -6145,7 +6146,7 @@ class DRDAConnThread extends Thread {
     }
 
     private void writeSQLCARD(SQLException e,
-        int updateCount, long rowCount ) throws DRDAProtocolException
+        long updateCount, long rowCount ) throws DRDAProtocolException
     {
         writer.createDssObject();
         writer.startDdm(CodePoint.SQLCARD);
@@ -6285,7 +6286,7 @@ class DRDAConnThread extends Thread {
      * 
      * @exception DRDAProtocolException
      */
-    private void writeSQLCAGRP(SQLException e, int updateCount, long rowCount)
+    private void writeSQLCAGRP(SQLException e, long updateCount, long rowCount)
         throws DRDAProtocolException
     {
         int sqlcode = getSqlCode(e);
@@ -6360,7 +6361,7 @@ class DRDAConnThread extends Thread {
      */
 
     private void writeSQLCAGRP(byte[] sqlState, int sqlcode, 
-                               int updateCount, long rowCount) throws DRDAProtocolException
+                               long updateCount, long rowCount) throws DRDAProtocolException
     {
         if (rowCount < 0 && updateCount < 0) {
             writer.writeByte(CodePoint.NULLDATA);
@@ -6601,7 +6602,7 @@ class DRDAConnThread extends Thread {
      * 
      * @exception DRDAProtocolException
      */
-    private void writeSQLCAXGRP(int updateCount,  long rowCount, String sqlerrmc,
+    private void writeSQLCAXGRP(long updateCount,  long rowCount, String sqlerrmc,
                 SQLException nextException) throws DRDAProtocolException
     {
         writer.writeByte(0);        // SQLCAXGRP INDICATOR
@@ -6628,15 +6629,18 @@ class DRDAConnThread extends Thread {
      * @param updateCount
      * @param rowCount 
      */
-    private void writeSQLCAERRWARN(int updateCount, long rowCount) 
+    private void writeSQLCAERRWARN(long updateCount, long rowCount) 
     {
-        // SQL ERRD1 - ERRD2 - row Count
-        writer.writeInt((int)((rowCount>>>32))); 
+        // SQL ERRD1 = Sqlca.HIGH_ORDER_ROW_COUNT
+        writer.writeInt((int)((rowCount>>>32)));
+        // SQL ERRD2 = Sqlca.LOW_ORDER_ROW_COUNT
         writer.writeInt((int)(rowCount & 0x0000000ffffffffL));
-        // SQL ERRD3 - updateCount
-        writer.writeInt(updateCount);
-        // SQL ERRD4 - D6 (12 bytes)
-        writer.writeBytes(errD4_D6); // byte[] constant
+        // SQL ERRD3 = Sqlca.LOW_ORDER_UPDATE_COUNT
+        writer.writeInt( (int)(updateCount & 0x0000000ffffffffL) );
+        // SQL ERRD4 = Sqlca.HIGH_ORDER_UPDATE_COUNT
+        writer.writeInt( (int)(updateCount>>>32) );
+        // SQL ERRD5 - D6 (8 bytes)
+        writer.writeBytes(errD5_D6); // byte[] constant
         // WARN0-WARNA (11 bytes)
         writer.writeBytes(warn0_warnA); // byte[] constant
     }
@@ -9093,7 +9097,7 @@ class DRDAConnThread extends Thread {
      * @exception DRDAProtocolException
      */
     private void checkWarning(Connection conn, Statement stmt, ResultSet rs,
-                          int updateCount, boolean alwaysSend, boolean sendWarn)
+                          long updateCount, boolean alwaysSend, boolean sendWarn)
         throws DRDAProtocolException, SQLException
     {
         // instead of writing a chain of sql warning, we send the first one, this is

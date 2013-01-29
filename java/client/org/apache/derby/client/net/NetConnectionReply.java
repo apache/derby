@@ -2678,7 +2678,7 @@ public class NetConnectionReply extends Reply
             skipFastBytes(18);
         }
         //   SQLERRD1 to SQLERRD6; PROTOCOL TYPE I4; ENVLID 0x02; Length Override 4
-        int[] sqlerrd = new int[6];
+        int[] sqlerrd = new int[ NetSqlca.SQL_ERR_LENGTH ];
         readFastIntArray(sqlerrd);
 
         //   SQLWARN0 to SQLWARNA; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
