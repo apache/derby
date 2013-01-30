@@ -82,7 +82,7 @@ public abstract class Cursor {
 
     // Total number of rows read so far.
     // This should never exceed this.statement.maxRows
-    int rowsRead_;
+    long rowsRead_;
 
     // Maximum column size limit in bytes.
     int maxFieldSize_ = 0;

@@ -109,7 +109,7 @@ public class EmbedStatement extends ConnectionChild
 	
 	// The maximum # of rows to return per result set.
 	// (0 means no limit.)
-	int maxRows;
+	long maxRows;
 
 	private ParameterValueSet pvs;
 
@@ -456,6 +456,22 @@ public class EmbedStatement extends ConnectionChild
      */
 	public int getMaxRows() throws SQLException 
 	{
+        return (int) getLargeMaxRows();
+	}
+
+    /**
+     * JDBC 4.2
+     *
+     * The maxRows limit is the maximum number of rows that a
+     * ResultSet can contain.  If the limit is exceeded, the excess
+     * rows are silently dropped. For use with
+     * statements which may touch more than Integer.MAX_VALUE rows.
+     *
+     * @return the current max row limit; zero means unlimited
+	 * @exception SQLException thrown on failure.
+     */
+	public long getLargeMaxRows() throws SQLException 
+	{
 		checkStatus();
 		return maxRows;
 	}
@@ -470,10 +486,23 @@ public class EmbedStatement extends ConnectionChild
      */
 	public void setMaxRows(int max) throws SQLException	
 	{
+        setLargeMaxRows( max );
+	}
+
+    /**
+     * The maxRows limit is set to limit the number of rows that any
+     * ResultSet can contain.  If the limit is exceeded, the excess
+     * rows are silently dropped.
+     *
+     * @param max the new max rows limit; zero means unlimited
+	 * @exception SQLException thrown on failure.
+     */
+	public void setLargeMaxRows(long max) throws SQLException	
+	{
 		checkStatus();
-		if (max < 0)
+		if (max < 0L)
 		{
-			throw newSQLException(SQLState.INVALID_MAX_ROWS_VALUE, new Integer(max));
+			throw newSQLException(SQLState.INVALID_MAX_ROWS_VALUE, new Long(max));
 		}
 		this.maxRows = max;
 	}

@@ -568,7 +568,7 @@ final public class GenericActivationHolder implements Activation
 	/**
 	 * @see Activation#setMaxRows
 	 */
-	public void setMaxRows(int maxRows)
+	public void setMaxRows(long maxRows)
 	{
 		ac.setMaxRows(maxRows);
 	}
@@ -576,7 +576,7 @@ final public class GenericActivationHolder implements Activation
 	/**
 	 * @see Activation#getMaxRows
 	 */
-	public int getMaxRows()
+	public long getMaxRows()
 	{
 		return ac.getMaxRows();
 	}

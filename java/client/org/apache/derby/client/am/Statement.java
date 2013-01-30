@@ -28,6 +28,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class Statement implements java.sql.Statement, StatementCallbackInterface{
 
+    /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */
+    public  static  long    fetchedRowBase = 0L;
+    
     //---------------------navigational members-----------------------------------
 
     public MaterialStatement materialStatement_ = null;
@@ -124,7 +127,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     protected ArrayList<String> timeoutArrayList = new ArrayList<String>(1);
     protected boolean doWriteTimeout = false;
     int timeout_ = 0; // for query timeout in seconds
-    int maxRows_ = 0;
+    long maxRows_ = 0L;
     int maxFieldSize_ = 0; // zero means that there is no limit to the size of a column.
 
     // When this is false we skip autocommit for this PreparedStatement.
@@ -261,7 +264,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         cursorName_ = null; // setCursorName
         timeout_ = 0; // setQueryTimeout
         doWriteTimeout = false; // setQueryTimeout
-        maxRows_ = 0; // setMaxRows
+        maxRows_ = 0L; // setMaxRows
         maxFieldSize_ = 0; // setMaxFieldSize
         fetchSize_ = 0; // setFetchSize
         fetchDirection_ = java.sql.ResultSet.FETCH_FORWARD; // setFetchDirection
@@ -722,11 +725,18 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     public int getMaxRows() throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "getMaxRows", maxRows_);
+        }
+        return (int) getLargeMaxRows();
+    }
+
+    public long getLargeMaxRows() throws SQLException {
         try
         {
             checkForClosedStatement();
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getMaxRows", maxRows_);
+                agent_.logWriter_.traceExit(this, "getLargeMaxRows", maxRows_);
             }
             return maxRows_;
         }
@@ -737,11 +747,21 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     public void setMaxRows(int maxRows) throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "setMaxRows", maxRows);
+            }
+            setLargeMaxRows( maxRows );
+        }
+    }
+
+    // Added by JDBC 4.2
+    public void setLargeMaxRows(long maxRows) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setMaxRows", maxRows);
+                    agent_.logWriter_.traceEntry(this, "setLargeMaxRows", maxRows);
                 }
                 checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
                 if (maxRows < 0) {
@@ -1644,7 +1664,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             return;
         }
         openOnServer_ = true;
-        resultSet.cursor_.rowsRead_ = 0;
+        resultSet.cursor_.rowsRead_ = fetchedRowBase;
 
         // Set fetchSize_ to the default(64) if not set by the user if the resultset is scrollable.
         // This fetchSize_ is used to check for a complete rowset when rowsets are parsed.
@@ -1672,7 +1692,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             return;
         }
         openOnServer_ = true;
-        resultSet.cursor_.rowsRead_ = 0;
+        resultSet.cursor_.rowsRead_ = fetchedRowBase;
 
         resultSet.generatedSection_ = generatedSection;
 

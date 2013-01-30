@@ -95,6 +95,9 @@ import org.apache.derby.iapi.util.InterruptStatus;
 public class EmbedResultSet extends ConnectionChild
     implements EngineResultSet, Comparable {
 
+    /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */
+    public  static  long    fetchedRowBase = 0L;
+    
 	// cursor movement
 	protected static final int FIRST = 1;
 	protected static final int NEXT = 2;
@@ -150,7 +153,7 @@ public class EmbedResultSet extends ConnectionChild
 	private final ResultDescription resultDescription;
 
     // max rows limit for this result set
-    private int maxRows;
+    private long maxRows;
     // The Maximum field size limt set for this result set
     private final int maxFieldSize;
 
@@ -159,7 +162,7 @@ public class EmbedResultSet extends ConnectionChild
      * returned if the maxRows is set. The following varible is used
      * to keep the count of number of rows returned to the user.
      */
-    private int NumberofFetchedRows;
+    private long NumberofFetchedRows = fetchedRowBase;
 
 
 	/**

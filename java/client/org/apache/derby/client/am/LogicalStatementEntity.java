@@ -307,5 +307,13 @@ abstract class LogicalStatementEntity
     {
         return ((org.apache.derby.client.am.Statement) getPhysStmt()).getLargeUpdateCount();
     }
+    public  long getLargeMaxRows() throws SQLException
+    {
+        return ((org.apache.derby.client.am.Statement) getPhysStmt()).getLargeMaxRows();
+    }
+    public  void    setLargeMaxRows(long maxRows) throws SQLException
+    {
+        ((org.apache.derby.client.am.Statement) getPhysStmt()).setLargeMaxRows( maxRows );
+    }
 
 }

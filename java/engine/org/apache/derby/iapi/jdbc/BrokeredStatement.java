@@ -644,9 +644,17 @@ public class BrokeredStatement implements EngineStatement
     {
         return ((EngineStatement) getStatement()).executeLargeUpdate( sql, columnNames );
     }
+    public  long getLargeMaxRows() throws SQLException
+    {
+        return ((EngineStatement) getStatement()).getLargeMaxRows();
+    }
     public  long getLargeUpdateCount() throws SQLException
     {
         return ((EngineStatement) getStatement()).getLargeUpdateCount();
+    }
+    public  void setLargeMaxRows( long max ) throws SQLException
+    {
+        ((EngineStatement) getStatement()).setLargeMaxRows( max );
     }
 
 }

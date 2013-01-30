@@ -130,7 +130,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 	private TableDescriptor ddlTableDescriptor;
 
-	private int maxRows = -1;
+	private long maxRows = -1L;
 	private boolean			forCreateTable;
 
 	private boolean			scrollable;
@@ -1134,7 +1134,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	/**
 	 * @see Activation#setMaxRows
 	 */
-	public void setMaxRows(int maxRows)
+	public void setMaxRows(long maxRows)
 	{
 		this.maxRows = maxRows;
 	}
@@ -1142,7 +1142,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	/**
 	 * @see Activation#getMaxRows
 	 */
-	public int getMaxRows()
+	public long getMaxRows()
 	{
 		return maxRows;
 	}

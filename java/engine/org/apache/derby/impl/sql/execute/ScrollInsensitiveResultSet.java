@@ -107,7 +107,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	public int numFromHashTable;
 	public int numToHashTable;
 
-	private int maxRows;
+	private long maxRows;
 
     private boolean keepAfterCommit;
 

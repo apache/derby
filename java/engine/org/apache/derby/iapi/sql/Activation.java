@@ -521,7 +521,7 @@ public interface Activation extends Dependent
 	 *
 	 * @param maxRows Maximum # of rows. (0 means no limit.)
 	 */
-	public void setMaxRows(int maxRows);
+	public void setMaxRows(long maxRows);
 
 	/**
 	 * Get the maximum # of rows.  (# of rows that can
@@ -529,7 +529,7 @@ public interface Activation extends Dependent
 	 *
 	 * @return Maximum # of rows.  (0 means no limit.)
 	 */
-	public int getMaxRows();
+	public long getMaxRows();
 
 	/**
 	 * Is this Activation for a cursor?

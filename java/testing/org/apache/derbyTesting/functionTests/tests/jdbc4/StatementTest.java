@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derby.vti.VTITemplate;
+import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.sql.execute.RowUtil;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
@@ -383,13 +384,15 @@ public class StatementTest
 
         largeBatchTest( sw, (long) Integer.MAX_VALUE );
         largeBatchTest( sw, 0L);
+
+        largeMaxRowsTest( sw,  ((long) Integer.MAX_VALUE) + 1L );
     }
     private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
         throws Exception
     {
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
-        sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+        setRowCountBase( sw, false, rowCountBase );
 
         largeUpdateTest( sw, rowCountBase, 1L );
         largeUpdateTest( sw, rowCountBase, 3L );
@@ -444,7 +447,7 @@ public class StatementTest
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
         sw.getWrappedStatement().clearBatch();
-        sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+        setRowCountBase( sw, false, rowCountBase );
 
         long[]  expectedResult = new long[] { rowCountBase + 1L, rowCountBase + 1L, rowCountBase + 2L };
 
@@ -462,6 +465,44 @@ public class StatementTest
         sw.getWrappedStatement().addBatch( "insert into bigintTable( col2 ) values ( 1 )" );
         sw.getWrappedStatement().addBatch( "update bigintTable set col2 = 2" );
         sw.getWrappedStatement().addBatch( "insert into bigintTable( col2 ) values ( 3 ), ( 4 )" );
+    }
+    private static  void    largeMaxRowsTest( StatementWrapper sw, long maxRows )
+        throws Exception
+    {
+        println( "Large max rows test with maxRows = " + maxRows );
+
+        long    expectedRowCount = 3L;
+
+        truncate( sw );
+        sw.getWrappedStatement().execute( "insert into bigintTable( col2 ) values ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 )" );
+        
+        setRowCountBase( sw, usingDerbyNetClient(), maxRows - expectedRowCount );
+
+        sw.setLargeMaxRows( maxRows );
+        
+        ResultSet   rs = sw.getWrappedStatement().executeQuery( "select * from bigintTable" );
+        int     rowCount = 0;
+        while( rs.next() ) { rowCount++; }
+        rs.close();
+
+        setRowCountBase( sw, usingDerbyNetClient(), 0L );
+        
+        assertEquals( expectedRowCount, rowCount );
+        assertEquals( maxRows, sw.getLargeMaxRows() );
+    }
+        
+    private static  void    setRowCountBase
+        ( StatementTest.StatementWrapper sw, boolean onClient, long rowCountBase )
+        throws Exception
+    {
+        if ( onClient )
+        {
+            org.apache.derby.client.am.Statement.fetchedRowBase = rowCountBase;
+        }
+        else
+        {
+            sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+        }
     }
     private static  void    truncate( StatementTest.StatementWrapper sw )
         throws Exception
@@ -559,6 +600,15 @@ public class StatementTest
                  new Object[] { sql, columnNames }
                  )).longValue();
         }
+        public  long getLargeMaxRows() throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "getLargeMaxRows",
+                 new Class[] {},
+                 new Object[] {}
+                 )).longValue();
+        }
         public  long getLargeUpdateCount() throws SQLException
         {
             return ((Long) invoke
@@ -567,6 +617,15 @@ public class StatementTest
                  new Class[] {},
                  new Object[] {}
                  )).longValue();
+        }
+        public  void setLargeMaxRows( long max ) throws SQLException
+        {
+            invoke
+                (
+                 "setLargeMaxRows",
+                 new Class[] { Long.TYPE },
+                 new Object[] { new Long( max ) }
+                 );
         }
 
 
@@ -594,9 +653,10 @@ public class StatementTest
     //
     ////////////////////////////////////////////////////////////////////////
 
-    /** Set the base which is used for returned row counts */
+    /** Set the base which is used for returned row counts and fetched row counters */
     public  static  void    setRowCountBase( long newBase )
     {
+        EmbedResultSet.fetchedRowBase = newBase;
         RowUtil.rowCountBase = newBase;
     }
 

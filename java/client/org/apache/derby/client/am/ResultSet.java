@@ -208,7 +208,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     
     // Keep maxRows in the ResultSet, so that changes to maxRow in the statement
     // do not affect the resultSet after it has been created
-    private int maxRows_;
+    private long maxRows_;
 
     /**
      * Indicates which columns have been fetched as a stream or as a LOB for a
