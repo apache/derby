@@ -133,7 +133,7 @@ public class SerializeDataSources {
             ObjectOutputStream oos = new ObjectOutputStream(os);
             // Wrote version string, build number, the data source
             // object and finally a {@link javax.naming.Reference} for
-            // the data source (if non a non-JNDI data source).
+            // the data source (if not a non-JNDI data source).
             oos.writeUTF(versionString);
             oos.writeUTF(buildNumber);
             oos.writeObject(ds);
