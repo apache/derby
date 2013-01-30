@@ -200,7 +200,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                         "org.apache.derby.jdbc.ClientDataSource").newInstance();
                 } else {
                     ds = (ClientDataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.NonJNDIClientDataSource40").
+                        "org.apache.derby.jdbc.BasicClientDataSource40").
                             newInstance();
                 }
 

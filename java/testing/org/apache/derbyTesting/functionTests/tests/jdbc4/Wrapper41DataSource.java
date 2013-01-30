@@ -30,8 +30,8 @@ import org.apache.derby.jdbc.ClientXADataSource40;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40;
 import org.apache.derby.jdbc.EmbeddedDataSource40;
 import org.apache.derby.jdbc.EmbeddedXADataSource40;
-import org.apache.derby.jdbc.NonJNDIClientDataSource40;
-import org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40;
+import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
@@ -50,12 +50,12 @@ public  class   Wrapper41DataSource
     private EmbeddedDataSource40    _embedded;
     private EmbeddedConnectionPoolDataSource40    _ecpds;
     private EmbeddedXADataSource40    _exads;
-    private NonJNDIEmbeddedDataSource40    _nonJNDIembedded;
+    private BasicEmbeddedDataSource40    _basicembedded;
 
     private ClientDataSource40      _netclient;
     private ClientConnectionPoolDataSource40      _ccpds;
     private ClientXADataSource40      _cxads;
-    private NonJNDIClientDataSource40      _nonJNDInetclient;
+    private BasicClientDataSource40      _basicnetclient;
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -81,10 +81,10 @@ public  class   Wrapper41DataSource
                 _cxads = (ClientXADataSource40) wrapped; }
             else { throw nothingWrapped(); }
         } else {
-            if ( wrapped instanceof NonJNDIEmbeddedDataSource40  ) {
-                _nonJNDIembedded = (NonJNDIEmbeddedDataSource40 ) wrapped; }
-            else if ( wrapped instanceof NonJNDIClientDataSource40 ) {
-                _nonJNDInetclient = (NonJNDIClientDataSource40) wrapped; }
+            if ( wrapped instanceof BasicEmbeddedDataSource40  ) {
+                _basicembedded = (BasicEmbeddedDataSource40 ) wrapped; }
+            else if ( wrapped instanceof BasicClientDataSource40 ) {
+                _basicnetclient = (BasicClientDataSource40) wrapped; }
             else { throw nothingWrapped(); }
         }
     }
@@ -106,10 +106,10 @@ public  class   Wrapper41DataSource
             else if ( _cxads != null ) {return _cxads.getParentLogger(); }
             else { throw nothingWrapped(); }
         } else {
-            if ( _nonJNDIembedded != null ) {
-                return _nonJNDIembedded.getParentLogger(); }
-            else if ( _nonJNDInetclient != null) {
-                return _nonJNDInetclient.getParentLogger(); }
+            if ( _basicembedded != null ) {
+                return _basicembedded.getParentLogger(); }
+            else if ( _basicnetclient != null) {
+                return _basicnetclient.getParentLogger(); }
             else { throw nothingWrapped(); }
         }
     }
@@ -131,8 +131,8 @@ public  class   Wrapper41DataSource
             else if ( _cxads != null ) { return _cxads; }
             else { throw nothingWrapped(); }
         } else {
-            if ( _nonJNDIembedded != null ) { return _nonJNDIembedded; }
-            else if ( _nonJNDInetclient != null ) { return _nonJNDInetclient; }
+            if ( _basicembedded != null ) { return _basicembedded; }
+            else if ( _basicnetclient != null ) { return _basicnetclient; }
             else { throw nothingWrapped(); }
         }
     }

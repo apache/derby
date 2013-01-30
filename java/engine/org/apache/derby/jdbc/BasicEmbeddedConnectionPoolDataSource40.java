@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.NonJNDIEmbeddedConnectionPoolDataSource40
+   Derby - Class org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -24,14 +24,14 @@ import java.sql.SQLException;
 import javax.sql.PooledConnection;
 
 /**
- * NonJNDIEmbeddedConnectionPoolDataSource40 is similar to
+ * BasicEmbeddedConnectionPoolDataSource40 is similar to
  * EmbeddedConnectionPoolDataSource40 except it does not support JNDI naming,
  * i.e. it does not implement {@code javax.naming.Referenceable}.
  *
  * @see EmbeddedConnectionPoolDataSource40
  */
-public class NonJNDIEmbeddedConnectionPoolDataSource40
-    extends NonJNDIEmbeddedDataSource40
+public class BasicEmbeddedConnectionPoolDataSource40
+    extends BasicEmbeddedDataSource40
     implements javax.sql.ConnectionPoolDataSource,
         EmbeddedConnectionPoolDataSourceInterface {
 
@@ -40,7 +40,7 @@ public class NonJNDIEmbeddedConnectionPoolDataSource40
     /**
      *  No-argument constructor.
      */
-    public NonJNDIEmbeddedConnectionPoolDataSource40() {
+    public BasicEmbeddedConnectionPoolDataSource40() {
         super();
     }
 

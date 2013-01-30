@@ -34,7 +34,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
-import org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40;
+import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -215,10 +215,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
         }
 
         if (JDBC.vmSupportsJDBC4()) {
-            NonJNDIEmbeddedDataSource40 nds = new NonJNDIEmbeddedDataSource40();
+            BasicEmbeddedDataSource40 nds = new BasicEmbeddedDataSource40();
             nds.setDatabaseName(dbName);
             assertConnectionOK(
-                    expectedValues, "NonJNDIDataSource", nds.getConnection());
+                    expectedValues, "BasicDataSource", nds.getConnection());
         }
     }            
     
@@ -275,7 +275,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
                     "org.apache.derby.jdbc.ClientDataSource").newInstance();
         } else {
             ds = (ClientDataSourceInterface)Class.forName(
-                    "org.apache.derby.jdbc.NonJNDIClientDataSource40").
+                    "org.apache.derby.jdbc.BasicClientDataSource40").
                     newInstance();
         }
 
@@ -458,7 +458,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
               "org.apache.derby.jdbc.ClientDataSource").newInstance();
         } else {
             ds = (ClientDataSourceInterface)Class.forName(
-              "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+              "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
         }
 
         ds.setPortNumber(TestConfiguration.getCurrent().getPort());

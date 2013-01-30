@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40
+   Derby - Class org.apache.derby.jdbc.BasicEmbeddedDataSource40
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -27,18 +27,18 @@ import org.apache.derby.impl.jdbc.Util;
 
 /**
  *
- * NonJNDIEmbeddedDataSource40 is similar to EmbeddedDataSource40, but does
+ * BasicEmbeddedDataSource40 is similar to EmbeddedDataSource40, but does
  * not support JNDI naming, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
  *
  * @see EmbeddedDataSource40
  */
- public class NonJNDIEmbeddedDataSource40 extends EmbeddedBaseDataSource
+ public class BasicEmbeddedDataSource40 extends EmbeddedBaseDataSource
     implements javax.sql.DataSource {
 
    private static final long serialVersionUID = -4945135214995641182L;
 
-    public NonJNDIEmbeddedDataSource40() {}
+    public BasicEmbeddedDataSource40() {}
 
     ////////////////////////////////////////////////////////////////////
     //

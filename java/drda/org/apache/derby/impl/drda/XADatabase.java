@@ -72,7 +72,7 @@ class XADatabase extends Database {
                 } else {
                     xaDataSource =
                         (EmbeddedXADataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40").
+                        "org.apache.derby.jdbc.BasicEmbeddedXADataSource40").
                         newInstance();
                 }
             } catch (Exception e) {

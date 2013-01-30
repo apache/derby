@@ -59,7 +59,7 @@ public class ClientConnectionPoolDataSourceTest
                     .newInstance();
         } else {
             cDs = (ClientConnectionPoolDataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40")
+                "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40")
                     .newInstance();
         }
         // Check the default value.

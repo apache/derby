@@ -541,7 +541,7 @@ class xaHelper implements xaAbstractHelper
                             ).newInstance());
                 } else {
                     return (XADataSource)(Class.forName(
-                        "org.apache.derby.jdbc.NonJNDIClientXADataSource40").
+                        "org.apache.derby.jdbc.BasicClientXADataSource40").
                             newInstance());
                 }
             } else {
@@ -565,7 +565,7 @@ class xaHelper implements xaAbstractHelper
                             newInstance());
                 } else {
                     return (XADataSource)(Class.forName(
-                        "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40").
+                        "org.apache.derby.jdbc.BasicEmbeddedXADataSource40").
                             newInstance());
                 }
             }

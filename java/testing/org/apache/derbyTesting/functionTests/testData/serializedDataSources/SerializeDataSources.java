@@ -67,9 +67,9 @@ public class SerializeDataSources {
             "org.apache.derby.jdbc.EmbeddedDataSource40",
             "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40",
             "org.apache.derby.jdbc.EmbeddedXADataSource40",
-            "org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40",
-            "org.apache.derby.jdbc.NonJNDIEmbeddedConnectionPoolDataSource40",
-            "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40"
+            "org.apache.derby.jdbc.BasicEmbeddedDataSource40",
+            "org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.BasicEmbeddedXADataSource40"
         };
 
     /** List of known data sources in the client driver. */
@@ -80,9 +80,9 @@ public class SerializeDataSources {
             "org.apache.derby.jdbc.ClientDataSource40",
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource40",
             "org.apache.derby.jdbc.ClientXADataSource40",
-            "org.apache.derby.jdbc.NonJNDIClientDataSource40",
-            "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40",
-            "org.apache.derby.jdbc.NonJNDIClientXADataSource40"
+            "org.apache.derby.jdbc.BasicClientDataSource40",
+            "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.BasicClientXADataSource40"
         };
 
     /**
@@ -137,7 +137,7 @@ public class SerializeDataSources {
             oos.writeUTF(versionString);
             oos.writeUTF(buildNumber);
             oos.writeObject(ds);
-            if (!(dsClassName.contains("NonJNDI"))) {
+            if (!(dsClassName.contains("Basic"))) {
                 Method getRef = Class.forName("javax.naming.Referenceable").
                         getMethod("getReference");
                 Object dsRef = getRef.invoke(ds);
@@ -180,7 +180,7 @@ public class SerializeDataSources {
             System.out.println("\tbuild  : " + buildNr);
             Object obj = ois.readObject();
             System.out.println("\tobject : " + obj);
-            if (!(obj.getClass().getName().indexOf("NonJNDI") > 0)) {
+            if (!(obj.getClass().getName().indexOf("Basic") > 0)) {
                 obj = ois.readObject();
                 System.out.println("\tobject : " + obj);
             }

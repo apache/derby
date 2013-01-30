@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.NonJNDIClientDataSource40
+   Derby - Class org.apache.derby.jdbc.BasicClientDataSource40
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -29,16 +29,16 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
- * NonJNDIClientDataSource40 is similar to ClientDataSource40 except it
+ * BasicClientDataSource40 is similar to ClientDataSource40 except it
  * can not be used with JNDI, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
  */
-public class NonJNDIClientDataSource40
+public class BasicClientDataSource40
     extends ClientBaseDataSourceRoot implements DataSource {
 
     private final static long serialVersionUID = 1894299584216955554L;
     public final static String className__ =
-            "org.apache.derby.jdbc.NonJNDIClientDataSource40";
+            "org.apache.derby.jdbc.BasicClientDataSource40";
 
     /**
      * Creates a simple DERBY data source with default property values
@@ -50,7 +50,7 @@ public class NonJNDIClientDataSource40
      * since many beanboxes attempt to instantiate a bean by invoking
      * its no-argument constructor.
      */
-    public NonJNDIClientDataSource40() {
+    public BasicClientDataSource40() {
         super();
     }
 

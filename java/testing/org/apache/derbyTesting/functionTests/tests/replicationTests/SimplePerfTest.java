@@ -30,7 +30,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
-import org.apache.derby.jdbc.NonJNDIClientDataSource40;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -149,7 +149,7 @@ public class SimplePerfTest extends BaseJDBCTestCase
             ds = (ClientDataSourceInterface)Class.forName(
                     "org.apache.derby.jdbc.ClientDataSource").newInstance();
         } else {
-            ds = new NonJNDIClientDataSource40();
+            ds = new BasicClientDataSource40();
         }
 
         ds.setDatabaseName(dbPath);

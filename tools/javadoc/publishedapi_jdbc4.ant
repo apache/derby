@@ -41,11 +41,11 @@ org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java
 org/apache/derby/jdbc/EmbeddedDataSource40.java
 org/apache/derby/jdbc/EmbeddedXADataSource40.java
 
-org/apache/derby/jdbc/NonJNDIClientConnectionPoolDataSource40.java
-org/apache/derby/jdbc/NonJNDIClientDataSource40.java
-org/apache/derby/jdbc/NonJNDIClientXADataSource40.java
+org/apache/derby/jdbc/BasicClientConnectionPoolDataSource40.java
+org/apache/derby/jdbc/BasicClientDataSource40.java
+org/apache/derby/jdbc/BasicClientXADataSource40.java
 
-org/apache/derby/jdbc/NonJNDIEmbeddedConnectionPoolDataSource40.java
-org/apache/derby/jdbc/NonJNDIEmbeddedDataSource40.java
-org/apache/derby/jdbc/NonJNDIEmbeddedXADataSource40.java
+org/apache/derby/jdbc/BasicEmbeddedConnectionPoolDataSource40.java
+org/apache/derby/jdbc/BasicEmbeddedDataSource40.java
+org/apache/derby/jdbc/BasicEmbeddedXADataSource40.java
 

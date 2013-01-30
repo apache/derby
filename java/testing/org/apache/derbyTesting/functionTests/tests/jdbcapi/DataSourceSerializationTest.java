@@ -91,7 +91,7 @@ public class DataSourceSerializationTest
             deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
-        final String EMBEDDED_CLASS = "NonJNDIEmbeddedDataSource40";
+        final String EMBEDDED_CLASS = "BasicEmbeddedDataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
         
     }
@@ -114,7 +114,7 @@ public class DataSourceSerializationTest
         }
 
         final String EMBEDDED_CLASS =
-                "NonJNDIEmbeddedConnectionPoolDataSource40";
+                "BasicEmbeddedConnectionPoolDataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
 
@@ -135,7 +135,7 @@ public class DataSourceSerializationTest
             deSerializeDs(EMBEDDED_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
-        final String EMBEDDED_CLASS = "NonJNDIEmbeddedXADataSource40";
+        final String EMBEDDED_CLASS = "BasicEmbeddedXADataSource40";
         deSerializeDs(EMBEDDED_CLASS, VERSION_10_10_1_0, false);
     }
 
@@ -156,7 +156,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
         
-        final String CLIENT_CLASS = "NonJNDIClientDataSource40";
+        final String CLIENT_CLASS = "BasicClientDataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
@@ -177,7 +177,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
          
-        final String CLIENT_CLASS = "NonJNDIClientConnectionPoolDataSource40";
+        final String CLIENT_CLASS = "BasicClientConnectionPoolDataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
@@ -198,7 +198,7 @@ public class DataSourceSerializationTest
             deSerializeDs(CLIENT_CLASS + _40Suffix, VERSION_10_10_1_0, true);
         }
          
-        final String CLIENT_CLASS = "NonJNDIClientXADataSource40";
+        final String CLIENT_CLASS = "BasicClientXADataSource40";
         deSerializeDs(CLIENT_CLASS, VERSION_10_10_1_0, false);
     }
 
@@ -393,14 +393,14 @@ public class DataSourceSerializationTest
                 filePrefix + "ClientConnectionPoolDataSource40-10_10_1_0.ser",
                 filePrefix + "ClientXADataSource-10_10_1_0.ser",
                 filePrefix + "ClientXADataSource40-10_10_1_0.ser",
-                filePrefix + "NonJNDIEmbeddedDataSource40-10_10_1_0.ser",
+                filePrefix + "BasicEmbeddedDataSource40-10_10_1_0.ser",
                 filePrefix +
-                    "NonJNDIEmbeddedConnectionPoolDataSource40-10_10_1_0.ser",
-                filePrefix + "NonJNDIEmbeddedXADataSource40-10_10_1_0.ser",
-                filePrefix + "NonJNDIClientDataSource40-10_10_1_0.ser",
+                    "BasicEmbeddedConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "BasicEmbeddedXADataSource40-10_10_1_0.ser",
+                filePrefix + "BasicClientDataSource40-10_10_1_0.ser",
                 filePrefix +
-                    "NonJNDIClientConnectionPoolDataSource40-10_10_1_0.ser",
-                filePrefix + "NonJNDIClientXADataSource40-10_10_1_0.ser",
+                    "BasicClientConnectionPoolDataSource40-10_10_1_0.ser",
+                filePrefix + "BasicClientXADataSource40-10_10_1_0.ser",
             });
     }
 }

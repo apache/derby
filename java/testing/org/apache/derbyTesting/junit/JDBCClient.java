@@ -48,15 +48,15 @@ public final class JDBCClient {
 
             JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.EmbeddedDataSource40":
-            "org.apache.derby.jdbc.NonJNDIEmbeddedDataSource40",
+            "org.apache.derby.jdbc.BasicEmbeddedDataSource40",
 
             JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40":
-            "org.apache.derby.jdbc.NonJNDIEmbeddedConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40",
 
             JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.EmbeddedXADataSource40":
-            "org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40",
+            "org.apache.derby.jdbc.BasicEmbeddedXADataSource40",
 
             "jdbc:derby:");
     
@@ -97,19 +97,19 @@ public final class JDBCClient {
             JDBC.vmSupportsJDBC4() ?
             (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientDataSource40" :
-            "org.apache.derby.jdbc.NonJNDIClientDataSource40") :
+            "org.apache.derby.jdbc.BasicClientDataSource40") :
              "org.apache.derby.jdbc.ClientDataSource",
 
             JDBC.vmSupportsJDBC4() ?
             (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource40" :
-            "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40") :
+            "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40") :
             "org.apache.derby.jdbc.ClientConnectionPoolDataSource",
 
             JDBC.vmSupportsJDBC4() ?
             (JDBC.vmSupportsJNDI() ?
             "org.apache.derby.jdbc.ClientXADataSource40" :
-            "org.apache.derby.jdbc.NonJNDIClientXADataSource40") :
+            "org.apache.derby.jdbc.BasicClientXADataSource40") :
             "org.apache.derby.jdbc.ClientXADataSource",
 
             "jdbc:derby://");

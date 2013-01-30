@@ -2738,7 +2738,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     newInstance();
         } else {
             cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40").
+               "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40").
                     newInstance();
         }
 
@@ -2780,7 +2780,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     newInstance();
         } else {
             xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.NonJNDIClientXADataSource40").
+                "org.apache.derby.jdbc.BasicClientXADataSource40").
                     newInstance();
         }
 
@@ -3076,7 +3076,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     newInstance();
         } else {
             cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40").
+               "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40").
                     newInstance();
         }
 
@@ -3103,7 +3103,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     newInstance();
         } else {
             xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.NonJNDIClientXADataSource40").
+                "org.apache.derby.jdbc.BasicClientXADataSource40").
                     newInstance();
         }
         //XADataSource - retrieveMessageTextProperty

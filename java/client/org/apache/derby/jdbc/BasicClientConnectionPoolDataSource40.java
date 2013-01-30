@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40
+   Derby - Class org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -29,14 +29,14 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
- * NonJNDIClientConnectionPoolDataSource40 is similar to
+ * BasicClientConnectionPoolDataSource40 is similar to
  * ClientConnectionPoolDataSource40 except that it does not support JNDI,
  * i.e. it does not implement {@code javax.naming.Referenceable}.
  *
  * @see ClientConnectionPoolDataSource40
  */
-public class NonJNDIClientConnectionPoolDataSource40
-        extends NonJNDIClientDataSource40
+public class BasicClientConnectionPoolDataSource40
+        extends BasicClientDataSource40
         implements javax.sql.ConnectionPoolDataSource,
                    ClientConnectionPoolDataSourceInterface {
 
@@ -47,7 +47,7 @@ public class NonJNDIClientConnectionPoolDataSource40
             new MessageUtil("org.apache.derby.loc.clientmessages");
 
     public static final String className__ =
-            "org.apache.derby.jdbc.NonJNDIClientConnectionPoolDataSource40";
+            "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40";
 
     /**
      * Specifies the maximum number of statements that can be cached per
@@ -60,7 +60,7 @@ public class NonJNDIClientConnectionPoolDataSource40
      */
     private int maxStatements = 0;
 
-    public NonJNDIClientConnectionPoolDataSource40() {
+    public BasicClientConnectionPoolDataSource40() {
         super();
     }
 

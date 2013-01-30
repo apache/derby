@@ -132,7 +132,7 @@ public class ReplicationRun_Local_1Indexing extends ReplicationRun
                "org.apache.derby.jdbc.ClientDataSource").newInstance();
         } else {
             ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.NonJNDIClientDataSource40").newInstance();
+               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
         }
 
         ds.setDatabaseName(dbPath);

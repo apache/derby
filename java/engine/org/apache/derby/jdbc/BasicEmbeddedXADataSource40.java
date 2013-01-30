@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.jdbc.NonJNDIEmbeddedXADataSource40
+   Derby - Class org.apache.derby.jdbc.BasicEmbeddedXADataSource40
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -27,14 +27,14 @@ import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 /**
  *
- * NonJNDIEmbeddedXADataSource40 is similar to
+ * BasicEmbeddedXADataSource40 is similar to
  * EmbeddedXADataSource40, except that it does not support JNDI
  * naming, i.e. it does not implement {@code javax.naming.Referenceable}.
  *
  * @see EmbeddedXADataSource40
  */
-public class NonJNDIEmbeddedXADataSource40
-    extends NonJNDIEmbeddedDataSource40
+public class BasicEmbeddedXADataSource40
+    extends BasicEmbeddedDataSource40
     implements
         EmbeddedXADataSourceInterface,
         javax.sql.XADataSource /* compile time check of 41 extensions */
@@ -45,7 +45,7 @@ public class NonJNDIEmbeddedXADataSource40
     // link to the database
     private transient ResourceAdapter ra;
 
-    public NonJNDIEmbeddedXADataSource40() {
+    public BasicEmbeddedXADataSource40() {
         super();
     }
 

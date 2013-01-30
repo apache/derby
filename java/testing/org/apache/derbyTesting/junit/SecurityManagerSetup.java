@@ -389,7 +389,7 @@ public final class SecurityManagerSetup extends TestSetup {
            URL client = getURL(
                     JDBC.vmSupportsJNDI() ?
                     "org.apache.derby.jdbc.ClientDataSource" :
-                    "org.apache.derby.jdbc.NonJNDIClientDataSource40");
+                    "org.apache.derby.jdbc.BasicClientDataSource40");
 
 		    if(client != null)
 		        classPathSet.setProperty("derbyTesting.clientjar", stripJar(client));
