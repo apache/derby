@@ -29,6 +29,9 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
+ * This datasource is suitable for client/server use of Derby,
+ * running on Java 8 Compact Profile 2 or higher.
+ * <p/>
  * BasicClientConnectionPoolDataSource40 is similar to
  * ClientConnectionPoolDataSource40 except that it does not support JNDI,
  * i.e. it does not implement {@code javax.naming.Referenceable}.

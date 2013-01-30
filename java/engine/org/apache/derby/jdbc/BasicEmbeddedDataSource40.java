@@ -27,6 +27,9 @@ import org.apache.derby.impl.jdbc.Util;
 
 /**
  *
+ * This datasource is suitable for an application using embedded Derby,
+ * running on Java 8 Compact Profile 2 or higher.
+ * <p/>
  * BasicEmbeddedDataSource40 is similar to EmbeddedDataSource40, but does
  * not support JNDI naming, i.e. it does not implement
  * {@code javax.naming.Referenceable}.

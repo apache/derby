@@ -41,10 +41,11 @@ import org.apache.derby.impl.jdbc.Util;
 
 /**
  * 
- * 
+ * This datasource is suitable for an application using embedded Derby,
+ * running on CDC/Foundation Profile 1.1.
+ * <p/>
  * EmbeddedSimpleDataSource is Derby's DataSource implementation
  * for J2ME/CDC/Foundation. It is also supports J2SE platforms.
- * 
  * 
  * Supports the same properties as EmbeddedDataSource, see that class for details.
  * <P>

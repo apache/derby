@@ -42,8 +42,6 @@ org/apache/derby/drda/NetworkServerControl.java
 
 # package: org.apache.derby.jdbc
 
-org/apache/derby/jdbc/ClientBaseDataSource.java
-org/apache/derby/jdbc/ClientDriver.java
 org/apache/derby/jdbc/EmbeddedDriver.java
 
 # package: org.apache.derby.tools

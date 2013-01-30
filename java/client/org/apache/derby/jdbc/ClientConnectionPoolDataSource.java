@@ -32,17 +32,14 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
+ * This datasource is suitable for a client/server use of Derby,
+ * running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
+ * If running on Java SE 7 og higher, consider a more capable data source.
+ * <p/>
  * ClientConnectionPoolDataSource is a factory for PooledConnection objects.
  * An object that implements this interface
  * will typically be registered with a naming service that is based on the
- * Java Naming and Directory Interface (JNDI). Use
- * ClientConnectionPoolDataSource if your application runs under
- * JDBC 3.0 or JDBC 4.0, that is, on the following Java Virtual Machines:
- * <p/>
- * <UL>
- * <LI> JDBC 4.0 - Java SE 6
- * <LI> JDBC 3.0 - J2SE 5.0
- * </UL>
+ * Java Naming and Directory Interface (JNDI).
  */
 public class ClientConnectionPoolDataSource extends ClientDataSource 
     implements ClientConnectionPoolDataSourceInterface

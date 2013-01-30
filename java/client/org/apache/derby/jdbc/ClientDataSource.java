@@ -22,18 +22,16 @@
 package org.apache.derby.jdbc;
 
 /**
+ * This datasource is suitable for a client/server use of Derby,
+ * running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
+ * If running on Java SE 7 og higher, consider a more capable data source.
+ * <p/>
  * ClientDataSource is a simple data source implementation
  * that can be used for establishing connections in a
  * non-pooling, non-distributed environment.
  * The class ClientConnectionPoolDataSource can be used in a connection pooling environment,
  * and the class ClientXADataSource can be used in a distributed, and pooling
- * environment. Use these DataSources if your application runs under
- * JDBC 3.0 or JDBC 4.0, that is, on the following Java Virtual Machines:
- * <p/>
- * <UL>
- * <LI> JDBC 4.0 - Java SE 6
- * <LI> JDBC 3.0 - J2SE 5.0
- * </UL>
+ * environment.
  *
  * <p>The example below registers a DNC data source object with a JNDI naming service.
  * <pre>

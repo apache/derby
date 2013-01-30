@@ -29,6 +29,9 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * This datasource is suitable for client/server use of Derby,
+ * running on Java 8 Compact Profile 2 or higher.
+ * <p/>
  * BasicClientDataSource40 is similar to ClientDataSource40 except it
  * can not be used with JNDI, i.e. it does not implement
  * {@code javax.naming.Referenceable}.

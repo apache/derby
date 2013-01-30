@@ -28,21 +28,20 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
- * <p>
- * This is Derby's network XADataSource for use with JDBC 4.1.
- * </p>
+ * This datasource is suitable for a client/server use of Derby,
+ * running on full Java SE 7, corresponding to JDBC 4.1.
+ * <p/>
+ * Use ClientXADataSource if your application runs in the following
+ * environments:
+ * <ul>
+ *   <li> JDBC 4.0 - Java SE 6
+ *   <li> JDBC 3.0 - J2SE 5.0
+ * </ul>
+ *
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource
  * interface is typically registered with a JNDI service provider.
  * <P>
- * Use ClientXADataSource40 if your application runs at JDBC level 4.1 (or
- * higher). Use ClientXADataSource
- * if your application runs in the following environments:
- * <UL>
- * <LI> JDBC 4.0 - Java SE 6
- * <LI> JDBC 3.0 - J2SE 5.0
- * </UL>
- *
  * <P>ClientXADataSource40 is serializable and referenceable.</p>
  *
  * <P>See ClientDataSource40 for DataSource properties.</p>

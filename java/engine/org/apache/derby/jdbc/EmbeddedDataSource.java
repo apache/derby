@@ -30,9 +30,10 @@ import javax.naming.Referenceable;
 import javax.naming.StringRefAddr;
 
 /** 
-
-    EmbeddedDataSource is Derby's DataSource implementation for JDBC 3.0
-    and JDBC 4.0.
+    This datasource is suitable for an application using embedded Derby,
+    running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
+    If running on Java SE 7 og higher, consider a more capable data source.
+    <p/>
 
 	<P>A DataSource  is a factory for Connection objects. An object that
 	implements the DataSource interface will typically be registered with a

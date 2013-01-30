@@ -35,7 +35,9 @@ import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
-
+/**
+ * The client JDBC driver (type 4) for Derby.
+ */
 public class ClientDriver implements java.sql.Driver {
     private transient int traceFileSuffixIndex_ = 0;
 

@@ -28,20 +28,22 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * This datasource is suitable for a client/server use of Derby,
+ * running on full Java SE 7, corresponding to JDBC 4.1.
+ * <p/>
+ * Use the corresponding ClientDataSource,
+ * ClientConnectionPoolDataSource, and ClientXADataSource classes if
+ * your application runs in the following environments:
+ * <ul>
+ *  <li> JDBC 4.0 - Java SE 6
+ *  <li> JDBC 3.0 - J2SE 5.0
+ * </ul>
  * ClientDataSource40 is a simple data source implementation
  * that can be used for establishing connections in a
  * non-pooling, non-distributed environment.
  * The class ClientConnectionPoolDataSource40 can be used in a connection pooling environment,
  * and the class ClientXADataSource40 can be used in a distributed, and pooling
- * environment. Use these DataSources if your application runs at
- * JDBC level 4.1 (or higher). Use the corresponding ClientDataSource,
- * ClientConnectionPoolDataSource, and ClientXADataSource classes if
- * your application runs in the following environments:
- * <p/>
- *  <UL>
- *  <LI> JDBC 4.0 - Java SE 6
- *  <LI> JDBC 3.0 - J2SE 5.0
- * </UL>
+ * environment.
  *
  * <p>The example below registers a DNC data source object with a JNDI naming service.
  * <pre>

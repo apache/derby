@@ -28,18 +28,20 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * This datasource is suitable for a client/server use of Derby,
+ * running on full Java SE 7, corresponding to JDBC 4.1.
+ * <p/>
+ * Use ClientConnectionPoolDataSource, instead, if your application
+ * runs under JDBC 4.0 or JDBC 3.0, that is, on the following Java
+ * Virtual Machines:
+ * <ul>
+ *   <li> JDBC 4.0 - Java SE 6
+ *   <li> JDBC 3.0 - J2SE 5.0
+ * </ul>
  * ClientConnectionPoolDataSource40 is a factory for PooledConnection objects.
  * An object that implements this interface
  * will typically be registered with a naming service that is based on the
- * Java Naming and Directory Interface (JNDI). Use this factory
- * if your application runs at JDBC level 4.1 (or higher). Use
- * ClientConnectionPoolDataSource, instead, if your application runs under
- * JDBC 4.0 or JDBC 3.0, that is, on the following Java Virtual Machines:
- * <p/>
- * <UL>
- * <LI> JDBC 4.0 - Java SE 6
- * <LI> JDBC 3.0 - J2SE 5.0
- * </UL>
+ * Java Naming and Directory Interface (JNDI).
  */
 public class ClientConnectionPoolDataSource40
     extends ClientConnectionPoolDataSource

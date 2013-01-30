@@ -19,10 +19,11 @@
 <P>
 Client/Remote driver and data sources, used to connect to the network server
 <UL>
-<LI> <B>ClientDriver</B> - Type 4 JDBC driver
-<LI> <B>ClientDataSource</B> - Data source
-<LI> <B>ClientConnectionPoolDataSource</B> - Connection pooling data source
-<LI> <B>ClientXADataSource</B> - XA data source
+<LI> <B>ClientDriver, ClientDriver40</B> - Type 4 JDBC drivers
+<LI> <B>ClientDataSource, ClientDataSource40</B> - Data sources
+<LI> <B>ClientConnectionPoolDataSource, ClientConnectionPoolDataSource40</B> -
+        Connection pooling data sources
+<LI> <B>ClientXADataSource, ClientXADataSource40</B> - XA data sources
 </UL>
 <P>
 Embedded driver and data sources, used when the database engine is embedded with the application.
@@ -33,7 +34,26 @@ Embedded driver and data sources, used when the database engine is embedded with
 <LI> <B>EmbeddedConnectionPoolSource, EmbeddedConnectionPoolSource40</B> - Connection pooling data source
 <LI> <B>EmbeddedXASource, EmbeddedXASource40</B> - XA data sources
 </UL>
-<P>
+
+<p>
+Client/server data sources for use with Java 8 Compact Profile 2 and above:
+<ul>
+  <li> <b>BasicClientDataSource40</b> - Data source
+  <li> <b>BasicClientConnectionPoolDataSource40</b> - Connection pooling data
+    source
+  <li> <b>BasicClientXADataSource40</b> - XA data source
+</ul>
+
+<p>
+Embedded data sources for use with Java 8 Compact Profile 2 and above:
+<ul>
+  <li> <b>BasicEmbeddedDataSource40</b> - Data source for J2SE and J2EE
+  <li> <b>BasicEmbeddedConnectionPoolSource40</B> - Connection pooling data
+    source
+  <li> <b>BasicEmbeddedXASource40</B> - XA data source
+</ul>
+
+<p>
 Derby's JDBC api is defined by its entry point classes, the drivers and data source implementations
 and the standard JDBC api definitions of the <code>java.sql</code> and <code>javax.sql</code> classes.
 Derby does not provide non-standard extensions to standard JDBC classes such as <code>Connection</code>,

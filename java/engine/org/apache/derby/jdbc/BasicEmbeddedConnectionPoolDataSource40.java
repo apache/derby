@@ -24,6 +24,9 @@ import java.sql.SQLException;
 import javax.sql.PooledConnection;
 
 /**
+ * This datasource is suitable for an application using embedded Derby,
+ * running on Java 8 Compact Profile 2 or higher.
+ * <p/>
  * BasicEmbeddedConnectionPoolDataSource40 is similar to
  * EmbeddedConnectionPoolDataSource40 except it does not support JNDI naming,
  * i.e. it does not implement {@code javax.naming.Referenceable}.

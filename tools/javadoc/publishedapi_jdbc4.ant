@@ -33,6 +33,7 @@
 
 # package: org.apache.derby.jdbc
 
+org/apache/derby/jdbc/ClientDriver40.java
 org/apache/derby/jdbc/ClientConnectionPoolDataSource40.java
 org/apache/derby/jdbc/ClientDataSource40.java
 org/apache/derby/jdbc/ClientXADataSource40.java

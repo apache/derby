@@ -27,6 +27,9 @@ import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 /**
  *
+ * This datasource is suitable for an application using embedded Derby,
+ * running on Java 8 Compact Profile 2 or higher.
+ * <p/>
  * BasicEmbeddedXADataSource40 is similar to
  * EmbeddedXADataSource40, except that it does not support JNDI
  * naming, i.e. it does not implement {@code javax.naming.Referenceable}.
