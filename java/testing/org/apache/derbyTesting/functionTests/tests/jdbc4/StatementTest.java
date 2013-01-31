@@ -392,7 +392,7 @@ public class StatementTest
     {
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
-        setRowCountBase( sw, false, rowCountBase );
+        setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
 
         largeUpdateTest( sw, rowCountBase, 1L );
         largeUpdateTest( sw, rowCountBase, 3L );
@@ -447,7 +447,7 @@ public class StatementTest
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
         sw.getWrappedStatement().clearBatch();
-        setRowCountBase( sw, false, rowCountBase );
+        setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
 
         long[]  expectedResult = new long[] { rowCountBase + 1L, rowCountBase + 1L, rowCountBase + 2L };
 
@@ -476,7 +476,7 @@ public class StatementTest
         truncate( sw );
         sw.getWrappedStatement().execute( "insert into bigintTable( col2 ) values ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 )" );
         
-        setRowCountBase( sw, usingDerbyNetClient(), maxRows - expectedRowCount );
+        setRowCountBase( sw.getWrappedStatement(), usingDerbyNetClient(), maxRows - expectedRowCount );
 
         sw.setLargeMaxRows( maxRows );
         
@@ -485,14 +485,14 @@ public class StatementTest
         while( rs.next() ) { rowCount++; }
         rs.close();
 
-        setRowCountBase( sw, usingDerbyNetClient(), 0L );
+        setRowCountBase( sw.getWrappedStatement(), usingDerbyNetClient(), 0L );
         
         assertEquals( expectedRowCount, rowCount );
         assertEquals( maxRows, sw.getLargeMaxRows() );
     }
         
-    private static  void    setRowCountBase
-        ( StatementTest.StatementWrapper sw, boolean onClient, long rowCountBase )
+    public static  void    setRowCountBase
+        ( Statement stmt, boolean onClient, long rowCountBase )
         throws Exception
     {
         if ( onClient )
@@ -501,7 +501,7 @@ public class StatementTest
         }
         else
         {
-            sw.getWrappedStatement().execute( "call setRowCountBase( " + rowCountBase + " )" );
+            stmt.execute( "call setRowCountBase( " + rowCountBase + " )" );
         }
     }
     private static  void    truncate( StatementTest.StatementWrapper sw )
@@ -543,7 +543,7 @@ public class StatementTest
      * VM rev levels lower than Java 8.
      * </p>
      */
-    public  static  final   class   StatementWrapper
+    public  static  class   StatementWrapper
     {
         private Statement   _wrappedStatement;
 
@@ -630,7 +630,7 @@ public class StatementTest
 
 
         // Reflection minion
-        private Object  invoke( String methodName, Class[] argTypes, Object[] argValues )
+        protected Object  invoke( String methodName, Class[] argTypes, Object[] argValues )
             throws SQLException
         {
             try {

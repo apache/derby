@@ -384,4 +384,16 @@ public class LogicalPreparedStatement
     public ResultSet executeQuery(String sql) throws SQLException {
         return getPhysPs().executeQuery(sql);
     }
+
+    ////////////////////////////////////////////////////////////////
+    //
+    //  ADDED BY JDBC 4.2
+    //
+    ////////////////////////////////////////////////////////////////
+
+    public  long    executeLargeUpdate() throws SQLException
+    {
+        return ((PreparedStatement) getPhysPs()).executeLargeUpdate();
+    }
+
 }

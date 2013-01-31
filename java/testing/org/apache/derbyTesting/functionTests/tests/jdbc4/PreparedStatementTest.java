@@ -1183,6 +1183,49 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test the large update methods added by JDBC 4.2.
+     */
+    public void testLargeUpdate_jdbc4_2() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        largeUpdate_jdbc4_2( conn );
+    }
+
+    public  static  void    largeUpdate_jdbc4_2( Connection conn )
+        throws Exception
+    {
+        println( "Running large update test for JDBC 4.2" );
+        
+        conn.prepareStatement
+            (
+             "create procedure setRowCountBase( newBase bigint )\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.StatementTest.setRowCountBase'\n"
+             ).execute();
+        conn.prepareStatement
+            (
+             "create table bigintTable( col1 int generated always as identity, col2 bigint )"
+             ).execute();
+
+        Statement   stmt = conn.createStatement();
+        PreparedStatementWrapper  psw = new PreparedStatementWrapper
+            ( conn.prepareStatement( "insert into bigintTable( col2 ) values ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 )" ) );
+
+        largeUpdateTest( stmt, psw, ((long) Integer.MAX_VALUE) + 1L );
+        
+        StatementTest.setRowCountBase( stmt, false, 0L );
+    }
+    private static  void    largeUpdateTest
+        ( Statement stmt, PreparedStatementWrapper psw, long rowCountBase )
+        throws Exception
+    {
+        StatementTest.setRowCountBase( stmt, false, rowCountBase );
+
+        assertEquals( rowCountBase + 5L, psw.executeLargeUpdate() );
+    }
+
     /************************************************************************
      *                 A U X I L I A R Y  M E T H O D S                     *
      ************************************************************************/
@@ -1289,4 +1332,39 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         assertEquals("Incorrect internal SQL state", expectedInternal,
                      dioe.getSQLState());
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED JDBC 4.2 WRAPPER AROUND A PreparedStatement
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * This wrapper is used to expose JDBC 4.2 methods which can run on
+     * VM rev levels lower than Java 8.
+     * </p>
+     */
+    public  static  class   PreparedStatementWrapper    extends StatementTest.StatementWrapper
+    {
+        private PreparedStatement   _wrappedPreparedStatement;
+
+        public  PreparedStatementWrapper( PreparedStatement wrappedPreparedStatement )
+        {
+            super( wrappedPreparedStatement );
+        }
+
+        PreparedStatement   getWrappedPreparedStatement() { return (PreparedStatement) getWrappedStatement(); }
+
+        public  long executeLargeUpdate() throws SQLException
+        {
+            return ((Long) invoke
+                (
+                 "executeLargeUpdate",
+                 new Class[] {},
+                 new Object[] {}
+                 )).longValue();
+        }
+    }
+    
 }

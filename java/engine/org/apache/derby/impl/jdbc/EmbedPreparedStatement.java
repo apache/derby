@@ -307,12 +307,22 @@ public class EmbedPreparedStatement
 	 * @exception SQLException thrown on failure.
      */
         public final int executeUpdate() throws SQLException {
+            return (int) executeLargeUpdate();
+        }
+
+    /**
+     * Execute a SQL INSERT, UPDATE or DELETE statement. In addition,
+     * SQL statements that return nothing such as SQL DDL statements
+     * can be executed. For use with
+     * statements which may touch more than Integer.MAX_VALUE rows.
+     */
+        public final long executeLargeUpdate() throws SQLException {
             try {
                 executeStatement(activation, false, true);
             } catch(SQLException sqle) {
                 checkStatementValidity(sqle);
             }
-            return (int) updateCount;
+            return updateCount;
         }
 
     /**

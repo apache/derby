@@ -47,4 +47,13 @@ public interface EnginePreparedStatement extends PreparedStatement, EngineStatem
      * @return version counter
      */
     public long getVersionCounter() throws SQLException;
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.2 IN JAVA 8
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public long executeLargeUpdate() throws SQLException;
+    
 }

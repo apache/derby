@@ -2774,6 +2774,30 @@ public class PreparedStatement extends Statement
 
     // End of JDBC 4.0 methods
 
+    // Beginning of JDBC 4.2 methods
+
+    public long executeLargeUpdate() throws SQLException {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "executeLargeUpdate");
+                }
+                long updateValue = executeUpdateX();
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "executeLargeUpdate", updateValue);
+                }
+                return updateValue;
+            }
+        }
+        catch ( SqlException se ) {
+            checkStatementValidity(se);
+            throw se.getSQLException();
+        }
+    }
+
+    // End of JDBC 4.2 methods
+
         /*
          * Method calls onStatementError occurred on the 
          * BrokeredConnectionControl class after checking the 

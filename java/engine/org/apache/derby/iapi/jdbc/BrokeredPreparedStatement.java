@@ -500,6 +500,15 @@ public class BrokeredPreparedStatement extends BrokeredStatement
         getPreparedStatement().setTimestamp( i, x, cal);
     }
     
+    // JDBC 4.1 methods exposed via the EnginePreparedStatement interface
+
+    public long executeLargeUpdate() throws SQLException
+    {
+        final EnginePreparedStatement engnps = (EnginePreparedStatement) getPreparedStatement();  
+
+        return engnps.executeLargeUpdate();
+    }    
+    
     // JDBC 4.0 methods exposed via the EnginePreparedStatement interface
     
     public void setBinaryStream(int parameterIndex, 
