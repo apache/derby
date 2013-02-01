@@ -298,6 +298,9 @@
             If a Java 6 JDK isn't present, then use the Java 5 environment to build the JDBC 4 support.
             If a Java 5 JDK also isn't present then use the Java 7 environment to build the JDBC 4 support
     -->
+    <condition property="java17compile.classpath" value="${out.jdbc4.dir}:${java18compile.classpath}">
+          <isset property="java18compile.classpath"/>
+    </condition>
     <condition property="java16compile.classpath" value="${out.jdbc4.dir}:${java15compile.classpath}" else="${java17compile.classpath}">
           <isset property="java15compile.classpath"/>
     </condition>

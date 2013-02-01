@@ -54,6 +54,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <li>java15compile.classpath</li>
  * <li>java16compile.classpath</li>
  * <li>java17compile.classpath</li>
+ * <li>java18compile.classpath</li>
  * </ul>
  *
  * <p>
@@ -65,6 +66,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <li>j15lib</li>
  * <li>j16lib</li>
  * <li>j17lib</li>
+ * <li>j18lib</li>
  * </ul>
  *
  * <p>
@@ -94,6 +96,7 @@ public class PropertySetter extends Task
         new VMLevel( "15", "1.5" ),
         new VMLevel( "16", "1.6" ),
         new VMLevel( "17", "1.7" ),
+        new VMLevel( "18", "1.8" ),
     };
 
     private static  final   String  JDK_VENDOR = "java.vendor";
