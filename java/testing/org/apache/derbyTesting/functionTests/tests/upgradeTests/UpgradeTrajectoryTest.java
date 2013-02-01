@@ -62,11 +62,14 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *   trajectories which begin with some release, then upgrade through all
  *   intermediate releases to the highest release in the original collection of
  *   all releases. A set of N releases gives rise to N-1 minimal trajectories.</li>
- *   <li>Otherwise, if the system property derbyTesting.allTrajectories is set to true, builds the set of all upgrade trajectories possible on that collection of
- *   releases. An upgrade trajectory is a sorted subset of those releases. Each
- *   subset is sorted in ascending release order. We exclude the vacuous empty
- *   subset and the uninteresting singleton subsets. A set of N releases
- *   gives rise to ((2**N) - N) - 1 hard-upgrade trajectories.</li>
+ *
+ *   <li>Otherwise, if the system property {@code derbyTesting.allTrajectories}
+ *   is set to true, builds the set of all upgrade trajectories possible on
+ *   that collection of releases. An upgrade trajectory is a sorted subset of
+ *   those releases. Each subset is sorted in ascending release order. We
+ *   exclude the vacuous empty subset and the uninteresting singleton
+ *   subsets. A set of N releases gives rise to ((2**N) - N) - 1 hard-upgrade
+ *   trajectories.</li>
  *  </ul>
  * </li>
  * <li>For each trajectory, we create two databases:
@@ -91,10 +94,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * </p>
  *
  * <p>
- * By default we consider all trajectories possible on the collection of
- * releases listed in _Suite. If you want to consider a different collection of
- * releases, you can override the _Suite collection by setting the system
- * property "derbyTesting.oldVersionsPath". Here, for instance, is the command
+ * By default we consider all  trajectories possible on the collection
+ * of releases listed in {@link OldVersions}. If you want to consider
+ * a different  collection of  releases, you  can override  the {@code
+ * OldVersions}  collection  by  setting the  system  property  {@code
+ * "derbyTesting.oldVersionsPath"}. Here, for instance, is the command
  * line to run this test against a customized list of releases:
  * </p>
  *
@@ -131,7 +135,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *
  * <p>
  * If you need to test a particular trajectory, you can hand-edit
- * makeSampleTrajectories() and uncomment the call to it.
+ * {@code makeSampleTrajectories()} and uncomment the call to it.
  * </p>
  *
  */
