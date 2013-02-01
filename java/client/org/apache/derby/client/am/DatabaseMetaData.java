@@ -2886,6 +2886,15 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         return ps.executeQueryX();
     }
 
+    // ------------------- JDBC 4.2 -------------------------
+
+    /** See DatabaseMetaData javadoc and Limits.DB2_LOB_MAXWIDTH */
+    public  long getMaxLogicalLOBSize() { return ((long) Integer.MAX_VALUE) * 2; }
+
+    /** Derby does not support the Types.REF_CURSOR type. */
+    public boolean supportsRefCursors() { return false; }
+
+
     //----------------------------helper methods----------------------------------
 
 

@@ -3825,8 +3825,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.BOOLEAN,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.BIGINT,
+                Types.BIGINT,Types.VARCHAR};
         
         boolean [] nullability = {false,false,false,
             false,false,true,true,true,false,false,true,true,true};
@@ -5013,6 +5013,30 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute( "drop table t_jdbc41" );
     }
     
+    /**
+     * Test methods added by JDBC 4.2
+     */
+    public void test_jdbc4_2() throws Exception
+    {
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 10, 0, 0 ) ) < 0 ) { return; }
+
+        Statement s = createStatement();
+        DatabaseMetaData dmd = getDMD();
+        println( "Testing JDBC 4.2 methods on a " + dmd.getClass().getName() );
+        Wrapper42DBMD wrapper = new Wrapper42DBMD( dmd );
+
+        //
+        // getMaxLogicalLOBSize()
+        //
+        assertEquals( ((long) Integer.MAX_VALUE) * 2, wrapper.getMaxLogicalLOBSize() );
+
+        //
+        // supportsRefCursors()
+        //
+        assertEquals( false, wrapper.supportsRefCursors() );
+    }
+
     public void testBugFixes() throws SQLException {
         
         Statement s = createStatement();

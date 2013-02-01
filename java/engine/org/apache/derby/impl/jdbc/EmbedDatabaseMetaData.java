@@ -972,6 +972,18 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
     /**
+     * Added in JDBC 4.2.
+     *
+     * Derby does not support the Types.REF_CURSOR type.
+     *
+     * @return true if so
+     */
+	public boolean supportsRefCursors()
+    {
+		return false;
+	}
+    
+    /**
      * Is SELECT for UPDATE supported?
      *
      * @return true if so
@@ -1208,6 +1220,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public int getMaxIndexLength() {
 		return 0;
 	}
+
+    /**
+     * Added in JDBC 4.2.
+     *
+     * What's the maximum length of Derby LOB? This
+     * is the maximum number of bytes in a LOB. Since a
+     * CLOB can have DB2_LOB_MAXWIDTH characters, the
+     * maximum number of bytes is 2 * DB2_LOB_MAXWIDTH.
+     * If you change this value, consider whether you need to change
+     * DatabaseMetaData.getMaxLogicalLOBSize().
+     *
+     * @return max index length in bytes
+     */
+	public long getMaxLogicalLOBSize() { return ((long) Limits.DB2_LOB_MAXWIDTH) * 2; }
 
     /**
      * What's the maximum length allowed for a schema name?

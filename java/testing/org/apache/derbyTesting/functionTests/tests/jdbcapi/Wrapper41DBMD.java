@@ -39,8 +39,8 @@ public  class   Wrapper41DBMD
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private EmbedDatabaseMetaData    _embedded;
-    private DatabaseMetaData      _netclient;
+    protected EmbedDatabaseMetaData    _embedded;
+    protected DatabaseMetaData      _netclient;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -96,7 +96,7 @@ public  class   Wrapper41DBMD
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private SQLException nothingWrapped() { return new SQLException( "Nothing wrapped!" ); }
+    protected SQLException nothingWrapped() { return new SQLException( "Nothing wrapped!" ); }
 
 }
 

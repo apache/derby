@@ -131,4 +131,20 @@ public class LogicalDatabaseMetaData40
             ( catalog, schemaPattern, tableNamePattern, columnNamePattern );
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.2 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /** See DatabaseMetaData javadoc */
+    public  long getMaxLogicalLOBSize() throws SQLException
+    {
+        return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).getMaxLogicalLOBSize();
+    }
+    public  boolean supportsRefCursors() throws SQLException
+    {
+        return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).supportsRefCursors();
+    }
+
 }
