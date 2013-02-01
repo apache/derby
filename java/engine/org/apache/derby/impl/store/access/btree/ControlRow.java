@@ -318,14 +318,14 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 		// Page numbers start out "invalid".  Presumably the caller will
 		// link the page into a page chain as one of its next steps.
 		leftSiblingPageNumber  = 
-            new SQLLongint(btree.container.INVALID_PAGE_NUMBER);
+            new SQLLongint(ContainerHandle.INVALID_PAGE_NUMBER);
 		rightSiblingPageNumber = 
-            new SQLLongint(btree.container.INVALID_PAGE_NUMBER);
+            new SQLLongint(ContainerHandle.INVALID_PAGE_NUMBER);
 
 		// Remember the parent if there is one and we're remembering parents.
         parentPageNumber = new SQLLongint( 
             (parent == null ?  
-                 btree.container.INVALID_PAGE_NUMBER : 
+                 ContainerHandle.INVALID_PAGE_NUMBER : 
                  parent.page.getPageNumber()));
 
 		// All pages start out not being root pages.  The caller will setIsRoot
@@ -783,23 +783,6 @@ public abstract class ControlRow implements AuxObject, TypedFormat
                (RecordHandle) null, CR_SLOT, scratch_row, fetchDesc, false); 
 		}
 		return this.btree;
-	}
-
-    /**
-     * Set the conglomerate field in the btree.
-     * <p>
-     * Sets the btree field of the control row.  Updates just the disk copy. 
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	private void setConglom(BTree btree)
-		throws StandardException
-	{
-		// Store the field.  Delay faulting value into object until getConlgom()
-        // call, which in general only happens during recovery.
-
-		// Write the field through to the underlying row.
-		this.page.updateFieldAtSlot(CR_SLOT, CR_CONGLOM_COLID, btree, null);
 	}
 
 	/*

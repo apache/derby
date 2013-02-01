@@ -920,7 +920,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		throws StandardException
 	{
 		boolean setUserIdentity = constants.hasAutoincrement() && isSingleRowResultSet();
-		boolean	firstDeferredRow = true;
 		ExecRow	deferredRowBuffer = null;
                 long user_autoinc=0;
                         
@@ -1566,10 +1565,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                         fkConglom,
                         false,                       // hold 
                         0, 							 // read only
-                        tc.MODE_TABLE,				 // doesn't matter, 
-                                                     //   already locked
-                        tc.ISOLATION_READ_COMMITTED, // doesn't matter, 
-                                                     //   already locked
+                        // doesn't matter, already locked
+                        TransactionController.MODE_TABLE,
+                        // doesn't matter, already locked
+                        TransactionController.ISOLATION_READ_COMMITTED,
                         (FormatableBitSet)null, 				 // retrieve all fields
                         (DataValueDescriptor[])null, // startKeyValue
                         ScanController.GE,           // startSearchOp
@@ -1619,10 +1618,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						false,                       	// hold 
 						0, 								// read only
                         (fkConglom == pkConglom) ?
-								tc.MODE_TABLE :
-								tc.MODE_RECORD,
-						tc.ISOLATION_READ_COMMITTED,	// read committed is 
-                                                        //    good enough
+                                TransactionController.MODE_TABLE :
+                                TransactionController.MODE_RECORD,
+                        // read committed is good enough
+                        TransactionController.ISOLATION_READ_COMMITTED,
 						(FormatableBitSet)null, 					// retrieve all fields
 						(DataValueDescriptor[])null,    // startKeyValue
 						ScanController.GE,            	// startSearchOp
@@ -1938,7 +1937,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			if ((numRows = cCount.getRowCount()) > 0)
 			{
 				long[] c = cCount.getCardinality();
-				DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
 				for (int i= 0; i < c.length; i++)
 				{
@@ -2456,9 +2454,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                     false,					// for update
                     -1,						// saved object for referenced bitImpl
                     -1,
-                    tc.MODE_TABLE,
+                    TransactionController.MODE_TABLE,
                     true,					// table locked
-                    tc.ISOLATION_READ_COMMITTED,
+                    TransactionController.ISOLATION_READ_COMMITTED,
                     LanguageProperties.BULK_FETCH_DEFAULT_INT,	// rows per read
                     false,                  // never disable bulk fetch
                     false,					// not a 1 row per scan

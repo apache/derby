@@ -667,8 +667,8 @@ class TabInfoImpl
 		** is a start key and no stop key or vice versa.
 		*/
 		int lockMode = ((startKey != null) && (stopKey != null)) ? 
-				tc.MODE_RECORD : 
-				tc.MODE_TABLE;
+                TransactionController.MODE_RECORD : 
+                TransactionController.MODE_TABLE;
 
 		/*
 		** Don't use level 3 if we have the same start/stop key.
