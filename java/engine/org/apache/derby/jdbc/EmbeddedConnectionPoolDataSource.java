@@ -27,7 +27,7 @@ import javax.sql.PooledConnection;
 /** 
     This datasource is suitable for an application using embedded Derby,
     running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
-    If running on Java SE 7 og higher, consider a more capable data source.
+    If running on Java SE 7 or higher, consider a more capable data source.
     <p/>
    EmbeddedConnectionPoolDataSource is a ConnectionPoolDataSource
    implementation.

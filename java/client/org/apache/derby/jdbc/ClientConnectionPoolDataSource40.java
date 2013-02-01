@@ -29,15 +29,24 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 7, corresponding to JDBC 4.1.
- * <p/>
- * Use ClientConnectionPoolDataSource, instead, if your application
- * runs under JDBC 4.0 or JDBC 3.0, that is, on the following Java
- * Virtual Machines:
+ * running on the following platforms:
+ * <p>
+ * <ul>
+ *   <li>JDBC 4.1 - Java SE 7
+ *   <li>JDBC 4.2 - full Java SE 8
+ * </ul>
+ * <p>
+ * Use BasicClientConnectionPoolDataSource40 if your application
+ * runs on Java 8 Compact Profile 2.
+ * <p>
+ * Use ClientConnectionPoolDataSource if your application
+ * runs on the following platforms:
+ * <p>
  * <ul>
  *   <li> JDBC 4.0 - Java SE 6
  *   <li> JDBC 3.0 - J2SE 5.0
  * </ul>
+ * <p>
  * ClientConnectionPoolDataSource40 is a factory for PooledConnection objects.
  * An object that implements this interface
  * will typically be registered with a naming service that is based on the

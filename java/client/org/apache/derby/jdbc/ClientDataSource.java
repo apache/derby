@@ -24,7 +24,7 @@ package org.apache.derby.jdbc;
 /**
  * This datasource is suitable for a client/server use of Derby,
  * running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
- * If running on Java SE 7 og higher, consider a more capable data source.
+ * If running on Java SE 7 or higher, consider a more capable data source.
  * <p/>
  * ClientDataSource is a simple data source implementation
  * that can be used for establishing connections in a

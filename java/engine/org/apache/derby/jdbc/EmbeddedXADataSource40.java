@@ -28,10 +28,19 @@ import org.apache.derby.impl.jdbc.Util;
 /**
 
     This datasource is suitable for an application using embedded Derby,
-    running on full Java SE 7, corresponding to JDBC 4.1.
+    running on the following platforms:
     <p>
-	Use EmbeddedXADataSource
-	if your application runs in the following environments:
+    <ul>
+      <li>JDBC 4.1 - Java SE 7
+      <li>JDBC 4.2 - full Java SE 8
+    </ul>
+    <p>
+    Use BasicEmbeddedXADataSource40 if your application runs on Java 8
+    Compact Profile 2.
+    <p>
+    Use EmbeddedXADataSource if your application runs on the following
+    platforms:
+    <p>
     <ul>
       <li> JDBC 3.0 - J2SE 5.0 </li>
       <li> JDBC 4.0 - Java SE 6 </li>

@@ -29,15 +29,24 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 7, corresponding to JDBC 4.1.
- * <p/>
- * Use the corresponding ClientDataSource,
- * ClientConnectionPoolDataSource, and ClientXADataSource classes if
- * your application runs in the following environments:
+ * running on the following platforms:
+ * <p>
+ * <ul>
+ *   <li>JDBC 4.1 - Java SE 7
+ *   <li>JDBC 4.2 - full Java SE 8
+ * </ul>
+ * <p>
+ * Use BasicClientDataSource40 if your application runs on Java 8
+ * Compact Profile 2.
+ * <p>
+ * Use ClientDataSource if your application runs on the following
+ * platforms:
+ * <p>
  * <ul>
  *  <li> JDBC 4.0 - Java SE 6
  *  <li> JDBC 3.0 - J2SE 5.0
  * </ul>
+ * <p>
  * ClientDataSource40 is a simple data source implementation
  * that can be used for establishing connections in a
  * non-pooling, non-distributed environment.
