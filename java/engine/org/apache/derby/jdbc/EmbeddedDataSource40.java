@@ -31,8 +31,8 @@ import org.apache.derby.impl.jdbc.Util;
     running on the following platforms:
     <p>
     <ul>
-      <li>JDBC 4.1 - Java SE 7
-      <li>JDBC 4.2 - full Java SE 8
+      <li>Java SE 7 (JDBC 4.1) and
+      <li>full Java SE 8 (JDBC 4.2).
     </ul>
     <p>
     Use BasicEmbeddedDataSource40 if your application runs on Java 8
