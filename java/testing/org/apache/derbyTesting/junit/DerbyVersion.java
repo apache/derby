@@ -40,6 +40,7 @@ public class DerbyVersion
     public static final DerbyVersion _10_6     = new DerbyVersion(10,6,0,0);
     public static final DerbyVersion _10_7     = new DerbyVersion(10,7,0,0);
     public static final DerbyVersion _10_8     = new DerbyVersion(10,8,0,0);
+    public static final DerbyVersion _10_9     = new DerbyVersion(10,9,0,0);
 
     // A list of all known official Derby releases.
 
@@ -77,6 +78,10 @@ public class DerbyVersion
     public static final DerbyVersion _10_8_1_2 = new DerbyVersion(10,8,1,2);
     /** 10.8.2.2 (October 24, 2011/ SVN 1181258) */
     public static final DerbyVersion _10_8_2_2 = new DerbyVersion(10,8,2,2);
+    /** 10.8.3.0 (November 16, 2012/ SVN 1405108) */
+    public static final DerbyVersion _10_8_3_0 = new DerbyVersion(10,8,3,0);
+    /** 10.9.1.0 (June 25, 2012/ SVN 1344872) */
+    public static final DerbyVersion _10_9_1_0 = new DerbyVersion(10,9,1,0);
 
     private final int major;
     private final int minor;

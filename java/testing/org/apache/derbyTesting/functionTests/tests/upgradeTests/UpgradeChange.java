@@ -21,6 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DerbyVersion;
 
 /**
  * Abstract class to provide support for test fixtures for
@@ -94,6 +95,16 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
         return ((Integer) phase.get()).intValue();
     }
     
+    /**
+     * Returns a {@code DerbyVersion} object describing the old version.
+     *
+     * @return A version object.
+     */
+    final DerbyVersion getOldVersion() {
+        return new DerbyVersion(
+                getOldMajor(), getOldMinor(), getOldFixPack(), getOldPoint());
+    }
+
     /**
      * Get the major number of the old version being upgraded
      * from.

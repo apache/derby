@@ -30,6 +30,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.derbyTesting.junit.DerbyVersion;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 
 /**
@@ -48,6 +49,7 @@ public class DisposableIndexStatistics {
      */
     private static final int ROW_COUNT = 2000;
 
+    private final DerbyVersion oldVersion;
     private final Connection con;
     private final String tbl;
     private final String fktbl;
@@ -59,7 +61,10 @@ public class DisposableIndexStatistics {
      * @param con connection
      * @param tableName base table name
      */
-    public DisposableIndexStatistics(Connection con, String tableName) {
+    public DisposableIndexStatistics(DerbyVersion oldVersion,
+                                     Connection con,
+                                     String tableName) {
+        this.oldVersion = oldVersion;
         this.con = con;
         this.tbl = tableName;
         this.fktbl = tableName + "_FK";
@@ -137,12 +142,21 @@ public class DisposableIndexStatistics {
         stmt.executeUpdate("alter table " + tbl + " drop constraint " +
                 "fk_on_pk");
         // Derby failed to drop the statistics when the constraint got dropped.
-        Assert.assertTrue(stats.getStatsTable(tbl).length == preFkAddition +1);
+        // DERBY-5681: Originally fixed in 10.9, but has now been backported
+        //      all the way back to 10.3.
+        int tableStatsCount = stats.getStatsTable(tbl).length;
+        if (hasDerby5681Bug(oldVersion)) {
+            Assert.assertEquals(preFkAddition +1, tableStatsCount);
+        } else {
+            Assert.assertEquals(preFkAddition, tableStatsCount);
+        }
 
-        // Do an assert, but since we may be run with both old and new
-        // releases allow for two cases.
-        Assert.assertEquals(
-                getNumTotalPossibleStats(), getAllRelevantStats(null));
+        // Several valid states here, use a relaxed range check.
+        int max = getNumTotalPossibleStats();
+        int min = max - getNumDisposableStats();
+        int cur = getAllRelevantStats(null);
+        Assert.assertTrue("cur=" + cur + ", min=" + min, cur >= min);
+        Assert.assertTrue("cur=" + cur + ", max=" + max, cur <= max);
     }
 
     private void insertData(Connection con)
@@ -190,9 +204,24 @@ public class DisposableIndexStatistics {
         return new String[] {tbl, fktbl, pktbl};
     }
 
-    /** Asserts the number of statistics entries for all relevant tables. */
-    public void assertStatsCount(int expected)
+    /**
+     * Asserts the number of statistics entries for all relevant tables.
+     *
+     * @param disposedOf tells if the disposable statistics entries are
+     *      expected to have been removed at this point
+     */
+    public void assertStatsCount(boolean disposedOf)
             throws SQLException {
+        int expected = getNumTotalPossibleStats();
+        // Adjust expected count if the disposable stats should be gone.
+        if (disposedOf) {
+            expected -= getNumDisposableStats();
+        } else if (!hasDerby5681Bug(oldVersion)) {
+            // Here we correct for the orphaned statistics entry, but not for
+            // entires that are considered extraneous by newer releases (for
+            // instance statistics for single column unique indexes).
+            expected--;
+        }
         ArrayList entries = new ArrayList();
         int found = getAllRelevantStats(entries);
         if (found != expected) {
@@ -252,5 +281,37 @@ public class DisposableIndexStatistics {
     /** Number of disposable statistics entries. */
     public static int getNumDisposableStats() {
         return 3;
+    }
+
+    /**
+     * Tells if the old version is affected by the DERBY-5681 bug.
+     * <p>
+     * The bug is that Derby fails to drop a statistics entry for a foreign key
+     * constraint, leaving an orphaned and outdated entry behind.
+     *
+     * @param oldVersion the old derbyVersion used in the test
+     * @return {@code true} if the old version has the bug.
+     */
+    public static boolean hasDerby5681Bug(DerbyVersion oldVersion) {
+        if (oldVersion.atLeast(DerbyVersion._10_9)) {
+            return false;
+        }
+
+        // Here we have to check the versions within each branch back to 10.5
+        // (the test isn't run for older versions).
+        if (oldVersion.atMajorMinor(10, 8)) {
+            return !oldVersion.greaterThan(DerbyVersion._10_8_2_2);
+        }
+        if (oldVersion.atMajorMinor(10, 7)) {
+            return !oldVersion.greaterThan(DerbyVersion._10_7_1_1);
+        }
+        if (oldVersion.atMajorMinor(10, 6)) {
+            return !oldVersion.greaterThan(DerbyVersion._10_6_2_1);
+        }
+        if (oldVersion.atMajorMinor(10, 5)) {
+            return !oldVersion.greaterThan(DerbyVersion._10_5_3_0);
+        }
+        throw new IllegalStateException(
+                "didn't expect to get here, old version is " + oldVersion);
     }
 }

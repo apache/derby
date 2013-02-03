@@ -886,6 +886,10 @@ public class Changes10_9 extends UpgradeChange
         // Helper object to obtain information about index statistics.
         IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
+        // The expected initial number of statistics entries in TEST_TAB_2.
+        final int expected =
+                DisposableIndexStatistics.hasDerby5681Bug(getOldVersion()) ?
+                    2 : 1;
         
         switch (getPhase())
         {
@@ -926,7 +930,7 @@ public class Changes10_9 extends UpgradeChange
                     "DROP CONSTRAINT TEST_TAB_2_FK_1");
             //Dropping the foreign key constraint does not remove it's 
             // statistics row because of DERBY-5681.
-            stats.assertTableStats("TEST_TAB_2",2);
+            stats.assertTableStats("TEST_TAB_2", expected);
             assertStatementError("42Y03", s,
             "CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
             break;
@@ -938,7 +942,7 @@ public class Changes10_9 extends UpgradeChange
             break;
 
         case PH_HARD_UPGRADE:
-            stats.assertTableStats("TEST_TAB_2",2);
+            stats.assertTableStats("TEST_TAB_2", expected);
             s.execute("CALL SYSCS_UTIL.SYSCS_DROP_STATISTICS('APP','TEST_TAB_2', null)");
             stats.assertNoStatsTable("TEST_TAB_2");
             s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','TEST_TAB_2', null)");
@@ -987,8 +991,8 @@ public class Changes10_9 extends UpgradeChange
         final String TBL = "ISTAT_DISPOSABLE_STATS";
         String updateStatsSQL = "call syscs_util.syscs_update_statistics(" +
                 "'APP', ?, null)";
-        DisposableIndexStatistics dis =
-                new DisposableIndexStatistics(getConnection(), TBL);
+        DisposableIndexStatistics dis = new DisposableIndexStatistics(
+                getOldVersion(), getConnection(), TBL);
 
         switch (getPhase()) {
             // create with old version
@@ -998,8 +1002,7 @@ public class Changes10_9 extends UpgradeChange
                 // We expect that the maximum number of statistics have been
                 // created here, since we're using an older version of Derby
                 // that contained a bug and lacked the latest optimizations.
-                dis.assertStatsCount(
-                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                dis.assertStatsCount(false);
                 break;
             }
             // boot with new version and soft-upgrade
@@ -1012,22 +1015,19 @@ public class Changes10_9 extends UpgradeChange
                     ps.setString(1, tables[i]);
                     ps.executeUpdate();
                 }
-                dis.assertStatsCount(
-                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                dis.assertStatsCount(false);
                 break;
             }
             // soft-downgrade: boot with old version after soft-upgrade
             case PH_POST_SOFT_UPGRADE:
             {
-                dis.assertStatsCount(
-                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                dis.assertStatsCount(false);
                 break;
             }
             // boot with new version and hard-upgrade
             case PH_HARD_UPGRADE:
             {
-                dis.assertStatsCount(
-                        DisposableIndexStatistics.getNumTotalPossibleStats());
+                dis.assertStatsCount(false);
                 PreparedStatement ps = prepareStatement(updateStatsSQL);
                 String[] tables = dis.getTableNames();
                 for (int i=0; i < tables.length; i++) {
@@ -1037,9 +1037,7 @@ public class Changes10_9 extends UpgradeChange
                 // Confirm that we disposed of the statistics that were added
                 // due to a bug or simply not needed by Derby.
                 try {
-                    dis.assertStatsCount(
-                        DisposableIndexStatistics.getNumTotalPossibleStats() -
-                        DisposableIndexStatistics.getNumDisposableStats());
+                    dis.assertStatsCount(true);
                 } finally {
                     for (int i=0; i < tables.length; i++) {
                         dropTable(tables[i]);
