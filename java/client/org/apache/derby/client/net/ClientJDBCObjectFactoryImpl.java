@@ -27,6 +27,7 @@ import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.am.CachingLogicalConnection;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.ParameterMetaData;
 import org.apache.derby.client.am.PreparedStatement;
@@ -43,6 +44,9 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.StatementCacheInteractor;
+import org.apache.derby.client.am.Utils;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * Implements the the ClientJDBCObjectFactory interface and returns the classes
@@ -52,6 +56,15 @@ import org.apache.derby.client.am.StatementCacheInteractor;
  */
 
 public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
+    /** 
+     *  The message utility instance we use to find messages
+     *  It's primed with the name of the client message bundle so that
+     *  it knows to look there if the message isn't found in the
+     *  shared message bundle.
+     */
+    private static final MessageUtil msgutil_ =
+        SqlException.getMessageUtil();
+
     /**
      * Returns an instance of org.apache.derby.client.ClientPooledConnection 
      */
@@ -419,5 +432,37 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      */
     public ParameterMetaData newParameterMetaData(ColumnMetaData columnMetaData) {
         return new ParameterMetaData(columnMetaData);
+    }
+
+    /**
+     * Creates a BatchUpdateException depending on the JVM level.
+     */
+    public  java.sql.BatchUpdateException    newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, Object[] args, long[] updateCounts, SqlException cause )
+    {
+        java.sql.BatchUpdateException   bue = newBatchUpdateException
+            (
+             msgutil_.getCompleteMessage( msgid.msgid, args),
+             ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
+             ExceptionUtil.getSeverityFromIdentifier(msgid.msgid),
+             updateCounts
+             );
+    
+        if (logWriter != null) {
+            logWriter.traceDiagnosable( bue );
+        }
+
+        if (cause != null) {
+            bue.initCause(cause);
+            bue.setNextException(cause.getSQLException());
+        }
+    
+        return bue;
+    }
+    /** This method is overriden on JVM 8 */
+    protected   java.sql.BatchUpdateException   newBatchUpdateException
+        ( String message, String sqlState, int errorCode, long[] updateCounts )
+    {
+        return new java.sql.BatchUpdateException( message, sqlState, errorCode, Utils.squashLongs( updateCounts ) );
     }
 }

@@ -222,6 +222,20 @@ public class Configuration {
         }
     }
 
+    /**
+     * Check to see if the jvm version is such that JDBC 4.2 is supported
+     */
+    
+    public static boolean supportsJDBC42() {
+        // use reflection to identify whether we support JDBC42
+        try {
+            Class.forName("java.sql.SQLType");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
 
 }

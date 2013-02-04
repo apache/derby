@@ -165,6 +165,9 @@
     <available property="compilerAtCorrectLevel" classname="java.util.Queue"/>
 
     <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 5 or later."/>
+
+    <antcall target="checkVMLevel"/>
+    
   </target>
 
   <!-- checkVMLevel:
@@ -176,6 +179,7 @@
     <!-- The java.lang.ManagementFactory class was new in J2SE 5.0 -->
     <available classname="java.lang.management.ManagementFactory" property="vmLevelIsAtLeast1.5"/>
     <available classname="java.sql.Wrapper" property="vmLevelIsAtLeast1.6" value="true"/>
+    <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -1714,7 +1718,7 @@
 
 <!-- - - - - - - - - - - - - - derbyclient.jar target - - - - - - - - -->
 
- <target name="derbyclientjar" depends="setsanityname,initjars">
+ <target name="derbyclientjar" depends="checkVMLevel,setsanityname,initjars">
 
     <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
@@ -1725,6 +1729,7 @@
 
     <copy file="${basedir}/tools/jar/dnc.properties"
           tofile="${derby.jar.dir}/lists/dnc.properties"/>
+    <antcall target="derbyclientjar.1.8"/>
 
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/dnc.list"/>
@@ -1786,6 +1791,14 @@
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
+  </target>
+
+
+  <!-- Add extra classes to jar file if building for Java 8 -->
+  <target name="derbyclientjar.1.8" if="vmLevelIsAtLeast1.8">
+    <concat destfile="${derby.jar.dir}/lists/dnc.properties" append="true">
+      <fileset file="${basedir}/tools/jar/dnc.1.8.properties" />
+    </concat>
   </target>
 
 <!-- - - - - - - - - - - - - - derbyrun.jar target  - - - - - - - - - -->

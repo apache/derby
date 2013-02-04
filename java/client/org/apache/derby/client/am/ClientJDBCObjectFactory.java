@@ -382,4 +382,10 @@ public interface ClientJDBCObjectFactory {
      *
      */
     ParameterMetaData newParameterMetaData(ColumnMetaData columnMetaData);
+    
+    /**
+     * Creates a BatchUpdateException depending on the JVM level.
+     */
+    public  java.sql.BatchUpdateException    newBatchUpdateException
+        ( LogWriter logWriter, ClientMessageId msgid, Object[] args, long[] updateCounts, SqlException cause );
 }

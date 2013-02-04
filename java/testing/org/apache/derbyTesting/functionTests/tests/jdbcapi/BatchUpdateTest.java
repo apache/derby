@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -203,9 +204,35 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     } 
     
     /* 
+     * helper method to check each count in the return array of a BatchUpdateException
+     */
+    public  static   void assertBatchUpdateCounts
+        ( long[] expectedBatchResult, BatchUpdateException bue )
+    {
+        assertBatchUpdateCounts( squashLongs( expectedBatchResult ), bue.getUpdateCounts() );
+        
+        if ( isJava8() )
+        {
+            BatchUpdateExceptionWrapper wrapper = new BatchUpdateExceptionWrapper( bue );
+
+            assertEquals( expectedBatchResult, wrapper.getLargeUpdateCounts() );
+        }
+    }
+   
+    /** Squash an array of longs into an array of ints */
+    public static  int[]   squashLongs( long[] longs )
+    {
+        int count = (longs == null) ? 0 : longs.length;
+        int[]   ints = new int[ count ];
+        for ( int i = 0; i < count; i++ ) { ints[ i ] = (int) longs[ i ]; }
+
+        return ints;
+    }
+    
+    /* 
      * helper method to check each count in the return array of batchExecute
      */
-    private void assertBatchUpdateCounts( 
+    private static void assertBatchUpdateCounts( 
         int[] expectedBatchResult, int[] executeBatchResult )
     {
         assertEquals("length of array should be identical", 
@@ -233,20 +260,18 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      *                             be executed.
      * @param expectedUpdateCount The expectedUpdateCount array.
      */
-    protected void assertBatchExecuteError( 
+    public static void assertBatchExecuteError( 
         String expectedError,
         Statement stmt,
-        int[] expectedUpdateCount) 
+        long[] expectedUpdateCount) 
     throws SQLException 
-    {
-        int[] updateCount;    
-        try {
-            updateCount = stmt.executeBatch();
+    { 
+       try {
+            stmt.executeBatch();
             fail("Expected batchExecute to fail");
         } catch (BatchUpdateException bue) {
             assertSQLState(expectedError, bue);
-            updateCount = bue.getUpdateCounts();
-            assertBatchUpdateCounts(expectedUpdateCount, updateCount);
+            assertBatchUpdateCounts(expectedUpdateCount, bue);
         } 
     }
     
@@ -520,9 +545,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(1)");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
-            assertBatchExecuteError("X0Y79", stmt, new int[] {});
+            assertBatchExecuteError("X0Y79", stmt, new long[] {});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {-3, 1});
+            assertBatchExecuteError("XJ208", stmt, new long[] {-3, 1});
         
         assertTableRowCount("T1",
                 usingEmbedded() ? 0 : 1);
@@ -535,9 +560,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(1)");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
-            assertBatchExecuteError("X0Y79", stmt, new int[] {1});
+            assertBatchExecuteError("X0Y79", stmt, new long[] {1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {1,-3,1});
+            assertBatchExecuteError("XJ208", stmt, new long[] {1,-3,1});
             
         assertTableRowCount("T1",
                 usingEmbedded() ? 1 : 3);
@@ -550,9 +575,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("SELECT * FROM SYS.SYSCOLUMNS");
         if (usingEmbedded())
             /* Ensure the exception is the ResultSetReturnNotAllowed */
-            assertBatchExecuteError("X0Y79", stmt, new int[] {1,1});
+            assertBatchExecuteError("X0Y79", stmt, new long[] {1,1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {1,1,-3});
+            assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
 
         assertTableRowCount("T1",
                 usingEmbedded() ? 3 : 5);
@@ -583,7 +608,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
         {
             stmt.addBatch("insert into t1 values(1)"); 
-            assertBatchExecuteError("XJ208",stmt, new int[] {-3,1});           
+            assertBatchExecuteError("XJ208",stmt, new long[] {-3,1});           
             // pull level with embedded situation
             rollback();
         }
@@ -633,7 +658,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             stmt.addBatch("SELECT * FROM SYS.SYSCOLUMNS");
             if (usingDerbyNetClient())
             {
-                assertBatchExecuteError("XJ208", stmt, new int[] {1,1,-3});
+                assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
             }
             else if (usingEmbedded())
             {
@@ -677,9 +702,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Overflow is first stmt in the batch, so expect no update count */
         if (usingEmbedded())
-            assertBatchExecuteError("22003", stmt, new int[] {});
+            assertBatchExecuteError("22003", stmt, new long[] {});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {-3,1});
+            assertBatchExecuteError("XJ208", stmt, new long[] {-3,1});
 
         assertTableRowCount("T1",
                 usingEmbedded() ? 1 : 2);
@@ -693,9 +718,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Update is second statement in the batch, expect 1 update count */
         if (usingEmbedded())
-            assertBatchExecuteError("22003", stmt, new int[] {1});
+            assertBatchExecuteError("22003", stmt, new long[] {1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {1,-3,1});
+            assertBatchExecuteError("XJ208", stmt, new long[] {1,-3,1});
 
         assertTableRowCount("T1",
                 usingEmbedded() ? 2 : 4);
@@ -709,9 +734,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         /* Check to be sure the exception is the one we expect */
         /* Update is last statement in the batch, expect 2 update counts */
         if (usingEmbedded())
-            assertBatchExecuteError("22003", stmt, new int[] {1,1});
+            assertBatchExecuteError("22003", stmt, new long[] {1,1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", stmt, new int[] {1,1,-3});
+            assertBatchExecuteError("XJ208", stmt, new long[] {1,1,-3});
 
         assertTableRowCount("T1",
                 usingEmbedded() ? 4 : 6);
@@ -1261,9 +1286,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Ensure the exception is the ResultSetReturnNotAllowed */
             /* "Select is first statement in the batch, 
              * so there should not be any update counts */
-            assertBatchExecuteError("X0Y79", pStmt, new int[] {});
+            assertBatchExecuteError("X0Y79", pStmt, new long[] {});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ117", pStmt, new int[] {-3});
+            assertBatchExecuteError("XJ117", pStmt, new long[] {-3});
         pStmt.close();
 
         assertTableRowCount("T1", 0);
@@ -1373,9 +1398,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is first statement in the batch, 
              * so there should not be any update count */
-            assertBatchExecuteError("22003", pStmt, new int[] {});
+            assertBatchExecuteError("22003", pStmt, new long[] {});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", pStmt, new int[] {-3});
+            assertBatchExecuteError("XJ208", pStmt, new long[] {-3});
         pStmt.close();
 
         assertTableRowCount("T1", 1);
@@ -1393,9 +1418,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is second statement in the batch, 
              * so there should be only 1 update count */
-            assertBatchExecuteError("22003", pStmt, new int[] {1});
+            assertBatchExecuteError("22003", pStmt, new long[] {1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", pStmt, new int[] {1,-3,1});
+            assertBatchExecuteError("XJ208", pStmt, new long[] {1,-3,1});
         pStmt.close();
 
         assertTableRowCount("T1", 1);
@@ -1414,9 +1439,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             /* Check to be sure the exception is the one we expect */
             /* Overflow is last statement in the batch, 
              * so there should be 2 update counts */
-            assertBatchExecuteError("22003", pStmt, new int[] {1,1});
+            assertBatchExecuteError("22003", pStmt, new long[] {1,1});
         else if (usingDerbyNetClient())
-            assertBatchExecuteError("XJ208", pStmt, new int[] {1,1,-3});
+            assertBatchExecuteError("XJ208", pStmt, new long[] {1,1,-3});
 
         assertTableRowCount("T1", 1);
         
@@ -1547,8 +1572,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         // Embedded stops processing the batch on the first failure, and only
         // the update count from the successful statement is returned. The
         // client driver continues after the failure, so it'll also drop C.
-        int[] expectedCounts = usingEmbedded() ?
-            new int[]{0} : new int[]{0, Statement.EXECUTE_FAILED, 0};
+        long[] expectedCounts = usingEmbedded() ?
+            new long[]{0} : new long[]{0, Statement.EXECUTE_FAILED, 0};
 
         assertBatchExecuteError("X0Y25", s, expectedCounts);
 
@@ -1566,4 +1591,53 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             assertStatementError("42X05", s, "select * from c");
         }
     }
+    ////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED JDBC 4.2 WRAPPER AROUND A BatchUpdateException
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * This wrapper is used to expose JDBC 4.2 methods which can run on
+     * VM rev levels lower than Java 8.
+     * </p>
+     */
+    public  static  class   BatchUpdateExceptionWrapper
+    {
+        private BatchUpdateException    _wrappedException;
+
+        public BatchUpdateExceptionWrapper( BatchUpdateException wrappedException )
+        {
+            _wrappedException = wrappedException;
+        }
+
+        public  BatchUpdateException   getWrappedException() { return _wrappedException; }
+
+        // New methods added by JDBC 4.2
+        public  long[] getLargeUpdateCounts()
+        {
+            return ((long[]) invoke
+                (
+                 "getLargeUpdateCounts",
+                 new Class[] {},
+                 new Object[] {}
+                 ));
+        }
+
+        // Reflection minion
+        protected Object  invoke( String methodName, Class[] argTypes, Object[] argValues )
+        {
+            try {
+                Method  method = _wrappedException.getClass().getMethod( methodName, argTypes );
+
+                return method.invoke( _wrappedException, argValues );
+            }
+            catch (Exception nsme) { printException( nsme ); }
+
+            return null;
+        }
+        private void    printException( Throwable t ) { BaseJDBCTestCase.println( t.getMessage() ); }
+    }
+    
 }

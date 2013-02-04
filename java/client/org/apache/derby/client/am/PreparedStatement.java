@@ -1647,7 +1647,7 @@ public class PreparedStatement extends Statement
 
     // Batch requires that input types are exact, we perform no input cross conversion for Batch.
     // If so, this is an external semantic, and should go into the release notes
-    public int[] executeBatch() throws SQLException, BatchUpdateException {
+    public int[] executeBatch() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -2192,7 +2192,7 @@ public class PreparedStatement extends Statement
     }
 
     public long[] executeBatchX(boolean supportsQueryBatchRequest) 
-        throws SqlException, SQLException, BatchUpdateException {
+        throws SqlException, SQLException {
         synchronized (connection_) {
             checkForClosedStatement(); // Per jdbc spec (see Statement.close() javadoc)
             clearWarningsX(); // Per jdbc spec 0.7, also see getWarnings() javadoc
@@ -2202,7 +2202,7 @@ public class PreparedStatement extends Statement
 
 
     private long[] executeBatchRequestX(boolean supportsQueryBatchRequest)
-            throws SqlException, BatchUpdateException {
+            throws SqlException, java.sql.BatchUpdateException {
         SqlException chainBreaker = null;
         int batchSize = batch_.size();
         long[] updateCounts = new long[batchSize];
@@ -2223,9 +2223,9 @@ public class PreparedStatement extends Statement
         // and the values 0 and 0xffff are reserved as special values. So
         // that imposes an upper limit on the batch size we can support:
         if (batchSize > 65534)
-            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
+            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
-                65534, updateCounts);
+                new Object[] { new Integer( 65534 ) }, updateCounts, null );
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot
@@ -2235,13 +2235,13 @@ public class PreparedStatement extends Statement
         }
 
         if (!supportsQueryBatchRequest && sqlMode_ == isQuery__) {
-            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), updateCounts);
+            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
+            new ClientMessageId(SQLState.CANNOT_BATCH_QUERIES), (Object [])null, updateCounts, null);
         }
         if (supportsQueryBatchRequest && sqlMode_ != isQuery__) {
-            throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
+            throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.QUERY_BATCH_ON_NON_QUERY_STATEMENT), 
-                updateCounts);
+                (Object [])null, updateCounts, null);
         }
 
         resultSetList_ = null;
@@ -2288,9 +2288,9 @@ public class PreparedStatement extends Statement
                         chainAutoCommit || (i != batchSize - 1));  // more statements to chain
             } else if (outputRegistered_) // make sure no output parameters are registered
             {
-                throw BatchUpdateException.newBatchUpdateException(agent_.logWriter_, 
+                throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.OUTPUT_PARAMS_NOT_ALLOWED),
-                    updateCounts);
+                    (Object [])null, updateCounts, null );
             } else {
                 writeExecuteCall(false, // no output expected for batched CALLs
                         null, // no procedure name supplied for prepared CALLs

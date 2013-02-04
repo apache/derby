@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -39,6 +40,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
+import java.lang.reflect.Constructor;
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.io.IOException;
@@ -114,18 +117,21 @@ public abstract class Util  {
     			(message != null) && (message.equals("Connection refused : java.lang.OutOfMemoryError")))				
     		return;
 
+        logError( "\nERROR " +  se.getSQLState() + ": "  + se.getMessage() + "\n", se );
+    }
+    private static  void    logError( String errorMessage, Throwable t )
+    {
     	HeaderPrintWriter errorStream = Monitor.getStream();
     	if (errorStream == null) {
-    		se.printStackTrace();
+    		t.printStackTrace();
     		return;
     	}
     	ErrorStringBuilder	errorStringBuilder = new ErrorStringBuilder(errorStream.getHeader());
-    	errorStringBuilder.append("\nERROR " +  se.getSQLState() + ": "  + se.getMessage() + "\n");
-    	errorStringBuilder.stackTrace(se);
+    	errorStringBuilder.append( errorMessage );
+    	errorStringBuilder.stackTrace( t );
     	errorStream.print(errorStringBuilder.get().toString());
     	errorStream.flush();
     	errorStringBuilder.reset();
-
     }
 
 	
@@ -338,7 +344,27 @@ public abstract class Util  {
     static  SQLException    newBatchUpdateException
         ( String message, String sqlState, int errorCode, long[] updateCounts )
     {
-        return new java.sql.BatchUpdateException
+        if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_18 )
+        {
+            try {
+                Constructor constructor = BatchUpdateException.class.getConstructor
+                    (
+                     new Class[] { String.class, String.class, Integer.TYPE, updateCounts.getClass(), Throwable.class }
+                     );
+
+                return (BatchUpdateException) constructor.newInstance
+                    ( new Object[] { message, sqlState, new Integer( errorCode ), updateCounts, (Throwable) null } );
+            }
+            catch (Exception e)
+            {
+                // unanticipated problem. log it and return the Java 7 version of the exception
+                logError( "\nERROR " +  e.getMessage() + "\n", e );
+            }
+        }
+
+        // use this constructor if we're not on Java 8 or if an error occurred
+        // while using the Java 8 constructor
+        return new BatchUpdateException
             ( message, sqlState, errorCode, squashLongs( updateCounts ) );
     }
 

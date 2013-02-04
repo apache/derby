@@ -399,7 +399,9 @@ public class ClientDriver implements java.sql.Driver {
     public static ClientJDBCObjectFactory getFactory() {
         if(factoryObject!=null)
             return factoryObject;
-        if (Configuration.supportsJDBC40()) {
+        if (Configuration.supportsJDBC42()) {
+            factoryObject = createJDBC42FactoryImpl();
+        } else if (Configuration.supportsJDBC40()) {
             factoryObject = createJDBC40FactoryImpl();
         } else {
             factoryObject = createDefaultFactoryImpl();
@@ -440,6 +442,34 @@ public class ClientDriver implements java.sql.Driver {
             return createDefaultFactoryImpl();
         }
     }
+
+    /**
+     *Returns an instance of the ClientJDBCObjectFactoryImpl42 class
+     *If a ClassNotFoundException occurs then it returns an
+     *instance of the most refined ClientJDBCObjectFactoryImpl possible
+     *
+     *If a future version of JDBC comes then
+     *a similar method would be added say createJDBCXXFactoryImpl
+     *in which if  the class is not found then it would
+     *return the lower version thus having a sort of cascading effect
+     *until it gets a valid instance
+     */
+    
+    private static ClientJDBCObjectFactory createJDBC42FactoryImpl() {
+        final String factoryName =
+                "org.apache.derby.client.net.ClientJDBCObjectFactoryImpl42";
+        try {
+            return (ClientJDBCObjectFactory)
+            Class.forName(factoryName).newInstance();
+        } catch (ClassNotFoundException cnfe) {
+            return createJDBC40FactoryImpl();
+        } catch (InstantiationException ie) {
+            return createJDBC40FactoryImpl();
+        } catch (IllegalAccessException iae) {
+            return createJDBC40FactoryImpl();
+        }
+    }
+
 }
 
 

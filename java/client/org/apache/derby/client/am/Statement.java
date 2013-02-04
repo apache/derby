@@ -1175,7 +1175,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    public int[] executeBatch() throws SQLException, BatchUpdateException {
+    public int[] executeBatch() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1196,7 +1196,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     // Added by JDBC 4.2
-    public long[] executeLargeBatch() throws SQLException, BatchUpdateException {
+    public long[] executeLargeBatch() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1216,7 +1216,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    private long[] executeBatchX() throws SqlException, BatchUpdateException {
+    private long[] executeBatchX() throws SqlException, java.sql.BatchUpdateException {
         checkForClosedStatement(); // Per jdbc spec (see java.sql.Statement.close() javadoc)
         clearWarningsX(); // Per jdbc spec 0.7, and getWarnings() javadoc
         resultSetList_ = null;
@@ -2349,7 +2349,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    void flowExecuteBatch(long[] updateCounts) throws SqlException, BatchUpdateException {
+    void flowExecuteBatch(long[] updateCounts) throws SqlException, java.sql.BatchUpdateException {
         SqlException chainBreaker = null;
         boolean isCallCataloguedBestGuess = true;
         agent_.beginBatchedWriteChain(this);

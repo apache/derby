@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Agent {
@@ -252,7 +253,8 @@ public abstract class Agent {
         checkForExceptions();
     }
 
-    public final void endBatchedReadChain(long[] updateCounts, SqlException accumulatedExceptions) throws BatchUpdateException {
+    public final void endBatchedReadChain(long[] updateCounts, SqlException accumulatedExceptions)
+        throws java.sql.BatchUpdateException {
         disableBatchedExceptionTracking();
         for (int i = 0; i < batchedExceptionGenerated_.length; i++) {
             if (batchedExceptionGenerated_[i]) {
@@ -267,7 +269,7 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
-            throw BatchUpdateException.newBatchUpdateException(logWriter_,
+            throw ClientDriver.getFactory().newBatchUpdateException(logWriter_,
                 new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
                 null, updateCounts, accumulatedExceptions);
         }

@@ -24,8 +24,9 @@ import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.sql.execute.RowUtil;
 
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest;
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -386,6 +387,8 @@ public class StatementTest
         largeBatchTest( sw, 0L);
 
         largeMaxRowsTest( sw,  ((long) Integer.MAX_VALUE) + 1L );
+
+        largeBatchUpdateExceptionTest( sw, ((long) Integer.MAX_VALUE) + 1L );
     }
     private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
         throws Exception
@@ -489,6 +492,45 @@ public class StatementTest
         
         assertEquals( expectedRowCount, rowCount );
         assertEquals( maxRows, sw.getLargeMaxRows() );
+    }
+    private static  void    largeBatchUpdateExceptionTest( StatementWrapper sw, long rowCountBase )
+        throws Exception
+    {
+        println( "Large batch update exception test with rowCountBase = " + rowCountBase );
+        
+        sw.getWrappedStatement().clearBatch();
+        sw.getWrappedStatement().execute( "create table intTable( col1 int generated always as identity, col2 int )" );
+
+        // poke the rowCountBase into the engine. all returned row counts will be
+        // increased by this amount
+        setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
+
+        //
+        // Create a batch of statements. The last one will die on an overflow condition.
+        //
+        sw.getWrappedStatement().addBatch( "insert into intTable( col2 ) values ( 1 )" );
+        sw.getWrappedStatement().addBatch( "insert into intTable( col2 ) values ( 1 )" );
+        sw.getWrappedStatement().addBatch( "update intTable set col2 = 2147483647 + 1" );
+
+        if ( usingEmbedded() )
+        {
+            BatchUpdateTest.assertBatchExecuteError
+                (
+                 "22003", sw.getWrappedStatement(),
+                 new long[] { rowCountBase + 1L, rowCountBase + 1L }
+                 );
+        }
+        else if ( usingDerbyNetClient() )
+        {
+            BatchUpdateTest.assertBatchExecuteError
+                (
+                 "XJ208", sw.getWrappedStatement(),
+                 new long[] { rowCountBase + 1L, rowCountBase + 1L, -3 }
+                 );
+        }
+        
+        sw.getWrappedStatement().clearBatch();
+        setRowCountBase( sw.getWrappedStatement(), false, 0L );
     }
         
     public static  void    setRowCountBase
