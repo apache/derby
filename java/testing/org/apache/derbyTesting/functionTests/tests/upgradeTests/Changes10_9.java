@@ -999,9 +999,10 @@ public class Changes10_9 extends UpgradeChange
             case PH_CREATE:
             {
                 dis.createAndPopulateTables();
-                // We expect that the maximum number of statistics have been
-                // created here, since we're using an older version of Derby
-                // that contained a bug and lacked the latest optimizations.
+                // The expected number of statistics entries depends on the
+                // version of Derby used to create the database. Some older
+                // versions of Derby contained a bug and lacked optimizations,
+                // causing the number of statistics entries to increase.
                 dis.assertStatsCount(false);
                 break;
             }

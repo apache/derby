@@ -218,11 +218,11 @@ public class DisposableIndexStatistics {
             expected -= getNumDisposableStats();
         } else if (!hasDerby5681Bug(oldVersion)) {
             // Here we correct for the orphaned statistics entry, but not for
-            // entires that are considered extraneous by newer releases (for
+            // entries that are considered extraneous by newer releases (for
             // instance statistics for single column unique indexes).
             expected--;
         }
-        ArrayList entries = new ArrayList();
+        ArrayList entries = new ArrayList(); // used for reporting only
         int found = getAllRelevantStats(entries);
         if (found != expected) {
             Assert.assertEquals(
