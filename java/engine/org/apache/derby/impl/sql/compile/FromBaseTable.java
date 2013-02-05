@@ -896,6 +896,20 @@ public class FromBaseTable extends FromTable
 	}
 
 	/**
+     * <p>
+     * Estimate the cost of scanning this {@code FromBaseTable} using the
+     * given predicate list with the given conglomerate.
+     * </p>
+     *
+     * <p>
+     * If the table contains little data, the cost estimate might be adjusted
+     * to make it more likely that an index scan will be preferred to a table
+     * scan, and a unique index will be preferred to a non-unique index. Even
+     * though such a plan may be slightly suboptimal when seen in isolation,
+     * using indexes, unique indexes in particular, needs fewer locks and
+     * allows more concurrency.
+     * </p>
+     *
 	 * @see Optimizable#estimateCost
 	 *
 	 * @exception StandardException		Thrown on error
@@ -1060,6 +1074,24 @@ public class FromBaseTable extends FromTable
 						getBaseCostController().getFetchFromRowLocationCost(
 																(FormatableBitSet) null,
 																0);
+
+                // The estimated row count is always 1 here, although the
+                // index scan may actually return 0 rows, depending on whether
+                // or not the predicates match a key. It is assumed that a
+                // match is more likely than a miss, hence the row count is 1.
+
+                // Note (DERBY-6011): Alternative (non-unique) indexes may come
+                // up with row counts lower than 1 because they multiply with
+                // the selectivity, especially if the table is almost empty.
+                // This makes the optimizer prefer non-unique indexes if there
+                // are not so many rows in the table. We still want to use the
+                // unique index in that case, as the performance difference
+                // between the different scans on a small table is small, and
+                // the unique index is likely to lock fewer rows and reduce
+                // the chance of deadlocks. Therefore, we compensate by
+                // making the row count at least 1 for the non-unique index.
+                // See reference to DERBY-6011 further down in this method.
+
 				cost = singleFetchCost * costEstimate.rowCount();
 
 				costEstimate.setEstimatedCost(
@@ -1693,7 +1725,28 @@ public class FromBaseTable extends FromTable
 																(FormatableBitSet) null,
 																0);
 
-				cost = singleFetchCost * costEstimate.rowCount();
+                // The number of rows we expect to fetch from the base table.
+                double rowsToFetch = costEstimate.rowCount();
+
+                if (oneRowResultSetForSomeConglom) {
+                    // DERBY-6011: We know that there is a unique index, and
+                    // that there are predicates that guarantee that at most
+                    // one row will be fetched from the unique index. The
+                    // unique alternative always has 1 as estimated row count
+                    // (see reference to DERBY-6011 further up in this method),
+                    // even though it could actually return 0 rows.
+                    //
+                    // If the alternative that's being considered here has
+                    // expected row count less than 1, it is going to have
+                    // lower estimated cost for fetching base rows. We prefer
+                    // unique indexes, as they lock fewer rows and allow more
+                    // concurrency. Therefore, make sure the cost estimate for
+                    // this alternative includes at least fetching one row from
+                    // the base table.
+                    rowsToFetch = Math.max(1.0d, rowsToFetch);
+                }
+
+                cost = singleFetchCost * rowsToFetch;
 
 				costEstimate.setEstimatedCost(
 								costEstimate.getEstimatedCost() + cost);
