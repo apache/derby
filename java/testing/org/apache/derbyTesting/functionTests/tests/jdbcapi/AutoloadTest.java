@@ -230,6 +230,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversClientTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversAllTest.class));
+        suite.addTest(new AutoloadTest(ConcurrentAutoloadTest.class));
 
         // The forked test processes will access the default test database, so
         // stop the engine in the main test process to prevent attempts to
