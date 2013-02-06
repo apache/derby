@@ -1111,10 +1111,8 @@ public class EmbedStatement extends ConnectionChild
             System.arraycopy(returnUpdateCountForBatch, 0, successfulUpdateCount, 0, i);
 
 			SQLException batch = Util.newBatchUpdateException
-                ( sqle.getMessage(), sqle.getSQLState(),sqle.getErrorCode(), successfulUpdateCount );
+                ( sqle.getMessage(), sqle.getSQLState(),sqle.getErrorCode(), successfulUpdateCount, sqle );
 
-			batch.setNextException(sqle);
-			batch.initCause(sqle);
 			throw batch;
       }
 	}

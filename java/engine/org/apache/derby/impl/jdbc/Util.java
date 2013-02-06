@@ -342,7 +342,7 @@ public abstract class Util  {
 
     /** Create the correct BatchUpdateException depending on whether this is Java 8 or lower */
     static  SQLException    newBatchUpdateException
-        ( String message, String sqlState, int errorCode, long[] updateCounts )
+        ( String message, String sqlState, int errorCode, long[] updateCounts, Throwable cause )
     {
         if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_18 )
         {
@@ -353,7 +353,7 @@ public abstract class Util  {
                      );
 
                 return (BatchUpdateException) constructor.newInstance
-                    ( new Object[] { message, sqlState, new Integer( errorCode ), updateCounts, (Throwable) null } );
+                    ( new Object[] { message, sqlState, new Integer( errorCode ), updateCounts, cause } );
             }
             catch (Exception e)
             {
@@ -364,8 +364,13 @@ public abstract class Util  {
 
         // use this constructor if we're not on Java 8 or if an error occurred
         // while using the Java 8 constructor
-        return new BatchUpdateException
+        BatchUpdateException batch = new BatchUpdateException
             ( message, sqlState, errorCode, squashLongs( updateCounts ) );
+        
+        if ( cause instanceof SQLException ) { batch.setNextException( (SQLException) cause ); }
+        batch.initCause( cause );
+
+        return batch;
     }
 
     /** Squash an array of longs into an array of ints */

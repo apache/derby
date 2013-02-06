@@ -445,24 +445,31 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
              msgutil_.getCompleteMessage( msgid.msgid, args),
              ExceptionUtil.getSQLStateFromIdentifier(msgid.msgid),
              ExceptionUtil.getSeverityFromIdentifier(msgid.msgid),
-             updateCounts
+             updateCounts,
+             cause
              );
     
         if (logWriter != null) {
             logWriter.traceDiagnosable( bue );
         }
-
+    
         if (cause != null) {
-            bue.initCause(cause);
             bue.setNextException(cause.getSQLException());
         }
-    
+
         return bue;
     }
     /** This method is overriden on JVM 8 */
     protected   java.sql.BatchUpdateException   newBatchUpdateException
-        ( String message, String sqlState, int errorCode, long[] updateCounts )
+        ( String message, String sqlState, int errorCode, long[] updateCounts, SqlException cause  )
     {
-        return new java.sql.BatchUpdateException( message, sqlState, errorCode, Utils.squashLongs( updateCounts ) );
+        java.sql.BatchUpdateException bue = new java.sql.BatchUpdateException
+            ( message, sqlState, errorCode, Utils.squashLongs( updateCounts ) );
+
+        if (cause != null) {
+            bue.initCause(cause);
+        }
+
+        return bue;
     }
 }

@@ -21,6 +21,8 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.SqlException;
+
 /**
  * Implements the ClientJDBCObjectFactory interface and returns the JDBC 4.2
  * specific classes.
@@ -29,9 +31,9 @@ public class ClientJDBCObjectFactoryImpl42 extends ClientJDBCObjectFactoryImpl40
 {
     /** This method is overriden on JVM 8 to take advantage of long update counts */
     protected   java.sql.BatchUpdateException   newBatchUpdateException
-        ( String message, String sqlState, int errorCode, long[] updateCounts )
+        ( String message, String sqlState, int errorCode, long[] updateCounts, SqlException cause )
     {
-        return new java.sql.BatchUpdateException( message, sqlState, errorCode, updateCounts, null );
+        return new java.sql.BatchUpdateException( message, sqlState, errorCode, updateCounts, cause );
     }
 }
 
