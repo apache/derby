@@ -445,6 +445,7 @@ public abstract class Util  {
 			case Types.OTHER		:  return "OTHER";
 			case Types.JAVA_OBJECT	:  return "Types.JAVA_OBJECT";
 			case Types.REF : return TypeId.REF_NAME;
+			case JDBC40Translation.REF_CURSOR: return TypeId.REF_CURSOR;
 			case JDBC40Translation.ROWID: return TypeId.ROWID_NAME;
 			case Types.STRUCT: return TypeId.STRUCT_NAME;
 			case StoredFormatIds.XML_TYPE_ID :  return TypeId.XML_NAME;

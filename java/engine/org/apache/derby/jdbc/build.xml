@@ -33,7 +33,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="compile_jdbc3,compile_jdbc4"/>
+  <target name="jdbc" depends="checkVMLevel,compile_jdbc3,compile_jdbc4,compile_jdbc42"/>
 
 <!-- build targets which need JDBC 3.0 libs in the end-->
 <!-- first build all non-special (non-JDBC 3.0) targets-->
@@ -116,7 +116,32 @@
         </classpath>
         <include name="${derby.dir}/jdbc/*40.java"/>
     </javac>
-
   </target> 
+
+  <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
+    <javac
+      source="${compilerLevel16}"
+      target="${compilerLevel16}"
+        bootclasspath="${empty}"
+        nowarn="on"
+        debug="${debug}"
+        depend="${depend}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+        proceed="${proceed}"
+        verbose="${verbose}"
+        srcdir="${derby.engine.src.dir}"
+        destdir="${out.dir}">
+        <classpath>
+            <pathelement path="${java18compile.classpath}"/>
+        </classpath>
+        <include name="${derby.dir}/jdbc/*42.java"/>
+    </javac>
+  </target> 
+
+  <target name="checkVMLevel">
+    <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
+  </target>
+
 </project>
 

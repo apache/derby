@@ -38,7 +38,6 @@ import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1781,43 +1780,6 @@ public class EmbedPreparedStatement
             }
             throw sqle;
         }
-
-    /**
-     * Checks whether a data type is supported for
-     * <code>setObject(int, Object, int)</code> and
-     * <code>setObject(int, Object, int, int)</code>.
-     *
-     * @param dataType the data type to check
-     * @exception SQLException if the type is not supported
-     */
-    private void checkForSupportedDataType(int dataType) throws SQLException {
-
-        // JDBC 4.0 javadoc for setObject() says:
-        //
-        // Throws: (...) SQLFeatureNotSupportedException - if
-        // targetSqlType is a ARRAY, BLOB, CLOB, DATALINK,
-        // JAVA_OBJECT, NCHAR, NCLOB, NVARCHAR, LONGNVARCHAR, REF,
-        // ROWID, SQLXML or STRUCT data type and the JDBC driver does
-        // not support this data type
-        //
-        // Of these types, we only support BLOB, CLOB and
-        // (sort of) JAVA_OBJECT.
-
-        switch (dataType) {
-        case Types.ARRAY:
-        case Types.DATALINK:
-        case JDBC40Translation.NCHAR:
-        case JDBC40Translation.NCLOB:
-        case JDBC40Translation.NVARCHAR:
-        case JDBC40Translation.LONGNVARCHAR:
-        case Types.REF:
-        case JDBC40Translation.ROWID:
-        case JDBC40Translation.SQLXML:
-        case Types.STRUCT:
-            throw newSQLException(SQLState.DATA_TYPE_NOT_SUPPORTED,
-                                  Util.typeName(dataType));
-        }
-    }
 
    //jdbc 4.0 methods
 

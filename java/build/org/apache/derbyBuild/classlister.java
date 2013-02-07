@@ -562,6 +562,13 @@ public class classlister {
 			InputStream is = locateClass(fileName, false);
 
 			if (is == null) {
+
+                //
+                // Until there is a Java 8 whose stubs can be used to build Derby, we will allow
+                // the build to complete without the JDBC 4.2 support.
+                //
+                if ( className.endsWith( "Driver42" ) ) { return; }
+                
 				pwOut.println("**error** Got NULL when looking for fileName = " + fileName);
 				if (!keepRolling)
 				{

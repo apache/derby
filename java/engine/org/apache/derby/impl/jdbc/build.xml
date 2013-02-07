@@ -34,7 +34,7 @@
 
 <!-- Targets -->
 
-  <target name="compile" depends="compile_jdbc3, compile_jdbc4"/>
+  <target name="compile" depends="checkVMLevel, compile_jdbc3, compile_jdbc4, compile_jdbc42"/>
 
   <target name="compile_jsr169">
 	    <javac
@@ -57,6 +57,7 @@
 	  <exclude name="${derby.dir}/impl/jdbc/*20.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*30.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*40.java"/>
+	  <exclude name="${derby.dir}/impl/jdbc/*42.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/LOBStoredProcedure.java"/>
 
 	  <include name="${derby.dir}/impl/jdbc/authentication/**"/>
@@ -109,6 +110,33 @@
         </classpath>
         <include name="${derby.dir}/impl/jdbc/*40.java"/>
     </javac>
-</target> 
+</target>
+
+
+<target name="compile_jdbc42" depends="compile_jdbc4"  if="vmLevelIsAtLeast1.8">
+    <javac
+      source="${compilerLevel16}"
+      target="${compilerLevel16}"
+        bootclasspath="${empty}"
+        nowarn="on"
+        debug="${debug}"
+        depend="${depend}"
+        deprecation="${deprecation}"
+        optimize="${optimize}"
+        proceed="${proceed}"
+        verbose="${verbose}"
+        srcdir="${derby.engine.src.dir}"
+        destdir="${out.dir}">
+        <classpath>
+            <pathelement path="${java18compile.classpath}"/>
+        </classpath>
+        <include name="${derby.dir}/impl/jdbc/*42.java"/>
+    </javac>
+</target>
+
+<target name="checkVMLevel">
+  <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
+</target>
+
 </project>
 

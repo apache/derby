@@ -21,6 +21,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
@@ -48,7 +49,7 @@ public class _Suite extends BaseTestCase  {
 
         // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);
-        
+
 		suite.addTest(BlobTest.suite());
 		suite.addTest(CallableStatementTest.suite());
 		suite.addTest(ClobTest.suite());
@@ -78,7 +79,30 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AbortTest.suite());
         suite.addTest(Driver40Test.suite());
         suite.addTest(Driver40UnbootedTest.suite());
+
+        if ( isJava8() )
+        {
+            suite.addTest( getSuite( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" ) );
+        }
 		
 		return suite;
 	}
+
+    /**
+     * <p>
+     * Get the test suite from a class name.
+     * </p>
+     */
+    private static  Test    getSuite( String className )
+        throws SQLException
+    {
+        try {
+            Class<?>   klass = Class.forName( className );
+            Method  suiteMethod = klass.getMethod( "suite", new Class<?>[] {} );
+
+            return (Test) suiteMethod.invoke( null, new Object[] {} );
+        }
+        catch (Exception e) { throw new SQLException( e.getMessage(), e ); }
+    }
+    
 }

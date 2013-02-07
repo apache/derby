@@ -957,6 +957,8 @@ final class CrossConverters {
             return setObject(targetType, new java.sql.Timestamp(  ((java.util.Date) source).getTime() ) );
         } else if (source instanceof java.util.Calendar) {
             return setObject(targetType, new java.sql.Timestamp(  ((java.util.Calendar) source).getTime().getTime() ) );
+        } else if (targetType == Types.JAVA_OBJECT) {
+            return source;
         } else {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),

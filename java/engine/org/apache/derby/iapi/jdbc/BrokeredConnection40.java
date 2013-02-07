@@ -263,7 +263,7 @@ public class BrokeredConnection40
             throw sqle;
         }
     }
-    public final BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
+    public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
         try {
             return new BrokeredPreparedStatement40(statementControl, sql, generatedKeys);
         } catch (SQLException sqle) {

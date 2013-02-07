@@ -2473,6 +2473,7 @@ public class PreparedStatement extends Statement
         case JDBC40Translation.NVARCHAR:
         case JDBC40Translation.LONGNVARCHAR:
         case java.sql.Types.REF:
+        case JDBC40Translation.REF_CURSOR:
         case JDBC40Translation.ROWID:
         case JDBC40Translation.SQLXML:
         case java.sql.Types.STRUCT:

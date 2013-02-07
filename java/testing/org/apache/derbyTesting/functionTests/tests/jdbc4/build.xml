@@ -65,6 +65,31 @@
 		        <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>
+            <exclude name="${this.dir}/*42.java"/>
+            <compilerarg value="-Xlint"/>
+        </javac>
+    </target>	
+
+    <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
+        <javac
+          source="${compilerLevel16}"
+          target="${compilerLevel16}"
+            bootclasspath="${empty}"
+            nowarn="on"
+            debug="true"
+            depend="${depend}"
+            deprecation="${deprecation}"
+            optimize="${optimize}"
+            proceed="${proceed}"
+            verbose="${verbose}" 
+            srcdir="${derby.testing.src.dir}"
+            destdir="${out.dir}">
+            <classpath>
+                <pathelement path="${java18compile.classpath}"/>
+		        <pathelement path="${junit}"/>
+            </classpath>
+            <include name="${this.dir}/*42.java"/>
+            <compilerarg value="-Xlint"/>
         </javac>
     </target>	
 
@@ -75,6 +100,10 @@
         </copy>
     </target>
     
-    <target name="compile" depends="compile_jdbc4"/>
+    <target name="compile" depends="checkVMLevel,compile_jdbc4,compile_jdbc42"/>
+
+    <target name="checkVMLevel">
+      <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
+    </target>
 
 </project>

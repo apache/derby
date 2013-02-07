@@ -167,12 +167,7 @@ public class SQLBlob extends SQLBinary
             if ( bytes == null ) { return null; }
             else
             {
-                try {
-                    return new HarmonySerialBlob( bytes );
-                } catch (SQLException se)
-                {
-                    throw StandardException.plainWrapException( se );
-                }
+                return new HarmonySerialBlob( bytes );
             }
         }
     }

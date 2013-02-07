@@ -160,6 +160,7 @@ public final class TypeId
         public static final String      LONGVARBINARY_NAME = "LONGVARBINARY";
         public static final String      BOOLEAN_NAME = "BOOLEAN";
         public static final String      REF_NAME = "REF";
+        public static final String      REF_CURSOR = "REF CURSOR";
         public static final String      NATIONAL_CHAR_NAME = "NATIONAL CHAR";
         public static final String      NATIONAL_VARCHAR_NAME = "NATIONAL CHAR VARYING";
         public static final String      NATIONAL_LONGVARCHAR_NAME = "LONG NVARCHAR";

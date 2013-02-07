@@ -80,7 +80,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
      * @throws SQLException
      *             if a SQL error is encountered
      */
-    public HarmonySerialBlob(byte[] buf) throws SQLException {
+    public HarmonySerialBlob(byte[] buf) {
         this.buf = new byte[buf.length];
         len = buf.length;
         origLen = len;

@@ -66,5 +66,6 @@ public interface JDBC40Translation {
     public static final int LONGNVARCHAR = -16;
     public static final int NCLOB = 2011;
     public static final int ROWID = -8;
+    public static final int REF_CURSOR = 2012;
     public static final int SQLXML = 2009;
 }
