@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -93,7 +94,9 @@ public abstract class Connection
 
     //prepared statements associated with isolation level change are stored 
     // in isolationLevelPreparedStmts
-    private Hashtable isolationLevelPreparedStmts = new Hashtable();
+    final private HashMap<String, PreparedStatement> 
+        isolationLevelPreparedStmts = 
+            new HashMap<String, PreparedStatement>();
     
     // used to get transaction isolation level
     private Statement getTransactionIsolationStmt = null;
@@ -792,22 +795,15 @@ public abstract class Connection
         SQLException accumulatedExceptions = null;
 
         //Close prepared statements associated with isolation level change
-        if (isolationLevelPreparedStmts != null) {
-            PreparedStatement ps;
-            for (Iterator<PreparedStatement> it = isolationLevelPreparedStmts.keySet().iterator();
-                    it.hasNext(); ) {
-                try {
-                    Object key = it.next();
-                    ps = (PreparedStatement)isolationLevelPreparedStmts.get(key);
-                    ps.close();
-                    ps = null;
-                } catch (SQLException se) {
-                    accumulatedExceptions = Utils.accumulateSQLException(
-                            se, accumulatedExceptions);
-                }
+        for (PreparedStatement ps : isolationLevelPreparedStmts.values() ) {
+            try {
+                ps.close();
+            } catch (SQLException se) {
+                accumulatedExceptions = Utils.accumulateSQLException(
+                        se, accumulatedExceptions);
             }
-            isolationLevelPreparedStmts.clear();
         }
+        isolationLevelPreparedStmts.clear();
         if (getTransactionIsolationStmt != null) {
             try {
                 getTransactionIsolationStmt.close();
