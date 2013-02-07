@@ -1229,11 +1229,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * CLOB can have DB2_LOB_MAXWIDTH characters, the
      * maximum number of bytes is 2 * DB2_LOB_MAXWIDTH.
      * If you change this value, consider whether you need to change
-     * DatabaseMetaData.getMaxLogicalLOBSize().
+     * DatabaseMetaData.getMaxLogicalLobSize().
      *
      * @return max index length in bytes
      */
-	public long getMaxLogicalLOBSize() { return ((long) Limits.DB2_LOB_MAXWIDTH) * 2; }
+	public long getMaxLogicalLobSize() { return ((long) Limits.DB2_LOB_MAXWIDTH) * 2; }
 
     /**
      * What's the maximum length allowed for a schema name?

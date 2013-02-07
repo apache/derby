@@ -57,7 +57,7 @@ public interface Limits
 
 	public static final int	DB2_CHAR_MAXWIDTH = 254;
 	public static final int	DB2_VARCHAR_MAXWIDTH = 32672;
-	public static final int DB2_LOB_MAXWIDTH = 2147483647; // If you change this value, consider whether you need to change DatabaseMetaData.getMaxLogicalLOBSize().
+	public static final int DB2_LOB_MAXWIDTH = 2147483647; // If you change this value, consider whether you need to change DatabaseMetaData.getMaxLogicalLobSize().
 	public static final int	DB2_LONGVARCHAR_MAXWIDTH = 32700;
     public static final int DB2_CONCAT_VARCHAR_LENGTH = 4000;
 	public static final int DB2_MAX_FLOATINGPOINT_LITERAL_LENGTH = 30; // note, this value 30 is also contained in err msg 42820

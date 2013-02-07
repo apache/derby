@@ -138,9 +138,9 @@ public class LogicalDatabaseMetaData40
     /////////////////////////////////////////////////////////////////////////
 
     /** See DatabaseMetaData javadoc */
-    public  long getMaxLogicalLOBSize() throws SQLException
+    public  long getMaxLogicalLobSize() throws SQLException
     {
-        return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).getMaxLogicalLOBSize();
+        return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).getMaxLogicalLobSize();
     }
     public  boolean supportsRefCursors() throws SQLException
     {

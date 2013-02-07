@@ -51,10 +51,10 @@ public  class   Wrapper42DBMD   extends Wrapper41DBMD
     //
     ///////////////////////////////////////////////////////////////////////
 
-    public  long getMaxLogicalLOBSize() throws SQLException
+    public  long getMaxLogicalLobSize() throws SQLException
     {
-        if ( _embedded != null ) { return _embedded.getMaxLogicalLOBSize(); }
-        else if ( _netclient != null ) { return _netclient.getMaxLogicalLOBSize(); }
+        if ( _embedded != null ) { return _embedded.getMaxLogicalLobSize(); }
+        else if ( _netclient != null ) { return _netclient.getMaxLogicalLobSize(); }
         else { throw nothingWrapped(); }
     }
 

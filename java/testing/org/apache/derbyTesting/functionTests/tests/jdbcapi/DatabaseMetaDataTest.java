@@ -5027,9 +5027,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         Wrapper42DBMD wrapper = new Wrapper42DBMD( dmd );
 
         //
-        // getMaxLogicalLOBSize()
+        // getMaxLogicalLobSize()
         //
-        assertEquals( ((long) Integer.MAX_VALUE) * 2, wrapper.getMaxLogicalLOBSize() );
+        assertEquals( ((long) Integer.MAX_VALUE) * 2, wrapper.getMaxLogicalLobSize() );
 
         //
         // supportsRefCursors()
