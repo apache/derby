@@ -179,6 +179,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         makeTable( conn );
         populateTable( conn );
         vetTableContents( conn );
+        updateColumns( conn );
     }
     private void    makeTable( Connection conn ) throws Exception
     {
@@ -204,36 +205,11 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     }
     private void    populateTable( Connection conn ) throws Exception
     {
-        StringBuilder   columnBuffer = new StringBuilder();
-        StringBuilder   valuesBuffer = new StringBuilder();
-
-        columnBuffer.append( "( " );
-        valuesBuffer.append( "( " );
-        for ( int i = 0; i < _columnDescs.length; i++ )
-        {
-            String  columnName = "col" + (i+1);
-            if ( i > 0 )
-            {
-                columnBuffer.append( ", " );
-                valuesBuffer.append( ", " );
-            }
-            columnBuffer.append( columnName );
-            valuesBuffer.append( "?" );
-        }
-        columnBuffer.append( " )" );
-        valuesBuffer.append( " )" );
-
-        PreparedStatement   insert = conn.prepareStatement
-            ( "insert into allTypes " + columnBuffer.toString() + " values " + valuesBuffer.toString() );
+        PreparedStatement   insert = prepareInsert( conn );
 
         for ( int rowIdx = 0; rowIdx < ColumnDesc.VALUE_COUNT; rowIdx++ )
         {
-            for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
-            {
-                ColumnDesc  cd = _columnDescs[ colIdx ];
-                insert.setObject( colIdx + 1, cd.values[ rowIdx ], cd.jdbcType );
-            }
-            insert.executeUpdate();
+            insertRow( insert, rowIdx );
         }
 
         for ( int rowIdx = 0; rowIdx < ColumnDesc.VALUE_COUNT; rowIdx++ )
@@ -261,6 +237,41 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
         insert.close();
     }
+    private PreparedStatement   prepareInsert( Connection conn ) throws Exception
+    {
+        StringBuilder   columnBuffer = new StringBuilder();
+        StringBuilder   valuesBuffer = new StringBuilder();
+
+        columnBuffer.append( "( " );
+        valuesBuffer.append( "( " );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            String  columnName = "col" + (i+1);
+            if ( i > 0 )
+            {
+                columnBuffer.append( ", " );
+                valuesBuffer.append( ", " );
+            }
+            columnBuffer.append( columnName );
+            valuesBuffer.append( "?" );
+        }
+        columnBuffer.append( " )" );
+        valuesBuffer.append( " )" );
+
+        PreparedStatement   insert = conn.prepareStatement
+            ( "insert into allTypes " + columnBuffer.toString() + " values " + valuesBuffer.toString() );
+
+        return insert;
+    }
+    private void    insertRow( PreparedStatement insert, int rowIdx ) throws Exception
+    {
+        for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+        {
+            ColumnDesc  cd = _columnDescs[ colIdx ];
+            insert.setObject( colIdx + 1, cd.values[ rowIdx ], cd.jdbcType );
+        }
+        insert.executeUpdate();
+    }
     private void    vetTableContents( Connection conn ) throws Exception
     {
         PreparedStatement   selectPS = conn.prepareStatement( "select * from allTypes order by col0" );
@@ -281,6 +292,98 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
             rowCount++;
         }
+        
+        selectRS.close();
+        selectPS.close();
+    }
+    // test the behavior of the new ResultSet methods added by JDBC 4.2
+    private void    updateColumns( Connection conn ) throws Exception
+    {
+        PreparedStatement forUpdatePS = conn.prepareStatement
+            ( "select * from allTypes for update", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE );
+        ResultSet   updateRS = null;
+
+        // ResultSet.updateObject( int, Object, SQLType )
+        prepTable( conn, 0 );
+        updateRS = forUpdatePS.executeQuery();
+        updateRS.next();
+        for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+        {
+            ColumnDesc  cd = _columnDescs[ colIdx ];
+            updateRS.updateObject( colIdx + 2, cd.values[ 1 ], cd.jdbcType );
+        }
+        updateRS.updateRow();
+        updateRS.close();
+        vetTable( conn, 1, 1 );
+
+        // ResultSet.updateObject( int, Object, SQLType, int )
+        prepTable( conn, 0 );
+        updateRS = forUpdatePS.executeQuery();
+        updateRS.next();
+        for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+        {
+            ColumnDesc  cd = _columnDescs[ colIdx ];
+            updateRS.updateObject( colIdx + 2, cd.values[ 1 ], cd.jdbcType, 0 );
+        }
+        updateRS.updateRow();
+        updateRS.close();
+        vetTable( conn, 1, 1 );
+
+        // ResultSet.updateObject( String, Object, SQLType )
+        prepTable( conn, 0 );
+        updateRS = forUpdatePS.executeQuery();
+        updateRS.next();
+        for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+        {
+            ColumnDesc  cd = _columnDescs[ colIdx ];
+            updateRS.updateObject( "col" + (colIdx+1), cd.values[ 1 ], cd.jdbcType );
+        }
+        updateRS.updateRow();
+        updateRS.close();
+        vetTable( conn, 1, 1 );
+
+        // ResultSet.updateObject( String, Object, SQLType, int )
+        prepTable( conn, 0 );
+        updateRS = forUpdatePS.executeQuery();
+        updateRS.next();
+        for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+        {
+            ColumnDesc  cd = _columnDescs[ colIdx ];
+            updateRS.updateObject( "col" + (colIdx+1), cd.values[ 1 ], cd.jdbcType, 0 );
+        }
+        updateRS.updateRow();
+        updateRS.close();
+        vetTable( conn, 1, 1 );
+    }
+    private void    prepTable( Connection conn, int rowIdx ) throws Exception
+    {
+        conn.prepareStatement( "truncate table allTypes" ).execute();
+
+        PreparedStatement   insert = prepareInsert( conn );
+
+        insertRow( insert, rowIdx );
+        vetTable( conn,rowIdx, 1 );
+    }
+    private void    vetTable( Connection conn, int rowIdx, int expectedRowCount ) throws Exception
+    {
+        PreparedStatement   selectPS = conn.prepareStatement( "select * from allTypes order by col0" );
+        ResultSet               selectRS = selectPS.executeQuery();
+        int                     actualRowCount = 0;
+
+        while( selectRS.next() )
+        {
+            for ( int colIdx = 0; colIdx < _columnDescs.length; colIdx++ )
+            {
+                Object          expected = _columnDescs[ colIdx ].values[ rowIdx ];
+
+                // skip the first column, the primary key
+                assertObjectEquals( expected, selectRS.getObject( colIdx + 2 ) );
+            }
+
+            actualRowCount++;
+        }
+
+        assertEquals( expectedRowCount, actualRowCount );
         
         selectRS.close();
         selectPS.close();

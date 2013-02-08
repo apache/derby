@@ -25,6 +25,7 @@ import org.apache.derby.client.am.SqlException;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.LogicalPreparedStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement42;
 import org.apache.derby.client.am.PreparedStatement;
@@ -86,6 +87,22 @@ public class ClientJDBCObjectFactoryImpl42 extends ClientJDBCObjectFactoryImpl40
         return new LogicalPreparedStatement42(ps, stmtKey, cacheInteractor);
     }
     
+    /**
+     * returns an instance of org.apache.derby.client.net.NetResultSet
+     */
+    public org.apache.derby.client.am.ResultSet newNetResultSet(Agent netAgent,
+            org.apache.derby.client.am.MaterialStatement netStatement,
+            Cursor cursor,int qryprctyp,int sqlcsrhld,
+            int qryattscr,int qryattsns,int qryattset,long qryinsid,
+            int actualResultSetType,int actualResultSetConcurrency,
+            int actualResultSetHoldability) throws SqlException {
+        return new NetResultSet42((NetAgent)netAgent,(NetStatement)netStatement,
+                cursor,
+                qryprctyp, sqlcsrhld, qryattscr, qryattsns, qryattset, qryinsid,
+                actualResultSetType,actualResultSetConcurrency,
+                actualResultSetHoldability);
+    }
+
 }
 
     

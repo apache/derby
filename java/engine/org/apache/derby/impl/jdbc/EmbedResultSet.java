@@ -3056,6 +3056,17 @@ public class EmbedResultSet extends ConnectionChild
 	public void updateObject(int columnIndex, Object x, int scale)
 			throws SQLException {
 		updateObject(columnIndex, x);
+        adjustScale( columnIndex, scale );
+	}
+
+    /**
+     * <p>
+     * Adjust the scale of a type.
+     * </p>
+     */
+    protected   void    adjustScale( int columnIndex, int scale )
+        throws SQLException
+    {
 		/*
 		* If the parameter type is DECIMAL or NUMERIC, then
 		* we need to set them to the passed scale.
@@ -3078,7 +3089,7 @@ public class EmbedResultSet extends ConnectionChild
 				throw EmbedResultSet.noStateChangeException(t);
 			}
 		}
-	}
+    }
 
 	/**
 	 * JDBC 2.0

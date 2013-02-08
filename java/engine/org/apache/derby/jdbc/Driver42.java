@@ -27,11 +27,14 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection42;
+import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.impl.jdbc.EmbedResultSet;
+import org.apache.derby.impl.jdbc.EmbedResultSet42;
 
 /**
  * <p>
@@ -72,4 +75,14 @@ public class Driver42 extends Driver40
         return new BrokeredConnection42(control);
     }
     
+    public EmbedResultSet newEmbedResultSet
+        (
+         EmbedConnection conn, ResultSet results, boolean forMetaData,
+         org.apache.derby.impl.jdbc.EmbedStatement statement,
+         boolean isAtomic
+         ) throws SQLException
+    {
+        return new EmbedResultSet42( conn, results, forMetaData, statement, isAtomic );
+    }
+
 }
