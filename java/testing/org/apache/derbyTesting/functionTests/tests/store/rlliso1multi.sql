@@ -31,7 +31,7 @@ autocommit off;
 set isolation CS;
 commit;
 
-run resource 'rlliso1multi.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 
 ------------------------------------------------------------------------------
 -- TEST SERIALIZABLE INTERACTION:
@@ -41,7 +41,7 @@ autocommit off;
 set isolation RR;
 commit;
 
-run resource 'rlliso1multi.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 
 ------------------------------------------------------------------------------
 -- TEST REPEATABLE READ INTERACTION:
@@ -51,7 +51,7 @@ autocommit off;
 set current isolation = RS;
 commit;
 
-run resource 'rlliso1multi.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 
 ------------------------------------------------------------------------------
 -- TEST READ UNCOMMITTED INTERACTION:
@@ -62,4 +62,4 @@ autocommit off;
 set isolation UR;
 commit;
 
-run resource 'rlliso1multi.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';

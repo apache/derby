@@ -18,7 +18,7 @@
 -- Test multi user lock interaction under isolation level 2.  default isolation
 -- level has been set as a property to serializable.
 --------------------------------------------------------------------------------
-run resource 'createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 
 autocommit off;
@@ -195,7 +195,7 @@ autocommit off;
 set connection client_1;
 update a set b = 'new value' where a > 'b' and a <= 'd';
 
--- run resource 'LockTableQuery.subsql';
+-- run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 
 set connection client_2;
 
@@ -219,7 +219,7 @@ insert into a values (PADSTRING('a',1000), PADSTRING('a',1000));
 --------------------------------------------------------------------------------
 insert into a values (PADSTRING('c',1000), PADSTRING('c',1000));
 
--- run resource 'LockTableQuery.subsql';
+-- run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 
 --------------------------------------------------------------------------------
 -- cleanup.
@@ -792,7 +792,7 @@ autocommit off;
 commit;
 
 set connection ddl;
-run resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 commit;
 
 

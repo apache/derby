@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -17,8 +17,8 @@ ij> --
 --------------------------------------------------------------------------------
 -- Test multi user lock interaction of ddl. 
 --------------------------------------------------------------------------------
-run resource 'createTestProcedures.subsql';
-ij> --
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -36,10 +36,10 @@ ij> --
 --
 CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+ij(CONNECTION1)> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> autocommit off;
-ij> connect 'wombat' as deleter;
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> connect 'wombat' as deleter;
 ij(DELETER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
 ij(DELETER)> connect 'wombat' as scanner;
@@ -49,7 +49,7 @@ ij(SCANNER)> -- set up
 set connection scanner;
 ij(SCANNER)> set isolation CS;
 0 rows inserted/updated/deleted
-ij(SCANNER)> run resource 'LockTableQuery.subsql';
+ij(SCANNER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 ij(SCANNER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -84,6 +84,7 @@ on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 ij(SCANNER)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
 -- order by
 --     tabname, type desc, mode, cnt, lockname
+
 -- lock table with system catalog locks included.
 create view full_lock_table as
 select 
@@ -159,6 +160,7 @@ ij(DELETER)> -------------------------------------------------------------------
 --         that the scanner is positioned on.  Then do a next on the scanner
 --         and verify the scanner goes to the last page.
 --------------------------------------------------------------------------------
+
 set connection scanner;
 ij(SCANNER)> create table just_to_block_on (a int);
 0 rows inserted/updated/deleted
@@ -255,6 +257,7 @@ ij> ----------------------------------------------------------------------------
 --         for the row the scan is positioned on to be purged by post commit,
 --         but leave a row on the page for scan to reposition to.
 --------------------------------------------------------------------------------
+
 ---------------
 -- setup
 ---------------
@@ -313,6 +316,7 @@ ij(LOCKHOLDER)> commit;
 ij(LOCKHOLDER)> --------------
 -- run the test
 --------------
+
 set connection lockholder;
 ij(LOCKHOLDER)> create table just_to_block_on (a int);
 0 rows inserted/updated/deleted
@@ -332,11 +336,13 @@ KEYCOL
 -----------
 10         
 ij(SCANNER)> -- scan is now positioned on row (10, 100), as it group fetched 2 rows.
+
 -- in deleter1 thread delete the last row on the page, but don't commit.
 -- in the other deleter thread delete the rest of the rows on the page and
 -- commit it, which will result in a post commit to try and reclaim all the
 -- rows on the page, but it won't be able to reclaim the one that has not
 -- been committed by deleter1.
+
 -- delete in this transaction keycol (30, 300).
 set connection deleter1;
 ij(DELETER1)> delete from data where keycol = 30;
@@ -408,6 +414,7 @@ ij> ----------------------------------------------------------------------------
 --         This time make the row left on the page be deleted, so when the
 --         scan repositions, it should jump over the deleted row.
 --------------------------------------------------------------------------------
+
 ---------------
 -- setup
 ---------------
@@ -464,6 +471,7 @@ ij(LOCKHOLDER)> commit;
 ij(LOCKHOLDER)> --------------
 -- run the test
 --------------
+
 set connection lockholder;
 ij(LOCKHOLDER)> create table just_to_block_on (a int);
 0 rows inserted/updated/deleted
@@ -483,11 +491,13 @@ KEYCOL
 -----------
 10         
 ij(SCANNER)> -- scan is now positioned on row (10, 100), as it group fetched 2 rows.
+
 -- In the deleter1 thread delete the last row on the page, but don't commit.
 -- in the other deleter thread delete the rest of the rows on the page and
 -- commit it, which will result in a post commit to try and reclaim all the
 -- rows on the page, but it won't be able to reclaim the one that has not
 -- been committed by deleter1.
+
 -- delete in this transaction keycol (30, 300).
 set connection deleter1;
 ij(DELETER1)> delete from data where keycol = 30;
@@ -561,6 +571,7 @@ ij> ----------------------------------------------------------------------------
 --         "next" row on the page, find that no such row exists on the page,
 --         and finally move to the next page.
 --------------------------------------------------------------------------------
+
 ---------------
 -- setup
 ---------------
@@ -617,6 +628,7 @@ ij(LOCKHOLDER)> commit;
 ij(LOCKHOLDER)> --------------
 -- run the test
 --------------
+
 set connection lockholder;
 ij(LOCKHOLDER)> create table just_to_block_on (a int);
 0 rows inserted/updated/deleted
@@ -652,6 +664,7 @@ KEYCOL
 -----------
 50         
 ij(SCANNER)> -- scan is now positioned on row (50, 500), as it group fetched in 2 row chunks.
+
 -- In the deleter1 thread delete the 1st row on the page, but don't commit:
 -- (40, 400).
 -- In the deleter2 thread delete the current row and the rows following on the
@@ -659,6 +672,7 @@ ij(SCANNER)> -- scan is now positioned on row (50, 500), as it group fetched in 
 -- the code seeing a page with all rows deleted and then queue a post commit on
 -- the page which will purge 50, 60, and 70, but it won't be able to reclaim 
 -- the one that has not been committed by deleter1.
+
 -- delete in this transaction keycol (30, 300).
 set connection deleter1;
 ij(DELETER1)> delete from data where keycol = 40;
@@ -722,6 +736,7 @@ ij> ----------------------------------------------------------------------------
 --         for all rows in the table to be purged.  The reposition code will
 --         attempt to position on the "next" page, and find no more pages.
 --------------------------------------------------------------------------------
+
 ---------------
 -- setup
 ---------------
@@ -778,6 +793,7 @@ ij(LOCKHOLDER)> commit;
 ij(LOCKHOLDER)> --------------
 -- run the test
 --------------
+
 set connection lockholder;
 ij(LOCKHOLDER)> create table just_to_block_on (a int);
 0 rows inserted/updated/deleted
@@ -813,8 +829,10 @@ KEYCOL
 -----------
 50         
 ij(SCANNER)> -- scan is now positioned on row (50, 500), as it group fetched in 2 row chunks.
+
 -- In the deleter1 thread delete all the rows, allowing all rows/pages to be
 -- reclaimed.
+
 -- delete in this transaction all rows.
 set connection deleter1;
 ij(DELETER1)> delete from data where keycol >= 0 ;

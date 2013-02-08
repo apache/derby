@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -18,6 +18,7 @@ ij> --
 -- Test multi user lock interaction under isolation level 3.  default isolation
 -- level has been set as a property to serializable.
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- Test 0: verify isolation level by seeing if a read lock is released or not.
 --------------------------------------------------------------------------------
@@ -31,7 +32,7 @@ ij(WRITER)> set isolation to rr;
 0 rows inserted/updated/deleted
 ij(WRITER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
-ij(WRITER)> run resource 'createTestProcedures.subsql';
+ij(WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 ij(WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -96,6 +97,7 @@ ij(WRITER)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 1: make sure a leaf root growing get's the right lock.
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- Test setup - create a 1 page btre, with the page ready to split.
 --------------------------------------------------------------------------------
@@ -217,9 +219,11 @@ ij(CLIENT_1)> insert into a values (PADSTRING('b',1000), PADSTRING('b',1000));
 ij(CLIENT_1)> set connection client_2;
 ij(CLIENT_2)> autocommit off;
 ij(CLIENT_2)> --------------------------------------------------------------------------------
+
 -- the following will not cause a time out, as the previous
 -- key insert lock will not conflict with other insert locks, only other
 -- select locks, or non insert update locks.
+
 --------------------------------------------------------------------------------
 insert into a values (PADSTRING('c',1000), PADSTRING('c',1000));
 1 row inserted/updated/deleted
@@ -299,6 +303,7 @@ ij(CLIENT_1)> ------------------------------------------------------------------
 --         scanner should hold the previous to first key lock until end of 
 --         transaction, thus blocking the attempted insert to the range.
 --------------------------------------------------------------------------------
+
 connect 'wombat' as scanner;
 ij(SCANNER)> set isolation to rr;
 0 rows inserted/updated/deleted
@@ -384,6 +389,7 @@ ij(SCANNER)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 6: test update locks
 --------------------------------------------------------------------------------
+
 connect 'wombat' as t6scanner;
 ij(T6SCANNER)> set isolation to rr;
 0 rows inserted/updated/deleted
@@ -399,7 +405,7 @@ ij(T6WRITER)> set isolation to rr;
 0 rows inserted/updated/deleted
 ij(T6WRITER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
-ij(T6WRITER)> run resource 'LockTableQuery.subsql';
+ij(T6WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 ij(T6WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -434,6 +440,7 @@ on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 ij(T6WRITER)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
 -- order by
 --     tabname, type desc, mode, cnt, lockname
+
 -- lock table with system catalog locks included.
 create view full_lock_table as
 select 
@@ -492,6 +499,7 @@ ij(T6UPDATER)> --
 --==================================================
 -- t6updater gets an update lock on row where a=1
 --==================================================
+
 get cursor update_cursor as
     'select b from test_6 where a=1 for update of b';
 ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
@@ -621,6 +629,7 @@ ij(T6SCANNER)> --
 --==================================================
 -- t6scanner gets a read lock
 --==================================================
+
 select b from test_6 where a=1;
 B          
 -----------
@@ -659,6 +668,7 @@ ij(T6SCANNER)> --
 --==================================================
 -- t6writer gets a write lock
 --==================================================
+
 set connection t6writer;
 ij(T6WRITER)> autocommit off;
 ij(T6WRITER)> update test_6 set b=77 where a=2;

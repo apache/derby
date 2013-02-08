@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -21,15 +21,17 @@ ij> --
 --    test is run 4 times each with the second user running in a different 
 --    isolation level.
 ------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------------
 -- TEST READ COMMITTED INTERACTION:
 ------------------------------------------------------------------------------
+
 connect 'wombat' as writer;
 ij(WRITER)> autocommit off;
 ij(WRITER)> set isolation CS;
 0 rows inserted/updated/deleted
 ij(WRITER)> commit;
-ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 ij(WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -60,6 +62,7 @@ ij(WRITER)> --
 --  TEST 2: test RU(read uncommitted) ddl interaction
 --
 ------------------------------------------------------------------------------
+
 -- SCRIPT SETUP
 connect 'wombat' as iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -67,6 +70,7 @@ ij(ISO_READ_UNCOMMITTED)> commit;
 ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
 --  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -155,6 +159,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -243,6 +248,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 2: test RU(read uncommitted) ddl interaction
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -311,7 +317,7 @@ ij(WRITER)> autocommit off;
 ij(WRITER)> set isolation RR;
 0 rows inserted/updated/deleted
 ij(WRITER)> commit;
-ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 ij(WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -342,6 +348,7 @@ ij(WRITER)> --
 --  TEST 2: test RU(read uncommitted) ddl interaction
 --
 ------------------------------------------------------------------------------
+
 -- SCRIPT SETUP
 connect 'wombat' as iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -349,6 +356,7 @@ ij(ISO_READ_UNCOMMITTED)> commit;
 ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
 --  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -440,6 +448,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -528,6 +537,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 2: test RU(read uncommitted) ddl interaction
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -596,7 +606,7 @@ ij(WRITER)> autocommit off;
 ij(WRITER)> set current isolation = RS;
 0 rows inserted/updated/deleted
 ij(WRITER)> commit;
-ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 ij(WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -627,6 +637,7 @@ ij(WRITER)> --
 --  TEST 2: test RU(read uncommitted) ddl interaction
 --
 ------------------------------------------------------------------------------
+
 -- SCRIPT SETUP
 connect 'wombat' as iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -634,6 +645,7 @@ ij(ISO_READ_UNCOMMITTED)> commit;
 ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
 --  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -732,6 +744,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -820,6 +833,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 2: test RU(read uncommitted) ddl interaction
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -883,12 +897,13 @@ ij(ISO_READ_UNCOMMITTED)> disconnect;
 ij> ------------------------------------------------------------------------------
 -- TEST READ UNCOMMITTED INTERACTION:
 ------------------------------------------------------------------------------
+
 connect 'wombat' as writer;
 ij(WRITER)> autocommit off;
 ij(WRITER)> set isolation UR;
 0 rows inserted/updated/deleted
 ij(WRITER)> commit;
-ij(WRITER)> run resource 'rlliso1multi.subsql';
+ij(WRITER)> run resource '/org/apache/derbyTesting/functionTests/tests/store/rlliso1multi.subsql';
 ij(WRITER)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -919,6 +934,7 @@ ij(WRITER)> --
 --  TEST 2: test RU(read uncommitted) ddl interaction
 --
 ------------------------------------------------------------------------------
+
 -- SCRIPT SETUP
 connect 'wombat' as iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -926,6 +942,7 @@ ij(ISO_READ_UNCOMMITTED)> commit;
 ij(ISO_READ_UNCOMMITTED)> ------------------------------------------------------------------------------
 --  TEST 0: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -1028,6 +1045,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 1: test RU(read uncommitted) heap read interaction insert/delete/update
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;
@@ -1116,6 +1134,7 @@ ij(WRITER)> commit;
 ij(WRITER)> ------------------------------------------------------------------------------
 --  TEST 2: test RU(read uncommitted) ddl interaction
 ------------------------------------------------------------------------------
+
 -- set up
 set connection iso_read_uncommitted;
 ij(ISO_READ_UNCOMMITTED)> autocommit off;

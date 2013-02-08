@@ -51,7 +51,7 @@ drop table create2;
 set current isolation = serializable;
 commit;
 
-run resource 'cisco.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 
 --------------------------------------------------------------------------------
 -- Test 1: create1:serializable, create2:repeatable read
@@ -82,7 +82,7 @@ drop table create2;
 set isolation RS;
 commit;
 
-run resource 'cisco.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 
 --------------------------------------------------------------------------------
 -- Test 1: create1:repeatable read, create2:serializable
@@ -113,7 +113,7 @@ drop table create2;
 set isolation serializable;
 commit;
 
-run resource 'cisco.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 
 
 --------------------------------------------------------------------------------

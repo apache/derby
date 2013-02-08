@@ -23,8 +23,8 @@
 --    print lock table which should match the master
 --    end transation
 -- 
-run resource 'createTestProcedures.subsql';
-run  resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
+run  resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 autocommit off;
 CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 create table a (a int, b int, c varchar(1900)) ;

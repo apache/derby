@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -18,13 +18,13 @@ ij> --
 --removes the stub files are no longer necessary
 create table t1(a int ) ;
 0 rows inserted/updated/deleted
-ij> autocommit off ;
-ij> drop table t1 ;
+ij(CONNECTION1)> autocommit off ;
+ij(CONNECTION1)> drop table t1 ;
 0 rows inserted/updated/deleted
-ij> commit ;
-ij> connect 'wombat;shutdown=true';
+ij(CONNECTION1)> commit ;
+ij(CONNECTION1)> connect 'wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
-ij> disconnect all;
+ij(CONNECTION1)> disconnect all;
 ij> connect 'wombat';
 ij> autocommit on;
 ij> create table t1(a int ) ;

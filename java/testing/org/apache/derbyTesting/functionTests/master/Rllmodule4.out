@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -16,8 +16,8 @@ ij> --
 --
 -- Test whether the RllRAMAccessmanager is working right (ie. forcing row 
 -- level locking). 
-run resource 'LockTableQuery.subsql';
-ij> --
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -48,9 +48,10 @@ from
     syscs_diag.lock_table l  right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 0 rows inserted/updated/deleted
-ij> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
+ij(CONNECTION1)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
 -- order by
 --     tabname, type desc, mode, cnt, lockname
+
 -- lock table with system catalog locks included.
 create view full_lock_table as
 select 
@@ -67,7 +68,7 @@ from
     syscs_diag.lock_table l right outer join syscs_diag.transaction_table t
 on l.xid = t.xid where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
-ij> -- lock table with no join.
+ij(CONNECTION1)> -- lock table with no join.
 create view lock_table2 as
 select 
     cast(l.xid as char(8)) as xid,
@@ -81,26 +82,26 @@ from
     syscs_diag.lock_table l  
 where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
-ij> -- transaction table with no join.
+ij(CONNECTION1)> -- transaction table with no join.
 create view tran_table as
 select 
     *
 from 
     syscs_diag.transaction_table;
 0 rows inserted/updated/deleted
-ij> autocommit off;
-ij> create table heap_only (a int);
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> create table heap_only (a int);
 0 rows inserted/updated/deleted
-ij> commit;
-ij> --------------------------------------------------------------------------------
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> --------------------------------------------------------------------------------
 -- Test insert into empty heap, should just get row lock 
 --------------------------------------------------------------------------------
 insert into heap_only values (1);
 1 row inserted/updated/deleted
-ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
+ij(CONNECTION1)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ----------------------------------------------------------------------------------
 APP     |UserTransaction|TABLE   |1   |IX  |HEAP_ONLY   |Tablelock |GRANT|ACTIVE  
 APP     |UserTransaction|ROW     |1   |X   |HEAP_ONLY   |(1,7)     |GRANT|ACTIVE  
-ij> commit;
-ij> 
+ij(CONNECTION1)> commit;
+ij(CONNECTION1)> 

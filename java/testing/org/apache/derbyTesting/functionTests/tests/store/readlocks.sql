@@ -17,8 +17,8 @@
 -- Very basic single user testing of update row locking.
 
 autocommit off;
-run resource 'createTestProcedures.subsql';
-run resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 commit;
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 
@@ -44,7 +44,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -61,7 +61,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -79,7 +79,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -98,7 +98,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -116,7 +116,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -134,7 +134,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- run each test with rows across multiple pages in the interesting 
 -- conglomerate (heap in the non-index tests, and in the index in the index 
@@ -155,7 +155,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -172,7 +172,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -193,7 +193,7 @@ commit;
     PADSTRING('index pad 7',600));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -214,7 +214,7 @@ commit;
 	   PADSTRING('index pad 7',700));
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -236,7 +236,7 @@ commit;
 	   PADSTRING('index pad 7',800));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -258,7 +258,7 @@ commit;
 
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 commit;
 
@@ -284,7 +284,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -301,7 +301,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -319,7 +319,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -337,7 +337,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -355,7 +355,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -373,7 +373,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- run each test with rows across multiple pages in the interesting 
 -- conglomerate (heap in the non-index tests, and in the index in the index 
@@ -390,7 +390,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six',1900));
     insert into a values (7, 70, PADSTRING('seven',1900));
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -403,7 +403,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six',1900));
     insert into a values (7, 70, PADSTRING('seven',1900));
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -424,7 +424,7 @@ commit;
 	   PADSTRING('index pad 7',600));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -445,7 +445,7 @@ commit;
 	   PADSTRING('index pad 7',700));
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -467,7 +467,7 @@ commit;
 
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -488,7 +488,7 @@ commit;
 	   PADSTRING('index pad 7',900));
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 commit;
 
@@ -514,7 +514,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -531,7 +531,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -549,7 +549,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -568,7 +568,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -586,7 +586,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -604,7 +604,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- run each test with rows across multiple pages in the interesting 
 -- conglomerate (heap in the non-index tests, and in the index in the index 
@@ -625,7 +625,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six', 1900));
     insert into a values (7, 70, PADSTRING('seven', 1900));
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -642,7 +642,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six', 1900));
     insert into a values (7, 70, PADSTRING('seven', 1900));
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -663,7 +663,7 @@ commit;
     PADSTRING('index pad 7',600));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -684,7 +684,7 @@ commit;
 	   PADSTRING('index pad 7',700));
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -706,7 +706,7 @@ commit;
 	   PADSTRING('index pad 7',800));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -728,7 +728,7 @@ commit;
 
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 commit;
 
@@ -756,7 +756,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -773,7 +773,7 @@ commit;
     insert into a values (6, 60, 'six');
     insert into a values (7, 70, 'seven');
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -791,7 +791,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -810,7 +810,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -828,7 +828,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create unique index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -846,7 +846,7 @@ commit;
     insert into a values (7, 70, 'seven');
     create index a_idx on a (a);
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- run each test with rows across multiple pages in the interesting 
 -- conglomerate (heap in the non-index tests, and in the index in the index 
@@ -867,7 +867,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six', 1900));
     insert into a values (7, 70, PADSTRING('seven', 1900));
     commit;
-    run resource 'readCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readCursorLocks.subsql';
 
 -- non cursor, no index run
     drop table a;
@@ -884,7 +884,7 @@ commit;
     insert into a values (6, 60, PADSTRING('six', 1900));
     insert into a values (7, 70, PADSTRING('seven', 1900));
     commit;
-    run resource 'readSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readSetLocks.subsql';
 
 -- cursor, unique index run
     drop table a;
@@ -905,7 +905,7 @@ commit;
     PADSTRING('index pad 7',600));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- cursor, non-unique index run
     drop table a;
@@ -926,7 +926,7 @@ commit;
 	   PADSTRING('index pad 7',700));
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeCursorLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeCursorLocks.subsql';
 
 -- non cursor, unique index run
     drop table a;
@@ -948,7 +948,7 @@ commit;
 	   PADSTRING('index pad 7',800));
     create unique index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 -- non cursor, non-unique index run
     drop table a;
@@ -970,7 +970,7 @@ commit;
 
     create index a_idx on a (a, index_pad) ;
     commit;
-    run resource 'readBtreeSetLocks.subsql';
+    run resource '/org/apache/derbyTesting/functionTests/tests/store/readBtreeSetLocks.subsql';
 
 commit;
 

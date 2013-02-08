@@ -16,7 +16,7 @@
 --
 -- create a table with 5 rows, with 4K pageSize,
 -- this should expand over 3 pages
-run resource 'createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 create table testing 
 	(a varchar(2024), b varchar(1024), c varchar(1024), d varchar(2048), e varchar(300)) ;
@@ -192,3 +192,4 @@ select * from testing where key4 = 4000 or key1 = 1;
 
 
 
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', 'NULL');

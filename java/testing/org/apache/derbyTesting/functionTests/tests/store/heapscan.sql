@@ -17,7 +17,7 @@
 --------------------------------------------------------------------------------
 -- Test multi user lock interaction of ddl. 
 --------------------------------------------------------------------------------
-run resource 'createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 autocommit off;
 
 connect 'wombat' as deleter;
@@ -31,7 +31,7 @@ NoHoldForConnection;
 -- set up
 set connection scanner;
 set isolation CS;
-run resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 autocommit off;
 drop table data;
 -- create a table with 2 rows per page.

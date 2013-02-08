@@ -19,7 +19,7 @@
 -- not consistent across runs, in particular for indexes, but also for
 -- tables. 
 -- Therefore tests do not report the numunfilledpages column
-run resource 'createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 create table ideleteu (a varchar(2000), b varchar(2000)) ;
 insert into ideleteu values (PADSTRING('rrrrrrrrrr',2000), PADSTRING('ssssssssssssssss',2000));

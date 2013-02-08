@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -18,11 +18,12 @@ ij> --
 -- Test multi user lock interaction of ddl. 
 --------------------------------------------------------------------------------
 autocommit off;
-ij> connect 'wombat' as create1;
+ij(CONNECTION1)> connect 'wombat' as create1;
 ij(CREATE1)> connect 'wombat' as create2;
 ij(CREATE2)> --------------------------------------------------------------------------------
 -- Test 0: create1:serializable, create2:serializable
 --------------------------------------------------------------------------------
+
 -- set up
 set connection create1;
 ij(CREATE1)> autocommit off;
@@ -62,7 +63,7 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'CREATE2' because it does not e
 ij(CREATE2)> set current isolation = serializable;
 0 rows inserted/updated/deleted
 ij(CREATE2)> commit;
-ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 ij(CREATE2)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -82,6 +83,7 @@ ij(CREATE2)> --
 --------------------------------------------------------------------------------
 -- Test 0.1: ddl interaction
 --------------------------------------------------------------------------------
+
 -- create 1st table.  Drop the table, which will get regular X locks on the
 -- rows in the system catalogs (which are different than insert locks).
 set connection create1;
@@ -104,6 +106,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> select * from data where keycol <= 10;
@@ -127,6 +130,7 @@ ij(CREATE1)> set connection create1;
 ij(CREATE1)> commit;
 ij(CREATE1)> delete from data where keycol = 5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij(CREATE1)> commit;
 ij(CREATE1)> set connection create2;
 ij(CREATE2)> commit;
@@ -135,6 +139,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> delete from data where keycol <= 10;
@@ -153,12 +158,14 @@ ij(CREATE1)> set connection create1;
 ij(CREATE1)> commit;
 ij(CREATE1)> delete from data where keycol = 6;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij(CREATE1)> commit;
 ij(CREATE1)> set connection create2;
 ij(CREATE2)> commit;
 ij(CREATE2)> --------------------------------------------------------------------------------
 -- Test 1: create1:serializable, create2:repeatable read
 --------------------------------------------------------------------------------
+
 -- set up
 set connection create1;
 ij(CREATE1)> autocommit off;
@@ -198,7 +205,7 @@ ij(CREATE2)> drop table create2;
 ij(CREATE2)> set isolation RS;
 0 rows inserted/updated/deleted
 ij(CREATE2)> commit;
-ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 ij(CREATE2)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -218,6 +225,7 @@ ij(CREATE2)> --
 --------------------------------------------------------------------------------
 -- Test 0.1: ddl interaction
 --------------------------------------------------------------------------------
+
 -- create 1st table.  Drop the table, which will get regular X locks on the
 -- rows in the system catalogs (which are different than insert locks).
 set connection create1;
@@ -240,6 +248,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> select * from data where keycol <= 10;
@@ -263,6 +272,7 @@ ij(CREATE1)> set connection create1;
 ij(CREATE1)> commit;
 ij(CREATE1)> delete from data where keycol = 5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij(CREATE1)> commit;
 ij(CREATE1)> set connection create2;
 ij(CREATE2)> commit;
@@ -271,6 +281,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> delete from data where keycol <= 10;
@@ -289,12 +300,14 @@ ij(CREATE1)> set connection create1;
 ij(CREATE1)> commit;
 ij(CREATE1)> delete from data where keycol = 6;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij(CREATE1)> commit;
 ij(CREATE1)> set connection create2;
 ij(CREATE2)> commit;
 ij(CREATE2)> --------------------------------------------------------------------------------
 -- Test 1: create1:repeatable read, create2:serializable
 --------------------------------------------------------------------------------
+
 -- set up
 set connection create1;
 ij(CREATE1)> autocommit off;
@@ -334,7 +347,7 @@ ij(CREATE2)> drop table create2;
 ij(CREATE2)> set isolation serializable;
 0 rows inserted/updated/deleted
 ij(CREATE2)> commit;
-ij(CREATE2)> run resource 'cisco.subsql';
+ij(CREATE2)> run resource '/org/apache/derbyTesting/functionTests/tests/store/cisco.subsql';
 ij(CREATE2)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -354,6 +367,7 @@ ij(CREATE2)> --
 --------------------------------------------------------------------------------
 -- Test 0.1: ddl interaction
 --------------------------------------------------------------------------------
+
 -- create 1st table.  Drop the table, which will get regular X locks on the
 -- rows in the system catalogs (which are different than insert locks).
 set connection create1;
@@ -376,6 +390,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> select * from data where keycol <= 10;
@@ -408,6 +423,7 @@ ij(CREATE2)> -------------------------------------------------------------------
 --           if create1 session isolation is serializable, otherwise it will
 --           not block.
 --------------------------------------------------------------------------------
+
 -- get lock on range of keys 0->10, iso level determines if phantoms allowed.
 set connection create1;
 ij(CREATE1)> delete from data where keycol <= 10;

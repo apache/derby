@@ -32,7 +32,7 @@ set isolation to rr;
 -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
 
-run resource 'createTestProcedures.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 
 -- set up
@@ -355,7 +355,7 @@ set isolation to rr;
 -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
 
-run resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 
 -- set up
 set connection t6updater;

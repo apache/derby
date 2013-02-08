@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -18,8 +18,8 @@ ij> --
 -- Test multi user lock interaction under isolation level 2.  default isolation
 -- level has been set as a property to serializable.
 --------------------------------------------------------------------------------
-run resource 'createTestProcedures.subsql';
-ij> --
+run resource '/org/apache/derbyTesting/functionTests/tests/store/createTestProcedures.subsql';
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -37,14 +37,14 @@ ij> --
 --
 CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.Formatters.padString' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
+ij(CONNECTION1)> CREATE PROCEDURE WAIT_FOR_POST_COMMIT() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.T_Access.waitForPostCommitToFinish' PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
+ij(CONNECTION1)> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', '4096');
 0 rows inserted/updated/deleted
-ij> autocommit off;
-ij> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
-ij> --------------------------------------------------------------------------------
+ij(CONNECTION1)> --------------------------------------------------------------------------------
 -- Test 0: verify isolation level by seeing if a read lock is released or not.
 --------------------------------------------------------------------------------
 connect 'wombat' as scanner;
@@ -102,6 +102,7 @@ ij(WRITER)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 1: make sure a leaf root growing get's the right lock.
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- Test setup - create a 1 page btree, with the page ready to split.
 --------------------------------------------------------------------------------
@@ -229,12 +230,15 @@ ij(CLIENT_2)> ------------------------------------------------------------------
 set connection client_1;
 ij(CLIENT_1)> update a set b = 'new value' where a > 'b' and a <= 'd';
 1 row inserted/updated/deleted
-ij(CLIENT_1)> -- run resource 'LockTableQuery.subsql';
+ij(CLIENT_1)> -- run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
+
 set connection client_2;
 ij(CLIENT_2)> --------------------------------------------------------------------------------
+
 -- the following will not time out, the insert
 -- will get a previous key insert lock which will not conflict with the
 -- non-insert read-committed exclusive lock on 'c'.
+
 --------------------------------------------------------------------------------
 insert into a values (PADSTRING('d',1000), PADSTRING('d',1000));
 1 row inserted/updated/deleted
@@ -249,7 +253,8 @@ ij(CLIENT_2)> ------------------------------------------------------------------
 --------------------------------------------------------------------------------
 insert into a values (PADSTRING('c',1000), PADSTRING('c',1000));
 ERROR 40XL1: A lock could not be obtained within the time requested
-ij(CLIENT_2)> -- run resource 'LockTableQuery.subsql';
+ij(CLIENT_2)> -- run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
+
 --------------------------------------------------------------------------------
 -- cleanup.
 --------------------------------------------------------------------------------
@@ -338,6 +343,7 @@ ij(CLIENT_1)> ------------------------------------------------------------------
 --         handles a row that is deleted after it has read a row from the index
 --         but before it has read the row from the base table.
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- Test setup - create a 1 page btre, with the page ready to split.
 --------------------------------------------------------------------------------
@@ -436,7 +442,9 @@ ij> ----------------------------------------------------------------------------
 -- Test 6: make sure a that heap scans which cross page boundaries release
 --         locks correctly.
 --------------------------------------------------------------------------------
+
 -- Test setup - create a heap with one row per page.
+
 connect 'wombat' as scanner;
 ij(SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
@@ -539,7 +547,9 @@ ij> ----------------------------------------------------------------------------
 --         point there was a problem where releasing locks in one of the cursors
 --         released locks in the other cursor).
 --------------------------------------------------------------------------------
+
 -- Test setup - create a heap with one row per page.
+
 connect 'wombat' as scanner;
 ij(SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
@@ -651,6 +661,7 @@ ij> ----------------------------------------------------------------------------
 --               client continue on with work.
 --
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- 8.1 setup 
 --------------------------------------------------------------------------------
@@ -675,6 +686,7 @@ ij(CLIENT_1)> ------------------------------------------------------------------
 -- 8.1 test - simply delete rows from table, heap post commit will run and 
 --            reclaim all pages.
 --------------------------------------------------------------------------------
+
 set connection client_1;
 ij(CLIENT_1)> delete from test_8;
 5 rows inserted/updated/deleted
@@ -707,6 +719,7 @@ ij(CLIENT_1)> commit;
 ij(CLIENT_1)> --------------------------------------------------------------------------------
 -- 8.2 test - client 1 holds row lock which will prevent client 2 post commit.
 --------------------------------------------------------------------------------
+
 set connection client_1;
 ij(CLIENT_1)> insert into test_8 values (6, 60, PADSTRING('a',1000), 'test 8.2');
 1 row inserted/updated/deleted
@@ -753,6 +766,7 @@ ij(CLIENT_2)> ------------------------------------------------------------------
 -- 8.3 test - simply delete rows from index table, btree post commit will run
 --            and reclaim all pages.
 --------------------------------------------------------------------------------
+
 set connection client_1;
 ij(CLIENT_1)> delete from test_8;
 5 rows inserted/updated/deleted
@@ -787,6 +801,7 @@ ij(CLIENT_1)> commit;
 ij(CLIENT_1)> --------------------------------------------------------------------------------
 -- 8.4 test - client 1 holds row lock which will prevent client 2 post commit.
 --------------------------------------------------------------------------------
+
 set connection client_1;
 ij(CLIENT_1)> insert into test_8 values (6, 60, PADSTRING('a',1500), 'test 8.4');
 1 row inserted/updated/deleted
@@ -811,6 +826,7 @@ ij(CLIENT_2)> commit;
 ij(CLIENT_2)> --------------------------------------------------------------------------------
 -- cleanup.
 --------------------------------------------------------------------------------
+
 set connection client_1;
 ij(CLIENT_1)> drop table test_8;
 0 rows inserted/updated/deleted
@@ -825,6 +841,7 @@ ij> ----------------------------------------------------------------------------
 --         (Scan locks are no longer used after DERBY-2991.)
 --
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- 9.1 setup 
 --------------------------------------------------------------------------------
@@ -859,6 +876,7 @@ ij(SCANNER)> -------------------------------------------------------------------
 -- 9.1 test - open a cursor for update on table, and make sure splitter waits
 --            on the scan position.
 --------------------------------------------------------------------------------
+
 set connection scanner;
 ij(SCANNER)> CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault','1');
 0 rows inserted/updated/deleted
@@ -904,6 +922,7 @@ ij(SCANNER)> commit;
 ij(SCANNER)> --------------------------------------------------------------------------------
 -- cleanup.
 --------------------------------------------------------------------------------
+
 set connection scanner;
 ij(SCANNER)> drop table test_9;
 0 rows inserted/updated/deleted
@@ -915,6 +934,7 @@ ij(SPLITTER)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 10: Make sure a ddl does not block the lock table vti.
 --------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
 -- 10 setup 
 --------------------------------------------------------------------------------
@@ -929,7 +949,7 @@ NoHoldForConnection;
 ij(LOCKTABLE)> autocommit off;
 ij(LOCKTABLE)> commit;
 ij(LOCKTABLE)> set connection ddl;
-ij(DDL)> run resource 'LockTableQuery.subsql';
+ij(DDL)> run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 ij(DDL)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -964,6 +984,7 @@ on l.xid = t.xid where l.tableType <> 'S' and t.type='UserTransaction';
 ij(DDL)> --on l.xid = t.xid where l.tableType <> 'S' or l.tableType is null
 -- order by
 --     tabname, type desc, mode, cnt, lockname
+
 -- lock table with system catalog locks included.
 create view full_lock_table as
 select 
@@ -1006,6 +1027,7 @@ ij(DDL)> -----------------------------------------------------------------------
 -- 10 test - do ddl in one connection and look at lock table in another 
 --           connection.
 --------------------------------------------------------------------------------
+
 set connection ddl;
 ij(DDL)> create table test_10 (a int, a2 int, b varchar(1000), c char(10)) 
     ;
@@ -1029,6 +1051,7 @@ ij(LOCKTABLE)> commit;
 ij(LOCKTABLE)> --------------------------------------------------------------------------------
 -- cleanup.
 --------------------------------------------------------------------------------
+
 set connection ddl;
 ij(DDL)> drop table test_10;
 0 rows inserted/updated/deleted
@@ -1040,6 +1063,7 @@ ij(LOCKTABLE)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 11: test update locks
 --------------------------------------------------------------------------------
+
 connect 'wombat' as t11scanner;
 ij(T11SCANNER)> -- by default, holdability of ResultSet objects created using this Connection object is true. Following will set it to false for this connection.
 NoHoldForConnection;
@@ -1070,6 +1094,7 @@ ij(T11UPDATER)> --
 --==================================================
 -- t11updater gets an update lock on row where a=1
 --==================================================
+
 get cursor update_cursor as
     'select b from test_11 where a=1 for update of b';
 ij(T11UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
@@ -1187,6 +1212,7 @@ ij(T11SCANNER)> --
 --==================================================
 -- t11scanner gets a read lock
 --==================================================
+
 select b from test_11 where a=1;
 B          
 -----------
@@ -1218,6 +1244,7 @@ ij(T11SCANNER)> --
 --==================================================
 -- t11writer gets a write lock
 --==================================================
+
 set connection t11writer;
 ij(T11WRITER)> autocommit off;
 ij(T11WRITER)> update test_11 set b=77 where a=2;

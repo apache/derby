@@ -16,7 +16,7 @@
 --
 -- Test whether the RllRAMAccessmanager is working right (ie. forcing row 
 -- level locking). 
-run resource 'LockTableQuery.subsql';
+run resource '/org/apache/derbyTesting/functionTests/tests/store/LockTableQuery.subsql';
 
 autocommit off;
 
