@@ -54,7 +54,7 @@ import org.apache.derby.vti.VTITemplate;
 	<LI> ID CHAR(36) - not nullable.  Internal identifier of the compiled statement.
 	<LI> SCHEMANAME VARCHAR(128) - nullable.  Schema the statement was compiled in.
 	<LI> SQL_TEXT VARCHAR(32672) - not nullable.  Text of the statement
-	<LI> UNICODE BIT/BOOLEAN - not nullable.  True if the statement is compiled as a pure unicode string, false if it handled unicode escapes.
+	<LI> UNICODE BIT/BOOLEAN - not nullable.  Always true.
 	<LI> VALID BIT/BOOLEAN - not nullable.  True if the statement is currently valid, false otherwise
 	<LI> COMPILED_AT TIMESTAMP nullable - time statement was compiled, requires STATISTICS TIMING to be enabled.
 
