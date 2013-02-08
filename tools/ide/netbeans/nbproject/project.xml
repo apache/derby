@@ -210,6 +210,11 @@
                     <ide-action name="test"/>
                     <ide-action name="debug-ij"/>
                     <ide-action name="debug-server"/>
+                    <action>
+                        <script>${ant.script}</script>
+                        <label>build-classes</label>
+                        <target>all</target>
+                    </action>
                 </context-menu>
             </view>
             <subprojects/>
