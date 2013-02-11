@@ -21,6 +21,7 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -32,6 +33,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement42;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet42;
@@ -83,6 +85,20 @@ public class Driver42 extends Driver40
          ) throws SQLException
     {
         return new EmbedResultSet42( conn, results, forMetaData, statement, isAtomic );
+    }
+
+    public CallableStatement newEmbedCallableStatement(
+        EmbedConnection conn,
+        String stmt,
+        int resultSetType,
+        int resultSetConcurrency,
+        int resultSetHoldability)
+        throws SQLException {
+        return new EmbedCallableStatement42(conn,
+            stmt,
+            resultSetType,
+            resultSetConcurrency,
+            resultSetHoldability);
     }
 
 }

@@ -271,7 +271,7 @@ public class BrokeredConnection40
             throw sqle;
         }
     }
-    public final BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
+    public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
         try {
             return new BrokeredCallableStatement40(statementControl, sql);
         } catch (SQLException sqle) {

@@ -43,4 +43,13 @@ public class BrokeredConnection42
             throw sqle;
         }
     }
+    
+    public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
+        try {
+            return new BrokeredCallableStatement42(statementControl, sql);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
 }

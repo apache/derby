@@ -21,7 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.math.BigDecimal;
+import java.io.Serializable;
 import java.sql.Blob;
+import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
@@ -51,6 +53,8 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     // CONSTANTS
     //
     //////////////////////////////////////////////////////////
+
+    private static  final   String  UNIMPLEMENTED_FEATURE = "0A000";
 
     //
     // If any of these becomes a legal Derby type, remove it from this table and put a corresponding line
@@ -93,8 +97,8 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         new ColumnDesc( JDBCType.LONGVARCHAR, "long varchar", "01234", "56789", null ),
         new ColumnDesc( JDBCType.LONGVARBINARY, "long varchar for bit data", makeBinary( "01234" ), makeBinary( "56789" ), null ),
         new ColumnDesc( JDBCType.NUMERIC, "numeric", new BigDecimal( 0 ), new BigDecimal( 1 ), null ),
-        new ColumnDesc( JDBCType.REAL, "float", new Float( 0.0F ), new Float( 1F ), null ),
-        new ColumnDesc( JDBCType.SMALLINT, "smallint", new Short( (short) 0 ), new Short( (short) 1 ), null ),
+        new ColumnDesc( JDBCType.REAL, "real", new Float( 0.0F ), new Float( 1F ), null ),
+        new ColumnDesc( JDBCType.SMALLINT, "smallint", new Integer( 0 ), new Integer( 1 ), null ),
         new ColumnDesc( JDBCType.TIME, "time", new Time( 0L ), new Time( 1L ), null ),
         new ColumnDesc( JDBCType.TIMESTAMP, "timestamp", new Timestamp( 0L ), new Timestamp( 1L ), null ),
         new ColumnDesc( JDBCType.JAVA_OBJECT, "Price", makePrice( 0L ), makePrice( 1L ), null ),
@@ -176,18 +180,14 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     {
         Connection conn = getConnection();
 
+        setupPrice( conn );
         makeTable( conn );
         populateTable( conn );
         vetTableContents( conn );
         updateColumns( conn );
     }
     private void    makeTable( Connection conn ) throws Exception
-    {
-        conn.prepareStatement
-            (
-             "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
-             ).execute();
-        
+    {        
         StringBuilder   buffer = new StringBuilder();
 
         buffer.append( "create table allTypes\n(\n" );
@@ -389,12 +389,243 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         selectPS.close();
     }
 
+    /**
+     * <p>
+     * Test the CallableStatement.registerObject() overloads added by JDBC 4.2.
+     * </p>
+     */
+    public  void    test_02_registerObject() throws Exception
+    {
+        Connection conn = getConnection();
+
+        registerObjectTest( conn );
+    }
+    public  static  void    registerObjectTest( Connection conn ) throws Exception
+    {
+        createSchemaObjects( conn );
+        vetProc( conn );
+    }
+    private static void    createSchemaObjects( Connection conn ) throws Exception
+    {
+        setupPrice( conn );
+        createProc( conn );
+    }
+    private static void    createProc( Connection conn ) throws Exception
+    {
+        StringBuilder   buffer = new StringBuilder();
+
+        buffer.append( "create procedure unpackAllTypes( in valueIdx int" );
+        
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            ColumnDesc  cd = _columnDescs[ i ];
+            String  parameterName = "param" + (i+1);
+            String  parameterType = cd.sqlType;
+            buffer.append( ", out " + parameterName + " " + parameterType );
+        }
+        
+        buffer.append( " ) language java parameter style java no sql\n" );
+        buffer.append( "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42.unpackAllTypes'" );
+
+        String  sqlText = buffer.toString();
+        println( sqlText );
+
+        conn.prepareStatement( sqlText ).execute();
+    }
+    private static void    vetProc( Connection conn ) throws Exception
+    {
+        StringBuilder   buffer = new StringBuilder();
+        buffer.append( "call unpackAllTypes( ?" );
+        for ( int i = 0; i < _columnDescs.length; i++ ) { buffer.append( ", ?" ); }
+        buffer.append( " )" );
+        String  sqlText = buffer.toString();
+        println( sqlText );
+
+        CallableStatement   cs = conn.prepareCall( sqlText );
+        int     valueIdx;
+        int     param;
+
+        // registerOutParameter( int, SQLType )
+        valueIdx = 0;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            cs.registerOutParameter( param++, _columnDescs[ i ].jdbcType );
+        }
+        cs.execute();
+        vetCS( cs, valueIdx );
+
+        // registerOutParameter( int, SQLType, int )
+        valueIdx = 1;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            cs.registerOutParameter( param++, _columnDescs[ i ].jdbcType, 0 );
+        }
+        cs.execute();
+        vetCS( cs, valueIdx );
+
+        // registerOutParameter( int, SQLType, String )
+        valueIdx = 0;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            cs.registerOutParameter( param++, _columnDescs[ i ].jdbcType, "foo" );
+        }
+        cs.execute();
+        vetCS( cs, valueIdx );
+
+        // registerOutParameter( String, SQLType )
+        try {
+            cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType );
+            fail( "Expected unimplemented feature." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        }
+
+        // registerOutParameter( String, SQLType, int )
+        try {
+            cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType, 0 );
+            fail( "Expected unimplemented feature." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        }
+
+        // registerOutParameter( String, SQLType, String )
+        try {
+            cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType, "foo" );
+            fail( "Expected unimplemented feature." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        }
+    }
+    private  static void    vetCS( CallableStatement cs, int valueIdx )
+        throws Exception
+    {
+        int     idx = 0;
+        int     colIdx = 2;
+
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+        assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
+    }
+
+
+    //////////////////////////////////////////////////////////
+    //
+    // SQL ROUTINES
+    //
+    //////////////////////////////////////////////////////////
+
+    public  static  void    unpackAllTypes
+        (
+         int valueIdx,
+         Long[]    bigintValue,
+         Blob[]   blobValue,
+         Boolean[] booleanValue,
+         String[]  charValue,
+         byte[][]  binaryValue,
+         Clob[]    clobValue,
+         Date[]    dateValue,
+         BigDecimal[]  decimalValue,
+         Double[]  doubleValue,
+         Double[]  floatValue,
+         Integer[] intValue,
+         String[]  longVarcharValue,
+         byte[][]  longVarbinaryValue,
+         BigDecimal[]  numericValue,
+         Float[]   realValue,
+         Integer[]   smallintValue,
+         Time[]    timeValue,
+         Timestamp[]  timestampValue,
+         Price[]   priceValue,
+         String[]  varcharValue,
+         byte[][]  varbinaryValue
+         )
+    {
+        int     colIdx = 0;
+        
+        bigintValue[ 0 ] = (Long) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        blobValue[ 0 ] = (Blob) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        booleanValue[ 0 ] = (Boolean) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        charValue[ 0 ] = (String) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        binaryValue[ 0 ] = (byte[]) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        clobValue[ 0 ] = (Clob) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        dateValue[ 0 ] = (Date) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        decimalValue[ 0 ] = (BigDecimal) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        doubleValue[ 0 ] = (Double) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        floatValue[ 0 ] = (Double) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        intValue[ 0 ] = (Integer) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        longVarcharValue[ 0 ] = (String) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        longVarbinaryValue[ 0 ] = (byte[]) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        numericValue[ 0 ] = (BigDecimal) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        realValue[ 0 ] = (Float) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        smallintValue[ 0 ] = (Integer) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        timeValue[ 0 ] = (Time) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        timestampValue[ 0 ] = (Timestamp) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        priceValue[ 0 ] = (Price) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        varcharValue[ 0 ] = (String) _columnDescs[ colIdx++ ].values[ valueIdx ];
+        varbinaryValue[ 0 ] = (byte[]) _columnDescs[ colIdx++ ].values[ valueIdx ];
+    }
+
     //////////////////////////////////////////////////////////
     //
     // MINIONS
     //
     //////////////////////////////////////////////////////////
 
+    private static void setupPrice( Connection conn ) throws Exception
+    {
+        if ( !aliasExists( conn, "PRICE" ) )
+        {
+            conn.prepareStatement
+                (
+                 "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java"
+                 ).execute();
+        }
+    }
+    private static  boolean aliasExists( Connection conn, String aliasName ) throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select count(*) from sys.sysaliases where alias = ?" );
+        ps.setString( 1, aliasName );
+        ResultSet   rs = ps.executeQuery();
+        rs.next();
+
+        int retval = rs.getInt( 1 );
+
+        rs.close();
+        ps.close();
+
+        return (retval > 0);
+    }
+    
     private  static  Blob    makeBlob( String contents )
     {
         return new HarmonySerialBlob( makeBinary( contents ) );
@@ -422,7 +653,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         return Price.makePrice( new BigDecimal( raw ) );
     }
 
-    private void    assertObjectEquals( Object expected, Object actual ) throws Exception
+    public static void    assertObjectEquals( Object expected, Object actual ) throws Exception
     {
         if ( expected == null )
         {
@@ -439,7 +670,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         else if ( expected instanceof byte[] ) { compareBytes( (byte[]) expected, (byte[]) actual ); }
         else { assertEquals( expected.toString(), actual.toString() ); }
     }
-    private void  compareBytes( byte[] left, byte[] right )
+    private static void  compareBytes( byte[] left, byte[] right )
         throws Exception
     {
         int count = left.length;

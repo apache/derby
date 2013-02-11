@@ -210,7 +210,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 	/**
 	 * JDBC 2.0
 	 *
-	 * Registers the designated output parameter
+	 * Derby ignores the typeName argument because UDTs don't need it.
 	 *
 	 * @exception SQLException if a database-access error occurs.
 	 */
@@ -218,7 +218,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
  									 String typeName) 
  		 throws SQLException
  	{
- 		throw Util.notImplemented("registerOutParameter");
+ 		registerOutParameter( parameterIndex, sqlType );
  	}
  		 
  

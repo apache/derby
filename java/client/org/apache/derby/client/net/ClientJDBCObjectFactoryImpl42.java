@@ -25,7 +25,11 @@ import org.apache.derby.client.am.SqlException;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.CallableStatement;
+import org.apache.derby.client.am.CallableStatement42;
 import org.apache.derby.client.am.Cursor;
+import org.apache.derby.client.am.LogicalCallableStatement;
+import org.apache.derby.client.am.LogicalCallableStatement42;
 import org.apache.derby.client.am.LogicalPreparedStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement42;
 import org.apache.derby.client.am.PreparedStatement;
@@ -103,6 +107,25 @@ public class ClientJDBCObjectFactoryImpl42 extends ClientJDBCObjectFactoryImpl40
                 actualResultSetHoldability);
     }
 
+    /** return a CallableStatement */
+    public CallableStatement newCallableStatement(Agent agent,
+            org.apache.derby.client.am.Connection connection,
+            String sql,int type,int concurrency,
+            int holdability,ClientPooledConnection cpc) throws SqlException {
+        return new CallableStatement42(agent,connection,sql,type,concurrency,
+                holdability,cpc);
+    }
+
+    /**
+     * Returns a new logical callable statement object.
+     */
+    public LogicalCallableStatement newLogicalCallableStatement(
+            java.sql.CallableStatement cs,
+            StatementKey stmtKey,
+            StatementCacheInteractor cacheInteractor) {
+        return new LogicalCallableStatement42(cs, stmtKey, cacheInteractor);
+    }
+    
 }
 
     

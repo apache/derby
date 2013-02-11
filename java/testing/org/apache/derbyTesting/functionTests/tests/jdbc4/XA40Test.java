@@ -26,6 +26,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
+import java.lang.reflect.Method;
 import java.sql.*;
 
 import javax.sql.XAConnection;
@@ -185,6 +186,22 @@ public class XA40Test extends BaseJDBCTestCase {
     public void testLargeUpdate_jdbc4_2() throws Exception
     {
         StatementTest.largeUpdate_jdbc4_2( con );
+    }
+
+    /**
+     * <p>
+     * Test the JDBC 4.2 additions to brokered CallableStatements.
+     * </p>
+     */
+    public void test_registerOutParameter_jdbc4_2() throws Exception
+    {
+        if ( isJava8() )
+        {
+            Class<?>   klass = Class.forName( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" );
+            Method  method = klass.getMethod( "registerObjectTest", new Class<?>[] { Connection.class } );
+
+            method.invoke( null, new Object[] { con } );
+        }
     }
 
     /**

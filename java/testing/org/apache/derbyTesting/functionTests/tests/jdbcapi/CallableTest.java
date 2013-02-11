@@ -218,9 +218,6 @@ public class CallableTest extends BaseJDBCTestCase {
             // Test that both requires DriverManager and BigDecimal
             suite.addTest
                 (new CallableTest("xtestNumericBoundariesProc"));
-            
-            suite.addTest
-                (new CallableTest("xtestRegUserDefOutParameterError"));
         }
 
 
@@ -586,27 +583,6 @@ public class CallableTest extends BaseJDBCTestCase {
         assertEquals("Time: changed to", Time.valueOf("11:06:03"), 
             cs.getTime(12));
 
-    }
-
-    /**
-     * Tries to register a user-defined OUT parameter, which isn't supported
-     * and is expected to throw a "not implemented" exception.
-     * DERBY-1184 fixed the behavior in the Derby Network Client to throw an
-     * exception; however, DB2 Client behavior is incorrect, so the suite 
-     * excludes this test when run with DB2 Client.
-     * @throws SQLException 
-     */
-    public void xtestRegUserDefOutParameterError() throws SQLException
-    {
-        CallableStatement cs = prepareCall
-            ("? = call NO_IN_ONE_OUT_FUNC()");
-
-        try {
-            cs.registerOutParameter (1, java.sql.Types.INTEGER, "user-def");
-            fail("FAIL - Shouldn't reach here. Functionality not implemented.");
-        } catch (SQLException se) {
-            assertSQLState(NOT_IMPLEMENTED, se);
-        }
     }
 
     /**

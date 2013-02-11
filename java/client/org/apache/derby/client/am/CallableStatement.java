@@ -192,11 +192,12 @@ public class CallableStatement extends PreparedStatement
         parameterRegistered_[parameterIndex - 1] = true;
     }
 
+    /** Derby ignores the typeName argument because UDTs don't need it */
     public void registerOutParameter(int parameterIndex, int jdbcType, String typeName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "registerOutParameter", parameterIndex, jdbcType, typeName);
         }
-        throw jdbcMethodNotImplemented();
+        registerOutParameter( parameterIndex, jdbcType );
     }
 
     public boolean wasNull() throws SQLException {
