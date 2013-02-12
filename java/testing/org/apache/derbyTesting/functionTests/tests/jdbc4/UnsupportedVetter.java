@@ -111,7 +111,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "setNClob", new Class[] { int.class, java.io.Reader.class, long.class } ),
 						new MD( "setNString", new Class[] { int.class, String.class } ),
 						new MD( "setRef", new Class[] { int.class, Ref.class } ),
-						new MD( "setRowId", new Class[] { int.class, RowId.class } ),
+                        new MD( "setRowId", new Class[] { int.class, RowId.class } ),
 						new MD( "setSQLXML", new Class[] { int.class, SQLXML.class } ),
 					    new MD( "setURL", new Class[] { int.class, URL.class } ),
 					    new MD( "setNull", new Class[] { int.class, int.class, String.class } ),
@@ -178,6 +178,9 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
 						new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
 						new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
+                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType" }, true ),
+                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "int" }, true ),
+                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "java.lang.String" }, true ),
 						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
@@ -298,6 +301,30 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 		};
 
+    //
+    // Make an MD if the JVM level supports the indicated classes.
+    // Returns null if the JVM doesn't.
+    //
+    private static  MD  makeMD
+        ( String methodName, String[] argClassNames, boolean requiredAtThisLevel )
+    {
+        // return null if the class names can't be resolved
+        int     count = argClassNames.length;
+        Class[] argTypes = new Class[ count ];
+
+        try {
+            for ( int i = 0; i < count; i++ )
+            {
+                String  className = argClassNames[ i ];
+                if ( "int".equals( className ) ) { argTypes[ i ] = int.class; }
+                else { argTypes[ i ] = Class.forName( argClassNames[ i ] ); }
+            }
+        }
+        catch (Exception e) { return null; }
+
+        return new MD( methodName, argTypes, requiredAtThisLevel );
+    }
+    
 	//
 	// This is the Hashtable where we keep the exclusions.
 	//
@@ -526,6 +553,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			{
 				MD		md = mds[ j ];
 
+                if ( md == null ) { continue; }
                 if ( !md.requiredAtThisLevel() ) { continue; }
 
 				//
