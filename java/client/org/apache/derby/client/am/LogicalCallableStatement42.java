@@ -88,4 +88,29 @@ public class LogicalCallableStatement42 extends LogicalCallableStatement40
         ((CallableStatement42)getPhysCs()).registerOutParameter( parameterName, sqlType, typeName );
     }
 
+    public  void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType )
+        throws SQLException
+    {
+        ((CallableStatement42)getPhysCs()).setObject( parameterIndex, x, sqlType );
+    }
+    
+    public void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        ((CallableStatement42)getPhysCs()).setObject( parameterIndex, x, sqlType, scaleOrLength );
+    }
+
+    public  void setObject( String parameterName, Object x, SQLType sqlType )
+        throws SQLException
+    {
+        ((CallableStatement42)getPhysCs()).setObject( parameterName, x, sqlType );
+    }
+    
+    public  void setObject( String parameterName, Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        ((CallableStatement42)getPhysCs()).setObject( parameterName, x, sqlType, scaleOrLength );
+    }
 }

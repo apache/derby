@@ -105,19 +105,115 @@ public class CallableStatement42 extends CallableStatement40
     public  void registerOutParameter( String parameterName, SQLType sqlType )
         throws SQLException
     {
-        throw jdbcMethodNotImplemented();
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "registerOutParameter", parameterName, sqlType );
+                }
+                checkForClosedStatement();
+                registerOutParameter( parameterName, Utils42.getTypeAsInt(agent_, sqlType ) );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
     }
     
     public  void registerOutParameter( String parameterName, SQLType sqlType, int scale )
         throws SQLException
     {
-        throw jdbcMethodNotImplemented();
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "registerOutParameter", parameterName, sqlType, scale );
+                }
+                checkForClosedStatement();
+                registerOutParameter( parameterName, Utils42.getTypeAsInt(agent_, sqlType ), scale );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
     }
     
     public  void registerOutParameter( String parameterName,  SQLType sqlType, String typeName )
         throws SQLException
     {
-        throw jdbcMethodNotImplemented();
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "registerOutParameter", parameterName, sqlType, typeName );
+                }
+                checkForClosedStatement();
+                registerOutParameter( parameterName, Utils42.getTypeAsInt(agent_, sqlType ), typeName );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
+    }
+
+    public  void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType )
+        throws SQLException
+    {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "setObject", parameterIndex, x, sqlType );
+                }
+                checkForClosedStatement();
+                setObject( parameterIndex, x, Utils42.getTypeAsInt(agent_, sqlType ) );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
+    }
+    
+    public void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "setObject", new Integer( parameterIndex ), x, sqlType, new Integer( scaleOrLength ) );
+                }
+                checkForClosedStatement();
+                setObject( parameterIndex, x, Utils42.getTypeAsInt(agent_, sqlType ), scaleOrLength );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
+    }
+
+    public  void setObject( String parameterName, Object x, SQLType sqlType )
+        throws SQLException
+    {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "setObject", parameterName, x, sqlType );
+                }
+                checkForClosedStatement();
+                setObject( parameterName, x, Utils42.getTypeAsInt(agent_, sqlType ) );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
+    }
+    
+    public  void setObject( String parameterName, Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry( this, "setObject", parameterName, x, sqlType, scaleOrLength );
+                }
+                checkForClosedStatement();
+                setObject( parameterName, x, Utils42.getTypeAsInt(agent_, sqlType ), scaleOrLength );
+            }
+        }
+        catch ( SqlException se )  { throw se.getSQLException(); }
     }
 
 }

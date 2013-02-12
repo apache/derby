@@ -537,6 +537,106 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         assertObjectEquals( _columnDescs[ idx++ ].values[ valueIdx ], cs.getObject( colIdx++ ) );
     }
 
+    /**
+     * <p>
+     * Test the CallableStatement.setObject() overloads added by JDBC 4.2.
+     * </p>
+     */
+    public  void    test_03_setObject() throws Exception
+    {
+        Connection conn = getConnection();
+
+        callableStatementSetObjectTest( conn );
+    }
+    public  static  void    callableStatementSetObjectTest( Connection conn ) throws Exception
+    {
+        createSetObjectSchemaObjects( conn );
+        vetSetObjectProc( conn );
+    }
+    private static void    createSetObjectSchemaObjects( Connection conn ) throws Exception
+    {
+        setupPrice( conn );
+        createSetObjectProc( conn );
+    }
+    private static void    createSetObjectProc( Connection conn ) throws Exception
+    {
+        StringBuilder   buffer = new StringBuilder();
+
+        buffer.append( "create procedure packAllTypes( in valueIdx int" );
+        
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            ColumnDesc  cd = _columnDescs[ i ];
+            String  parameterName = "param" + (i+1);
+            String  parameterType = cd.sqlType;
+            buffer.append( ", in " + parameterName + " " + parameterType );
+        }
+        
+        buffer.append( " ) language java parameter style java no sql\n" );
+        buffer.append( "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42.packAllTypes'" );
+
+        String  sqlText = buffer.toString();
+        println( sqlText );
+
+        conn.prepareStatement( sqlText ).execute();
+    }
+    private static void    vetSetObjectProc( Connection conn ) throws Exception
+    {
+        StringBuilder   buffer = new StringBuilder();
+        buffer.append( "call packAllTypes( ?" );
+        for ( int i = 0; i < _columnDescs.length; i++ ) { buffer.append( ", ?" ); }
+        buffer.append( " )" );
+        String  sqlText = buffer.toString();
+        println( sqlText );
+
+        CallableStatement   cs = conn.prepareCall( sqlText );
+        int     valueIdx;
+        int     param;
+
+        // setObject( int, Object, SQLType )
+        valueIdx = 0;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            ColumnDesc  cd = _columnDescs[ i ];
+            cs.setObject( param++, cd.values[ valueIdx ], cd.jdbcType );
+        }
+        cs.execute();
+
+        // setObject( int, Object, SQLType, int )
+        valueIdx = 1;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < _columnDescs.length; i++ )
+        {
+            ColumnDesc  cd = _columnDescs[ i ];
+            cs.setObject( param++, cd.values[ valueIdx ], cd.jdbcType, 0 );
+        }
+        cs.execute();
+
+        // setObject( String, Object, SQLType )
+        try {
+            ColumnDesc  cd = _columnDescs[ 0 ];
+            cs.setObject( "param1", cd.values[ 0 ], cd.jdbcType );
+            fail( "Expected unimplemented feature." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        }
+
+        // setObject( String, Object, SQLType, int )
+        try {
+            ColumnDesc  cd = _columnDescs[ 0 ];
+            cs.setObject( "param1", cd.values[ 0 ], cd.jdbcType, 0 );
+            fail( "Expected unimplemented feature." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        }
+    }
 
     //////////////////////////////////////////////////////////
     //
@@ -593,6 +693,58 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         priceValue[ 0 ] = (Price) _columnDescs[ colIdx++ ].values[ valueIdx ];
         varcharValue[ 0 ] = (String) _columnDescs[ colIdx++ ].values[ valueIdx ];
         varbinaryValue[ 0 ] = (byte[]) _columnDescs[ colIdx++ ].values[ valueIdx ];
+    }
+
+    public  static  void    packAllTypes
+        (
+         int valueIdx,
+         Long    bigintValue,
+         Blob   blobValue,
+         Boolean booleanValue,
+         String  charValue,
+         byte[]  binaryValue,
+         Clob    clobValue,
+         Date    dateValue,
+         BigDecimal  decimalValue,
+         Double  doubleValue,
+         Double  floatValue,
+         Integer intValue,
+         String  longVarcharValue,
+         byte[]  longVarbinaryValue,
+         BigDecimal  numericValue,
+         Float   realValue,
+         Integer   smallintValue,
+         Time    timeValue,
+         Timestamp  timestampValue,
+         Price   priceValue,
+         String  varcharValue,
+         byte[]  varbinaryValue
+         )
+        throws Exception
+    {
+        int     colIdx = 0;
+        
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], bigintValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], blobValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], booleanValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], charValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], binaryValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], clobValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], dateValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], decimalValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], doubleValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], floatValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], intValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], longVarcharValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], longVarbinaryValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], numericValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], realValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], smallintValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], timeValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], timestampValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], priceValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], varcharValue );
+        assertObjectEquals( _columnDescs[ colIdx++ ].values[ valueIdx ], varbinaryValue );
     }
 
     //////////////////////////////////////////////////////////

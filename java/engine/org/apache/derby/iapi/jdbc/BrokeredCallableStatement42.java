@@ -68,4 +68,30 @@ public class BrokeredCallableStatement42 extends BrokeredCallableStatement40
         getCallableStatement().registerOutParameter( parameterName, sqlType, typeName );
     }
     
+    public  void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType )
+        throws SQLException
+    {
+        getCallableStatement().setObject( parameterIndex, x, sqlType );
+    }
+    
+    public void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        getCallableStatement().setObject( parameterIndex, x, sqlType, scaleOrLength );
+    }
+
+    public  void setObject( String parameterName, Object x, SQLType sqlType )
+        throws SQLException
+    {
+        getCallableStatement().setObject( parameterName, x, sqlType );
+    }
+    
+    public  void setObject( String parameterName, Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        getCallableStatement().setObject( parameterName, x, sqlType, scaleOrLength );
+    }
+
 }

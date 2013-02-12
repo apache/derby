@@ -60,19 +60,54 @@ public class EmbedCallableStatement42 extends EmbedCallableStatement40
     public  void registerOutParameter( String parameterName, SQLType sqlType )
         throws SQLException
     {
-        throw Util.notImplemented();
+        checkStatus();
+        registerOutParameter( parameterName, Util42.getTypeAsInt( this, sqlType ) );
     }
     
     public  void registerOutParameter( String parameterName, SQLType sqlType, int scale )
         throws SQLException
     {
-        throw Util.notImplemented();
+        checkStatus();
+        registerOutParameter( parameterName, Util42.getTypeAsInt( this, sqlType ), scale );
     }
     
     public  void registerOutParameter( String parameterName,  SQLType sqlType, String typeName )
         throws SQLException
     {
-        throw Util.notImplemented();
+        checkStatus();
+        registerOutParameter( parameterName, Util42.getTypeAsInt( this, sqlType ), typeName );
+    }
+
+    public  void setObject
+        ( int parameterIndex, java.lang.Object x, SQLType targetSqlType )
+        throws SQLException
+    {
+        checkStatus();
+        setObject( parameterIndex, x, Util42.getTypeAsInt( this, targetSqlType ) );
+    }
+    
+    public void setObject
+        (
+         int parameterIndex, java.lang.Object x,
+         SQLType targetSqlType, int scaleOrLength
+         )  throws SQLException
+    {
+        checkStatus();
+        setObject( parameterIndex, x, Util42.getTypeAsInt( this, targetSqlType ), scaleOrLength );
+    }
+
+    public  void setObject( String parameterName, Object x, SQLType sqlType )
+        throws SQLException
+    {
+        checkStatus();
+        setObject( parameterName, x, Util42.getTypeAsInt( this, sqlType ) );
+    }
+    
+    public  void setObject( String parameterName, Object x, SQLType sqlType, int scaleOrLength )
+        throws SQLException
+    {
+        checkStatus();
+        setObject( parameterName, x, Util42.getTypeAsInt( this, sqlType ), scaleOrLength );
     }
     
 }
