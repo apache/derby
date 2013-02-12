@@ -147,7 +147,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
-    private static final boolean _ = false;
+    private static final boolean n = false;
 
     private static final boolean X = true;
 
@@ -168,26 +168,26 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 //                                                           A     I  N
 //                                                           R     N  
 
-/* 0 getByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 1 getShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 2 getInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 3 getLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 4 getFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 5 getDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 6 getBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 7 getBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 8 getString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _},
-/* 9 getBytes*/         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-/*10 getDate*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
-/*11 getTime*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, X, _, _},
-/*12 getTimestamp*/     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
-/*13 getAsciiStream*/   { _, _, _, _, _, _, _, _, _, _, _, X, X, X, X, X, X, _, _, _, _, _},
-/*14 getBinaryStream*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-/*15 getCharStream*/    { _, _, _, _, _, _, _, _, _, _, _, X, X, X, X, X, X, _, _, _, _, _},
-/*16 getClob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
-/*17 getBlob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
+/* 0 getByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 1 getShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 2 getInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 3 getLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 4 getFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 5 getDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 6 getBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 7 getBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 8 getString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n},
+/* 9 getBytes*/         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+/*10 getDate*/          { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, n, X, n, n},
+/*11 getTime*/          { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X, X, n, n},
+/*12 getTimestamp*/     { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
+/*13 getAsciiStream*/   { n, n, n, n, n, n, n, n, n, n, n, X, X, X, X, X, X, n, n, n, n, n},
+/*14 getBinaryStream*/  { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+/*15 getCharStream*/    { n, n, n, n, n, n, n, n, n, n, n, X, X, X, X, X, X, n, n, n, n, n},
+/*16 getClob */         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n},
+/*17 getBlob */         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X},
                  
-/*18 getUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+/*18 getUnicodeStream */{ n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
         };
 
 
@@ -225,26 +225,26 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         //                                                           R     N  
 
         public static boolean[][] B2_MOD = {
-/* 0 setByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 1 setShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 2 setInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 3 setLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 4 setFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 5 setDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 6 setBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 7 setBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 8 setString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, _, _},
-/* 9 setBytes*/         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-/*10 setDate*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
-/*11 setTime*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
-/*12 setTimestamp*/     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
-/*13 setAsciiStream*/   { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, X, _},
-/*14 setBinaryStream*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X},
-/*15 setCharStream*/    { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, X, _},
-/*16 setClob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
-/*17 setBlob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
+/* 0 setByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 1 setShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 2 setInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 3 setLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 4 setFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 5 setDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 6 setBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 7 setBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 8 setString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, X, X, X, n, n},
+/* 9 setBytes*/         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+/*10 setDate*/          { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, n, X, n, n},
+/*11 setTime*/          { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X, n, n, n},
+/*12 setTimestamp*/     { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
+/*13 setAsciiStream*/   { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n, n, X, n},
+/*14 setBinaryStream*/  { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X},
+/*15 setCharStream*/    { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n, n, X, n},
+/*16 setClob */         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n},
+/*17 setBlob */         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X},
                  
-/*18 setUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+/*18 setUnicodeStream */{ n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
         };
 
         /** Table B5 conversion of Objects using setObject*/
@@ -261,30 +261,30 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 //                                                           A     I  N
 //                                                           R     N  
         public static boolean[][] B5 = {
-/* 0 String */          { X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, X, _, _},
-/* 1 BigDecimal */      { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 2 Boolean */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 3 Integer */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 4 Long */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 5 Float */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 6 Double */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/* 7 byte[] */          { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-/* 8 Date */            { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
-/* 9 Time */            { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
-/*10 Timestamp */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
-/*11 Blob   */          { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
-/*12 Clob */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
+/* 0 String */          { X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, X, X, X, X, n, n},
+/* 1 BigDecimal */      { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 2 Boolean */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 3 Integer */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 4 Long */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 5 Float */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 6 Double */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/* 7 byte[] */          { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+/* 8 Date */            { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, n, X, n, n},
+/* 9 Time */            { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X, n, n, n},
+/*10 Timestamp */       { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
+/*11 Blob   */          { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X},
+/*12 Clob */            { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n},
 
 //Byte and Short were added to this table in JDBC 4.0. (See DERBY-1500.)
 
-/*13 Byte */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-/*14 Short */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/*13 Byte */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+/*14 Short */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
 
 //java.math.BigInteger, java.util.Date and java.util.Calendar were added to this table in JDBC 4.1. (See DERBY-5488.)
 
-/*15 java.math.BigInteger */            { _, _, _, X, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, _, _},
-/*16 java.util.Date */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
-/*17 java.util.Calendar */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+/*15 java.math.BigInteger */            { n, n, n, X, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n, n, n, n},
+/*16 java.util.Date */       { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
+/*17 java.util.Calendar */       { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
         };
 
      
@@ -302,28 +302,28 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 //                                                                           H     B  I        P
 //                                                                           A     I  N
 //    param sqlType                                                          R     N  
-            /* 0 null    */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
-            /* 1 SMALLINT*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 2 INTEGER*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 3 BIGINT */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 4 REAL    */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 5 FLOAT     */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 6 DOUBLE    */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 7 DECIMAL*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /* 8 null     */        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, _, _},
-            /* 9 null*/             { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-            /*10 BOOLEAN   */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
-            /*11 CHAR(60) */        { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
-            /*12 VARCHAR(60) */     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
-            /*13 LONG VARCHAR */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
-            /*14 CHAR FOR BIT   */  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-            /*15 VARCHAR FOR BIT*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-            /*16 LONGVARCHAR FOR B*/{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
-            /*17 DATE */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _},
-            /*18 TIME */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _},
-            /*19 TIMESTAMP */       { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _},
-            /*20 CLOB         */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
-            /*21 BLOB         */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+            /* 0 null    */         { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
+            /* 1 SMALLINT*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 2 INTEGER*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 3 BIGINT */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 4 REAL    */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 5 FLOAT     */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 6 DOUBLE    */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 7 DECIMAL*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /* 8 null     */        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, X, X, X, n, n},
+            /* 9 null*/             { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+            /*10 BOOLEAN   */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, n, n, n, n, n, n, n, n},
+            /*11 CHAR(60) */        { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X, n, n, n},
+            /*12 VARCHAR(60) */     { n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, X, X, X, n, n},
+            /*13 LONG VARCHAR */    { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
+            /*14 CHAR FOR BIT   */  { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+            /*15 VARCHAR FOR BIT*/  { n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, n},
+            /*16 LONGVARCHAR FOR B*/{ n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
+            /*17 DATE */            { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n, n, n, n},
+            /*18 TIME */            { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n, n, n},
+            /*19 TIMESTAMP */       { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X, n, n},
+            /*20 CLOB         */    { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
+            /*21 BLOB         */    { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n},
                     };
 
         

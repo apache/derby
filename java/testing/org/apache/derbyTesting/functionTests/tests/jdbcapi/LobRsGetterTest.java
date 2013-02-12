@@ -76,7 +76,7 @@ public class LobRsGetterTest
     private static final boolean X = SUPPORTED;
     /** Supported, but not marked as valid by the JDBC spec. */
     private static final boolean E = SUPPORTED; // visual que in table only
-    private static final boolean _ = UNSUPPORTED;
+    private static final boolean u = UNSUPPORTED;
 
     /**
      * Lists the compatible getters for {@literal BLOB} and {@literal CLOB}.
@@ -94,13 +94,13 @@ public class LobRsGetterTest
                                 /*   L  L */
                                 /*   O  O */
                                 /*   B  B */
-        /* getBytes             */ { X, _ },
+        /* getBytes             */ { X, u },
         /* getString            */ { E, X },
         /* getAsciiStream       */ { E, X },
-        /* getBinaryStream      */ { X, _ },
+        /* getBinaryStream      */ { X, u },
         /* getCharacterStream   */ { E, X },
-        /* getClob              */ { _, X },
-        /* getBlob              */ { X, _ },
+        /* getClob              */ { u, X },
+        /* getBlob              */ { X, u },
         /* getObject            */ { X, X },
     };
 

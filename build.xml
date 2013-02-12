@@ -1162,7 +1162,7 @@
     bootClasspath    Sensitive to JDBC level.
     extraApi         Extra files to include in the public api.
   -->
-  <target name="publishedapi-workhorse" depends="initjars">
+  <target name="publishedapi-workhorse" depends="initjars,set-doclint">
  
     <!--  Only include the files we want customers to see.  -->
     <mkdir dir="${javadoc.temp.dir}"/>
@@ -1192,6 +1192,7 @@
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.tools.src.dir}"
                includesfile="${javadoc.inclusions}"/>
+      <arg value="${xarg.doclint}"/>
     </javadoc>
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
@@ -1205,7 +1206,7 @@
   </target>
 
 
-  <target name="derbydocs" depends="initjars">
+  <target name="derbydocs" depends="initjars,set-doclint">
 
     <delete dir="${out.javadoc.dir}/engine"/>
     <mkdir dir="${out.javadoc.dir}/engine"/>
@@ -1256,6 +1257,7 @@
       <fileset dir="${derby.tools.src.dir}"
                excludesfile="${javadoc.exclusions}"/> 
       <link href="."/>
+      <arg value="${xarg.doclint}"/>
     </javadoc>
 
     <delete dir="${javadoc.temp.dir}"/>
@@ -1317,7 +1319,7 @@
 
   </target>
 
-  <target name="demodocs" depends="init">
+  <target name="demodocs" depends="init,set-doclint">
 
     <delete dir="${out.javadoc.dir}/demo"/>
     <mkdir dir="${out.javadoc.dir}/demo"/>
@@ -1334,6 +1336,7 @@
         doctitle="Apache Derby Demos"
     >
      <fileset dir="${derby.demo.src.dir}/vtis/java"/>
+      <arg value="${xarg.doclint}"/>
     </javadoc>
 
 
@@ -1362,7 +1365,7 @@
 
   </target>
 
-  <target name="testingdocs" depends="initjars">
+  <target name="testingdocs" depends="initjars,set-doclint">
 
     <antcall target="exclude-from-javadoc">
       <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
@@ -1385,6 +1388,7 @@
      >
       <fileset dir="${derby.testing.src.dir}"
                excludesfile="${javadoc.exclusions}"/>
+      <arg value="${xarg.doclint}"/>
     </javadoc>
 
   </target>
@@ -1394,6 +1398,14 @@
     <delete dir="${out.javadoc.dir}"/>
 
   </target>
+
+  <!-- Set the doclint variable depending on whether this is Java 8. Use a harmless arg if not on Java 8 -->
+  <target name="set-doclint">
+    <condition property="xarg.doclint" value="-Xdoclint:none" else="-J-mx500M">
+      <available classname="java.sql.SQLType"/>
+    </condition>
+  </target>
+
 
 <!-- =================================================================== -->
 <!-- Eclipse Plugin                                                     -->
