@@ -45,6 +45,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 
@@ -79,6 +80,15 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
 
     private final static String COLUMN_NAMES = 
         "KIND, ITEM_UUID, ITEM_TYPE, BEFORE, AFTER, FOREIGN_KEY_UUID, ID";
+
+    private final static String DERBY_6045_DATA_TABLE = "VARIABLE_TERM";
+    private final static String CREATE_DERBY_6045_DATA_TABLE =
+            "CREATE TABLE " + DERBY_6045_DATA_TABLE + " (" +
+            "term_id INTEGER NOT NULL, " +
+            "var_name VARCHAR(1024) NOT NULL, " +
+            "var_type SMALLINT NOT NULL, " +
+            "kb_status INTEGER NOT NULL " +
+            ")";
 
     private final static String CREATE_DATA_TABLE =
         "CREATE TABLE " + DATA_TABLE + " (" +
@@ -179,11 +189,23 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             */
             protected void decorateSQL(Statement s) throws SQLException
             {
+                // Create the test table and data for DERBY-6045
+                s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
+                s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
+                    " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
+                    " PRIMARY KEY (term_id)");
+                //insert 10 rows
+                PreparedStatement ps = s.getConnection().prepareStatement(
+                    "insert into " + DERBY_6045_DATA_TABLE +
+                    " VALUES (?, '?var0', 1, 1)");
+                for (int i=1; i<=10; i++) {
+                    ps.setInt(1, i);
+                    ps.executeUpdate();
+                }
+
                 // Create the test table.
                 s.executeUpdate(CREATE_DATA_TABLE);
-
                 // Insert test data.
-
                 final int BATCH_SIZE = 1000;
                 int numDataRows = NUM_ROWS;
                 Random random = new Random(1);
@@ -892,6 +914,64 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         ps.close();
         st.execute("drop table cheese");
         st.close();
+    }
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows that we should continue using index scan 
+    //  even after adding extra rows to the table.
+    public void xtestDerby6045()
+        throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', " + 
+            "'VARIABLE_TERM', null)");
+        s.executeQuery("SELECT * FROM " + DERBY_6045_DATA_TABLE + 
+            " WHERE TERM_ID = 11");
+        RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+        s.executeQuery("SELECT * FROM  " + DERBY_6045_DATA_TABLE + 
+            " WHERE (TERM_ID = 11) OR " +
+            "(TERM_ID =21) OR (TERM_ID = 31)");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+        s.executeQuery("SELECT * FROM " + DERBY_6045_DATA_TABLE + " WHERE " +
+            "(TERM_ID IN (11, 21, 31))");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+
+        PreparedStatement ps = prepareStatement(
+            "insert into " + DERBY_6045_DATA_TABLE +
+            " VALUES (?, '?var0', 1, 1)");
+        //Add 14 more rows
+        for (int i=11; i<=25; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+        //Had to execute the query with an extra white space so that the
+        // queries will get recompiled. If the following queries looked 
+        // exactly like the earlier queries in this fixture, we would 
+        // end up using the earloer query plan rather than creating a 
+        // new query plan recognizing the additional rows.
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+        s.executeQuery("SELECT  * FROM " + DERBY_6045_DATA_TABLE + 
+            " WHERE TERM_ID = 11");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+        s.executeQuery("SELECT  * FROM  " + DERBY_6045_DATA_TABLE + 
+            " WHERE (TERM_ID = 11) OR " +
+            "(TERM_ID =21) OR (TERM_ID = 31)");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+        s.executeQuery("SELECT  * FROM " + DERBY_6045_DATA_TABLE + " WHERE " +
+            "(TERM_ID IN (11, 21, 31))");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+
+        s.executeUpdate("DROP TABLE " + DERBY_6045_DATA_TABLE);
+        s.close();
     }
 
     public void testDerby3603()
