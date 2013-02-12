@@ -1221,6 +1221,7 @@
     <antcall target="exclude-from-javadoc">
       <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
     </antcall>
+    <antcall target="exclude-java8-from-javadoc"/>
 
     <javadoc
         additionalparam="-J-mx500M"
@@ -1295,6 +1296,15 @@
     </concat>
   </target>
 
+  <!--
+     Exclude Java 8 support from the javadoc if using Java 7 or earlier.
+  -->
+  <target name="exclude-java8-from-javadoc" depends="checkVMLevel" unless="vmLevelIsAtLeast1.8">
+    <antcall target="exclude-from-javadoc">
+      <param name="more_exclusions" value="derbydocs_java8_exclusions.ant"/>
+    </antcall>
+  </target>
+
   <target name="toolsdocs">
 
     <delete dir="${out.javadoc.dir}/tools"/>
@@ -1353,6 +1363,12 @@
   </target>
 
   <target name="testingdocs" depends="initjars">
+
+    <antcall target="exclude-from-javadoc">
+      <param name="more_exclusions" value="derbydocs_exclusions.ant"/>
+    </antcall>
+    <antcall target="exclude-java8-from-javadoc"/>
+
     <javadoc
        additionalparam="-J-mx500M"
        packagenames="org.*"
@@ -1366,8 +1382,11 @@
        Footer="${javadoc.Footer}"
        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
        source="1.5"
-       sourcepath="${derby.testing.src.dir}"
-     />
+     >
+      <fileset dir="${derby.testing.src.dir}"
+               excludesfile="${javadoc.exclusions}"/>
+    </javadoc>
+
   </target>
 
   <target name="cleandocs">

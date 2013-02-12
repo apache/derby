@@ -28,14 +28,28 @@
 # Please do not add whitespace in front of class names.
 # Blank lines and comments are allowed.
 
-**/build.xml
-**/messages*.xml
-**/*.dtd
-**/*.properties
+**/*.a*
+**/*.b*
+**/*.c*
+**/*.d*
+**/*.e*
+**/*.g*
+**/*.h*
+**/*.i*
+**/*.k*
+**/*.m*
+**/*.n*
+**/*.o*
+**/*.p*
+**/*.jar
 **/*.jj
-**/*.tmpl
-**/package.html
-**/*.rej
-**/*.orig
-**/*.policy
-**/*.xsl
+**/*.r*
+**/*.s*
+**/*.t*
+**/*.u*
+**/*.v*
+**/*.x*
+
+**/readme
+**/README*
+**/shortbanner
