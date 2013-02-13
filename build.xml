@@ -1377,6 +1377,7 @@
        packagenames="org.*"
        access="private"
        breakiterator="yes"
+       useexternalfile="yes"
        bootclasspath="${java16compile.classpath}"
        classpath="${out.dir};${java16compile.classpath};${jars.javadoc};${junit}"
        destdir="${out.javadoc.dir}/testing"
