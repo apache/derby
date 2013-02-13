@@ -5029,7 +5029,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         //
         // getMaxLogicalLobSize()
         //
-        assertEquals( ((long) Integer.MAX_VALUE) * 2, wrapper.getMaxLogicalLobSize() );
+        assertEquals( 0L, wrapper.getMaxLogicalLobSize() );
 
         //
         // supportsRefCursors()

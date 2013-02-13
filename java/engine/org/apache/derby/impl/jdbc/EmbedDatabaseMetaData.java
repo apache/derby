@@ -1225,15 +1225,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * Added in JDBC 4.2.
      *
      * What's the maximum length of Derby LOB? This
-     * is the maximum number of bytes in a LOB. Since a
-     * CLOB can have DB2_LOB_MAXWIDTH characters, the
-     * maximum number of bytes is 2 * DB2_LOB_MAXWIDTH.
-     * If you change this value, consider whether you need to change
-     * DatabaseMetaData.getMaxLogicalLobSize().
+     * is the maximum number of bytes in a LOB. We return the
+     * default value of 0, which means "unknown". The maximum size
+     * of a CLOB is a complicated because it depends on how many
+     * bytes are needed to encode its string value on disk.
      *
      * @return max index length in bytes
      */
-	public long getMaxLogicalLobSize() { return ((long) Limits.DB2_LOB_MAXWIDTH) * 2; }
+	public long getMaxLogicalLobSize() { return 0L; }
 
     /**
      * What's the maximum length allowed for a schema name?
