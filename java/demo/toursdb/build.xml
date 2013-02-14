@@ -77,8 +77,6 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
-      <!-- The jvmarg hacks around Open JDK 8 bug http://bugs.sun.com/view_bug.do?bug_id=8004967 -->
-      <jvmarg value="-noverify"/>
     </java>
   </target>
 
@@ -97,8 +95,6 @@
       <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
       <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
       <arg value="${script.name}"/>
-      <!-- The jvmarg hacks around Open JDK 8 bug http://bugs.sun.com/view_bug.do?bug_id=8004967 -->
-      <jvmarg value="-noverify"/>
     </java>
   </target>
 
