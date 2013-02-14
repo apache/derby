@@ -194,14 +194,6 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
                 s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
                     " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
                     " PRIMARY KEY (term_id)");
-                //insert 10 rows
-                PreparedStatement ps = s.getConnection().prepareStatement(
-                    "insert into " + DERBY_6045_DATA_TABLE +
-                    " VALUES (?, '?var0', 1, 1)");
-                for (int i=1; i<=10; i++) {
-                    ps.setInt(1, i);
-                    ps.executeUpdate();
-                }
 
                 // Create the test table.
                 s.executeUpdate(CREATE_DATA_TABLE);
@@ -925,53 +917,78 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     {
         Statement s = createStatement();
         s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
-        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', " + 
-            "'VARIABLE_TERM', null)");
-        s.executeQuery("SELECT * FROM " + DERBY_6045_DATA_TABLE + 
-            " WHERE TERM_ID = 11");
-        RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
-        assertTrue(rtsp.usedIndexScan());
-        s.executeQuery("SELECT * FROM  " + DERBY_6045_DATA_TABLE + 
-            " WHERE (TERM_ID = 11) OR " +
-            "(TERM_ID =21) OR (TERM_ID = 31)");
-        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
-        assertTrue(rtsp.usedIndexScan());
-        s.executeQuery("SELECT * FROM " + DERBY_6045_DATA_TABLE + " WHERE " +
-            "(TERM_ID IN (11, 21, 31))");
-        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
-        assertTrue(rtsp.usedIndexScan());
-
-        PreparedStatement ps = prepareStatement(
+        s.executeUpdate("DELETE FROM " + DERBY_6045_DATA_TABLE);
+        //insert 10 rows
+        PreparedStatement ps = s.getConnection().prepareStatement(
             "insert into " + DERBY_6045_DATA_TABLE +
             " VALUES (?, '?var0', 1, 1)");
+        for (int i=1; i<=10; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+        runThreeQueries(0);
+
         //Add 14 more rows
         for (int i=11; i<=25; i++) {
             ps.setInt(1, i);
             ps.executeUpdate();
         }
-        //Had to execute the query with an extra white space so that the
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+        //Need to execute the query with an extra white space so that the
         // queries will get recompiled. If the following queries looked 
         // exactly like the earlier queries in this fixture, we would 
         // end up using the earloer query plan rather than creating a 
-        // new query plan recognizing the additional rows.
-        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
-        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
-        s.executeQuery("SELECT  * FROM " + DERBY_6045_DATA_TABLE + 
+        // new query plan which is going recognize the additional rows.
+        runThreeQueries(1);
+
+        //Add 10K more rows
+        for (int i=26; i<=10000; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+        //Again, need to execute the query with another extra white space so 
+        // it looks different from the queries run earlier and hence they will
+        // get compiled rather than existing query plan getting picked up from
+        // statement cache.
+        runThreeQueries(2);
+
+        s.executeUpdate("DROP TABLE " + DERBY_6045_DATA_TABLE);
+        s.close();
+    }
+
+    //Make sure that we are using index scan for the following queries. 
+    // Also, add extra white spaces in the query so old queries from 
+    // statement cache don't get picked up. This will cause the query 
+    // plans to be created based on the current number of rows in the table
+    // @param numOfWhiteSpace Number of white spaces that will be put in 
+    //  SELECT queries below
+    private void runThreeQueries(int numOfWhiteSpace)
+        throws SQLException
+    {
+        RuntimeStatisticsParser rtsp;
+        Statement s = createStatement();
+        
+        String whiteSpace = "";
+        for (int i=1; i<=numOfWhiteSpace; i++)
+        {
+            whiteSpace = whiteSpace + " ";
+        }
+        
+        s.executeQuery("SELECT * FROM " + whiteSpace + DERBY_6045_DATA_TABLE + 
             " WHERE TERM_ID = 11");
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
-        s.executeQuery("SELECT  * FROM  " + DERBY_6045_DATA_TABLE + 
+
+        s.executeQuery("SELECT  *  FROM  " + whiteSpace + DERBY_6045_DATA_TABLE + 
             " WHERE (TERM_ID = 11) OR " +
             "(TERM_ID =21) OR (TERM_ID = 31)");
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
-        s.executeQuery("SELECT  * FROM " + DERBY_6045_DATA_TABLE + " WHERE " +
-            "(TERM_ID IN (11, 21, 31))");
+
+        s.executeQuery("SELECT  *  FROM " + whiteSpace + DERBY_6045_DATA_TABLE 
+            + " WHERE (TERM_ID IN (11, 21, 31))");
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
-
-        s.executeUpdate("DROP TABLE " + DERBY_6045_DATA_TABLE);
-        s.close();
     }
 
     public void testDerby3603()
