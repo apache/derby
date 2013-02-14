@@ -55,6 +55,17 @@ create table T (i int);
 values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
 drop table T;
 
+-- check that setting to an invalid value reverts to the default
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', 'a');
+create table T (i int);
+values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+drop table T;
+
+-- setting to NULL is also invalid
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', 'NULL');
+create table T (i int);
+values GET_TABLE_PROPERTY('APP', 'T', 'derby.storage.pageSize');
+drop table T;
 
 -- ************ derby.storage.minimumRecordSize
 

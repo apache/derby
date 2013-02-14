@@ -1,4 +1,3 @@
-store/databaseProperties.sql
 store/logDevice.sql
 store/Rllmodule2.sql
 store/TransactionTable.sql

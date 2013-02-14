@@ -21,8 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -46,7 +44,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         /* in comments reasons why scripts from the storemore suite can/cannot be run like this*/
         "cisco",        
         "connectDisconnect", 
-        //"databaseProperties", // causes failures in AccessTest in EncryptionSuite
+        "databaseProperties", // causes failures in AccessTest in EncryptionSuite
         "longRow",
         //"logDevice", // cannot run like this; test tries to set up 
         // a separate logDevice by using ij.DataSource.connectionAttribute
@@ -151,10 +149,17 @@ public class StoreScriptsTest extends ScriptTestCase {
         Statement s = createStatement();
         // Clear the database properties set by this test so that they
         // don't affect other tests.
-        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize', NULL)");
-        commit();
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                "('derby.storage.pageSize', NULL)");
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                "('derby.storage.pageReservedSpace', NULL)");
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                "('derby.database.propertiesOnly', false)");
+        // databaseProperties.sql sets this as a system property as well.
+        removeSystemProperty("derby.storage.pageSize");
 
         super.tearDown();
     }
+
 
 }
