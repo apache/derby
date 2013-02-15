@@ -121,7 +121,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08004","Database connection refused.","40000"},
         		{"08004","User '{0}' cannot shut down database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.","40000"},
-        		{"08004","User '{0}' cannot hard upgrade database '{1}'. Only the database owner can perform this operation.","40000"},
+        		{"08004","User '{0}' cannot upgrade database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","Connection refused to database '{0}' because it is in replication slave mode.","40000"},
         		{"08004","User '{0}' cannot issue a replication operation on database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","Missing permission for user '{0}' to shutdown system [{1}].","40000"},
