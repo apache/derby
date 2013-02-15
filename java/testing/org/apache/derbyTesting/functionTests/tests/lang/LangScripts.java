@@ -84,6 +84,7 @@ public final class LangScripts extends ScriptTestCase {
         "orderby",
         "positionedDelUpd",
         "refActions1",
+        "reopenScan",
         "schemas",
         "select",
         "synonym",

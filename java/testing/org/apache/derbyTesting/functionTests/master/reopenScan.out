@@ -22,6 +22,8 @@ ij> --
 -- things like join nodes.  This test is to ensure
 -- that we don't leave around any state when reopening
 -- various complex nodes.
+
+
 drop table x;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'X' because it does not exist.
 ij> drop table y;
@@ -56,6 +58,7 @@ X
 ij> --
 -- nested loop
 --
+
 -- one row right side
 select x from z where x in (select x from y where x in (select x from x));
 X          

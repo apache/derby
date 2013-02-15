@@ -26,7 +26,6 @@ lang/predicatesIntoViews.sql
 lang/refActions.sql
 lang/refActions2.sql
 lang/refActions3.sql
-lang/reopenScan.sql
 lang/setOpPlan.sql
 lang/specjPlans.sql
 lang/subquery2.sql
