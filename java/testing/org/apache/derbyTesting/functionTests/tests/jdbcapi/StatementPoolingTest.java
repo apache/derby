@@ -140,7 +140,15 @@ public class StatementPoolingTest
         String[] names = obj.getClass().getName().split("\\.");
         final String simpleName = names[names.length -1];
         if (JDBC.vmSupportsJDBC4() && !expectedName.endsWith("40")) {
-            expectedName += "40";
+
+            if ( isJava8() && expectedName.contains( "Statement" ) )
+            {
+                expectedName += "42";
+            }
+            else
+            {
+                expectedName += "40";
+            }
         }
         assertEquals(expectedName, simpleName);
     }
