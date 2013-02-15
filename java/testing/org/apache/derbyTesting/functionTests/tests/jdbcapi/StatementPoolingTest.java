@@ -53,7 +53,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testCacheOverflow()
+    public void t01_testCacheOverflow()
             throws SQLException {
         final int stmtCount = 150;
         ConnectionPoolDataSource cpDs =
@@ -79,7 +79,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if creating the JDBC objects fail
      */
-    public void testPoolingEnabledByCheckingImplementationDetails()
+    public void t02_testPoolingEnabledByCheckingImplementationDetails()
             throws SQLException {
         final String conClass = "CachingLogicalConnection";
         final String psClass = "LogicalPreparedStatement";
@@ -151,7 +151,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if creating the prepared statement fails
      */
-    public void testPrepareStatementPath()
+    public void t03_testPrepareStatementPath()
             throws SQLException {
         PreparedStatement ps = prepareStatement("values 9708");
         ps.close();
@@ -163,7 +163,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if creating the callable statement fails
      */
-    public void testPrepareCallPath()
+    public void t04_testPrepareCallPath()
             throws SQLException {
         CallableStatement cs = prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
@@ -176,7 +176,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if creating the callable statement fails
      */
-    public void testPrepareCallWithNoCallPath()
+    public void t05_testPrepareCallWithNoCallPath()
             throws SQLException {
         CallableStatement cs = prepareCall("values 1");
         cs.close();
@@ -187,7 +187,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testClosingPSClosesRS()
+    public void t06_testClosingPSClosesRS()
             throws SQLException {
         PreparedStatement ps = prepareStatement("values 99");
         ResultSet rs = ps.executeQuery();
@@ -206,7 +206,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testHoldabilityIsResetExplicitClose()
+    public void t07_testHoldabilityIsResetExplicitClose()
             throws SQLException {
         doTestHoldabilityIsReset(true);
     }
@@ -218,7 +218,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testHoldabilityIsResetNoExplicitClose()
+    public void t08_testHoldabilityIsResetNoExplicitClose()
             throws SQLException {
         doTestHoldabilityIsReset(false);
     }
@@ -255,22 +255,22 @@ public class StatementPoolingTest
         pc.close();
     }
 
-    public void testIsolationLevelIsResetExplicitCloseQuery()
+    public void t09_testIsolationLevelIsResetExplicitCloseQuery()
             throws SQLException {
         doTestIsolationLevelIsReset(true, true);
     }
 
-    public void testIsolationLevelIsResetExplicitCloseNoQuery()
+    public void t11_testIsolationLevelIsResetExplicitCloseNoQuery()
             throws SQLException {
         doTestIsolationLevelIsReset(true, false);
     }
 
-    public void testIsolationLevelIsResetNoExplicitCloseNoQuery()
+    public void t12_testIsolationLevelIsResetNoExplicitCloseNoQuery()
             throws SQLException {
         doTestIsolationLevelIsReset(false, false);
     }
 
-    public void testIsolationLevelIsResetNoExplicitCloseQuery()
+    public void t13_testIsolationLevelIsResetNoExplicitCloseQuery()
             throws SQLException {
         doTestIsolationLevelIsReset(false, true);
     }
@@ -343,7 +343,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen()
+    public void t14_testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen()
             throws SQLException {
         final String SELECT_SQL = "select * from clcclso";
         ConnectionPoolDataSource cpDs =
@@ -448,7 +448,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testDeleteReferringTableWhenOpen()
+    public void t15_testDeleteReferringTableWhenOpen()
             throws SQLException {
         getConnection().setAutoCommit(false);
         // Create a table, insert a row, then create a statement selecting it.
@@ -484,7 +484,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testDeleteReferringTableWhenInCache()
+    public void t16_testDeleteReferringTableWhenInCache()
             throws SQLException {
         getConnection().setAutoCommit(false);
         // Create a table, insert a row, then create a statement selecting it.
@@ -528,7 +528,7 @@ public class StatementPoolingTest
      *
      * @throws SQLException if the test fails for some reason
      */
-    public void testTemporaryTablesAreDeletedInNewLogicalConnection()
+    public void t17_testTemporaryTablesAreDeletedInNewLogicalConnection()
             throws SQLException {
         ConnectionPoolDataSource cpds =
                 J2EEDataSource.getConnectionPoolDataSource();
@@ -601,7 +601,7 @@ public class StatementPoolingTest
      * Make sure {@link ResultSet#getStatement} returns the same object as the
      * one that created the result set.
      */
-    public void testGetStatementCallable()
+    public void t18_testGetStatementCallable()
             throws SQLException {
         doTestGetStatement(prepareCall("values 7653"));
     }
@@ -610,7 +610,7 @@ public class StatementPoolingTest
      * Make sure {@link ResultSet#getStatement} returns the same object as the
      * one that created the result set.
      */
-    public void testGetStatementPrepared()
+    public void t19_testGetStatementPrepared()
             throws SQLException {
         doTestGetStatement(prepareStatement("values 7652"));
     }
@@ -807,6 +807,28 @@ public class StatementPoolingTest
             assertEquals(rowCount,
                     stmt.executeUpdate("delete from stmtpooldata"));
         }
+    }
+
+    public  void    testAll() throws Exception
+    {
+        t01_testCacheOverflow();
+        t02_testPoolingEnabledByCheckingImplementationDetails();
+        t03_testPrepareStatementPath();
+        t04_testPrepareCallPath();
+        t05_testPrepareCallWithNoCallPath();
+        t06_testClosingPSClosesRS();
+        t07_testHoldabilityIsResetExplicitClose();
+        t08_testHoldabilityIsResetNoExplicitClose();
+        t09_testIsolationLevelIsResetExplicitCloseQuery();
+        t11_testIsolationLevelIsResetExplicitCloseNoQuery();
+        t12_testIsolationLevelIsResetNoExplicitCloseNoQuery();
+        t13_testIsolationLevelIsResetNoExplicitCloseQuery();
+        t14_testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen();
+        t15_testDeleteReferringTableWhenOpen();
+        t16_testDeleteReferringTableWhenInCache();
+        t17_testTemporaryTablesAreDeletedInNewLogicalConnection();
+        t18_testGetStatementCallable();
+        t19_testGetStatementPrepared();
     }
 
     public static Test suite() {
