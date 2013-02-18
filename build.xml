@@ -2329,6 +2329,9 @@
     <!-- Set a dummy value for the JaCoCo agent option when running without
          JaCoCo for code coverage. Required because ant doesn't (yet) handle
          empty variables passed to jvmarg. See also target jacoco-enable. -->
+    <!-- The purpose of the system property derby.tests.jacoco.agent is to
+         allow the Derby test framework to pass on the correct -javaagent
+         option when spawning VMs. -->
     <condition property="derby.tests.jacoco.agent" value="-Dderby.dummy.prop=X">
       <not>
         <isset property="derby.tests.jacoco.agent"/>            

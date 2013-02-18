@@ -330,7 +330,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
 
-        if (!runsWithEmma()) {
+        if (!(runsWithEmma() || runsWithJaCoCo())) {
             // With Emma we run without the security manager, so we can't
             // assert on seeing it.
             assertTrue( myName + "\nExpected: " +

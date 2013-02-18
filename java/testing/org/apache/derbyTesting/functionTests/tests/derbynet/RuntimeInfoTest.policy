@@ -375,6 +375,11 @@ grant {
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
+// Grant the required permissions for JaCoCo (code coverage tool).
+grant {
+  permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
+};
+
 // When inserting XML values that use external DTD's, the JAXP parser
 // needs permission to read the DTD files.  We assume that all DTD
 // files will be copied to extin/ by whichever tests need them.  So

@@ -88,7 +88,20 @@ public final class SecurityManagerSetup extends TestSetup {
 		externalSecurityManagerInstalled = determineClasspath();
         
 	}
-	
+
+    static final boolean jacocoEnabled = checkIfJacocoIsRunning();
+    private static boolean checkIfJacocoIsRunning() {
+        return ((Boolean)AccessController.doPrivileged(new PrivilegedAction() {
+                public Object run() {
+                    if (getURL("org.jacoco.agent.rt.RT") != null) {
+                        System.setProperty("jacoco.active", "");
+                        return Boolean.TRUE;
+                    }
+                    return Boolean.FALSE;
+                }
+		})).booleanValue();
+    }
+
 	private final String decoratorPolicyResource;
     /** An additional policy to install (may be {@code null}). */
     private final String additionalPolicyResource;
@@ -339,7 +352,7 @@ public final class SecurityManagerSetup extends TestSetup {
         if (emma != null) {
             classPathSet.setProperty("emma.active", "");
         }
-		
+
         /* When inserting XML values that use external DTD's, the JAXP
          * parser needs permission to read the DTD files.  So here we set
          * a property to hold the location of the JAXP implementation
@@ -429,6 +442,8 @@ public final class SecurityManagerSetup extends TestSetup {
         try {
             return getURL(Class.forName(className));
         } catch (ClassNotFoundException e) {
+            return null;
+        } catch (NoClassDefFoundError e) {
             return null;
         }
     }

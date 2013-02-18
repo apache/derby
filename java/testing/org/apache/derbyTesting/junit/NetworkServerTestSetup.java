@@ -331,7 +331,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         // running with Emma we don't run with the security manager, as the
         // default server policy doesn't contain needed permissions and,
         // additionally, Emma sources do not use doPrivileged blocks anyway.
-        if (!TestConfiguration.loadingFromJars() || BaseTestCase.runsWithEmma())
+        if (!TestConfiguration.loadingFromJars() ||
+                BaseTestCase.runsWithEmma() || BaseTestCase.runsWithJaCoCo())
         {
             boolean setNoSecurityManager = true;
             for (int i = 0; i < systemProperties.length; i++)

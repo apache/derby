@@ -105,3 +105,8 @@ grant {
     permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
     permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
+
+// Grant the required permissions for JaCoCo (code coverage tool).
+grant {
+  permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
+};

@@ -817,9 +817,7 @@ public abstract class BaseTestCase
     }
 
     public static boolean runsWithJaCoCo() {
-        String agentProp = getSystemProperty(JACOCO_AGENT_PROP);
-        // Additional logic due to the use of a dummy property in build.xml
-        return agentProp != null && agentProp.startsWith("-javaagent");
+        return SecurityManagerSetup.jacocoEnabled;
     }
 
     /**
