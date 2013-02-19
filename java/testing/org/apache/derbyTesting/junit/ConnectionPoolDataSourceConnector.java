@@ -51,7 +51,21 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         
         this.config = config;
         ds = J2EEDataSource.getConnectionPoolDataSource(config, (HashMap) null);
+
         // Enable statement pooling by default.
+        enableStatementPooling(ds);
+
+        // NOTE: Any other setup of the data source that gets added here,
+        // probably also needs to be added to singleUseDS(). Otherwise, that
+        // setup won't be performed on data sources that are used to create
+        // or shut down a database.
+
+    }
+
+    /**
+     * Enable statement pooling on the specified data source.
+     */
+    private static void enableStatementPooling(ConnectionPoolDataSource ds) {
         // Note that this does not automatically test the pooling itself, but it
         // should test basic JDBC operations on the logical wrapper classes.
         try {
@@ -184,6 +198,12 @@ public class ConnectionPoolDataSourceConnector implements Connector {
     {
         ConnectionPoolDataSource sds =
                 J2EEDataSource.getConnectionPoolDataSource(config, hm);
+
+        // Enable statement pooling by default for single-use data sources
+        // too, just like it's enabled for the default data source in
+        // setConfiguration().
+        enableStatementPooling(sds);
+
         return sds;
     }
 
