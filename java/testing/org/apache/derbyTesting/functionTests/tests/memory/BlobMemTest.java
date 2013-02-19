@@ -24,22 +24,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Blob;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
-import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -284,5 +278,45 @@ public class BlobMemTest extends BaseJDBCTestCase {
         rs.close();
 
         rollback();
+    }
+
+    /**
+     * Test that a BLOB that goes through the sorter does not get materialized
+     * twice in memory. It will still be materialized as part of the sorting,
+     * but the fix for DERBY-5752 prevents the creation of a second copy when
+     * accessing the BLOB after the sorting.
+     */
+    public void testDerby5752DoubleMaterialization() throws Exception {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d5752(id int, b blob)");
+
+        int lobSize = 1000000;
+
+        // Insert a single BLOB in the table.
+        PreparedStatement insert =
+                prepareStatement("insert into d5752 values (1,?)");
+        insert.setBinaryStream(1, new LoopingAlphabetStream(lobSize), lobSize);
+        insert.execute();
+        closeStatement(insert);
+
+        Blob[] blobs = new Blob[15];
+
+        // Repeatedly sort the table and keep a reference to the BLOB.
+        for (int i = 0; i < blobs.length; i++) {
+            ResultSet rs = s.executeQuery("select * from d5752 order by id");
+            rs.next();
+            // Used to get an OutOfMemoryError here because a new copy of the
+            // BLOB was created in memory.
+            blobs[i] = rs.getBlob(2);
+            rs.close();
+        }
+
+        // Access the BLOBs here to make sure they are not garbage collected
+        // earlier (in which case we wouldn't see the OOME in the loop above).
+        for (int i = 0; i < blobs.length; i++) {
+            assertEquals(lobSize, blobs[i].length());
+        }
     }
 }

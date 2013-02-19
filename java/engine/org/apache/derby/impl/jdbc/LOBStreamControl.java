@@ -44,13 +44,12 @@ import org.apache.derby.shared.common.reference.MessageId;
  * This class acts as a layer of blob/clob repository (in memory or file).
  * The max bytes of data stored in memory depends on the way this
  * class is created. If the class is created with initial data, the buffer
- * size is set to the size of the byte array supplied. If no initial data
- * is supplied or if the initial data size is less than DEFAULT_MAX_BUF_SIZE,
- * The buffer size is set to DEFAULT_MAX_BUF_SIZE.
+ * size is set to the size of the byte array supplied, but no larger than
+ * MAX_BUF_SIZE. If no initial data is supplied, or if the initial data size
+ * is less than DEFAULT_BUF_SIZE, the buffer size is set to DEFAULT_BUF_SIZE.
  * When write increases the data beyond this value a temporary file is created
  * and data is moved into that. If truncate reduces the size of the file below
- * initial buffer size (max of DEFAULT_MAX_BUF_SIZE and initial byte array size)
- * the data moved into memory.
+ * initial buffer size, the data is moved into memory.
  *
  * This class also creates InputStream and OutputStream which can be used to access
  * blob data irrespective of if its in memory or in file.
@@ -63,7 +62,8 @@ class LOBStreamControl {
     private final int bufferSize;
     private final EmbedConnection conn;
     private long updateCount;
-    private static final int DEFAULT_MAX_BUF_SIZE = 4096;
+    private static final int DEFAULT_BUF_SIZE = 4096;
+    private static final int MAX_BUF_SIZE = 32768;
 
     /**
      * Creates an empty LOBStreamControl.
@@ -73,7 +73,7 @@ class LOBStreamControl {
         this.conn = conn;
         updateCount = 0;
         //default buffer size
-        bufferSize = DEFAULT_MAX_BUF_SIZE;
+        bufferSize = DEFAULT_BUF_SIZE;
     }
 
     /**
@@ -85,7 +85,8 @@ class LOBStreamControl {
             throws IOException, StandardException {
         this.conn = conn;
         updateCount = 0;
-        bufferSize = Math.max (DEFAULT_MAX_BUF_SIZE, data.length);
+        bufferSize =
+            Math.min(Math.max(DEFAULT_BUF_SIZE, data.length), MAX_BUF_SIZE);
         write (data, 0, data.length, 0);
     }
 
