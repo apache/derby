@@ -2466,6 +2466,10 @@
       <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
       <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
       <sysproperty key="emma.verbosity.level" value="silent"/>
+      <!-- Pass on properties from the command line to the spawned VM. -->
+      <syspropertyset id="system-properties-passed-on">
+        <propertyref builtin="commandline"/>
+      </syspropertyset>
       <!-- Use the system property below to debug lacking java security permissions -->
 <!--      <sysproperty key="java.security.debug" value="access:failure"/> -->
       <formatter type="xml"/>
@@ -2525,6 +2529,10 @@
                failureproperty="tests.failed">
           <jvmarg value="${derby.tests.jacoco.agent}"/>
           <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
+          <!-- Pass on properties from the command line to the spawned VM. -->
+          <syspropertyset id="system-properties-passed-on">
+            <propertyref builtin="commandline"/>
+          </syspropertyset>
           <formatter type="xml"/>
 
     <test name="org.apache.derbyTesting.system.oe.test.OETest"
@@ -2555,6 +2563,10 @@
   	       failureproperty="tests.failed">
       <jvmarg value="${derby.tests.jacoco.agent}"/>
       <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
+      <!-- Pass on properties from the command line to the spawned VM. -->
+      <syspropertyset id="system-properties-passed-on">
+        <propertyref builtin="commandline"/>
+      </syspropertyset>
       <formatter type="xml"/>
   	 	
       <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
@@ -2579,6 +2591,10 @@
   	       failureproperty="tests.failed">
       <jvmarg value="${derby.tests.jacoco.agent}"/>
       <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
+      <!-- Pass on properties from the command line to the spawned VM. -->
+      <syspropertyset id="system-properties-passed-on">
+        <propertyref builtin="commandline"/>
+      </syspropertyset>
       <formatter type="xml"/>
   	 	
       <test name="org.apache.derbyTesting.functionTests.tests.memory._Suite"
@@ -2602,6 +2618,10 @@
             failureproperty="tests.failed">
         <jvmarg value="${derby.tests.jacoco.agent}"/>
         <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
+        <!-- Pass on properties from the command line to the spawned VM. -->
+        <syspropertyset id="system-properties-passed-on">
+          <propertyref builtin="commandline"/>
+        </syspropertyset>
         <formatter type="xml"/>
 
         <test name="org.apache.derbyTesting.functionTests.tests.management._Suite"
@@ -2626,7 +2646,11 @@
             failureproperty="tests.failed">
         <jvmarg value="${derby.tests.jacoco.agent}"/>
         <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
-        <formatter type="xml"/>
+        <!-- Pass on properties from the command line to the spawned VM. -->
+        <syspropertyset id="system-properties-passed-on">
+          <propertyref builtin="commandline"/>
+        </syspropertyset>
+         <formatter type="xml"/>
 
         <test name="org.apache.derby.PackagePrivateTestSuite"
                 todir="junit_${derby.junit.timestamp}"/>
@@ -2657,8 +2681,13 @@
            failureproperty="tests.failed">
       <jvmarg value="${derby.tests.jacoco.agent}"/>
       <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
+      <sysproperty key="java.security.debug" value="policy"/>
       <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
       <sysproperty key="emma.verbosity.level" value="silent"/>
+      <!-- Pass on properties from the command line to the spawned VM. -->
+      <syspropertyset id="system-properties-passed-on">
+        <propertyref builtin="commandline"/>
+      </syspropertyset>
       <formatter type="xml"/>
       
       <test name="${derby.junit.testclass}" todir="junit_${derby.junit.timestamp}"/>
