@@ -89,6 +89,14 @@ public final class SecurityManagerSetup extends TestSetup {
         
 	}
 
+    static {
+        // Work around bug in weme6.2 (DERBY-5558 and DERBY-6079).
+        if (BaseTestCase.isJ9Platform()) {
+            BaseTestCase.setSystemProperty("emma.active", "");
+            BaseTestCase.setSystemProperty("jacoco.active", "");
+        }
+    }
+
     static final boolean jacocoEnabled = checkIfJacocoIsRunning();
     private static boolean checkIfJacocoIsRunning() {
         return ((Boolean)AccessController.doPrivileged(new PrivilegedAction() {

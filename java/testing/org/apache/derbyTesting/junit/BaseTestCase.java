@@ -591,8 +591,14 @@ public abstract class BaseTestCase
             // also add the setting for emma.active so any tests
             // that fork will work correctly. See DERBY-5558.
             String emmaactive=getSystemProperty("emma.active");
-            if (emmaactive != null)
+            if (emmaactive != null) {
                 cmdlist.add("-Demma.active=" + emmaactive);            
+            }
+            // Do the same for jacoco.active, see DERBY-6079.
+            String jacocoactive = getSystemProperty("jacoco.active");
+            if (jacocoactive != null) {
+                cmdlist.add("-Djacoco.active=" + jacocoactive);
+            }
 	    }
 
         if (isCVM()) {
