@@ -3974,8 +3974,12 @@ public class StoredPage extends CachedPage
                     {
                         // this is an update that is increasing the number of 
                         // columns but not providing any value. this can happen
-                        // if you are updating a new column after using
-                        // ALTER TABLE to add a couple new columns.
+                        // if you are updating a new column that does not 
+                        // actually exist in the table after using
+                        // ALTER TABLE to add a couple new columns.  This
+                        // case is going to create actual null entries for
+                        // the non-existent columns that are before the actual
+                        // column being updated by the user.
                         // see DERBY-5679.
                         spaceAvailable = 
                             logColumn(
