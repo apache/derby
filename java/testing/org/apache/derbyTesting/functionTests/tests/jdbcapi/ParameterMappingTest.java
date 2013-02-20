@@ -4758,11 +4758,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         // REAL Underflow checking
-        //
-        // Uncomment when DERBY-5546 is fixed:
-        // assertUpdateState(rs, "F04", bdSmallestPosDoubleValue, "22003");
-        // assertUpdateState(rs, "F04", bdSmallestNegDoubleValue, "22003");
-
+        // Remove test when DERBY-5534 is fixed
+        if (usingEmbedded()) {
+            assertUpdateState(rs, "F04", bdSmallestPosDoubleValue, "22003");
+            assertUpdateState(rs, "F04", bdSmallestNegDoubleValue, "22003");
+        }
 
         // DOUBLE, FLOAT (SQL FLOAT is really the same as SQL DOUBLE in Derby)
         final String[] dfCols = new String[]{"F05", "F06"};
@@ -4802,12 +4802,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             }
 
             // DOUBLE, FLOAT underflow checking
-            //
-            // Uncomment when DERBY-5546 is fixed
-            // assertUpdateState(rs, dfCols[i],
-            //     bdSmallestPosDoubleValue.divide(BigDecimal.TEN), "22003");
-            // assertUpdateState(rs, dfCols[i],
-            //     bdSmallestNegDoubleValue.divide(BigDecimal.TEN), "22003");
+            // Remove test when DERBY-5534 is fixed
+            if (usingEmbedded()) {
+                assertUpdateState(rs, dfCols[i],
+                    bdSmallestPosDoubleValue.divide(BigDecimal.TEN), "22003");
+                assertUpdateState(rs, dfCols[i],
+                    bdSmallestNegDoubleValue.divide(BigDecimal.TEN), "22003");
+            }
         }
 
         // Derby BOOLEAN: not range checked: FALSE of 0, else TRUE.

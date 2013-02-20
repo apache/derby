@@ -36,6 +36,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -398,9 +399,25 @@ public final class SQLReal
 
 		// Note BigDecimal.floatValue() handles the case where
 		// its value is outside the range of a float. It returns
-		// infinity values which should throw an exception in setValue(double).
-		setValue(bigDecimal.floatValue());
-		
+        // infinity values which should throw an exception in setValue(float).
+
+        float v = bigDecimal.floatValue();
+
+        if (v == 0) {
+            // We need to catch underflow here, since BigDecimal#floatValue it
+            // just returns 0 (i.e. no exception).
+            boolean isZero =
+                ((BigDecimal) bigDecimal).compareTo(BigDecimal.ZERO) == 0;
+
+            if (!isZero) {
+                throw StandardException.
+                    newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
+                                 TypeId.REAL_NAME);
+            }
+        }
+
+        setValue(v);
+
 	}
 
 	public void setValue(float theValue)
