@@ -150,7 +150,29 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			equal.bindComparisonOperator();
 			return equal;
 		}
-		else if ((leftOperand instanceof ColumnReference) &&
+
+        // DERBY-6017: All comparisons have to be performed using the dominant
+        // type of *all* the values in the left operand and the right operand.
+        // If either the left operand is of the dominant type, or all of the
+        // values in the right operand are of the dominant type, we know that
+        // each comparison will be performed using the dominant type.
+        // Otherwise, cast the left operand to the dominant type to ensure
+        // that each comparison operation will use the dominant type.
+        DataTypeDescriptor targetType = getDominantType();
+        int targetTypePrecedence = targetType.getTypeId().typePrecedence();
+        if ((leftOperand.getTypeServices().getTypeId().typePrecedence() !=
+                    targetTypePrecedence) &&
+                !rightOperandList.allSamePrecendence(targetTypePrecedence)) {
+            CastNode cn = (CastNode) getNodeFactory().getNode(
+                    C_NodeTypes.CAST_NODE,
+                    leftOperand,
+                    targetType,
+                    getContextManager());
+            cn.bindCastNodeOnly();
+            leftOperand = cn;
+        }
+
+        if ((leftOperand instanceof ColumnReference) &&
 				 rightOperandList.containsOnlyConstantAndParamNodes())
 		{
 			/* At this point we have an IN-list made up of constant and/or
@@ -235,27 +257,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				 * would lead to comparisons with truncated values and could
 				 * therefore lead to an incorrect sort order. DERBY-2256.
 				 */
-				DataTypeDescriptor targetType = leftOperand.getTypeServices();
-				TypeId judgeTypeId = targetType.getTypeId();
-
-				if (!rightOperandList.allSamePrecendence(
-					judgeTypeId.typePrecedence()))
-				{
-					/* Iterate through the entire list of values to find out
-					 * what the dominant type is.
-					 */
-					ClassFactory cf = getClassFactory();
-					int sz = rightOperandList.size();
-					for (int i = 0; i < sz; i++)
-					{
-						ValueNode vn = (ValueNode)rightOperandList.elementAt(i);
-						targetType =
-							targetType.getDominantType(
-								vn.getTypeServices(), cf);
-					}
-				}
  
-				/* Now wort the list in ascending order using the dominant
+				/* Now sort the list in ascending order using the dominant
 				 * type found above.
 				 */
 				DataValueDescriptor judgeODV = targetType.getNull();
@@ -279,27 +282,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 				if (judgeODV.equals(minODV, maxODV).equals(true))
 				{
-                    int judgePrecedence = judgeODV.typePrecedence();
-                    int leftPrecedence = leftOperand.getTypeServices()
-                            .getTypeId().typePrecedence();
-                    if (leftPrecedence != judgePrecedence &&
-                            minODV.typePrecedence() != judgePrecedence) {
-                        // DERBY-6017: If neither the minimum value nor the
-                        // left operand is of the dominant type, cast the
-                        // minimum value to the dominant type. Otherwise, the
-                        // equals operation will be performed using a different
-                        // type, which may not have the same ordering as the
-                        // type used to sort the list, and it could produce
-                        // unexpected results.
-                        CastNode cn = (CastNode) getNodeFactory().getNode(
-                                C_NodeTypes.CAST_NODE,
-                                minValue,
-                                targetType,
-                                getContextManager());
-                        cn.bindCastNodeOnly();
-                        minValue = cn;
-                    }
-
 					BinaryComparisonOperatorNode equal = 
 						(BinaryComparisonOperatorNode)getNodeFactory().getNode(
 							C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
@@ -385,6 +367,31 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			return this;
 		}
 	}
+
+    /**
+     * Get the dominant type of all the operands in this IN list.
+     * @return the type descriptor for the dominant type
+     * @see DataTypeDescriptor#getDominantType(DataTypeDescriptor, ClassFactory)
+     */
+    private DataTypeDescriptor getDominantType() {
+        DataTypeDescriptor targetType = leftOperand.getTypeServices();
+        TypeId judgeTypeId = targetType.getTypeId();
+
+        if (!rightOperandList.allSamePrecendence(
+                judgeTypeId.typePrecedence())) {
+            // Iterate through the entire list of values to find out
+            // what the dominant type is.
+            ClassFactory cf = getClassFactory();
+            int sz = rightOperandList.size();
+            for (int i = 0; i < sz; i++) {
+                ValueNode vn = (ValueNode) rightOperandList.elementAt(i);
+                targetType = targetType.getDominantType(
+                        vn.getTypeServices(), cf);
+            }
+        }
+
+        return targetType;
+    }
 
 	/**
 	 * Eliminate NotNodes in the current query block.  We traverse the tree, 

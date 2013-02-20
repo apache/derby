@@ -1140,6 +1140,13 @@ public abstract class DataType
 		 * compare using the dominant type of the two values being compared.
 		 * Otherwise we can end up with wrong results when doing the binary
 		 * search (ex. as caused by incorrect truncation).  DERBY-2256.
+         *
+         * DERBY-6017: Actually, it's not good enough to compare using the
+         * dominant type of the two values being compared. It has to be the
+         * dominant type of *all* the values in the left operand and the right
+         * operand. Therefore, InListOperatorNode.preprocess() inserts a
+         * cast if necessary to ensure that either the left side or the right
+         * side of each comparison is of the overall dominating type.
 		 */
 		int leftPrecedence = left.typePrecedence();
 		DataValueDescriptor comparator = null;

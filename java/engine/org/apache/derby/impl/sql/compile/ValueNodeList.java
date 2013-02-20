@@ -260,7 +260,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *			type precendence as the specified value.
 	 */
 	boolean allSamePrecendence(int precedence)
-	throws StandardException
 	{
 		boolean allSame = true;
 		int size = size();

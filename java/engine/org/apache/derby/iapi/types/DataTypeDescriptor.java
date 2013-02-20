@@ -700,11 +700,8 @@ public final class DataTypeDescriptor implements Formatable
 	 * @param cf		A ClassFactory
 	 *
 	 * @return DataTypeDescriptor  DTS for dominant type
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 	public DataTypeDescriptor getDominantType(DataTypeDescriptor otherDTS, ClassFactory cf)
-			throws StandardException
 	{
 		boolean				nullable;
 		TypeId				thisType;

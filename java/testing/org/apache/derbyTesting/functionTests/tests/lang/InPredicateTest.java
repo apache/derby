@@ -118,4 +118,68 @@ public class InPredicateTest extends BaseJDBCTestCase {
                 " 9223372036854775807, 9.223372036854776E18)"),
                 allRows);
     }
+
+    /**
+     * Another test case for DERBY-6017. Derby used to evaluate IN lists by
+     * using the semantics of the dominant type of the two values being
+     * compared. It should use the dominant type of all the values in the
+     * left operand and in the IN list. Verify that it works as expected now.
+     */
+    public void testMixedTypes() throws SQLException {
+        setAutoCommit(false);
+
+        // Test an IN predicate that mixes BIGINT and DOUBLE.
+
+        Statement s = createStatement();
+        s.executeUpdate("create table t2(b1 bigint, b2 bigint, d double)");
+        s.executeUpdate("insert into t2 values " +
+                        "(9223372036854775805, 9223372036854775806, 1)");
+
+        // The first query used to return zero rows. However, the next two
+        // queries used to return one row, and SQL:2003, 8.4 <in predicate>
+        // says that the three queries are equivalent. Now, they all return
+        // one row.
+
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select true from t2 where b1 in (b2, d)"),
+            "true");
+
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select true from t2 where b1 in (values b2, d)"),
+            "true");
+
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select true from t2 where b1 = any (values b2, d)"),
+            "true");
+
+        // Test an IN predicate that mixes INT and REAL. They are supposed
+        // to be compared using DOUBLE semantics, but used to be compared as
+        // REALs.
+
+        s.executeUpdate("create table t3 (i1 int, r1 real, r2 real)");
+        s.executeUpdate("insert into t3 values " +
+                        "(2147483645, 2147483645, 2147483645), " +
+                        "(2147483645, 2147483645, 0)");
+
+        String[][] expectedRows = {
+            { "2147483645", "2.14748365E9", "2.14748365E9" }
+        };
+
+        // The first query used to return two rows. However, the next two
+        // queries used to return one row, and SQL:2003, 8.4 <in predicate>
+        // says that the three queries are equivalent. Now, they all return
+        // one row.
+
+        JDBC.assertFullResultSet(
+            s.executeQuery("select * from t3 where r1 in (i1, r2)"),
+            expectedRows);
+
+        JDBC.assertFullResultSet(
+            s.executeQuery("select * from t3 where r1 in (values i1, r2)"),
+            expectedRows);
+
+        JDBC.assertFullResultSet(
+            s.executeQuery("select * from t3 where r1 = any (values i1, r2)"),
+            expectedRows);
+    }
 }
