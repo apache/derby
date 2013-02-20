@@ -167,7 +167,6 @@ import java.util.Hashtable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Vector;
 
 import java.util.List;
 import java.util.Iterator;
@@ -4944,7 +4943,7 @@ public final class	DataDictionaryImpl
 
 		CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
 		actionStmt.accept(visitor);
-		Vector refs = visitor.getList();
+		List refs = visitor.getList();
 		/* we need to sort on position in string, beetle 4324
 		 */
 		Collections.sort(refs, OFFSET_COMPARATOR);

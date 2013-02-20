@@ -56,11 +56,10 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.sql.ResultSet;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -239,10 +238,9 @@ abstract class MethodCallNode extends JavaValueNode
 	{
 		CollectNodesVisitor getCRs = new CollectNodesVisitor(ColumnReference.class);
 		accept(getCRs);
-		Vector colRefs = getCRs.getList();
-		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		for (Iterator it = getCRs.getList().iterator(); it.hasNext(); )
 		{
-			ColumnReference ref = (ColumnReference)e.nextElement();
+			ColumnReference ref = (ColumnReference) it.next();
 			if (ref.getCorrelated())
 			{
 				correlationMap.set(ref.getTableNumber());

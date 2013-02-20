@@ -21,8 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -267,10 +267,10 @@ public class FromSubquery extends FromTable
         // references are illegal. See DERBY-5554 and DERBY-5779.
 		CollectNodesVisitor nestedVTIs = new CollectNodesVisitor( FromVTI.class );
 		subquery.accept( nestedVTIs );
-		Vector vtiRefs = nestedVTIs.getList();
-		for (Enumeration e = vtiRefs.elements(); e.hasMoreElements(); )
+		List vtiRefs = nestedVTIs.getList();
+		for (Iterator it = vtiRefs.iterator(); it.hasNext(); )
 		{
-			FromVTI ref = (FromVTI) e.nextElement();
+			FromVTI ref = (FromVTI) it.next();
             ref.addOuterFromList( fromListParam );
 		}
         

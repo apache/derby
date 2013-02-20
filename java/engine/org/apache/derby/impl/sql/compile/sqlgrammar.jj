@@ -10203,10 +10203,10 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
         // rather than ordinary function calls.
         CollectNodesVisitor  functionSniffer = new CollectNodesVisitor( StaticMethodCallNode.class );
         columnExpression.accept( functionSniffer );
-        Vector    functionNodes = functionSniffer.getList();
+        List functionNodes = functionSniffer.getList();
         for ( int i = 0; i < functionNodes.size(); i++ )
         {
-            ((StaticMethodCallNode) functionNodes.elementAt( i )).setAppearsInGroupBy();
+            ((StaticMethodCallNode) functionNodes.get(i)).setAppearsInGroupBy();
         }
 
 		if (columnExpression.isParameterNode()) 

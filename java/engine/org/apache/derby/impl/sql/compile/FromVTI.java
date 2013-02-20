@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.DefaultInfo;
@@ -901,11 +903,11 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * from other VTIs that appear after this one in the FROM list.
 		 * These CRs will have uninitialized column and table numbers.
 		 */
-		Vector colRefs = getNodesFromParameters(ColumnReference.class);
+		List colRefs = getNodesFromParameters(ColumnReference.class);
 		Vector aggregateVector = null;
-		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
-			ColumnReference ref = (ColumnReference)e.nextElement();
+			ColumnReference ref = (ColumnReference) it.next();
 
             //
             // Table Function parameters may not reference columns from other tables in the
@@ -1006,11 +1008,11 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @param nodeClass	The Class of interest.
 	 *
-	 * @return A vector containing all of the nodes of interest.
+	 * @return A list containing all of the nodes of interest.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	Vector getNodesFromParameters(Class nodeClass)
+	List getNodesFromParameters(Class nodeClass)
 		throws StandardException
 	{
 		CollectNodesVisitor getCRs = new CollectNodesVisitor(nodeClass);
@@ -1610,10 +1612,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
      */
     private void remapBaseTableColumns() throws StandardException
     {
-		Vector colRefs = getNodesFromParameters(ColumnReference.class);
-		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		List colRefs = getNodesFromParameters(ColumnReference.class);
+		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
-			ColumnReference ref = (ColumnReference)e.nextElement();
+			ColumnReference ref = (ColumnReference) it.next();
             FromTable   fromTable = (FromTable) argSources.get( new Integer( ref.getTableNumber() ) );
 
             if ( fromTable != null )
@@ -1678,8 +1680,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		// o  No ? or ColumnReferences in parameters
 
 		boolean reuseablePs = version2 &&
-			(getNodesFromParameters(ParameterNode.class).size() == 0) &&
-			(getNodesFromParameters(ColumnReference.class).size() == 0);
+			(getNodesFromParameters(ParameterNode.class).isEmpty()) &&
+			(getNodesFromParameters(ColumnReference.class).isEmpty());
 
 
 

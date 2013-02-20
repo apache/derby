@@ -33,7 +33,6 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
@@ -63,6 +62,7 @@ import org.apache.derby.catalog.UUID;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -931,11 +931,11 @@ public class TableElementList extends QueryTreeNodeVector
         {
             ColumnDefinitionNode    cdn = (ColumnDefinitionNode) generatedColumns.get( i );
             GenerationClauseNode    generationClauseNode = cdn.getGenerationClauseNode();
-            Vector                  referencedColumns = generationClauseNode.findReferencedColumns();
+            List                    referencedColumns = generationClauseNode.findReferencedColumns();
             int                     refCount = referencedColumns.size();
             for ( int j = 0; j < refCount; j++ )
             {
-                String  name = ((ColumnReference) referencedColumns.elementAt( j ) ).getColumnName();
+                String name = ((ColumnReference) referencedColumns.get(j)).getColumnName();
 
                 if ( name != null )
                 {

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
@@ -42,8 +43,6 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
 
 /**
  * A CreateTriggerNode is the root of a QueryTree 
@@ -603,7 +602,7 @@ public class CreateTriggerNode extends DDLStatementNode
 			*/
 			CollectNodesVisitor visitor = new CollectNodesVisitor(FromBaseTable.class);
 			actionNode.accept(visitor);
-			Vector tabs = visitor.getList();
+			List tabs = visitor.getList();
 			Collections.sort(tabs, OFFSET_COMPARATOR);
 			for (int i = 0; i < tabs.size(); i++)
 			{
@@ -725,7 +724,7 @@ public class CreateTriggerNode extends DDLStatementNode
 
         actionNode.accept( visitor );
 
-        Vector                   columnRefs = visitor.getList();
+        List columnRefs = visitor.getList();
         int                             colRefCount = columnRefs.size();
 
         for ( int crf_idx = 0; crf_idx < colRefCount; crf_idx++ )

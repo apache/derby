@@ -22,7 +22,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Arrays;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -39,7 +38,6 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -47,6 +45,7 @@ import org.apache.derby.iapi.util.JBitSet;
 
 import java.util.Vector;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * A SelectNode represents the result set for any of the basic DML
@@ -95,7 +94,7 @@ public class SelectNode extends ResultSetNode
 	/**
 	 * List of window function calls (e.g. ROW_NUMBER, AVG(i), DENSE_RANK).
 	 */
-	Vector windowFuncCalls;
+	List windowFuncCalls;
 
 	/** User specified a group by without aggregates and we turned 
 	 * it into a select distinct 
@@ -195,7 +194,7 @@ public class SelectNode extends ResultSetNode
 
 			for (int i=0; i < windowFuncCalls.size(); i++) {
 				WindowFunctionNode wfn =
-					(WindowFunctionNode)windowFuncCalls.elementAt(i);
+					(WindowFunctionNode) windowFuncCalls.get(i);
 
 				// Some window function, e.g. ROW_NUMBER() contains an inline
 				// window specification, so we add it to our list of window
@@ -1315,11 +1314,11 @@ public class SelectNode extends ResultSetNode
 			CollectNodesVisitor cnvw =
 				new CollectNodesVisitor(WindowFunctionNode.class);
             orderByLists[0].accept(cnvw);
-			Vector wfcInOrderBy = cnvw.getList();
+			List wfcInOrderBy = cnvw.getList();
 
 			for (int i=0; i < wfcInOrderBy.size(); i++) {
 				WindowFunctionNode wfn =
-					(WindowFunctionNode)wfcInOrderBy.elementAt(i);
+					(WindowFunctionNode) wfcInOrderBy.get(i);
 				windowFuncCalls.add(wfn);
 
 

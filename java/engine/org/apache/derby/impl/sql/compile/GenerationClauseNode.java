@@ -21,31 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
+import java.util.List;
 
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
- import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import java.lang.reflect.Modifier;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import java.sql.Types;
 
 import java.util.Vector;
 
@@ -145,22 +130,18 @@ public class GenerationClauseNode extends ValueNode
     }
     
 	/**
-	 * Return a vector of columns referenced in the generation expression.
+	 * Return a list of columns referenced in the generation expression.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    public Vector findReferencedColumns()
+    public List findReferencedColumns()
         throws StandardException
     {
         CollectNodesVisitor visitor = new CollectNodesVisitor( ColumnReference.class );
 
         _generationExpression.accept( visitor );
 
-        Vector result = visitor.getList();
-
-        if ( result == null ) { result = new Vector(); }
-
-        return result;
+        return visitor.getList();
     }
 
 	/*

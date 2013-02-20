@@ -21,17 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import java.util.Vector;
-
 /**
  * Collect all nodes of the designated type to be returned
- * in a vector.
+ * in a list.
  * <p>
  * Can find any type of node -- the class or class name
  * of the target node is passed in as a constructor
@@ -40,9 +37,10 @@ import java.util.Vector;
  */
 public class CollectNodesVisitor implements Visitor
 {
-	private Vector	nodeList;
-	private Class 	nodeClass;
-	private Class	skipOverClass;
+    private final List nodeList;
+    private final Class nodeClass;
+    private final Class skipOverClass;
+
 	/**
 	 * Construct a visitor
 	 *
@@ -51,8 +49,7 @@ public class CollectNodesVisitor implements Visitor
 	 */
 	public CollectNodesVisitor(Class nodeClass)
 	{
-		this.nodeClass = nodeClass;
-		nodeList = new Vector();
+        this(nodeClass, null);
 	}
 
 	/**
@@ -65,7 +62,8 @@ public class CollectNodesVisitor implements Visitor
 	 */
 	public CollectNodesVisitor(Class nodeClass, Class skipOverClass)
 	{
-		this(nodeClass);
+        this.nodeList = new ArrayList();
+        this.nodeClass = nodeClass;
 		this.skipOverClass = skipOverClass;
 	}
 
@@ -101,7 +99,7 @@ public class CollectNodesVisitor implements Visitor
 	}
 
 	/**
-	 * Don't visit childen under the skipOverClass
+	 * Don't visit children under the skipOverClass
 	 * node, if it isn't null.
 	 *
 	 * @return true/false
@@ -120,9 +118,11 @@ public class CollectNodesVisitor implements Visitor
 	////////////////////////////////////////////////
 	/**
 	 * Return the list of matching nodes.
+     * The returned list may be empty, if there are no matching nodes. It
+     * is never {@code null}.
 	 *
 	 */
-	public Vector getList()
+	public List getList()
 	{
 		return nodeList;
 	}

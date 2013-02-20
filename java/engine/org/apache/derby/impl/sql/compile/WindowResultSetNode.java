@@ -20,37 +20,16 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import java.util.Iterator;
-import java.util.Vector;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
-
-import org.apache.derby.catalog.IndexDescriptor;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.impl.sql.execute.AggregatorInfo;
-import org.apache.derby.impl.sql.execute.AggregatorInfoList;
 
 
 /**
@@ -64,7 +43,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * over the windowing node and parent is set to that node.
      */
     FromTable   parent;
-    Vector windowFuncCalls;
+    List windowFuncCalls;
     WindowDefinitionNode wdn;
 
     /**
@@ -85,7 +64,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
     {
         super.init(bottomPR, null);
         this.wdn = (WindowDefinitionNode)windowDef;
-        this.windowFuncCalls = (Vector)windowFuncCalls;
+        this.windowFuncCalls = (List) windowFuncCalls;
         setLevel(((Integer)nestingLevel).intValue());
 
         ResultColumnList newBottomRCL;
@@ -175,13 +154,13 @@ public class WindowResultSetNode extends SingleChildResultSetNode
 
         parent.getResultColumns().accept(getCRVisitor);
 
-        Vector colRefs = getCRVisitor.getList();
+        List colRefs = getCRVisitor.getList();
 
         // Find all unique columns referenced and add those to windowing result
         // set.
-        Vector uniqueCols = new Vector();
+        ArrayList uniqueCols = new ArrayList();
         for (int i= 0; i< colRefs.size(); i++) {
-            ColumnReference cr = (ColumnReference)colRefs.elementAt(i);
+            ColumnReference cr = (ColumnReference) colRefs.get(i);
             if (!colRefAlreadySeen(uniqueCols, cr)) {
                 uniqueCols.add(cr);
             }
@@ -195,18 +174,18 @@ public class WindowResultSetNode extends SingleChildResultSetNode
             new CollectNodesVisitor(VirtualColumnNode.class);
 
         parent.getResultColumns().accept(getVCVisitor);
-        Vector vcs = getVCVisitor.getList();
+        List vcs = getVCVisitor.getList();
 
         // Add any virtual columns to windowing result.
         for (int i= 0; i< vcs.size(); i++) {
-            uniqueCols.add(vcs.elementAt(i));
+            uniqueCols.add(vcs.get(i));
         }
 
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = resultColumns;
 
         for (int i= 0; i< uniqueCols.size(); i++) {
-            ValueNode crOrVcn = (ValueNode)uniqueCols.elementAt(i);
+            ValueNode crOrVcn = (ValueNode) uniqueCols.get(i);
 
             ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
                     C_NodeTypes.RESULT_COLUMN,
@@ -253,12 +232,12 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * @return true if an equivalent column reference to cand is already
      * present in uniqueColRefs
      */
-    private boolean colRefAlreadySeen(Vector uniqueColRefs,
+    private boolean colRefAlreadySeen(List uniqueColRefs,
                                       ColumnReference cand)
             throws StandardException {
 
         for (int i= 0; i< uniqueColRefs.size(); i++) {
-            ColumnReference cr = (ColumnReference)uniqueColRefs.elementAt(i);
+            ColumnReference cr = (ColumnReference) uniqueColRefs.get(i);
 
             if (cr.isEquivalent(cand)) {
                 return true;
@@ -294,7 +273,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
 
         for (int i=0; i < windowFuncCalls.size(); i++) {
             WindowFunctionNode winFunc =
-                (WindowFunctionNode)windowFuncCalls.elementAt(i);
+                (WindowFunctionNode) windowFuncCalls.get(i);
 
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(

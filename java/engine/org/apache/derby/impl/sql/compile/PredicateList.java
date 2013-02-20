@@ -21,7 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -41,25 +40,15 @@ import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.Row;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -67,11 +56,10 @@ import org.apache.derby.iapi.util.JBitSet;
 
 import java.lang.reflect.Modifier;
 
-import java.sql.Types;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -1480,7 +1468,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                 new CollectNodesVisitor(ColumnReference.class);
 
 			predicate.getAndNode().accept(getCRs);
-			Vector colRefs = getCRs.getList();
+			List colRefs = getCRs.getList();
 
 			/* state doesn't become true until we find the 1st
 			 * ColumnReference.  (We probably will always find
@@ -1489,9 +1477,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			boolean state = colRefs.size() > 0;
 			if (state)
 			{
-				for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+				for (Iterator it = colRefs.iterator(); it.hasNext(); )
 				{
-					ColumnReference ref = (ColumnReference)e.nextElement();
+					ColumnReference ref = (ColumnReference) it.next();
 					if (!ref.pointsToColumnReference())
 					{
 						state = false;
@@ -1644,10 +1632,10 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			predicate.getAndNode().accept(collectCRs);
 		}
 
-		Vector colRefs = collectCRs.getList();
-		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		List colRefs = collectCRs.getList();
+		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
-			ColumnReference ref = (ColumnReference)e.nextElement();
+			ColumnReference ref = (ColumnReference) it.next();
 			ResultColumn source = ref.getSource();
 
             // DERBY-4391: Don't try to call markAllRCsInChainReferenced() if
