@@ -2461,7 +2461,7 @@ public class SelectNode extends ResultSetNode
 	 * (a delete or update).  The update mode will always be row for
 	 * CurrentOfNodes.  It will be table if there is no where clause.
 	 *
-	 * @see TransactionController
+	 * @see org.apache.derby.iapi.store.access.TransactionController
 	 *
 	 * @return	The lock mode
 	 */

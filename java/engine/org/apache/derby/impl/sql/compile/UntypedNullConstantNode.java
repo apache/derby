@@ -96,7 +96,7 @@ public final class UntypedNullConstantNode extends ConstantNode
 		return typeDescriptor.getNull();
 	}
 	
-	/** @see ValueNode#bindExpression(FromList, SubqueryList, Vector)
+	/** @see ValueNode#bindExpression(FromList, SubqueryList, List)
 	 * @see ResultColumnList#bindUntypedNullsToResultColumns
 	 * This does nothing-- the node is actually bound when
 	 * bindUntypedNullsToResultColumns is called.
