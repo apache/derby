@@ -21,33 +21,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.reference.ClassName;
@@ -56,7 +46,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 /**
  * A ConditionalNode represents an if/then/else operator with a single
@@ -207,7 +196,7 @@ public class ConditionalNode extends ValueNode
 	 * @exception             StandardException Thrown on error.
 	 */
 	private DataTypeDescriptor findType(ValueNodeList thenElseList,
-		FromList fromList, SubqueryList subqueryList, Vector aggregateVector)
+		FromList fromList, SubqueryList subqueryList, List aggregateVector)
 		throws StandardException
 	{
 		/* We need to "prebind" because we want the Types.  Provide
@@ -293,7 +282,7 @@ public class ConditionalNode extends ValueNode
 	 */
 	private void recastNullNodes(ValueNodeList thenElseList,
 	                           DataTypeDescriptor castType, FromList fromList,
-	                           SubqueryList subqueryList, Vector aggregateVector)
+	                           SubqueryList subqueryList, List aggregateVector)
 	 throws StandardException {
 
 		// Don't do anything if we couldn't find a castType.
@@ -378,7 +367,7 @@ public class ConditionalNode extends ValueNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
         CompilerContext cc = getCompilerContext();

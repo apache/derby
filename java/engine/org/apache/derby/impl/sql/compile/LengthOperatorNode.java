@@ -25,19 +25,15 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.ConcatableDataValue;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node represents a unary XXX_length operator
@@ -88,7 +84,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 
 	public ValueNode bindExpression(
 		FromList	fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
 		TypeId	operandType;

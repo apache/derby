@@ -22,7 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -30,7 +30,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -218,7 +217,7 @@ public class ParameterNode extends ValueNode
 
 	public ValueNode bindExpression(
 			FromList fromList, SubqueryList subqueryList,
-			Vector	aggregateVector) 
+			List aggregateVector)
 				throws StandardException
 	{
 		checkReliability( "?", CompilerContext.UNNAMED_PARAMETER_ILLEGAL );

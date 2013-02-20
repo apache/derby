@@ -21,11 +21,9 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -34,15 +32,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import java.lang.reflect.Modifier;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * The CurrentDatetimeOperator operator is for the builtin CURRENT_DATE,
@@ -95,7 +90,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	 * @exception StandardException		Thrown on error
 	 */
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							Vector	aggregateVector)
+							List aggregateVector)
 					throws StandardException
 	{
 		checkReliability( methodName[whichType], CompilerContext.DATETIME_ILLEGAL );

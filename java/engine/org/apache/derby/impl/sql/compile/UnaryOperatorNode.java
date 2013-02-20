@@ -42,7 +42,7 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.sql.Types;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * A UnaryOperatorNode represents a built-in unary operator as defined by
@@ -297,7 +297,7 @@ public class UnaryOperatorNode extends OperatorNode
 
 	public ValueNode bindExpression(
 					FromList fromList, SubqueryList subqueryList,
-					Vector	aggregateVector)
+					List aggregateVector)
 				throws StandardException
 	{
 		bindOperand(fromList, subqueryList, aggregateVector);
@@ -315,8 +315,7 @@ public class UnaryOperatorNode extends OperatorNode
      * method to bind the operand.
 	 */
 	protected void bindOperand(
-					FromList fromList, SubqueryList subqueryList,
-					Vector	aggregateVector)
+            FromList fromList, SubqueryList subqueryList, List aggregateVector)
 				throws StandardException
 	{
 		operand = operand.bindExpression(fromList, subqueryList,

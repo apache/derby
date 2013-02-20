@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
@@ -40,7 +39,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This class implements the timestamp( x) and date(x) functions.
@@ -99,7 +98,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 	 */
 	public ValueNode bindExpression (
 					FromList fromList, SubqueryList subqueryList,
-					Vector aggregateVector)
+					List aggregateVector)
 				throws StandardException
 	{
         boolean isIdentity = false; // Is this function the identity operator?

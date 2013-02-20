@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -39,7 +40,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 /**
  * A BinaryOperatorNode represents a built-in binary operator as defined by
@@ -281,7 +281,7 @@ public class BinaryOperatorNode extends OperatorNode
 
 	public ValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList, 

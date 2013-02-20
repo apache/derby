@@ -21,9 +21,9 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
 import org.apache.derby.iapi.types.TypeId;
@@ -33,19 +33,14 @@ import org.apache.derby.iapi.store.access.ScanController;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.sql.Types;
-
-import java.util.Vector;
 
 /**
  * This node is the superclass  for all unary comparison operators, such as is null
@@ -71,7 +66,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 
 	public ValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
 		bindOperand(fromList, subqueryList, 

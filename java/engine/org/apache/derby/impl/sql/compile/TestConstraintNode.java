@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -29,13 +30,10 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 /**
  * A TestConstraintNode is used to determine when a constraint
@@ -86,7 +84,7 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 
 	public ValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
 		bindOperand(fromList, subqueryList, aggregateVector);

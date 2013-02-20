@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -33,12 +34,12 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Vector;
 
 /**
  * A ValueNodeList represents a list of ValueNodes within a specific predicate 
@@ -75,7 +76,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 */
 	public void	bindExpression(FromList fromList, 
 							   SubqueryList subqueryList,
-							   Vector aggregateVector)
+							   List aggregateVector)
 			throws StandardException
 	{
 		int size = size();

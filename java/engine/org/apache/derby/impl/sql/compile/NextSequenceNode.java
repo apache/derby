@@ -25,14 +25,13 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
-import java.util.Vector;
 import java.sql.Types;
+import java.util.List;
 
 /**
  * A class that represents a value obtained from a Sequence using 'NEXT VALUE'
@@ -66,7 +65,7 @@ public class NextSequenceNode extends ValueNode {
      */
     public ValueNode bindExpression(
             FromList fromList, SubqueryList subqueryList,
-            Vector aggregateVector, boolean forQueryRewrite)
+            List aggregateVector, boolean forQueryRewrite)
             throws StandardException
     {
         //

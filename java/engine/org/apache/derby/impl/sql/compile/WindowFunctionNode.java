@@ -20,15 +20,13 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.reference.SQLState;
 
-import java.sql.Types;
-import java.util.Vector;
 
 
 /**
@@ -109,7 +107,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
     public ValueNode bindExpression(
             FromList fromList,
             SubqueryList subqueryList,
-            Vector  aggregateVector)
+            List aggregateVector)
         throws StandardException
     {
         if (window instanceof WindowReferenceNode) {

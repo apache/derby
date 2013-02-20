@@ -26,12 +26,10 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -45,7 +43,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import java.lang.reflect.Modifier;
 
 import java.sql.Types;
-import java.util.Vector;
+import java.util.List;
 /**
  * A TernaryOperatorNode represents a built-in ternary operators.
  * This covers  built-in functions like substr().
@@ -196,7 +194,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		receiver = receiver.bindExpression(fromList, subqueryList, 

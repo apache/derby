@@ -22,18 +22,10 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.Qualifier;
 
 
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -42,19 +34,13 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.types.JSQLType;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import org.apache.derby.catalog.AliasInfo;
 
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * A NonStaticMethodCallNode is really a node to represent a (static or non-static)
@@ -127,12 +113,9 @@ public class NonStaticMethodCallNode extends MethodCallNode
 
 	public JavaValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
-		boolean		nullParameter = false;
-		String[]	parmTypeNames;
-
 		/* NULL and ? not allowed as receivers */
 		if (receiver instanceof SQLToJavaValueNode)
 		{

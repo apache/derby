@@ -21,24 +21,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.lang.reflect.Modifier;
-
-import java.util.Vector;
 
 public class IsNode extends BinaryLogicalOperatorNode
 {
@@ -78,7 +69,7 @@ public class IsNode extends BinaryLogicalOperatorNode
 
 	public ValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
 		super.bindExpression(fromList, subqueryList, aggregateVector);

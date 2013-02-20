@@ -21,11 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -33,10 +32,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import java.util.Vector;
-import java.sql.Types;
 
 /**
  * This node is the superclass  for all binary comparison operators, such as =,
@@ -124,8 +119,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 */
 
 	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 			throws StandardException
 	{
 		super.bindExpression(fromList, subqueryList, aggregateVector);

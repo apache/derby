@@ -21,31 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.RefDataValue;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-
-import org.apache.derby.iapi.services.compiler.ClassBuilder;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.catalog.TypeDescriptor;
-
-import java.util.Vector;
 
 /**
  * The CurrentRowLocation operator is used by DELETE and UPDATE to get the
@@ -71,7 +61,7 @@ public class CurrentRowLocationNode extends ValueNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							Vector aggregateVector)
+							List aggregateVector)
 					throws StandardException
 	{
 		setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(TypeId.REF_NAME),

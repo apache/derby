@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -30,7 +31,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import java.util.Vector;
 /**
@@ -101,7 +101,8 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 * This does nothing-- the node is actually bound when
 	 * bindUntypedNullsToResultColumns is called.
 	 */
-	public ValueNode bindExpression(FromList fromList, SubqueryList	subqueryList, Vector aggregateVector)
+    public ValueNode bindExpression(
+        FromList fromList, SubqueryList	subqueryList, List aggregateVector)
 	{
 		return this;
 	}

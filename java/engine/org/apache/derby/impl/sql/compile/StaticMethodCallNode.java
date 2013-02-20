@@ -53,8 +53,8 @@ import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
-import java.util.Vector;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 /**
  * A StaticMethodCallNode represents a static method call from a Class
@@ -178,7 +178,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 	public JavaValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		// for a function we can get called recursively
@@ -500,7 +500,9 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * @param sd
 	 * @throws StandardException
 	 */
-	private void resolveRoutine(FromList fromList, SubqueryList subqueryList, Vector aggregateVector, SchemaDescriptor sd) throws StandardException {
+    private void resolveRoutine(FromList fromList, SubqueryList subqueryList,
+                                List aggregateVector, SchemaDescriptor sd)
+            throws StandardException {
 		if (sd.getUUID() != null) {
 
 		java.util.List list = getDataDictionary().getRoutineList(
@@ -677,7 +679,7 @@ public class StaticMethodCallNode extends MethodCallNode
         (
          FromList fromList,
          SubqueryList subqueryList,
-         Vector aggregateVector,
+         List aggregateVector,
          RoutineAliasInfo rai,
          int    parameterCount, // number of declared routine args
          DataTypeDescriptor paramdtd,   // declared type of routine arg

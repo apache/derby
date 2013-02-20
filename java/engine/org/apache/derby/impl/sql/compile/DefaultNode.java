@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -40,7 +41,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
-import java.util.Vector;
 
 /**
  * DefaultNode represents a column/parameter default.
@@ -149,7 +149,7 @@ public  class DefaultNode extends ValueNode
 	 * @exception StandardException		Thrown on failure
 	 */
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-			Vector	aggregateVector)
+			List aggregateVector)
 		throws StandardException
 	{
 		ColumnDescriptor	cd;

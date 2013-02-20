@@ -22,10 +22,9 @@ package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.sql.Types;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Class that represents a call to the ROW_NUMBER() window function.
@@ -59,7 +58,7 @@ public final class RowNumberFunctionNode extends WindowFunctionNode
     public ValueNode bindExpression(
                     FromList            fromList,
                     SubqueryList        subqueryList,
-                    Vector              aggregateVector)
+                    List                aggregateVector)
             throws StandardException
     {
         super.bindExpression(fromList, subqueryList, aggregateVector);

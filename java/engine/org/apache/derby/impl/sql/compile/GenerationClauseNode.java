@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import java.util.Vector;
 
 /**
  * This node describes a Generation Clause in a column definition.
@@ -96,7 +95,7 @@ public class GenerationClauseNode extends ValueNode
 	 * Binding the generation clause.
 	 */
 	public ValueNode bindExpression
-        ( FromList fromList, SubqueryList subqueryList, Vector	aggregateVector )
+        ( FromList fromList, SubqueryList subqueryList, List aggregateVector )
         throws StandardException
 	{
         _boundExpression = _generationExpression.bindExpression( fromList, subqueryList, aggregateVector );

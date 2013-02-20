@@ -21,7 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -704,7 +703,7 @@ public class ResultColumn extends ValueNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-					Vector	aggregateVector)
+					List aggregateVector)
 				throws StandardException
 	{
 		/*

@@ -21,40 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
+import java.util.List;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.jdbc.ConnectionContext;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.execute.BaseActivation;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.reference.ClassName;
 
-import java.sql.SQLException;
-import java.sql.Types;
-
-import java.util.Vector;
 
 /**
  * This node represents a unary getCurrentConnection operator
@@ -93,7 +78,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 
 	public JavaValueNode bindExpression(
 		FromList	fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
 		return this;

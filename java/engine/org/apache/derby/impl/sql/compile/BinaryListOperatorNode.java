@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -28,13 +29,11 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Vector;
 
 /**
  * A BinaryListOperatorNode represents a built-in "binary" operator with a single
@@ -136,8 +135,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 */
 
 	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 			throws StandardException
 	{
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList, aggregateVector);

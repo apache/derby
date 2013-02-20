@@ -38,7 +38,7 @@ import org.apache.derby.iapi.util.JBitSet;
 
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node represents coalesce/value function which returns the first argument that is not null.
@@ -136,7 +136,7 @@ public class CoalesceFunctionNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							Vector	aggregateVector)
+							List aggregateVector)
 					throws StandardException
 	{
 		//bind all the arguments

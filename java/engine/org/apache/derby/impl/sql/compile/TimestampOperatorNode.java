@@ -21,14 +21,11 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
@@ -37,7 +34,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * The TimestampOperatorNode class implements the timestamp( date, time) function.
@@ -78,8 +75,7 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 	 */
 
 	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 			throws StandardException
 	{
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList, 

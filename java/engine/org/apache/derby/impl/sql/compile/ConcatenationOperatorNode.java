@@ -39,7 +39,7 @@ import org.apache.derby.iapi.reference.ClassName;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node represents a concatenation comparison operator
@@ -97,7 +97,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 	 *                thrown on failure
 	 */
 	public ValueNode bindExpression(FromList fromList,
-			SubqueryList subqueryList, Vector aggregateVector)
+			SubqueryList subqueryList, List aggregateVector)
 			throws StandardException {
 		// deal with binding operands
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList,

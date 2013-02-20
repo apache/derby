@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -31,13 +32,9 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.iapi.util.ReuseFactory;
-
-import java.util.Vector;
 
 /**
  * ConstantNode holds literal constants as well as nulls.
@@ -175,7 +172,7 @@ abstract class ConstantNode extends ValueNode
 	 */
 	public ValueNode bindExpression(
 			FromList fromList, SubqueryList subqueryList,
-			Vector	aggregateVector)
+			List aggregateVector)
 	throws StandardException
 	{
 		/*

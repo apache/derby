@@ -28,18 +28,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.JSQLType;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.reference.ClassName;
@@ -49,7 +39,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node type converts a value in the SQL domain to a value in the Java
@@ -197,7 +187,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 
 	public JavaValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		/* Bind the expression under us */

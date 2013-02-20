@@ -21,18 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
@@ -43,7 +38,7 @@ import java.lang.reflect.Modifier;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node represents a unary DB2 compatible length operator
@@ -78,7 +73,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 
 	public ValueNode bindExpression(
 		FromList	fromList, SubqueryList subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException
 	{
         bindOperand( fromList, subqueryList, aggregateVector);

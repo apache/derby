@@ -62,7 +62,6 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 /**
  * A MethodCallNode represents a Java method call.  Method calls can be done
@@ -308,10 +307,9 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
 	final void bindParameters(
 		FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		/* Bind the parameters */

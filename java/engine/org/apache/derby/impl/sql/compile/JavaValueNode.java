@@ -25,19 +25,13 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import org.apache.derby.iapi.types.JSQLType;
 
@@ -55,7 +49,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This abstract node class represents a data value in the Java domain.
@@ -222,7 +216,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 	abstract JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							Vector aggregateVector) 
+							List aggregateVector)
 							throws StandardException;
 	/**
 	 * @see ValueNode#preprocess

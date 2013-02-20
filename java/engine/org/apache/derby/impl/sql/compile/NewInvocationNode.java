@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
-import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -34,26 +33,19 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
-import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -229,7 +221,7 @@ public class NewInvocationNode extends MethodCallNode
 
 	public JavaValueNode bindExpression(
 		FromList fromList, SubqueryList subqueryList,
-		Vector aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		bindParameters(fromList, subqueryList, aggregateVector);

@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -33,7 +32,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import java.lang.reflect.Modifier;
 
@@ -45,7 +43,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
      SpecialFunctionNode handles system SQL functions.
@@ -116,7 +114,7 @@ public class SpecialFunctionNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							Vector	aggregateVector)
+							List aggregateVector)
 					throws StandardException
 	{		DataTypeDescriptor dtd;
 		int nodeType = getNodeType();

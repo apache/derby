@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -45,15 +44,12 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import java.lang.reflect.Modifier;
 
-import java.util.Iterator;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
+import java.util.List;
 import org.apache.derby.impl.sql.execute.OnceResultSet;
 
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 /**
  * A SubqueryNode represents a subquery.  Subqueries return values to their
@@ -454,7 +450,7 @@ public class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-					Vector	aggregateVector)
+					List aggregateVector)
 				throws StandardException
 	{
 		ResultColumnList	resultColumns;

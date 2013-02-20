@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DateTimeDataValue;
@@ -38,7 +37,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * This node represents a unary extract operator, used to extract
@@ -84,7 +83,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 	public ValueNode bindExpression(
 		FromList		fromList, 
 		SubqueryList	subqueryList,
-		Vector	aggregateVector)
+		List aggregateVector)
 			throws StandardException 
 	{
 		int	operandType;

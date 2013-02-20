@@ -24,12 +24,9 @@ package org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -38,18 +35,15 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.iapi.types.Like;
 
 import java.sql.Types;
-import org.apache.derby.iapi.reference.ClassName;
+import java.util.List;
 
 import java.util.Vector;
 
@@ -150,7 +144,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     public ValueNode bindExpression(
     FromList        fromList, 
     SubqueryList    subqueryList,
-    Vector          aggregateVector) 
+    List            aggregateVector)
         throws StandardException
     {
         super.bindExpression(fromList, subqueryList, aggregateVector);

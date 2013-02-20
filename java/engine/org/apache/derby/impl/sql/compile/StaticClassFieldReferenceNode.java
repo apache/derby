@@ -21,7 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
@@ -29,14 +28,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -44,7 +41,7 @@ import org.apache.derby.iapi.util.JBitSet;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * A StaticClassFieldReferenceNode represents a Java static field reference from 
@@ -97,7 +94,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 */
 
 	public JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		Vector aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		ClassInspector classInspector = getClassFactory().getClassInspector();

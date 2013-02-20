@@ -31,7 +31,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeUtilities;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.reference.Limits;
 
@@ -47,12 +46,10 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import java.lang.reflect.Modifier;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.types.NumberDataType;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -60,7 +57,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.Types;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * An CastNode represents a cast expressionr.
@@ -199,7 +196,7 @@ public class CastNode extends ValueNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-									Vector aggregateVector)
+									List aggregateVector)
 				throws StandardException
 	{
 		castOperand = castOperand.bindExpression(

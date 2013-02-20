@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -28,12 +29,10 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.util.Vector;
 
 public final class CharConstantNode extends ConstantNode
 {
@@ -149,8 +148,7 @@ public final class CharConstantNode extends ConstantNode
 	}
 	
 	public ValueNode bindExpression(
-			FromList fromList, SubqueryList subqueryList,
-			Vector	aggregateVector)
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 	throws StandardException
 	{
 		//The DTD for this character constant should get its collation type

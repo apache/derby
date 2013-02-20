@@ -22,7 +22,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
@@ -34,18 +33,15 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Vector;
 
 /**
  * This node type converts a value from the Java domain to the SQL domain.
@@ -224,9 +220,8 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		Vector	aggregateVector) 
+		List aggregateVector)
 			throws StandardException
 	{
 		// method invocations are not allowed in ADD TABLE clauses.

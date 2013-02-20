@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 
@@ -29,7 +30,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -38,7 +38,6 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Vector;
 
 /**
  * A ColumnReference represents a column in the query tree.  The parser generates a
@@ -382,7 +381,7 @@ public class ColumnReference extends ValueNode
 	 */
 
 	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-			Vector aggregateVector) 
+			List aggregateVector)
 				throws StandardException
 	{
 		ResultColumn matchingRC;

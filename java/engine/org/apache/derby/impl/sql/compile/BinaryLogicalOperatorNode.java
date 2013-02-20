@@ -21,28 +21,18 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import java.lang.reflect.Modifier;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 {
@@ -83,8 +73,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 */
 
 	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		Vector aggregateVector)
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 			throws StandardException
 	{
 		//following is to check if we have something like "? AND 1=1" or "2>1 OR ?" 

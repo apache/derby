@@ -21,15 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
@@ -368,8 +366,7 @@ public abstract class ValueNode extends QueryTreeNode
 
 	
 	public ValueNode bindExpression(
-									FromList fromList, SubqueryList subqueryList,
-									Vector	aggregateVector)
+            FromList fromList, SubqueryList subqueryList, List aggregateVector)
 		throws StandardException
 	{
 		return bindExpression(fromList, subqueryList, aggregateVector,false);
@@ -392,7 +389,7 @@ public abstract class ValueNode extends QueryTreeNode
 
 	public ValueNode bindExpression(
 			FromList fromList, SubqueryList subqueryList,
-			Vector aggregateVector, boolean forQueryRewrite) 
+			List aggregateVector, boolean forQueryRewrite)
 				throws StandardException
 	{
 		/* There are a bizillion classes which extend ValueNode.  Here is info

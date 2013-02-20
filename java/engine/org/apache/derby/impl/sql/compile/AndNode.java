@@ -21,14 +21,12 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import java.util.List;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import java.util.Vector;
 
 public class AndNode extends BinaryLogicalOperatorNode
 {
@@ -61,8 +59,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 */
 
 	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		Vector aggregateVector)
+        FromList fromList, SubqueryList subqueryList, List aggregateVector)
 			throws StandardException
 	{
 		super.bindExpression(fromList, subqueryList, aggregateVector);
