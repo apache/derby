@@ -82,7 +82,8 @@ public interface Limits
 	public static final int DB2_DEFAULT_DECIMAL_SCALE       = 0;
 
     /**
-     * REAL/DOUBLE range limits
+     * REAL/DOUBLE range limits pre DERBY-3398. After that fix, they are
+     * only used in soft-upgrade scenarios with older databases.
      */
 
     static final float DB2_SMALLEST_REAL = -3.402E+38f;

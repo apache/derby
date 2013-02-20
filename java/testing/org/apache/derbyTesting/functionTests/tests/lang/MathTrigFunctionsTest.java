@@ -33,15 +33,20 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 	private static final boolean debugFlag = false;
 
-	private static final double SMALLEST_NEG_DERBY_DOUBLE = -1.79769E+308;
+   private static final double
+            PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE = -1.79769E+308;
 
-	private static final double SMALL_NEG_DOUBLE = -1.79768E+308;
+   private static final double
+            SMALL_NEG_DOUBLE = -1.79768E+308;
 
-	private static final double SMALLEST_POS_DERBY_DOUBLE = 2.225E-307;
+   private static final double
+            PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE = 2.225E-307;
 
-	private static final double LARGEST_POS_DERBY_DOUBLE = 1.79769E+308;
+   private static final double
+            PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE = 1.79769E+308;
 
-	private static final double LARGEST_NEG_DERBY_DOUBLE = -2.225E-307;
+   private static final double
+            PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE = -2.225E-307;
 
 	private static final double[] testRadians = { -0.000000001, -0.25,
 			0.000000001, 0.25, 0.5, 0.0, 1.0, 2.0, java.lang.StrictMath.PI,
@@ -51,19 +56,26 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 			0.25, -0.25, 0.5, 0.0, -0.0, 1.0, -1.0 };
 
 	private static final double[] logValues = { 0.000000001, 0.25, 0.5, 1.0,
-			45.0, 90.0, 135.0, 180.0, 270, SMALLEST_POS_DERBY_DOUBLE,
-			LARGEST_POS_DERBY_DOUBLE };
+           45.0, 90.0, 135.0, 180.0, 270, PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE,
+           PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE };
 
-	private static final double[] testValues = { SMALLEST_NEG_DERBY_DOUBLE,
-			SMALL_NEG_DOUBLE, SMALLEST_POS_DERBY_DOUBLE,
-			LARGEST_POS_DERBY_DOUBLE, LARGEST_NEG_DERBY_DOUBLE, 0.000000001,
+   private static final double[] testValues = {
+            PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE,
+            SMALL_NEG_DOUBLE,
+            PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE,
+            PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE,
+            PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE,
+            0.000000001,
 			-0.000000001, 0.25, -0.25, 0.5, 0.0, -0.0, 1.0, -1.0, 2.0, 3.0,
 			java.lang.StrictMath.PI, 2 * java.lang.StrictMath.PI, 4.0, 45.0,
 			90.0, 135.0, 180.0, 270 };
 
-	private static final double[] testValuesTwo = { SMALLEST_NEG_DERBY_DOUBLE,
-			SMALL_NEG_DOUBLE, SMALLEST_POS_DERBY_DOUBLE,
-			LARGEST_NEG_DERBY_DOUBLE, 0.000000001, -0.000000001, 0.25, -0.25,
+   private static final double[] testValuesTwo = {
+            PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE,
+           SMALL_NEG_DOUBLE,
+            PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE,
+           PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE,
+            0.000000001, -0.000000001, 0.25, -0.25,
 			0.5, 0.0, -0.0, 1.0, -1.0, 2.0, 3.0, java.lang.StrictMath.PI,
 			2 * java.lang.StrictMath.PI, 4.0, 45.0, 90.0, 135.0, 180.0, 270 };
 
@@ -477,9 +489,10 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
-			getValue(ps, SMALLEST_NEG_DERBY_DOUBLE);
+            // Yields -Infinity, so thould throw.
+            getValue(ps, PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
-					+ SMALLEST_NEG_DERBY_DOUBLE);
+                   + PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
 			// data type DOUBLE.";
@@ -488,9 +501,10 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			getValue(psFN, SMALLEST_NEG_DERBY_DOUBLE);
+            // Yields -Infinity, so thould throw.
+            getValue(psFN, PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
-					+ SMALLEST_NEG_DERBY_DOUBLE);
+                   + PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
 			// data type DOUBLE.";
@@ -503,6 +517,10 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
         psFN.close();
 	}
 
+    // 2.2250738585072014E-308 remove when we move to compile with source level
+    // Java 6. Cf Double.MIN_NORMAL.
+    final static double DOUBLE_MIN_NORMAL = 2.2250738585072014E-308; 
+    
 	/**
 	 * Tests the RADIANS function which converts a DOUBLE PRECISION number from
 	 * degrees to radians.
@@ -549,28 +567,26 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		}
 
-		try {
-			getValue(ps, SMALLEST_POS_DERBY_DOUBLE);
-			fail("RADIANS: Out of range test failed, input value is: "
-					+ SMALLEST_NEG_DERBY_DOUBLE);
-		} catch (SQLException sqlE) {
-			// "ERROR 22003: The resulting value is outside the range for the
-			// data type DOUBLE.";
-			assertSQLState(
-					SQLStateConstants.DATA_EXCEPTION_NUMERIC_VALUE_OUT_OF_RANGE,
-					sqlE);
-		}
-		try {
-			getValue(psFN, SMALLEST_POS_DERBY_DOUBLE);
-			fail("RADIANS: Out of range test failed, input value is: "
-					+ SMALLEST_NEG_DERBY_DOUBLE);
-		} catch (SQLException sqlE) {
-			// "ERROR 22003: The resulting value is outside the range for the
-			// data type DOUBLE.";
-			assertSQLState(
-					SQLStateConstants.DATA_EXCEPTION_NUMERIC_VALUE_OUT_OF_RANGE,
-					sqlE);
-		}
+        // Numbers below verified by using lava.lang.StrictMath.toRadians
+        // outside Derby context. First number: argument to ps and psFN, second
+        // number: expected result.
+        double[][] inOut = new double[][] {
+            {180.0d, java.lang.StrictMath.PI},
+            {PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE, -3.1375609430176863E306},
+            {DOUBLE_MIN_NORMAL, 3.8834864931005E-310},
+            {Double.MIN_VALUE, 0.0d},
+            {Double.MAX_VALUE, 3.1375664143845866E306},
+            {PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE, 3.88335758568738E-309},
+            {PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE, -3.88335758568738E-309},
+        };
+
+        for (int i=0; i < inOut.length; i++) {
+            double dv = getValue(ps, inOut[i][0]);
+            assertEquals(inOut[i][1], dv, 0.0d);
+            dv = getValue(psFN, inOut[i][0]);
+            assertEquals(inOut[i][1], dv, 0.0d);
+        }
+
         ps.close();
         psFN.close();
 	}
@@ -617,9 +633,9 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
-			getValue(ps, LARGEST_POS_DERBY_DOUBLE);
+            getValue(ps, PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
-					+ LARGEST_POS_DERBY_DOUBLE);
+                   + PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
 			// data type DOUBLE.";
@@ -628,9 +644,9 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			getValue(psFN, LARGEST_POS_DERBY_DOUBLE);
+            getValue(psFN, PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
-					+ LARGEST_POS_DERBY_DOUBLE);
+                   + PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
 			// data type DOUBLE.";

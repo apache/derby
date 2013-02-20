@@ -24,16 +24,14 @@ package org.apache.derby.iapi.types;
 import java.math.BigDecimal;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
-import org.apache.derby.iapi.types.*;
 
 /**
  * NumberDataType is the superclass for all exact and approximate 
@@ -54,6 +52,7 @@ public abstract class NumberDataType extends DataType
 	static final BigDecimal ONE = BigDecimal.valueOf(1L);
 	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
 	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
+
 
     /**
      * Numbers check for isNegative first and negate it if negative.
@@ -477,19 +476,30 @@ public abstract class NumberDataType extends DataType
 	}
 
 	/**
-       normalizeREAL checks the validity of the given java float that
-       it fits within the range of DB2 REALs. In addition it
-       normalizes the value, so that negative zero (-0.0) becomes positive.
-	*/
+      * normalizeREAL normalizes the value, so that negative zero (-0.0) becomes
+      * positive.
+      * @throws StandardException if the value is not a number (NaN) or is
+      * infinite.
+      */
     public static float normalizeREAL(float v) throws StandardException
 	{
-        if ( (Float.isNaN(v) || Float.isInfinite(v)) ||
-             ((v < Limits.DB2_SMALLEST_REAL) || (v > Limits.DB2_LARGEST_REAL)) ||
-             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_REAL)) ||
-             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_REAL)) )
-        {
-			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
+        boolean invalid = Float.isNaN(v) || Float.isInfinite(v);
+
+        if (v < Limits.DB2_SMALLEST_REAL ||
+            v > Limits.DB2_LARGEST_REAL ||
+            (v > 0 && v < Limits.DB2_SMALLEST_POSITIVE_REAL) ||
+            (v < 0 && v > Limits.DB2_LARGEST_NEGATIVE_REAL)) {
+
+            if (useDB2Limits()) {
+                invalid = true;
+            }
         }
+
+        if (invalid) {
+            throw StandardException.newException(
+                SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
+        }
+
         // Normalize negative floats to be "positive" (can't detect easily without using Float object because -0.0f = 0.0f)
         // DERBY-2447: It shouldn't matter whether we compare to 0.0f or -0.0f,
         // both should match negative zero, but comparing to 0.0f triggered
@@ -500,47 +510,76 @@ public abstract class NumberDataType extends DataType
 	}
 
 	/**
-       normalizeREAL checks the validity of the given java double that
-       it fits within the range of DB2 REALs. In addition it
-       normalizes the value, so that negative zero (-0.0) becomes positive.
-
-       The reason for having normalizeREAL with two signatures is to
-       avoid that normalizeREAL is called with a casted (float)doublevalue,
-       since this invokes an unwanted rounding (of underflow values to 0.0),
-       in contradiction to DB2s casting semantics.
-	*/
-    public static float normalizeREAL(double v) throws StandardException
+     * normalizeREAL normalizes the value, so that negative zero (-0.0)
+     * becomes positive.
+     * <p>
+     * The reason for having normalizeREAL with two signatures is to
+     * avoid that normalizeREAL is accidentally called with a casted
+     * {@code (float)<double value>} since this can introduce an undetected
+     * underflow values to 0.0f.
+     * @throws StandardException if the value is not a number (NaN) or is
+     * infinite or on underflow
+     * (the value has magnitude too small to be represented as a float).
+     */
+    public static float normalizeREAL(final double v) throws StandardException
     {
-        // can't just cast it to float and call normalizeFloat(float) since casting can round down to 0.0
-        if ( (Double.isNaN(v) || Double.isInfinite(v)) ||
-             ((v < Limits.DB2_SMALLEST_REAL) || (v > Limits.DB2_LARGEST_REAL)) ||
-             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_REAL)) ||
-             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_REAL)) )
-        {
-			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
+        // Can't just cast it to float and call normalizeFloat(float) since
+        // casting can round down to 0.0
+        float fv = (float)v;
+
+        boolean invalid =
+            Double.isNaN(v) ||
+            Double.isInfinite(v) ||
+            (fv == 0.0f && v != 0.0d); // too small to represent as REAL
+
+        if (v < Limits.DB2_SMALLEST_REAL ||
+            v > Limits.DB2_LARGEST_REAL ||
+            (v > 0 && v < Limits.DB2_SMALLEST_POSITIVE_REAL) ||
+            (v < 0 && v > Limits.DB2_LARGEST_NEGATIVE_REAL)) {
+
+            if (useDB2Limits()) {
+                invalid = true;
+            }
         }
+
+        if (invalid) {
+            throw StandardException.newException(
+                SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
+        }
+
         // Normalize negative floats to be "positive" (can't detect easily without using Float object because -0.0f = 0.0f)
         // DERBY-2447: It shouldn't matter whether we compare to 0.0d or -0.0d,
         // both should match negative zero, but comparing to 0.0d triggered
         // this JVM bug: http://bugs.sun.com/view_bug.do?bug_id=6833879
-        if (v == -0.0d) v = 0.0d;
+        if (fv == -0.0f) {
+            fv = 0.0f;
+        }
 
-        return (float)v;
+        return fv;
     }
 
 	/**
-       normalizeDOUBLE checks the validity of the given java double that
-       it fits within the range of DB2 DOUBLEs. In addition it
-       normalizes the value, so that negative zero (-0.0) becomes positive.
-	*/
+     * normalizeDOUBLE normalizes the value, so that negative zero (-0.0)
+     * becomes positive.
+     * @throws StandardException if v is not a number (NaN) or is infinite.
+     */
     public static double normalizeDOUBLE(double v) throws StandardException
 	{
-        if ( (Double.isNaN(v) || Double.isInfinite(v)) ||
-             ((v < Limits.DB2_SMALLEST_DOUBLE) || (v > Limits.DB2_LARGEST_DOUBLE)) ||
-             ((v > 0) && (v < Limits.DB2_SMALLEST_POSITIVE_DOUBLE)) ||
-             ((v < 0) && (v > Limits.DB2_LARGEST_NEGATIVE_DOUBLE)) )
-        {
-			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.DOUBLE_NAME);
+        boolean invalid = Double.isNaN(v) || Double.isInfinite(v);
+
+        if (v < Limits.DB2_SMALLEST_DOUBLE ||
+            v > Limits.DB2_LARGEST_DOUBLE ||
+            (v > 0 && v < Limits.DB2_SMALLEST_POSITIVE_DOUBLE) ||
+            (v < 0 && v > Limits.DB2_LARGEST_NEGATIVE_DOUBLE)) {
+
+            if (useDB2Limits()) {
+                invalid = true;
+            }
+        }
+
+        if (invalid) {
+            throw StandardException.newException(
+                SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.DOUBLE_NAME);
         }
         // Normalize negative doubles to be "positive" (can't detect easily without using Double object because -0.0f = 0.0f)
         // DERBY-2447: It shouldn't matter whether we compare to 0.0d or -0.0d,
@@ -552,5 +591,24 @@ public abstract class NumberDataType extends DataType
 	}
 
 
+   /**
+     * Controls use of old DB2 limits (DERBY-3398).
+     * @returns false if dictionary is new enough, see DD_Version.
+     */
+     private static boolean useDB2Limits() throws StandardException {
+         LanguageConnectionContext lcc =
+             (LanguageConnectionContext)ContextService.getContextOrNull(
+                 LanguageConnectionContext.CONTEXT_ID);
+         if (lcc != null) {
+             return !lcc.getDataDictionary().checkVersion(
+                     DataDictionary.DD_VERSION_DERBY_10_10, null);
+         } else {
+             // In PreparedStatement#setXXX and ResultSet#updateXXX contexts we
+             // do not have LanguageConnectionContext so check is deferred to
+             // the PreparedStatement execute time or ResultSet#updateRow time
+             // as the case may be.
+             return false;
+         }
+    }
 }
 

@@ -237,7 +237,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals(5, rsmd.getScale(4));
         // COLUMN 5 REAL
         assertEquals("java.lang.Float", rsmd.getColumnClassName(5));
-        assertEquals(13, rsmd.getColumnDisplaySize(5));
+        assertEquals(15, rsmd.getColumnDisplaySize(5));
         assertEquals("REALCOL", rsmd.getColumnLabel(5));
         assertEquals(java.sql.Types.REAL,rsmd.getColumnType(5));
         assertEquals("REAL", rsmd.getColumnTypeName(5));
@@ -246,7 +246,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN 6 DOUBLE
         assertEquals("java.lang.Double", rsmd.getColumnClassName(6));
-        assertEquals(22, rsmd.getColumnDisplaySize(6));
+        assertEquals(24, rsmd.getColumnDisplaySize(6));
         assertEquals("DOUBLECOL", rsmd.getColumnLabel(6));
         assertEquals(java.sql.Types.DOUBLE,rsmd.getColumnType(6));
         assertEquals("DOUBLE", rsmd.getColumnTypeName(6));

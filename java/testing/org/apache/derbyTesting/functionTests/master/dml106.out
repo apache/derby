@@ -256,9 +256,9 @@ ij> -- PASS:0611 If 1 row is inserted?
 
    SELECT SECOND( FIPS2)
   * 1000000 - 999990 FROM TSFIPS;
-1                     
-----------------------
-9.0                   
+1                       
+------------------------
+9.0                     
 ij> -- PASS:0611 If 1 row selected and value is 9?
 
 --0   SELECT YEAR( FIPS3),

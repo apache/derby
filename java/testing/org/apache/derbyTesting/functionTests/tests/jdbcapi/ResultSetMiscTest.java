@@ -125,7 +125,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(3));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(3));
         assertTrue(met.isSigned(3));
-        assertEquals(13, met.getColumnDisplaySize(3));
+        assertEquals(15, met.getColumnDisplaySize(3));
         assertEquals("R", met.getColumnLabel(3));
         assertEquals("R", met.getColumnName(3));
         // beetle 5323
@@ -150,7 +150,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(4));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(4));
         assertTrue(met.isSigned(4));
-        assertEquals(22, met.getColumnDisplaySize(4));
+        assertEquals(24, met.getColumnDisplaySize(4));
         assertEquals("D", met.getColumnLabel(4));
         assertEquals("D", met.getColumnName(4));
         // beetle 5323

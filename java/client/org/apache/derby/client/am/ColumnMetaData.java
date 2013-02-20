@@ -291,10 +291,10 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.BIGINT:
                 return 20;
             case Types.REAL:
-                return 13;
+                return 15;
             case Types.DOUBLE:
             case java.sql.Types.FLOAT:
-                return 22;
+                return 24;
             case Types.DECIMAL:
             case java.sql.Types.NUMERIC:
         // There are 3 possible cases with respect to finding the correct max width for DECIMAL type.

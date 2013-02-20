@@ -287,9 +287,9 @@ ij> values (cast (1.1 as bigint));
 --------------------
 1                   
 ij> values (cast (1.1 as double precision));
-1                     
-----------------------
-1.1                   
+1                       
+------------------------
+1.1                     
 ij> values (cast (1.1 as numeric(2,1)));
 1   
 ----
@@ -307,13 +307,13 @@ ij> values (cast (1.1 as decimal(2,0)));
 ---
 1  
 ij> values (cast (1.1 as float));
-1                     
-----------------------
-1.1                   
+1                       
+------------------------
+1.1                     
 ij> values (cast (1.1 as real));
-1            
--------------
-1.1          
+1              
+---------------
+1.1            
 ij> values (cast (1.9 as int));
 1          
 -----------
@@ -327,9 +327,9 @@ ij> values (cast (1.9 as bigint));
 --------------------
 1                   
 ij> values (cast (1.9 as double precision));
-1                     
-----------------------
-1.9                   
+1                       
+------------------------
+1.9                     
 ij> values (cast (1.9 as numeric(2,1)));
 1   
 ----
@@ -347,13 +347,13 @@ ij> values (cast (1.9 as decimal(2,0)));
 ---
 1  
 ij> values (cast (1.9 as float));
-1                     
-----------------------
-1.9                   
+1                       
+------------------------
+1.9                     
 ij> values (cast (1.9 as real));
-1            
--------------
-1.9          
+1              
+---------------
+1.9            
 ij> -- bug 4352,4358 loss of precision on casts
 --   9223372036854775807 is Long::MAX_VALUE
 values (
@@ -883,15 +883,15 @@ ij> select cast(v as char varying(10)) from tab1;
 varchar   
 NULL      
 ij> select cast(d as double precision) from tab1;
-1                     
-----------------------
-1.1                   
-NULL                  
+1                       
+------------------------
+1.1                     
+NULL                    
 ij> select cast(r as float) from tab1;
-1                     
-----------------------
-1.100000023841858     
-NULL                  
+1                       
+------------------------
+1.100000023841858       
+NULL                    
 ij> select cast(dt as date) from tab1;
 1         
 ----------
@@ -936,15 +936,15 @@ NULL
 ij> select cast(i as char varying(10)) from tab1;
 ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
 ij> select cast(i as double precision) from tab1;
-1                     
-----------------------
-1.0                   
-NULL                  
+1                       
+------------------------
+1.0                     
+NULL                    
 ij> select cast(i as float) from tab1;
-1                     
-----------------------
-1.0                   
-NULL                  
+1                       
+------------------------
+1.0                     
+NULL                    
 ij> select cast(i as date) from tab1;
 ERROR 42846: Cannot convert types 'INTEGER' to 'DATE'.
 ij> select cast(i as time) from tab1;
@@ -1095,22 +1095,22 @@ ij> insert into t1 (lvc) values cast(null as long varchar);
 1 row inserted/updated/deleted
 ij> -- expect 10 rows of nulls
 select * from t1;
-BT  |BTV |C                             |D                     |I          |R            |S     |DC                 |NUM                |DT        |T       |TS                           |V                             |LVC                                                                                                                             
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+BT  |BTV |C                             |D                       |I          |R              |S     |DC                 |NUM                |DT        |T       |TS                           |V                             |LVC                                                                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
 ij> -- make sure casting works correctly on nulls
 select cast (bt as char(1) for bit data) from t1;
 1   
@@ -1164,39 +1164,39 @@ NULL
 NULL                          
 NULL                          
 ij> select cast (d as double precision) from t1;
-1                     
-----------------------
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
-NULL                  
+1                       
+------------------------
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
+NULL                    
 ij> select cast (r as real) from t1;
-1            
--------------
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
-NULL         
+1              
+---------------
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
+NULL           
 ij> select cast (s as smallint) from t1;
 1     
 ------
@@ -1381,21 +1381,21 @@ ij> execute q15 using 'values char(654321)';
 ij> execute q16 using 'values char(987654)';
 1 row inserted/updated/deleted
 ij> select * from t1;
-BT  |BTV |C                             |D                     |I          |R            |S     |DC                 |NUM                |DT        |T       |TS                           |V                             |LVC                                                                                                                             
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-aa  |NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|aa  |NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|123456                        |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |123456.78             |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |4321       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |12321 |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |123456             |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |123456             |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |9876-05-04|NULL    |NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |01:02:34|NULL                         |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |9876-05-04 01:02:34.0        |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |654321                        |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |987654                                                                                                                          
+BT  |BTV |C                             |D                       |I          |R              |S     |DC                 |NUM                |DT        |T       |TS                           |V                             |LVC                                                                                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+aa  |NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|aa  |NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|123456                        |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |123456.78               |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |4321       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |12321 |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |123456             |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |123456             |NULL               |NULL      |NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |9876-05-04|NULL    |NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |01:02:34|NULL                         |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |9876-05-04 01:02:34.0        |NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |654321                        |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                    |NULL       |NULL           |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                         |NULL                          |987654                                                                                                                          
 ij> -- clean up t1
 delete from t1;
 13 rows inserted/updated/deleted
@@ -1685,12 +1685,12 @@ ij> select cast (aliasinfo as BIGINT) from sys.sysaliases;
 --------------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BIGINT'.
 ij> select cast (aliasinfo as REAL) from sys.sysaliases;
-1            
--------------
+1              
+---------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'REAL'.
 ij> select cast (aliasinfo as DOUBLE) from sys.sysaliases;
-1                     
-----------------------
+1                       
+------------------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'DOUBLE'.
 ij> select cast (aliasinfo as DECIMAL(5,4)) from sys.sysaliases;
 1      

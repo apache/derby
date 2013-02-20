@@ -59,9 +59,9 @@ ij> -- PASS:0436 If INTTEST is NULL (Implementor defined print format)?
 
     SELECT REALTEST 
       FROM GG;
-REALTEST     
--------------
-NULL         
+REALTEST       
+---------------
+NULL           
 ij> -- PASS:0436 If REALTEST is NULL (Implementor defined print format)?
 
 
@@ -69,9 +69,9 @@ ij> -- PASS:0436 If REALTEST is NULL (Implementor defined print format)?
     SELECT *
       FROM GG 
       WHERE REALTEST IS NULL;
-REALTEST     
--------------
-NULL         
+REALTEST       
+---------------
+NULL           
 ij> -- PASS:0436 If count = 1?
 
 
@@ -85,9 +85,9 @@ ij> -- PASS:0436 If SMALLTEST is NULL (Implementor defined print format)?
 
     SELECT DOUBLETEST 
       FROM II;
-DOUBLETEST            
-----------------------
-NULL                  
+DOUBLETEST              
+------------------------
+NULL                    
 ij> -- PASS:0436 If DOUBLETEST is NULL (Implementor defined print format)?
 
 
@@ -95,17 +95,17 @@ ij> -- PASS:0436 If DOUBLETEST is NULL (Implementor defined print format)?
     SELECT * 
       FROM II 
       WHERE DOUBLETEST IS NULL;
-DOUBLETEST            
-----------------------
-NULL                  
+DOUBLETEST              
+------------------------
+NULL                    
 ij> -- PASS:0436 If count = 1?
 
 
     SELECT FLOATTEST 
       FROM JJ;
-FLOATTEST             
-----------------------
-NULL                  
+FLOATTEST               
+------------------------
+NULL                    
 ij> -- PASS:0436 If FLOATTEST is NULL (Implementor defined print format)?
 
 
@@ -113,9 +113,9 @@ ij> -- PASS:0436 If FLOATTEST is NULL (Implementor defined print format)?
     SELECT * 
       FROM JJ 
       WHERE FLOATTEST IS NULL;
-FLOATTEST             
-----------------------
-NULL                  
+FLOATTEST               
+------------------------
+NULL                    
 ij> -- PASS:0436 If count = 1?
 
 

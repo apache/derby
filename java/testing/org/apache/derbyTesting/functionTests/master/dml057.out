@@ -33,18 +33,18 @@ ij> -- PASS:0248 If 1 row is inserted?
 
      SELECT FLOATTEST
           FROM JJ;
-FLOATTEST             
-----------------------
-0.1048575             
+FLOATTEST               
+------------------------
+0.1048575               
 ij> -- PASS:0248 If FLOATTEST = 0.1048575 ?
 -- PASS:0248 OR  is between 0.1048574 and 0.1048576 ?
 
 --O     SELECT COUNT(*) FROM JJ
      SELECT * FROM JJ
        WHERE FLOATTEST > 0.1048574 AND FLOATTEST < 0.1048576;
-FLOATTEST             
-----------------------
-0.1048575             
+FLOATTEST               
+------------------------
+0.1048575               
 ij> -- PASS:0248 If count = 1?
 
      DELETE FROM JJ;
@@ -59,18 +59,18 @@ ij> -- PASS:0248 If 1 row is inserted?
 
      SELECT FLOATTEST
           FROM JJ;
-FLOATTEST             
-----------------------
--0.1048575            
+FLOATTEST               
+------------------------
+-0.1048575              
 ij> -- PASS:0248 If FLOATTEST = -0.1048575 ?
 -- PASS:0248 OR  is between -0.1048576 and -0.1048574 ?
 
 --O     SELECT COUNT(*) FROM JJ
      SELECT * FROM JJ
        WHERE FLOATTEST > -0.1048576 AND FLOATTEST < -0.1048574;
-FLOATTEST             
-----------------------
--0.1048575            
+FLOATTEST               
+------------------------
+-0.1048575              
 ij> -- PASS:0248 If count = 1?
 
 -- restore
@@ -95,18 +95,18 @@ ij> -- PASS:0249 If 1 row is inserted?
 
      SELECT REALTEST
           FROM GG;
-REALTEST     
--------------
-0.1048575    
+REALTEST       
+---------------
+0.1048575      
 ij> -- PASS:0249 If REALTEST =  0.1048575 ?
 -- PASS:0249 OR  is between 0.1048574 and 0.1048576 ?
 
 --O     SELECT COUNT(*) FROM GG
      SELECT * FROM GG
        WHERE REALTEST > 0.1048574 AND REALTEST < 0.1048576;
-REALTEST     
--------------
-0.1048575    
+REALTEST       
+---------------
+0.1048575      
 ij> -- PASS:0249 If count = 1?
 
      DELETE FROM GG;
@@ -121,18 +121,18 @@ ij> -- PASS:0249 If 1 row is inserted?
 
      SELECT REALTEST
           FROM GG;
-REALTEST     
--------------
--0.1048575   
+REALTEST       
+---------------
+-0.1048575     
 ij> -- PASS:0249 If REALTEST =  -0.1048575 ?
 -- PASS:0249 OR  is between -0.1048576 and -0.1048574 ?
 
 --O     SELECT COUNT(*) FROM GG
      SELECT * FROM GG
        WHERE REALTEST > -0.1048576 AND REALTEST < -0.1048574;
-REALTEST     
--------------
--0.1048575   
+REALTEST       
+---------------
+-0.1048575     
 ij> -- PASS:0249 If count = 1?
 
 -- restore
@@ -157,18 +157,18 @@ ij> -- PASS:0250 If 1 row is inserted?
 
      SELECT DOUBLETEST
           FROM II;
-DOUBLETEST            
-----------------------
-0.1073741823          
+DOUBLETEST              
+------------------------
+0.1073741823            
 ij> -- PASS:0250 If DOUBLETEST = 0.1073741823 ?
 -- PASS:0250 OR  is between  0.1073741822 and 0.1073741824 ?
 
 --O     SELECT COUNT(*) FROM II
      SELECT * FROM II
        WHERE DOUBLETEST > 0.1073741822 AND DOUBLETEST < 0.1073741824;
-DOUBLETEST            
-----------------------
-0.1073741823          
+DOUBLETEST              
+------------------------
+0.1073741823            
 ij> -- PASS:0250 If count = 1?
 
      DELETE FROM II;
@@ -183,18 +183,18 @@ ij> -- PASS:0250 If 1 row is inserted?
 
      SELECT DOUBLETEST
           FROM II;
-DOUBLETEST            
-----------------------
--0.1073741823         
+DOUBLETEST              
+------------------------
+-0.1073741823           
 ij> -- PASS:0250 If DOUBLETEST = -0.1073741823 ?
 -- PASS:0250 OR  is between  -0.1073741824 and -0.1073741822 ?
 
 --O     SELECT COUNT(*) FROM II
      SELECT * FROM II
        WHERE DOUBLETEST > -0.1073741824 AND DOUBLETEST < -0.1073741822;
-DOUBLETEST            
-----------------------
--0.1073741823         
+DOUBLETEST              
+------------------------
+-0.1073741823           
 ij> -- PASS:0250 If count = 1?
 
 -- restore 

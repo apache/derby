@@ -89,13 +89,13 @@ ij> values cast (1.1 as smallint);
 ------
 1     
 ij> values cast (1.1 as real);
-1            
--------------
-1.1          
+1              
+---------------
+1.1            
 ij> values cast (1.1 as float);
-1                     
-----------------------
-1.1                   
+1                       
+------------------------
+1.1                     
 ij> values cast (1.1 as char(10));
 1         
 ----------
@@ -150,22 +150,22 @@ ij> select cast(d as bigint) from tmp;
 --------------------
 ERROR 22003: The resulting value is outside the range for the data type BIGINT.
 ij> select cast(d as float) from tmp;
-1                     
-----------------------
-1.0E29                
+1                       
+------------------------
+1.0E29                  
 ij> select cast(d as real) from tmp;
-1            
--------------
-1.0E29       
+1              
+---------------
+1.0E29         
 ij> select cast(d as double precision) from tmp;
-1                     
-----------------------
-1.0E29                
+1                       
+------------------------
+1.0E29                  
 ij> -- test alternative syntax
 select cast(d as double) from tmp;
-1                     
-----------------------
-1.0E29                
+1                       
+------------------------
+1.0E29                  
 ij> insert into tmp values (+1.79769E+308);
 ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(31,0).
 ij> select * from tmp;
@@ -396,20 +396,20 @@ ij> select cast(d as bigint) from tmp;
 1                   
 1                   
 ij> select cast(d as float) from tmp;
-1                     
-----------------------
-1.0                   
-1.0                   
+1                       
+------------------------
+1.0                     
+1.0                     
 ij> select cast(d as real) from tmp;
-1            
--------------
-1.0          
-1.0          
+1              
+---------------
+1.0            
+1.0            
 ij> select cast(d as double precision) from tmp;
-1                     
-----------------------
-1.0                   
-1.0                   
+1                       
+------------------------
+1.0                     
+1.0                     
 ij> select cast(d as dec(10,2)) from tmp;
 1           
 ------------
@@ -465,48 +465,48 @@ NULL
 -10.00      
 0.00        
 ij> select dc + i, dc + s, dc + r, dc + dc from t;
-1               |2             |3            |4             
-------------------------------------------------------------
-NULL            |NULL          |NULL         |NULL          
-20.00           |20.00         |20.0         |20.00         
--20.00          |-20.00        |-20.0        |-20.00        
-0.00            |0.00          |0.0          |0.00          
+1               |2             |3              |4             
+--------------------------------------------------------------
+NULL            |NULL          |NULL           |NULL          
+20.00           |20.00         |20.0           |20.00         
+-20.00          |-20.00        |-20.0          |-20.00        
+0.00            |0.00          |0.0            |0.00          
 ij> select dc - i, dc - s, dc - r, dc - dc from t;
-1               |2             |3            |4             
-------------------------------------------------------------
-NULL            |NULL          |NULL         |NULL          
-0.00            |0.00          |0.0          |0.00          
-0.00            |0.00          |0.0          |0.00          
-0.00            |0.00          |0.0          |0.00          
+1               |2             |3              |4             
+--------------------------------------------------------------
+NULL            |NULL          |NULL           |NULL          
+0.00            |0.00          |0.0            |0.00          
+0.00            |0.00          |0.0            |0.00          
+0.00            |0.00          |0.0            |0.00          
 ij> select dc * i, dc * s, dc * r, dc * dc from t;
-1                      |2                 |3            |4                      
---------------------------------------------------------------------------------
-NULL                   |NULL              |NULL         |NULL                   
-100.00                 |100.00            |100.0        |100.0000               
-100.00                 |100.00            |100.0        |100.0000               
-0.00                   |0.00              |0.0          |0.0000                 
+1                      |2                 |3              |4                      
+----------------------------------------------------------------------------------
+NULL                   |NULL              |NULL           |NULL                   
+100.00                 |100.00            |100.0          |100.0000               
+100.00                 |100.00            |100.0          |100.0000               
+0.00                   |0.00              |0.0            |0.0000                 
 ij> select dc / i, dc / s, dc / r, dc / dc from t;
-1                                 |2                                 |3            |4                                 
-----------------------------------------------------------------------------------------------------------------------
-NULL                              |NULL                              |NULL         |NULL                              
-1.00000000000000000000000         |1.00000000000000000000000         |1.0          |1.000000000000000000000           
-1.00000000000000000000000         |1.00000000000000000000000         |1.0          |1.000000000000000000000           
+1                                 |2                                 |3              |4                                 
+------------------------------------------------------------------------------------------------------------------------
+NULL                              |NULL                              |NULL           |NULL                              
+1.00000000000000000000000         |1.00000000000000000000000         |1.0            |1.000000000000000000000           
+1.00000000000000000000000         |1.00000000000000000000000         |1.0            |1.000000000000000000000           
 ERROR 22012: Attempt to divide by zero.
 ij> -- try unary minus, plus
 select -(dc * 100 / 100e0 ), +(dc * 100e0 / 100 ) from t;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
--10.0                 |10.0                  
-10.0                  |-10.0                 
-0.0                   |0.0                   
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+-10.0                   |10.0                    
+10.0                    |-10.0                   
+0.0                     |0.0                     
 ij> -- test null/null, constant/null, null/constant
 select dc, i / dc, 10 / dc, dc / 10e0 from t;
-DC          |2                                 |3                                 |4                     
----------------------------------------------------------------------------------------------------------
-NULL        |NULL                              |NULL                              |NULL                  
-10.00       |1.0000000000000000000             |1.0000000000000000000             |1.0                   
--10.00      |1.0000000000000000000             |-1.0000000000000000000            |-1.0                  
+DC          |2                                 |3                                 |4                       
+-----------------------------------------------------------------------------------------------------------
+NULL        |NULL                              |NULL                              |NULL                    
+10.00       |1.0000000000000000000             |1.0000000000000000000             |1.0                     
+-10.00      |1.0000000000000000000             |-1.0000000000000000000            |-1.0                    
 ERROR 22012: Attempt to divide by zero.
 ij> -- test for divide by 0
 select dc / i from t;
@@ -517,12 +517,12 @@ NULL
 1.00000000000000000000000         
 ERROR 22012: Attempt to divide by zero.
 ij> select 20e0 / 5e0 / 4e0, 20e0 / 4e0 / 5 from t;
-1                     |2                     
----------------------------------------------
-1.0                   |1.0                   
-1.0                   |1.0                   
-1.0                   |1.0                   
-1.0                   |1.0                   
+1                       |2                       
+-------------------------------------------------
+1.0                     |1.0                     
+1.0                     |1.0                     
+1.0                     |1.0                     
+1.0                     |1.0                     
 ij> -- test positive/negative, negative/positive and negative/negative
 select dc, dc / -dc, (-dc) / dc, (-dc) / -dc from t;
 DC          |2                                 |3                                 |4                                 
@@ -533,12 +533,12 @@ NULL        |NULL                              |NULL                            
 ERROR 22012: Attempt to divide by zero.
 ij> -- test some "more complex" expressions
 select dc, dc + 10e0, dc - (10 - 20e0), dc - 10, dc - (20 - 10) from t;
-DC          |2                     |3                     |4               |5               
---------------------------------------------------------------------------------------------
-NULL        |NULL                  |NULL                  |NULL            |NULL            
-10.00       |20.0                  |20.0                  |0.00            |0.00            
--10.00      |0.0                   |0.0                   |-20.00          |-20.00          
-0.00        |10.0                  |10.0                  |-10.00          |-10.00          
+DC          |2                       |3                       |4               |5               
+------------------------------------------------------------------------------------------------
+NULL        |NULL                    |NULL                    |NULL            |NULL            
+10.00       |20.0                    |20.0                    |0.00            |0.00            
+-10.00      |0.0                     |0.0                     |-20.00          |-20.00          
+0.00        |10.0                    |10.0                    |-10.00          |-10.00          
 ij> -- make sure we get the right scale/precision during arithmetic
 values (9.0 + 9.0);
 1     
@@ -1152,91 +1152,91 @@ ij> insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0);
 ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0);
 1 row inserted/updated/deleted
 ij> select d + d, i + d, s + d from t;
-1                     |2                     |3                     
---------------------------------------------------------------------
-NULL                  |NULL                  |NULL                  
-400.0                 |200.0                 |300.0                 
--400.0                |-201.0                |-300.0                
+1                       |2                       |3                       
+--------------------------------------------------------------------------
+NULL                    |NULL                    |NULL                    
+400.0                   |200.0                   |300.0                   
+-400.0                  |-201.0                  |-300.0                  
 ij> select d + d + d, d + 100 + 432e0 from t;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-600.0                 |732.0                 
--600.0                |332.0                 
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+600.0                   |732.0                   
+-600.0                  |332.0                   
 ij> select d - i, i - d, d - s, s - d from t;
-1                     |2                     |3                     |4                     
--------------------------------------------------------------------------------------------
-NULL                  |NULL                  |NULL                  |NULL                  
-200.0                 |-200.0                |100.0                 |-100.0                
--199.0                |199.0                 |-100.0                |100.0                 
+1                       |2                       |3                       |4                       
+---------------------------------------------------------------------------------------------------
+NULL                    |NULL                    |NULL                    |NULL                    
+200.0                   |-200.0                  |100.0                   |-100.0                  
+-199.0                  |199.0                   |-100.0                  |100.0                   
 ij> select d - d - d, d - 100 - 432e0 from t;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
--200.0                |-332.0                
-200.0                 |-732.0                
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+-200.0                  |-332.0                  
+200.0                   |-732.0                  
 ij> select i, d, i * d, d * i, d * d, d * 2, d * 2.0e0 from t;
-I          |D                     |3                     |4                     |5                     |6                     |7                     
------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL                  |NULL                  |NULL                  |NULL                  |NULL                  
-0          |200.0                 |0.0                   |0.0                   |40000.0               |400.0                 |400.0                 
--1         |-200.0                |200.0                 |200.0                 |40000.0               |-400.0                |-400.0                
+I          |D                       |3                       |4                       |5                       |6                       |7                       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                    |NULL                    |NULL                    |NULL                    |NULL                    |NULL                    
+0          |200.0                   |0.0                     |0.0                     |40000.0                 |400.0                   |400.0                   
+-1         |-200.0                  |200.0                   |200.0                   |40000.0                 |-400.0                  |-400.0                  
 ij> -- try unary minus, plus
 select -(d * 100 / 100e0 ), +(d * 100e0 / 100 ) from t;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
--200.0                |200.0                 
-200.0                 |-200.0                
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+-200.0                  |200.0                   
+200.0                   |-200.0                  
 ij> -- test null/null, constant/null, null/constant
 -- Cast to decimal to remove a minor diff among
 -- vms, where 0.005 converted to a String would be
 -- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
 select i, d, CAST (i / d AS DECIMAL(6,5)), 10 / d, d / 10e0 from t;
-I          |D                     |3       |4                     |5                     
------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL    |NULL                  |NULL                  
-0          |200.0                 |0.00000 |0.05                  |20.0                  
--1         |-200.0                |0.00500 |-0.05                 |-20.0                 
+I          |D                       |3       |4                       |5                       
+-----------------------------------------------------------------------------------------------
+NULL       |NULL                    |NULL    |NULL                    |NULL                    
+0          |200.0                   |0.00000 |0.05                    |20.0                    
+-1         |-200.0                  |0.00500 |-0.05                   |-20.0                   
 ij> -- test for divide by 0
 select d / i from t;
-1                     
-----------------------
-NULL                  
+1                       
+------------------------
+NULL                    
 ERROR 22012: Attempt to divide by zero.
 ij> select 20e0 / 5e0 / 4e0, 20e0 / 4e0 / 5 from t;
-1                     |2                     
----------------------------------------------
-1.0                   |1.0                   
-1.0                   |1.0                   
-1.0                   |1.0                   
+1                       |2                       
+-------------------------------------------------
+1.0                     |1.0                     
+1.0                     |1.0                     
+1.0                     |1.0                     
 ij> -- test positive/negative, negative/positive and negative/negative
 select d, d / -d, (-d) / d, (-d) / -d from t;
-D                     |2                     |3                     |4                     
--------------------------------------------------------------------------------------------
-NULL                  |NULL                  |NULL                  |NULL                  
-200.0                 |-1.0                  |-1.0                  |1.0                   
--200.0                |-1.0                  |-1.0                  |1.0                   
+D                       |2                       |3                       |4                       
+---------------------------------------------------------------------------------------------------
+NULL                    |NULL                    |NULL                    |NULL                    
+200.0                   |-1.0                    |-1.0                    |1.0                     
+-200.0                  |-1.0                    |-1.0                    |1.0                     
 ij> -- test some "more complex" expressions
 select d, d + 10e0, d - (10 - 20e0), d - 10, d - (20 - 10) from t;
-D                     |2                     |3                     |4                     |5                     
-------------------------------------------------------------------------------------------------------------------
-NULL                  |NULL                  |NULL                  |NULL                  |NULL                  
-200.0                 |210.0                 |210.0                 |190.0                 |190.0                 
--200.0                |-190.0                |-190.0                |-210.0                |-210.0                
+D                       |2                       |3                       |4                       |5                       
+----------------------------------------------------------------------------------------------------------------------------
+NULL                    |NULL                    |NULL                    |NULL                    |NULL                    
+200.0                   |210.0                   |210.0                   |190.0                   |190.0                   
+-200.0                  |-190.0                  |-190.0                  |-210.0                  |-210.0                  
 ij> -- show that decimals will go into doubles:
 select d+1.1 from t;
-1                     
-----------------------
-NULL                  
-201.1                 
--198.9                
+1                       
+------------------------
+NULL                    
+201.1                   
+-198.9                  
 ij> insert into t (d) values(1.1);
 1 row inserted/updated/deleted
 ij> select d from t where d=1.1;
-D                     
-----------------------
-1.1                   
+D                       
+------------------------
+1.1                     
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- test overflow
@@ -1250,11 +1250,11 @@ ij> insert into s values (0, 100);
 ij> insert into s values (1, 101);
 1 row inserted/updated/deleted
 ij> select d + 1.7e+308 from s;
-1                     
-----------------------
-NULL                  
-1.7E308               
-1.7E308               
+1                       
+------------------------
+NULL                    
+1.7E308                 
+1.7E308                 
 ij> -- these are close enough to the infinities to overflow
 -- the null row will still get returned
 select 1.798e+308, - 1.798e+308, 'This query should not work' from s;
@@ -1263,39 +1263,39 @@ ij> select 1.8e+1000, - 1.8e+1000, 'This query should not work' from s;
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- these are far enough from the infinities to work
 select 1.797e+308, - 1.797e+308, 'This query should work' from s;
-1                     |2                     |3                     
---------------------------------------------------------------------
-1.797E308             |-1.797E308            |This query should work
-1.797E308             |-1.797E308            |This query should work
-1.797E308             |-1.797E308            |This query should work
+1                       |2                       |3                     
+------------------------------------------------------------------------
+1.797E308               |-1.797E308              |This query should work
+1.797E308               |-1.797E308              |This query should work
+1.797E308               |-1.797E308              |This query should work
 ij> select 1.6e+308, - 1.6e+308, 'This query should work' from s;
-1                     |2                     |3                     
---------------------------------------------------------------------
-1.6E308               |-1.6E308              |This query should work
-1.6E308               |-1.6E308              |This query should work
-1.6E308               |-1.6E308              |This query should work
+1                       |2                       |3                     
+------------------------------------------------------------------------
+1.6E308                 |-1.6E308                |This query should work
+1.6E308                 |-1.6E308                |This query should work
+1.6E308                 |-1.6E308                |This query should work
 ij> -- the null row will still get returned
 select d - 1.6e+308 - 0, 'This query should work' from s;
-1                     |2                     
----------------------------------------------
-NULL                  |This query should work
--1.6E308              |This query should work
--1.6E308              |This query should work
+1                       |2                     
+-----------------------------------------------
+NULL                    |This query should work
+-1.6E308                |This query should work
+-1.6E308                |This query should work
 ij> select d - 1.6e+308 - 1.6e+308, 'This query should fail' from s;
-1                     |2                     
----------------------------------------------
-NULL                  |This query should fail
+1                       |2                     
+-----------------------------------------------
+NULL                    |This query should fail
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- these should fail
 select p * 1.6e+308 from s;
-1                     
-----------------------
-NULL                  
+1                       
+------------------------
+NULL                    
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> select p * -1.6e+308 from s;
-1                     
-----------------------
-NULL                  
+1                       
+------------------------
+NULL                    
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- these work
 insert into s values (-1.6e+308, 0);
@@ -1309,13 +1309,13 @@ ij> insert into s values (-1.8e+308, 0);
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- see two more rows
 select -d from s;
-1                     
-----------------------
-NULL                  
-0.0                   
--1.0                  
-1.6E308               
-1.797E308             
+1                       
+------------------------
+NULL                    
+0.0                     
+-1.0                    
+1.6E308                 
+1.797E308               
 ij> drop table s;
 0 rows inserted/updated/deleted
 ij> -- test the arithmetic operators on a type we know they don't work on
@@ -1348,139 +1348,139 @@ ij> insert into c values (1956475, 1956, 1956475e0, 1956475e0);
 1 row inserted/updated/deleted
 ij> -- select each one in turn
 select d from c where d = 0e0;
-D                     
-----------------------
-0.0                   
+D                       
+------------------------
+0.0                     
 ij> select d from c where d = 1e0;
-D                     
-----------------------
-1.0                   
+D                       
+------------------------
+1.0                     
 ij> select d from c where d = 1956475e0;
-D                     
-----------------------
-1956475.0             
+D                       
+------------------------
+1956475.0               
 ij> -- now look for a value that isn't in the table
 select d from c where p = 2e0;
-D                     
-----------------------
-1.0                   
+D                       
+------------------------
+1.0                     
 ij> -- now test null = null semantics
 select d from c where d = d;
-D                     
-----------------------
-0.0                   
-5.0                   
-1.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+5.0                     
+1.0                     
+1956475.0               
 ij> -- now test <>, <, >
 select d from c where d <> 0e0;
-D                     
-----------------------
-5.0                   
-1.0                   
-1956475.0             
+D                       
+------------------------
+5.0                     
+1.0                     
+1956475.0               
 ij> select d from c where d <> 1e0;
-D                     
-----------------------
-0.0                   
-5.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+5.0                     
+1956475.0               
 ij> select d from c where d < 1956475e0;
-D                     
-----------------------
-0.0                   
-5.0                   
-1.0                   
+D                       
+------------------------
+0.0                     
+5.0                     
+1.0                     
 ij> select d from c where d < 2e0;
-D                     
-----------------------
-0.0                   
-1.0                   
+D                       
+------------------------
+0.0                     
+1.0                     
 ij> select d from c where d > d;
-D                     
-----------------------
+D                       
+------------------------
 ij> select d from c where d > p;
-D                     
-----------------------
+D                       
+------------------------
 ij> -- now test <=, >=
 select d from c where d <= 0e0;
-D                     
-----------------------
-0.0                   
+D                       
+------------------------
+0.0                     
 ij> select d from c where d <= 1e0;
-D                     
-----------------------
-0.0                   
-1.0                   
+D                       
+------------------------
+0.0                     
+1.0                     
 ij> select d from c where d <= 2e0;
-D                     
-----------------------
-0.0                   
-1.0                   
+D                       
+------------------------
+0.0                     
+1.0                     
 ij> select d from c where d >= 1956475e0;
-D                     
-----------------------
-1956475.0             
+D                       
+------------------------
+1956475.0               
 ij> select d from c where d >= d;
-D                     
-----------------------
-0.0                   
-5.0                   
-1.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+5.0                     
+1.0                     
+1956475.0               
 ij> select d from c where d >= p;
-D                     
-----------------------
-0.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+1956475.0               
 ij> -- test comparisons with int and smallint
 select d from c where d <= i;
-D                     
-----------------------
-0.0                   
-1.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+1.0                     
+1956475.0               
 ij> select d from c where d < s;
-D                     
-----------------------
+D                       
+------------------------
 ij> select d from c where d > i;
-D                     
-----------------------
+D                       
+------------------------
 ij> select d from c where d >= s;
-D                     
-----------------------
-0.0                   
-1.0                   
-1956475.0             
+D                       
+------------------------
+0.0                     
+1.0                     
+1956475.0               
 ij> select d from c where d <> i;
-D                     
-----------------------
+D                       
+------------------------
 ij> select d from c where d = s;
-D                     
-----------------------
-0.0                   
-1.0                   
+D                       
+------------------------
+0.0                     
+1.0                     
 ij> -- test that the smallint gets promoted to double, and not vice versa.  65537
 -- when converted to short becomes 1
 select d from c where s = 65537e0;
-D                     
-----------------------
+D                       
+------------------------
 ij> -- test =SQ
 -- this gets cardinality error
 select d from c where d = (select d from c);
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- this works
 select d from c where d = (select d from c where d=5);
-D                     
-----------------------
-5.0                   
+D                       
+------------------------
+5.0                     
 ij> -- show that double is comparable to real
 
 create table o (c char(10), v varchar(30), dc decimal);
 0 rows inserted/updated/deleted
 ij> select d from c,o where d <> dc;
-D                     
-----------------------
+D                       
+------------------------
 ij> -- clean up
 drop table c;
 0 rows inserted/updated/deleted
@@ -1529,43 +1529,43 @@ ij> insert into target select d from source;
 ERROR 23502: Column 'P'  cannot accept a NULL value.
 ij> -- expect 4 rows in target: 1, 2, 5, and 1:
 select * from target;
-P                     
-----------------------
-1.0                   
-2.0                   
-5.0                   
+P                       
+------------------------
+1.0                     
+2.0                     
+5.0                     
 ij> update target set p = p + 1;
 3 rows inserted/updated/deleted
 ij> select * from target;
-P                     
-----------------------
-2.0                   
-3.0                   
-6.0                   
+P                       
+------------------------
+2.0                     
+3.0                     
+6.0                     
 ij> update target set p = p - 1;
 3 rows inserted/updated/deleted
 ij> select * from target;
-P                     
-----------------------
-1.0                   
-2.0                   
-5.0                   
+P                       
+------------------------
+1.0                     
+2.0                     
+5.0                     
 ij> update target set p = p / 10;
 3 rows inserted/updated/deleted
 ij> select * from target;
-P                     
-----------------------
-0.1                   
-0.2                   
-0.5                   
+P                       
+------------------------
+0.1                     
+0.2                     
+0.5                     
 ij> update target set p = p * 10;
 3 rows inserted/updated/deleted
 ij> select * from target;
-P                     
-----------------------
-1.0                   
-2.0                   
-5.0                   
+P                       
+------------------------
+1.0                     
+2.0                     
+5.0                     
 ij> -- these should work
 update source set i = 1.4e8;
 1 row inserted/updated/deleted
@@ -1599,14 +1599,14 @@ ij> insert into abcfloat values (-0.223456789);
 ij> insert into abcfloat values (12345678.9);
 1 row inserted/updated/deleted
 ij> select * from abcfloat;
-NUMTEST      
--------------
-1.2345679    
-0.12345679   
--0.12345679  
-0.22345679   
--0.22345679  
-1.2345679E7  
+NUMTEST        
+---------------
+1.2345679      
+0.12345679     
+-0.12345679    
+0.22345679     
+-0.22345679    
+1.2345679E7    
 ij> drop table abcfloat;
 0 rows inserted/updated/deleted
 ij> -- ** insert float.sql
@@ -1640,9 +1640,9 @@ ij> -- invalid float values
 insert into t(r) values 'NaN';
 ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'. 
 ij> insert into t(r) values +3.4021E+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into t(r) values -3.4021E+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> create table tt(c char(254));
 0 rows inserted/updated/deleted
 ij> insert into tt values -3.402E+38;
@@ -1654,11 +1654,9 @@ ERROR 42821: Columns of type 'REAL' cannot hold values of type 'CHAR'.
 ij> update t set r = NaN;
 ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> update t set r = +3.4021E+38;
-0 rows inserted/updated/deleted
-WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+2 rows inserted/updated/deleted
 ij> update t set r = -3.4021E+38;
-0 rows inserted/updated/deleted
-WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+2 rows inserted/updated/deleted
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> drop table tt;
@@ -1706,72 +1704,72 @@ ij> insert into t values (0, 100, 'hello', 'everyone is here', 200.0e0, 200.0e0)
 ij> insert into t values (-1, -100, 'goodbye', 'everyone is there', -200.0e0, -200.0e0);
 1 row inserted/updated/deleted
 ij> select r + r, d + r, i + r, s + r, r + i from t;
-1            |2                     |3            |4            |5            
-------------------------------------------------------------------------------
-NULL         |NULL                  |NULL         |NULL         |NULL         
-400.0        |400.0                 |200.0        |300.0        |200.0        
--400.0       |-400.0                |-201.0       |-300.0       |-201.0       
+1              |2                       |3              |4              |5              
+----------------------------------------------------------------------------------------
+NULL           |NULL                    |NULL           |NULL           |NULL           
+400.0          |400.0                   |200.0          |300.0          |200.0          
+-400.0         |-400.0                  |-201.0         |-300.0         |-201.0         
 ij> select r + r + r, r + 100 + 432e0 from t;
-1            |2                     
-------------------------------------
-NULL         |NULL                  
-600.0        |732.0                 
--600.0       |332.0                 
+1              |2                       
+----------------------------------------
+NULL           |NULL                    
+600.0          |732.0                   
+-600.0         |332.0                   
 ij> select r - r, r - d, d - r, r - i, i - r, r - s, s - r from t;
-1            |2                     |3                     |4            |5            |6            |7            
--------------------------------------------------------------------------------------------------------------------
-NULL         |NULL                  |NULL                  |NULL         |NULL         |NULL         |NULL         
-0.0          |0.0                   |0.0                   |200.0        |-200.0       |100.0        |-100.0       
-0.0          |0.0                   |0.0                   |-199.0       |199.0        |-100.0       |100.0        
+1              |2                       |3                       |4              |5              |6              |7              
+---------------------------------------------------------------------------------------------------------------------------------
+NULL           |NULL                    |NULL                    |NULL           |NULL           |NULL           |NULL           
+0.0            |0.0                     |0.0                     |200.0          |-200.0         |100.0          |-100.0         
+0.0            |0.0                     |0.0                     |-199.0         |199.0          |-100.0         |100.0          
 ij> select r - r - r, r - 100 - 432e0 from t;
-1            |2                     
-------------------------------------
-NULL         |NULL                  
--200.0       |-332.0                
-200.0        |-732.0                
+1              |2                       
+----------------------------------------
+NULL           |NULL                    
+-200.0         |-332.0                  
+200.0          |-732.0                  
 ij> select i, d, s, r, i * r, r * i, s * r, d * r, r * r, r * 2, r * 2.0e0 from t;
-I          |D                     |S     |R            |5            |6            |7            |8                     |9            |10           |11                    
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL  |NULL         |NULL         |NULL         |NULL         |NULL                  |NULL         |NULL         |NULL                  
-0          |200.0                 |100   |200.0        |0.0          |0.0          |20000.0      |40000.0               |40000.0      |400.0        |400.0                 
--1         |-200.0                |-100  |-200.0       |200.0        |200.0        |20000.0      |40000.0               |40000.0      |-400.0       |-400.0                
+I          |D                       |S     |R              |5              |6              |7              |8                       |9              |10             |11                      
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                    |NULL  |NULL           |NULL           |NULL           |NULL           |NULL                    |NULL           |NULL           |NULL                    
+0          |200.0                   |100   |200.0          |0.0            |0.0            |20000.0        |40000.0                 |40000.0        |400.0          |400.0                   
+-1         |-200.0                  |-100  |-200.0         |200.0          |200.0          |20000.0        |40000.0                 |40000.0        |-400.0         |-400.0                  
 ij> -- try unary minus, plus
 select -(r * 100 / 100e0 ), +(r * 100e0 / 100 ) from t;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
--200.0                |200.0                 
-200.0                 |-200.0                
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+-200.0                  |200.0                   
+200.0                   |-200.0                  
 ij> -- test null/null, constant/null, null/constant
 -- Cast to decimal to remove a minor diff among
 -- vms, where 0.005 converted to a String would be
 -- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
 select i, d, r, d / r, CAST (i / r AS DECIMAL(6,5)), 10 / r, r / d, r / 10e0 from t;
-I          |D                     |R            |4                     |5       |6            |7                     |8                     
---------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL         |NULL                  |NULL    |NULL         |NULL                  |NULL                  
-0          |200.0                 |200.0        |1.0                   |0.00000 |0.05         |1.0                   |20.0                  
--1         |-200.0                |-200.0       |1.0                   |0.00500 |-0.05        |1.0                   |-20.0                 
+I          |D                       |R              |4                       |5       |6              |7                       |8                       
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                    |NULL           |NULL                    |NULL    |NULL           |NULL                    |NULL                    
+0          |200.0                   |200.0          |1.0                     |0.00000 |0.05           |1.0                     |20.0                    
+-1         |-200.0                  |-200.0         |1.0                     |0.00500 |-0.05          |1.0                     |-20.0                   
 ij> -- test for divide by 0
 select r / i from t;
-1            
--------------
-NULL         
+1              
+---------------
+NULL           
 ERROR 22012: Attempt to divide by zero.
 ij> -- test positive/negative, negative/positive and negative/negative
 select r, r / -r, (-r) / r, (-r) / -r from t;
-R            |2            |3            |4            
--------------------------------------------------------
-NULL         |NULL         |NULL         |NULL         
-200.0        |-1.0         |-1.0         |1.0          
--200.0       |-1.0         |-1.0         |1.0          
+R              |2              |3              |4              
+---------------------------------------------------------------
+NULL           |NULL           |NULL           |NULL           
+200.0          |-1.0           |-1.0           |1.0            
+-200.0         |-1.0           |-1.0           |1.0            
 ij> -- test some "more complex" expressions
 select r, r + 10e0, r - (10 - 20e0), r - 10, r - (20 - 10) from t;
-R            |2                     |3                     |4            |5            
----------------------------------------------------------------------------------------
-NULL         |NULL                  |NULL                  |NULL         |NULL         
-200.0        |210.0                 |210.0                 |190.0        |190.0        
--200.0       |-190.0                |-190.0                |-210.0       |-210.0       
+R              |2                       |3                       |4              |5              
+-------------------------------------------------------------------------------------------------
+NULL           |NULL                    |NULL                    |NULL           |NULL           
+200.0          |210.0                   |210.0                   |190.0          |190.0          
+-200.0         |-190.0                  |-190.0                  |-210.0         |-210.0         
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- test overflow
@@ -1785,11 +1783,11 @@ ij> insert into s values (0, 100);
 ij> insert into s values (1, 101);
 1 row inserted/updated/deleted
 ij> select d + 3.4e+38 from s;
-1                     
-----------------------
-NULL                  
-3.4E38                
-3.4E38                
+1                       
+------------------------
+NULL                    
+3.4E38                  
+3.4E38                  
 ij> -- these are close enough to the infinities to overflow
 -- Can't test simple select of literal because literals are doubles
 insert into s values(3.403e+38, 3.403e+38);
@@ -1801,11 +1799,11 @@ ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> insert into s values(- 1.8e+100, - 1.8e+100);
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select * from s;
-D            |P            
----------------------------
-NULL         |NULL         
-0.0          |100.0        
-1.0          |101.0        
+D              |P              
+-------------------------------
+NULL           |NULL           
+0.0            |100.0          
+1.0            |101.0          
 ij> -- these are far enough from the infinities to work
 insert into s values(3.402e+38, - 3.402e+38);
 1 row inserted/updated/deleted
@@ -1814,22 +1812,22 @@ ij> insert into s values(3.3e+38, - 3.3e+38);
 ij> -- these show that math is promoted to double because of the double
 -- literals. If it was real math, it would fail
 select d - 3.3e+38 - 3.3e+38, p * 3.3e+38, p * -3.3e+38 from s;
-1                     |2                     |3                     
---------------------------------------------------------------------
-NULL                  |NULL                  |NULL                  
--6.6E38               |3.3E40                |-3.3E40               
--6.6E38               |3.333E40              |-3.333E40             
--3.1979999994446195E38|-1.1226600001832754E77|1.1226600001832754E77 
--3.3000000345172877E38|-1.088999988609295E77 |1.088999988609295E77  
+1                       |2                       |3                       
+--------------------------------------------------------------------------
+NULL                    |NULL                    |NULL                    
+-6.6E38                 |3.3E40                  |-3.3E40                 
+-6.6E38                 |3.333E40                |-3.333E40               
+-3.1979999994446195E38  |-1.1226600001832754E77  |1.1226600001832754E77   
+-3.3000000345172877E38  |-1.088999988609295E77   |1.088999988609295E77    
 ij> -- see two more rows
 select -d from s;
-1            
--------------
-NULL         
-0.0          
--1.0         
--3.402E38    
--3.3E38      
+1              
+---------------
+NULL           
+0.0            
+-1.0           
+-3.402E38      
+-3.3E38        
 ij> -- to do the math as reals, we have to keep it in the columns
 delete from s;
 5 rows inserted/updated/deleted
@@ -1837,16 +1835,16 @@ ij> insert into s values (1,3.3e+38);
 1 row inserted/updated/deleted
 ij> -- these will fail, because the math is done as reals
 select d - p - p from s;
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select p * p from s;
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select p * -p from s;
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> delete from s;
 1 row inserted/updated/deleted
@@ -1856,10 +1854,10 @@ insert into s values (.111, 1e-1);
 ij> insert into s values (0.222, 0.222);
 1 row inserted/updated/deleted
 ij> select * from s;
-D            |P            
----------------------------
-0.111        |0.1          
-0.222        |0.222        
+D              |P              
+-------------------------------
+0.111          |0.1            
+0.222          |0.222          
 ij> delete from s;
 2 rows inserted/updated/deleted
 ij> insert into s values (10, 1e-10);
@@ -1868,15 +1866,15 @@ ij> -- underflow calculation doesn't round off, gives error.
 update s set d=d*1.4e-55, p=p*1.4e-45;
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select d, p from s;
-D            |P            
----------------------------
-10.0         |1.0E-10      
+D              |P              
+-------------------------------
+10.0           |1.0E-10        
 ij> update s set d=d + 1.4e-46;
 1 row inserted/updated/deleted
 ij> select d from s;
-D            
--------------
-10.0         
+D              
+---------------
+10.0           
 ij> drop table s;
 0 rows inserted/updated/deleted
 ij> -- test the arithmetic operators on a type we know they don't work on
@@ -1910,109 +1908,109 @@ ij> insert into c values (1956475, 1956, 1956475e0, 1956475e0, 1956475e0);
 1 row inserted/updated/deleted
 ij> -- select each one in turn
 select r from c where r = 0e0;
-R            
--------------
-0.0          
+R              
+---------------
+0.0            
 ij> select r from c where r = 1e0;
-R            
--------------
+R              
+---------------
 ij> select r from c where r = 1956475e0;
-R            
--------------
-1956475.0    
+R              
+---------------
+1956475.0      
 ij> -- now look for a value that isn't in the table
 select r from c where l = 2e0;
-R            
--------------
+R              
+---------------
 ij> -- now test null = null semantics
 select r from c where r = r;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> -- now test <>, <, >, <=, >=
 select r from c where r <> 0e0;
-R            
--------------
-2.0          
-1956475.0    
+R              
+---------------
+2.0            
+1956475.0      
 ij> select r from c where r <> 1e0;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> select r from c where r < 1956475e0;
-R            
--------------
-0.0          
-2.0          
+R              
+---------------
+0.0            
+2.0            
 ij> select r from c where r < 2e0;
-R            
--------------
-0.0          
+R              
+---------------
+0.0            
 ij> select r from c where r > d;
-R            
--------------
-2.0          
+R              
+---------------
+2.0            
 ij> select r from c where r <= l;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> select r from c where r >= r;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> -- test comparisons with int and smallint and double
 select r from c where r <= i;
-R            
--------------
-0.0          
-1956475.0    
+R              
+---------------
+0.0            
+1956475.0      
 ij> select r from c where r < s;
-R            
--------------
+R              
+---------------
 ij> select r from c where r > i;
-R            
--------------
-2.0          
+R              
+---------------
+2.0            
 ij> select r from c where r >= s;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> select r from c where r <> i;
-R            
--------------
-2.0          
+R              
+---------------
+2.0            
 ij> select r from c where r = s;
-R            
--------------
-0.0          
+R              
+---------------
+0.0            
 ij> select r from c where r = d;
-R            
--------------
-0.0          
-1956475.0    
+R              
+---------------
+0.0            
+1956475.0      
 ij> select r from c where r >= d;
-R            
--------------
-0.0          
-2.0          
-1956475.0    
+R              
+---------------
+0.0            
+2.0            
+1956475.0      
 ij> -- show that real is comparable to decimal
 
 create table o (c char(10), v varchar(30), dc decimal);
 0 rows inserted/updated/deleted
 ij> select r from c,o where r <> dc;
-R            
--------------
+R              
+---------------
 ij> -- clean up
 drop table c;
 0 rows inserted/updated/deleted
@@ -2058,67 +2056,67 @@ ij> insert into target select r from source;
 ERROR 23502: Column 'T'  cannot accept a NULL value.
 ij> -- expect 5 rows in target: 1, 2, 5, 6, and 1:
 select * from target;
-T            
--------------
-1.0          
-2.0          
-5.0          
-6.0          
+T              
+---------------
+1.0            
+2.0            
+5.0            
+6.0            
 ij> update target set t = t + 1;
 4 rows inserted/updated/deleted
 ij> select * from target;
-T            
--------------
-2.0          
-3.0          
-6.0          
-7.0          
+T              
+---------------
+2.0            
+3.0            
+6.0            
+7.0            
 ij> update target set t = t - 1;
 4 rows inserted/updated/deleted
 ij> select * from target;
-T            
--------------
-1.0          
-2.0          
-5.0          
-6.0          
+T              
+---------------
+1.0            
+2.0            
+5.0            
+6.0            
 ij> update target set t = t / 10;
 4 rows inserted/updated/deleted
 ij> select * from target;
-T            
--------------
-0.1          
-0.2          
-0.5          
-0.6          
+T              
+---------------
+0.1            
+0.2            
+0.5            
+0.6            
 ij> update target set t = t * 10;
 4 rows inserted/updated/deleted
 ij> select * from target;
-T            
--------------
-1.0          
-2.0          
-5.0          
-6.0          
+T              
+---------------
+1.0            
+2.0            
+5.0            
+6.0            
 ij> -- these should work
 update source set r = 1.4e4;
 2 rows inserted/updated/deleted
 ij> update source set i = r, s=r, d=r;
 2 rows inserted/updated/deleted
 ij> select i, s, d from source where i=1.4e4 or s=1.4e4 or d=1.4e4;
-I          |S     |D                     
------------------------------------------
-14000      |14000 |14000.0               
-14000      |14000 |14000.0               
+I          |S     |D                       
+-------------------------------------------
+14000      |14000 |14000.0                 
+14000      |14000 |14000.0                 
 ij> -- just curious, do columns see the before or after values, and
 -- does it matter if they are before or after the changed value?
 update source set i = r, r = 0, s = r;
 2 rows inserted/updated/deleted
 ij> select i, r, s from source where r = 0;
-I          |R            |S     
---------------------------------
-14000      |0.0          |14000 
-14000      |0.0          |14000 
+I          |R              |S     
+----------------------------------
+14000      |0.0            |14000 
+14000      |0.0            |14000 
 ij> -- these should get overflow
 update source set r = 1.4e12;
 2 rows inserted/updated/deleted
@@ -2140,7 +2138,9 @@ ij> -- ============================================================
 values 5e-325;
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values 5e-324;
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1                       
+------------------------
+4.9E-324                
 ij> -- --- TEST SPECIAL VALUES
 
 -- DB2 (should succed)
@@ -2158,15 +2158,15 @@ ij> insert into fake values -2;
 1 row inserted/updated/deleted
 ij> -- CS (should fail)
 insert into fake values( -3.4028235E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +3.4028235E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -3;
 1 row inserted/updated/deleted
 ij> insert into fake values( -1.4E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +1.4E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -4;
 1 row inserted/updated/deleted
 ij> -- ============================================================
@@ -2182,13 +2182,13 @@ ij> insert into fake values (+0.0E-38);
 ij> insert into fake values (+0.0E-500);
 1 row inserted/updated/deleted
 ij> values (+0.0E-500);
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> values (+1.0E-300);
-1                     
-----------------------
-1.0E-300              
+1                       
+------------------------
+1.0E-300                
 ij> -- approx ZERO (java rounds to zero, but not DB2)
 insert into fake values (+1.0E-300);
 ERROR 22003: The resulting value is outside the range for the data type REAL.
@@ -2206,103 +2206,125 @@ ij> insert into fake values -11;
 1 row inserted/updated/deleted
 ij> -- ============================================================
 
--- DB2 MAX_VALUES (first succeed, second fail)
+-- DB2 MAX_VALUES (first succeed, second used to fail)
 insert into fake values( -3.4019E+38 );
 1 row inserted/updated/deleted
 ij> insert into fake values( -3.4021E+38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -21;
 1 row inserted/updated/deleted
 ij> insert into fake values( +3.4019E+38 );
 1 row inserted/updated/deleted
 ij> insert into fake values( +3.4021E+38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -22;
 1 row inserted/updated/deleted
-ij> -- DB2 MIN_VALUES (first fail, second succeed)
+ij> -- DB2 MIN_VALUES (first used to fail, second succeed)
 insert into fake values( -1.1749E-37 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -1.1751E-37 );
 1 row inserted/updated/deleted
 ij> insert into fake values -23;
 1 row inserted/updated/deleted
 ij> insert into fake values( +1.1749E-37 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +1.1751E-37 );
 1 row inserted/updated/deleted
 ij> insert into fake values -24;
 1 row inserted/updated/deleted
-ij> -- CS (fail)
+ij> -- CS (used to fail pre DERBY-3398)
 insert into fake values( -3.4028234E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -3.40282349E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -3.40282351E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -3.4028236E38 );
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> insert into fake values -25;
 1 row inserted/updated/deleted
 ij> insert into fake values( +3.4028234E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +3.40282349E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +3.40282351E38 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +3.4028236E38 );
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> insert into fake values -26;
 1 row inserted/updated/deleted
 ij> insert into fake values( -1.39E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -1.399E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -1.401E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( -1.41E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -27;
 1 row inserted/updated/deleted
 ij> insert into fake values( +1.39E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +1.399E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +1.401E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values( +1.41E-45 );
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values -28;
 1 row inserted/updated/deleted
 ij> -- checkpoint
 select * from fake;
-R            
--------------
--3.402E38    
-3.402E38     
--1.0         
--1.175E-37   
-1.175E-37    
--2.0         
--3.0         
--4.0         
-0.0          
-0.0          
-0.0          
-0.0          
-0.0          
--11.0        
--3.4019E38   
--21.0        
-3.4019E38    
--22.0        
--1.1751E-37  
--23.0        
-1.1751E-37   
--24.0        
--25.0        
--26.0        
--27.0        
--28.0        
+R              
+---------------
+-3.402E38      
+3.402E38       
+-1.0           
+-1.175E-37     
+1.175E-37      
+-2.0           
+-3.4028235E38  
+3.4028235E38   
+-3.0           
+-1.4E-45       
+1.4E-45        
+-4.0           
+0.0            
+0.0            
+0.0            
+0.0            
+0.0            
+-11.0          
+-3.4019E38     
+-3.4021E38     
+-21.0          
+3.4019E38      
+3.4021E38      
+-22.0          
+-1.1749E-37    
+-1.1751E-37    
+-23.0          
+1.1749E-37     
+1.1751E-37     
+-24.0          
+-3.4028235E38  
+-3.4028235E38  
+-3.4028235E38  
+-25.0          
+3.4028235E38   
+3.4028235E38   
+3.4028235E38   
+-26.0          
+-1.4E-45       
+-1.4E-45       
+-1.4E-45       
+-1.4E-45       
+-27.0          
+1.4E-45        
+1.4E-45        
+1.4E-45        
+1.4E-45        
+-28.0          
 ij> drop table fake;
 0 rows inserted/updated/deleted
 ij> create table fake(r real);
@@ -2313,28 +2335,28 @@ ij> -- ============================================================
 
 -- ok
 values cast(5e-37/1e0 as real);
-1            
--------------
-5.0E-37      
+1              
+---------------
+5.0E-37        
 ij> -- fail
 values cast(5e-37/1e1 as real);
-1            
--------------
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1              
+---------------
+5.0E-38        
 ij> values cast(5e-37/1e300 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values cast(5e-37 as real)/cast(1e10 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> -- ok
 insert into fake values 5e-37/1e0;
 1 row inserted/updated/deleted
 ij> -- fail
 insert into fake values 5e-37/1e1;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into fake values 5e-37/1e300;
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> insert into fake values cast(5e-37 as real)/cast(1e10 as real);
@@ -2343,77 +2365,81 @@ ij> drop table fake;
 0 rows inserted/updated/deleted
 ij> -- makes double to small, so java double rounds to 0. need to catch (fail)
 values 5e-37 / 1e300;
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values cast(5e-37 / 1e300 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- ok, zero result (succeed)
 values cast(cast(0.0e0 as real) - cast(0.0e0 as real) as real);
-1            
--------------
-0.0          
+1              
+---------------
+0.0            
 ij> values cast(cast(1.0e-30 as real) - cast(1.0e-30 as real) as real);
-1            
--------------
-0.0          
-ij> -- java (and CS previously) rounded result to zero, but now gives errors like DB2 (fail)
+1              
+---------------
+0.0            
+ij> -- used to fail pre DERBY-3398
 values cast(cast(5e-37 as real) - cast(4e-37 as real) as real);
-1            
--------------
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1              
+---------------
+1.0000002E-37  
 ij> values cast(5e-37 - 4e-37 as real);
-1            
--------------
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1              
+---------------
+1.0E-37        
 ij> values cast(5e-37 - 4.99e-37 as real);
-1            
--------------
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1              
+---------------
+1.0E-39        
 ij> values cast(5e-308 - 4e-308 as real);
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
-ij> values cast(5e-37 + -4e-37 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
+ij> values cast(5e-37 + -4e-37 as real);
+1              
+---------------
+1.0E-37        
 ij> values cast(5e-324 - 4e-324 as real);
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1              
+---------------
+0.0            
 ij> values cast(5e-37 * 4e-37 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> values cast(cast(5e-37 as real) * cast(4e-37 as real) as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> -- double trouble, underflow detection (fail)
 values cast(5e-300 * 4e-300 as real);
-1            
--------------
+1              
+---------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- underflow aritmetic DOUBLE (fail)
 values -3e-305/1e100;
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values -3e-305/1e100;
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- negative zeros not allowed (succeed)
 values 0.0e5/-1;
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> -- 30 characters limit to be enforced ) (first fail, second ok)
 values 01234567890123456789012345678e1;
 ERROR 42820: The floating point literal '01234567890123456789012345678e1' contains more than 30 characters.
 ij> values 0123456789012345678901234567e1;
-1                     
-----------------------
-1.2345678901234569E27 
+1                       
+------------------------
+1.2345678901234569E27   
 ij> -- ============================================================
 
 --- Marks tests
@@ -2428,17 +2454,19 @@ ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> insert into t1 values +1.40129846432481700e-46;
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select * from t1;
-C1           
--------------
-ij> -- these 2 insert statements should raise an error msg in compat mode
--- because the values are greater db2's limits (fail)
+C1             
+---------------
+ij> -- these 2 insert statements used to raise error pre DERBY-3398
+-- because the values were greater than db2's limits
 insert into t1 values 3.40282346638528860e+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into t1 values -3.40282346638528860e+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> select * from t1;
-C1           
--------------
+C1             
+---------------
+3.4028235E38   
+-3.4028235E38  
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- Examples in DB2 UDB for LUW 8.1.4:
@@ -2451,17 +2479,19 @@ ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> insert into t1 values +1.40129846432481700e-46;
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> select * from t1;
-C1           
--------------
-ij> -- these 2 insert statements raise ERROR 22003 because
--- the values are greater db2's limits (fail)
+C1             
+---------------
+ij> -- these 2 insert statements used to raise error pre DERBY-3398
+-- because the values were greater than db2's limits
 insert into t1 values 3.40282346638528860e+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> insert into t1 values -3.40282346638528860e+38;
-ERROR 22003: The resulting value is outside the range for the data type REAL.
+1 row inserted/updated/deleted
 ij> select * from t1;
-C1           
--------------
+C1             
+---------------
+3.4028235E38   
+-3.4028235E38  
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- ============================================================

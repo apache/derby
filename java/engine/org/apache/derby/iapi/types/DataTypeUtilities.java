@@ -172,10 +172,10 @@ public abstract class DataTypeUtilities  {
 				break;
 			case Types.REAL :
 			case Types.FLOAT :
-				size = 13;
+				size = 15;
 				break;
 			case Types.DOUBLE:
-				size = 22;
+				size = 24;
 				break;
 			case Types.TINYINT :
 				size = 15;

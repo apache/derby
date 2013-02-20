@@ -253,13 +253,13 @@ ij> -- PASS:0844 If 5 rows selected with ordered rows and column values ?
        ON GRADE * -40 > T7.T_FLOAT
        OR (T_DOUBLE -542.5 < GRADE AND T_DOUBLE -541.5 > GRADE)
    ORDER BY GRADE;
-GRADE|T_FLOAT               |T_DOUBLE              
----------------------------------------------------
-10   |-444.0                |-55.0                 
-12   |NULL                  |NULL                  
-12   |NULL                  |NULL                  
-13   |44.0                  |555.0                 
-13   |44.0                  |555.0                 
+GRADE|T_FLOAT                 |T_DOUBLE                
+-------------------------------------------------------
+10   |-444.0                  |-55.0                   
+12   |NULL                    |NULL                    
+12   |NULL                    |NULL                    
+13   |44.0                    |555.0                   
+13   |44.0                    |555.0                   
 ij> -- PASS:0844 If 5 rows selected with ordered rows and column values ?
 -- PASS:0844    10 -444 (approximately)  -55 (approximately) ?
 -- PASS:0844    12 NULL                 NULL                 ?

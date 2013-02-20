@@ -55,12 +55,12 @@ ij> -- PASS:0870 If 1 row inserted successfully?
 
    SELECT * FROM APPLES UNION ALL SELECT * FROM ORANGES
      ORDER BY 1;
-1                     |2              
---------------------------------------
-1.0                   |Granny Smith   
-1.5                   |Navel          
-2.0                   |Red Delicious  
-2.5                   |Florida        
+1                       |2              
+----------------------------------------
+1.0                     |Granny Smith   
+1.5                     |Navel          
+2.0                     |Red Delicious  
+2.5                     |Florida        
 ij> -- PASS:0870 If 4 rows returned in the following order?
 --                col1                 col2
 --                ====                 ====

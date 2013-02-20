@@ -79,9 +79,9 @@ ij> -- PASS:0647 If 1 row is updated?
 
    SELECT SUM (USER_INPUT) * 100, SUM (RECEIVABLE)
   FROM STANDARD_INPUT;
-1                    |2            
------------------------------------
--95301.00            |-453.02      
+1                    |2              
+-------------------------------------
+-95301.00            |-453.02        
 ij> -- PASS:0647 If 1 row selected and first value is -95301 +- 4?
 -- PASS:0647 AND second value is -453.02 +- 0.04?
 

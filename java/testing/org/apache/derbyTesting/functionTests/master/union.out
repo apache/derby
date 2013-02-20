@@ -77,44 +77,44 @@ ij> values (1, 2, 3, 4) union values (1, 2, 3, 4) union values (1, 2, 3, 4);
 -----------------------------------------------
 1          |2          |3          |4          
 ij> select * from t1 union select * from t2;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> select * from t1 union select * from t1;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> select * from t1 union select * from t2 union select * from dups;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> select * from t1 union select i, s, d, r, c10, c30, vc10, vc30 from t2;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> select * from t1 union select i, s, d, r, c10, c30, vc10, vc30 from t2
 		union select * from dups;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> -- derived tables
 select * from (values (1, 2, 3, 4) union values (5, 6, 7, 8)) a;
 1          |2          |3          |4          
@@ -376,35 +376,35 @@ ij> -- simple tests
 insert into insert_test select * from t1 union select * from dups;
 5 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> delete from insert_test;
 5 rows inserted/updated/deleted
 ij> insert into insert_test (s, i) values (2, 1) union values (4, 3);
 2 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |4     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |2     |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |4     |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> delete from insert_test;
 2 rows inserted/updated/deleted
 ij> -- test type dominance/length/nullability
 insert into insert_test (vc30) select vc10 from t1 union select c30 from t2;
 5 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |11111                         
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |22222                         
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |33333     33                  
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |44444     44                  
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |11111                         
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |22222                         
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |33333     33                  
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |44444     44                  
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> delete from insert_test;
 5 rows inserted/updated/deleted
 ij> insert into insert_test (c30)
@@ -415,24 +415,24 @@ ij> insert into insert_test (c30)
 	select c10 from t1;
 5 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |33333     33                  |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |44444     44                  |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |22222                         |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |33333     33                  |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |44444     44                  |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> delete from insert_test;
 5 rows inserted/updated/deleted
 ij> -- test NormalizeResultSet generation
 select i, d from t1 union select d, i from t2;
-1                     |2                     
----------------------------------------------
-1.0                   |10.0                  
-2.0                   |20.0                  
-30.0                  |3.0                   
-40.0                  |4.0                   
-NULL                  |NULL                  
+1                       |2                       
+-------------------------------------------------
+1.0                     |10.0                    
+2.0                     |20.0                    
+30.0                    |3.0                     
+40.0                    |4.0                     
+NULL                    |NULL                    
 ij> select vc10, c30 from t1 union select c30, vc10 from t2;
 1                             |2                             
 -------------------------------------------------------------
@@ -466,20 +466,20 @@ values (1) union values (1.1);
 1.0           
 1.1           
 ij> values (1) union values (1.1e1);
-1                     
-----------------------
-1.0                   
-11.0                  
+1                       
+------------------------
+1.0                     
+11.0                    
 ij> values (1.1) union values (1);
 1             
 --------------
 1.0           
 1.1           
 ij> values (1.1e1) union values (1);
-1                     
-----------------------
-1.0                   
-11.0                  
+1                       
+------------------------
+1.0                     
+11.0                    
 ij> -- negative cases
 values (x'aa') union values (1);
 ERROR 42X61: Types 'CHAR () FOR BIT DATA' and 'INTEGER' are not UNION compatible.
@@ -550,23 +550,23 @@ ij> values (1, 2, 3, 4) union all values (5, 6, 7, 8) union all values (9, 10, 1
 5          |6          |7          |8          
 9          |10         |11         |12         
 ij> select * from t1 union all select * from t2;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
 ij> select * from t1 union all select i, s, d, r, c10, c30, vc10, vc30 from t2;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
 ij> -- derived tables
 select * from (values (1, 2, 3, 4) union all values (5, 6, 7, 8)) a;
 1          |2          |3          |4          
@@ -786,23 +786,23 @@ ij> -- simple tests
 insert into insert_test select * from t1 union all select * from t2;
 6 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-1          |1     |10.0                  |10.0         |11111     |11111     11                  |11111     |11111      11                 
-2          |2     |20.0                  |20.0         |22222     |22222     22                  |22222     |22222      22                 
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |3     |30.0                  |30.0         |33333     |33333     33                  |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444     44                  |44444     |44444      44                 
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                    |10.0           |11111     |11111     11                  |11111     |11111      11                 
+2          |2     |20.0                    |20.0           |22222     |22222     22                  |22222     |22222      22                 
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                    |30.0           |33333     |33333     33                  |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444     44                  |44444     |44444      44                 
 ij> delete from insert_test;
 6 rows inserted/updated/deleted
 ij> insert into insert_test (s, i) values (2, 1) union all values (4, 3);
 2 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-1          |2     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |4     |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+1          |2     |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |4     |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
 ij> delete from insert_test;
 2 rows inserted/updated/deleted
 ij> -- type conversions between union all and target table
@@ -810,14 +810,14 @@ insert into insert_test select s, i, r, d, vc10, vc30, c10, c30 from t1 union al
 						select s, i, r, d, vc10, vc30, c10, vc30 from t2;
 6 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-1          |1     |10.0                  |10.0         |11111     |11111      11                 |11111     |11111     11                  
-2          |2     |20.0                  |20.0         |22222     |22222      22                 |22222     |22222     22                  
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-3          |3     |30.0                  |30.0         |33333     |33333      33                 |33333     |33333      33                 
-4          |4     |40.0                  |40.0         |44444     |44444      44                 |44444     |44444      44                 
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+1          |1     |10.0                    |10.0           |11111     |11111      11                 |11111     |11111     11                  
+2          |2     |20.0                    |20.0           |22222     |22222      22                 |22222     |22222     22                  
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+3          |3     |30.0                    |30.0           |33333     |33333      33                 |33333     |33333      33                 
+4          |4     |40.0                    |40.0           |44444     |44444      44                 |44444     |44444      44                 
 ij> delete from insert_test;
 6 rows inserted/updated/deleted
 ij> -- test type dominance/length/nullability
@@ -833,14 +833,14 @@ NULL
 ij> insert into insert_test (vc30) select vc10 from t1 union all select c30 from t2;
 6 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |11111                         
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |22222                         
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |33333     33                  
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |44444     44                  
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |11111                         
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |22222                         
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |33333     33                  
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |44444     44                  
 ij> delete from insert_test;
 6 rows inserted/updated/deleted
 ij> insert into insert_test (c30)
@@ -851,29 +851,29 @@ ij> insert into insert_test (c30)
 	select c10 from t1;
 9 rows inserted/updated/deleted
 ij> select * from insert_test;
-I          |S     |D                     |R            |C10       |C30                           |VC10      |VC30                          
--------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |33333     33                  |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |44444     44                  |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |NULL                          |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |11111                         |NULL      |NULL                          
-NULL       |NULL  |NULL                  |NULL         |NULL      |22222                         |NULL      |NULL                          
+I          |S     |D                       |R              |C10       |C30                           |VC10      |VC30                          
+-----------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |22222                         |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |33333     33                  |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |44444     44                  |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |NULL                          |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |11111                         |NULL      |NULL                          
+NULL       |NULL  |NULL                    |NULL           |NULL      |22222                         |NULL      |NULL                          
 ij> delete from insert_test;
 9 rows inserted/updated/deleted
 ij> -- test NormalizeResultSet generation
 select i, d from t1 union all select d, i from t2;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-1.0                   |10.0                  
-2.0                   |20.0                  
-NULL                  |NULL                  
-30.0                  |3.0                   
-40.0                  |4.0                   
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+1.0                     |10.0                    
+2.0                     |20.0                    
+NULL                    |NULL                    
+30.0                    |3.0                     
+40.0                    |4.0                     
 ij> select vc10, c30 from t1 union all select c30,  vc10 from t2;
 1                             |2                             
 -------------------------------------------------------------

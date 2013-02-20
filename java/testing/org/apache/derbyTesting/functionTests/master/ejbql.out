@@ -426,137 +426,137 @@ ij> -- End of Bigint test
 create table myreal( a real );
 0 rows inserted/updated/deleted
 ij> select abs(a) from myreal;
-1            
--------------
+1              
+---------------
 ij> insert into myreal values (null), (+0), (-0), (+1), (-1), (null), (100000000), (-100000000),
 (3.402E+38), (-3.402E+38),
 (1.175E-37), (-1.175E-37);
 12 rows inserted/updated/deleted
 ij> select a from myreal;
-A            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
--1.0         
-NULL         
-1.0E8        
--1.0E8       
-3.402E38     
--3.402E38    
-1.175E-37    
--1.175E-37   
+A              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+-1.0           
+NULL           
+1.0E8          
+-1.0E8         
+3.402E38       
+-3.402E38      
+1.175E-37      
+-1.175E-37     
 ij> select -a from myreal;
-1            
--------------
-NULL         
-0.0          
-0.0          
--1.0         
-1.0          
-NULL         
--1.0E8       
-1.0E8        
--3.402E38    
-3.402E38     
--1.175E-37   
-1.175E-37    
+1              
+---------------
+NULL           
+0.0            
+0.0            
+-1.0           
+1.0            
+NULL           
+-1.0E8         
+1.0E8          
+-3.402E38      
+3.402E38       
+-1.175E-37     
+1.175E-37      
 ij> select abs(a) from myreal;
-1            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
-1.0          
-NULL         
-1.0E8        
-1.0E8        
-3.402E38     
-3.402E38     
-1.175E-37    
-1.175E-37    
+1              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+1.0            
+NULL           
+1.0E8          
+1.0E8          
+3.402E38       
+3.402E38       
+1.175E-37      
+1.175E-37      
 ij> select abs(-a) from myreal;
-1            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
-1.0          
-NULL         
-1.0E8        
-1.0E8        
-3.402E38     
-3.402E38     
-1.175E-37    
-1.175E-37    
+1              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+1.0            
+NULL           
+1.0E8          
+1.0E8          
+3.402E38       
+3.402E38       
+1.175E-37      
+1.175E-37      
 ij> select -abs(a) from myreal;
-1            
--------------
-NULL         
-0.0          
-0.0          
--1.0         
--1.0         
-NULL         
--1.0E8       
--1.0E8       
--3.402E38    
--3.402E38    
--1.175E-37   
--1.175E-37   
+1              
+---------------
+NULL           
+0.0            
+0.0            
+-1.0           
+-1.0           
+NULL           
+-1.0E8         
+-1.0E8         
+-3.402E38      
+-3.402E38      
+-1.175E-37     
+-1.175E-37     
 ij> select abs(abs(-abs(-abs(a)))) from myreal;
-1            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
-1.0          
-NULL         
-1.0E8        
-1.0E8        
-3.402E38     
-3.402E38     
-1.175E-37    
-1.175E-37    
+1              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+1.0            
+NULL           
+1.0E8          
+1.0E8          
+3.402E38       
+3.402E38       
+1.175E-37      
+1.175E-37      
 ij> SELECT ABSVAL(ABSVAL(-ABSVAL(-ABSVAL(A)))) FROM MYREAL;
-1            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
-1.0          
-NULL         
-1.0E8        
-1.0E8        
-3.402E38     
-3.402E38     
-1.175E-37    
-1.175E-37    
+1              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+1.0            
+NULL           
+1.0E8          
+1.0E8          
+3.402E38       
+3.402E38       
+1.175E-37      
+1.175E-37      
 ij> select distinct abs(a) from myreal;
-1            
--------------
-0.0          
-1.175E-37    
-1.0          
-1.0E8        
-3.402E38     
-NULL         
+1              
+---------------
+0.0            
+1.175E-37      
+1.0            
+1.0E8          
+3.402E38       
+NULL           
 ij> ---- There is nothing wrong with returning 1.0.  The float overflows and this is just the way it behaves.
 -- this used to work on CS, not any more when adopted to DB2 style floats
 -- since contant numbers are (parsed as) doubles
 select abs(-abs(a)) + 1 from myreal where a=1.175E-37;
-1            
--------------
+1              
+---------------
 ij> -- when casted to a real, it is found
 select abs(-abs(a)) + 1 from myreal where a=cast(1.175E-37 as real);
-1            
--------------
-1.0          
+1              
+---------------
+1.0            
 ij> -- Error
 insert into myreal values ( 3.402E+38 *2);
 ERROR 22003: The resulting value is outside the range for the data type REAL.
@@ -572,131 +572,131 @@ ij> -- End of Real test
 create table mydoubleprecision( a double precision );
 0 rows inserted/updated/deleted
 ij> select abs(a) from mydoubleprecision;
-1                     
-----------------------
+1                       
+------------------------
 ij> insert into mydoubleprecision values (null), (+0), (-0), (+1), (-1), (100000000), (-100000000), (null),
 (1.79769E+308), (-1.79769E+308),
 (2.225E-307), (-2.225E-307);
 12 rows inserted/updated/deleted
 ij> select a from mydoubleprecision;
-A                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
--1.0                  
-1.0E8                 
--1.0E8                
-NULL                  
-1.79769E308           
--1.79769E308          
-2.225E-307            
--2.225E-307           
+A                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+-1.0                    
+1.0E8                   
+-1.0E8                  
+NULL                    
+1.79769E308             
+-1.79769E308            
+2.225E-307              
+-2.225E-307             
 ij> select -a from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
--1.0                  
-1.0                   
--1.0E8                
-1.0E8                 
-NULL                  
--1.79769E308          
-1.79769E308           
--2.225E-307           
-2.225E-307            
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+-1.0                    
+1.0                     
+-1.0E8                  
+1.0E8                   
+NULL                    
+-1.79769E308            
+1.79769E308             
+-2.225E-307             
+2.225E-307              
 ij> select abs(a) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-1.0                   
-1.0E8                 
-1.0E8                 
-NULL                  
-1.79769E308           
-1.79769E308           
-2.225E-307            
-2.225E-307            
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+1.0                     
+1.0E8                   
+1.0E8                   
+NULL                    
+1.79769E308             
+1.79769E308             
+2.225E-307              
+2.225E-307              
 ij> select abs(-a) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-1.0                   
-1.0E8                 
-1.0E8                 
-NULL                  
-1.79769E308           
-1.79769E308           
-2.225E-307            
-2.225E-307            
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+1.0                     
+1.0E8                   
+1.0E8                   
+NULL                    
+1.79769E308             
+1.79769E308             
+2.225E-307              
+2.225E-307              
 ij> select -abs(a) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
--1.0                  
--1.0                  
--1.0E8                
--1.0E8                
-NULL                  
--1.79769E308          
--1.79769E308          
--2.225E-307           
--2.225E-307           
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+-1.0                    
+-1.0                    
+-1.0E8                  
+-1.0E8                  
+NULL                    
+-1.79769E308            
+-1.79769E308            
+-2.225E-307             
+-2.225E-307             
 ij> select abs(abs(-abs(-abs(a)))) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-1.0                   
-1.0E8                 
-1.0E8                 
-NULL                  
-1.79769E308           
-1.79769E308           
-2.225E-307            
-2.225E-307            
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+1.0                     
+1.0E8                   
+1.0E8                   
+NULL                    
+1.79769E308             
+1.79769E308             
+2.225E-307              
+2.225E-307              
 ij> SELECT ABSVAL(ABSVAL(-ABSVAL(-ABSVAL(A)))) FROM MYDOUBLEPRECISION;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-1.0                   
-1.0E8                 
-1.0E8                 
-NULL                  
-1.79769E308           
-1.79769E308           
-2.225E-307            
-2.225E-307            
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+1.0                     
+1.0E8                   
+1.0E8                   
+NULL                    
+1.79769E308             
+1.79769E308             
+2.225E-307              
+2.225E-307              
 ij> select distinct abs(a) from mydoubleprecision;
-1                     
-----------------------
-0.0                   
-2.225E-307            
-1.0                   
-1.0E8                 
-1.79769E308           
-NULL                  
+1                       
+------------------------
+0.0                     
+2.225E-307              
+1.0                     
+1.0E8                   
+1.79769E308             
+NULL                    
 ij> -- There is nothing wrong with returning 1.0.  The double overflows and this is just the way it behaves.
 select abs(-abs(a)) + 1 from mydoubleprecision where a=2.225E-307;
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> -- Error
 insert into mydoubleprecision values ( 1.79769E+308 *2);
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
@@ -712,8 +712,8 @@ ij> -- End of Double Precision test
 create table myfloat( a float, b float(23) );
 0 rows inserted/updated/deleted
 ij> select abs(a), abs(b) from myfloat;
-1                     |2            
-------------------------------------
+1                       |2              
+----------------------------------------
 ij> select columnname, columndatatype
 from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='MYFLOAT';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
@@ -728,140 +728,140 @@ ij> insert into myfloat values (null, null), (+0, +0), (-0, -0), (+1, +1), (-1, 
 (-2.225E-307, -1.175E-37);
 12 rows inserted/updated/deleted
 ij> select a, b from myfloat;
-A                     |B            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
--1.0                  |-1.0         
-1.0E8                 |1.0E8        
--1.0E8                |-1.0E8       
-NULL                  |NULL         
-1.79769E308           |3.402E38     
--1.79769E308          |-3.402E38    
-2.225E-307            |1.175E-37    
--2.225E-307           |-1.175E-37   
+A                       |B              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+-1.0                    |-1.0           
+1.0E8                   |1.0E8          
+-1.0E8                  |-1.0E8         
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+-1.79769E308            |-3.402E38      
+2.225E-307              |1.175E-37      
+-2.225E-307             |-1.175E-37     
 ij> select -a, -b from myfloat;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
--1.0                  |-1.0         
-1.0                   |1.0          
--1.0E8                |-1.0E8       
-1.0E8                 |1.0E8        
-NULL                  |NULL         
--1.79769E308          |-3.402E38    
-1.79769E308           |3.402E38     
--2.225E-307           |-1.175E-37   
-2.225E-307            |1.175E-37    
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+-1.0                    |-1.0           
+1.0                     |1.0            
+-1.0E8                  |-1.0E8         
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+-1.79769E308            |-3.402E38      
+1.79769E308             |3.402E38       
+-2.225E-307             |-1.175E-37     
+2.225E-307              |1.175E-37      
 ij> select abs(a), abs(b) from myfloat;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
-1.0                   |1.0          
-1.0E8                 |1.0E8        
-1.0E8                 |1.0E8        
-NULL                  |NULL         
-1.79769E308           |3.402E38     
-1.79769E308           |3.402E38     
-2.225E-307            |1.175E-37    
-2.225E-307            |1.175E-37    
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+1.0                     |1.0            
+1.0E8                   |1.0E8          
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+1.79769E308             |3.402E38       
+2.225E-307              |1.175E-37      
+2.225E-307              |1.175E-37      
 ij> select abs(-a), abs(-b) from myfloat;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
-1.0                   |1.0          
-1.0E8                 |1.0E8        
-1.0E8                 |1.0E8        
-NULL                  |NULL         
-1.79769E308           |3.402E38     
-1.79769E308           |3.402E38     
-2.225E-307            |1.175E-37    
-2.225E-307            |1.175E-37    
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+1.0                     |1.0            
+1.0E8                   |1.0E8          
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+1.79769E308             |3.402E38       
+2.225E-307              |1.175E-37      
+2.225E-307              |1.175E-37      
 ij> select -abs(a), -abs(b) from myfloat;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
--1.0                  |-1.0         
--1.0                  |-1.0         
--1.0E8                |-1.0E8       
--1.0E8                |-1.0E8       
-NULL                  |NULL         
--1.79769E308          |-3.402E38    
--1.79769E308          |-3.402E38    
--2.225E-307           |-1.175E-37   
--2.225E-307           |-1.175E-37   
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+-1.0                    |-1.0           
+-1.0                    |-1.0           
+-1.0E8                  |-1.0E8         
+-1.0E8                  |-1.0E8         
+NULL                    |NULL           
+-1.79769E308            |-3.402E38      
+-1.79769E308            |-3.402E38      
+-2.225E-307             |-1.175E-37     
+-2.225E-307             |-1.175E-37     
 ij> select abs(abs(-abs(-abs(a)))), abs(abs(-abs(-abs(b)))) from myfloat;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
-1.0                   |1.0          
-1.0E8                 |1.0E8        
-1.0E8                 |1.0E8        
-NULL                  |NULL         
-1.79769E308           |3.402E38     
-1.79769E308           |3.402E38     
-2.225E-307            |1.175E-37    
-2.225E-307            |1.175E-37    
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+1.0                     |1.0            
+1.0E8                   |1.0E8          
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+1.79769E308             |3.402E38       
+2.225E-307              |1.175E-37      
+2.225E-307              |1.175E-37      
 ij> SELECT ABSVAL(ABSVAL(-ABSVAL(-ABSVAL(A)))), ABSVAL(ABSVAL(-ABSVAL(-ABSVAL(B)))) FROM MYFLOAT;
-1                     |2            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
-1.0                   |1.0          
-1.0E8                 |1.0E8        
-1.0E8                 |1.0E8        
-NULL                  |NULL         
-1.79769E308           |3.402E38     
-1.79769E308           |3.402E38     
-2.225E-307            |1.175E-37    
-2.225E-307            |1.175E-37    
+1                       |2              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+1.0                     |1.0            
+1.0E8                   |1.0E8          
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+1.79769E308             |3.402E38       
+2.225E-307              |1.175E-37      
+2.225E-307              |1.175E-37      
 ij> select distinct abs(a) from myfloat;
-1                     
-----------------------
-0.0                   
-2.225E-307            
-1.0                   
-1.0E8                 
-1.79769E308           
-NULL                  
+1                       
+------------------------
+0.0                     
+2.225E-307              
+1.0                     
+1.0E8                   
+1.79769E308             
+NULL                    
 ij> -- -- There is nothing wrong with returning 1.0.  The float overflows and this is just the way it behaves.
 -- this used to work in CS, but no more, = on floating point values isn't really useful
 select abs(-abs(a)) + 1, abs(-abs(b)) + 1 from myfloat where a=2.225E-307 AND b=1.175E-37;
-1                     |2            
-------------------------------------
+1                       |2              
+----------------------------------------
 ij> select abs(-abs(a)) + 1, abs(-abs(b)) + 1 from myfloat where b=3.402E+38;
-1                     |2            
-------------------------------------
+1                       |2              
+----------------------------------------
 ij> -- 'real =' works on DB2 and DB2 Cloudscape
 select abs(-abs(a)) + 1, abs(-abs(b)) + 1 from myfloat where b=cast(3.402E+38 as real);
-1                     |2            
-------------------------------------
-1.79769E308           |3.402E38     
+1                       |2              
+----------------------------------------
+1.79769E308             |3.402E38       
 ij> select abs(-abs(a)) + 1, abs(-abs(b)) + 1 from myfloat where a=2.225E-307 AND b=cast(1.175E-37 as real);
-1                     |2            
-------------------------------------
-1.0                   |1.0          
+1                       |2              
+----------------------------------------
+1.0                     |1.0            
 ij> select abs(-abs(a)) + 1, abs(-abs(b)) + 1 from myfloat where a=2.225E-307;
-1                     |2            
-------------------------------------
-1.0                   |1.0          
+1                       |2              
+----------------------------------------
+1.0                     |1.0            
 ij> -- Error
 insert into myfloat values ( 1.79769E+308 *2, 3.402E+38 *2);
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
@@ -1622,52 +1622,56 @@ ij> -- Double Precision/Double
 -- Basic
 -- beetle 5803 - support DOUBLE_[PRECISION] built-in function
 values{fn abs( DOUBLE( 0)                      )};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> values{fn abs( DOUBLE(-0)                      )};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> values{fn abs( DOUBLE( 1)                      )};
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> values{fn abs( DOUBLE(-1)                      )};
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> values{fn abs( DOUBLE( 1000000.001)            )};
-1                     
-----------------------
-1000000.001           
+1                       
+------------------------
+1000000.001             
 ij> values{fn abs( DOUBLE(-1000000.001)            )};
-1                     
-----------------------
-1000000.001           
+1                       
+------------------------
+1000000.001             
 ij> values{fn abs( DOUBLE(-1.79769E+308)           )};
-1                     
-----------------------
-1.79769E308           
+1                       
+------------------------
+1.79769E308             
 ij> values{fn abs( DOUBLE( 1.79769E+308) + 1       )};
-1                     
-----------------------
-1.79769E308           
+1                       
+------------------------
+1.79769E308             
 ij> values{fn abs( DOUBLE( 2.225E-307 + 1)         )};
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> -- Error
 values{fn abs( DOUBLE( 1.79769E+308 * 2)       )};
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn abs(-DOUBLE( NaN)                    )};
 ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> values{fn abs( DOUBLE( 4.9E-324)               )};
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1                       
+------------------------
+4.9E-324                
 ij> values{fn abs( DOUBLE( 1.7976931348623157E308) )};
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1                       
+------------------------
+1.7976931348623157E308  
 ij> -- Decimal/Numeric
 -- Basic
 -- beetle 5802 - support DEC[IMAL] built-in function
@@ -3123,78 +3127,78 @@ ij> -- End of LOCATE test
 create table myreal( a real );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from myreal;
-1                     
-----------------------
+1                       
+------------------------
 ij> insert into myreal values (null), (+0), (-0), (+1), (null), (100000000),
 (3.402E+38), (1.175E-37);
 8 rows inserted/updated/deleted
 ij> select a from myreal;
-A            
--------------
-NULL         
-0.0          
-0.0          
-1.0          
-NULL         
-1.0E8        
-3.402E38     
-1.175E-37    
+A              
+---------------
+NULL           
+0.0            
+0.0            
+1.0            
+NULL           
+1.0E8          
+3.402E38       
+1.175E-37      
 ij> select sqrt(a) from myreal;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-NULL                  
-10000.0               
-1.844451138023282E19  
-3.427827260414494E-19 
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+NULL                    
+10000.0                 
+1.844451138023282E19    
+3.427827260414494E-19   
 ij> select -sqrt(a) from myreal;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
--1.0                  
-NULL                  
--10000.0              
--1.844451138023282E19 
--3.427827260414494E-19
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+-1.0                    
+NULL                    
+-10000.0                
+-1.844451138023282E19   
+-3.427827260414494E-19  
 ij> select sqrt(sqrt(-sqrt(-sqrt(a)))) from myreal;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> SELECT SQRT(SQRT(-SQRT(-SQRT(A)))) FROM MYREAL;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> select sqrt(sqrt(sqrt(sqrt(a)))) from myreal;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-NULL                  
-3.1622776601683795    
-255.99612668910464    
-0.004919006155611499  
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+NULL                    
+3.1622776601683795      
+255.99612668910464      
+0.004919006155611499    
 ij> select distinct sqrt(a) from myreal;
-1                     
-----------------------
-0.0                   
-3.427827260414494E-19 
-1.0                   
-10000.0               
-1.844451138023282E19  
-NULL                  
+1                       
+------------------------
+0.0                     
+3.427827260414494E-19   
+1.0                     
+10000.0                 
+1.844451138023282E19    
+NULL                    
 ij> drop table myreal;
 0 rows inserted/updated/deleted
 ij> -- End of Real test
@@ -3205,78 +3209,78 @@ ij> -- End of Real test
 create table mydoubleprecision( a double precision );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from mydoubleprecision;
-1                     
-----------------------
+1                       
+------------------------
 ij> insert into mydoubleprecision values (null), (+0), (-0), (+1), (100000000), (null),
 (1.79769E+308), (2.225E-307);
 8 rows inserted/updated/deleted
 ij> select a from mydoubleprecision;
-A                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-1.0E8                 
-NULL                  
-1.79769E308           
-2.225E-307            
+A                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+1.0E8                   
+NULL                    
+1.79769E308             
+2.225E-307              
 ij> select sqrt(a) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-10000.0               
-NULL                  
-1.3407796239501852E154
-4.716990566028302E-154
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+10000.0                 
+NULL                    
+1.3407796239501852E154  
+4.716990566028302E-154  
 ij> select -sqrt(a) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
--1.0                  
--10000.0              
-NULL                  
--1.3407796239501852E1&
--4.716990566028302E-1&
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+-1.0                    
+-10000.0                
+NULL                    
+-1.3407796239501852E154 
+-4.716990566028302E-154 
 ij> select sqrt(sqrt(-sqrt(-sqrt(a)))) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> SELECT SQRT(SQRT(-SQRT(-SQRT(A)))) FROM MYDOUBLEPRECISION;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> select sqrt(sqrt(sqrt(sqrt(a)))) from mydoubleprecision;
-1                     
-----------------------
-NULL                  
-0.0                   
-0.0                   
-1.0                   
-3.1622776601683795    
-NULL                  
-1.8446742063214512E19 
-6.826657681281494E-20 
+1                       
+------------------------
+NULL                    
+0.0                     
+0.0                     
+1.0                     
+3.1622776601683795      
+NULL                    
+1.8446742063214512E19   
+6.826657681281494E-20   
 ij> select distinct sqrt(a) from mydoubleprecision;
-1                     
-----------------------
-0.0                   
-4.716990566028302E-154
-1.0                   
-10000.0               
-1.3407796239501852E154
-NULL                  
+1                       
+------------------------
+0.0                     
+4.716990566028302E-154  
+1.0                     
+10000.0                 
+1.3407796239501852E154  
+NULL                    
 ij> drop table mydoubleprecision;
 0 rows inserted/updated/deleted
 ij> -- End of Double Precision test
@@ -3287,8 +3291,8 @@ ij> -- End of Double Precision test
 create table myfloat( a float, b float(23) );
 0 rows inserted/updated/deleted
 ij> select sqrt(a), sqrt(b) from myfloat;
-1                     |2                     
----------------------------------------------
+1                       |2                       
+-------------------------------------------------
 ij> select columnname, columndatatype
 from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) = 'MYFLOAT';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
@@ -3300,81 +3304,81 @@ ij> insert into myfloat values (null, null), (+0, +0), (-0, -0), (+1, +1), (1000
 (2.225E-307, 1.175E-37);
 8 rows inserted/updated/deleted
 ij> select a, b from myfloat;
-A                     |B            
-------------------------------------
-NULL                  |NULL         
-0.0                   |0.0          
-0.0                   |0.0          
-1.0                   |1.0          
-1.0E8                 |1.0E8        
-NULL                  |NULL         
-1.79769E308           |3.402E38     
-2.225E-307            |1.175E-37    
+A                       |B              
+----------------------------------------
+NULL                    |NULL           
+0.0                     |0.0            
+0.0                     |0.0            
+1.0                     |1.0            
+1.0E8                   |1.0E8          
+NULL                    |NULL           
+1.79769E308             |3.402E38       
+2.225E-307              |1.175E-37      
 ij> select sqrt(a), sqrt(b) from myfloat;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-0.0                   |0.0                   
-0.0                   |0.0                   
-1.0                   |1.0                   
-10000.0               |10000.0               
-NULL                  |NULL                  
-1.3407796239501852E154|1.844451138023282E19  
-4.716990566028302E-154|3.427827260414494E-19 
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+0.0                     |0.0                     
+0.0                     |0.0                     
+1.0                     |1.0                     
+10000.0                 |10000.0                 
+NULL                    |NULL                    
+1.3407796239501852E154  |1.844451138023282E19    
+4.716990566028302E-154  |3.427827260414494E-19   
 ij> select -sqrt(a), -sqrt(b) from myfloat;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-0.0                   |0.0                   
-0.0                   |0.0                   
--1.0                  |-1.0                  
--10000.0              |-10000.0              
-NULL                  |NULL                  
--1.3407796239501852E1&|-1.844451138023282E19 
--4.716990566028302E-1&|-3.427827260414494E-19
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+0.0                     |0.0                     
+0.0                     |0.0                     
+-1.0                    |-1.0                    
+-10000.0                |-10000.0                
+NULL                    |NULL                    
+-1.3407796239501852E154 |-1.844451138023282E19   
+-4.716990566028302E-154 |-3.427827260414494E-19  
 ij> select sqrt(sqrt(-sqrt(-sqrt(a)))), sqrt(sqrt(-sqrt(-sqrt(b)))) from myfloat;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-0.0                   |0.0                   
-0.0                   |0.0                   
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+0.0                     |0.0                     
+0.0                     |0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> SELECT SQRT(SQRT(-SQRT(-SQRT(A)))), SQRT(SQRT(-SQRT(-SQRT(B)))) FROM MYFLOAT;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-0.0                   |0.0                   
-0.0                   |0.0                   
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+0.0                     |0.0                     
+0.0                     |0.0                     
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> select sqrt(sqrt(sqrt(sqrt(a)))), sqrt(sqrt(sqrt(sqrt(b)))) from myfloat;
-1                     |2                     
----------------------------------------------
-NULL                  |NULL                  
-0.0                   |0.0                   
-0.0                   |0.0                   
-1.0                   |1.0                   
-3.1622776601683795    |3.1622776601683795    
-NULL                  |NULL                  
-1.8446742063214512E19 |255.99612668910464    
-6.826657681281494E-20 |0.004919006155611499  
+1                       |2                       
+-------------------------------------------------
+NULL                    |NULL                    
+0.0                     |0.0                     
+0.0                     |0.0                     
+1.0                     |1.0                     
+3.1622776601683795      |3.1622776601683795      
+NULL                    |NULL                    
+1.8446742063214512E19   |255.99612668910464      
+6.826657681281494E-20   |0.004919006155611499    
 ij> select distinct sqrt(a) from myfloat;
-1                     
-----------------------
-0.0                   
-4.716990566028302E-154
-1.0                   
-10000.0               
-1.3407796239501852E154
-NULL                  
+1                       
+------------------------
+0.0                     
+4.716990566028302E-154  
+1.0                     
+10000.0                 
+1.3407796239501852E154  
+NULL                    
 ij> select distinct sqrt(b) from myfloat;
-1                     
-----------------------
-0.0                   
-3.427827260414494E-19 
-1.0                   
-10000.0               
-1.844451138023282E19  
-NULL                  
+1                       
+------------------------
+0.0                     
+3.427827260414494E-19   
+1.0                     
+10000.0                 
+1.844451138023282E19    
+NULL                    
 ij> drop table myfloat;
 0 rows inserted/updated/deleted
 ij> -- End of Float test
@@ -3419,13 +3423,13 @@ ij> autocommit off;
 ij> prepare p1 as 'select a from foo';
 ij> prepare p2 as 'insert into foo select a*(-1) from foo';
 ij> execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> execute p2;
 0 rows inserted/updated/deleted
 ij> execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> insert into foo values ( sqrt(FLOAT( 6)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
 Issue the 'help' command for general information on IJ command syntax.
@@ -3461,17 +3465,17 @@ Consult your DBMS server reference documentation for details of the SQL syntax s
 ij> prepare p3 as 'select sqrt(a) from foo';
 ij> -- executing p3 should fail
 execute p3;
-1                     
-----------------------
+1                       
+------------------------
 ij> -- these should pass
 execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> execute p2;
 0 rows inserted/updated/deleted
 ij> execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> rollback;
 ij> commit;
 ij> autocommit on;
@@ -3514,21 +3518,21 @@ Consult your DBMS server reference documentation for details of the SQL syntax s
 ij> -- these should pass
 autocommit off;
 ij> execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> execute p3;
-1                     
-----------------------
+1                       
+------------------------
 ij> execute p1;
-A                     
-----------------------
+A                       
+------------------------
 ij> -- executing p2 should fail
 execute p2;
 0 rows inserted/updated/deleted
 ij> autocommit on;
 ij> select * from foo;
-A                     
-----------------------
+A                       
+------------------------
 ij> drop table foo;
 0 rows inserted/updated/deleted
 ij> -- End of SQRT test.  For all valid types.  Un-escaped function.
@@ -3542,11 +3546,11 @@ create table myint( a int );
 ij> create table myinteger( a Integer );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from myint;
-1                     
-----------------------
+1                       
+------------------------
 ij> select sqrt(a) from myinteger;
-1                     
-----------------------
+1                       
+------------------------
 ij> drop table myint;
 0 rows inserted/updated/deleted
 ij> drop table myinteger;
@@ -3554,22 +3558,22 @@ ij> drop table myinteger;
 ij> create table mysmallint( a smallint );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from mysmallint;
-1                     
-----------------------
+1                       
+------------------------
 ij> drop table mysmallint;
 0 rows inserted/updated/deleted
 ij> create table mybigint( a bigint );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from mybigint;
-1                     
-----------------------
+1                       
+------------------------
 ij> drop table mybigint;
 0 rows inserted/updated/deleted
 ij> create table mydecimal( a decimal );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from mydecimal;
-1                     
-----------------------
+1                       
+------------------------
 ij> drop table mydecimal;
 0 rows inserted/updated/deleted
 ij> -- For escape function.
@@ -3578,23 +3582,23 @@ ij> -- For escape function.
 -- Integer
 -- Basic
 values{ fn sqrt(INT('0'))};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> -- Smallint
 -- Basic
 -- beetle 5805 - support INT[EGER] built-in function
 values{ fn sqrt(SMALLINT('0'))};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> -- Bigint
 -- Basic
 -- beetle 5809 - support BIGINT built-in function
 values{ fn sqrt(BIGINT('0'))};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> -- Real
 -- Basic
 -- beetle 5806 - support REAL built-in function
@@ -3663,26 +3667,26 @@ ij> -- Double Precision/Double
 -- Basic
 -- beetle 5803 - support DOUBLE_[PRECISION] built-in function
 values{fn  sqrt( DOUBLE( 0)                      )};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> values{fn  sqrt( DOUBLE(-0)                      )};
-1                     
-----------------------
-0.0                   
+1                       
+------------------------
+0.0                     
 ij> values{fn  sqrt( DOUBLE( 1)                      )};
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> values{fn -sqrt( DOUBLE(1)                       )};
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 11.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn  sqrt( DOUBLE( 1000000.001)            )};
-1                     
-----------------------
-1000.0000005          
+1                       
+------------------------
+1000.0000005            
 ij> values{fn -sqrt( DOUBLE(1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 11.
 Issue the 'help' command for general information on IJ command syntax.
@@ -3694,36 +3698,40 @@ Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn  sqrt( DOUBLE( 1.79769E+308) + 1       )};
-1                     
-----------------------
-1.3407796239501852E154
+1                       
+------------------------
+1.3407796239501852E154  
 ij> values{fn  sqrt( DOUBLE( 2.225E-307 + 1)         )};
-1                     
-----------------------
-1.0                   
+1                       
+------------------------
+1.0                     
 ij> -- Error
 values{fn  sqrt( DOUBLE(-1)                      )};
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-1.0'.
 ij> values{fn  sqrt( DOUBLE(-1000000.001)            )};
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-1000000.001'.
 ij> values{fn  sqrt( DOUBLE(-1.79769E+308)           )};
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-1.79769E308'.
 ij> values{fn  sqrt( DOUBLE( 1.79769E+308 * 2)       )};
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values{fn  sqrt(-DOUBLE( NaN)                    )};
 ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> values{fn  sqrt( DOUBLE( 4.9E-324)               )};
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1                       
+------------------------
+2.2227587494850775E-162 
 ij> values{fn  sqrt( DOUBLE( 1.7976931348623157E308) )};
-ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+1                       
+------------------------
+1.3407807929942596E154  
 ij> -- Decimal/Numeric
 -- Basic
 -- beetle 5802 - support DEC[IMAL] built-in function
@@ -3734,28 +3742,28 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- More generic test
 values{ fn sqrt( 0+1+.1 ) };
-1                     
-----------------------
-1.0488088481701516    
+1                       
+------------------------
+1.0488088481701516      
 ij> values{ fn sqrt( +0+1.000000001 ) };
-1                     
-----------------------
-1.0000000005          
+1                       
+------------------------
+1.0000000005            
 ij> VALUES{ FN sqrt( 100+200+300 ) };
-1                     
-----------------------
-24.49489742783178     
+1                       
+------------------------
+24.49489742783178       
 ij> values{ fn sqrt( 0-1-.1 ) };
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-1.1'.
 ij> values{ fn sqrt( -0-1.000000001 ) };
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-1.000000001'.
 ij> VALUES{ FN sqrt( 100-200-300 ) };
-1                     
-----------------------
+1                       
+------------------------
 ERROR 22013: Attempt to take the square root of a negative number, '-400.0'.
 ij> -- Error
 values{ fn sqrt('null') };
@@ -3770,14 +3778,14 @@ ij> -- End of SQRT test.
 create table myreal( a real );
 0 rows inserted/updated/deleted
 ij> select sqrt(a) from myreal;
-1                     
-----------------------
+1                       
+------------------------
 ij> insert into myreal values ( 3.402E+38 );
 1 row inserted/updated/deleted
 ij> select a from myreal;
-A            
--------------
-3.402E38     
+A              
+---------------
+3.402E38       
 ij> -- Prepare Statements, should pass
 -- beetle 5806 - support REAL built-in function
 autocommit off;
@@ -4529,30 +4537,30 @@ insert into n values (1, 1.1, date('1111-11-11'), '%');
 ij> insert into n values (2, 2.2, date('2222-2-2'), 'haha');
 1 row inserted/updated/deleted
 ij> select * from n where u like 'haha______';
-I          |R            |D         |U         
------------------------------------------------
-2          |2.2          |2222-02-02|haha      
+I          |R              |D         |U         
+-------------------------------------------------
+2          |2.2            |2222-02-02|haha      
 ij> -- now, with an index
 create table m (i int, r real, d date, u varchar(10));
 0 rows inserted/updated/deleted
 ij> insert into m select * from n;
 2 rows inserted/updated/deleted
 ij> select * from m where u like 'haha';
-I          |R            |D         |U         
------------------------------------------------
+I          |R              |D         |U         
+-------------------------------------------------
 ij> select * from m where u like 'haha______';
-I          |R            |D         |U         
------------------------------------------------
-2          |2.2          |2222-02-02|haha      
+I          |R              |D         |U         
+-------------------------------------------------
+2          |2.2            |2222-02-02|haha      
 ij> create index i1 on m(u);
 0 rows inserted/updated/deleted
 ij> select * from m where u like 'haha';
-I          |R            |D         |U         
------------------------------------------------
+I          |R              |D         |U         
+-------------------------------------------------
 ij> select * from m where u like 'haha______';
-I          |R            |D         |U         
------------------------------------------------
-2          |2.2          |2222-02-02|haha      
+I          |R              |D         |U         
+-------------------------------------------------
+2          |2.2            |2222-02-02|haha      
 ij> -- tests for column like constant optimization
 create table u (c char(10), vc varchar(10));
 0 rows inserted/updated/deleted

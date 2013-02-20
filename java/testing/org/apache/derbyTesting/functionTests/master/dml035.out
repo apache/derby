@@ -42,14 +42,14 @@ ij> -- PASS:0157 If 1 row is inserted?
      SELECT FLOATTEST
           FROM JJ
           ORDER BY FLOATTEST DESC;
-FLOATTEST             
-----------------------
-66.3                  
-66.2                  
-0.2222                
--44.5                 
--66.25                
--87.0                 
+FLOATTEST               
+------------------------
+66.3                    
+66.2                    
+0.2222                  
+-44.5                   
+-66.25                  
+-87.0                   
 ij> -- PASS:0157 If 6 rows are selected ?
 -- PASS:0157 If last FLOATTEST = -87 OR  is between -87.5 and -86.5 ?
 

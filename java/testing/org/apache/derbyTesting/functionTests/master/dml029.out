@@ -50,9 +50,9 @@ ij> -- PASS:0130 If 1 row is inserted?
       SELECT *
            FROM JJ
            WHERE FLOATTEST > 123455 AND FLOATTEST < 123457;
-FLOATTEST             
-----------------------
-123456.0              
+FLOATTEST               
+------------------------
+123456.0                
 ij> -- PASS:0130 If count = 1 ?
 
 -- restore
@@ -72,9 +72,9 @@ ij> -- PASS:0131 If 1 row is inserted?
       SELECT *
            FROM JJ
            WHERE FLOATTEST > 122 AND FLOATTEST < 124;
-FLOATTEST             
-----------------------
-123.456               
+FLOATTEST               
+------------------------
+123.456                 
 ij> -- PASS:0131 If count = 1 ?
 
 -- restore
@@ -94,9 +94,9 @@ ij> -- PASS:0182 If 1 row is inserted?
      SELECT *
            FROM JJ
            WHERE FLOATTEST > -124 AND FLOATTEST < -122;
-FLOATTEST             
-----------------------
--123.456              
+FLOATTEST               
+------------------------
+-123.456                
 ij> -- PASS:0182 If count = 1 ?
 
 -- restore

@@ -4738,27 +4738,28 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           _X, -(new Float(Float.MAX_VALUE)).doubleValue() * 10,
                           XXX_DOUBLE, "22003");
         assertUpdateState(rs, "F04",
+                          _X, Float.POSITIVE_INFINITY, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F04",
                           _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
         assertUpdateState(rs, "F04",
                           bdMinFloatValue.multiply(BigDecimal.TEN), "22003");
 
-        // Remove test when DERBY-5534 is fixed
+        // These two would fail prior to DERBY-3398
+        assertUpdateOK(rs, "F04", _X, Float.MIN_VALUE, XXX_FLOAT);
+        assertUpdateOK(rs, "F04", _X, -Float.MIN_VALUE, XXX_FLOAT);
+
+        // Make unconditional when DERBY-5534 is fixed
         if (usingEmbedded()) {
             assertUpdateState(rs, "F04",
                               _X, Float.NaN, XXX_FLOAT, "22003");
             assertUpdateState(rs, "F04",
                               _X, Double.MIN_VALUE, XXX_DOUBLE, "22003");
-
-            // REAL DB2 limits: remove if DERBY-3398 is implemented
-            assertUpdateState(rs, "F04", bdSmallestPosFloatValue, "22003");
-            assertUpdateState(rs, "F04", bdSmallestNegFloatValue, "22003");
-
-            assertUpdateState(rs, "F04", bdMaxFloatValue, "22003");
-            assertUpdateState(rs, "F04", bdMinFloatValue, "22003");
+            assertUpdateState(rs, "F04",
+                              _X, -Double.MIN_VALUE, XXX_DOUBLE, "22003");
         }
 
         // REAL Underflow checking
-        // Remove test when DERBY-5534 is fixed
+        // Make unconditional DERBY-5534 is fixed
         if (usingEmbedded()) {
             assertUpdateState(rs, "F04", bdSmallestPosDoubleValue, "22003");
             assertUpdateState(rs, "F04", bdSmallestNegDoubleValue, "22003");
@@ -4775,11 +4776,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                               bdMaxDoubleValue.multiply(BigDecimal.TEN),
                               "22003");
 
-            // Uncomment when DERBY-5534 is fixed, or remove entirely if
-            // DERBY-3398 is fixed
-            // assertUpdateState(rs, dfCols[i], _X,
-            //                   Double.MAX_VALUE, UPDATE_DOUBLE, "22003");
-
             assertUpdateState(rs, dfCols[i],
                               _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
             assertUpdateState(rs, dfCols[i],
@@ -4789,26 +4785,24 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                               bdMinDoubleValue.multiply(BigDecimal.TEN),
                               "22003");
 
-            // Uncomment when DERBY-5534 is fixed, or remove entirely if
-            // DERBY-3398 is fixed
-
-            // assertUpdateState(rs, dfCols[i], _X,
-            //                   Double.MIN_VALUE, UPDATE_DOUBLE, "22003");
-
-            // Remove test when DERBY-5534 is fixed
+            // Make unconditional when DERBY-5534 is fixed
             if (usingEmbedded()) {
                 assertUpdateState(rs, dfCols[i],
                                   _X, Double.NaN, XXX_DOUBLE, "22003");
             }
 
             // DOUBLE, FLOAT underflow checking
-            // Remove test when DERBY-5534 is fixed
+            // Make unconditional when DERBY-5534 is fixed
             if (usingEmbedded()) {
                 assertUpdateState(rs, dfCols[i],
                     bdSmallestPosDoubleValue.divide(BigDecimal.TEN), "22003");
                 assertUpdateState(rs, dfCols[i],
                     bdSmallestNegDoubleValue.divide(BigDecimal.TEN), "22003");
             }
+
+            // These two would fail prior to DERBY-3398
+            assertUpdateOK(rs, dfCols[i], _X, Double.MIN_VALUE, XXX_DOUBLE);
+            assertUpdateOK(rs, dfCols[i], _X, -Double.MIN_VALUE, XXX_DOUBLE);
         }
 
         // Derby BOOLEAN: not range checked: FALSE of 0, else TRUE.
@@ -4985,11 +4979,23 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
-
+    /*
+     * Using ResultSet.updateXXX with value or dvalue as the case may be on
+     * colName, assert that we do not see an error. XXX is indicated by
+     * updateType.
+     */
+    private void assertUpdateOK(
+            ResultSet rs,
+            String colName,
+            long value,
+            double dvalue,
+            int updateType) throws SQLException {
+        assertUpdateState(rs, colName, value, dvalue, updateType, null);
+    }
     /*
      * Using ResultSet.updateXXX with value or dvalue as the case may be on
      * colName, assert that we see the SQLstate expected. XXX is indicated by
-     * updateType.
+     * updateType. If expected is null, expect no error.
      */
     private void assertUpdateState(
         ResultSet rs,
@@ -5022,8 +5028,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 fail("wrong argument");
             }
 
-            fail("exception expected");
+            if (expected != null) {
+                fail("exception expected");
+            }
         } catch (SQLException e) {
+            if (expected == null) {
+                throw e;
+            }
             println(e.toString());
             assertSQLState(expected, e);
         }

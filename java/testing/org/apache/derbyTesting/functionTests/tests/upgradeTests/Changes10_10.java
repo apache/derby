@@ -23,27 +23,16 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.functionTests.tests.upgradeTests.helpers.DisposableIndexStatistics;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
-import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -308,5 +297,221 @@ public class Changes10_10 extends UpgradeChange
         
         }
     }
+
+    // Old DB2 constants in Limits.java:
+    // static final float DB2_SMALLEST_REAL = -3.402E+38f;
+    // static final float DB2_LARGEST_REAL  = +3.402E+38f;
+    // static final float DB2_SMALLEST_POSITIVE_REAL = +1.175E-37f;
+    // static final float DB2_LARGEST_NEGATIVE_REAL  = -1.175E-37f;
+
+    // static final double DB2_SMALLEST_DOUBLE = -1.79769E+308d;
+    // static final double DB2_LARGEST_DOUBLE  = +1.79769E+308d;
+    // static final double DB2_SMALLEST_POSITIVE_DOUBLE = +2.225E-307d;
+    // static final double DB2_LARGEST_NEGATIVE_DOUBLE  = -2.225E-307d;
+
+    static final float[] beyondDB2Real = new float[] {
+        Float.MIN_VALUE,
+        Float.MAX_VALUE,
+        +1.174E-37f,
+        -1.174E-37f,
+        1.17549435E-38f // Float.MIN_NORMAL
+        -1.17549435E-38f // -Float.MIN_NORMAL
+    };
+
+    static final double[] beyondDB2Double = new double[] {
+        Double.MIN_VALUE,
+        Double.MAX_VALUE,
+        +2.224E-307d,
+        -2.224E-307d,
+        2.2250738585072014E-308 // Double.MIN_NORMAL
+        -2.2250738585072014E-308 // -Double.MIN_NORMAL
+    };
+
+    /**
+     * Verify upgrade behavior DERBY-3398: removing DB2 float limits
+     */
+    public  void    testFloatLimits()  throws Exception
+    {
+        Statement st = createStatement();
+        st.execute("create table d3398(r real, d double)");
+
+        PreparedStatement psInsertReal =
+            prepareStatement("insert into d3398(r) values (?)");
+        PreparedStatement psInsertDouble =
+            prepareStatement("insert into d3398(d) values (?)");
+        PreparedStatement psSelect =
+            prepareStatement("select * from d3398",
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
+
+        st.execute("insert into d3398 values (0.0, 0.0)");
+
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+            verifyDB2Behavior(psSelect, psInsertReal, psInsertDouble, false);
+
+            break;
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old
+                                   // version after soft-upgrade
+            verifyDB2Behavior(psSelect, psInsertReal, psInsertDouble, false);
+
+            break;
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+
+            verifyDB2Behavior(psSelect, psInsertReal, psInsertDouble, true);
+
+            break;
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+
+            for (int i = 0; i < beyondDB2Real.length; i++) {
+                psInsertReal.setFloat(1, beyondDB2Real[i]);
+                psInsertReal.execute();
+
+                ResultSet rs = psSelect.executeQuery();
+                rs.next();
+                rs.updateFloat(1, beyondDB2Real[i]);
+                rs.updateRow();
+                rs.close();
+            }
+
+            for (int i = 0; i < beyondDB2Double.length; i++) {
+                psInsertDouble.setDouble(1, beyondDB2Double[i]);
+                psInsertDouble.execute();
+
+                ResultSet rs = psSelect.executeQuery();
+                rs.next();
+                rs.updateDouble(2, beyondDB2Double[i]);
+                rs.updateRow();
+                rs.close();
+            }
+
+            break;
+        }
+
+        st.executeUpdate("drop table d3398");
+        st.close();
+    }
+
+    private void assertSetError(PreparedStatement ps, float fv, boolean defer)
+            throws SQLException {
+        try {
+            ps.setFloat(1, fv);
+
+            if (!defer) {
+                fail();
+            }
+
+            ps.executeUpdate();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22003", e);
+        }
+    }
     
+    private void assertSetError(PreparedStatement ps, double dv, boolean defer)
+            throws SQLException {
+        try {
+            ps.setDouble(1, dv);
+
+            if (!defer) {
+                fail();
+            }
+
+            ps.executeUpdate();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22003", e);
+        }
+    }
+
+
+    private void assertUpdateError(
+            PreparedStatement ps,
+            float fv,
+            boolean defer) throws SQLException {
+
+        boolean supportsForwardUpdatableResultSet = oldAtLeast( 10, 2 );
+
+        if (!supportsForwardUpdatableResultSet) {
+            return;
+        }
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+
+        try {
+            rs.updateFloat(1, fv);
+
+            if (!defer) {
+                fail();
+            }
+
+            rs.updateRow();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22003", e);
+        } finally {
+            rs.close();
+        }
+    }
+
+    private void assertUpdateError(
+            PreparedStatement ps,
+            double fv,
+            boolean defer) throws SQLException {
+
+        boolean supportsForwardUpdatableResultSet = oldAtLeast( 10, 2 );
+
+        if (!supportsForwardUpdatableResultSet) {
+            return;
+        }
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+
+        try {
+            rs.updateDouble(1, fv);
+
+            if (!defer) {
+                fail();
+            }
+
+            rs.updateRow();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("22003", e);
+        } finally {
+            rs.close();
+        }
+    }
+
+    /**
+     * Check that the old DB2 limits are (still) enforced.
+     *
+     * @param defer In soft upgrade mode, the checking if deferred after
+     * DERBY-3398, i.e. instead of throwing on the DB2 limits when calling
+     * {@code ResultSet#updateXXX} or {@code PreparedStatement#setXXX}, the
+     * check throws on {@code ResultSet#updateRow}, or {#insertRow}, and
+     * similarly on {@code PreparedStatement#execute} or {@code #executeUpdate}.
+     *
+     * @throws SQLException if we see some expected error.
+     */
+    private void verifyDB2Behavior (
+            PreparedStatement psSelect,
+            PreparedStatement psInsertReal,
+            PreparedStatement psInsertDouble,
+            boolean defer) throws SQLException {
+
+        for (int i = 0; i < beyondDB2Real.length; i++) {
+            assertSetError(psInsertReal, beyondDB2Real[i], defer);
+            assertUpdateError(psSelect, beyondDB2Real[i], defer);
+        }
+
+        for (int i = 0; i < beyondDB2Double.length; i++) {
+            assertSetError(psInsertDouble, beyondDB2Double[i], defer);
+            assertUpdateError(psSelect, beyondDB2Double[i], defer);
+        }
+    }
 }
