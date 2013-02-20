@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.math.BigDecimal;
-import java.io.Serializable;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -31,6 +30,8 @@ import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -42,6 +43,7 @@ import org.apache.derby.iapi.types.HarmonySerialClob;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.tests.lang.Price;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Tests for new methods added for PreparedStatement in JDBC 4.2.
@@ -231,7 +233,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
             }
             catch (SQLException se)
             {
-                assertSQLState( "0A000", se );
+                assertSQLState( UNIMPLEMENTED_FEATURE, se );
             }
         }
 
@@ -636,6 +638,73 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         {
             assertSQLState( UNIMPLEMENTED_FEATURE, se );
         }
+    }
+
+    /**
+     * DERBY-6081: Verify that an SQLException is raised if the supplied
+     * SQLType argument is null. It used to fail with a NullPointerException.
+     */
+    public void test_04_targetTypeIsNull() throws SQLException {
+        setAutoCommit(false);
+
+        // Test PreparedStatement.setObject() with targetType == null.
+
+        PreparedStatement ps = prepareStatement("values cast(? as int)");
+
+        try {
+            ps.setObject(1, 1, null);
+            fail("setObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        try {
+            ps.setObject(1, 1, null, 1);
+            fail("setObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        // Test ResultSet.updateObject() with targetType == null.
+
+        Statement s = createStatement(
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        s.execute("create table t(x int)");
+        s.execute("insert into t values 1");
+
+        ResultSet rs = s.executeQuery("select * from t");
+        assertTrue(rs.next());
+
+        try {
+            rs.updateObject("x", 1, null);
+            fail("updateObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        try {
+            rs.updateObject(1, 1, null);
+            fail("updateObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        try {
+            rs.updateObject("x", 1, null, 1);
+            fail("updateObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        try {
+            rs.updateObject(1, 1, null, 1);
+            fail("updateObject should fail when type is null");
+        } catch (SQLFeatureNotSupportedException se) {
+            assertSQLState(UNIMPLEMENTED_FEATURE, se);
+        }
+
+        // There should be no more rows.
+        JDBC.assertEmpty(rs);
     }
 
     //////////////////////////////////////////////////////////

@@ -54,7 +54,7 @@ public class Util42
         }
 
         throw connChild.newSQLException
-            ( SQLState.DATA_TYPE_NOT_SUPPORTED, sqlType.toString() );
+            ( SQLState.DATA_TYPE_NOT_SUPPORTED, sqlType );
     }
     
 }    

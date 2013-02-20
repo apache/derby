@@ -52,7 +52,7 @@ public final class Utils42
             (
              agent.logWriter_,
              new ClientMessageId(SQLState.DATA_TYPE_NOT_SUPPORTED),
-             sqlType.toString()
+             sqlType
              ).getSQLException();
     }
 
