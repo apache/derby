@@ -255,7 +255,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     Thread.sleep(SLEEP_TIME);
                 } else {
                     BaseTestCase.fail(
-                        "Timed out waiting for server port to become available",
+                        "Timed out waiting for server port " + port +
+                        " to become available on host " + conf.getHostName(),
                         ioe);
                 }
             }
