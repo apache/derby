@@ -34,7 +34,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 	/**
 	 * Initializer for an AndNode
 	 *
-	 * @param leftOperand_ERROR_THAT_WILL_BE_REVERTED	The left operand of the AND
+	 * @param leftOperand	The left operand of the AND
 	 * @param rightOperand	The right operand of the AND
 	 */
 
