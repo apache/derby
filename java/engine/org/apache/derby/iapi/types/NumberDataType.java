@@ -593,7 +593,7 @@ public abstract class NumberDataType extends DataType
 
    /**
      * Controls use of old DB2 limits (DERBY-3398).
-     * @returns false if dictionary is new enough, see DD_Version.
+     * @return false if dictionary is new enough, see DD_Version.
      */
      private static boolean useDB2Limits() throws StandardException {
          LanguageConnectionContext lcc =
