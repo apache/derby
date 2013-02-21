@@ -2681,7 +2681,6 @@
            failureproperty="tests.failed">
       <jvmarg value="${derby.tests.jacoco.agent}"/>
       <sysproperty key="derby.tests.jacoco.agent" value="${derby.tests.jacoco.agent}"/>
-      <sysproperty key="java.security.debug" value="policy"/>
       <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
       <sysproperty key="emma.verbosity.level" value="silent"/>
       <!-- Pass on properties from the command line to the spawned VM. -->
