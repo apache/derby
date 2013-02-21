@@ -314,7 +314,7 @@ public class Changes10_10 extends UpgradeChange
         Float.MAX_VALUE,
         +1.174E-37f,
         -1.174E-37f,
-        1.17549435E-38f // Float.MIN_NORMAL
+        1.17549435E-38f, // Float.MIN_NORMAL
         -1.17549435E-38f // -Float.MIN_NORMAL
     };
 
@@ -323,7 +323,7 @@ public class Changes10_10 extends UpgradeChange
         Double.MAX_VALUE,
         +2.224E-307d,
         -2.224E-307d,
-        2.2250738585072014E-308 // Double.MIN_NORMAL
+        2.2250738585072014E-308, // Double.MIN_NORMAL
         -2.2250738585072014E-308 // -Double.MIN_NORMAL
     };
 
