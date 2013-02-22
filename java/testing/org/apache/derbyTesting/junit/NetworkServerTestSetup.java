@@ -211,7 +211,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             if (serverShouldComeUp)
             {
                 if (!pingForServerStart(networkServerController)) {
-                    String msg = "Timed out waiting for network server to start";
+                    String msg = getTimeoutErrorMsg("network server to start");
                     // Dump the output from the spawned process
                     // and destroy it.
                     if (spawnedServer != null) {
@@ -219,10 +219,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                         msg = spawnedServer.getFailMessage(msg);
                         spawnedServer = null;
                     }
-                    fail(msg);
                     //DERBY-6012 print thread dump and java core
-                    fail(ExceptionUtil.dumpThreads());
                     JVMInfo.javaDump();
+                    fail(msg + Utilities.NL + ExceptionUtil.dumpThreads());
                 }
             }
         }
@@ -255,8 +254,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     Thread.sleep(SLEEP_TIME);
                 } else {
                     BaseTestCase.fail(
-                        "Timed out waiting for server port " + port +
-                        " to become available on host " + conf.getHostName(),
+                        getTimeoutErrorMsg("server port to become available"),
                         ioe);
                 }
             }
@@ -564,7 +562,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
        throws InterruptedException 
     {
         if (!pingForServerStart(networkServerController)) {
-             fail("Timed out waiting for network server to start");
+             fail(getTimeoutErrorMsg("network server to start"));
         }
     }
     
@@ -715,4 +713,12 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         return waitTime;
     }
 
+    /** Returns an error message for timeouts including the port and host. */
+    private static String getTimeoutErrorMsg(String failedAction) {
+        TestConfiguration conf = TestConfiguration.getCurrent();
+        int port = conf.getPort();
+        String host = conf.getHostName();
+        return "Timed out waiting for " +
+                failedAction + " (" + host + ":" + port + ")";
+    }
 }

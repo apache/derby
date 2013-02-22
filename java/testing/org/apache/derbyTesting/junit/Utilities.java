@@ -40,6 +40,12 @@ import junit.framework.Assert;
  */
 public class Utilities {
 
+    /** The newline character(s). */
+    public static final String NL;
+    static {
+        NL = BaseTestCase.getSystemProperty("line.separator");
+    }
+
     private Utilities() { }
 
     /**
