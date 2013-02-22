@@ -43,8 +43,56 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class StatementPoolingTest
     extends BaseJDBCTestCase {
 
+    private LogicalPooledConnectionFactory lpcf;
+
     public StatementPoolingTest(String name) {
         super(name);
+    }
+
+    public void tearDown()
+            throws Exception {
+        closePooledConnectionFactory();
+        super.tearDown();
+    }
+    
+    /** Closes the connection factory associated with this test. */
+    private void closePooledConnectionFactory()
+            throws SQLException {
+        if (lpcf != null) {
+            try {
+                lpcf.close();
+            } finally {
+                lpcf = null;
+            }
+        }
+    }
+
+    /**
+     * Returns a logical connection from a pooled connection obtained from a
+     * data source configured with a default statement cache size.
+     *
+     * @return A logical connection.
+     * @throws SQLException if obtaining the connection fails
+     */
+    private Connection getCachingConnection()
+            throws SQLException {
+        return getCachingConnection(7);
+    }
+
+    /**
+     * Returns a logical connection from a pooled connection obtained from a
+     * data source configured to have the specified statement cache size.
+     *
+     * @param cacheSize statement cache size
+     * @return A logical connection.
+     * @throws SQLException if obtaining the connection fails
+     */
+    private Connection getCachingConnection(int cacheSize)
+            throws SQLException {
+        if (lpcf == null) {
+            lpcf = new LogicalPooledConnectionFactory();
+        }
+        return lpcf.getConnection(cacheSize);
     }
 
     /**
@@ -56,12 +104,7 @@ public class StatementPoolingTest
     public void testCacheOverflow()
             throws SQLException {
         final int stmtCount = 150;
-        ConnectionPoolDataSource cpDs =
-                J2EEDataSource.getConnectionPoolDataSource();
-        J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(11));
-        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
-        PooledConnection pc = cpDs.getPooledConnection();
-        Connection con = pc.getConnection();
+        Connection con = getCachingConnection(11);
         for (int i=0; i < stmtCount; i++) {
             // Yes, the "values + i" is intended here.
             PreparedStatement pStmt = con.prepareStatement("values " + i);
@@ -70,7 +113,6 @@ public class StatementPoolingTest
             pStmt.close();
         }
         con.close();
-        pc.close();
     }
 
     /**
@@ -85,7 +127,7 @@ public class StatementPoolingTest
         final String psClass = "LogicalPreparedStatement";
         final String csClass = "LogicalCallableStatement";
         final String dmdClass = "LogicalDatabaseMetaData";
-        Connection con = getConnection();
+        Connection con = getCachingConnection();
         assertClassName(con, conClass);
         assertClassName(con.prepareStatement("values 1"), psClass);
         assertClassName(con.prepareStatement("values 1",
@@ -154,7 +196,7 @@ public class StatementPoolingTest
     }
 
     /**
-     * This test merley checks that creating a logical prepared statement does
+     * This test merely checks that creating a logical prepared statement does
      * not fail.
      *
      * @throws SQLException if creating the prepared statement fails
@@ -166,7 +208,7 @@ public class StatementPoolingTest
     }
 
     /**
-     * This test merley checks that creating a logical callable statement does
+     * This test merely checks that creating a logical callable statement does
      * not fail.
      *
      * @throws SQLException if creating the callable statement fails
@@ -179,7 +221,7 @@ public class StatementPoolingTest
     }
 
     /**
-     * This test merley checks that creating a logical callable statement, which
+     * This test merely checks that creating a logical callable statement, which
      * is not really a call, does not fail.
      *
      * @throws SQLException if creating the callable statement fails
@@ -240,15 +282,10 @@ public class StatementPoolingTest
      */
     private void doTestHoldabilityIsReset(final boolean closeConnection)
             throws SQLException {
-        ConnectionPoolDataSource cpDs =
-                J2EEDataSource.getConnectionPoolDataSource();
-        J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
-        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
-        PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
-        Connection con = pc.getConnection();
+        Connection con = getCachingConnection();
         assertEquals("Unexpected default holdability",
                 ResultSet.HOLD_CURSORS_OVER_COMMIT, con.getHoldability());
         con.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
@@ -257,10 +294,9 @@ public class StatementPoolingTest
         if (closeConnection) {
             con.close();
         }
-        con = pc.getConnection();
+        con = getCachingConnection();
         assertEquals("Holdability not reset",
                 ResultSet.HOLD_CURSORS_OVER_COMMIT, con.getHoldability());
-        pc.close();
     }
 
     public void testIsolationLevelIsResetExplicitCloseQuery()
@@ -300,15 +336,10 @@ public class StatementPoolingTest
     private void doTestIsolationLevelIsReset(final boolean closeConnection,
                                              final boolean executeQuery)
             throws SQLException {
-        ConnectionPoolDataSource cpDs =
-                J2EEDataSource.getConnectionPoolDataSource();
-        J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
-        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
-        PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
-        Connection con = pc.getConnection();
+        Connection con = getCachingConnection();
         assertEquals("Unexpected default isolation level",
                 Connection.TRANSACTION_READ_COMMITTED,
                 con.getTransactionIsolation());
@@ -324,11 +355,10 @@ public class StatementPoolingTest
         if (closeConnection) {
             con.close();
         }
-        con = pc.getConnection();
+        con = getCachingConnection();
         assertEquals("Isolation level not reset",
                 Connection.TRANSACTION_READ_COMMITTED,
                 con.getTransactionIsolation());
-        pc.close();
     }
 
     /**
@@ -354,15 +384,10 @@ public class StatementPoolingTest
     public void testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen()
             throws SQLException {
         final String SELECT_SQL = "select * from clcclso";
-        ConnectionPoolDataSource cpDs =
-                J2EEDataSource.getConnectionPoolDataSource();
-        J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
-        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
-        PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
         // Statement pooling only works within a single pooled connection.
-        Connection con = pc.getConnection();
+        Connection con = getCachingConnection();
         con.setAutoCommit(false);
         Statement stmt = createStatement();
         stmt.executeUpdate("create table clcclso (id int)");
@@ -382,7 +407,7 @@ public class StatementPoolingTest
         commit();
         // If an exception is thrown here, statement pooling is disabled or not
         // working correctly.
-        con = pc.getConnection();
+        con = getCachingConnection();
         ps = con.prepareStatement(SELECT_SQL); // From cache.
         try {
             // Should fail here because the referenced table has been deleted.
@@ -531,19 +556,14 @@ public class StatementPoolingTest
     }
 
     /**
-     * Tests that a temporary table crated in one logical connection is gone
+     * Tests that a temporary table created in one logical connection is gone
      * in the next logical connection.
      *
      * @throws SQLException if the test fails for some reason
      */
     public void testTemporaryTablesAreDeletedInNewLogicalConnection()
             throws SQLException {
-        ConnectionPoolDataSource cpds =
-                J2EEDataSource.getConnectionPoolDataSource();
-        J2EEDataSource.setBeanProperty(cpds, "maxStatements", new Integer(3));
-        J2EEDataSource.setBeanProperty(cpds, "createDatabase", "create");
-        PooledConnection pc = cpds.getPooledConnection();
-        Connection lcOne = pc.getConnection();
+        Connection lcOne = getCachingConnection();
 
         // Create the first logical connection and the temporary table.
         Statement stmt = lcOne.createStatement();
@@ -557,7 +577,7 @@ public class StatementPoolingTest
         lcOne.close();
 
         // Create the second logical connection and try to query the temp table.
-        Connection lcTwo = pc.getConnection();
+        Connection lcTwo = getCachingConnection();
         stmt = lcTwo.createStatement();
         try {
             stmt.executeQuery("select * from SESSION.cpds_temp_table");
@@ -568,14 +588,13 @@ public class StatementPoolingTest
         }
         lcTwo.rollback();
         lcTwo.close();
-        pc.close();
     }
 
     /**
      * Tests if the holdability settings is taking effect, and also that the
      * result set is closed when the connection is closed.
      *
-     * @param holdability result set holdability as specfied by
+     * @param holdability result set holdability as specified by
      *      {@link java.sql.ResultSet}
      * @throws SQLException if something goes wrong...
      */
@@ -874,5 +893,47 @@ public class StatementPoolingTest
                 }
             }));
         return TestConfiguration.clientServerDecorator(suite);
+    }
+
+    /**
+     * A simple factory for obtaining logical connections from a pooled
+     * connection created from a data source configured with statement caching.
+     * <p>
+     * For now we only support holding one pooled connection open, but the
+     * factory can easily be extended to hold several pooled (physical)
+     * connection open if a test requires it.
+     */
+    //@NotThreadSafe
+    private static class LogicalPooledConnectionFactory {
+        private int curCacheSize;
+        private PooledConnection pooledConnection;
+        
+        public Connection getConnection(int cacheSize) 
+                throws SQLException {
+            if (pooledConnection == null || curCacheSize != cacheSize) {
+                close();
+                ConnectionPoolDataSource cpDs =
+                        J2EEDataSource.getConnectionPoolDataSource();
+                J2EEDataSource.setBeanProperty(
+                        cpDs, "maxStatements", new Integer(cacheSize));
+                J2EEDataSource.setBeanProperty(
+                        cpDs, "createDatabase", "create");
+                pooledConnection = cpDs.getPooledConnection();
+                curCacheSize = cacheSize;
+            }
+            return pooledConnection.getConnection();
+        }
+
+        public void close()
+                throws SQLException {
+            if (pooledConnection != null) {
+                try {
+                    pooledConnection.close();
+                } finally {
+                    pooledConnection = null;
+                    curCacheSize = -1;
+                }
+            }
+        }
     }
 }
