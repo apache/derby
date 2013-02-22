@@ -256,16 +256,16 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T3' , 'extinout/t3.dat' ,
                                  null, null, null, 0) ;
 0 rows inserted/updated/deleted
 ij> select * from t3;
-C1         |C2                    |C3    |C4                  
---------------------------------------------------------------
-1          |3.5                   |8     |test strings        
-2          |3.5                   |8     |test strings        
-3          |3.5                   |8     |test strings        
-4          |3.5                   |8     |test strings        
-1          |3.5                   |8     |test strings        
-2          |3.5                   |8     |test strings        
-3          |3.5                   |8     |test strings        
-4          |3.5                   |8     |test strings        
+C1         |C2                      |C3    |C4                  
+----------------------------------------------------------------
+1          |3.5                     |8     |test strings        
+2          |3.5                     |8     |test strings        
+3          |3.5                     |8     |test strings        
+4          |3.5                     |8     |test strings        
+1          |3.5                     |8     |test strings        
+2          |3.5                     |8     |test strings        
+3          |3.5                     |8     |test strings        
+4          |3.5                     |8     |test strings        
 8 rows selected
 ij> --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null,
