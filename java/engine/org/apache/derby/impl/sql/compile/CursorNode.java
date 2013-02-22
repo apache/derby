@@ -22,7 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -64,7 +64,7 @@ public class CursorNode extends DMLStatementNode
 	** There can only be a list of updatable columns when FOR UPDATE
 	** is specified as part of the cursor specification.
 	*/
-	private Vector	updatableColumns;
+	private List updatableColumns;
 	private FromTable updateTable;
 	private ResultColumnDescriptor[]	targetColumnDescriptors;
     /**
@@ -120,7 +120,7 @@ public class CursorNode extends DMLStatementNode
         this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		this.updateMode = ((Integer) updateMode).intValue();
-		this.updatableColumns = (Vector) updatableColumns;
+		this.updatableColumns = (List) updatableColumns;
 
 		/*
 		** This is a sanity check and not an error since the parser
@@ -128,7 +128,7 @@ public class CursorNode extends DMLStatementNode
 		*/
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(this.updatableColumns == null ||
-			this.updatableColumns.size() == 0 || this.updateMode == UPDATE,
+			this.updatableColumns.isEmpty() || this.updateMode == UPDATE,
 			"Can only have explicit updatable columns if update mode is UPDATE");
 	}
 
@@ -857,11 +857,7 @@ public class CursorNode extends DMLStatementNode
 			return (String[])null;
 		}
 
-		String[] names = new String[size];
-
-		updatableColumns.copyInto(names);
-
-		return names;
+        return (String[]) updatableColumns.toArray(new String[size]);
 	}
 	
 	public String getXML()

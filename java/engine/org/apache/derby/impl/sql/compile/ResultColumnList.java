@@ -25,9 +25,9 @@ import java.lang.reflect.Modifier;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Hashtable;
-import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
@@ -817,7 +817,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 */
 	public void bindExpressions(
 					FromList fromList, SubqueryList subqueryList,
-					Vector	aggregateVector)
+					List aggregateVector)
 				throws StandardException
 	{
 		/* First we expand the *'s in the result column list */
@@ -2871,7 +2871,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param updateColumns		A Vector representing the columns
 	 *							to be updated.
 	 */
-	void markColumnsInSelectListUpdatableByCursor(Vector updateColumns)
+	void markColumnsInSelectListUpdatableByCursor(List updateColumns)
 	{
 		commonCodeForUpdatableByCursor(updateColumns, true);
 	}
@@ -2887,7 +2887,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * In the eg above, we will find updatable column c11 in the select column
 	 * list but we will not find updatable column c12 in the select column list
 	 */
-	private void commonCodeForUpdatableByCursor(Vector updateColumns, boolean dealingWithSelectResultColumnList)
+    private void commonCodeForUpdatableByCursor(
+            List updateColumns, boolean dealingWithSelectResultColumnList)
 	{
 		/*
 		** If there is no update column list, or the list is empty, then it means that
@@ -2932,7 +2933,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param updateColumns		A Vector representing the columns
 	 *							to be updated.
 	 */
-	void markUpdatableByCursor(Vector updateColumns)
+	void markUpdatableByCursor(List updateColumns)
 	{
 		commonCodeForUpdatableByCursor(updateColumns, false);
 	}

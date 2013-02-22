@@ -409,7 +409,7 @@ public class ParameterNode extends ValueNode
 	 */
 	static public	void generateParameterValueSet(ExpressionClassBuilder	acb,
 								   int		numberOfParameters,
-								   Vector	parameterList)
+								   List     parameterList)
 		throws StandardException
 	{
 		if (numberOfParameters > 0)

@@ -27,10 +27,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.ParameterValueSet;
-
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -42,15 +38,12 @@ import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.SortCostController;
 
 import java.util.List;
-import java.util.Vector;
 import java.sql.SQLWarning;
 
 /**
@@ -458,14 +451,14 @@ public interface CompilerContext extends Context
 	 *
 	 * @param parameterList	The parameter list.
 	 */
-	public void setParameterList(Vector parameterList);
+	public void setParameterList(List parameterList);
 
 	/**
 	 * Get the parameter list.
 	 *
 	 * @return	The parameter list.
 	 */
-	public Vector getParameterList();
+	public List getParameterList();
 
 	/**
 	 * If callable statement uses ? = form

@@ -24,8 +24,8 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -1410,7 +1410,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @param updateColumns		A Vector representing the columns
 	 *							that can be updated.
 	 */
-	protected void markUpdatableByCursor(Vector updateColumns)
+	protected void markUpdatableByCursor(List updateColumns)
 	{
 		resultColumns.markUpdatableByCursor(updateColumns);
 	}

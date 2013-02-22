@@ -48,7 +48,6 @@ import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 
@@ -59,7 +58,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.SortCostController;
@@ -67,13 +65,10 @@ import org.apache.derby.iapi.store.access.SortCostController;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -85,8 +80,6 @@ import java.util.Vector;
 import java.util.Properties;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Stack;
 import java.util.ArrayList;
@@ -585,7 +578,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * @see CompilerContext#setParameterList
 	 */
-	public void setParameterList(Vector parameterList)
+	public void setParameterList(List parameterList)
 	{
 		this.parameterList = parameterList;
 
@@ -601,7 +594,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * @see CompilerContext#getParameterList
 	 */
-	public Vector getParameterList()
+	public List getParameterList()
 	{
 		return parameterList;
 	}
@@ -1048,7 +1041,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	private SortCostController	sortCostController;
 
-	private Vector parameterList;
+	private List parameterList;
 
 	/* Type descriptors for the ? parameters */
 	private DataTypeDescriptor[]	parameterDescriptors;

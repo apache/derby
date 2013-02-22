@@ -21,18 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.JBitSet;
 
 /**
@@ -267,12 +265,12 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	int activationKind()
 	{
-		Vector parameterList = getCompilerContext().getParameterList();
+		List parameterList = getCompilerContext().getParameterList();
 		/*
 		** We need rows for all types of DML activations.  We need parameters
 		** only for those that have parameters.
 		*/
-		if (parameterList != null && parameterList.size() > 0)
+		if (parameterList != null && !parameterList.isEmpty())
 		{
 			return StatementNode.NEED_PARAM_ACTIVATION;
 		}
@@ -392,13 +390,13 @@ abstract class DMLStatementNode extends StatementNode
 	void generateParameterValueSet(ActivationClassBuilder acb)
 		throws StandardException
 	{
-		Vector parameterList = getCompilerContext().getParameterList();
+		List parameterList = getCompilerContext().getParameterList();
 		int	numberOfParameters = (parameterList == null) ? 0 : parameterList.size();
 
 		if (numberOfParameters <= 0)
 			return;
 
-			ParameterNode.generateParameterValueSet
+        ParameterNode.generateParameterValueSet
 				( acb, numberOfParameters, parameterList);
 	}
 

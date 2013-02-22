@@ -21,6 +21,8 @@
 
 package     org.apache.derby.impl.sql.compile;
 
+import java.util.List;
+
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -28,7 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.StatementType;
-import java.util.Vector;
 
 
 /**
@@ -132,7 +133,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
     private void generateParameterValueSet(ActivationClassBuilder acb)
         throws StandardException
     {
-        Vector parameterList = getCompilerContext().getParameterList();
+        List parameterList = getCompilerContext().getParameterList();
         // parameter list size should be 1
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(parameterList != null &&
@@ -151,7 +152,6 @@ public class SetRoleNode extends MiscellaneousStatementNode
      */
     int activationKind()
     {
-        Vector parameterList = getCompilerContext().getParameterList();
         /*
         ** We need parameters only for those that have parameters.
         */
