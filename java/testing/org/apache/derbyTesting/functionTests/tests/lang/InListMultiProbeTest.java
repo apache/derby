@@ -189,12 +189,6 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             */
             protected void decorateSQL(Statement s) throws SQLException
             {
-                // Create the test table and data for DERBY-6045
-                s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
-                s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
-                    " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
-                    " PRIMARY KEY (term_id)");
-
                 // Create the test table.
                 s.executeUpdate(CREATE_DATA_TABLE);
                 // Insert test data.
@@ -917,7 +911,13 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     {
         Statement s = createStatement();
         s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
-        s.executeUpdate("DELETE FROM " + DERBY_6045_DATA_TABLE);
+        dropTable(DERBY_6045_DATA_TABLE);
+        // Create the test table, primary key and insert data
+        s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
+        s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
+            " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
+            " PRIMARY KEY (term_id)");
+
         //insert 10 rows
         PreparedStatement ps = s.getConnection().prepareStatement(
             "insert into " + DERBY_6045_DATA_TABLE +
@@ -951,8 +951,47 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         // get compiled rather than existing query plan getting picked up from
         // statement cache.
         runThreeQueries(2);
+        s.close();
+    }
 
-        s.executeUpdate("DROP TABLE " + DERBY_6045_DATA_TABLE);
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows 2 cases
+    //  1)If we insert 10K rows to an empty table with primary key on column
+    //    being used in the where clause, we use index scan for the queries
+    //    being tested
+    //  2)To the table above, if we add another unique index on 2 columns 
+    //    which are being used in the select clause, we stop using index scan
+    //    for SELECT queries with IN and OR clause on the primary key
+    public void xtestDerby6045InsertAllRows() 
+        throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        dropTable(DERBY_6045_DATA_TABLE);
+        // Create the test table, primary key and insert data
+        s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
+        s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
+            " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
+            " PRIMARY KEY (term_id)");
+    	
+        //insert 10K rows
+        for (int i=1; i<=10000; i++) {
+            s.executeUpdate("insert into " + DERBY_6045_DATA_TABLE +
+    		" VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ",1)");
+        }
+        runThreeQueries(0);
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+        runThreeQueries(1);
+
+        //create additional unique key. Creation of this unique key is making
+        // the select queries with IN and OR clause on the primary key to use
+        // table scan
+        s.executeUpdate("ALTER TABLE  " + DERBY_6045_DATA_TABLE + 
+            " ADD CONSTRAINT kb_variable_term_variable_name_unique " +
+            " UNIQUE (var_name, var_type)");
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+        runThreeQueries(1);
         s.close();
     }
 
