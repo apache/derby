@@ -99,7 +99,7 @@ public abstract class Connection
             new HashMap<String, PreparedStatement>();
     
     // used to get transaction isolation level
-    private Statement getTransactionIsolationStmt = null;
+    private PreparedStatement getTransactionIsolationPrepStmt = null;
     
     // ------------------------dynamic properties---------------------------------
 
@@ -804,15 +804,15 @@ public abstract class Connection
             }
         }
         isolationLevelPreparedStmts.clear();
-        if (getTransactionIsolationStmt != null) {
+        if (getTransactionIsolationPrepStmt != null) {
             try {
-                getTransactionIsolationStmt.close();
+                getTransactionIsolationPrepStmt.close();
             } catch (SQLException se) {
                 accumulatedExceptions = Utils.accumulateSQLException(
                         se, accumulatedExceptions);
             }
         }
-        getTransactionIsolationStmt = null;
+        getTransactionIsolationPrepStmt = null;
         try {
             flowClose();
         } catch (SqlException e) {
@@ -1084,7 +1084,6 @@ public abstract class Connection
         // at the end of this method.
         boolean currentAutoCommit = autoCommit_;
         java.sql.ResultSet rs = null;
-        
         try
         {
             checkForClosedConnection();
@@ -1102,6 +1101,35 @@ public abstract class Connection
             // cause an auto-commit from getTransactionIsolation() method. 
             autoCommit_ = false;
             
+            // DERBY-6066(Client should use a prepared statement rather than 
+            //  regular statement for Connection.getTransactionIsolation)
+            // Following code(which actually sends the get transaction 
+            //  isolation call to the server on the wire) will be executed 
+            //  in at least following 2 cases
+            // 1)When a newer client is working with the older versions of 
+            //   servers(ie server that do not have support for isolation 
+            //   level caching) - Server version 10.3 and earlier do not 
+            //   support isolation level caching and hence when a newer 
+            //   client(10.4 and higher) is talking to a 10.3 and earlier 
+            //   server, the if condition above will be false and the code 
+            //   will reach here to get the isolation level from the server 
+            //   by sending "VALUES CURRENT ISOLATION" over the wire. For 
+            //   server versions 10.4 and above, the if condition above can 
+            //   be true if the isolation level was already piggybacked to 
+            //   the client as part of some other client server communication
+            //   and hence the current isolation level is already available to 
+            //   the client and there is no need to send 
+            //   "VALUES CURRENT ISOLATION" over the wire to the server.
+            // 2)Additionally, as per DERBY-4314 and write up on piggybacking
+            //    at http://wiki.apache.org/db-derby/Derby3192Writeup, there 
+            //    might be cases, where even though server has support for 
+            //    isolation level caching, server has not had a chance to 
+            //    send the isolation level piggybacked to the client as part  
+            //    of some other communication between client and server and 
+            //    hence the if condition above will be false and client will
+            //    actually need to send "VALUES CURRENT ISOLATION" to the 
+            //    server to get the current isolation level.
+            // 
             // DERBY-1148 - Client reports wrong isolation level. We need to get the isolation
             // level from the server. 'isolation_' maintained in the client's connection object
             // can be out of sync with the real isolation when in an XA transaction. This can 
@@ -1116,17 +1144,21 @@ public abstract class Connection
             // The XA-problem is handled by letting XA state changes set the
             // cached isolation level to TRANSACTION_UNKNOWN which will trigger
             // a refresh from the server.
-            if (getTransactionIsolationStmt == null  || 
-                    !(getTransactionIsolationStmt.openOnClient_ &&
-                            getTransactionIsolationStmt.openOnServer_)) {
-                getTransactionIsolationStmt =
-                        createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+            if (getTransactionIsolationPrepStmt == null  || 
+                    !(getTransactionIsolationPrepStmt.openOnClient_ &&
+                            getTransactionIsolationPrepStmt.openOnServer_)) {
+            	getTransactionIsolationPrepStmt =
+                        prepareStatementX(
+                                "VALUES CURRENT ISOLATION",
+                                java.sql.ResultSet.TYPE_FORWARD_ONLY,
                                 java.sql.ResultSet.CONCUR_READ_ONLY,
-                                holdability());
+                                holdability(),
+                                java.sql.Statement.NO_GENERATED_KEYS,
+                                null, null);
             }
             
             boolean savedInUnitOfWork = inUnitOfWork_;
-            rs = getTransactionIsolationStmt.executeQuery("values current isolation");
+            rs = getTransactionIsolationPrepStmt.executeQuery();
             rs.next();
             String isolationStr = rs.getString(1);
 
