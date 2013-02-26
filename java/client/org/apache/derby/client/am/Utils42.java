@@ -45,7 +45,13 @@ public final class Utils42
         // must correspond to something in java.sql.Types
         if ( sqlType instanceof JDBCType )
         {
-            return ((JDBCType) sqlType).getVendorTypeNumber();
+            int     jdbcType = ((JDBCType) sqlType).getVendorTypeNumber();
+
+            try {
+                agent.checkForSupportedDataType( jdbcType );
+            } catch (SqlException se) { throw se.getSQLException(); }
+        
+            return jdbcType;
         }
 
         throw new SqlException

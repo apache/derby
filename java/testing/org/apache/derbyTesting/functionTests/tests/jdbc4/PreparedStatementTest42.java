@@ -74,7 +74,6 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         JDBCType.ROWID,
         JDBCType.SQLXML,
         JDBCType.STRUCT,
-        JDBCType.TINYINT,
     };
 
     //////////////////////////////////////////////////////////
@@ -231,13 +230,16 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
             try {
                 insert.setObject( 1, null, ILLEGAL_JDBC_TYPES[ i ] );
             }
-            catch (SQLException se)
-            {
-                assertSQLState( UNIMPLEMENTED_FEATURE, se );
-            }
+            catch (SQLException se) { assertUnimplemented( se ); }
         }
 
         insert.close();
+    }
+    private static void    assertUnimplemented( SQLException se ) throws Exception
+    {
+        assertSQLState( UNIMPLEMENTED_FEATURE, se );
+        assertTrue( se instanceof SQLFeatureNotSupportedException );
+
     }
     private PreparedStatement   prepareInsert( Connection conn ) throws Exception
     {
@@ -480,35 +482,39 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         cs.execute();
         vetCS( cs, valueIdx );
 
+        // Negative test
+        valueIdx = 1;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < ILLEGAL_JDBC_TYPES.length; i++ )
+        {
+            try {
+                cs.registerOutParameter( param++, ILLEGAL_JDBC_TYPES[ i ], 0 );
+                fail();
+            }
+            catch (SQLException se) { assertUnimplemented( se ); }
+        }
+
         // registerOutParameter( String, SQLType )
         try {
             cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType );
             fail( "Expected unimplemented feature." );
         }
-        catch (SQLException se)
-        {
-            assertSQLState( UNIMPLEMENTED_FEATURE, se );
-        }
+        catch (SQLException se) { assertUnimplemented( se ); }
 
         // registerOutParameter( String, SQLType, int )
         try {
             cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType, 0 );
             fail( "Expected unimplemented feature." );
         }
-        catch (SQLException se)
-        {
-            assertSQLState( UNIMPLEMENTED_FEATURE, se );
-        }
+        catch (SQLException se) { assertUnimplemented( se ); }
 
         // registerOutParameter( String, SQLType, String )
         try {
             cs.registerOutParameter( "param1", _columnDescs[ 0 ].jdbcType, "foo" );
             fail( "Expected unimplemented feature." );
         }
-        catch (SQLException se)
-        {
-            assertSQLState( UNIMPLEMENTED_FEATURE, se );
-        }
+        catch (SQLException se) { assertUnimplemented( se ); }
     }
     private  static void    vetCS( CallableStatement cs, int valueIdx )
         throws Exception
@@ -623,10 +629,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
             cs.setObject( "param1", cd.values[ 0 ], cd.jdbcType );
             fail( "Expected unimplemented feature." );
         }
-        catch (SQLException se)
-        {
-            assertSQLState( UNIMPLEMENTED_FEATURE, se );
-        }
+        catch (SQLException se) { assertUnimplemented( se ); }
 
         // setObject( String, Object, SQLType, int )
         try {
@@ -634,17 +637,15 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
             cs.setObject( "param1", cd.values[ 0 ], cd.jdbcType, 0 );
             fail( "Expected unimplemented feature." );
         }
-        catch (SQLException se)
-        {
-            assertSQLState( UNIMPLEMENTED_FEATURE, se );
-        }
+        catch (SQLException se) { assertUnimplemented( se ); }
     }
 
     /**
      * DERBY-6081: Verify that an SQLException is raised if the supplied
      * SQLType argument is null. It used to fail with a NullPointerException.
      */
-    public void test_04_targetTypeIsNull() throws SQLException {
+    public void test_04_targetTypeIsNull() throws Exception
+    {
         setAutoCommit(false);
 
         // Test PreparedStatement.setObject() with targetType == null.
@@ -654,16 +655,12 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         try {
             ps.setObject(1, 1, null);
             fail("setObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         try {
             ps.setObject(1, 1, null, 1);
             fail("setObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         // Test ResultSet.updateObject() with targetType == null.
 
@@ -678,30 +675,22 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         try {
             rs.updateObject("x", 1, null);
             fail("updateObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         try {
             rs.updateObject(1, 1, null);
             fail("updateObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         try {
             rs.updateObject("x", 1, null, 1);
             fail("updateObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         try {
             rs.updateObject(1, 1, null, 1);
             fail("updateObject should fail when type is null");
-        } catch (SQLFeatureNotSupportedException se) {
-            assertSQLState(UNIMPLEMENTED_FEATURE, se);
-        }
+        } catch (SQLException se) { assertUnimplemented( se ); }
 
         // There should be no more rows.
         JDBC.assertEmpty(rs);
