@@ -172,10 +172,13 @@ abstract class ConnectionChild {
         switch (dataType) {
         case Types.ARRAY:
         case Types.DATALINK:
+        case Types.DISTINCT:
         case JDBC40Translation.NCHAR:
         case JDBC40Translation.NCLOB:
         case JDBC40Translation.NVARCHAR:
         case JDBC40Translation.LONGNVARCHAR:
+        case Types.NULL:
+        case Types.OTHER:
         case Types.REF:
         case JDBC40Translation.REF_CURSOR:
         case JDBC40Translation.ROWID:

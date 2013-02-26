@@ -103,17 +103,4 @@ public class  PreparedStatement42 extends  org.apache.derby.client.am.PreparedSt
         }
     }
 
-    /**
-     * <p>
-     * Check for closed statement and extract the SQLException if it is raised.
-     * </p>
-     */
-    private void    checkStatus() throws SQLException
-    {
-        try {
-            checkForClosedStatement();
-        }
-        catch (SqlException se) { throw se.getSQLException(); }
-    }
-
 }

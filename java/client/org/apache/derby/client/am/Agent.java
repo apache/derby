@@ -77,10 +77,13 @@ public abstract class Agent {
         switch (dataType) {
         case java.sql.Types.ARRAY:
         case java.sql.Types.DATALINK:
+        case java.sql.Types.DISTINCT:
         case JDBC40Translation.NCHAR:
         case JDBC40Translation.NCLOB:
         case JDBC40Translation.NVARCHAR:
         case JDBC40Translation.LONGNVARCHAR:
+        case java.sql.Types.NULL:
+        case java.sql.Types.OTHER:
         case java.sql.Types.REF:
         case JDBC40Translation.REF_CURSOR:
         case JDBC40Translation.ROWID:

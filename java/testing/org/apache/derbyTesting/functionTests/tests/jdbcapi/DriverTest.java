@@ -52,7 +52,9 @@ import junit.framework.TestSuite;
 public class DriverTest extends BaseJDBCTestCase {
 
     // DERBY-618 - Database name with spaces
-    private static String DB_NAME_WITH_SPACES = "db name with spaces";
+    private static final    String DB_NAME_WITH_SPACES = "db name with spaces";
+
+    private static  final   String  MALFORMED_URL = "XJ028";
     
     /**
      * Set of additional databases for tests that
@@ -222,6 +224,18 @@ public class DriverTest extends BaseJDBCTestCase {
         // on Java 6 or higher
         println( "Driver is a " + driver.getClass().getName() );
         assertEquals( JDBC.vmSupportsJDBC4(), driver.getClass().getName().endsWith( "40" ) );
+
+        // test that null connection URLs raise a SQLException per JDBC 4.2 spec clarification
+        try {
+            driver.acceptsURL( null );
+            fail( "Should not have accepted a null connection url" );
+        }
+        catch (SQLException se) { assertSQLState( MALFORMED_URL, se ); }
+        try {
+            driver.connect( null, props );
+            fail( "Should not have accepted a null connection url" );
+        }
+        catch (SQLException se) { assertSQLState( MALFORMED_URL, se ); }
         
         conn.close();
     }

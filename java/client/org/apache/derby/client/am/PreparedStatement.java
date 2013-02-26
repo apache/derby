@@ -3178,4 +3178,18 @@ public class PreparedStatement extends Statement
         }
         
     }
+    
+    /**
+     * <p>
+     * Check for closed statement and extract the SQLException if it is raised.
+     * </p>
+     */
+    protected void    checkStatus() throws SQLException
+    {
+        try {
+            checkForClosedStatement();
+        }
+        catch (SqlException se) { throw se.getSQLException(); }
+    }
+
 }

@@ -132,7 +132,8 @@ public abstract class InternalDriver implements ModuleControl {
 	/*
 	** Methods from java.sql.Driver
 	*/
-	public boolean acceptsURL(String url) {
+	public boolean acceptsURL(String url) throws SQLException
+    {
 		return active && embeddedDriverAcceptsURL( url );
 	}
 
@@ -141,7 +142,13 @@ public abstract class InternalDriver implements ModuleControl {
 	** don't accidentally boot Derby while answering the question "Can
 	** you handle this URL?"
 	*/
-	public static	boolean embeddedDriverAcceptsURL(String url) {
+	public static	boolean embeddedDriverAcceptsURL(String url) throws SQLException
+    {
+        if ( url == null )
+        {
+            throw Util.generateCsSQLException( SQLState.MALFORMED_URL, "null" );
+        }
+        
 		return
 		//	need to reject network driver's URL's
 		!url.startsWith(Attribute.JCC_PROTOCOL) && !url.startsWith(Attribute.DNC_PROTOCOL) &&

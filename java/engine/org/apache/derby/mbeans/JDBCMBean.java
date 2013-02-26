@@ -21,6 +21,8 @@
 
 package org.apache.derby.mbeans;
 
+import java.sql.SQLException;
+
 /** 
  * Management and information for the embedded JDBC driver.
  * <P>
@@ -64,6 +66,6 @@ public interface JDBCMBean {
      * @return True if it supports it, false otherwise.
      * @see java.sql.Driver#acceptsURL(String)
      */
-    public boolean acceptsURL(String url);
+    public boolean acceptsURL(String url) throws SQLException;
 
 }

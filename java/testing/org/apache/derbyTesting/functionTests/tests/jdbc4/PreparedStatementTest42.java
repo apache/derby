@@ -66,9 +66,13 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
     {
         JDBCType.ARRAY,
         JDBCType.DATALINK,
+        JDBCType.DISTINCT,
+        JDBCType.LONGNVARCHAR,
         JDBCType.NCHAR,
         JDBCType.NCLOB,
+        JDBCType.NULL,
         JDBCType.NVARCHAR,
+        JDBCType.OTHER,
         JDBCType.REF,
         JDBCType.REF_CURSOR,
         JDBCType.ROWID,
@@ -229,6 +233,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         {
             try {
                 insert.setObject( 1, null, ILLEGAL_JDBC_TYPES[ i ] );
+                fail( "setObject() should have failed." );
             }
             catch (SQLException se) { assertUnimplemented( se ); }
         }

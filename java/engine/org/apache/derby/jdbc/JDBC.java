@@ -21,6 +21,8 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.SQLException;
+
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.mbeans.JDBCMBean;
 
@@ -55,6 +57,7 @@ final class JDBC implements JDBCMBean
     }
     
     public boolean acceptsURL(String url)
+        throws SQLException
     {
         return driver.acceptsURL(url);
     }

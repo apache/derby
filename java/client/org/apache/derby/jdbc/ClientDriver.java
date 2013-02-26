@@ -93,6 +93,9 @@ public class ClientDriver implements java.sql.Driver {
     public java.sql.Connection connect(String url,
                                        java.util.Properties properties) throws java.sql.SQLException {
         org.apache.derby.client.net.NetConnection conn;
+        
+        checkURLNotNull( url );
+
         try {    
             if (exceptionsOnLoadDriver__ != null) {
                 throw exceptionsOnLoadDriver__;
@@ -207,6 +210,9 @@ public class ClientDriver implements java.sql.Driver {
     }
 
     public boolean acceptsURL(String url) throws java.sql.SQLException {
+
+        checkURLNotNull( url );
+        
         try
         {
             java.util.StringTokenizer urlTokenizer = 
@@ -217,6 +223,17 @@ public class ClientDriver implements java.sql.Driver {
         catch ( SqlException se )
         {
             throw se.getSQLException();
+        }
+    }
+    private void    checkURLNotNull( String url ) throws java.sql.SQLException
+    {
+        if ( url == null )
+        {
+            throw (new SqlException
+                (
+                 null, 
+                 new ClientMessageId( SQLState.MALFORMED_URL), "null"
+                 )).getSQLException();
         }
     }
 
