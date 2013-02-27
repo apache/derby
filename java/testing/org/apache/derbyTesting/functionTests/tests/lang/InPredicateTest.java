@@ -161,8 +161,12 @@ public class InPredicateTest extends BaseJDBCTestCase {
                         "(2147483645, 2147483645, 2147483645), " +
                         "(2147483645, 2147483645, 0)");
 
-        String[][] expectedRows = {
-            { "2147483645", "2.14748365E9", "2.14748365E9" }
+        Object[][] expectedRows = {
+            {
+                new Integer(2147483645),
+                new Float(2.14748365E9f),
+                new Float(2.14748365E9f),
+            }
         };
 
         // The first query used to return two rows. However, the next two
@@ -172,14 +176,14 @@ public class InPredicateTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(
             s.executeQuery("select * from t3 where r1 in (i1, r2)"),
-            expectedRows);
+            expectedRows, false);
 
         JDBC.assertFullResultSet(
             s.executeQuery("select * from t3 where r1 in (values i1, r2)"),
-            expectedRows);
+            expectedRows, false);
 
         JDBC.assertFullResultSet(
             s.executeQuery("select * from t3 where r1 = any (values i1, r2)"),
-            expectedRows);
+            expectedRows, false);
     }
 }
