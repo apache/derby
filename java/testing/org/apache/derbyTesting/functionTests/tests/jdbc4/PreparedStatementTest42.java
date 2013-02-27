@@ -363,6 +363,37 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         updateRS.updateRow();
         updateRS.close();
         vetTable( conn, 1, 1 );
+
+        // verify that ResultSet.updateObject() fails on bad SQLTypes
+        prepTable( conn, 0 );
+        updateRS = forUpdatePS.executeQuery();
+        updateRS.next();
+        println( "Testing ResultSet.updateObject() on illegal types." );
+        for ( int i = 0; i < ILLEGAL_JDBC_TYPES.length; i++ )
+        {
+            try {
+                updateRS.updateObject( 2, _columnDescs[ 0 ].values[ 1 ], ILLEGAL_JDBC_TYPES[ i ] );
+                fail( "updateObject() should have failed." );
+            }
+            catch (SQLException se) { assertUnimplemented( se ); }
+            try {
+                updateRS.updateObject( 2, _columnDescs[ 0 ].values[ 1 ], ILLEGAL_JDBC_TYPES[ i ], 0 );
+                fail( "updateObject() should have failed." );
+            }
+            catch (SQLException se) { assertUnimplemented( se ); }
+            try {
+                updateRS.updateObject( "col2", _columnDescs[ 0 ].values[ 1 ], ILLEGAL_JDBC_TYPES[ i ] );
+                fail( "updateObject() should have failed." );
+            }
+            catch (SQLException se) { assertUnimplemented( se ); }
+            try {
+                updateRS.updateObject( "col2", _columnDescs[ 0 ].values[ 1 ], ILLEGAL_JDBC_TYPES[ i ], 0 );
+                fail( "updateObject() should have failed." );
+            }
+            catch (SQLException se) { assertUnimplemented( se ); }
+        }
+        updateRS.close();
+        vetTable( conn, 0, 1 );
     }
     private void    prepTable( Connection conn, int rowIdx ) throws Exception
     {
