@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
+
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
@@ -28,12 +30,10 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import java.util.Vector;
-
 class RowOrderingImpl implements RowOrdering {
 
 	/* This vector contains ColumnOrderings */
-	Vector ordering;
+	private final ArrayList ordering = new ArrayList();
 
 	/*
 	** This ColumnOrdering represents the columns that can be considered
@@ -49,18 +49,15 @@ class RowOrderingImpl implements RowOrdering {
 	** This vector contains table numbers for tables that are always ordered.
 	** This happens for one-row tables.
 	*/
-	Vector alwaysOrderedOptimizables;
+    private final ArrayList alwaysOrderedOptimizables = new ArrayList();
 
 	ColumnOrdering	currentColumnOrdering;
 
 	/* This vector contains unordered Optimizables */
-	Vector unorderedOptimizables;
+    private final ArrayList unorderedOptimizables = new ArrayList();
 
 	RowOrderingImpl() {
-		ordering = new Vector();
-		unorderedOptimizables = new Vector();
 		columnsAlwaysOrdered = new ColumnOrdering(RowOrdering.DONTCARE);
-		alwaysOrderedOptimizables = new Vector();
 	}
 	
 	/** @see RowOrdering#isColumnAlwaysOrdered */
@@ -161,7 +158,7 @@ class RowOrderingImpl implements RowOrdering {
 	 * Return true if the given vector of Optimizables contains an Optimizable
 	 * with the given table number.
 	 */
-	private boolean vectorContainsOptimizable(int tableNumber, Vector vec)
+	private boolean vectorContainsOptimizable(int tableNumber, ArrayList vec)
 	{
 		int i;
 
@@ -187,12 +184,13 @@ class RowOrderingImpl implements RowOrdering {
 								int tableNumber,
 								int columnNumber)
 	{
-		if (unorderedOptimizables.size() > 0)
+        if (!unorderedOptimizables.isEmpty()) {
 			return;
+        }
 
 		ColumnOrdering currentColumnOrdering;
 
-		if (ordering.size() == 0)
+		if (ordering.isEmpty())
 		{
 			currentColumnOrdering = new ColumnOrdering(direction);
 			ordering.add(currentColumnOrdering);
@@ -219,8 +217,9 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#nextOrderPosition */
 	public void nextOrderPosition(int direction)
 	{
-		if (unorderedOptimizables.size() > 0)
+        if (!unorderedOptimizables.isEmpty()) {
 			return;
+        }
 
 		currentColumnOrdering = new ColumnOrdering(direction);
 		ordering.add(currentColumnOrdering);
@@ -250,7 +249,7 @@ class RowOrderingImpl implements RowOrdering {
 		int tableNumber = (hasTableNumber ? optimizable.getTableNumber() : 0);
 		if (
 			(
-				(ordering.size() == 0) ||
+				(ordering.isEmpty()) ||
 				(
 					hasTableNumber &&
 					((ColumnOrdering) ordering.get(0)).hasTable(
@@ -321,7 +320,7 @@ class RowOrderingImpl implements RowOrdering {
 	 * Remove all optimizables with the given table number from the
 	 * given vector of optimizables.
 	 */
-	private void removeOptimizableFromVector(int tableNumber, Vector vec)
+	private void removeOptimizableFromVector(int tableNumber, ArrayList vec)
 	{
 		int i;
 

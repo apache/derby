@@ -21,12 +21,10 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.util.Vector;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 class ColumnOrdering {
 
@@ -34,13 +32,13 @@ class ColumnOrdering {
 	int	myDirection;
 
 	/* A vector of column numbers (Integers) */
-	Vector columns = new Vector();
+    private final ArrayList columns = new ArrayList();
 
 	/*
 	** A vector of table numbers (Integers), corresponding to the column
 	** vector by position.
 	*/
-	Vector tables = new Vector();
+    private final ArrayList tables = new ArrayList();
 
 	/**
 	 * @param direction	See RowOrdering for possible values
@@ -112,8 +110,8 @@ class ColumnOrdering {
 	 */
 	void addColumn(int tableNumber, int columnNumber)
 	{
-		tables.add(new Integer(tableNumber));
-		columns.add(new Integer(columnNumber));
+        tables.add(ReuseFactory.getInteger(tableNumber));
+        columns.add(ReuseFactory.getInteger(columnNumber));
 	}
 
 	/**
@@ -141,7 +139,7 @@ class ColumnOrdering {
 	 */
 	boolean empty()
 	{
-		return (tables.size() == 0);
+		return tables.isEmpty();
 	}
 
 	/** Return a clone of this ColumnOrdering */
@@ -150,8 +148,8 @@ class ColumnOrdering {
 
 		for (int i = 0; i < columns.size(); i++) {
 			/* Integers are immutable, so just copy the pointers */
-			retval.columns.addElement(columns.get(i));
-			retval.tables.addElement(tables.get(i));
+			retval.columns.add(columns.get(i));
+			retval.tables.add(tables.get(i));
 		}
 
 		return retval;
@@ -159,23 +157,11 @@ class ColumnOrdering {
 
 	/** Is the given table number in this ColumnOrdering? */
 	boolean hasTable(int tableNumber) {
-		if (tables.size() == 0)
-			return false;
-
-		for (int i = 0; i < tables.size(); i++) {
-			Integer tab = (Integer) tables.get(i);
-			
-			if (tab.intValue() == tableNumber)
-				return true;
-		}
-
-		return false;
+        return tables.contains(ReuseFactory.getInteger(tableNumber));
 	}
 
 	/** Is there any table other than the given one in this ColumnOrdering? */
 	boolean hasAnyOtherTable(int tableNumber) {
-		if (tables.size() == 0)
-			return false;
 
 		for (int i = 0; i < tables.size(); i++) {
 			Integer tab = (Integer) tables.get(i);
