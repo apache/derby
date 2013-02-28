@@ -1,8 +1,5 @@
 storetests/st_schema.sql
 storetests/st_derby1939.java
-storetests/st_derby1189.sql
 storetests/st_reclaim_longcol.java
 storetests/st_derby715.java
-storetests/st_1.sql
-storetests/st_b5772.sql
 storetests/derby94.sql

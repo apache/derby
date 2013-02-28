@@ -98,7 +98,15 @@ public class StoreScriptsTest extends ScriptTestCase {
         //"backupRestore", // uses another database than wombat
         "bug3498", 
         //"onlineBackupTest2", // runs into lock time out 
-        //"onlineBackupTest4" // runs into security exception 
+        //"onlineBackupTest4" // runs into security exception
+        // Following scripts were part of the 'storetests' suite
+        "st_derby1189",
+        // "st_1",// this one can just be removed - was the
+        // first initial test for the SYSCS_UTIL schema. All functionality
+        // is now better tested elsewhere.
+        "st_b5772",
+        //"derby94" // this one needs special property 
+        // derby.locks.escalationThreshold=102
         };
 
     public StoreScriptsTest(String script) {
