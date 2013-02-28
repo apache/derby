@@ -27,6 +27,9 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -85,8 +88,10 @@ public abstract class Connection
     // Used to get the public key and encrypt password and/or userid
     protected EncryptionManager encryptionManager_;
 
-    // used to set transaction isolation level
-    private Statement setTransactionIsolationStmt = null;
+    //prepared statements associated with isolation level change are stored 
+    // in isolationLevelPreparedStmts
+    final private HashMap isolationLevelPreparedStmts =
+    		new java.util.HashMap();
     
     // used to get transaction isolation level
     private Statement getTransactionIsolationStmt = null;
@@ -771,14 +776,22 @@ public abstract class Connection
         
         resetConnectionAtFirstSql_ = false; // unset indicator of deferred reset
         SQLException accumulatedExceptions = null;
-        if (setTransactionIsolationStmt != null) {
+
+        //Close prepared statements associated with isolation level change
+        for (Iterator isoIterator = isolationLevelPreparedStmts.keySet().iterator();
+            isoIterator.hasNext();) {
             try {
-                setTransactionIsolationStmt.close();
-            } catch (SQLException se) {
-                accumulatedExceptions = se;
+                String isoLevel = (String)isoIterator.next();
+                PreparedStatement ps = 
+                    (PreparedStatement)isolationLevelPreparedStmts.get(isoLevel);
+                ps.close();
+            }
+            catch (SQLException se) {
+                accumulatedExceptions = Utils.accumulateSQLException(
+                    se, accumulatedExceptions);
             }
         }
-        setTransactionIsolationStmt = null;
+        isolationLevelPreparedStmts.clear();
         if (getTransactionIsolationStmt != null) {
             try {
                 getTransactionIsolationStmt.close();
@@ -990,18 +1003,22 @@ public abstract class Connection
                 new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
                 new Integer(level));
         }
-        if (setTransactionIsolationStmt == null  ||
-                !(setTransactionIsolationStmt.openOnClient_ &&
-                        setTransactionIsolationStmt.openOnServer_)) {
-            setTransactionIsolationStmt =
-                    createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                            java.sql.ResultSet.CONCUR_READ_ONLY,
-                            holdability());
+        //If we do not already have a prepared statement for the requested
+        // isolation level change, then create one
+        PreparedStatement ps = (PreparedStatement)isolationLevelPreparedStmts.get(levelString);
+        if (ps == null  || !ps.openOnClient_) {
+            ps = prepareStatementX(
+                    "SET CURRENT ISOLATION = " + levelString,
+                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    holdability(),
+                    java.sql.Statement.NO_GENERATED_KEYS,
+                    null, null);
+            isolationLevelPreparedStmts.put(levelString, ps);
         }
-
+        //Execute the prepared statement to change the isolation level
         try {
-            setTransactionIsolationStmt.executeUpdate(
-                "SET CURRENT ISOLATION = " + levelString);
+            ps.execute();
         } catch (SQLException sqle) {
             throw new SqlException(sqle);
         }
