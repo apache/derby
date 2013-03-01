@@ -86,8 +86,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             "CREATE TABLE " + DERBY_6045_DATA_TABLE + " (" +
             "term_id INTEGER NOT NULL, " +
             "var_name VARCHAR(1024) NOT NULL, " +
-            "var_type SMALLINT NOT NULL, " +
-            "kb_status INTEGER NOT NULL " +
+            "var_type SMALLINT NOT NULL " +
             ")";
 
     private final static String CREATE_DATA_TABLE =
@@ -921,7 +920,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         //insert 10 rows
         PreparedStatement ps = s.getConnection().prepareStatement(
             "insert into " + DERBY_6045_DATA_TABLE +
-            " VALUES (?, '?var0', 1, 1)");
+            " VALUES (?, '?var0', 1)");
         for (int i=1; i<=10; i++) {
             ps.setInt(1, i);
             ps.executeUpdate();
@@ -953,17 +952,55 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         runThreeQueries(2);
         s.close();
     }
+    
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Test following case
+    //    Insert 10K rows to a table with primary key on a column and
+    //    unique index on 2 other columns in the table. A SELECT * from 
+    //    the table with WHERE clause using primary key with OR ends up 
+    //    doing table scan rather than index scan.
+    //    If the unique key is removed from the table, the same query
+    //    will start doing index scan.
+    public void xtestDerby6045InsertAllRowsAdditionalUniqueIndex() 
+            throws SQLException
+    {
+         Statement s = createStatement();
+         s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+         dropTable(DERBY_6045_DATA_TABLE);
+         // Create the test table, primary key, unique key and insert data
+         s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
+         s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
+             " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
+             " PRIMARY KEY (term_id)");
+
+         //create additional unique key. Creation of this unique key is making
+         // the select queries with IN and OR clause on the primary key to use
+         // table scan
+         s.executeUpdate("ALTER TABLE  " + DERBY_6045_DATA_TABLE + 
+             " ADD CONSTRAINT kb_variable_term_variable_name_unique " +
+             " UNIQUE (var_name, var_type)");
+
+         //insert 10K rows
+         for (int i=1; i<=10000; i++) {
+             s.executeUpdate("insert into " + DERBY_6045_DATA_TABLE +
+     	         " VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ")");
+         }
+         s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+         runThreeQueries(0);
+         s.close();
+    }
 
     // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
     //  with >256 rows)
-    // Following test shows 2 cases
+    // Test following case
     //  1)If we insert 10K rows to an empty table with primary key on column
     //    being used in the where clause, we use index scan for the queries
     //    being tested
-    //  2)To the table above, if we add another unique index on 2 columns 
-    //    which are being used in the select clause, we stop using index scan
-    //    for SELECT queries with IN and OR clause on the primary key
-    public void xtestDerby6045InsertAllRows() 
+    //    Insert 10K rows to a table with primary key. A SELECT * from 
+    //    the table with WHERE clause using primary key with OR uses 
+    //    index scan.
+    public void testDerby6045InsertAllRows() 
         throws SQLException
     {
         Statement s = createStatement();
@@ -978,20 +1015,10 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         //insert 10K rows
         for (int i=1; i<=10000; i++) {
             s.executeUpdate("insert into " + DERBY_6045_DATA_TABLE +
-    		" VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ",1)");
+    		" VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ")");
         }
+        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
         runThreeQueries(0);
-        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
-        runThreeQueries(1);
-
-        //create additional unique key. Creation of this unique key is making
-        // the select queries with IN and OR clause on the primary key to use
-        // table scan
-        s.executeUpdate("ALTER TABLE  " + DERBY_6045_DATA_TABLE + 
-            " ADD CONSTRAINT kb_variable_term_variable_name_unique " +
-            " UNIQUE (var_name, var_type)");
-        s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
-        runThreeQueries(1);
         s.close();
     }
 
