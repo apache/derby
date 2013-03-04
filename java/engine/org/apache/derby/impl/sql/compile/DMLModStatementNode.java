@@ -21,9 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
@@ -745,7 +746,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		expression = expression.bindExpression(
 										fakeFromList,
 										(SubqueryList) null,
-										(Vector) null);
+										(List) null);
 	}
 
 	/**
@@ -874,7 +875,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
     )
 		throws StandardException
 	{
-		Vector								fkVector = new Vector(10);
+		ArrayList							fkVector = new ArrayList();
 		int 								type;
 		UUID[] 								uuids = null;
 		long[] 								conglomNumbers = null;
@@ -885,11 +886,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ConstraintDescriptorList			activeList = dd.getActiveConstraintDescriptors(cdl);
 		int[]								rowMap = getRowMap(readColsBitSet, td);
 		int[]                               raRules = null;
-		Vector                              refTableNames = new Vector(1);
-		Vector                              refIndexConglomNum = new Vector(1);
-		Vector                              refActions = new Vector(1);
-		Vector                              refColDescriptors = new Vector(1);
-		Vector                              fkColMap = new Vector(1);
+		ArrayList                           refTableNames = new ArrayList(1);
+		ArrayList                           refIndexConglomNum = new ArrayList(1);
+		ArrayList                           refActions = new ArrayList(1);
+		ArrayList                           refColDescriptors = new ArrayList(1);
+		ArrayList                           fkColMap = new ArrayList(1);
 		int activeSize = activeList.size();
 		for (int index = 0; index < activeSize; index++)
 		{
@@ -1005,18 +1006,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		/*
 		** Now convert the vector into an array.
 		*/
-		int size = fkVector.size();
-		if (size > 0)
-		{
-			fkInfo = new FKInfo[size];
-			for (int i = 0; i < size; i++)
-			{
-				fkInfo[i] = (FKInfo)fkVector.get(i);
-			}
-		}
+        if (!fkVector.isEmpty()) {
+            fkInfo = (FKInfo[]) fkVector.toArray(new FKInfo[fkVector.size()]);
+        }
 
 		//convert the ref action info vectors to  to arrays
-		size = refActions.size();
+		int size = refActions.size();
 		if (size > 0)
 		{
 			fkTableNames = new String[size];
@@ -1690,7 +1685,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	)
 					throws StandardException
 	{
-		Vector		conglomVector = new Vector();
+		ArrayList conglomVector = new ArrayList();
 
 		DMLModStatementNode.getXAffectedIndexes(td, updatedColumns, colBitSet, conglomVector );
 
@@ -1718,7 +1713,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		TableDescriptor		baseTable,
 		ResultColumnList	updatedColumns,
 		FormatableBitSet				colBitSet,
-		Vector				conglomVector
+		List				conglomVector
 	)
 		throws StandardException
 	{
@@ -1776,7 +1771,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 	protected	void	markAffectedIndexes
 	(
-		Vector	affectedConglomerates
+		List	affectedConglomerates
     )
 		throws StandardException
 	{
