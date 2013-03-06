@@ -3947,12 +3947,11 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * choose the statistic which has the maximum match with the predicates.
 	 * value is returned in ret.
 	 */
-	private int chooseLongestMatch(PredicateWrapperList[] predArray, Vector ret,
+	private int chooseLongestMatch(PredicateWrapperList[] predArray, List ret,
 								   int numWorkingPredicates)
 	{
 		int max = 0, maxWeight = 0;
 		int position = -1;
-		int weight;
 
 		for (int i = 0; i < predArray.length; i++)
 		{
@@ -3993,7 +3992,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 * [p2] shuld be considered again later.
 		*/
 		PredicateWrapperList pwl = predArray[position];
-		Vector uniquepreds = pwl.createLeadingUnique();
+		List uniquepreds = pwl.createLeadingUnique();
 		
 		/* uniqueprds is a vector of predicate (along with wrapper) that I'm
 		   going  to use to get statistics from-- we now have to delete these
@@ -4223,7 +4222,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 * I need to extract out 0 1 2 3.
 		 * leaving 0 2 3 in there.
 		 */
-		Vector createLeadingUnique()
+		private List createLeadingUnique()
 		{
 			Vector scratch = new Vector();
 

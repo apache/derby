@@ -57,7 +57,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
-import java.util.Vector;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -1032,7 +1032,7 @@ public abstract class ResultSetNode extends QueryTreeNode
                         String defaultText = defaultInfo.getDefaultText();
                         ValueNode defaultTree = parseDefault(defaultText);
                         defaultTree = defaultTree.bindExpression
-                            (getFromList(), (SubqueryList) null, (Vector) null);
+                            (getFromList(), (SubqueryList) null, (List) null);
                         newResultColumn = (ResultColumn) getNodeFactory().getNode
                             ( C_NodeTypes.RESULT_COLUMN, defaultTree.getTypeServices(), defaultTree, getContextManager());
                     }
@@ -1736,14 +1736,14 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param	crs					The specified ColumnReference[]
 	 * @param	permuteOrdering		Whether or not the order of the CRs in the array can be permuted
-	 * @param	fbtVector			Vector that is to be filled with the FromBaseTable	
+	 * @param	fbtVector			Vector that is to be filled with the FromBaseTable
 	 *
 	 * @return	Whether the underlying ResultSet tree
 	 * is ordered on the specified column.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 				throws StandardException
 	{
 		return false;
@@ -1868,7 +1868,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return number of aggregates
 	 */
-	protected static final int numDistinctAggregates(Vector aggregateVector)
+	protected static final int numDistinctAggregates(List aggregateVector)
 	{
 		int		count = 0;
 		int		size = aggregateVector.size();

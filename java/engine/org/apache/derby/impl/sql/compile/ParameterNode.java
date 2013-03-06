@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;

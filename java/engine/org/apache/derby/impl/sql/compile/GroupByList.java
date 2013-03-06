@@ -21,22 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-
-import java.util.Vector;
 
 /**
  * A GroupByList represents the list of expressions in a GROUP BY clause in
@@ -110,8 +101,7 @@ public class GroupByList extends OrderedColumnList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindGroupByColumns(SelectNode select,
-								   Vector	aggregateVector)
+	void bindGroupByColumns(SelectNode select, List aggregateVector)
 					throws StandardException
 	{
 		FromList		 fromList = select.getFromList();

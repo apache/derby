@@ -22,7 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
-import java.util.Vector;
+import java.util.List;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
@@ -614,7 +614,7 @@ public class ColumnDefinitionNode extends TableElementNode
 								getNodeFactory().doJoinOrderOptimization(),
 								getContextManager()), 
 							(SubqueryList) null,
-							(Vector) null);
+							(List) null);
 
 			TypeId columnTypeId = getType().getTypeId();
 			TypeId defaultTypeId = defaultTree.getTypeId();

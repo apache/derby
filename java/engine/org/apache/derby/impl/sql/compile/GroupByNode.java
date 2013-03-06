@@ -26,6 +26,7 @@ import java.util.Vector;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.iapi.error.StandardException;
@@ -84,7 +85,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * The list of all aggregates in the query block
 	 * that contains this group by.
 	 */
-	Vector	aggregateVector;
+    private List aggregateVector;
 
 	/**
 	 * Information that is used at execution time to
@@ -146,7 +147,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 //			Aggregage vector can be null if we have a having clause.
 //          select c1 from t1 group by c1 having c1 > 1;			
-//			SanityManager.ASSERT(((Vector) aggregateVector).size() > 0,
+//			SanityManager.ASSERT(((List) aggregateVector).size() > 0,
 //			"aggregateVector expected to be non-empty");
 			if (!(childResult instanceof Optimizable))
 			{
@@ -162,7 +163,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
 		ResultColumnList newBottomRCL;
 		this.groupingList = (GroupByList) groupingList;
-		this.aggregateVector = (Vector) aggregateVector;
+		this.aggregateVector = (List) aggregateVector;
 		this.parent = this;
 
 		/*

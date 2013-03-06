@@ -21,29 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
+import java.util.List;
 
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
@@ -53,8 +43,6 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  * This node type translates an index row to a base row.  It takes a
@@ -147,7 +135,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 				throws StandardException
 	{
 		return source.isOrderedOn(crs, permuteOrdering, fbtVector);

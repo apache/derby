@@ -24,10 +24,9 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.error.StandardException;
 
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -39,31 +38,31 @@ import java.util.Vector;
 
 abstract class QueryTreeNodeVector extends QueryTreeNode
 {
-	private Vector			v = new Vector();
+	private final List v = new Vector();
 
 	public final int size()
 	{
 		return v.size();
 	}
 
-	QueryTreeNode elementAt(int index)
+	final QueryTreeNode elementAt(int index)
 	{
-		return (QueryTreeNode) v.elementAt(index);
+		return (QueryTreeNode) v.get(index);
 	}
 
 	final void addElement(QueryTreeNode qt)
 	{
-		v.addElement(qt);
+		v.add(qt);
 	}
 
 	final void removeElementAt(int index)
 	{
-		v.removeElementAt(index);
+		v.remove(index);
 	}
 
 	final void removeElement(QueryTreeNode qt)
 	{
-		v.removeElement(qt);
+		v.remove(qt);
 	}
 
 	final Object remove(int index)
@@ -78,7 +77,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 
 	final void setElementAt(QueryTreeNode qt, int index)
 	{
-		v.setElementAt(qt, index);
+		v.set(index, qt);
 	}
 
 	void destructiveAppend(QueryTreeNodeVector qtnv)
@@ -89,21 +88,17 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 
 	void nondestructiveAppend(QueryTreeNodeVector qtnv)
 	{
-		int qtnvSize = qtnv.size();
-		for (int index = 0; index < qtnvSize; index++)
-		{
-			v.addElement(qtnv.elementAt(index));
-		}
+        v.addAll(qtnv.v);
 	}
 
 	final void removeAllElements()
 	{
-		v.removeAllElements();
+		v.clear();
 	}
 
 	final void insertElementAt(QueryTreeNode qt, int index)
 	{
-		v.insertElementAt(qt, index);
+		v.add(index, qt);
 	}
 
 

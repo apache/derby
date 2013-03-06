@@ -101,7 +101,7 @@ import org.apache.derby.impl.sql.catalog.SYSUSERSRowFactory;
  * </pre></i> Ideally, the cursor only selects cint.  Then,
  * something akin to an IndexRowToBaseRow is generated to
  * take the CursorResultSet and get the appropriate columns
- * out of the base table from the RowLocation retunrned by the
+ * out of the base table from the RowLocation returned by the
  * cursor.  Then the update node can generate the appropriate
  * NormalizeResultSet (or whatever else it might need) to
  * get things into the correct format for the UpdateResultSet.
@@ -2205,9 +2205,9 @@ public class FromBaseTable extends FromTable
 	/**
 	 * Clear the bits from the dependency map when join nodes are flattened
 	 *
-	 * @param locations	vector of bit numbers to be cleared
+	 * @param locations	list of bit numbers to be cleared
 	 */
-	void clearDependency(Vector locations)
+	void clearDependency(List locations)
 	{
 		if (this.dependencyMap != null)
 		{
@@ -4277,7 +4277,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 				throws StandardException
 	{
 		/* The following conditions must be met, regardless of the value of permuteOrdering,

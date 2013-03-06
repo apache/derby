@@ -23,16 +23,12 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 
-import java.util.Vector;
 /**
  * An UntypedNullConstantNode represents a SQL NULL before it has
  * been bound.  The bind() operation will replace the UntypedNullConstantNodes

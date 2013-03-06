@@ -60,6 +60,7 @@ import org.apache.derby.iapi.services.io.FormatableProperties;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -913,7 +914,7 @@ public class DeleteNode extends DMLModStatementNode
 	private static FormatableBitSet getDeleteReadMap
 	(
 		TableDescriptor				baseTable,
-		Vector						conglomVector,
+		List						conglomVector,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing
 	)

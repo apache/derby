@@ -21,13 +21,10 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.reference.ClassName;
 
 /**

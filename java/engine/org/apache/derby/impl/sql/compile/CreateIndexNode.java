@@ -22,8 +22,8 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -54,7 +54,7 @@ public class CreateIndexNode extends DDLStatementNode
 	String				indexType;
 	TableName			indexName;
 	TableName			tableName;
-	Vector				columnNameList;
+	List				columnNameList;
 	String[]			columnNames = null;
 	boolean[]			isAscending;
 	int[]				boundColumnIDs;
@@ -88,7 +88,7 @@ public class CreateIndexNode extends DDLStatementNode
 		this.indexType = (String) indexType;
 		this.indexName = (TableName) indexName;
 		this.tableName = (TableName) tableName;
-		this.columnNameList = (Vector) columnNameList;
+		this.columnNameList = (List) columnNameList;
 		this.properties = (Properties) properties;
 	}
 

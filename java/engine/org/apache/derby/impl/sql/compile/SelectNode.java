@@ -69,9 +69,10 @@ public class SelectNode extends ResultSetNode
 	FromTable targetTable;
 
 	/* Aggregate Vectors for select and where clauses */
-	Vector	selectAggregates ;
-	Vector	whereAggregates;
-	Vector  havingAggregates;
+    private List selectAggregates;
+    private List whereAggregates;
+    private List havingAggregates;
+
 	/**
 	 * The ValueNode for the WHERE clause must represent a boolean
 	 * expression.  The binding phase will enforce this - the parser
@@ -1189,8 +1190,8 @@ public class SelectNode extends ResultSetNode
 		 */
 		if (groupByList != null &&
 			havingClause == null &&
-			selectAggregates.size() == 0 &&
-			whereAggregates.size() == 0)
+			selectAggregates.isEmpty() &&
+			whereAggregates.isEmpty())
 		{
 			isDistinct = true;
 			groupByList = null;
@@ -1544,7 +1545,7 @@ public class SelectNode extends ResultSetNode
 		if (((selectAggregates != null) && (selectAggregates.size() > 0)) 
 			|| (groupByList != null))
 		{
-			Vector aggs = selectAggregates;
+			List aggs = selectAggregates;
 			if (havingAggregates != null && !havingAggregates.isEmpty()) {
 				havingAggregates.addAll(selectAggregates);
 				aggs = havingAggregates;
@@ -1863,7 +1864,7 @@ public class SelectNode extends ResultSetNode
 			}
 		}
 
-		return newTopRSN.isOrderedOn(crs, permuteOrdering, (Vector)null);
+		return newTopRSN.isOrderedOn(crs, permuteOrdering, (List) null);
 	}
 
 	/**

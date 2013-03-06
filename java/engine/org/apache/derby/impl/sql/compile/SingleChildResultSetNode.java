@@ -21,36 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
+import java.util.List;
 
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  * A SingleChildResultSetNode represents a result set with a single child.
@@ -510,7 +499,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 				throws StandardException
 	{
 		return childResult.isOrderedOn(crs, permuteOrdering, fbtVector);

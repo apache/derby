@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -59,7 +60,7 @@ import java.util.Vector;
 public class RowResultSetNode extends FromTable
 {
 	SubqueryList subquerys;
-	Vector		 aggregateVector;
+	private List aggregateVector;
 	OrderByList	 orderByList;
     ValueNode    offset; // OFFSET n ROWS
     ValueNode    fetchFirst; // FETCH FIRST n ROWS ONLY

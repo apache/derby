@@ -341,8 +341,7 @@ public class CompilerContextImpl extends ContextImpl
 	public Object[] getSavedObjects() {
 		if (savedObjects == null) return null;
 
-		Object[] retVal = new Object[savedObjects.size()];
-		savedObjects.copyInto(retVal);
+		Object[] retVal = savedObjects.toArray();
 		savedObjects = null; // erase to start over
 		return retVal;
 	}
@@ -461,10 +460,10 @@ public class CompilerContextImpl extends ContextImpl
 						lcc.getTransactionCompile().openStoreCost(conglomerateNumber);
 
 		/* Put it in the array */
-		storeCostControllers.add(storeCostControllers.size(), retval);
+		storeCostControllers.add(retval);
 
 		/* Put the conglomerate number in its array */
-		storeCostConglomIds.add(storeCostConglomIds.size(), new Long(conglomerateNumber));
+		storeCostConglomIds.add(new Long(conglomerateNumber));
 
 		return retval;
 	}
@@ -1023,7 +1022,7 @@ public class CompilerContextImpl extends ContextImpl
 	private int					scanIsolationLevel;
 	private int					nextEquivalenceClass = -1;
 	private long				nextClassName;
-	private Vector				savedObjects;
+	private List				savedObjects;
 	private String				classPrefix;
 	private SchemaDescriptor	compilationSchema;
 
@@ -1036,8 +1035,8 @@ public class CompilerContextImpl extends ContextImpl
 	private ProviderList		currentAPL;
 	private boolean returnParameterFlag;
 
-	private Vector				storeCostControllers = new Vector();
-	private Vector				storeCostConglomIds = new Vector();
+    private final List storeCostControllers = new Vector();
+    private final List storeCostConglomIds = new Vector();
 
 	private SortCostController	sortCostController;
 

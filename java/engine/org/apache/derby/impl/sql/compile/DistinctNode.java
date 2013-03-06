@@ -21,14 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
+
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -36,25 +35,16 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.util.JBitSet;
-
-
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  * A DistinctNode represents a result set for a disinct operation
@@ -264,7 +254,7 @@ public class DistinctNode extends SingleChildResultSetNode
 	 * @return	Whether the underlying ResultSet tree
 	 * is ordered on the specified column.
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 	{
 		/* RESOLVE - DistinctNodes are ordered on their RCLs.
 		 * Walk RCL to see if cr is 1st non-constant column in the

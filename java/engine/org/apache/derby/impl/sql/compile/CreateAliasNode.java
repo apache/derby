@@ -22,7 +22,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import java.util.Vector;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.AggregateAliasInfo;
@@ -31,7 +30,6 @@ import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.UDTAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.JDBC40Translation;
-import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -192,7 +190,7 @@ public class CreateAliasNode extends DDLStatementNode
 
 				Object[] routineElements = (Object[]) aliasSpecificInfo;
 				Object[] parameters = (Object[]) routineElements[PARAMETER_ARRAY];
-				int paramCount = ((Vector) parameters[0]).size();
+				int paramCount = ((List) parameters[0]).size();
 				
 				// Support for Java signatures in Derby was added in 10.1
 				// Check to see the catalogs have been upgraded to 10.1 before
@@ -213,15 +211,15 @@ public class CreateAliasNode extends DDLStatementNode
 				
 				if (paramCount != 0) {
 
-					names = new String[paramCount];
-					((Vector) parameters[0]).copyInto(names);
+                    names = (String[]) ((List) parameters[0]).toArray(
+                            new String[paramCount]);
 
-					types = new TypeDescriptor[paramCount];
-					((Vector) parameters[1]).copyInto(types);
+                    types = (TypeDescriptor[]) ((List) parameters[1]).toArray(
+                            new TypeDescriptor[paramCount]);
 
 					modes = new int[paramCount];
 					for (int i = 0; i < paramCount; i++) {
-                        int currentMode =  ((Integer) (((Vector) parameters[2]).get(i))).intValue();
+                        int currentMode =  ((Integer) (((List) parameters[2]).get(i))).intValue();
                         modes[i] = currentMode;
   
                         //

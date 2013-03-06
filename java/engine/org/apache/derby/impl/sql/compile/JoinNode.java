@@ -21,7 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
@@ -34,13 +33,11 @@ import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
@@ -50,14 +47,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.PropertyUtil;
@@ -98,7 +88,7 @@ public class JoinNode extends TableOperatorNode
 	private PredicateList rightPredicateList;
 
 	protected boolean flattenableJoin = true;
-	Vector				aggregateVector;
+	List				aggregateVector;
 	SubqueryList		subqueryList;
 	ValueNode			joinClause;
 	boolean	            joinClauseNormalized;
@@ -1912,7 +1902,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, Vector fbtVector)
+	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
 				throws StandardException
 	{
 		/* RESOLVE - easiest thing for now is to only consider the leftmost child */
@@ -1963,7 +1953,7 @@ public class JoinNode extends TableOperatorNode
 		this.subqueryList = subqueryList;
 	}
 
-	void setAggregateVector(Vector aggregateVector)
+	void setAggregateVector(List aggregateVector)
 	{
 		this.aggregateVector = aggregateVector;
 	}

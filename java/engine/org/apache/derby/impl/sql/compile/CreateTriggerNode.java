@@ -24,10 +24,9 @@ package	org.apache.derby.impl.sql.compile;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -60,7 +59,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	private	boolean				isBefore;
 	private	boolean				isRow;
 	private	boolean				isEnabled;
-	private	Vector				refClause;
+	private	List				refClause;
 	private	ValueNode		    whenClause;
 	private	String				whenText;
 	private	int					whenOffset;
@@ -264,7 +263,7 @@ public class CreateTriggerNode extends DDLStatementNode
 		this.isBefore = ((Boolean) isBefore).booleanValue();
 		this.isRow = ((Boolean) isRow).booleanValue();
 		this.isEnabled = ((Boolean) isEnabled).booleanValue();
-		this.refClause = (Vector) refClause;	
+		this.refClause = (List) refClause;
 		this.whenClause = (ValueNode) whenClause;
 		this.whenText = (whenText == null) ? null : ((String) whenText).trim();
 		this.whenOffset = ((Integer) whenOffset).intValue();
@@ -782,14 +781,14 @@ public class CreateTriggerNode extends DDLStatementNode
 	*/
 	private void validateReferencesClause(DataDictionary dd) throws StandardException
 	{
-		if ((refClause == null) || (refClause.size() == 0))
+		if ((refClause == null) || refClause.isEmpty())
 		{
 			return;
 		}
 
-		for (Enumeration e = refClause.elements(); e.hasMoreElements(); )
+		for (Iterator it = refClause.iterator(); it.hasNext(); )
 		{
-			TriggerReferencingStruct trn = (TriggerReferencingStruct)e.nextElement();
+			TriggerReferencingStruct trn = (TriggerReferencingStruct) it.next();
 
 			/*
 			** 1) Make sure that we don't try to refer
@@ -907,11 +906,11 @@ public class CreateTriggerNode extends DDLStatementNode
 			if (refClause != null)
 			{
 				StringBuffer buf = new StringBuffer();
-				for (Enumeration e = refClause.elements(); e.hasMoreElements(); )
+				for (Iterator it = refClause.iterator(); it.hasNext(); )
 				{
 					buf.append("\t");
 					TriggerReferencingStruct trn = 	
-							(TriggerReferencingStruct)e.nextElement();
+							(TriggerReferencingStruct) it.next();
 					buf.append(trn.toString());
 					buf.append("\n");
 				}

@@ -191,7 +191,9 @@ public class TableElementList extends QueryTreeNodeVector
 					//if the constraint type is not primary key or unique key, ignore it.
 					if (cd.getConstraintType() == DataDictionary.PRIMARYKEY_CONSTRAINT ||
 					cd.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT)
-						constraintsVector.addElement(cd);
+                    {
+                        constraintsVector.add(cd);
+                    }
 				}
 			}
 		}
@@ -267,7 +269,7 @@ public class TableElementList extends QueryTreeNodeVector
 				for (int i=0; i<constraintsVector.size();i++)
 				{
 
-					destConstraint = constraintsVector.elementAt(i);
+					destConstraint = constraintsVector.get(i);
 					if (destConstraint instanceof ConstraintDefinitionNode)
 					{
 						ConstraintDefinitionNode destCDN = (ConstraintDefinitionNode)destConstraint;
@@ -286,7 +288,7 @@ public class TableElementList extends QueryTreeNodeVector
 						throw StandardException.newException(SQLState.LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS,
 						cdn.getConstraintMoniker(), destName);
 				}
-				constraintsVector.addElement(cdn);
+				constraintsVector.add(cdn);
 			}
 
 			/* Make sure that there are no duplicate constraint names in the list */
