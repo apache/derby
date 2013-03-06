@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.management;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /**
@@ -51,13 +52,16 @@ public class _Suite extends BaseTestCase {
 
         TestSuite suite = new TestSuite("management");
 
-        suite.addTest(JMXTest.suite());
-        suite.addTest(ManagementMBeanTest.suite());
-        suite.addTest(InactiveManagementMBeanTest.suite());
-        suite.addTest(VersionMBeanTest.suite());
-        suite.addTest(JDBCMBeanTest.suite());
-        suite.addTest(NetworkServerMBeanTest.suite());
-        suite.addTest(CustomMBeanServerBuilderTest.suite());
+        if (JDBC.vmSupportsJMX()) {
+            suite.addTest(JMXTest.suite());
+            suite.addTest(ManagementMBeanTest.suite());
+            suite.addTest(InactiveManagementMBeanTest.suite());
+            suite.addTest(VersionMBeanTest.suite());
+            suite.addTest(JDBCMBeanTest.suite());
+            suite.addTest(NetworkServerMBeanTest.suite());
+            suite.addTest(CustomMBeanServerBuilderTest.suite());
+        }
+
         return suite;
     }
 }

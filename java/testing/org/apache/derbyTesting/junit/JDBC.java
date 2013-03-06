@@ -140,6 +140,13 @@ public class JDBC {
     }
 
     /**
+     * Is javax.management.MBeanServer available? Indicates whether the
+     * JVM supports the Java Management Extensions (JMX).
+     */
+    private static final boolean HAVE_MBEAN_SERVER =
+            haveClass("javax.management.MBeanServer");
+
+    /**
      * Can we load a specific class, use this to determine JDBC level.
      * @param className Class to attempt load on.
      * @return true if class can be loaded, false otherwise.
@@ -208,6 +215,13 @@ public class JDBC {
      */
     public static boolean vmSupportsJNDI() {
         return HAVE_REFERENCEABLE;
+    }
+
+    /**
+     * Return true if the JVM supports the Java Management Extensions (JMX).
+     */
+    public static boolean vmSupportsJMX() {
+        return HAVE_MBEAN_SERVER;
     }
 
 	/**
