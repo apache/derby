@@ -24,9 +24,9 @@ package	org.apache.derby.impl.sql.compile;
 import java.lang.reflect.Modifier;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
@@ -951,7 +951,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throws StandardException
 	{
 		int			size = size();
-		Hashtable	ht = new Hashtable(size + 2, (float) .999);
+        HashSet     seenNames = new HashSet(size + 2, 0.999f);
 
 		for (int index = 0; index < size; index++)
 		{
@@ -960,11 +960,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			/* Verify that this column's name is unique within the list */
 			String colName = rc.getName();
+            boolean alreadySeen = !seenNames.add(colName);
 
-			Object object = ht.put(colName, colName);
-
-			if (object != null &&
-				((String) object).equals(colName))
+			if (alreadySeen)
 			{
 				if (SanityManager.DEBUG)
 				{
@@ -2098,7 +2096,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throws StandardException
 	{
 		int size = size();
-		Hashtable	ht = new Hashtable(size + 2, (float) .999);
+        HashSet seenNames = new HashSet(size + 2, 0.999f);
 		ResultColumn rc;
 
 		for (int index = 0; index < size; index++)
@@ -2108,11 +2106,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 				throw StandardException.newException(SQLState.LANG_DB2_VIEW_REQUIRES_COLUMN_NAMES);
 			/* Verify that this column's name is unique within the list */
 			String colName = ((ResultColumn) elementAt(index)).getName();
+            boolean alreadySeen = !seenNames.add(colName);
 
-			Object object = ht.put(colName, colName);
-
-			if (object != null &&
-				((String) object).equals(colName))
+			if (alreadySeen)
 			{
 				return colName;
 			}

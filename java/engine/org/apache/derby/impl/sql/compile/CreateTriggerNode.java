@@ -24,7 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -411,12 +411,12 @@ public class CreateTriggerNode extends DDLStatementNode
 		*/
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
-			Hashtable columnNames = new Hashtable();
+            HashSet columnNames = new HashSet();
 			int tcSize = triggerCols.size();
 			for (int i = 0; i < tcSize; i++)
 			{
 				ResultColumn rc  = (ResultColumn) triggerCols.elementAt(i);
-				if (columnNames.put(rc.getName(), rc) != null)
+				if (!columnNames.add(rc.getName()))
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_IN_TRIGGER_UPDATE, 
 											rc.getName(), 

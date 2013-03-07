@@ -21,7 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -313,7 +313,7 @@ public class CreateIndexNode extends DDLStatementNode
 				throws StandardException
 	{
 		int size = columnNameList.size();
-		Hashtable	ht = new Hashtable(size + 2, (float) .999);
+        HashSet seenNames = new HashSet(size + 2, 0.999f);
 		columnNames = new String[size];
 		isAscending = new boolean[size];
 
@@ -331,10 +331,9 @@ public class CreateIndexNode extends DDLStatementNode
 			else
 				isAscending[index] = true;
 
-			Object object = ht.put(columnNames[index], columnNames[index]);
+            boolean alreadySeen = !seenNames.add(columnNames[index]);
 
-			if (object != null &&
-				((String) object).equals(columnNames[index]))
+			if (alreadySeen)
 			{
 				throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_NAME_CREATE_INDEX, columnNames[index]);
 			}

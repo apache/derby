@@ -60,10 +60,10 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -169,10 +169,10 @@ public class TableElementList extends QueryTreeNodeVector
 		int numAutoCols = 0;
 
 		int			size = size();
-		Hashtable	columnHT = new Hashtable(size + 2, (float) .999);
-		Hashtable	constraintHT = new Hashtable(size + 2, (float) .999);
+        HashSet columnNames = new HashSet(size + 2, 0.999f);
+        HashSet constraintNames = new HashSet(size + 2, 0.999f);
 		//all the primary key/unique key constraints for this table
-		Vector constraintsVector = new Vector();
+        ArrayList constraintsVector = new ArrayList();
 
 		//special case for alter table (td is not null in case of alter table)
 		if (td != null)
@@ -215,7 +215,7 @@ public class TableElementList extends QueryTreeNodeVector
 				{
 					throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, cdn.getColumnName());
 				}
-				checkForDuplicateColumns(ddlStmt, columnHT, cdn.getColumnName());
+				checkForDuplicateColumns(ddlStmt, columnNames, cdn.getColumnName());
 				cdn.checkUserType(td);
 				cdn.bindAndValidateDefault(dd, td);
 
@@ -292,7 +292,7 @@ public class TableElementList extends QueryTreeNodeVector
 			}
 
 			/* Make sure that there are no duplicate constraint names in the list */
-            checkForDuplicateConstraintNames(ddlStmt, constraintHT, cdn.getConstraintMoniker());
+            checkForDuplicateConstraintNames(ddlStmt, constraintNames, cdn.getConstraintMoniker());
 
 			/* Make sure that the constraint we are trying to drop exists */
 			if (cdn.getConstraintType() == DataDictionary.DROP_CONSTRAINT)
@@ -1373,18 +1373,17 @@ public class TableElementList extends QueryTreeNodeVector
 	 * RESOLVE: This check will also be performed by alter table.
 	 *
 	 * @param ddlStmt	DDLStatementNode which contains this list
-	 * @param ht		Hashtable for enforcing uniqueness.
+     * @param seenNames The column names seen so far (for enforcing uniqueness)
 	 * @param colName	Column name to check for.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateColumns(DDLStatementNode ddlStmt,
-									Hashtable ht,
+									Set seenNames,
 									String colName)
 			throws StandardException
 	{
-		Object object = ht.put(colName, colName);
-		if (object != null)
+		if (!seenNames.add(colName))
 		{
 			/* RESOLVE - different error messages for create and alter table */
 			if (ddlStmt instanceof CreateTableNode)
@@ -1402,19 +1401,20 @@ public class TableElementList extends QueryTreeNodeVector
 	 * RESOLVE: This check will also be performed by alter table.
 	 *
 	 * @param ddlStmt	DDLStatementNode which contains this list
+     * @param seenNames The constraint names seen so far (for enforcing
+     *                  uniqueness)
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateConstraintNames(DDLStatementNode ddlStmt,
-									Hashtable ht,
+									Set seenNames,
 									String constraintName)
 			throws StandardException
 	{
 		if (constraintName == null)
 			return;
 
-		Object object = ht.put(constraintName, constraintName);
-		if (object != null) {
+		if (!seenNames.add(constraintName)) {
 
 			/* RESOLVE - different error messages for create and alter table */
 			if (ddlStmt instanceof CreateTableNode)
