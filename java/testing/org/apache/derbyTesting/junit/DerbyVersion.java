@@ -41,6 +41,7 @@ public class DerbyVersion
     public static final DerbyVersion _10_7     = new DerbyVersion(10,7,0,0);
     public static final DerbyVersion _10_8     = new DerbyVersion(10,8,0,0);
     public static final DerbyVersion _10_9     = new DerbyVersion(10,9,0,0);
+    public static final DerbyVersion _10_10    = new DerbyVersion(10,10,0,0);
 
     // A list of all known official Derby releases.
 

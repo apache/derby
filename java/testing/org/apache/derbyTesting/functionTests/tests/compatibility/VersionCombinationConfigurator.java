@@ -37,6 +37,7 @@ import org.apache.derby.tools.sysinfo;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.DerbyDistribution;
 import org.apache.derbyTesting.junit.DerbyVersion;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -171,6 +172,12 @@ public class VersionCombinationConfigurator {
         // Generate a list of all the combinations.
         for (DerbyDistribution server : dists) {
             DerbyVersion serverVersion = server.getVersion();
+
+            // Check if testing of this server version should be skipped.
+            if (skipServerVersion(serverVersion)) {
+                continue;
+            }
+
             TestSuite clientSuites = new TestSuite(
                     "Client runs against server " + serverVersion.toString());
             for (DerbyDistribution client : dists) {
@@ -200,6 +207,29 @@ public class VersionCombinationConfigurator {
         if (toExclude != null) {
             this.toExclude = toExclude;
         }
+    }
+
+    /**
+     * Check if a certain server version should be skipped due to bugs that
+     * prevent it from working in the current environment.
+     *
+     * @param version the server version to check
+     * @return {@code true} if the specified version should be skipped, or
+     * {@code false} otherwise
+     */
+    private boolean skipServerVersion(DerbyVersion version) {
+
+        // DERBY-6098: Skip testing of server versions less than 10.10 if
+        // the JVM doesn't support JNDI. Earlier versions of the server don't
+        // accept connections if JNDI is not present.
+        if (!JDBC.vmSupportsJNDI() && version.lessThan(DerbyVersion._10_10)) {
+            println("Server version " + version + " was skipped because " +
+                    "it requires JNDI to run.");
+            return true;
+        }
+
+        // Default: don't skip
+        return false;
     }
 
     /**
