@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -107,6 +108,15 @@ public class OldVersions
                   && old[i][0]==10 && old[i][1]==3 
                   && old[i][2]==1 && old[i][3]==4 ) {
                 traceit("Skipping 10.3.1.4 on CVM");
+                continue;
+            }
+
+            // DERBY-6100: Data sources from Derby versions prior to 10.10
+            // cannot be loaded on platforms that don't support JNDI.
+            if (JDBC.vmSupportsJDBC3() && !JDBC.vmSupportsJNDI() &&
+                    UpgradeRun.lessThan(old[i], new int[] {10, 10, 0, 0})) {
+                traceit("Skipping " + Arrays.toString(old[i]) +
+                        " because JNDI is not available");
                 continue;
             }
 
