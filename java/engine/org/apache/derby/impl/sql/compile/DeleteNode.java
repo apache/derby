@@ -58,7 +58,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 
 import java.util.Vector;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -338,19 +338,18 @@ public class DeleteNode extends DMLModStatementNode
 
 				if(!isDependentTable){
 					//graph node
-					graphHashTable = new Hashtable();
+                    dependentTables = new HashSet();
 				}
 
-				/*Check whether the current tatget is already been explored.
+				/*Check whether the current target has already been explored.
 			 	*If we are seeing the same table name which we binded earlier
 			 	*means we have cyclic references.
 			 	*/
-				if(!graphHashTable.containsKey(currentTargetTableName))
+				if (dependentTables.add(currentTargetTableName))
 				{
 					cascadeDelete = true;
 					int noDependents = fkTableNames.length;
 					dependentNodes = new StatementNode[noDependents];
-					graphHashTable.put(currentTargetTableName, new Integer(noDependents));
 					for(int i =0 ; i < noDependents ; i ++)
 					{
 						dependentNodes[i] = getDependentTableNode(fkTableNames[i],
@@ -367,7 +366,7 @@ public class DeleteNode extends DMLModStatementNode
 				{
 					String currentTargetTableName = targetTableDescriptor.getSchemaName()
 							 + "." + targetTableDescriptor.getName();
-					graphHashTable.put(currentTargetTableName, new Integer(0));
+                    dependentTables.add(currentTargetTableName);
 
 				}
 			}
@@ -711,7 +710,7 @@ public class DeleteNode extends DMLModStatementNode
 	private StatementNode getDependentTableNode(String tableName, int refAction,
 												ColumnDescriptorList cdl) throws StandardException
 	{
-		StatementNode node=null;
+        DMLModStatementNode node = null;
 
 		int index = tableName.indexOf('.');
 		String schemaName = tableName.substring(0 , index);
@@ -719,22 +718,26 @@ public class DeleteNode extends DMLModStatementNode
 		if(refAction == StatementType.RA_CASCADE)
 		{
 			node = getEmptyDeleteNode(schemaName , tName);
-			((DeleteNode)node).isDependentTable = true;
-			((DeleteNode)node).graphHashTable = graphHashTable;
 		}
 
 		if(refAction == StatementType.RA_SETNULL)
 		{
 			node = getEmptyUpdateNode(schemaName , tName, cdl);
-			((UpdateNode)node).isDependentTable = true;
-			((UpdateNode)node).graphHashTable = graphHashTable;
 		}
+
+        // The dependent node should be marked as such, and it should inherit
+        // the set of dependent tables from the parent so that it can break
+        // out of cycles in the dependency graph.
+        if (node != null) {
+            node.isDependentTable = true;
+            node.dependentTables = dependentTables;
+        }
 
 		return node;
 	}
 
 
-    private StatementNode getEmptyDeleteNode(String schemaName, String targetTableName)
+    private DeleteNode getEmptyDeleteNode(String schemaName, String targetTableName)
         throws StandardException
     {
 
@@ -771,7 +774,7 @@ public class DeleteNode extends DMLModStatementNode
 													 null, /* windows */
 													 getContextManager());
 
-        return (StatementNode) nodeFactory.getNode(
+        return (DeleteNode) nodeFactory.getNode(
                                                     C_NodeTypes.DELETE_NODE,
                                                     tableName,
                                                     resultSet,
@@ -781,7 +784,7 @@ public class DeleteNode extends DMLModStatementNode
 
 
 	
-    private StatementNode getEmptyUpdateNode(String schemaName, 
+    private UpdateNode getEmptyUpdateNode(String schemaName,
 											 String targetTableName,
 											 ColumnDescriptorList cdl)
         throws StandardException
@@ -822,7 +825,7 @@ public class DeleteNode extends DMLModStatementNode
 													 null, /* windows */
                                                      getContextManager());
 
-        return (StatementNode) nodeFactory.getNode(
+        return (UpdateNode) nodeFactory.getNode(
                                                     C_NodeTypes.UPDATE_NODE,
                                                     tableName,
                                                     resultSet,

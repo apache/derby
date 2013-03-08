@@ -28,11 +28,11 @@ import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.vti.DeferModification;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * This class applies a VTI modification deferral policy to a statement to
@@ -91,13 +91,13 @@ class VTIDeferModPolicy implements Visitor
             if( statementType == DeferModification.UPDATE_STATEMENT)
             {
                 // Apply the columnRequiresDefer method to updated columns not in the where clause.
-                Enumeration columns = deferralSearch.columns.keys();
-                while( columns.hasMoreElements())
+                Iterator columns = deferralSearch.columns.iterator();
+                while (columns.hasNext())
                 {
-                    if( deferralControl.columnRequiresDefer( statementType,
-                                                             (String) columns.nextElement(),
-                                                             false))
+                    if (deferralControl.columnRequiresDefer(
+                            statementType, (String) columns.next(), false)) {
                         return true;
+                    }
                 }
             }
             return deferralSearch.deferred;
@@ -113,7 +113,7 @@ class VTIDeferModPolicy implements Visitor
     private DeferModification deferralControl;
     private int statementType;
     private int tableNumber;
-    private Hashtable columns = new Hashtable();
+    private final HashSet columns = new HashSet();
 
     private VTIDeferModPolicy( FromVTI targetVTI,
                                String[] columnNames,
@@ -125,8 +125,7 @@ class VTIDeferModPolicy implements Visitor
         tableNumber = targetVTI.getTableNumber();
         if( statementType == DeferModification.UPDATE_STATEMENT && columnNames != null)
         {
-            for( int i = 0; i < columnNames.length; i++)
-                columns.put( columnNames[i], columnNames[i]);
+            columns.addAll(Arrays.asList(columnNames));
         }
     }
 
@@ -143,21 +142,19 @@ class VTIDeferModPolicy implements Visitor
                     String columnName = cr.getColumnName();
                     if( statementType == DeferModification.DELETE_STATEMENT)
                     {
-                        if( columns.get( columnName) == null)
+                        if (columns.add(columnName))
                         {
-                            columns.put( columnName, columnName);
                             if( deferralControl.columnRequiresDefer( statementType, columnName, true))
                                 deferred = true;
                         }
                     }
                     else if( statementType == DeferModification.UPDATE_STATEMENT)
                     {
-                        if( columns.get( columnName) != null)
+                        if (columns.remove(columnName))
                         {
                             // This column is referenced in the where clause and is being updated
                             if( deferralControl.columnRequiresDefer( statementType, columnName, true))
                                 deferred = true;
-                            columns.remove( columnName); // Only test it once.
                         }
                     }
                 }

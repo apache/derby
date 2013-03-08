@@ -21,16 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.store.access.ScanController;
 
@@ -43,9 +40,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
 
 /**
  * A Predicate represents a top level predicate.
@@ -72,7 +68,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	/* Hashtable used for tracking the search clause types that have been
 	 * pushed through this predicate (if an equijoin) via transitive closure.
 	 */
-	private Hashtable searchClauseHT;
+    private Set searchClauses;
 
 	// Whether or not this predicate has been scoped; see the
 	// getPredScopedForResultSet() method of this class for more.
@@ -560,15 +556,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 */
 	boolean transitiveSearchClauseAdded(RelationalOperator ro)
 	{
-		if (searchClauseHT == null || 
-			searchClauseHT.get(new Integer(ro.getOperator())) == null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+        return searchClauses != null &&
+            searchClauses.contains(ReuseFactory.getInteger(ro.getOperator()));
 	}
 
 	/**
@@ -581,15 +570,13 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 */
 	void setTransitiveSearchClauseAdded(RelationalOperator ro)
 	{
-		if (searchClauseHT == null)
-		{
-			searchClauseHT = new Hashtable();
-		}
+        if (searchClauses == null) {
+            searchClauses = new HashSet();
+        }
 		/* I have to remember that this ro has been added to this predicate as a
 		 * transitive search clause.
 		 */
-		Integer i = new Integer(ro.getOperator());
-		searchClauseHT.put(i, i);
+        searchClauses.add(ReuseFactory.getInteger(ro.getOperator()));
 	}
 
 	/**
@@ -840,16 +827,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		this.startKey = otherPred.isStartKey();
 		this.stopKey = otherPred.isStopKey();
 		this.isQualifier = otherPred.isQualifier();
-		this.searchClauseHT = otherPred.getSearchClauseHT();
+        this.searchClauses = otherPred.searchClauses;
 
-	}
-
-	/**
-	 * Get the search clause Hash Table.
-	 */
-
-	public Hashtable getSearchClauseHT() {
-		return searchClauseHT;
 	}
 
 	/**

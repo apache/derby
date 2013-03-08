@@ -22,9 +22,9 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
@@ -104,10 +104,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	protected long[] fkIndexConglomNumbers; //conglomerate number of the backing index
 	protected  boolean isDependentTable;
 	protected int[][] fkColArrays; 
-	protected Hashtable graphHashTable; 
-                          // Hash Table which maitains the querytreenode graph 
 	protected TableName synonymTableName;
-	
+
+    /** Set of dependent tables for cascading deletes. */
+    Set dependentTables;
+
 	/**
 	 * Initializer for a DMLModStatementNode -- delegate to DMLStatementNode
 	 *
