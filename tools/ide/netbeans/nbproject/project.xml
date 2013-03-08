@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
@@ -13,7 +14,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
---><project xmlns="http://www.netbeans.org/ns/project/1">
+-->
+<project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
@@ -89,6 +91,16 @@
                     <type>java</type>
                     <location>${project.dir}/java/tools</location>
                     <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>generated/java</label>
+                    <type>java</type>
+                    <location>${project.dir}/generated/java</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>generated/java</label>
+                    <location>${project.dir}/generated/java</location>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -198,6 +210,10 @@
                         <label>java/tools</label>
                         <location>${project.dir}/java/tools</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>generated/java</label>
+                        <location>${project.dir}/generated/java</location>
+                    </source-folder>
                     <source-file>
                         <location>${ant.script}</location>
                     </source-file>
@@ -230,6 +246,7 @@
                 <package-root>${project.dir}/java/storeless</package-root>
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
+                <package-root>${project.dir}/generated/java</package-root>
                 <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix</classpath>
                 <built-to>${project.dir}/jars/sane/derby.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyTesting.jar</built-to>
