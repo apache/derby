@@ -90,7 +90,7 @@ public final class JDBCClient {
     /**
      * The Derby network client.
      */
-    static final JDBCClient DERBYNETCLIENT= new JDBCClient(
+    public static final JDBCClient DERBYNETCLIENT= new JDBCClient(
             "DerbyNetClient",
             "org.apache.derby.jdbc.ClientDriver",
 

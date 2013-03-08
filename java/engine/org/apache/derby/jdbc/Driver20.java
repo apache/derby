@@ -29,6 +29,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.io.FormatableProperties;
@@ -36,14 +37,25 @@ import org.apache.derby.iapi.security.SecurityUtil;
 
 import org.apache.derby.impl.jdbc.*;
 
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
 
 import java.security.Permission;
 import java.security.AccessControlException;
 
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.TimeUnit;
 
 /**
 	This class extends the local JDBC driver in order to determine at JBMS
@@ -53,6 +65,13 @@ import java.util.Properties;
 */
 
 public abstract class Driver20 extends InternalDriver implements Driver {
+
+    private static  ExecutorService _executorPool;
+    static
+    {
+        _executorPool = Executors.newCachedThreadPool();
+        ((ThreadPoolExecutor) _executorPool).setThreadFactory( new DaemonThreadFactory() );
+    } 
 
 	private static final String[] BOOLEAN_CHOICES = {"false", "true"};
 
@@ -219,4 +238,78 @@ public abstract class Driver20 extends InternalDriver implements Driver {
         throws Exception {
         SecurityUtil.checkUserHasPermission(user, perm);
     }
+
+	public Connection connect( String url, Properties info )
+		 throws SQLException 
+	{
+        return connect( url, info, DriverManager.getLoginTimeout() );
+    }
+    
+    /**
+     * Use java.util.concurrent package to enforce login timeouts.
+     */
+    protected EmbedConnection  timeLogin( String url, Properties info, int loginTimeoutSeconds )
+        throws SQLException
+    {
+        LoginCallable callable = new LoginCallable( this, url, info );
+        Future<EmbedConnection>  task = _executorPool.submit( callable );
+
+        try {
+            return task.get( loginTimeoutSeconds, TimeUnit.SECONDS );
+        }
+        catch (InterruptedException ie) { throw processException( ie ); }
+        catch (ExecutionException ee) { throw processException( ee ); }
+        catch (TimeoutException te) { throw Util.generateCsSQLException( SQLState.LOGIN_TIMEOUT ); }
+    }
+    /** Process exceptions raised while running a timed login */
+    private SQLException    processException( Throwable t )
+    {
+        Throwable   cause = t.getCause();
+        if ( !(cause instanceof SQLException) ) { return Util.javaException( t ); }
+        else { return (SQLException) cause; }
+    }
+
+    /** Thread factory to produce daemon threads which don't block VM shutdown */
+    public  static  final   class   DaemonThreadFactory implements ThreadFactory
+    {
+        public  Thread newThread( Runnable r )
+        {
+            Thread  result = new Thread( r );
+            result.setDaemon( true );
+            return result;
+        }
+    }
+
+    /**
+     * This code is called in a thread which puts time limits on it.
+     */
+    public  static  final   class   LoginCallable implements  Callable<EmbedConnection>
+    {
+        private Driver20        _driver;
+        private String      _url;
+        private Properties  _info;
+
+        public  LoginCallable( Driver20 driver, String url, Properties info )
+        {
+            _driver = driver;
+            _url = url;
+            _info = info;
+        }
+
+        public  EmbedConnection call()  throws SQLException
+        {
+            // erase the state variables after we use them.
+            // might be paranoid but there could be security-sensitive info
+            // in here.
+            String  url = _url;
+            Properties  info = _info;
+            Driver20    driver = _driver;
+            _url = null;
+            _info = null;
+            _driver = null;
+            
+            return driver.getNewEmbedConnection( url, info );
+        }
+    }
+
 }

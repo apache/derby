@@ -117,6 +117,7 @@ public final class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
+    private final static String KEY_LOGIN_TIMEOUT = "derby.tests.login.timeout";    
     private final static String KEY_TRACE = "derby.tests.trace";
     private final static String KEY_SSL = "ssl";
     private final static String KEY_JMX_PORT = "jmxPort";
@@ -1481,6 +1482,18 @@ public final class TestConfiguration {
             connector = new DataSourceConnector();
         }
         connector.setConfiguration(this);
+
+        try {
+            String  loginTimeoutString = BaseTestCase.getSystemProperty( KEY_LOGIN_TIMEOUT );
+            
+            if ( loginTimeoutString != null )
+            {
+                int loginTimeout = Integer.parseInt( loginTimeoutString );
+
+                connector.setLoginTimeout( loginTimeout );
+            }
+        }
+        catch (Exception e) { Assert.fail(e.getMessage()); }
     }
 
     /**
@@ -1804,7 +1817,13 @@ public final class TestConfiguration {
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
         }
-    }    
+    }
+
+    /** Get the login timeout from the connector */
+    public  int getLoginTimeout() throws SQLException
+    {
+        return connector.getLoginTimeout();
+    }
 
     public void waitForShutdownComplete(String physicalDatabaseName) {
         String path = getDatabasePath(physicalDatabaseName);

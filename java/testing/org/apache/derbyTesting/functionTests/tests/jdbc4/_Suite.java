@@ -79,6 +79,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AbortTest.suite());
         suite.addTest(Driver40Test.suite());
         suite.addTest(Driver40UnbootedTest.suite());
+        suite.addTest(LoginTimeoutTest.suite());
 
         if ( isJava8() )
         {

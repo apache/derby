@@ -107,7 +107,7 @@ package org.apache.derby.shared.common.reference;
 	  <LI> XBCM ClassManager
 	  <LI> XBCX	Cryptography
 	  <LI> XBM0	Monitor
-	  <LI> XBDA DataComm
+	  <LI> XBDA Communications
 	  <LI> XCY0 Properties
 	  </UL>
 
@@ -193,6 +193,11 @@ public interface SQLState {
 	String PROPERTY_FILE_NOT_FOUND_IN_BACKUP    = "XBM0Q.D";
 	String UNABLE_TO_DELETE_FILE                = "XBM0R.D";
     String INSTANTIATE_STORAGE_FACTORY_ERROR    = "XBM08.D";
+
+	/*
+	** Communications
+	*/
+    String LOGIN_TIMEOUT                        = "XBDA0.C.1";
 
 	/*
 	** Upgrade

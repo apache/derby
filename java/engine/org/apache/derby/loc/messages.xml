@@ -4025,6 +4025,16 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
         </family>
 
+        <family>
+            <title>Class XBD: Communication exceptions</title>
+
+            <msg>
+                <name>XBDA0.C.1</name>
+                <text>Login timeout exceeded.</text>
+            </msg>
+
+        </family>
+
 
         <family>
             <title>Class XCL: Execution exceptions</title>

@@ -423,7 +423,7 @@ public final class NativeAuthenticationServiceImpl
 
             String  connectionURL = Attribute.PROTOCOL + _credentialsDB;
 
-            Connection  conn = InternalDriver.activeDriver().connect( connectionURL, properties );
+            Connection  conn = InternalDriver.activeDriver().connect( connectionURL, properties, 0 );
             
             warnings = conn.getWarnings();
             conn.close();

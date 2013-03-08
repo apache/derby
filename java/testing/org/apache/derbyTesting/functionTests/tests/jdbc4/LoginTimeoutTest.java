@@ -1,0 +1,368 @@
+/*
+ 
+   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.LoginTimeoutTest
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to you under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+ 
+      http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+ */
+
+package org.apache.derbyTesting.functionTests.tests.jdbc4;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.util.Properties;
+import javax.sql.DataSource;
+import javax.sql.CommonDataSource;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.XADataSource;
+
+import junit.framework.*;
+
+import org.apache.derby.authentication.UserAuthenticator;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCClient;
+import org.apache.derbyTesting.junit.JDBCClientSetup;
+import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
+
+
+/**
+ * Test login timeouts.
+ */
+
+public class LoginTimeoutTest extends BaseJDBCTestCase
+{
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // CONSTANTS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    private static  final   String[][]    SYSTEM_PROPERTIES =
+    {
+        { "derby.connection.requireAuthentication", "true" },
+        { "derby.authentication.provider", LoginTimeoutTest.class.getName() + "$SluggishAuthenticator" },
+    };
+
+    private static  final   boolean SUCCEED = true;
+    private static  final   boolean FAIL = false;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // STATE
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    private static  final   String      RUTH = "RUTH";
+    private static  final   String      RUTH_PASSWORD = "RUTHPASSWORD";
+
+    private static  final   String      LOGIN_TIMEOUT = "XBDA0";
+    private static  final   String      LOGIN_FAILED = "08004";
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** User authenticator which sleeps for a while */
+    public  static  final   class   SluggishAuthenticator   implements  UserAuthenticator
+    {
+        private static  final   long    MILLIS_PER_SECOND = 1000L;
+        
+        public  static  long    secondsToSleep = 2;
+        public  static  boolean returnValue = true;
+        
+        public  SluggishAuthenticator() {}
+    
+        public boolean authenticateUser
+            (
+             String userName,
+             String userPassword,
+             String databaseName,
+             Properties info
+             )
+            throws SQLException
+        {
+            // sleepy...
+            try {
+                Thread.sleep( secondsToSleep * MILLIS_PER_SECOND );
+            } catch (Exception e) { throw new SQLException( e.getMessage(), e ); }
+
+            // ...and vacuous.
+            return returnValue;
+        }
+    }
+
+    /** Behavior shared by DataSource and DriverManager */
+    public  static  interface   Connector
+    {
+        public  Connection  getConnection( String user, String password ) throws SQLException;
+
+        public  void    setLoginTimeout( int seconds ) throws SQLException;
+    }
+
+    public  static  final   class   DriverManagerConnector  implements Connector
+    {
+        private BaseJDBCTestCase    _test;
+
+        public  DriverManagerConnector( BaseJDBCTestCase test ) { _test = test; }
+
+        public  Connection  getConnection( String user, String password ) throws SQLException
+        {
+            return _test.openDefaultConnection( user, password );
+        }
+
+        public  void    setLoginTimeout( int seconds ) { DriverManager.setLoginTimeout( seconds ); }
+
+        public  String  toString()  { return "DriverManagerConnector"; }
+    }
+    
+    public  static  final   class   DataSourceConnector  implements Connector
+    {
+        private CommonDataSource  _dataSource;
+
+        public  DataSourceConnector( CommonDataSource dataSource )
+        {
+            _dataSource = dataSource;
+        }
+
+        public  Connection  getConnection( String user, String password ) throws SQLException
+        {
+            if ( _dataSource instanceof DataSource )
+            {
+                return ((DataSource) _dataSource).getConnection( user, password );
+            }
+            else if ( _dataSource instanceof ConnectionPoolDataSource )
+            {
+                return ((ConnectionPoolDataSource) _dataSource).getPooledConnection( user, password ).getConnection();
+            }
+            else if ( _dataSource instanceof XADataSource )
+            {
+                return ((XADataSource) _dataSource).getXAConnection( user, password ).getConnection();
+            }
+            else { throw new SQLException( "Unknown data source type: " + _dataSource.getClass().getName() ); }
+        }
+
+        public  void    setLoginTimeout( int seconds ) throws SQLException
+        { _dataSource.setLoginTimeout( seconds ); }
+
+        public  String  toString()
+        {
+            return "DataSourceConnector( " + _dataSource.getClass().getName() + " )";
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // CONSTRUCTORS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     *
+     * Create a test with the given name.
+     */
+    public LoginTimeoutTest(String name) { super(name); }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // JUnit MACHINERY
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Return suite with all tests of the class.
+     */
+    public static Test suite()
+    {
+        TestSuite   suite = new TestSuite();
+
+        Test    embedded = new TestSuite( LoginTimeoutTest.class, "embedded LoginTimeoutTest" );
+        embedded = TestConfiguration.singleUseDatabaseDecorator( embedded );
+        embedded = new SystemPropertyTestSetup( embedded, systemProperties() );
+        suite.addTest( embedded );
+        
+        Test    clientServer = new TestSuite( LoginTimeoutTest.class, "client/server LoginTimeoutTest" );
+        clientServer = TestConfiguration.singleUseDatabaseDecorator( clientServer );
+        clientServer = new JDBCClientSetup( clientServer, JDBCClient.DERBYNETCLIENT );
+        clientServer = new NetworkServerTestSetup( clientServer, systemPropertiesArray(), new String[]{}, true );
+        suite.addTest( clientServer );
+
+        return suite;
+    }
+    private static  Properties  systemProperties()
+    {
+        Properties  props = new Properties();
+
+        for ( int i = 0; i < SYSTEM_PROPERTIES.length; i++ )
+        {
+            String[]    raw = SYSTEM_PROPERTIES[ i ];
+
+            props.put( raw[ 0 ], raw[ 1 ] );
+        }
+
+        return props;
+    }
+    private static  String[]    systemPropertiesArray()
+    {
+        String[]    result = new String[ SYSTEM_PROPERTIES.length ];
+
+        for ( int i = 0; i < SYSTEM_PROPERTIES.length; i++ )
+        {
+            String[]    raw = SYSTEM_PROPERTIES[ i ];
+
+            result[ i ] = raw[ 0 ] + "=" + raw[ 1 ];
+        }
+
+        return result;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // TESTS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Basic test of login timeouts.
+     */
+    public  void    testBasic() throws Exception
+    {
+        DataSource  ds = JDBCDataSource.getDataSource();
+        
+        vetConnector( new DriverManagerConnector( this ), true );
+        vetConnector( new DataSourceConnector( JDBCDataSource.getDataSource() ), true );
+        vetConnector( new DataSourceConnector( J2EEDataSource.getConnectionPoolDataSource() ), true );
+        vetConnector( new DataSourceConnector( J2EEDataSource.getXADataSource() ), true );
+
+        if ( usingEmbedded() ) { vetExceptionPassthrough(); }
+        if ( usingDerbyNetClient() ) { vetServerTimeouts(); }
+    }
+    private void    vetConnector( Connector connector, boolean shouldSucceed ) throws Exception
+    {
+        tryTimeout( connector, 1, FAIL && shouldSucceed );
+        tryTimeout( connector, 10, SUCCEED && shouldSucceed );
+        tryTimeout( connector, 0, SUCCEED && shouldSucceed );
+
+        // revert to default state
+        connector.setLoginTimeout( 0 );
+    }
+    private static  void    tryTimeout( Connector connector, int timeout, boolean shouldSucceed ) throws Exception
+    {
+        println( "Setting timeout " + timeout + " on " + connector );
+        connector.setLoginTimeout( timeout );
+
+        tryTimeout( connector, shouldSucceed );
+    }
+    private static  void    tryTimeout( Connector connector, boolean shouldSucceed ) throws Exception
+    {
+        long    startTime = System.currentTimeMillis();
+        
+        try {
+            Connection  conn = connector.getConnection( RUTH, RUTH_PASSWORD );
+            println( "    Got a " + conn.getClass().getName() );
+            if ( !shouldSucceed )   { fail( "Should not have been able to connect!" ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldSucceed ) { fail( "Should have been able to connect!" ); }
+
+            assertTrue( "Didn't expect to see a " + se.getClass().getName(), (se instanceof SQLTimeoutException) );
+            assertSQLState( LOGIN_TIMEOUT, se );
+        }
+
+        long    duration = System.currentTimeMillis() - startTime;
+
+        println( "        Experiment took " + duration + " milliseconds." );
+    }
+    private void    vetExceptionPassthrough() throws Exception
+    {
+        println( "Verifying that exceptions are not swallowed by the embedded login timer." );
+        // set a long timeout which we won't exceed
+        DriverManager.setLoginTimeout( 10 );
+
+        // tell the authenticator to always fail
+        SluggishAuthenticator.returnValue = false;
+
+        try {
+            openDefaultConnection( RUTH, RUTH_PASSWORD );
+            fail( "Didn't expect to get a connection!" );
+        }
+        catch (SQLException se) { assertSQLState( LOGIN_FAILED, se ); }
+
+        // return to default position
+        DriverManager.setLoginTimeout( 0 );
+        SluggishAuthenticator.returnValue = true;
+    }
+    private void    vetServerTimeouts() throws Exception
+    {
+        println( "Verifying behavior when timeouts are also set on the server." );
+
+        Connection  controlConnection = openDefaultConnection( RUTH, RUTH_PASSWORD );
+
+        // create a procedure for changing the login timeout on the server
+        String  createProc = 
+            "create procedure setLoginTimeout( timeout int ) language java parameter style java no sql\n" +
+            "external name '" + getClass().getName() + ".setLoginTimeout'";
+        println( createProc );
+        controlConnection.prepareStatement( createProc ).execute();
+
+        Connector   connector = new DriverManagerConnector( this );
+
+        vetServerTimeout( controlConnection, connector, 1, FAIL );
+        vetServerTimeout( controlConnection, connector, 10, SUCCEED );
+        vetServerTimeout( controlConnection, connector, 0, SUCCEED );
+
+        // reset server timeout to default
+        setServerTimeout( controlConnection, 0 );
+    }
+    private void    vetServerTimeout
+        ( Connection controlConnection, Connector connector, int serverTimeout, boolean shouldSucceed )
+        throws Exception
+    {
+        setServerTimeout( controlConnection, serverTimeout );
+        vetConnector( connector, shouldSucceed );
+    }
+    private void    setServerTimeout( Connection conn, int seconds ) throws Exception
+    {
+        CallableStatement   cs = conn.prepareCall( "call setLoginTimeout( ? )" );
+        cs.setInt( 1, seconds );
+        cs.execute();
+        cs.close();
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // SQL ROUTINES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Routine to set the DriverManager login timeout on the server */
+    public  static  void    setLoginTimeout( int seconds ) throws Exception
+    {
+        DriverManager.setLoginTimeout( seconds );
+    }
+    
+}

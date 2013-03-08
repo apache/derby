@@ -369,7 +369,7 @@ public class LOBStoredProcedure {
         // some other product's Driver might hijack our stored procedure.
         InternalDriver id = InternalDriver.activeDriver();
         if (id != null) { 
-            EmbedConnection conn = (EmbedConnection) id.connect("jdbc:default:connection", null);
+            EmbedConnection conn = (EmbedConnection) id.connect( "jdbc:default:connection", null, 0 );
             if (conn != null)
                 return conn;
         }

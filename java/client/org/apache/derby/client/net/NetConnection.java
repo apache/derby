@@ -444,6 +444,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
             open_ = false;
+
+            handleLoginTimeout( e );
+            
             // logWriter may be closed in agent_.close(),
             // so SqlException needs to be created before that
             // but to be thrown after.
@@ -488,6 +491,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
             open_ = false;
+
+            handleLoginTimeout( e );
+            
             // logWriter may be closed in agent_.close(),
             // so SqlException needs to be created before that
             // but to be thrown after.
@@ -510,6 +516,20 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             }
 
             throw exceptionToBeThrown;
+        }
+    }
+
+    /** Handle socket timeouts during connection attempts */
+    private void    handleLoginTimeout( Throwable original )
+        throws SqlException
+    {
+        for ( Throwable cause = original; cause != null; cause = cause.getCause() )
+        {
+            if ( cause instanceof java.net.SocketTimeoutException )
+            {
+                throw new SqlException
+                    ( agent_.logWriter_, new ClientMessageId( SQLState.LOGIN_TIMEOUT ), original );
+            }
         }
     }
 

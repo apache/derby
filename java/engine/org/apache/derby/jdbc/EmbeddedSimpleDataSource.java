@@ -405,7 +405,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 		if (shutdownDatabase != null)
 			info.put(Attribute.SHUTDOWN_ATTR, "true");
 
-		Connection conn = findDriver().connect(jdbcurl, info);
+		Connection conn = findDriver().connect( jdbcurl, info, loginTimeout );
 
 		// JDBC driver's getConnection method returns null if
 		// the driver does not handle the request's URL.

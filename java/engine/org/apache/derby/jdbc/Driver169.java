@@ -60,6 +60,16 @@ public class Driver169 extends InternalDriver {
         return new EmbedConnection(this, url, info);
 	}
 
+    /**
+     * This method does not enforce timeouts on JSR 169. If that functionality is important
+     * on CDC/FP 1.1 then a separate implementation can be plugged in here.
+     */
+    protected EmbedConnection  timeLogin( String url, Properties info, int loginTimeoutSeconds )
+        throws SQLException
+    {
+        return getNewEmbedConnection( url, info );
+    }
+    
 
 	/**
  	 * Get a new nested connection.

@@ -72,10 +72,9 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
 
         final SQLException ex;
         if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
-            //none of the sqlstate supported by derby belongs to
+            //no derby sqlstate belongs to
             //TransientConnectionException DERBY-3074
-            ex = new SQLNonTransientConnectionException(message, sqlState,
-                    severity, t);
+            ex = new SQLNonTransientConnectionException(message, sqlState, severity, t);
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, severity, t);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
@@ -92,7 +91,11 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             ex = new SQLSyntaxErrorException(message, sqlState, severity, t);
         } else if (sqlState.startsWith(SQLState.UNSUPPORTED_PREFIX)) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, severity, t);
-        } else if (sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5))) {
+        } else if
+                (
+                 sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5)) ||
+                 sqlState.equals(SQLState.LOGIN_TIMEOUT.substring(0, 5))
+                 ) {
             ex = new SQLTimeoutException(message, sqlState, severity, t);
         } else {
             ex = new SQLException(message, sqlState, severity, t);

@@ -100,6 +100,9 @@ public class DriverManagerConnector implements Connector {
             return DriverManager.getConnection(url, connectionAttributes);
         } catch (SQLException e) {
 
+            // Uncomment this for more information
+            // printFullException( e, 0 );
+
             // Expected state for database not found.
             // For the client the generic 08004 is returned,
             // will just retry on that.
@@ -117,6 +120,33 @@ public class DriverManagerConnector implements Connector {
 
             return DriverManager.getConnection(url, attributes);
         }
+    }
+
+    private static void printFullException( Throwable t, int indentLevel )
+    {
+        if ( t == null ) { return; }
+
+        String              tab = "    ";
+        StringBuilder   buffer = new StringBuilder();
+
+        for ( int i = 0; i < indentLevel; i++ ) { buffer.append( tab ); }
+        buffer.append( "Message:  " + t.getMessage() );
+
+        SQLException    nextSQLException = null;
+        
+        if ( t instanceof SQLException )
+        {
+            SQLException    se = (SQLException) t;
+
+            buffer.append( se.getClass().getName() + " : SQLState = " + se.getSQLState() );
+
+            nextSQLException = se.getNextException();
+        }
+
+        System.out.println( buffer.toString() );
+
+        printFullException( nextSQLException, indentLevel + 1 );
+        printFullException( t.getCause(), indentLevel + 1 );
     }
 
     /**
@@ -139,6 +169,16 @@ public class DriverManagerConnector implements Connector {
     public void shutEngine() throws SQLException {
         
         getConnectionByAttributes("jdbc:derby:", "shutdown", "true");
+    }
+    
+    public void setLoginTimeout( int seconds ) throws SQLException
+    {
+        DriverManager.setLoginTimeout( seconds );
+    }
+    
+    public int getLoginTimeout() throws SQLException
+    {
+        return DriverManager.getLoginTimeout();
     }
     
     /**

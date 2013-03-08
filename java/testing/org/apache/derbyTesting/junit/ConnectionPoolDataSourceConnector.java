@@ -178,6 +178,16 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         tmpDs.getPooledConnection();
     }
     
+    public void setLoginTimeout( int seconds ) throws SQLException
+    {
+        ds.setLoginTimeout( seconds );
+    }
+    
+    public int getLoginTimeout() throws SQLException
+    {
+        return ds.getLoginTimeout();
+    }
+    
     public String getDatabaseName() {
         String databaseName=null;
         try {

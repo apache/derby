@@ -156,7 +156,7 @@ public abstract class InternalDriver implements ModuleControl {
 				
 	}
 
-	public Connection connect(String url, Properties info)
+	public Connection connect( String url, Properties info, int loginTimeoutSeconds )
 		 throws SQLException 
 	{
 		if (!acceptsURL(url)) { return null; }
@@ -258,9 +258,12 @@ public abstract class InternalDriver implements ModuleControl {
                                          SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
 				}
 			}
-			
-			EmbedConnection conn = getNewEmbedConnection(url, finfo);
 
+            EmbedConnection conn;
+			
+            if ( loginTimeoutSeconds <= 0 ) { conn = getNewEmbedConnection( url, finfo ); }
+            else { conn = timeLogin( url, finfo, loginTimeoutSeconds ); }
+            
 			// if this is not the correct driver a EmbedConnection
 			// object is returned in the closed state.
 			if (conn.isClosed()) {
@@ -281,6 +284,12 @@ public abstract class InternalDriver implements ModuleControl {
 		}
 	}
 
+    /**
+     * Enforce the login timeout.
+     */
+    protected abstract EmbedConnection  timeLogin( String url, Properties info, int loginTimeoutSeconds )
+        throws SQLException;
+    
     /**
      * Checks for System Privileges.
      *
@@ -662,4 +671,6 @@ public abstract class InternalDriver implements ModuleControl {
     static boolean getDeregister() {
         return InternalDriver.deregister;
     }
+
+
 }

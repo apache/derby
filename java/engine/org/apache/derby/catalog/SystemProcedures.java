@@ -192,7 +192,7 @@ public class SystemProcedures  {
 	{
 		InternalDriver id = InternalDriver.activeDriver();
 		if (id != null) { 
-			Connection conn = id.connect("jdbc:default:connection", null);
+			Connection conn = id.connect( "jdbc:default:connection", null, 0 );
 			if (conn != null)
 				return conn;
 		}

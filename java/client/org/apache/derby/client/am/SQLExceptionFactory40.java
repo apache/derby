@@ -91,7 +91,11 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             sqlState.equals(DRDA_REPLY_MSG_NOT_SUPPORTED)           ) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, 
                     errCode);
-        } else if (sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5))) {
+        } else if
+                (
+                 sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5)) ||
+                 sqlState.equals(SQLState.LOGIN_TIMEOUT.substring(0, 5))
+                 ) {
             ex = new SQLTimeoutException(message, sqlState, errCode);
         }
         // If the sub-class cannot be determined based on the SQLState, use

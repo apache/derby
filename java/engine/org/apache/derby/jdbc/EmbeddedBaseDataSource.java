@@ -612,7 +612,7 @@ public abstract class EmbeddedBaseDataSource
             url = sb.toString();
         }
 
-        Connection conn =  findDriver().connect(url, info);
+        Connection conn =  findDriver().connect( url, info, loginTimeout );
 
         // JDBC driver's getConnection method returns null if
         // the driver does not handle the request's URL.

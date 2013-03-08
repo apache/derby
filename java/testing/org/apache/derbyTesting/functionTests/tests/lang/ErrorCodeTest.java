@@ -162,6 +162,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"58015","The DDM object 0x{0} is not supported.  The connection has been terminated.","40000"},
         		{"58016","The DDM parameter 0x{0} is not supported.  The connection has been terminated.","40000"},
         		{"58017","The DDM parameter value 0x{0} is not supported.  An input host variable may not be within the range the server supports.  The connection has been terminated.","40000"},
+        		{"XBDA0","Login timeout exceeded.","40000"},
         		{"XBM01","Startup failed due to an exception. See next exception for details. ","45000"},
         		{"XBM02","Startup failed due to missing functionality for {0}. Please ensure your classpath includes the correct Derby software.","45000"},
         		{"XBM03","Supplied value '{0}' for collation attribute is invalid, expecting UCS_BASIC or TERRITORY_BASED.","45000"},

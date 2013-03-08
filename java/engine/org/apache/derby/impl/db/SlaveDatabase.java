@@ -432,7 +432,7 @@ public class SlaveDatabase extends BasicDatabase {
 
             InternalDriver driver = InternalDriver.activeDriver();
             if (driver != null) {
-                driver.connect(conStr, (Properties) null);
+                driver.connect( conStr, (Properties) null, 0 );
             }
         } catch (Exception e) {
             // Todo: report error to derby.log if exception is not

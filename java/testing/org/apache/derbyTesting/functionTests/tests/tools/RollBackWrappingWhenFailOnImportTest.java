@@ -59,10 +59,10 @@ public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
             }
         }
 
-        public Connection connect(String url, Properties info) {
+        public Connection connect( String url, Properties info, int loginTimeout ) {
             Connection conn = null;
             try {
-                conn = super.connect(url, info);
+                conn = super.connect( url, info, loginTimeout );
             } catch (Exception e) {
                 //this exception is ignored for mocking
             }

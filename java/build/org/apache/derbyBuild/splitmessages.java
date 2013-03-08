@@ -232,7 +232,8 @@ public class splitmessages {
         // to clientMessageIds
         if ( messageId.startsWith("XJ") || messageId.startsWith("J")  ||
              messageId.startsWith("XN") || messageId.startsWith("58") ||
-             messageId.startsWith("57") || messageId.startsWith("08"))
+             messageId.startsWith("57") || messageId.startsWith("08") ||
+             messageId.startsWith( "XBD" ) )
         {
             return true;
         }

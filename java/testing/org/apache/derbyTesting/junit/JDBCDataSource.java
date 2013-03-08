@@ -105,7 +105,7 @@ public class JDBCDataSource {
         if (beanProperties == null)
              beanProperties = getDataSourceProperties(config);
         
-        return (javax.sql.DataSource) getDataSourceObject(dsClassName,
+        return getDataSourceObject(dsClassName,
             beanProperties);
     }
     
@@ -143,7 +143,7 @@ public class JDBCDataSource {
      * If a thread context class loader exists then it is used
      * to try and load the class.
      */
-    static Object getDataSourceObject(String classname, HashMap beanProperties)
+    static javax.sql.DataSource getDataSourceObject(String classname, HashMap beanProperties)
     {
         ClassLoader contextLoader =
             (ClassLoader) AccessController.doPrivileged
@@ -155,11 +155,11 @@ public class JDBCDataSource {
         });
     
         try {
-            Object ds = null;
+            javax.sql.DataSource ds = null;
             if (contextLoader != null)
             {
                 try {
-                    ds = Class.forName(classname, true, contextLoader).newInstance();
+                    ds = (javax.sql.DataSource) Class.forName(classname, true, contextLoader).newInstance();
                 } catch (Exception e) {
                     // context loader may not be correctly hooked up
                     // with parent, try without it.
@@ -167,7 +167,9 @@ public class JDBCDataSource {
             }
             
             if (ds == null)
-                ds = Class.forName(classname).newInstance();
+            {
+                ds = (javax.sql.DataSource) Class.forName(classname).newInstance();
+            }
             
             for (Iterator i = beanProperties.keySet().iterator();
                 i.hasNext(); )
@@ -177,6 +179,9 @@ public class JDBCDataSource {
                 
                 setBeanProperty(ds, property, value);
             }
+
+            ds.setLoginTimeout( TestConfiguration.getCurrent().getLoginTimeout() );
+            
             return ds;
         } catch (Exception e) {
             BaseTestCase.fail("unexpected error", e);

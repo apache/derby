@@ -146,6 +146,16 @@ public class DataSourceConnector implements Connector {
         tmpDs.getConnection();
     }
     
+    public void setLoginTimeout( int seconds ) throws SQLException
+    {
+        ds.setLoginTimeout( seconds );
+    }
+    
+    public int getLoginTimeout() throws SQLException
+    {
+        return ds.getLoginTimeout();
+    }
+    
     /**
      * Get a connection from a single use DataSource configured
      * from the configuration but with the passed in property set.

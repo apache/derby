@@ -106,4 +106,14 @@ interface Connector {
      * Return nothing, exception is expected to be thrown with SQLState XJ015
      */
     abstract void shutEngine() throws SQLException;
+   
+    /**
+     * Set the login timeout for getting connections. Timeout is measured in seconds.
+     */
+    abstract void setLoginTimeout( int seconds ) throws SQLException;
+    
+    /**
+     * Get the login timeout in seconds.
+     */
+    abstract int getLoginTimeout() throws SQLException;
 }
