@@ -438,12 +438,6 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         addHeadlinedItem(list, ANT_HEADLINE,
                 summary.getTextByTagName(SUM_ANT_VERSION));
 
-        addHeadlinedItem(list, JDK14_HEADLINE,
-                summary.getTextByTagName(SUM_JDK14));
-
-        addHeadlinedItem(list, JAVA6_HEADLINE,
-                summary.getTextByTagName(SUM_JAVA6));
-
         addHeadlinedItem(list, COMPILER_HEADLINE,
                 summary.getTextByTagName(SUM_COMPILER));
 

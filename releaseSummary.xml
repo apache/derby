@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.8.2.2</previousReleaseID>
+<previousReleaseID>10.9.1.0</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -47,16 +47,10 @@ with real information.
 <buildInfo>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Mac OSX 10.7.3.</machine>
+  <machine>Mac OSX 10.7.5.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
   <antVersion>Apache Ant version 1.7.1 compiled on June 27 2008.</antVersion>
-
-  <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
-  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_22-b02-329).</jdk1.4>
-
-  <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6>Java(TM) SE Runtime Environment (build 1.6.0_31-b04-414-11M3626).</java6>
 
   <!--
          Say which compilers you used.
@@ -65,7 +59,7 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.6.0_31-b04-414-11M3626 javac was used to compile all classes.</compilers>
+  <compilers>All classes were compiled by a javacc built from the source for OpenJDK 64-Bit Server VM (build 25.0-b20, mixed mode).</compilers>
 
   <!--
          Say here whether you built the Java ME support and, if so, which
@@ -101,10 +95,8 @@ Derby functionality includes:
 Java and JDBC versions supported:
 </p>
 <ul>
-  <li>Java SE 1.4 and higher with
-    JDBC 2.1, 3.0, 4.0 and 4.1</li>
-  <li>Java ME CDC/Foundation Profile 1.1 with
-    JSR-169 JDBC Optional Package for CDC/Foundation Profile.</li>
+  <li>Java SE 5 and higher with 3.0, 4.0, 4.1, and 4.2.</li>
+  <li>Java ME CDC/Foundation Profile 1.1 with JSR-169 JDBC Optional Package for CDC/Foundation Profile.</li>
 </ul>
 </overview>
 
@@ -116,11 +108,20 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>NATIVE authentication</b> - Derby now provides better credentials management to replace BUILTIN authentication.</li>
+<li><b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are mis-behaving--for example if they throw a NoSuchMethod error on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
 	
-<li><b>JDBC 4.1 escape syntax</b> - Most of Derby's JDBC 4.1 support was provided in release 10.8.1.2. This release supplies the remaining bits: object mapping and new escape syntax.</li>
+<li><b>Unencrypting databases</b> - Encryption can be turned off on existing databases. See the section on the <i>decryptDatabase</i> attribute in the Derby Reference Manual.</li>
 	
-<li><b>Multi-column EXISTS subqueries</b> - Multi-column SELECT lists are now allowed in EXISTS subqueries.</li>
+<li><b>Small device profile</b> - Derby runs on the small CP2 profile of Java 8.</li>
+	
+<li><b>JDBC 4.2</b> - Derby supports the Java 8 enhancements to JDBC.</li>
+	
+<li><b>User-defined aggregates</b> - Applications can create their own aggregate operators. See the "CREATE DERBY AGGREGATE" section in the Derby Reference Manual.</li>
+	
+<li><b>Varargs routines</b> - SQL routines can be bound to user-written Java methods which have variable length argument lists.</li>
+	
+<li><b>Optional tools</b> - Derby has new, optional tools to support data migration and metadata queries. See the "Optional tools" section in the Derby Tools and Utilities Guide.</li>
+	
 	
 </ul>
 
