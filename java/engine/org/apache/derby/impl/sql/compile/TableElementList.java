@@ -64,7 +64,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Vector;
 
 /**
  * A TableElementList represents the list of columns and other table elements
@@ -611,7 +610,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 		cc = getCompilerContext();
 
-		Vector aggregateVector = new Vector();
+		ArrayList aggregateVector = new ArrayList();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -657,7 +656,7 @@ public class TableElementList extends QueryTreeNodeVector
 										 aggregateVector);
 
 				// no aggregates, please
-				if (aggregateVector.size() != 0)
+				if (!aggregateVector.isEmpty())
 				{
 					throw StandardException.newException(SQLState.LANG_INVALID_CHECK_CONSTRAINT, cdn.getConstraintText());
 				}
@@ -746,7 +745,7 @@ public class TableElementList extends QueryTreeNodeVector
         
 		cc = getCompilerContext();
 
-		Vector aggregateVector = new Vector();
+		ArrayList aggregateVector = new ArrayList();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -832,7 +831,7 @@ public class TableElementList extends QueryTreeNodeVector
                 }
 
 				// no aggregates, please
-				if (aggregateVector.size() != 0)
+				if (!aggregateVector.isEmpty())
 				{
 					throw StandardException.newException( SQLState.LANG_AGGREGATE_IN_GENERATION_CLAUSE, cdn.getName());
 				}

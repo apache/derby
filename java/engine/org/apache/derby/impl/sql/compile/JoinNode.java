@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 /**
  * A JoinNode represents a join result set for either of the basic DML
@@ -809,7 +808,7 @@ public class JoinNode extends TableOperatorNode
 		subqueryList = (SubqueryList) getNodeFactory().getNode(
 											C_NodeTypes.SUBQUERY_LIST,
 											getContextManager());
-		aggregateVector = new Vector();
+		aggregateVector = new ArrayList();
 
         CompilerContext cc = getCompilerContext();
         

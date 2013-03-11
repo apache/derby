@@ -30,11 +30,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
@@ -541,7 +539,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * Correlated subqueries are not allowed as parameters to
 		 * a VTI, so pass an empty FromList.
 		 */
-		Vector aggregateVector = new Vector();
+		ArrayList aggregateVector = new ArrayList();
 		methodCall.bindExpression(fromListParam,
 									 subqueryList,
 									 aggregateVector);
@@ -904,7 +902,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * These CRs will have uninitialized column and table numbers.
 		 */
 		List colRefs = getNodesFromParameters(ColumnReference.class);
-		Vector aggregateVector = null;
+		ArrayList aggregateVector = null;
 		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
 			ColumnReference ref = (ColumnReference) it.next();
@@ -967,7 +965,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 				// we need a fake agg list
 				if (aggregateVector == null)
 				{
-					aggregateVector = new Vector();
+					aggregateVector = new ArrayList();
 				}
 				ref.bindExpression(fromListParam,
 									subqueryList,

@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
@@ -50,7 +51,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Vector;
 
 /**
  * A RowResultSetNode represents the result set for a VALUES clause.
@@ -231,7 +231,7 @@ public class RowResultSetNode extends FromTable
 										C_NodeTypes.SUBQUERY_LIST,
 										getContextManager());
 
-		aggregateVector = new Vector();
+		aggregateVector = new ArrayList();
 
 		/* Verify that there are no DEFAULTs in the RCL.
 		 * DEFAULT is only valid for an insert, and it has
@@ -264,7 +264,7 @@ public class RowResultSetNode extends FromTable
 		// Pop ourselves back out of the FROM list
 		fromListParam.removeElementAt(0);
 
-		if (aggregateVector.size() > 0)
+		if (!aggregateVector.isEmpty())
 		{
 			throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 		}
