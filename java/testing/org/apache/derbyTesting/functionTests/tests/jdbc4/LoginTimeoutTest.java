@@ -270,7 +270,8 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
 
         // make sure the database is created in order to eliminate asymmetries
         // in running the tests
-        openDefaultConnection( RUTH, RUTH_PASSWORD );
+        Connection  conn = openDefaultConnection( RUTH, RUTH_PASSWORD );
+        conn.close();
         
         vetConnector( new DriverManagerConnector( this ), true );
         vetConnector( new DataSourceConnector( JDBCDataSource.getDataSource() ), true );
@@ -307,11 +308,12 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         try {
             Connection  conn = connector.getConnection( RUTH, RUTH_PASSWORD );
             println( "    Got a " + conn.getClass().getName() );
+            conn.close();
             if ( !shouldSucceed )   { fail( "Should not have been able to connect!" ); }
         }
         catch (SQLException se)
         {
-            if ( shouldSucceed ) { failWithTrace( se, "Should have been able to connect!" ); }
+            if ( shouldSucceed ) { fail( "Should have been able to connect!", se ); }
 
             assertTrue( "Didn't expect to see a " + se.getClass().getName(), (se instanceof SQLTimeoutException) );
             assertSQLState( LOGIN_TIMEOUT, se );
@@ -332,7 +334,8 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
             SluggishAuthenticator.returnValue = false;
 
             try {
-                openDefaultConnection( RUTH, RUTH_PASSWORD );
+                Connection conn = openDefaultConnection( RUTH, RUTH_PASSWORD );
+                conn.close();
                 fail( "Didn't expect to get a connection!" );
             }
             catch (SQLException se) { assertSQLState( LOGIN_FAILED, se ); }
@@ -365,6 +368,7 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
 
         // reset server timeout to default
         setServerTimeout( controlConnection, 0 );
+        controlConnection.close();
     }
     private void    vetServerTimeout
         ( Connection controlConnection, Connector connector, int serverTimeout, boolean shouldSucceed )
@@ -398,12 +402,5 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     // MINIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
-
-    /** Fail and print a stack trace */
-    private static void    failWithTrace( Throwable t, String message )
-    {
-        printStackTrace( t );
-        fail( message );
-    }
 
 }
