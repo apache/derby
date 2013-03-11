@@ -52,10 +52,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
 	This class extends the local JDBC driver in order to determine at JBMS
@@ -66,11 +69,13 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class Driver20 extends InternalDriver implements Driver {
 
-    private static  ExecutorService _executorPool;
+    private static  ThreadPoolExecutor _executorPool;
     static
     {
-        _executorPool = Executors.newCachedThreadPool();
-        ((ThreadPoolExecutor) _executorPool).setThreadFactory( new DaemonThreadFactory() );
+        _executorPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      60L, TimeUnit.SECONDS,
+                                      new SynchronousQueue<Runnable>());   
+        _executorPool.setThreadFactory( new DaemonThreadFactory() );
     } 
 
 	private static final String[] BOOLEAN_CHOICES = {"false", "true"};
@@ -245,21 +250,37 @@ public abstract class Driver20 extends InternalDriver implements Driver {
         return connect( url, info, DriverManager.getLoginTimeout() );
     }
     
+    private static final String driver20 = "driver20"; 
     /**
      * Use java.util.concurrent package to enforce login timeouts.
      */
     protected EmbedConnection  timeLogin( String url, Properties info, int loginTimeoutSeconds )
         throws SQLException
     {
-        LoginCallable callable = new LoginCallable( this, url, info );
-        Future<EmbedConnection>  task = _executorPool.submit( callable );
-
         try {
-            return task.get( loginTimeoutSeconds, TimeUnit.SECONDS );
+            LoginCallable callable = new LoginCallable( this, url, info );
+            Future<EmbedConnection>  task = _executorPool.submit( callable );
+            long startTime = System.currentTimeMillis();
+            long interruptedTime = startTime;
+            
+            while ((startTime - interruptedTime) / 1000.0 < loginTimeoutSeconds) {
+                try {
+                    return task.get( loginTimeoutSeconds, TimeUnit.SECONDS );
+                }
+                catch (InterruptedException ie) {
+                    interruptedTime = System.currentTimeMillis();
+                    InterruptStatus.setInterrupted();
+                    continue;
+                }
+                catch (ExecutionException ee) { throw processException( ee ); }
+                catch (TimeoutException te) { throw Util.generateCsSQLException( SQLState.LOGIN_TIMEOUT ); }
+            }
+            
+            // Timed out due to interrupts, throw.
+            throw Util.generateCsSQLException( SQLState.LOGIN_TIMEOUT );
+        } finally {
+            InterruptStatus.restoreIntrFlagIfSeen();
         }
-        catch (InterruptedException ie) { throw processException( ie ); }
-        catch (ExecutionException ee) { throw processException( ee ); }
-        catch (TimeoutException te) { throw Util.generateCsSQLException( SQLState.LOGIN_TIMEOUT ); }
     }
     /** Process exceptions raised while running a timed login */
     private SQLException    processException( Throwable t )
@@ -270,7 +291,7 @@ public abstract class Driver20 extends InternalDriver implements Driver {
     }
 
     /** Thread factory to produce daemon threads which don't block VM shutdown */
-    public  static  final   class   DaemonThreadFactory implements ThreadFactory
+    private static  final   class   DaemonThreadFactory implements ThreadFactory
     {
         public  Thread newThread( Runnable r )
         {

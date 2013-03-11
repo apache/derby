@@ -134,6 +134,10 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
         thisConf = TestConfiguration.getCurrent();
         threadNo = 0;    // counter for multiple threads tests
+
+        // test that we recover from login timeouts
+        DriverManager.setLoginTimeout( 10 );
+        
         allDone = false; // flag for threads to terminate
     }
 
@@ -142,6 +146,8 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
      */
     protected void tearDown()
             throws java.lang.Exception {
+
+        DriverManager.setLoginTimeout( 0 );
 
         // Forget about uncommitted changes
         rollback();
