@@ -200,6 +200,7 @@ public abstract class BaseTestCase
     public static void println(final String text) {
         if (TestConfiguration.getCurrent().isVerbose()) {
             out.println("DEBUG: " + text);
+            out.flush();
         }
     }
 
