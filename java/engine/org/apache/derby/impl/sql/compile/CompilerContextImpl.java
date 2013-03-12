@@ -80,7 +80,6 @@ import java.util.Properties;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 import java.util.ArrayList;
 
 /**
@@ -715,13 +714,14 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public void pushCurrentPrivType( int privType)
 	{
-		privTypeStack.push( ReuseFactory.getInteger( currPrivType));
+		privTypeStack.add(ReuseFactory.getInteger(currPrivType));
 		currPrivType = privType;
 	}
 
 	public void popCurrentPrivType( )
 	{
-		currPrivType = ((Integer) privTypeStack.pop()).intValue();
+        Integer top = (Integer) privTypeStack.remove(privTypeStack.size() - 1);
+        currPrivType = top.intValue();
 	}
 
 	/**
@@ -1043,7 +1043,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	private SQLWarning warnings;
 
-	private Stack privTypeStack = new Stack();
+	private final ArrayList privTypeStack = new ArrayList();
 	private int currPrivType = Authorizer.NULL_PRIV;
 	private HashMap requiredColumnPrivileges;
 	private HashMap requiredTablePrivileges;
