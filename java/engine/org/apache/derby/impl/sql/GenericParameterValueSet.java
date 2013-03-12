@@ -33,6 +33,7 @@ import org.apache.derby.iapi.types.UserDataValue;
 import org.apache.derby.iapi.types.SQLBit;
 import org.apache.derby.iapi.types.SQLBlob;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.impl.jdbc.Util;
 
 import java.io.InputStream;
 import java.sql.Types;
@@ -341,16 +342,17 @@ final class GenericParameterValueSet implements ParameterValueSet
 	 *
 	 * @param parameterIndex	The ordinal parameterIndex of a parameter to set
 	 *			to the given value.
-	 * @param sqlType	A type from java.sql.Types
+	 * @param jdbcType	A type from java.sql.Types
 	 * @param scale		the scale to use.  -1 means ignore scale
 	 *
 	 * @exception StandardException on error
 	 */
-	public void registerOutParameter(int parameterIndex, int sqlType, int scale)
+	public void registerOutParameter(int parameterIndex, int jdbcType, int scale)
 		throws StandardException
 	{
-		checkPosition(parameterIndex);
-		parms[parameterIndex].setOutParameter(sqlType, scale);
+		checkPosition( parameterIndex );
+        Util.checkSupportedRaiseStandard( jdbcType );
+		parms[ parameterIndex ].setOutParameter( jdbcType, scale );
 	}
 
 	/**

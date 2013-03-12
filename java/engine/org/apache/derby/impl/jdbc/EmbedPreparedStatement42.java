@@ -54,7 +54,7 @@ public class EmbedPreparedStatement42 extends EmbedPreparedStatement40
         setObject
             (
              parameterIndex, x,
-             Util42.getTypeAsInt( this, targetSqlType )
+             Util42.getTypeAsInt( targetSqlType )
              );
     }
     
@@ -68,7 +68,7 @@ public class EmbedPreparedStatement42 extends EmbedPreparedStatement40
         setObject
             (
              parameterIndex, x,
-             Util42.getTypeAsInt( this, targetSqlType ),
+             Util42.getTypeAsInt( targetSqlType ),
              scaleOrLength
              );
     }

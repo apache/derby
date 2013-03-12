@@ -207,6 +207,71 @@ public abstract class Util  {
 		}
 	}
 
+    /**
+     * Checks whether a data type is supported and raises a SQLException
+     * if it isn't.
+     */
+    public static   void checkForSupportedDataType(int dataType) throws SQLException
+    {
+        if ( !isSupportedType( dataType ) )
+        {
+            throw generateCsSQLException( SQLState.DATA_TYPE_NOT_SUPPORTED, typeName( dataType ) );
+        }
+    }
+
+    /**
+     * Checks whether a data type is supported and raises a StandardException
+     * if it isn't.
+     */
+    public static   void checkSupportedRaiseStandard(int dataType) throws StandardException
+    {
+        if ( !isSupportedType( dataType ) )
+        {
+            throw StandardException.newException( SQLState.DATA_TYPE_NOT_SUPPORTED, typeName( dataType ) );
+        }
+    }
+
+    /**
+     * Returns false if a data type is not supported for:
+     * <code>setObject(int, Object, int)</code> and
+     * <code>setObject(int, Object, int, int)</code>.
+     *
+     * @param dataType the data type to check
+     */
+    private static   boolean isSupportedType(int dataType)
+    {
+        // JDBC 4.0 javadoc for setObject() says:
+        //
+        // Throws: (...) SQLFeatureNotSupportedException - if
+        // targetSqlType is a ARRAY, BLOB, CLOB, DATALINK,
+        // JAVA_OBJECT, NCHAR, NCLOB, NVARCHAR, LONGNVARCHAR, REF,
+        // ROWID, SQLXML or STRUCT data type and the JDBC driver does
+        // not support this data type
+        //
+        // Of these types, we only support BLOB, CLOB and
+        // (sort of) JAVA_OBJECT.
+
+        switch (dataType) {
+        case Types.ARRAY:
+        case Types.DATALINK:
+        case Types.DISTINCT:
+        case JDBC40Translation.NCHAR:
+        case JDBC40Translation.NCLOB:
+        case JDBC40Translation.NVARCHAR:
+        case JDBC40Translation.LONGNVARCHAR:
+        case Types.NULL:
+        case Types.OTHER:
+        case Types.REF:
+        case JDBC40Translation.REF_CURSOR:
+        case JDBC40Translation.ROWID:
+        case JDBC40Translation.SQLXML:
+        case Types.STRUCT:
+            return false;
+        }
+
+        return true;
+    }
+
 	/*
 	** There is at least one static method for each message id.
 	** Its parameters are specific to its message.

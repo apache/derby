@@ -34,6 +34,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import junit.framework.*;
 
@@ -78,6 +79,23 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         JDBCType.ROWID,
         JDBCType.SQLXML,
         JDBCType.STRUCT,
+    };
+
+    private static  final   int[]  ILLEGAL_SQL_TYPES = new int[]
+    {
+        Types.ARRAY,
+        Types.DATALINK,
+        Types.DISTINCT,
+        Types.LONGNVARCHAR,
+        Types.NCHAR,
+        Types.NCLOB,
+        Types.NVARCHAR,
+        Types.OTHER,
+        Types.REF,
+        Types.REF_CURSOR,
+        Types.ROWID,
+        Types.SQLXML,
+        Types.STRUCT,
     };
 
     //////////////////////////////////////////////////////////
@@ -551,6 +569,19 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
             fail( "Expected unimplemented feature." );
         }
         catch (SQLException se) { assertUnimplemented( se ); }
+ 
+        // Make sure that the pre-JDBC4.2 overloads throw the correct exception too
+        valueIdx = 1;
+        param = 1;
+        cs.setInt( param++, valueIdx );
+        for ( int i = 0; i < ILLEGAL_SQL_TYPES.length; i++ )
+        {
+            int     type = ILLEGAL_SQL_TYPES[ i ];
+            try {
+                cs.registerOutParameter( param++, type, 0 );
+                fail( "Should not have been able to register parameter type " + type );
+            } catch (SQLException se) { assertUnimplemented( se ); }
+        }
     }
     private  static void    vetCS( CallableStatement cs, int valueIdx )
         throws Exception

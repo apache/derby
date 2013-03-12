@@ -40,7 +40,7 @@ public class Util42
      * Get the int type id from java.sql.Types which corresponds to the SQLType.
      * </p>
      */
-    public  static  int getTypeAsInt( ConnectionChild connChild, SQLType sqlType )
+    public  static  int getTypeAsInt( SQLType sqlType )
         throws SQLException
     {
         // must correspond to something in java.sql.Types
@@ -48,13 +48,12 @@ public class Util42
         {
             int     jdbcType = ((JDBCType) sqlType).getVendorTypeNumber();
             
-            connChild.checkForSupportedDataType( jdbcType );
+            Util.checkForSupportedDataType( jdbcType );
         
             return jdbcType;
         }
 
-        throw connChild.newSQLException
-            ( SQLState.DATA_TYPE_NOT_SUPPORTED, sqlType );
+        throw Util.generateCsSQLException( SQLState.DATA_TYPE_NOT_SUPPORTED, sqlType );
     }
     
 }    

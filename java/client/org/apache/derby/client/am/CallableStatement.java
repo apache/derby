@@ -186,6 +186,7 @@ public class CallableStatement extends PreparedStatement
 
     private void registerOutParameterX(int parameterIndex, int jdbcType, int scale) throws SqlException {
         super.checkForValidParameterIndex(parameterIndex);
+        agent_.checkForSupportedDataType( jdbcType );
         checkForValidScale(scale);
         outputRegistered_ = true; // this variable is only used by Batch
         //parameterSetOrRegistered_[parameterIndex - 1] = true;
