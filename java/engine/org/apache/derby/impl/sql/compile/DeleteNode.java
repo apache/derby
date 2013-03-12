@@ -57,7 +57,7 @@ import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -690,7 +690,7 @@ public class DeleteNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-		Vector		conglomVector = new Vector();
+		ArrayList conglomVector = new ArrayList();
 		relevantTriggers = new GenericDescriptorList();
 
 		FormatableBitSet	columnMap = DeleteNode.getDeleteReadMap(baseTable,conglomVector, relevantTriggers, needsDeferredProcessing);

@@ -43,9 +43,8 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.types.Like;
 
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.List;
-
-import java.util.Vector;
 
   
 /**
@@ -869,16 +868,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         throws StandardException 
     {
 
-        Vector param;
-
         if (escapeNode != null)
         {
-            param = new Vector(2);
             methodName += "WithEsc";
-        }
-        else
-        {
-            param = new Vector(1);
         }
 
         StaticMethodCallNode methodCall = (StaticMethodCallNode)
@@ -891,18 +883,16 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         // using a method call directly, thus need internal sql capability
         methodCall.internalCall = true;
 
-        param.add(parameterNode);
-        if (escapeNode != null)
-            param.add(escapeNode);
-
         QueryTreeNode maxWidthNode = (QueryTreeNode) getNodeFactory().getNode(
             C_NodeTypes.INT_CONSTANT_NODE,
             new Integer(maxWidth),
             getContextManager());
-        param.add(maxWidthNode);
 
-        methodCall.addParms(param);
+        QueryTreeNode[] param = (escapeNode == null) ?
+            new QueryTreeNode[] { parameterNode, maxWidthNode } :
+            new QueryTreeNode[] { parameterNode, escapeNode, maxWidthNode };
 
+        methodCall.addParms(Arrays.asList(param));
 
         ValueNode java2SQL = 
             (ValueNode) getNodeFactory().getNode(

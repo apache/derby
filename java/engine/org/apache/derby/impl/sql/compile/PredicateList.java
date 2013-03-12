@@ -60,7 +60,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * A PredicateList represents the list of top level predicates.
@@ -1948,7 +1947,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			/* Put all of the join clauses that already have an equivalence 
              * class at the head of the outer list to optimize search.
 			 */
-			Vector movePreds = new Vector();
+			ArrayList movePreds = new ArrayList();
 			for (int jcIndex = outerJCL.size() - 1; jcIndex >= 0; jcIndex--)
 			{
 				Predicate predicate = (Predicate) outerJCL.elementAt(jcIndex);
@@ -3873,7 +3872,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 *--------------------------------------------------------------------*/
 		double selectivity = 1.0;
 
-		Vector maxPreds = new Vector();
+		ArrayList maxPreds = new ArrayList();
 
 		while (true)
 		{
@@ -4099,23 +4098,16 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 */
 	private class PredicateWrapperList
 	{
-		Vector pwList;
+		private final ArrayList pwList;
 		int numPreds;
 		int numDuplicates;
 		int weight;
 
 		PredicateWrapperList(int maxValue)
 		{
-			pwList = new Vector(maxValue);
+			pwList = new ArrayList(maxValue);
 		}
 		
-		void removeElement(PredicateWrapper pw)
-		{
-			int index = pwList.indexOf(pw);
-			if (index >= 0)
-				removeElementAt(index);
-		}
-
 		void removeElement(Predicate p)
 		{
 			for (int i = numPreds - 1; i >= 0; i--)
@@ -4178,11 +4170,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 */
 		void retainLeadingContiguous()
 		{
-			if (pwList == null)
+            if (pwList.isEmpty()) {
 				return;
-
-			if (pwList.size() == 0)
-				return;
+            }
 
 			if (elementAt(0).getIndexPosition() != 0)
 			{
@@ -4224,8 +4214,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 */
 		private List createLeadingUnique()
 		{
-			Vector scratch = new Vector();
-
 			if (numPreds == 0)
 				return null;
 
@@ -4234,6 +4222,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			if (lastIndexPosition != 0)
 				return null;
 
+            ArrayList scratch = new ArrayList();
 			scratch.add(elementAt(0));	// always add 0.
 
 			for (int i = 1; i < numPreds; i++)

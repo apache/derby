@@ -21,24 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.error.StandardException;
 
-import java.util.List;
-import java.util.Vector;
-
 /**
  * QueryTreeNodeVector is the root class for all lists of query tree nodes.
- * It provides a wrapper for java.util.Vector. All
+ * It provides a wrapper for java.util.ArrayList. All
  * lists of query tree nodes inherit from QueryTreeNodeVector.
  *
  */
 
 abstract class QueryTreeNodeVector extends QueryTreeNode
 {
-	private final List v = new Vector();
+	private final ArrayList v = new ArrayList();
 
 	public final int size()
 	{

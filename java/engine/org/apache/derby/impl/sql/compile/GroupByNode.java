@@ -22,7 +22,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.Iterator;
-import java.util.Vector;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
@@ -218,7 +217,7 @@ public class GroupByNode extends SingleChildResultSetNode
 				
 			}
 			if (index == glSize) {
-				isInSortedOrder = childResult.isOrderedOn(crs, true, (Vector)null);
+				isInSortedOrder = childResult.isOrderedOn(crs, true, (List)null);
 			}
 		}
 	}
@@ -1246,10 +1245,14 @@ public class GroupByNode extends SingleChildResultSetNode
 						/* See if the underlying ResultSet tree
 						 * is ordered on the ColumnReference.
 						 */
-						ColumnReference[] crs = new ColumnReference[1];
-						crs[0] = (ColumnReference) an.getOperand();
-						
-						Vector tableVector = new Vector();
+                        ColumnReference[] crs = {
+                            (ColumnReference) an.getOperand()
+                        };
+
+                        // Holder list for the FromBaseTable. We expect no more
+                        // than one table, hence initial capacity is 1.
+						ArrayList tableVector = new ArrayList(1);
+
 						boolean minMaxOptimizationPossible = isOrderedOn(crs, false, tableVector);
 						if (SanityManager.DEBUG)
 						{
@@ -1290,7 +1293,9 @@ public class GroupByNode extends SingleChildResultSetNode
 									break;
 								}
 							}
-							FromBaseTable fbt = (FromBaseTable)tableVector.firstElement();
+
+                            FromBaseTable fbt =
+                                    (FromBaseTable) tableVector.get(0);
 							MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)ad;
 
 							/*  MAX   ASC      NULLABLE 

@@ -25,7 +25,6 @@ import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -47,11 +46,7 @@ import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
@@ -66,9 +61,10 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * An UpdateNode represents an UPDATE statement.  It is the top node of the
@@ -892,7 +888,7 @@ public final class UpdateNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-		Vector		conglomVector = new Vector();
+		ArrayList conglomVector = new ArrayList();
 		relevantCdl = new ConstraintDescriptorList();
 		relevantTriggers =  new GenericDescriptorList();
 
@@ -993,7 +989,7 @@ public final class UpdateNode extends DMLModStatementNode
 		DataDictionary		dd,
 		TableDescriptor				baseTable,
 		ResultColumnList			updateColumnList,
-		Vector						conglomVector,
+		List						conglomVector,
 		ConstraintDescriptorList	relevantConstraints,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing,

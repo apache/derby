@@ -23,12 +23,9 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -38,11 +35,13 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Enumeration;
-import java.util.Vector;
+
 
 /**
  * A FromList represents the list of tables in a FROM clause in a DML
@@ -725,7 +724,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 									throws StandardException
 	{
 		boolean			flattened = true;
-		Vector 			flattenedTableNumbers = new Vector();
+		ArrayList		flattenedTableNumbers = new ArrayList();
 
 		if (SanityManager.DEBUG)
 		{
@@ -755,7 +754,8 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 					ft.isFlattenableJoinNode())
 				{
 					//save the table number of the node to be flattened
-					flattenedTableNumbers.add(new Integer(ft.getTableNumber()));
+                    flattenedTableNumbers.add(
+                            ReuseFactory.getInteger(ft.getTableNumber()));
 
 					/* Remove the node from the list and insert its
 					 * FromList here.
@@ -799,7 +799,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		/* fix up dependency maps for exists base tables since they might have a
 		 * dependency on this join node
 		 */
-		if (flattenedTableNumbers.size() > 0)
+		if (!flattenedTableNumbers.isEmpty())
 		{
 			for (int i = 0; i < size(); i++)
 			{

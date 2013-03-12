@@ -76,7 +76,6 @@ import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.SQLWarning;
-import java.util.Vector;
 import java.util.Properties;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -332,7 +331,9 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	public int addSavedObject(Object obj) {
-		if (savedObjects == null) savedObjects = new Vector();
+        if (savedObjects == null) {
+            savedObjects = new ArrayList();
+        }
 
 		savedObjects.add(obj);
 		return savedObjects.size()-1;
@@ -442,28 +443,19 @@ public class CompilerContextImpl extends ContextImpl
 	public StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException
 	{
-		/*
-		** Try to find the given conglomerate number in the array of
-		** conglom ids.
-		*/
-		for (int i = 0; i < storeCostConglomIds.size(); i++)
-		{
-			Long conglomId = (Long) storeCostConglomIds.get(i);
-			if (conglomId.longValue() == conglomerateNumber)
-				return (StoreCostController) storeCostControllers.get(i);
-		}
+        Long conglomNum = ReuseFactory.getLong(conglomerateNumber);
 
-		/*
-		** Not found, so get a StoreCostController from the store.
-		*/
-		StoreCostController retval =
-						lcc.getTransactionCompile().openStoreCost(conglomerateNumber);
+        // Try to find the given conglomerate number among the already
+        // opened conglomerates.
+        StoreCostController retval = (StoreCostController)
+                storeCostControllers.get(conglomNum);
 
-		/* Put it in the array */
-		storeCostControllers.add(retval);
-
-		/* Put the conglomerate number in its array */
-		storeCostConglomIds.add(new Long(conglomerateNumber));
+        if (retval == null) {
+            // Not found, so get a StoreCostController from the store.
+            retval = lcc.getTransactionCompile()
+                        .openStoreCost(conglomerateNumber);
+            storeCostControllers.put(conglomNum, retval);
+        }
 
 		return retval;
 	}
@@ -473,10 +465,10 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	private void closeStoreCostControllers()
 	{
-		for (int i = 0; i < storeCostControllers.size(); i++)
+        Iterator it = storeCostControllers.values().iterator();
+        while (it.hasNext())
 		{
-			StoreCostController scc =
-				(StoreCostController) storeCostControllers.get(i);
+            StoreCostController scc = (StoreCostController) it.next();
 			try {
 				scc.close();
 			} catch (StandardException se) {
@@ -484,7 +476,6 @@ public class CompilerContextImpl extends ContextImpl
 		}
 
 		storeCostControllers.clear();
-		storeCostConglomIds.clear();
 	}
 
 	/**
@@ -1035,8 +1026,11 @@ public class CompilerContextImpl extends ContextImpl
 	private ProviderList		currentAPL;
 	private boolean returnParameterFlag;
 
-    private final List storeCostControllers = new Vector();
-    private final List storeCostConglomIds = new Vector();
+    /**
+     * Map that contains all store cost controllers opened in this compiler
+     * context. Conglomerate id (long) is the key.
+     */
+    private final HashMap storeCostControllers = new HashMap();
 
 	private SortCostController	sortCostController;
 

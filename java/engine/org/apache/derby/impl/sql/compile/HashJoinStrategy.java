@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
@@ -49,8 +50,8 @@ import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
 
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.util.Vector;
 
 public class HashJoinStrategy extends BaseJoinStrategy {
 	public HashJoinStrategy() {
@@ -639,30 +640,29 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 			}
 		}
 
-		// Build a Vector of all the hash key columns
-		int colCtr;
-		Vector hashKeyVector = new Vector();
-		for (colCtr = 0; colCtr < columns.length; colCtr++)
+        // Build a list of all the hash key columns
+        ArrayList hashKeys = new ArrayList();
+        for (int colCtr = 0; colCtr < columns.length; colCtr++)
 		{
 			// Is there an equijoin condition on this column?
 			if (predList.hasOptimizableEquijoin(innerTable, columns[colCtr]))
 			{
-				hashKeyVector.add(new Integer(colCtr));
+                hashKeys.add(ReuseFactory.getInteger(colCtr));
 			}
 		}
 
-		// Convert the Vector into an int[], if there are hash key columns
-		if (hashKeyVector.size() > 0)
-		{
-			int[] keyCols = new int[hashKeyVector.size()];
-			for (int index = 0; index < keyCols.length; index++)
-			{
-				keyCols[index] = ((Integer) hashKeyVector.get(index)).intValue();
-			}
-			return keyCols;
-		}
-		else
-			return (int[]) null;
+        // Convert the list into an int[], if there are hash key columns
+        if (hashKeys.isEmpty())
+        {
+            return null;
+        }
+
+        int[] keyCols = new int[hashKeys.size()];
+        for (int index = 0; index < keyCols.length; index++)
+        {
+            keyCols[index] = ((Integer) hashKeys.get(index)).intValue();
+        }
+        return keyCols;
 	}
 
 	public String toString() {
