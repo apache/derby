@@ -64,7 +64,7 @@ Java and JDBC versions supported:
 
 <ul>
   
-<li>Java SE 5 and higher with 3.0, 4.0, 4.1, and 4.2.</li>
+<li>Java SE 5 and higher with JDBC 3.0, 4.0, 4.1, and 4.2.</li>
   
 <li>Java ME CDC/Foundation Profile 1.1 with JSR-169 JDBC Optional Package for CDC/Foundation Profile.</li>
 
@@ -85,7 +85,7 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are mis-behaving--for example if they throw a NoSuchMethod error on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
+<b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are misbehaving--for example if they throw a NoSuchMethodError on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
 	
 
 <li>
@@ -165,6 +165,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6076">DERBY-6076</a></td><td>Folder.gif icon missing from derby documentation website</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6073">DERBY-6073</a></td><td>Test ordering instability in StatementPoolingTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6072">DERBY-6072</a></td><td>Move lang/reopenScan.sql to LangScripts</td>

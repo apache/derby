@@ -95,7 +95,7 @@ Derby functionality includes:
 Java and JDBC versions supported:
 </p>
 <ul>
-  <li>Java SE 5 and higher with 3.0, 4.0, 4.1, and 4.2.</li>
+  <li>Java SE 5 and higher with JDBC 3.0, 4.0, 4.1, and 4.2.</li>
   <li>Java ME CDC/Foundation Profile 1.1 with JSR-169 JDBC Optional Package for CDC/Foundation Profile.</li>
 </ul>
 </overview>
@@ -108,7 +108,7 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are mis-behaving--for example if they throw a NoSuchMethod error on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
+<li><b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are misbehaving--for example if they throw a NoSuchMethodError on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
 	
 <li><b>Unencrypting databases</b> - Encryption can be turned off on existing databases. See the section on the <i>decryptDatabase</i> attribute in the Derby Reference Manual.</li>
 	
