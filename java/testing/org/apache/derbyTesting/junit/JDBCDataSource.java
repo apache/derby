@@ -180,11 +180,15 @@ public class JDBCDataSource {
                 setBeanProperty(ds, property, value);
             }
 
-            ds.setLoginTimeout( TestConfiguration.getCurrent().getLoginTimeout() );
+            if ( !BaseTestCase.isJ9Platform() && !BaseTestCase.isCVM() )
+            {
+                ds.setLoginTimeout( TestConfiguration.getCurrent().getLoginTimeout() );
+            }
             
             return ds;
         } catch (Exception e) {
-            BaseTestCase.fail("unexpected error", e);
+            BaseTestCase.printStackTrace( e );
+            BaseTestCase.fail("unexpected error: " + e.getMessage(), e);
             return null;
         }
     }
