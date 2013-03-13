@@ -32,20 +32,10 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.SortCostController;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -55,8 +45,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.util.Properties;
 
 /**
  * An OrderByList is an ordered list of columns in the ORDER BY clause.

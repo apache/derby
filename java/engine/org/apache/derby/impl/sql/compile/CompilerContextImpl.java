@@ -76,7 +76,6 @@ import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.SQLWarning;
-import java.util.Properties;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -494,7 +493,7 @@ public class CompilerContextImpl extends ContextImpl
 			*/
 
 			sortCostController =
-				lcc.getTransactionCompile().openSortCostController((Properties) null);
+				lcc.getTransactionCompile().openSortCostController();
 		}
 
 		return sortCostController;

@@ -289,7 +289,7 @@ class NoOpTransaction implements TransactionController {
         return null;
     }
 
-    public SortCostController openSortCostController(Properties implParameters)
+    public SortCostController openSortCostController()
             throws StandardException {
         // Auto-generated method stub
         return null;

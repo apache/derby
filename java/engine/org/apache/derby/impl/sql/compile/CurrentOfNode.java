@@ -21,19 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -42,20 +36,12 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-
-import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.reference.ClassName;
@@ -66,12 +52,9 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Properties;
 
 /**
  * The CurrentOf operator is used by positioned DELETE 

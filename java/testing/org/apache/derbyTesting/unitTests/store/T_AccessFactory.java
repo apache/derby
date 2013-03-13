@@ -1988,7 +1988,7 @@ public class T_AccessFactory extends T_Generic
 
         // Test 1 - Just call for various types of sorts.  Not sure how 
         // to test the validity.
-		SortCostController scc = tc.openSortCostController(null);
+		SortCostController scc = tc.openSortCostController();
 
         double estimated_cost = 
             scc.getSortCost(

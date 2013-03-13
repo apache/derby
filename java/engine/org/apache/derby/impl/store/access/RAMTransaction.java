@@ -1867,8 +1867,7 @@ public class RAMTransaction
      *
      * @see StoreCostController
      **/
-    public SortCostController openSortCostController(
-    Properties      implParameters)
+    public SortCostController openSortCostController()
 		throws StandardException
     {
 		// Get the implementation type from the parameters.

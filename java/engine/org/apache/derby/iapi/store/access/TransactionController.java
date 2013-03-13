@@ -23,8 +23,6 @@ package org.apache.derby.iapi.store.access;
 
 import java.util.Properties;
 
-import java.io.Serializable;
-
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
@@ -37,11 +35,8 @@ import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
-import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 /**
 
 The TransactionController interface provides methods that an access client
@@ -1742,9 +1737,6 @@ public interface TransactionController
      * Return an open SortCostController which can be used to ask about 
      * the estimated costs of SortController() operations.
      * <p>
-     * @param implParameters  Properties which help in choosing 
-     *                        implementation-specific sort options.  If null, a
-	 *                        "generally useful" sort will be used.
      *
 	 * @return The open StoreCostController.
      *
@@ -1752,8 +1744,7 @@ public interface TransactionController
      *
      * @see StoreCostController
      **/
-    SortCostController openSortCostController(
-    Properties  implParameters)
+    SortCostController openSortCostController()
 		throws StandardException;
 
 	/**

@@ -21,33 +21,18 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.util.JBitSet;
-
-import java.util.Properties;
 
 /**
  * An HalfOuterJoinNode represents a left or a right outer join result set.

@@ -29,9 +29,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import java.util.Properties;
-
 import java.sql.Types;
 
 public class TypeCompilerFactoryImpl implements TypeCompilerFactory
