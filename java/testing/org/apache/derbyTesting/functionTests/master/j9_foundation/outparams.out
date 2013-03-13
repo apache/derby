@@ -311,7 +311,7 @@ call takesShortPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type SMALLINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesIntegerPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -558,7 +558,7 @@ call takesIntegerPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type INTEGER and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesLongPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -805,7 +805,7 @@ call takesLongPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type BIGINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesFloatPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -1094,7 +1094,7 @@ call takesFloatPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type REAL and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesDoublePrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -1383,7 +1383,7 @@ call takesDoublePrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DOUBLE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesByteArray(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -1493,7 +1493,7 @@ call takesDoublePrimitive(?,?)
 			getBytes(1) = -1000000000000000
 			getObject(1) = -1000000000000000
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesString(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -1891,7 +1891,7 @@ call takesString(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type VARCHAR and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesDate(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -1982,7 +1982,7 @@ call takesString(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DATE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesTimestamp(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -2073,7 +2073,7 @@ call takesTimestamp(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIMESTAMP and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesTime(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -2164,7 +2164,7 @@ call takesTimestamp(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ...now doing setObject on each type xxx
 ------------------------------------
 {call takesNothing()}
@@ -2456,7 +2456,7 @@ call takesShortPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type SMALLINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesIntegerPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -2703,7 +2703,7 @@ call takesIntegerPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type INTEGER and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesLongPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -2950,7 +2950,7 @@ call takesLongPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type BIGINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesFloatPrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -3239,7 +3239,7 @@ call takesFloatPrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type REAL and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesDoublePrimitive(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -3528,7 +3528,7 @@ call takesDoublePrimitive(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DOUBLE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesByteArray(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -3638,7 +3638,7 @@ call takesDoublePrimitive(?,?)
 			getBytes(1) = -1000000000000000
 			getObject(1) = -1000000000000000
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesString(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -4036,7 +4036,7 @@ call takesString(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type VARCHAR and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesDate(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -4127,7 +4127,7 @@ call takesString(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DATE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesTimestamp(?,?)
 	cs.registerOutParameter(1, BIT)
@@ -4218,7 +4218,7 @@ call takesTimestamp(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIMESTAMP and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesTime(?,?)}
 	cs.registerOutParameter(1, BIT)
@@ -4309,7 +4309,7 @@ call takesTimestamp(?,?)
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ...not doing any setXXX, just OUT parameters, not IN/OUT
 ------------------------------------
 {call takesNothing()}
@@ -4900,7 +4900,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type SMALLINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsIntegerP(?)}
 	cs.registerOutParameter(1, BIT)
@@ -5238,7 +5238,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type INTEGER and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsLongP(?)}
 	cs.registerOutParameter(1, BIT)
@@ -5576,7 +5576,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type BIGINT and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsFloatP(?)}
 	cs.registerOutParameter(1, BIT)
@@ -5914,7 +5914,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type REAL and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsDoubleP(?)}
 	cs.registerOutParameter(1, BIT)
@@ -6252,7 +6252,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DOUBLE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsByteArray(?)}
 	cs.registerOutParameter(1, BIT)
@@ -6359,7 +6359,7 @@ TESTING RETURN OUTPUT PARAMETERS
 			getBytes(1) = -1000000000000000
 			getObject(1) = -1000000000000000
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsString(?)}
 	cs.registerOutParameter(1, BIT)
@@ -6740,7 +6740,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type VARCHAR and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsDate(?)}
 	cs.registerOutParameter(1, BIT)
@@ -6889,7 +6889,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type DATE and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsTimestamp(?)}
 	cs.registerOutParameter(1, BIT)
@@ -7038,7 +7038,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIMESTAMP and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {? = call returnsTime(?)}
 	cs.registerOutParameter(1, BIT)
@@ -7187,7 +7187,7 @@ TESTING RETURN OUTPUT PARAMETERS
 	cs.registerOutParameter(1, LONGVARBINARY)
 	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type LONGVARBINARY because it maps to type TIME and they are incompatible.
 	cs.registerOutParameter(1, OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 ==============================================
 TESTING OUTPUT PARAMETERS WITH register(OTHER)
@@ -7239,443 +7239,443 @@ TESTING OUTPUT PARAMETERS WITH register(OTHER)
 ------------------------------------
 call takesShortPrimitive(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type SMALLINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesIntegerPrimitive(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type INTEGER and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesLongPrimitive(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type BIGINT and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesFloatPrimitive(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type REAL and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesDoublePrimitive(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DOUBLE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesByteArray(?,?)}
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR () FOR BIT DATA and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesString(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type VARCHAR and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesDate(?,?)}
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type DATE and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 call takesTimestamp(?,?)
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIMESTAMP and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 {call takesTime(?,?)}
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 	cs.registerOutParameter(1, Types.OTHER)
-	Exception java.sql.SQLException: Parameter 1 cannot be registered to be of type OTHER because it maps to type TIME and they are incompatible.
+	Exception java.sql.SQLException: The data type 'OTHER' is not supported.
 ------------------------------------
 start testManyOut
 Ten OUT parameters
