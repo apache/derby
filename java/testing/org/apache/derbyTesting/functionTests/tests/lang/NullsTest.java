@@ -51,6 +51,9 @@ public class NullsTest extends BaseJDBCTestCase {
     public void testCreate() throws SQLException{
         Statement st = createStatement();
 
+        // A column cannot be declared explicitly nullable.
+        assertCompileError("42X01", "create table a(a1 int null)");
+
         //Trying to define null and not null for a column
         String sql = "create table a(a1 int null not null)";
         assertStatementError("42X01", st, sql);
@@ -116,6 +119,9 @@ public class NullsTest extends BaseJDBCTestCase {
         sql = "alter table a add column a3 int null " +
                 "constraint ap1 primary key";
         assertStatementError("42X01", st, sql);
+
+        // Adding explicitly nullable column should fail.
+        assertCompileError("42X01", "alter table a add column a3 int null");
 
         //Alter table table level primary key constraint on nullable column
         //doesn't give an error
