@@ -2036,12 +2036,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>42X83</name>
-                <text>The constraints on column '{0}' require that it be both nullable and not nullable.</text>
-                <arg>columnName</arg>
-            </msg>
-
-            <msg>
                 <name>42X84</name>
                 <text>Index '{0}' was created to enforce constraint '{1}'.  It can only be dropped by dropping the constraint.</text>
                 <arg>index</arg>

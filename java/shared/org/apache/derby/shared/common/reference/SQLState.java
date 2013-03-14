@@ -907,7 +907,6 @@ public interface SQLState {
 	String LANG_EMPTY_VALUES_CLAUSE                                    = "42X80";
 	String LANG_EMPTY_COLUMN_LIST                                      = "42X81";
 	String LANG_USING_CARDINALITY_VIOLATION                            = "42X82";
-	String LANG_ADDING_COLUMN_WITH_NULL_AND_NOT_NULL_CONSTRAINT        = "42X83";
 	String LANG_CANT_DROP_BACKING_INDEX                                = "42X84";
 	String LANG_CONSTRAINT_SCHEMA_MISMATCH                             = "42X85";
 	String LANG_DROP_NON_EXISTENT_CONSTRAINT                           = "42X86";

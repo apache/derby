@@ -38,73 +38,8 @@ PARSER_BEGIN(SQLParser)
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.StatementType;
 
-/* aggregates */
-import org.apache.derby.impl.sql.compile.CountAggregateDefinition;
-import org.apache.derby.impl.sql.compile.MaxMinAggregateDefinition;
-import org.apache.derby.impl.sql.compile.SumAvgAggregateDefinition;
-
-import org.apache.derby.impl.sql.compile.AggregateNode;
-import org.apache.derby.impl.sql.compile.BinaryOperatorNode;
-import org.apache.derby.impl.sql.compile.CallStatementNode;
-import	org.apache.derby.impl.sql.compile.CharConstantNode;
-import	org.apache.derby.impl.sql.compile.CastNode;
-import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
-import org.apache.derby.impl.sql.compile.ColumnReference;
-import org.apache.derby.impl.sql.compile.CreateAliasNode;
-import org.apache.derby.impl.sql.compile.CursorNode;
-import org.apache.derby.impl.sql.compile.FromBaseTable;
-import org.apache.derby.impl.sql.compile.FromList;
-import org.apache.derby.impl.sql.compile.FromSubquery;
-import org.apache.derby.impl.sql.compile.FromTable;
-import org.apache.derby.impl.sql.compile.GroupByList;
-import org.apache.derby.impl.sql.compile.HasNodeVisitor;
-import org.apache.derby.impl.sql.compile.JavaToSQLValueNode;
-import org.apache.derby.impl.sql.compile.JoinNode;
-import org.apache.derby.impl.sql.compile.MethodCallNode;
-import org.apache.derby.impl.sql.compile.QueryTreeNode;
-import org.apache.derby.impl.sql.compile.ReplaceAggregatesWithCRVisitor;
-import org.apache.derby.impl.sql.compile.ResultColumnList;
-import org.apache.derby.impl.sql.compile.ResultColumn;
-import org.apache.derby.impl.sql.compile.OrderByList;
-import org.apache.derby.impl.sql.compile.OrderByColumn;
-import org.apache.derby.impl.sql.compile.ResultSetNode;
-import org.apache.derby.impl.sql.compile.SelectNode;
-import org.apache.derby.impl.sql.compile.SubqueryNode;
-import org.apache.derby.impl.sql.compile.TableName;
-import org.apache.derby.impl.sql.compile.TernaryOperatorNode;
-import org.apache.derby.impl.sql.compile.ParameterNode;
-import org.apache.derby.impl.sql.compile.PrivilegeNode;
-import org.apache.derby.impl.sql.compile.ConstraintDefinitionNode;
-import org.apache.derby.impl.sql.compile.DMLModStatementNode;
-import org.apache.derby.impl.sql.compile.RoutineDesignator;
-import org.apache.derby.impl.sql.compile.StatementNode;
-import org.apache.derby.impl.sql.compile.TableElementList;
-import org.apache.derby.impl.sql.compile.TableElementNode;
-import org.apache.derby.impl.sql.compile.TableOperatorNode;
-import org.apache.derby.impl.sql.compile.TablePrivilegesNode;
-import org.apache.derby.impl.sql.compile.TransactionStatementNode;
-import org.apache.derby.impl.sql.compile.TriggerReferencingStruct;
-import org.apache.derby.impl.sql.compile.UnionNode;
-import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
-import org.apache.derby.impl.sql.compile.UnaryOperatorNode;
-import org.apache.derby.impl.sql.compile.UntypedNullConstantNode;
-import org.apache.derby.impl.sql.compile.UpdateNode;
-import org.apache.derby.impl.sql.compile.UserTypeConstantNode;
-import org.apache.derby.impl.sql.compile.ValueNode;
-import org.apache.derby.impl.sql.compile.ValueNodeList;
-import org.apache.derby.impl.sql.compile.GroupByColumn;
-import org.apache.derby.impl.sql.compile.CurrentDatetimeOperatorNode;
-import org.apache.derby.impl.sql.compile.DDLStatementNode;
-import org.apache.derby.impl.sql.compile.AlterTableNode;
-
-import org.apache.derby.impl.sql.compile.ParseException;
-import org.apache.derby.impl.sql.compile.Token;
-import org.apache.derby.impl.sql.compile.TokenMgrError;
-import org.apache.derby.impl.sql.compile.SQLParserConstants;
-import org.apache.derby.impl.sql.compile.CharStream;
 import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
@@ -114,10 +49,8 @@ import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -150,20 +83,16 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableProperties;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.IdUtil;
 
 import java.sql.Types;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.lang.Character;
 
 public class SQLParser
 {
@@ -267,18 +196,6 @@ public class SQLParser
 	static final String DOUBLEQUOTES = "\"\"";
 
 	static final String DEFAULT_INDEX_TYPE = "BTREE";
-
-	//the following 2 booleans are used to make sure only null or not null is
-	//defined for a column while creating a table or altering a table. Defining
-	//both at the same time will be an error case.
-        boolean explicitNotNull = false;
-        boolean explicitNull = false;
-
-	//this vector keeps a list of explicitly nullable columns, so that if they
-	//get used in the table level primary key constraint, it will result in an
-	//exception.	
-        Vector explicitlyNullableColumnsList = new Vector();
-
 
 	final void setCompilerContext(CompilerContext cc) {
 		this.compilerContext = cc;
@@ -3061,11 +2978,6 @@ StatementNode
 StatementPart(Token[] tokenHolder) throws StandardException :
 {
 	StatementNode	statementNode;
-	//before starting new statements, initialize this variables. Otherwise, the left
-	//over values from previously failed sql will affect the next sql. 
-        explicitNotNull = false;
-        explicitNull = false;
-	explicitlyNullableColumnsList = new Vector();
 
 	/*
 	** Grab the token preceding this production
@@ -3965,11 +3877,6 @@ void
 tableElement(TableElementList tableElementList) throws StandardException :
 {
 	TableElementNode	tableElement;
-	//initialize following two booleans for every new table element so that the
-	//values from previous tableElement doesn't impact the next tableElement
-	explicitNotNull = false;
-	explicitNull = false;
-
 }
 {
 	tableElement = columnDefinition(tableElementList)
@@ -12866,9 +12773,6 @@ tableConstraintDefinition() throws StandardException :
 	Properties properties = null;
 	ConstraintDefinitionNode tcdn;
 	TableName		constraintName = null;
-	//initialize following two booleans before handling table level constraints
-	explicitNotNull = false;
-	explicitNull = false;
 }
 {
 	[ constraintName = constraintNameDefinition() ] 
@@ -12916,28 +12820,6 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 	constraintType = uniqueSpecification(null) 
 		<LEFT_PAREN> uniqueColumnList = uniqueColumnList() <RIGHT_PAREN>
 	{
-		//go through the unique columns list and if any of the columns in the
-		//list is explicitly defined null, throw an exception for this. Columns
-		//for which no nullability is defined are by default nullable. But in
-		//case of create table, there nullability changes automatically to 
-		//non-nullable if primary key is defined on it. But if user explicitly
-		//defines the nullability, then defining a primary key on it in create
-		//table will result in an exception.
-		if (constraintType ==  DataDictionary.PRIMARYKEY_CONSTRAINT)
-		{
-			for (int index = 0; index < uniqueColumnList.size(); index++)
-			{
-				String primaryKeyColumnName = ((ResultColumn) uniqueColumnList.elementAt(index)).getName();
-				if (explicitlyNullableColumnsList.contains(primaryKeyColumnName))
-				{
-					String errorState = 
-						(checkVersion (DataDictionary.DD_VERSION_DERBY_10_4, null))
-							? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
-							: SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
-					throw StandardException.newException(errorState, primaryKeyColumnName);
-				}
-			}
-		}
 		return (ConstraintDefinitionNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
 						constraintName,
@@ -12965,18 +12847,6 @@ uniqueSpecification(String columnName) throws StandardException :
 |
 	<PRIMARY> <KEY>
 	{
-		//explicitNull can be true only if it's column level constraint and
-		//that column has null constraint defined on it. In that case, defining
-		//a column-level constraint of primary key on it will result in an error.
-		if (explicitNull) 
-		{
-			String errorState = 
-				(checkVersion (DataDictionary.DD_VERSION_DERBY_10_4, null))
-					? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
-					: SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
-
-			throw StandardException.newException(errorState, columnName);
-		}
 		return DataDictionary.PRIMARYKEY_CONSTRAINT;
 	}
 }
@@ -13158,13 +13028,6 @@ columnConstraint(TableName constraintName,
 {
 	<NOT> <NULL>
 	{
-		//if column is explicitly defined not nullable, set following flag
-		explicitNotNull = true;
-		//if both null and not null constraints are defined for a column,
-		//throw an exception
-		if (explicitNull) 
-                   throw StandardException.newException(SQLState.LANG_ADDING_COLUMN_WITH_NULL_AND_NOT_NULL_CONSTRAINT, columnName); 
-
 		// columns with generation clauses can omit the datatype
 		if ( dataTypeDescriptor[0] == null ) { throw StandardException.newException(SQLState.LANG_NOT_NULL_NEEDS_DATATYPE); }
 
