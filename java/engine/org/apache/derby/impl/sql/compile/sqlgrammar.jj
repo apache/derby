@@ -92,7 +92,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 public class SQLParser
 {
@@ -173,7 +172,7 @@ public class SQLParser
 	private int			parameterNumber;
 
 	/* The list of ? parameters */
-	private Vector			parameterList;
+    private ArrayList parameterList;
 
 	/* Remember if the last identifier or keyword was a
 	 * delimited identifier.  This is used for remembering
@@ -467,7 +466,7 @@ public class SQLParser
 		{
 			paramCount++;
 
-			newNode = (ParameterNode) parameterList.elementAt(index);
+			newNode = (ParameterNode) parameterList.get(index);
 			newNode.setDescriptors(descriptors );
 		}
 	}
@@ -481,7 +480,7 @@ public class SQLParser
 	 */
 	void	initUnnamedParameterList()
 	{
-		parameterList = new Vector();
+		parameterList = new ArrayList();
 	}
 
 	/**
@@ -509,26 +508,9 @@ public class SQLParser
 								getContextManager());
 
 		parameterNumber++;
-		parameterList.addElement(parm);
+		parameterList.add(parm);
 
 		return parm;
-	}
-
-	/**
-	 * Looks up an unnamed parameter given its parameter number.
-	 *
-	 *	@param	paramNumber		Number of parameter in unnamed
-	 *							parameter list.
-	 *
-	 *	@return	corresponding unnamed parameter.
-	 *
-	 */
-	ParameterNode	lookupUnnamedParameter( int paramNumber )
-	{
-		ParameterNode		unnamedParameter;
-
-		unnamedParameter = (ParameterNode) parameterList.elementAt( paramNumber );
-		return unnamedParameter;
 	}
 
 	/**
@@ -3337,7 +3319,7 @@ CursorNode
 preparableSelectStatement(boolean checkParams) throws StandardException :
 {
 	ResultSetNode	  queryExpression;
-	Vector  updateColumns = new Vector();
+	ArrayList updateColumns = new ArrayList();
 	int               forUpdateState = CursorNode.UNSPECIFIED;
 	int				  isolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
@@ -4814,30 +4796,6 @@ datetimeType() throws StandardException :
 }
 
 /*
- * <A NAME="timePrecision">timePrecision</A>
- */
-
-void
-qualifiedNameList(Vector list, int id_length_limit) throws StandardException :
-{
-}
-{
-	qualifiedNameElement(list, id_length_limit) ( <COMMA> qualifiedNameElement(list, id_length_limit) ) *
-}
-
-void 
-qualifiedNameElement(Vector list, int id_length_limit) throws StandardException :
-{
-	TableName qualifiedName = null;
-}
-{
-	qualifiedName = qualifiedName(id_length_limit)
-	{
-		list.addElement(qualifiedName);
-	}
-}
-
-/*
  * <A NAME="qualifiedName">qualifiedName</A>
  */
 TableName
@@ -5916,9 +5874,8 @@ nonStaticMethodCallOrFieldAccess(ValueNode receiver) throws StandardException :
 ValueNode
 nonStaticMethodInvocation(ValueNode receiver) throws StandardException :
 {
-	Vector					parameterList = new Vector();
+	ArrayList				parameterList = new ArrayList();
 	MethodCallNode			methodNode;
-	ParameterNode			parameterNode;
 }
 {
         LOOKAHEAD
@@ -6039,19 +5996,19 @@ staticMethodName(String javaClassName) throws StandardException :
  * <A NAME="methodParameter">methodParameter</A>
  */
 void
-methodParameter(Vector parameterList) throws StandardException :
+methodParameter(List parameterList) throws StandardException :
 {
 	ValueNode	parameter;
 }
 {
 	parameter = valueExpression()
 	{
-		parameterList.addElement(parameter);
+		parameterList.add(parameter);
 	}
 |
 	parameter = nullSpecification()
 	{
-		parameterList.addElement(parameter);
+		parameterList.add(parameter);
 	}
 }
 
@@ -6259,7 +6216,7 @@ escapedValueFunction() throws StandardException :
 ValueNode
 escapedSYSFUNFunction() throws StandardException :
 {
-    Vector      parameterList = new Vector();
+    ArrayList parameterList = new ArrayList();
 	Token tok;
 }
 {
@@ -7721,7 +7678,7 @@ JavaToSQLValueNode
 newInvocation() throws StandardException :
 {
 	QueryTreeNode	newNode;
-	Vector	parameterList = new Vector();
+	ArrayList parameterList = new ArrayList();
 	String	javaClassName;
 }
 {
@@ -7779,7 +7736,7 @@ vtiTableConstruct() throws StandardException :
 {
     NewInvocationNode newNode = null;
     QueryTreeNode invocationNode = null;
-    Vector parameterList = new Vector();
+    ArrayList parameterList = new ArrayList();
     TableName vtiTableName = null;
     TableDescriptor td;
     MethodCallNode	methodNode;
@@ -7838,7 +7795,7 @@ vtiTableConstruct() throws StandardException :
 ValueNode
 staticMethodInvocation(String javaClassName) throws StandardException :
 {
-	Vector	parameterList = new Vector();
+	ArrayList parameterList = new ArrayList();
 	MethodCallNode	methodNode;
 }
 {
@@ -7862,7 +7819,7 @@ staticMethodInvocation(String javaClassName) throws StandardException :
  * <A NAME="methodCallParameterList">methodCallParameterList</A>
 */
 
-void methodCallParameterList(Vector parameterList) throws StandardException :
+void methodCallParameterList(List parameterList) throws StandardException :
 {
 }
 {
@@ -7900,7 +7857,7 @@ routineInvocation() throws StandardException :
 ValueNode
 routineExpression() throws StandardException :
 {
-	Vector	parameterList = new Vector();
+	ArrayList parameterList = new ArrayList();
 	TableName	routineName;
 	MethodCallNode	methodNode;
 }
@@ -8428,9 +8385,8 @@ fetchFirstClause() throws StandardException :
  * <A NAME="forUpdateClause">forUpdateClause</A>
  */
 int
-forUpdateClause(Vector columnList) throws StandardException :
+forUpdateClause(List columnList) throws StandardException :
 {
-	int	retval;
 }
 {
 	<UPDATE> [ <OF> forUpdateColumnList(columnList) ]
@@ -8453,7 +8409,7 @@ forUpdateClause(Vector columnList) throws StandardException :
  * <A NAME="forUpdateColumnList">forUpdateColumnList</A>
  */
 void
-forUpdateColumnList(Vector columnList) throws StandardException :
+forUpdateColumnList(List columnList) throws StandardException :
 {
 }
 {
@@ -8464,7 +8420,7 @@ forUpdateColumnList(Vector columnList) throws StandardException :
  * <A NAME="forUpdateColumn">forUpdateColumn</A>
  */
 void
-forUpdateColumn(Vector columnList) throws StandardException :
+forUpdateColumn(List columnList) throws StandardException :
 {
 	String		 columnName;
 }
@@ -8472,7 +8428,7 @@ forUpdateColumn(Vector columnList) throws StandardException :
 	/* identifier() used to be columnName() */
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		columnList.addElement(columnName);
+		columnList.add(columnName);
 	}
 }
 
@@ -9435,7 +9391,7 @@ columnNameItem(ResultColumnList columnList) throws StandardException :
  * <A NAME="indexColumnList">indexColumnList</A>
  */
 void
-indexColumnList(Vector columnList) throws StandardException :
+indexColumnList(List columnList) throws StandardException :
 {}
 {
 	indexColumnItem(columnList) ( <COMMA> indexColumnItem(columnList) ) *
@@ -9445,7 +9401,7 @@ indexColumnList(Vector columnList) throws StandardException :
  * <A NAME="indexColumnItem">indexColumnItem</A>
  */
 void
-indexColumnItem(Vector columnList) throws StandardException :
+indexColumnItem(List columnList) throws StandardException :
 {
 	String		columnName;
 }
@@ -9457,7 +9413,7 @@ indexColumnItem(Vector columnList) throws StandardException :
 		** Store the column names for the index columns in the
 		** index column list.
 		*/
-		columnList.addElement(columnName);
+		columnList.add(columnName);
 	}
 }
 
@@ -10629,7 +10585,7 @@ indexDefinition() throws StandardException :
 	Properties	properties = null;
 	TableName	indexName;
 	TableName	tableName;
-	Vector	indexColumnList = new Vector();
+	ArrayList indexColumnList = new ArrayList();
 }
 {
 	/*
@@ -10878,10 +10834,11 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 Object[]
 procedureParameterList( Object[] procedureElements ) throws StandardException :
 {
-	Vector[] list = new Vector[3];
-	list[0] = new Vector(); // name
-	list[1] = new Vector(); // type
-	list[2] = new Vector(); // in/out
+    List[] list = {
+        new ArrayList(), // name
+        new ArrayList(), // type
+        new ArrayList(), // in/out
+    };
     Boolean ellipsis = null;
 }
 {
@@ -10901,7 +10858,7 @@ procedureParameterList( Object[] procedureElements ) throws StandardException :
  * <A NAME="Definition">procedureParameterDefinition</A>
  */
 void
-procedureParameterDefinition(Vector[] list) throws StandardException :
+procedureParameterDefinition(List[] list) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	String				parameterName = "";
@@ -10916,9 +10873,9 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 	]
 	typeDescriptor = dataTypeDDL()
 	{
-		list[0].addElement(parameterName);
-		list[1].addElement(typeDescriptor.getCatalogType());
-		list[2].addElement(inout);
+		list[0].add(parameterName);
+		list[1].add(typeDescriptor.getCatalogType());
+		list[2].add(inout);
 	}
 }
 
@@ -10979,10 +10936,11 @@ functionDefinition() throws StandardException :
 Object[]
 functionParameterList( Object[] functionElements ) throws StandardException :
 {
-	Vector[] list = new Vector[3];
-	list[0] = new Vector(); // name
-	list[1] = new Vector(); // type
-	list[2] = new Vector(); // in/out - ALWAYS IN
+    List[] list = {
+        new ArrayList(), // name
+        new ArrayList(), // type
+        new ArrayList(), // in/out - ALWAYS IN
+    };
     Boolean ellipsis = null;
 }
 {
@@ -11013,7 +10971,7 @@ ellipsis() throws StandardException :
  * <A NAME="Definition">functionParameterDefinition</A>
  */
 void
-functionParameterDefinition(Vector[] list) throws StandardException :
+functionParameterDefinition(List[] list) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	String				parameterName = "";
@@ -11025,9 +10983,9 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 	]
 	typeDescriptor = dataTypeDDL() 
 	{
-		list[0].addElement(parameterName);
-		list[1].addElement(typeDescriptor.getCatalogType());
-		list[2].addElement(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
+		list[0].add(parameterName);
+		list[1].add(typeDescriptor.getCatalogType());
+		list[2].add(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
 	}
 }
 
@@ -11251,7 +11209,7 @@ triggerDefinition() throws StandardException :
 	ResultColumnList	triggerColumns = (ResultColumnList) nodeFactory.getNode(
 											C_NodeTypes.RESULT_COLUMN_LIST,
 											getContextManager());
-	Vector				refClause = null;
+	List				refClause = null;
 }
 {
 	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -11378,10 +11336,10 @@ rowOrStatement() :
 	}
 }
 
-Vector
+List
 triggerReferencingClause() throws StandardException :
 {
-	Vector vector = new Vector();
+	ArrayList vector = new ArrayList();
 }
 {
 	<REFERENCING> triggerReferencingExpression(vector) ( triggerReferencingExpression(vector) )*
@@ -11391,7 +11349,7 @@ triggerReferencingClause() throws StandardException :
 }
 
 void
-triggerReferencingExpression(Vector vector) throws StandardException :
+triggerReferencingExpression(List vector) throws StandardException :
 {
 	String	identifier;
 	boolean isNew = true;
@@ -11410,7 +11368,7 @@ triggerReferencingExpression(Vector vector) throws StandardException :
 
 	<AS> identifier = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		vector.addElement(new TriggerReferencingStruct(isRow, isNew, identifier));
+		vector.add(new TriggerReferencingStruct(isRow, isNew, identifier));
 	}
 }
  
@@ -12470,7 +12428,7 @@ setRoleStatement() throws StandardException :
 			setUpAndLinkParameters();
 			// set the type of parameter node, it should be a varchar
 			// max Limits.MAX_IDENTIFIER_LENGTH - non nullable
-			ParameterNode p = (ParameterNode)parameterList.elementAt(0);
+			ParameterNode p = (ParameterNode) parameterList.get(0);
 			p.setType(new DataTypeDescriptor
 					  (TypeId.getBuiltInTypeId(Types.VARCHAR),
 					   false,
@@ -12544,7 +12502,7 @@ setSchemaStatement() throws StandardException :
 		{
 			setUpAndLinkParameters();
 			// set the type of parameter node, it should be a varchar max Limits.MAX_IDENTIFIER_LENGTH - non nullable
-			ParameterNode p = (ParameterNode)parameterList.elementAt(0);
+			ParameterNode p = (ParameterNode) parameterList.get(0);
 			p.setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), false, Limits.MAX_IDENTIFIER_LENGTH));
 		}
 		return setSchema;
