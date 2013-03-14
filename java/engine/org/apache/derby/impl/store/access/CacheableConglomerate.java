@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
+import org.apache.derby.iapi.store.raw.ContainerKey;
 
 /**
 The CacheableConglomerate implements a single item in the cache used by
@@ -44,12 +45,14 @@ created.
 
 class CacheableConglomerate implements Cacheable
 {
+    private final RAMAccessManager accessManager;
     private Long            conglomid;
     private Conglomerate    conglom;
 
     /* Constructor */
-    CacheableConglomerate()
+    CacheableConglomerate(RAMAccessManager parent)
     {
+        this.accessManager = parent;
     }
 
 	/*
@@ -92,11 +95,15 @@ class CacheableConglomerate implements Cacheable
 	*/
 	public Cacheable setIdentity(Object key) throws StandardException
     {
-		if (SanityManager.DEBUG) {
-			SanityManager.THROWASSERT("not supported.");
-		}
+        conglomid = (Long) key;
 
-        return(null);
+        long id = conglomid.longValue();
+
+        conglom = accessManager.getFactoryFromConglomId(id).readConglomerate(
+                accessManager.getCurrentTransactionContext().getTransaction(),
+                new ContainerKey(0, id));
+
+        return this;
     }
 
 	/**

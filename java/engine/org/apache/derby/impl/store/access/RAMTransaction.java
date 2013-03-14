@@ -382,17 +382,7 @@ public class RAMTransaction
 	private Conglomerate findExistingConglomerate(long conglomId)
 		throws StandardException
 	{
-		Conglomerate conglom = null;
-
-		if (conglomId < 0)
-		{
-			if (tempCongloms != null)
-				conglom = (Conglomerate) tempCongloms.get(new Long(conglomId));
-		}
-        else
-        {
-            conglom = accessmanager.conglomCacheFind(this, conglomId);
-        }
+		Conglomerate conglom = findConglomerate(conglomId);
 
 		if (conglom == null)
         {
@@ -617,18 +607,13 @@ public class RAMTransaction
 
 		conglom.addColumn(this, column_id, template_column, collation_id);
 
-        // remove the old entry in the Conglomerate directory, and add the
-        // new one.
-		if (is_temporary)
+        // Set an indication that ALTER TABLE has been called so that the
+        // conglomerate will be invalidated if an error happens. Only needed
+        // for non-temporary conglomerates, since they are the only ones that
+        // live in the conglomerate cache.
+        if (!is_temporary)
 		{
-			tempCongloms.put(new Long(conglomId), conglom);
-		}
-		else
-        {
             alterTableCallMade = true;
-
-            // have access manager update the conglom to this new one.
-			accessmanager.conglomCacheUpdateEntry(conglomId, conglom);
         }
 
         cc.close();
@@ -1971,12 +1956,7 @@ public class RAMTransaction
 	public void abort()
 		throws StandardException
 	{
-	
-        if (alterTableCallMade)
-        {
-            accessmanager.conglomCacheInvalidate();
-            alterTableCallMade = false;
-        }
+        invalidateConglomerateCache();
 		this.closeControllers(true /* close all controllers */ );
 		rawtran.abort();
 

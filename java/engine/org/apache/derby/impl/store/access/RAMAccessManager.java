@@ -52,7 +52,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -371,7 +370,7 @@ public abstract class RAMAccessManager
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private ConglomerateFactory getFactoryFromConglomId(
+    ConglomerateFactory getFactoryFromConglomId(
     long    conglom_id)
 		throws StandardException
     {
@@ -464,36 +463,12 @@ public abstract class RAMAccessManager
         Conglomerate conglom       = null;
         Long         conglomid_obj = new Long(conglomid);
 
-        synchronized (conglom_cache)
-        {
-            CacheableConglomerate cache_entry = 
-                (CacheableConglomerate) conglom_cache.findCached(conglomid_obj);
+        CacheableConglomerate cache_entry =
+            (CacheableConglomerate) conglom_cache.find(conglomid_obj);
 
-            if (cache_entry != null)
-            {
-                conglom = cache_entry.getConglom();
-                conglom_cache.release(cache_entry);
-
-                // SanityManager.DEBUG_PRINT("find", "find hit : " + conglomid);
-            }
-            else
-            {
-                // SanityManager.DEBUG_PRINT("find", "find miss: " + conglomid);
-
-                // If not in cache - ask the factory for it and insert it.
-
-                conglom = 
-                    getFactoryFromConglomId(conglomid).readConglomerate(
-                        xact_mgr, new ContainerKey(0, conglomid));
-
-                if (conglom != null)
-                {
-                    // on cache miss, put the missing conglom in the cache.
-                    cache_entry = (CacheableConglomerate) 
-                        this.conglom_cache.create(conglomid_obj, conglom);
-                    this.conglom_cache.release(cache_entry);
-                }
-            }
+        if (cache_entry != null) {
+            conglom = cache_entry.getConglom();
+            conglom_cache.release(cache_entry);
         }
 
         return(conglom);
@@ -512,49 +487,7 @@ public abstract class RAMAccessManager
     /* package */ protected void conglomCacheInvalidate()
         throws StandardException
     {
-        synchronized (conglom_cache)
-        {
-            conglom_cache.ageOut();
-        }
-
-        return;
-    }
-
-    /**
-     * Update a conglomerate directory entry.
-     * <p>
-     * Update the Conglom column of the Conglomerate Directory.  The 
-     * Conglomerate with id "conglomid" is replaced by "new_conglom".
-     * <p>
-     *
-     * @param conglomid   The conglomid of conglomerate to replace.
-     * @param new_conglom The new Conglom to update the conglom column to.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    /* package */ void conglomCacheUpdateEntry(
-    long            conglomid, 
-    Conglomerate    new_conglom) 
-        throws StandardException
-    {
-        Long         conglomid_obj = new Long(conglomid);
-
-        synchronized (conglom_cache)
-        {
-            // remove the current entry
-            CacheableConglomerate conglom_entry = (CacheableConglomerate) 
-                conglom_cache.findCached(conglomid_obj);
-
-            if (conglom_entry != null)
-                conglom_cache.remove(conglom_entry);
-
-            // insert the updated entry.
-            conglom_entry = (CacheableConglomerate) 
-                conglom_cache.create(conglomid_obj, new_conglom);
-            conglom_cache.release(conglom_entry);
-        }
-
-        return;
+        conglom_cache.ageOut();
     }
 
     /**
@@ -571,15 +504,10 @@ public abstract class RAMAccessManager
     Conglomerate    conglom)
         throws StandardException
     {
-        synchronized (conglom_cache)
-        {
-            // insert the updated entry.
-            CacheableConglomerate conglom_entry = (CacheableConglomerate) 
-                conglom_cache.create(new Long(conglomid), conglom);
-            conglom_cache.release(conglom_entry);
-        }
-
-        return;
+        // Insert the new entry.
+        CacheableConglomerate conglom_entry = (CacheableConglomerate)
+            conglom_cache.create(new Long(conglomid), conglom);
+        conglom_cache.release(conglom_entry);
     }
 
     /**
@@ -593,19 +521,45 @@ public abstract class RAMAccessManager
     /* package */ void conglomCacheRemoveEntry(long conglomid)
         throws StandardException
     {
-        synchronized (conglom_cache)
-        {
-            CacheableConglomerate conglom_entry = (CacheableConglomerate) 
-                conglom_cache.findCached(new Long(conglomid));
+        CacheableConglomerate conglom_entry = (CacheableConglomerate)
+            conglom_cache.findCached(new Long(conglomid));
 
-            if (conglom_entry != null)
-                conglom_cache.remove(conglom_entry);
+        if (conglom_entry != null) {
+            conglom_cache.remove(conglom_entry);
         }
-
-        return;
     }
 
+    /**
+     * <p>
+     * Get the current transaction context.
+     * </p>
+     *
+     * <p>
+     * If there is an internal transaction on the context stack, return the
+     * internal transaction. Otherwise, if there is a nested user transaction
+     * on the context stack, return the nested transaction. Otherwise,
+     * return the current user transaction.
+     * </p>
+     *
+     * @return a context object referencing the current transaction
+     */
+    RAMTransactionContext getCurrentTransactionContext() {
+        RAMTransactionContext rtc =
+            (RAMTransactionContext) ContextService.getContext(
+                AccessFactoryGlobals.RAMXACT_INTERNAL_CONTEXT_ID);
 
+        if (rtc == null) {
+            rtc = (RAMTransactionContext) ContextService.getContext(
+                    AccessFactoryGlobals.RAMXACT_CHILD_CONTEXT_ID);
+        }
+
+        if (rtc == null) {
+            rtc = (RAMTransactionContext) ContextService.getContext(
+                    AccessFactoryGlobals.RAMXACT_CONTEXT_ID);
+        }
+
+        return rtc;
+    }
 
     /**************************************************************************
      * Public Methods implementing AccessFactory Interface:
@@ -1280,7 +1234,7 @@ public abstract class RAMAccessManager
 	*/
 
 	public Cacheable newCacheable(CacheManager cm) {
-		return new CacheableConglomerate();
+		return new CacheableConglomerate(this);
 	}
 
 }
