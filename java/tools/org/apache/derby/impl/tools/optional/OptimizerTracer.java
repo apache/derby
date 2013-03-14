@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.tools.optional;
 
+import java.io.FileWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.db.OptimizerTrace;
@@ -74,16 +75,52 @@ public	class   OptimizerTracer  implements OptionalTool
 
     /**
      * <p>
-     * Dump the optimizer trace and turn off tracing.
+     * Dump the optimizer trace and turn off tracing. Takes optional parameters:
      * </p>
+     *
+     * <ul>
+     * <li><b>fileName</b> - Where to write the optimizer trace. If omitted, the trace is written to System.out.</li>
+     * </ul>
      */
     public  void    unloadTool( String... configurationParameters )
         throws SQLException
     {
-        System.out.println( OptimizerTrace.getOptimizerTraceOutput() );
+        String  trace = OptimizerTrace.getOptimizerTraceOutput();
+        if ( trace == null ) { trace = ""; }
+
+        OptimizerTrace.nullifyTrace();
+        
+        if (
+            (configurationParameters != null) &&
+            (configurationParameters.length > 0)
+            )
+        {
+            try {
+                FileWriter    writer = new FileWriter( configurationParameters[ 0 ] );
+
+                writer.write( trace );
+                writer.flush();
+                writer.close();
+            } catch (Exception e) { throw wrap( e ); }
+        }
+        else
+        {
+            System.out.println( trace );
+        }
 
         OptimizerTrace.setOptimizerTrace( false );
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    //
+    //	MINIONS
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /** Wrap an exception in a SQLException */
+    private SQLException    wrap( Throwable t )
+    {
+        return new SQLException( t.getMessage(), t );
+    }
 }
 

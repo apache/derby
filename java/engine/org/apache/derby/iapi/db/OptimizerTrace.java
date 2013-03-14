@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.db;
 
+import java.sql.SQLException;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
@@ -57,6 +59,14 @@ public class OptimizerTrace
 
 		return retCode;
 	}
+
+    /**
+     * Null out the optimizer trace.
+     */
+    public  static  void    nullifyTrace()  throws SQLException
+    {
+        ConnectionUtil.getCurrentLCC().setOptimizerTraceOutput( null );
+    }
 
 	/**
 	 * Control whether or not optimizer trace is generated in html.
