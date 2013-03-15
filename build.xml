@@ -2147,7 +2147,7 @@
      <echo file="${checkinMessage}" message="${fullComment}"/>
      <echo message="Checking in ${fileName} with this comment: ${fullComment}"/>
 
-     <exec executable="svn">
+     <exec executable="svn" failonerror="true">
        <arg value="commit"/>
        <arg value="--username"/>
        <arg value="${svn.username}"/>
