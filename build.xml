@@ -3227,7 +3227,7 @@ you should not have to do this.
 
     <target
         name="createBranch"
-        depends="checkdocsroot,checksvnclientsclean"
+        depends="checkdocsroot,checksvnclientsclean,getsvnversion"
         description="Create a new branch (both docs and code)."
     >
       <antcall target="updatesvnclients"/>
