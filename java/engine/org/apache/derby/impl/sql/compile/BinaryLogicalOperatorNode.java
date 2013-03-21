@@ -65,22 +65,22 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 *
 	 * @param fromList			The query's FROM list
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		//following is to check if we have something like "? AND 1=1" or "2>1 OR ?" 
 		if (leftOperand.isParameterNode() || rightOperand.isParameterNode())
 			throw StandardException.newException( SQLState.LANG_UNTYPED_PARAMETER_IN_WHERE_CLAUSE );
 
-		super.bindExpression(fromList, subqueryList, aggregateVector);
+        super.bindExpression(fromList, subqueryList, aggregates);
 
 		return this;
 	}

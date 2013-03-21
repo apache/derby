@@ -288,19 +288,18 @@ public class UnaryOperatorNode extends OperatorNode
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode bindExpression(
-					FromList fromList, SubqueryList subqueryList,
-					List aggregateVector)
+    ValueNode bindExpression(
+            FromList fromList, SubqueryList subqueryList, List aggregates)
 				throws StandardException
 	{
-		bindOperand(fromList, subqueryList, aggregateVector);
+        bindOperand(fromList, subqueryList, aggregates);
         if (operatorType == XMLPARSE_OP)
             bindXMLParse();
         else if (operatorType == XMLSERIALIZE_OP)
@@ -315,11 +314,10 @@ public class UnaryOperatorNode extends OperatorNode
      * method to bind the operand.
 	 */
 	protected void bindOperand(
-            FromList fromList, SubqueryList subqueryList, List aggregateVector)
+            FromList fromList, SubqueryList subqueryList, List aggregates)
 				throws StandardException
 	{
-		operand = operand.bindExpression(fromList, subqueryList,
-								aggregateVector);
+        operand = operand.bindExpression(fromList, subqueryList, aggregates);
 
 		if (operand.requiresTypeFromContext()) {
 			bindParameter();

@@ -129,18 +129,17 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @param fromList			The FROM list for the statement.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes.
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes.
+     * @param aggregates        The aggregate list being built as we find AggregateNodes.
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							List aggregateVector)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 					throws StandardException
 	{
 		//bind all the arguments
-		argumentsList.bindExpression(fromList, subqueryList, aggregateVector);
+        argumentsList.bindExpression(fromList, subqueryList, aggregates);
 
 		//There should be more than one argument
 		if (argumentsList.size() < 2)

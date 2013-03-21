@@ -58,14 +58,12 @@ public final class AggregateWindowFunctionNode extends WindowFunctionNode
      * ValueNode override.
      * @see ValueNode#bindExpression
      */
-    public ValueNode bindExpression(
-                    FromList            fromList,
-                    SubqueryList        subqueryList,
-                    List                aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
             throws StandardException
     {
         aggregateFunction.bindExpression(
-            fromList, subqueryList, aggregateVector);
+            fromList, subqueryList, aggregates);
         return this;
     }
 

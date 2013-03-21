@@ -175,24 +175,22 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * as well as figuring out what the return type is for this expression.
 	 *
 	 * @param fromList		The FROM list for the query this
-	 *				expression is in, for binding columns.
-	 * @param subqueryList		The subquery list being built as we find
-	 *							SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     *                      expression is in, for binding columns.
+     * @param subqueryList  The subquery list being built as we find
+     *                      SubqueryNodes
+     * @param aggregates    The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return this	
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public JavaValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    JavaValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		/* Bind the expression under us */
 		value = value.bindExpression(fromList, subqueryList,
-							  aggregateVector);
+                              aggregates);
 
 		return this;
 	}

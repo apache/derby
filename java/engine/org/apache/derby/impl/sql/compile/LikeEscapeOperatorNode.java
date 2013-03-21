@@ -140,13 +140,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      *
      * @exception StandardException thrown on failure
      */
-    public ValueNode bindExpression(
-    FromList        fromList, 
-    SubqueryList    subqueryList,
-    List            aggregateVector)
+    ValueNode bindExpression(
+    FromList fromList, SubqueryList subqueryList, List aggregates)
         throws StandardException
     {
-        super.bindExpression(fromList, subqueryList, aggregateVector);
+        super.bindExpression(fromList, subqueryList, aggregates);
 
         String pattern = null;
 
@@ -405,7 +403,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
                     equals = (BinaryComparisonOperatorNode) 
                         equals.bindExpression(
-                            fromList, subqueryList, aggregateVector);
+                            fromList, subqueryList, aggregates);
 
                     // create new and node and hook in "equals" the new "=' node
                     //

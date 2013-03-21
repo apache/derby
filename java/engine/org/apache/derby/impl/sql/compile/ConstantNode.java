@@ -162,7 +162,7 @@ abstract class ConstantNode extends ValueNode
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
@@ -170,9 +170,8 @@ abstract class ConstantNode extends ValueNode
 	 * doesn't throw this exception, it's subclasses do and hence this method
 	 * signature here needs to have throws StandardException 
 	 */
-	public ValueNode bindExpression(
-			FromList fromList, SubqueryList subqueryList,
-			List aggregateVector)
+    ValueNode bindExpression(
+            FromList fromList, SubqueryList subqueryList, List aggregates)
 	throws StandardException
 	{
 		/*

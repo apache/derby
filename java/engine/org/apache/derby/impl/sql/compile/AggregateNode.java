@@ -259,16 +259,14 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @param fromList			The query's FROM list
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate list being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode bindExpression(
-					FromList			fromList,
-					SubqueryList		subqueryList,
-					List				aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
         DataDictionary  dd = getDataDictionary();
@@ -320,8 +318,8 @@ public class AggregateNode extends UnaryOperatorNode
             }
         }
 
-		/* Add ourselves to the aggregateVector before we do anything else */
-		aggregateVector.add(this);
+        // Add ourselves to the list of aggregates before we do anything else.
+        aggregates.add(this);
 
         CompilerContext cc = getCompilerContext();
         
@@ -329,7 +327,7 @@ public class AggregateNode extends UnaryOperatorNode
 		if (operand != null)
 		{
             int previousReliability = orReliability( CompilerContext.AGGREGATE_RESTRICTION );
-            bindOperand(fromList, subqueryList, aggregateVector);
+            bindOperand(fromList, subqueryList, aggregates);
             cc.setReliability( previousReliability );
             
 			/*
@@ -423,7 +421,7 @@ public class AggregateNode extends UnaryOperatorNode
 
             if ( castNode != null )
             {
-                operand = castNode.bindExpression( fromList, subqueryList, aggregateVector );
+                operand = castNode.bindExpression( fromList, subqueryList, aggregates );
             }
         }
 

@@ -147,8 +147,8 @@ public final class CharConstantNode extends ConstantNode
 		return value.getString();
 	}
 	
-	public ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 	throws StandardException
 	{
 		//The DTD for this character constant should get its collation type

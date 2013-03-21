@@ -1868,15 +1868,16 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return number of aggregates
 	 */
-	protected static final int numDistinctAggregates(List aggregateVector)
+    static int numDistinctAggregates(List aggregates)
 	{
 		int		count = 0;
-		int		size = aggregateVector.size();
+        int     size = aggregates.size();
 
 		for (int index = 0; index < size; index++)
 		{
-			count += (((AggregateNode) aggregateVector.get(index)).isDistinct() == true) ?
-						1 : 0;
+            if (((AggregateNode) aggregates.get(index)).isDistinct()) {
+                count++;
+            }
 		}
 		
 		return count;

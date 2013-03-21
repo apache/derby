@@ -167,18 +167,16 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * as well as figuring out what the return type is for this expression.
 	 *
 	 * @param fromList		The FROM list for the query this
-	 *				expression is in, for binding columns.
-	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     *                      expression is in, for binding columns.
+     * @param subqueryList  The subquery list being built as we find SubqueryNodes
+     * @param aggregates    The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	this or an AggregateNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public JavaValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    JavaValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		// for a function we can get called recursively
@@ -186,7 +184,7 @@ public class StaticMethodCallNode extends MethodCallNode
 			return this;
 
 
-		bindParameters(fromList, subqueryList, aggregateVector);
+        bindParameters(fromList, subqueryList, aggregates);
 
 		
 		/* If javaClassName is null then we assume that the current methodName
@@ -207,7 +205,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
             // The field methodName is used by resolveRoutine and
             // is set to the name of the routine (procedureName.getTableName()).
-			resolveRoutine( fromList, subqueryList, aggregateVector, sd );
+            resolveRoutine( fromList, subqueryList, aggregates, sd );
 
             if ( (ad != null) && (ad.getAliasType() == AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR) )
             {
@@ -242,7 +240,7 @@ public class StaticMethodCallNode extends MethodCallNode
                 // an in-memory table, set up in DataDictioanryImpl.
                 sd = getSchemaDescriptor("SYSFUN", true);
 
-                resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+                resolveRoutine(fromList, subqueryList, aggregates, sd);
             }
 
             if (ad == null) {
@@ -267,7 +265,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
                     forCallStatement = true; // temporarily: resolve
                                              // as procedure
-                    resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+                    resolveRoutine(fromList, subqueryList, aggregates, sd);
                     forCallStatement = false; // restore it
 
                     if (ad != null) {
@@ -279,7 +277,7 @@ public class StaticMethodCallNode extends MethodCallNode
                     // Maybe a function is being CALLed ?
                     forCallStatement = false; // temporarily: resolve
                                               // as function
-                    resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+                    resolveRoutine(fromList, subqueryList, aggregates, sd);
                     forCallStatement = true; // restore it
 
                     if (ad != null) {
@@ -400,7 +398,7 @@ public class StaticMethodCallNode extends MethodCallNode
 										returnValueCastNode, 
 										getContextManager());
 					returnValueToJava.setCollationType(returnType.getCollationType());
-					return returnValueToJava.bindExpression(fromList, subqueryList, aggregateVector);
+                    return returnValueToJava.bindExpression(fromList, subqueryList, aggregates);
 				}
 
 			}
@@ -494,14 +492,9 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * with a given type and name is allowed, thus if changes are made to
 	 * support overloaded routines, careful code inspection and testing will
 	 * be required.
-	 * @param fromList
-	 * @param subqueryList
-	 * @param aggregateVector
-	 * @param sd
-	 * @throws StandardException
 	 */
     private void resolveRoutine(FromList fromList, SubqueryList subqueryList,
-                                List aggregateVector, SchemaDescriptor sd)
+                                List aggregates, SchemaDescriptor sd)
             throws StandardException {
 		if (sd.getUUID() != null) {
 
@@ -610,7 +603,7 @@ public class StaticMethodCallNode extends MethodCallNode
                     {
                         coerceMethodParameter
                             (
-                             fromList, subqueryList, aggregateVector,
+                             fromList, subqueryList, aggregates,
                              rai,
                              methodParms.length,
                              paramdtd, parameterTypeId, parameterMode,
@@ -622,7 +615,7 @@ public class StaticMethodCallNode extends MethodCallNode
                 {
                     coerceMethodParameter
                         (
-                         fromList, subqueryList, aggregateVector,
+                         fromList, subqueryList, aggregates,
                          rai,
                          methodParms.length,
                          paramdtd, parameterTypeId, parameterMode,
@@ -679,7 +672,7 @@ public class StaticMethodCallNode extends MethodCallNode
         (
          FromList fromList,
          SubqueryList subqueryList,
-         List aggregateVector,
+         List aggregates,
          RoutineAliasInfo rai,
          int    parameterCount, // number of declared routine args
          DataTypeDescriptor paramdtd,   // declared type of routine arg
@@ -824,7 +817,8 @@ public class StaticMethodCallNode extends MethodCallNode
                  getContextManager()
                  );
 
-            methodParms[p] = methodParms[p].bindExpression(fromList, subqueryList, aggregateVector);
+            methodParms[p] = methodParms[p].bindExpression(
+                    fromList, subqueryList, aggregates);
         }
 
         // only force the type for a ? so that the correct type shows up

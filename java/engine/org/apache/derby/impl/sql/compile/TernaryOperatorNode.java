@@ -186,27 +186,26 @@ public class TernaryOperatorNode extends OperatorNode
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		receiver = receiver.bindExpression(fromList, subqueryList, 
-			aggregateVector);
+            aggregates);
 
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList,
-			    aggregateVector);
+                aggregates);
 
 		if (rightOperand != null)
 		{
 			rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
-				aggregateVector);
+                aggregates);
 		}
 		if (operatorType == TRIM)
 			trimBind();

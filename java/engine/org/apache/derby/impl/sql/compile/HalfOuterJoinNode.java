@@ -732,7 +732,7 @@ private boolean isNullRejecting (
 												getContextManager());
 						ij.setTableNumber(tableNumber);
 						ij.setSubqueryList(subqueryList);
-						ij.setAggregateVector(aggregateVector);
+                        ij.setAggregates(aggregates);
 						return ij;
 					}
 				}

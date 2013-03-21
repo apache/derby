@@ -55,13 +55,11 @@ public final class RowNumberFunctionNode extends WindowFunctionNode
      * ValueNode override.
      * @see ValueNode#bindExpression
      */
-    public ValueNode bindExpression(
-                    FromList            fromList,
-                    SubqueryList        subqueryList,
-                    List                aggregateVector)
+    ValueNode bindExpression(
+                    FromList fromList, SubqueryList subqueryList, List aggregates)
             throws StandardException
     {
-        super.bindExpression(fromList, subqueryList, aggregateVector);
+        super.bindExpression(fromList, subqueryList, aggregates);
         return this;
     }
 }

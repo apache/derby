@@ -539,10 +539,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * Correlated subqueries are not allowed as parameters to
 		 * a VTI, so pass an empty FromList.
 		 */
-		ArrayList aggregateVector = new ArrayList();
-		methodCall.bindExpression(fromListParam,
-									 subqueryList,
-									 aggregateVector);
+        ArrayList aggregates = new ArrayList();
+        methodCall.bindExpression(fromListParam, subqueryList, aggregates);
 
 		// Is the parameter list to the constructor valid for a VTI?
 		methodParms = methodCall.getMethodParms();
@@ -902,7 +900,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * These CRs will have uninitialized column and table numbers.
 		 */
 		List colRefs = getNodesFromParameters(ColumnReference.class);
-		ArrayList aggregateVector = null;
+        ArrayList aggregates = null;
 		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
 			ColumnReference ref = (ColumnReference) it.next();
@@ -963,13 +961,13 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			if (ref.getTableNumber() == -1)
 			{
 				// we need a fake agg list
-				if (aggregateVector == null)
+                if (aggregates == null)
 				{
-					aggregateVector = new ArrayList();
+                    aggregates = new ArrayList();
 				}
 				ref.bindExpression(fromListParam,
 									subqueryList,
-									aggregateVector);
+                                    aggregates);
 			}
 		}
 	}

@@ -1117,7 +1117,6 @@ abstract class SetOperatorNode extends TableOperatorNode
 			(ResultSetNode) getNodeFactory().getNode(
 				C_NodeTypes.SELECT_NODE,
 				rcl,      // ResultColumns
-				null,     // AGGREGATE list
 				fromList, // FROM list
 				null,     // WHERE clause
 				null,     // GROUP BY list

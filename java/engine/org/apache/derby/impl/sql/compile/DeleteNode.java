@@ -766,7 +766,6 @@ public class DeleteNode extends DMLModStatementNode
         SelectNode resultSet = (SelectNode) nodeFactory.getNode(
                                                      C_NodeTypes.SELECT_NODE,
                                                      null,
-                                                     null,   /* AGGREGATE list */
                                                      fromList, /* FROM list */
                                                      whereClause, /* WHERE clause */
                                                      null, /* GROUP BY list */
@@ -817,7 +816,6 @@ public class DeleteNode extends DMLModStatementNode
         SelectNode resultSet = (SelectNode) nodeFactory.getNode(
                                                      C_NodeTypes.SELECT_NODE,
                                                      getSetClause(tableName, cdl),
-                                                     null,   /* AGGREGATE list */
                                                      fromList, /* FROM list */
                                                      whereClause, /* WHERE clause */
                                                      null, /* GROUP BY list */

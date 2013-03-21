@@ -214,14 +214,14 @@ public class JavaToSQLValueNode extends ValueNode
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find
 	 *							SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates    The aggregate list being built as we find
+     *                      AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		// method invocations are not allowed in ADD TABLE clauses.
@@ -229,7 +229,7 @@ public class JavaToSQLValueNode extends ValueNode
 		javaNode.checkReliability(this);
 
 		/* Bind the expression under us */
-		javaNode = javaNode.bindExpression(fromList, subqueryList, aggregateVector);
+        javaNode = javaNode.bindExpression(fromList, subqueryList, aggregates);
 
         if ( javaNode instanceof StaticMethodCallNode )
         {
@@ -237,7 +237,7 @@ public class JavaToSQLValueNode extends ValueNode
 
             if ( agg != null )
             {
-                return agg.bindExpression( fromList, subqueryList, aggregateVector );
+                return agg.bindExpression( fromList, subqueryList, aggregates );
             }
         }
 

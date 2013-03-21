@@ -87,7 +87,7 @@ public class JoinNode extends TableOperatorNode
 	private PredicateList rightPredicateList;
 
 	protected boolean flattenableJoin = true;
-	List				aggregateVector;
+    List                aggregates;
 	SubqueryList		subqueryList;
 	ValueNode			joinClause;
 	boolean	            joinClauseNormalized;
@@ -808,7 +808,7 @@ public class JoinNode extends TableOperatorNode
 		subqueryList = (SubqueryList) getNodeFactory().getNode(
 											C_NodeTypes.SUBQUERY_LIST,
 											getContextManager());
-		aggregateVector = new ArrayList();
+        aggregates = new ArrayList();
 
         CompilerContext cc = getCompilerContext();
         
@@ -830,7 +830,7 @@ public class JoinNode extends TableOperatorNode
             int previousReliability = orReliability( CompilerContext.ON_CLAUSE_RESTRICTION );
 			joinClause = joinClause.bindExpression(
 									  fromList, subqueryList,
-									  aggregateVector);
+                                      aggregates);
             cc.setReliability( previousReliability );
 
 			// SQL 2003, section 7.7 SR 5
@@ -839,10 +839,10 @@ public class JoinNode extends TableOperatorNode
 			/*
 			** We cannot have aggregates in the ON clause.
 			** In the future, if we relax this, we'll need
-			** to be able to pass the aggregateVector up
+            ** to be able to pass the list of aggregates up
 			** the tree.
 			*/
-			if (aggregateVector.size() > 0)
+            if (!aggregates.isEmpty())
 			{
 				throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_ON_CLAUSE);
 			}
@@ -882,7 +882,7 @@ public class JoinNode extends TableOperatorNode
 							getContextManager()); 
 				leftCR = (ColumnReference) leftCR.bindExpression(
 									  fromListParam, subqueryList,
-									  aggregateVector);
+                                      aggregates);
 				fromListParam.removeElementAt(0);
 
 				/* Create and bind the right CR */
@@ -894,7 +894,7 @@ public class JoinNode extends TableOperatorNode
 							getContextManager()); 
 				rightCR = (ColumnReference) rightCR.bindExpression(
 									  fromListParam, subqueryList,
-									  aggregateVector);
+                                      aggregates);
 				fromListParam.removeElementAt(0);
 
 				/* Create and insert the new = condition */
@@ -1952,9 +1952,9 @@ public class JoinNode extends TableOperatorNode
 		this.subqueryList = subqueryList;
 	}
 
-	void setAggregateVector(List aggregateVector)
+    void setAggregates(List aggregates)
 	{
-		this.aggregateVector = aggregateVector;
+        this.aggregates = aggregates;
 	}
 
     /**

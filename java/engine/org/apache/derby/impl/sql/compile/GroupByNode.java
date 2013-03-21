@@ -84,7 +84,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * The list of all aggregates in the query block
 	 * that contains this group by.
 	 */
-    private List aggregateVector;
+    private List aggregates;
 
 	/**
 	 * Information that is used at execution time to
@@ -116,7 +116,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @param bottomPR	The child FromTable
 	 * @param groupingList	The groupingList
-	 * @param aggregateVector	The vector of aggregates from
+     * @param aggregates    The list of aggregates from
 	 *		the query block.  Since aggregation is done
 	 *		at the same time as grouping, we need them
 	 *		here.
@@ -130,7 +130,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	public void init(
 						Object bottomPR,
 						Object groupingList,
-						Object aggregateVector,
+                        Object aggregates,
 						Object havingClause,
 						Object havingSubquerys,
 						Object tableProperties,
@@ -144,10 +144,10 @@ public class GroupByNode extends SingleChildResultSetNode
 		/* Group by without aggregates gets xformed into distinct */
 		if (SanityManager.DEBUG)
 		{
-//			Aggregage vector can be null if we have a having clause.
+//          Aggregates can be null if we have a having clause.
 //          select c1 from t1 group by c1 having c1 > 1;			
-//			SanityManager.ASSERT(((List) aggregateVector).size() > 0,
-//			"aggregateVector expected to be non-empty");
+//          SanityManager.ASSERT(((List) aggregates).size() > 0,
+//          "aggregates expected to be non-empty");
 			if (!(childResult instanceof Optimizable))
 			{
 				SanityManager.THROWASSERT("childResult, " + childResult.getClass().getName() +
@@ -162,7 +162,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
 		ResultColumnList newBottomRCL;
 		this.groupingList = (GroupByList) groupingList;
-		this.aggregateVector = (List) aggregateVector;
+        this.aggregates = (List) aggregates;
 		this.parent = this;
 
 		/*
@@ -252,7 +252,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 */
 	private void addDistinctAggregatesToOrderBy()
 	{
-		int numDistinct = numDistinctAggregates(aggregateVector);
+        int numDistinct = numDistinctAggregates(aggregates);
 		if (numDistinct != 0)
 		{
 			if (SanityManager.DEBUG)
@@ -465,8 +465,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			// DERBY-4071 Don't substitute quite yet; we need the AggrateNodes
 			// undisturbed until after we have had the chance to build the
 			// other columns.  (The AggrateNodes are shared via an alias from
-			// aggregateVector and from the expression tree under
-			// havingClause).
+            // aggregates and from the expression tree under havingClause).
 		}
 		return havingRefsToSubstitute;
 	}
@@ -498,7 +497,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *	<LI> reset the top PR ref to point to the new GROUPBY
 	 *		 RC</LI></UL>	
 	 *
-	 * For each aggregate in aggregateVector <UL>
+     * For each aggregate in {@code aggregates} <UL>
 	 *	<LI> create RC in FROM TABLE.  Fill it with 
 	 * 		aggs Operator.
 	 *	<LI> create RC in FROM TABLE for agg result</LI>
@@ -607,7 +606,6 @@ public class GroupByNode extends SingleChildResultSetNode
 	private void addAggregateColumns() throws StandardException
 	{
 		DataDictionary			dd = getDataDictionary();
-		AggregateNode	aggregate = null;
 		ColumnReference	newColumnRef;
 		ResultColumn	newRC;
 		ResultColumn	tmpRC;
@@ -656,10 +654,10 @@ public class GroupByNode extends SingleChildResultSetNode
 		/*
 		** For each aggregate
 		*/
-		int alSize = aggregateVector.size();
+        int alSize = aggregates.size();
 		for (int index = 0; index < alSize; index++)
 		{
-			aggregate = (AggregateNode) aggregateVector.get(index);
+            AggregateNode aggregate = (AggregateNode) aggregates.get(index);
 
 			/*
 			** AGG RESULT: Set the aggregate result to null in the
@@ -896,14 +894,13 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 			super.printSubNodes(depth);
 
-			printLabel(depth, "aggregateVector:\n");
+            printLabel(depth, "aggregates:\n");
 
-			for (int i=0; i < aggregateVector.size(); i++) {
-					AggregateNode agg =
-						(AggregateNode)aggregateVector.get(i);
-					debugPrint(formatNodeString("[" + i + "]:", depth + 1));
-					agg.treePrint(depth + 1);
-			}
+            for (int i = 0; i < aggregates.size(); i++) {
+                AggregateNode agg = (AggregateNode) aggregates.get(i);
+                debugPrint(formatNodeString("[" + i + "]:", depth + 1));
+                agg.treePrint(depth + 1);
+            }
 
 			if (groupingList != null) {
 				printLabel(depth, "groupingList: ");
@@ -1234,9 +1231,9 @@ public class GroupByNode extends SingleChildResultSetNode
 		 */
 		if (groupingList == null)
 		{
-			if (aggregateVector.size() == 1)
+            if (aggregates.size() == 1)
 			{
-				AggregateNode an = (AggregateNode) aggregateVector.get(0);
+                AggregateNode an = (AggregateNode) aggregates.get(0);
 				AggregateDefinition ad = an.getAggregateDefinition();
 				if (ad instanceof MaxMinAggregateDefinition)
 				{

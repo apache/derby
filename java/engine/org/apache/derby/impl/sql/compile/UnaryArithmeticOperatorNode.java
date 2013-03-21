@@ -140,16 +140,15 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 *
 	 * @param fromList			The query's FROM list
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode bindExpression(
-		FromList	fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
@@ -157,8 +156,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 				&& operand.getTypeServices() == null)
 				return this;
 
-		bindOperand(fromList, subqueryList,
-				aggregateVector);
+        bindOperand(fromList, subqueryList, aggregates);
 
 		if (operatorType == SQRT || operatorType == ABSOLUTE)
 		{

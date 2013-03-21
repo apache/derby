@@ -365,11 +365,11 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	
-	public ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregateVector)
+    ValueNode bindExpression(
+            FromList fromList, SubqueryList subqueryList, List aggregates)
 		throws StandardException
 	{
-		return bindExpression(fromList, subqueryList, aggregateVector,false);
+        return bindExpression(fromList, subqueryList, aggregates, false);
 	}
 	
 
@@ -380,16 +380,15 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param fromList			The FROM list to use for binding
 	 * @param subqueryList		The SubqueryList we are building as we hit
 	 *							SubqueryNodes.
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
 
-	public ValueNode bindExpression(
-			FromList fromList, SubqueryList subqueryList,
-			List aggregateVector, boolean forQueryRewrite)
+    ValueNode bindExpression(
+            FromList fromList, SubqueryList subqueryList, List aggregates, boolean forQueryRewrite)
 				throws StandardException
 	{
 		/* There are a bizillion classes which extend ValueNode.  Here is info

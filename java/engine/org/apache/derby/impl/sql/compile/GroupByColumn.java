@@ -89,23 +89,22 @@ public class GroupByColumn extends OrderedColumn
 	 * @param fromList			The FROM list to use for binding
 	 * @param subqueryList		The SubqueryList we are building as we hit
 	 *							SubqueryNodes.
-	 * @param aggregateVector	The aggregate vector we build as we hit 
+     * @param aggregates        The aggregate list we build as we hit
 	 *							AggregateNodes.
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
-
-	public void bindExpression(
+    void bindExpression(
 			FromList fromList, 
 			SubqueryList subqueryList,
-			List aggregateVector)
+            List aggregates)
 				throws StandardException
 	{
 		/* Bind the ColumnReference to the FromList */
         int previousReliability = orReliability( CompilerContext.GROUP_BY_RESTRICTION );
 		columnExpression = (ValueNode) columnExpression.bindExpression(fromList,
 							  subqueryList,
-							  aggregateVector);
+                              aggregates);
         getCompilerContext().setReliability( previousReliability );
 
 		// Verify that we can group on the column

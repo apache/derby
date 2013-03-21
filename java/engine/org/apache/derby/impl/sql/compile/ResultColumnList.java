@@ -811,13 +811,12 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressions(
-					FromList fromList, SubqueryList subqueryList,
-					List aggregateVector)
+    void bindExpressions(
+            FromList fromList, SubqueryList subqueryList, List aggregates)
 				throws StandardException
 	{
 		/* First we expand the *'s in the result column list */
@@ -830,7 +829,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ValueNode vn = (ValueNode) elementAt(index);
 			vn = ((ResultColumn) vn ).bindExpression(
 												fromList, subqueryList, 
-												aggregateVector);
+                                                aggregates);
 			setElementAt(vn, index);
 		}
 	}

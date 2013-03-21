@@ -75,19 +75,18 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 	 *
 	 * @param fromList			The query's FROM list
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
-		bindOperand(fromList, subqueryList, aggregateVector);
+        bindOperand(fromList, subqueryList, aggregates);
 
 		/*
 		** If the operand is not boolean, cast it.

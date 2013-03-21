@@ -97,8 +97,8 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 * This does nothing-- the node is actually bound when
 	 * bindUntypedNullsToResultColumns is called.
 	 */
-    public ValueNode bindExpression(
-        FromList fromList, SubqueryList	subqueryList, List aggregateVector)
+    ValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 	{
 		return this;
 	}

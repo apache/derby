@@ -71,14 +71,12 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @param fromList			The query's FROM list
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public JavaValueNode bindExpression(
-		FromList	fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    JavaValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		return this;

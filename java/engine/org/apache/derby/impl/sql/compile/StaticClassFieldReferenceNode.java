@@ -84,17 +84,15 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 * as well as figuring out what the return type is for this expression.
 	 *
 	 * @param fromList		The FROM list for the query this
-	 *				expression is in, for binding columns.
-	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     *                      expression is in, for binding columns.
+     * @param subqueryList  The subquery list being built as we find SubqueryNodes
+     * @param aggregates    The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	Nothing
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		ClassInspector classInspector = getClassFactory().getClassInspector();

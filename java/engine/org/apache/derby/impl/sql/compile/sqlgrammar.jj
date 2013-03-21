@@ -737,7 +737,6 @@ public class SQLParser
 		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
 										C_NodeTypes.SELECT_NODE,
 										null,
-										null, 	/* AGGREGATE list */
 										fromList, /* FROM list */
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
@@ -778,7 +777,6 @@ public class SQLParser
 		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
 										C_NodeTypes.SELECT_NODE,
 										setClause,
-										null, 	/* AGGREGATE list */
 										fromList, /* FROM list */
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
@@ -9057,7 +9055,6 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 		selectNode = (SelectNode) nodeFactory.getNode(
 							C_NodeTypes.SELECT_NODE,
 							selectList,
-							null, 		/* AGGREGATE list */
 							fromList,
 							whereClause,
 							groupByList,

@@ -610,7 +610,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 		cc = getCompilerContext();
 
-		ArrayList aggregateVector = new ArrayList();
+        ArrayList aggregates = new ArrayList();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -652,11 +652,11 @@ public class TableElementList extends QueryTreeNodeVector
 
 				// Tell the compiler context to only allow deterministic nodes
 				cc.setReliability( CompilerContext.CHECK_CONSTRAINT );
-				checkTree = checkTree.bindExpression(fromList, (SubqueryList) null,
-										 aggregateVector);
+                checkTree = checkTree.bindExpression(
+                        fromList, (SubqueryList) null, aggregates);
 
 				// no aggregates, please
-				if (!aggregateVector.isEmpty())
+                if (!aggregates.isEmpty())
 				{
 					throw StandardException.newException(SQLState.LANG_INVALID_CHECK_CONSTRAINT, cdn.getConstraintText());
 				}
@@ -745,7 +745,7 @@ public class TableElementList extends QueryTreeNodeVector
         
 		cc = getCompilerContext();
 
-		ArrayList aggregateVector = new ArrayList();
+        ArrayList aggregates = new ArrayList();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -788,8 +788,8 @@ public class TableElementList extends QueryTreeNodeVector
 				// Tell the compiler context to forbid subqueries and
 				// non-deterministic functions.
 				cc.setReliability( CompilerContext.GENERATION_CLAUSE_RESTRICTION );
-				generationTree = generationClauseNode.bindExpression(fromList, (SubqueryList) null,
-										 aggregateVector);
+                generationTree = generationClauseNode.bindExpression(
+                        fromList, (SubqueryList) null, aggregates);
 
                 //
                 // If the user did not declare a type for this column, then the column type defaults
@@ -831,7 +831,7 @@ public class TableElementList extends QueryTreeNodeVector
                 }
 
 				// no aggregates, please
-				if (!aggregateVector.isEmpty())
+                if (!aggregates.isEmpty())
 				{
 					throw StandardException.newException( SQLState.LANG_AGGREGATE_IN_GENERATION_CLAUSE, cdn.getName());
 				}

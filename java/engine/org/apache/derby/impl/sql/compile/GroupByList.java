@@ -97,11 +97,11 @@ public class GroupByList extends OrderedColumnList
 	 *		   expressions in SELECT's RCL.
 	 *
 	 * @param select		The SelectNode
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates    The aggregate list being built as we find AggregateNodes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void bindGroupByColumns(SelectNode select, List aggregateVector)
+    void bindGroupByColumns(SelectNode select, List aggregates)
 					throws StandardException
 	{
 		FromList		 fromList = select.getFromList();
@@ -124,7 +124,7 @@ public class GroupByList extends OrderedColumnList
 		{
 			GroupByColumn groupByCol = (GroupByColumn) elementAt(index);
 			groupByCol.bindExpression(fromList,
-									  dummySubqueryList, aggregateVector);
+                                      dummySubqueryList, aggregates);
 		}
 
 		

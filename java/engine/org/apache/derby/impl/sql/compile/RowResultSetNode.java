@@ -60,7 +60,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 public class RowResultSetNode extends FromTable
 {
 	SubqueryList subquerys;
-	private List aggregateVector;
+    private List aggregates;
 	OrderByList	 orderByList;
     ValueNode    offset; // OFFSET n ROWS
     ValueNode    fetchFirst; // FETCH FIRST n ROWS ONLY
@@ -231,7 +231,7 @@ public class RowResultSetNode extends FromTable
 										C_NodeTypes.SUBQUERY_LIST,
 										getContextManager());
 
-		aggregateVector = new ArrayList();
+        aggregates = new ArrayList();
 
 		/* Verify that there are no DEFAULTs in the RCL.
 		 * DEFAULT is only valid for an insert, and it has
@@ -260,11 +260,11 @@ public class RowResultSetNode extends FromTable
 		setLevel(nestingLevel);
 		fromListParam.insertElementAt(this, 0);
 		resultColumns.bindExpressions(fromListParam, subquerys,
-									  aggregateVector);
+                                      aggregates);
 		// Pop ourselves back out of the FROM list
 		fromListParam.removeElementAt(0);
 
-		if (!aggregateVector.isEmpty())
+        if (!aggregates.isEmpty())
 		{
 			throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 		}
@@ -566,8 +566,7 @@ public class RowResultSetNode extends FromTable
 			return false;
 		}
 
-		if ((aggregateVector != null) &&
-			(aggregateVector.size() > 0))
+        if ((aggregates != null) && !aggregates.isEmpty())
 		{
 			return false;
 		}

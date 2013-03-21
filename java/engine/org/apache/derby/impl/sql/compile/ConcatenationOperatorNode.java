@@ -96,14 +96,13 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 	 * @exception StandardException
 	 *                thrown on failure
 	 */
-	public ValueNode bindExpression(FromList fromList,
-			SubqueryList subqueryList, List aggregateVector)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException {
 		// deal with binding operands
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList,
-				aggregateVector);
+                aggregates);
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList,
-				aggregateVector);
+                aggregates);
 
 		// deal with operand parameters
 		/*

@@ -106,15 +106,14 @@ public class SpecialFunctionNode extends ValueNode
 	 *							is not used in this case.
 	 * @param subqueryList		The subquery list being built as we find 
 	 *							SubqueryNodes. Not used in this case.
-	 * @param aggregateVector	The aggregate vector being built as we find 
+     * @param aggregates        The aggregate list being built as we find
 	 *							AggregateNodes. Not used in this case.
 	 *
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode bindExpression(FromList fromList, SubqueryList subqueryList,
-							List aggregateVector)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
 					throws StandardException
 	{		DataTypeDescriptor dtd;
 		int nodeType = getNodeType();

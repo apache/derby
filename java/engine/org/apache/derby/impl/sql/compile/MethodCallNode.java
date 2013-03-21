@@ -303,13 +303,12 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
 	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     * @param aggregates        The aggregate list being built as we find AggregateNodes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	final void bindParameters(
-		FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		/* Bind the parameters */
@@ -329,7 +328,7 @@ abstract class MethodCallNode extends JavaValueNode
 				{
 					methodParms[parm] =
 						methodParms[parm].bindExpression(
-							fromList, subqueryList, aggregateVector);
+                            fromList, subqueryList, aggregates);
 
 					if (routineInfo == null)
 						signature[ parm ] = methodParms[ parm ].getJSQLType();

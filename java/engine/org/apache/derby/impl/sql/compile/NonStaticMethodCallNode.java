@@ -102,18 +102,16 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 * as well as figuring out what the return type is for this expression.
 	 *
 	 * @param fromList		The FROM list for the query this
-	 *				expression is in, for binding columns.
-	 * @param subqueryList		The subquery list being built as we find SubqueryNodes
-	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
+     *                      expression is in, for binding columns.
+     * @param subqueryList  The subquery list being built as we find SubqueryNodes
+     * @param aggregates    The aggregate list being built as we find AggregateNodes
 	 *
 	 * @return	this
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public JavaValueNode bindExpression(
-		FromList fromList, SubqueryList subqueryList,
-		List aggregateVector)
+    JavaValueNode bindExpression(
+        FromList fromList, SubqueryList subqueryList, List aggregates)
 			throws StandardException
 	{
 		/* NULL and ? not allowed as receivers */
@@ -143,13 +141,13 @@ public class NonStaticMethodCallNode extends MethodCallNode
 			}
 		}
 
-		bindParameters(fromList, subqueryList, aggregateVector);
+        bindParameters(fromList, subqueryList, aggregates);
 
 		/* Now we don't allow an alias static method call here (that has to
 		 * use :: sign for any static call).  If it gets here, it can't be
 		 * alias static method call.
 		 */
-		receiver = receiver.bindExpression(fromList, subqueryList, aggregateVector);
+        receiver = receiver.bindExpression(fromList, subqueryList, aggregates);
 
         // Don't allow LOB types to be used as a method receiver
         String type = receiver.getJSQLType().getSQLType().getTypeId().getSQLTypeName();
