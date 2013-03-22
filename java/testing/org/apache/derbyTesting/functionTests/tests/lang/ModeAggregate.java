@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public  class   ModeAggregate    implements  Aggregator<Integer,Integer,ModeAggr
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public  static  final   class   Accumulator implements  Comparable<Accumulator>
+    public  static  final   class   Accumulator implements  Comparable<Accumulator>, Serializable
     {
         private Integer _value;
         private int         _count;
