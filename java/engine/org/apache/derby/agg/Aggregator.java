@@ -39,10 +39,22 @@ public interface Aggregator<V,R,A extends Aggregator<V,R,A>>    extends Serializ
     public  void    accumulate( V value );
 
     /**
+     * <p>
      * For merging another partial result into this Aggregator.
      * This lets the SQL interpreter divide the incoming rows into
      * subsets, aggregating each subset in isolation, and then merging
-     * the partial results together.
+     * the partial results together. This method can be called when
+     * performing a grouped aggregation with a large number of groups.
+     * While processing such a query, Derby may write intermediate grouped
+     * results to disk. The intermediate results may be retrieved and merged
+     * with later results if Derby encounters later rows which belong to groups
+     * whose intermediate results have been written to disk. This situation can
+     * occur with a query like the following:
+     * </p>
+     *
+     * <pre>
+     * select a, mode( b ) from mode_inputs group by a order by a
+     * </pre>
      */
     public  void    merge( A otherAggregator );
 
