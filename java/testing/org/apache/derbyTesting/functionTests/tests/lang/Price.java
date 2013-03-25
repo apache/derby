@@ -33,6 +33,9 @@ import java.sql.Timestamp;
  */
 public class Price implements Externalizable
 {
+    // this changed between 10.9 and 10.10 so require the 10.9 value
+    private static final long serialVersionUID = 102726277789621992L;
+    
     // initial version id
     private static final int FIRST_VERSION = 0;
     private static final int TIMESTAMPED_VERSION = FIRST_VERSION + 1;
