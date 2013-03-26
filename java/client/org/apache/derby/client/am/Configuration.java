@@ -35,14 +35,6 @@ public class Configuration {
 
 
     public static int traceFileSuffixIndex__ = 0;
-
-    public static int traceLevel__ = ClientDataSourceInterface.TRACE_ALL;
-
-    public static String traceFile__ = null;
-
-    public static String traceDirectory__ = null;
-
-    public static boolean traceFileAppend__ = false;
     public static final String jreLevel;// = "1.3.0"; // default level if unable to read
     public static final int jreLevelMajor;// = 1;
     public static final int jreLevelMinor;// = 3;
@@ -132,9 +124,10 @@ public class Configuration {
 
     // -----------------------Load resource bundles for the driver asap-----------
 
-    private static final String packageNameForDNC = "org.apache.derby.client"; // NOTUSED
-
-    public static SqlException exceptionsOnLoadResources = null; // used by ClientDriver to accumulate load exceptions
+    /**
+     * Used by ClientDriver to accumulate load exceptions
+     */
+    private static SqlException exceptionsOnLoadResources = null;
 
     static {
         try {
@@ -175,6 +168,10 @@ public class Configuration {
         jreLevelMinor = _jreLevelMinor;
     }
 
+    public static SqlException getExceptionOnLoadResources() {
+        return exceptionsOnLoadResources;
+    }
+    
     /**
      * load product version information and accumulate exceptions
      */

@@ -67,14 +67,15 @@ public class ClientDriver implements java.sql.Driver {
 
     protected static void   registerMe( ClientDriver me )
     {
-        // This may possibly hit the race-condition bug of java 1.1.
         // The Configuration static clause should execute before the following line does.
-        if (Configuration.exceptionsOnLoadResources != null) {
+        SqlException ole = Configuration.getExceptionOnLoadResources();
+        
+        if (ole != null) {
+            SQLException e = ole.getSQLException();
             exceptionsOnLoadDriver__ =
-                    Utils.accumulateSQLException(
-                            Configuration.exceptionsOnLoadResources.getSQLException(),
-                            exceptionsOnLoadDriver__);
+                Utils.accumulateSQLException(e, exceptionsOnLoadDriver__);
         }
+        
         try {
             registeredDriver__ = me;
             java.sql.DriverManager.registerDriver(registeredDriver__);

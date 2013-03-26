@@ -558,19 +558,6 @@ public abstract class ClientBaseDataSourceRoot implements
             traceFileSuffixIndex,
             traceLevel);
 
-        if (dncLogWriter != null) {
-            return dncLogWriter;
-        }
-        // compute global default dnc log writer if there is any
-        dncLogWriter = computeDncLogWriter(
-            null,
-            Configuration.traceDirectory__,
-            Configuration.traceFile__,
-            Configuration.traceFileAppend__,
-            "_global",
-            globaltraceFileSuffixIndex,
-            Configuration.traceLevel__);
-
         return dncLogWriter;
     }
 
