@@ -3,7 +3,6 @@
 # jdbcapi/HoldabilityTest.junit - test causes subsequent tests to fail because of missing
 #     File permission
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
-# derbynet/DerbyNetAutoStart.java - exits the suite...
 # derbynet/dblook_test_net.java - expects different dir structure
 # derbynet/dblook_test_net_territory.java - expects different dir structure
 # stress/stress.multi - exits suite
@@ -13,7 +12,6 @@
 #
 jdbcapi/HoldabilityTest.junit
 junitTests/derbyNet/CompatibilityTest.java
-derbynet/DerbyNetAutoStart.java
 derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 stress/stress.multi
