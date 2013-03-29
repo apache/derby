@@ -52,10 +52,6 @@ public class LogWriter {
         return printWriter_ != null && (traceLevel & traceLevel_) != 0;
     }
 
-    final protected boolean traceSuspended() {
-        return org.apache.derby.client.am.Configuration.traceSuspended__;
-    }
-
     // When garbage collector doesn't kick in in time
     // to close file descriptors, "Too many open files"
     // exception may occur (currently found on Linux).
@@ -105,22 +101,8 @@ public class LogWriter {
 
     // ------------------------ tracepoint api -----------------------------------
 
-    public void tracepoint(String component, int tracepoint, String message) {
-        if (traceSuspended()) {
-            return;
-        }
-        dncprintln(component,
-                "[time:" + System.currentTimeMillis() + "]" +
-                "[thread:" + Thread.currentThread().getName() + "]" +
-                "[tracepoint:" + tracepoint + "]" +
-                message);
-    }
-
     public void tracepoint(String component, int tracepoint,
                            String classContext, String methodContext) {
-        if (traceSuspended()) {
-            return;
-        }
         String staticContextTracepointRecord =
                 component +
                 "[time:" + System.currentTimeMillis() + "]" +
@@ -128,50 +110,6 @@ public class LogWriter {
                 "[tracepoint:" + tracepoint + "]" +
                 "[" + classContext + "." + methodContext + "]";
         dncprintln(staticContextTracepointRecord);
-    }
-
-    public void tracepoint(String component, int tracepoint,
-                           Object instance, String classContext, String methodContext) {
-        if (traceSuspended()) {
-            return;
-        }
-        String instanceContextTracepointRecord =
-                component +
-                "[time:" + System.currentTimeMillis() + "]" +
-                "[thread:" + Thread.currentThread().getName() + "]" +
-                "[tracepoint:" + tracepoint + "]" +
-                "[" + classContext + "@" + Integer.toHexString(instance.hashCode()) + "." + methodContext + "]";
-        dncprintln(instanceContextTracepointRecord);
-    }
-
-    public void tracepoint(String component, int tracepoint,
-                           String classContext, String methodContext,
-                           java.util.Map memory) {
-        if (traceSuspended()) {
-            return;
-        }
-        String staticContextTracepointRecord =
-                component +
-                "[time:" + System.currentTimeMillis() + "]" +
-                "[thread:" + Thread.currentThread().getName() + "]" +
-                "[tracepoint:" + tracepoint + "]" +
-                "[" + classContext + "." + methodContext + "]";
-        dncprintln(staticContextTracepointRecord + getMemoryMapDisplay(memory));
-    }
-
-    public void tracepoint(String component, int tracepoint,
-                           Object instance, String classContext, String methodContext,
-                           java.util.Map memory) {
-        if (traceSuspended()) {
-            return;
-        }
-        String instanceContextTracepointRecord =
-                component +
-                "[time:" + System.currentTimeMillis() + "]" +
-                "[thread:" + Thread.currentThread().getName() + "]" +
-                "[tracepoint:" + tracepoint + "]" +
-                "[" + classContext + "@" + Integer.toHexString(instance.hashCode()) + "." + methodContext + "]";
-        dncprintln(instanceContextTracepointRecord + getMemoryMapDisplay(memory));
     }
 
     private String getMemoryMapDisplay(java.util.Map memory) {
@@ -187,16 +125,10 @@ public class LogWriter {
     // We could decide in the future to restrict entry tracing only to methods with input arguments.
 
     private void traceExternalMethod(Object instance, String className, String methodName) {
-        if (traceSuspended()) {
-            return;
-        }
         dncprint(buildExternalMethodHeader(instance, className), methodName);
     }
 
     private void traceExternalDeprecatedMethod(Object instance, String className, String methodName) {
-        if (traceSuspended()) {
-            return;
-        }
         dncprint(buildExternalMethodHeader(instance, className), "Deprecated " + methodName);
     }
 
@@ -275,9 +207,6 @@ public class LogWriter {
     // --------------------------- method exit tracing --------------------------
 
     public void traceExit(Object instance, String methodName, Object returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
@@ -290,9 +219,6 @@ public class LogWriter {
     }
 
     public void traceDeprecatedExit(Object instance, String methodName, Object returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
@@ -305,140 +231,83 @@ public class LogWriter {
     }
 
     public void traceExit(Object instance, String methodName, ResultSet resultSet) {
-        if (traceSuspended()) {
-            return;
-        }
         String returnValue = (resultSet == null) ? "ResultSet@null" : "ResultSet@" + Integer.toHexString(resultSet.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
     public void traceExit(Object instance, String methodName, CallableStatement returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "CallableStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
     public void traceExit(Object instance, String methodName, PreparedStatement returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "PreparedStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
     public void traceExit(Object instance, String methodName, Statement returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "Statement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
     public void traceExit(Object instance, String methodName, Blob blob) {
-        if (traceSuspended()) {
-            return;
-        }
         String returnValue = (blob == null) ? "Blob@null" : "Blob@" + Integer.toHexString(blob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
     public void traceExit(Object instance, String methodName, Clob clob) {
-        if (traceSuspended()) {
-            return;
-        }
         String returnValue = (clob == null) ? "Clob@null" : "Clob@" + Integer.toHexString(clob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
     public void traceExit(Object instance, String methodName, DatabaseMetaData returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "DatabaseMetaData@" + Integer.toHexString(returnValue.hashCode()));
     }
 
     public void traceExit(Object instance, String methodName, Connection returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "Connection@" + Integer.toHexString(returnValue.hashCode()));
     }
 
     public void traceExit(Object instance, String methodName, ColumnMetaData returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "MetaData@" + (returnValue != null ? Integer.toHexString(returnValue.hashCode()) : null));
     }
 
     public void traceExit(Object instance, String methodName, byte[] returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, Utils.getStringFromBytes(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, int[] returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, Utils.getStringFromInts(returnValue));
     }
 
     public void traceDeprecatedExit(Object instance, String methodName, byte[] returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceDeprecatedExit(instance, methodName, Utils.getStringFromBytes(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, byte returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, "0x" + Integer.toHexString(returnValue & 0xff));
     }
 
     public void traceExit(Object instance, String methodName, int returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, boolean returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, long returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, float returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
     public void traceExit(Object instance, String methodName, double returnValue) {
-        if (traceSuspended()) {
-            return;
-        }
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
     // --------------------------- method entry tracing --------------------------
 
     private void traceEntryAllArgs(Object instance, String methodName, String argList) {
-        if (traceSuspended()) {
-            return;
-        }
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
@@ -451,9 +320,6 @@ public class LogWriter {
     }
 
     private void traceDeprecatedEntryAllArgs(Object instance, String methodName, String argList) {
-        if (traceSuspended()) {
-            return;
-        }
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
@@ -468,50 +334,32 @@ public class LogWriter {
     // ---------------------- trace entry of methods w/ no args ------------------
 
     public void traceEntry(Object instance, String methodName) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName, "()");
     }
 
     // ---------------------- trace entry of methods w/ 1 arg --------------------
 
     public void traceEntry(Object instance, String methodName, Object argument) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
 
     public void traceEntry(Object instance, String methodName, boolean argument) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int argument) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
 
     public void traceDeprecatedEntry(Object instance, String methodName, int argument) {
-        if (traceSuspended()) {
-            return;
-        }
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
 
     public void traceDeprecatedEntry(Object instance, String methodName, Object argument) {
-        if (traceSuspended()) {
-            return;
-        }
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
@@ -519,153 +367,96 @@ public class LogWriter {
     // ---------------------- trace entry of methods w/ 2 args -------------------
 
     public void traceEntry(Object instance, String methodName, Object arg1, Object arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, Object arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, byte[] arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + Utils.getStringFromBytes(arg2) + ")");
     }
 
     public void traceDeprecatedEntry(Object instance, String methodName, int arg1, int arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceDeprecatedEntry(Object instance, String methodName, Object arg1, int arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, boolean arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, byte arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, short arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, int arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, long arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, float arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, int arg1, double arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, boolean arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, byte arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, short arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, int arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, long arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, float arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     public void traceEntry(Object instance, String methodName, Object arg1, double arg2) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
@@ -674,99 +465,66 @@ public class LogWriter {
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, Object arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceDeprecatedEntry(Object instance, String methodName,
                                      int arg1, Object arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, int arg2, Object arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, int arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, Object arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, boolean arg2, boolean arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, boolean arg2, int arg3) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
@@ -775,45 +533,30 @@ public class LogWriter {
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, Object arg4) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, Object arg3, Object arg4) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, int arg3, int arg4) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, int arg3, int arg4) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, int arg3, int arg4) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
@@ -822,18 +565,12 @@ public class LogWriter {
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, int arg4, boolean arg5) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
     }
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, boolean arg4, boolean arg5) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
     }
@@ -842,9 +579,6 @@ public class LogWriter {
 
     public void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
-        if (traceSuspended()) {
-            return;
-        }
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ", " + arg6 + ")");
     }
@@ -852,9 +586,6 @@ public class LogWriter {
     // ---------------------------tracing exceptions and warnings-----------------
 
     public void traceDiagnosable(SqlException e) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -865,9 +596,6 @@ public class LogWriter {
         }
     }
     public void traceDiagnosable(java.sql.SQLException e) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -879,9 +607,6 @@ public class LogWriter {
     }
 
     public void traceDiagnosable(javax.transaction.xa.XAException e) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -894,9 +619,6 @@ public class LogWriter {
     // ------------------------ meta data tracing --------------------------------
 
     public void traceParameterMetaData(Statement statement, ColumnMetaData columnMetaData) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(
                 ClientDataSourceInterface.TRACE_PARAMETER_META_DATA) ||
                 columnMetaData == null) {
@@ -918,9 +640,6 @@ public class LogWriter {
     }
 
     public void traceResultSetMetaData(Statement statement, ColumnMetaData columnMetaData) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(
                 ClientDataSourceInterface.TRACE_RESULT_SET_META_DATA) ||
                 columnMetaData == null) {
@@ -944,9 +663,6 @@ public class LogWriter {
     //-----------------------------transient state--------------------------------
 
     private void traceColumnMetaData(String header, ColumnMetaData columnMetaData) {
-        if (traceSuspended()) {
-            return;
-        }
         try {
             synchronized (printWriter_) {
 
@@ -1005,9 +721,6 @@ public class LogWriter {
 
     // Jdbc 2
     public void traceConnectEntry(ClientBaseDataSourceRoot dataSource) {
-        if (traceSuspended()) {
-            return;
-        }
         if (loggingEnabled(
                 ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc2();
@@ -1022,9 +735,6 @@ public class LogWriter {
                                   int port,
                                   String database,
                                   java.util.Properties properties) {
-        if (traceSuspended()) {
-            return;
-        }
         if (loggingEnabled(
                 ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc1();
@@ -1038,9 +748,6 @@ public class LogWriter {
             Object instance, LogWriter logWriter,
             String user, ClientBaseDataSourceRoot ds) {
 
-        if (traceSuspended()) {
-            return;
-        }
         traceEntry(instance, "reset", logWriter, user, "<escaped>", ds);
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsResetEntry(ds);
@@ -1048,18 +755,12 @@ public class LogWriter {
     }
 
     public void traceConnectExit(Connection connection) {
-        if (traceSuspended()) {
-            return;
-        }
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
         }
     }
 
     public void traceConnectResetExit(Connection connection) {
-        if (traceSuspended()) {
-            return;
-        }
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsResetExit(connection);
         }
@@ -1070,9 +771,6 @@ public class LogWriter {
 
     private void traceConnectsResetEntry(ClientBaseDataSourceRoot dataSource) {
         try {
-            if (traceSuspended()) {
-                return;
-            }
             traceConnectsResetEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
@@ -1084,9 +782,6 @@ public class LogWriter {
 
     private void traceConnectsEntry(ClientBaseDataSourceRoot dataSource) {
         try {
-            if (traceSuspended()) {
-                return;
-            }
             traceConnectsEntry(dataSource.getServerName(),
                     dataSource.getPortNumber(),
                     dataSource.getDatabaseName(),
@@ -1101,9 +796,6 @@ public class LogWriter {
                                          int port,
                                          String database,
                                          java.util.Properties properties) {
-        if (traceSuspended()) {
-            return;
-        }
         dncprintln("BEGIN TRACE_CONNECT_RESET");
         dncprintln("Connection reset requested for " + server + ":" + port + "/" + database);
         dncprint("Using properties: ");
@@ -1115,9 +807,6 @@ public class LogWriter {
                                     int port,
                                     String database,
                                     java.util.Properties properties) {
-        if (traceSuspended()) {
-            return;
-        }
         synchronized (printWriter_) {
             dncprintln("BEGIN TRACE_CONNECTS");
             dncprintln("Attempting connection to " + server + ":" + port + "/" + database);
@@ -1129,9 +818,6 @@ public class LogWriter {
 
     // Specialized by NetLogWriter.traceConnectsExit()
     public void traceConnectsExit(Connection c) {
-        if (traceSuspended()) {
-            return;
-        }
         synchronized (printWriter_) {
             String header = "[Connection@" + Integer.toHexString(c.hashCode()) + "]";
             try {
@@ -1151,9 +837,6 @@ public class LogWriter {
     }
 
     public void traceConnectsResetExit(org.apache.derby.client.am.Connection c) {
-        if (traceSuspended()) {
-            return;
-        }
         synchronized (printWriter_) {
             String header = "[Connection@" + Integer.toHexString(c.hashCode()) + "]";
             try {
@@ -1203,9 +886,6 @@ public class LogWriter {
     //-------------------------tracing driver configuration-----------------------
 
     private void traceDriverConfigurationJdbc2() {
-        if (traceSuspended()) {
-            return;
-        }
         synchronized (printWriter_) {
             if (!driverConfigurationHasBeenWrittenToJdbc2Stream_) {
                 writeDriverConfiguration();
@@ -1215,9 +895,6 @@ public class LogWriter {
     }
 
     private void traceDriverConfigurationJdbc1() {
-        if (traceSuspended()) {
-            return;
-        }
         synchronized (printWriter_) {
             if (!driverConfigurationHasBeenWrittenToJdbc1Stream_) {
                 writeDriverConfiguration();

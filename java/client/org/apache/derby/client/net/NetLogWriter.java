@@ -134,9 +134,6 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
 
     // Specialization of LogWriter.traceConnectsExit()
     public void traceConnectsExit(org.apache.derby.client.am.Connection connection) {
-        if (traceSuspended()) {
-            return;
-        }
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsExit(c);
@@ -155,9 +152,6 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
     }
 
     public void traceConnectsResetExit(org.apache.derby.client.am.Connection connection) {
-        if (traceSuspended()) {
-            return;
-        }
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsResetExit(c);
@@ -189,9 +183,6 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
                                                String className,
                                                String methodName,
                                                int tracepoint) {
-        if (traceSuspended()) {
-            return;
-        }
         if (!loggingEnabled(org.apache.derby.jdbc.ClientDataSource.TRACE_PROTOCOL_FLOWS)) {
             return;
         }

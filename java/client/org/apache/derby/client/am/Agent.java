@@ -130,7 +130,7 @@ public abstract class Agent {
     //-------------------- entry points ------------------------------------------
 
     public final boolean loggingEnabled() {
-        return !org.apache.derby.client.am.Configuration.traceSuspended__ && logWriter_ != null;
+        return logWriter_ != null;
     }
 
     public final void setLogWriter(LogWriter logWriter) {

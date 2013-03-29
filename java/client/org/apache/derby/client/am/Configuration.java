@@ -42,8 +42,6 @@ public class Configuration {
     private Configuration() {
     }
 
-    public static boolean traceSuspended__;
-
     public static boolean[] enableConnectivityToTargetServer__;
     public static boolean jvmSupportsMicrosClock__ = false;
 
