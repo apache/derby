@@ -79,7 +79,7 @@ public final class TestConfiguration {
      * page at  http://wiki.apache.org/db-derby/DerbyJUnitTesting
      * need to be updated. 
      */
-    private final static int MAX_PORTS_USED = 20;
+    private final static int MAX_PORTS_USED = 22;
     
     /** This is the base port. This does NOT change EVER during the run of a suite.
      *	It is set using the property derby.tests.basePort and it is set to default when
@@ -1496,6 +1496,10 @@ public final class TestConfiguration {
      */
     public String getHostName() {
         return hostName;
+    }
+
+    public static int getBasePort() {
+        return basePort;
     }
 
     /**

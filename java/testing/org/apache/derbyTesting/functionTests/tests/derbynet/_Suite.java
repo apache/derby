@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GetCurrentPropertiesTest.suite());
         suite.addTest(Utf8CcsidManagerTest.suite());
         suite.addTest(Utf8CcsidManagerClientTest.suite());
+        suite.addTest(DerbyNetAutoStartTest.suite());
 
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
