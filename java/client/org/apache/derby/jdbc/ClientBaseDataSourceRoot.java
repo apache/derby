@@ -545,9 +545,6 @@ public abstract class ClientBaseDataSourceRoot implements
         String logWriterInUseSuffix,
         int traceFileSuffixIndex) throws SqlException {
 
-        int globaltraceFileSuffixIndex =
-            Configuration.traceFileSuffixIndex__++;
-
         // compute regular dnc log writer if there is any
         LogWriter dncLogWriter = computeDncLogWriter(
             logWriter,

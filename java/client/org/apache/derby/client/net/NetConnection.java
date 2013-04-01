@@ -23,12 +23,14 @@ package org.apache.derby.client.net;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import javax.transaction.xa.Xid;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.DatabaseMetaData;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.PreparedStatement;
-import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.MessageId;
@@ -38,6 +40,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -45,7 +48,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 public class NetConnection extends org.apache.derby.client.am.Connection {
     
     // Use this to get internationalized strings...
-    protected static MessageUtil msgutil = SqlException.getMessageUtil();
+    protected static final MessageUtil msgutil = SqlException.getMessageUtil();
 
     protected NetAgent netAgent_;
     //contains a reference to the PooledConnection from which this created 
@@ -85,11 +88,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     protected int targetRsyncmgr_ = NetConfiguration.MGRLVL_NA;
     protected int targetUnicodemgr_ = CcsidManager.UTF8_CCSID;
 
-    // this is the external name of the target server.
-    // it is set by the parseExcsatrd method but not really used for much at this
-    // time.  one possible use is for logging purposes and in the future it
-    // may be placed in the trace.
-    String targetExtnam_;
     String extnam_;
 
     // Server Class Name of the target server returned in excsatrd.
@@ -116,7 +114,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     // Keys used for encryption.
     transient byte[] publicKey_;
-    transient byte[] targetPublicKey_;
+    private transient byte[] targetPublicKey_;
 
     // Seeds used for strong password substitute generation (USRSSBPWD)
     transient byte[] sourceSeed_;   // Client seed
@@ -170,10 +168,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     protected byte[] cnntkn_ = null;
 
-    // resource manager Id for XA Connections.
-    private int rmId_ = 0;
     protected NetXAResource xares_ = null;
-    protected java.util.Hashtable indoubtTransactions_ = null;
+    private HashMap<Xid, NetIndoubtTransaction> indoubtTransactions_ = null;
     protected int currXACallInfoOffset_ = 0;
     private short seqNo_ = 1;
 
@@ -238,7 +234,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
-        initialize(password, dataSource, rmId, isXAConn);
+        initialize(password, dataSource, isXAConn);
     }
 
     public NetConnection(NetLogWriter netLogWriter,
@@ -259,13 +255,13 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         productID_ = targetSrvrlslv_;
         super.completeConnect();
     }
-    
+
     // For JDBC 2 Connections
     /**
      * This constructor is called from the ClientPooledConnection object 
      * to enable the NetConnection to pass <code>this</code> on to the associated 
      * prepared statement object thus enabling the prepared statement object 
-     * to inturn  raise the statement events to the ClientPooledConnection object
+     * to in turn raise the statement events to the ClientPooledConnection object
      * @param netLogWriter NetLogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
@@ -289,21 +285,19 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          ClientPooledConnection cpc) throws SqlException {
         super(netLogWriter, user, password, isXAConn, dataSource);
         netAgent_ = (NetAgent) super.agent_;
-        initialize(password, dataSource, rmId, isXAConn);
+        initialize(password, dataSource, isXAConn);
         this.pooledConnection_=cpc;
         this.closeStatementsOnClose = !cpc.isStatementPoolingEnabled();
     }
 
     private void initialize(String password,
                             ClientBaseDataSourceRoot dataSource,
-                            int rmId,
                             boolean isXAConn) throws SqlException {
         securityMechanism_ = dataSource.getSecurityMechanism(password);
 
         setDeferredResetPassword(password);
         checkDatabaseName();
         dataSource_ = dataSource;
-        this.rmId_ = rmId;
         this.isXAConnection_ = isXAConn;
         flowConnect(password, securityMechanism_);
         // it's possible that the internal Driver.connect() calls returned null,
@@ -335,7 +329,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         // do not reset managers on a connection reset.  this information shouldn't
         // change and can be used to check secmec support.
 
-        targetExtnam_ = null;
         targetSrvclsnm_ = null;
         targetSrvnam_ = null;
         targetSrvrlslv_ = null;
@@ -381,7 +374,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
     }
 
-    public void completeConnect() throws SqlException {
+    public final void completeConnect() throws SqlException {
         super.completeConnect();
     }
 
@@ -390,7 +383,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         super.completeReset(isDeferredReset, closeStatementsOnClose, xares_);
     }
 
-    public void flowConnect(String password,
+    public final void flowConnect(String password,
                             int securityMechanism) throws SqlException {
         netAgent_ = (NetAgent) super.agent_;
         constructExtnam();
@@ -472,7 +465,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
     }
     
-    protected void flowSimpleConnect() throws SqlException {
+    protected final void flowSimpleConnect() throws SqlException {
         netAgent_ = (NetAgent) super.agent_;
         constructExtnam();
         // these calls need to be after newing up the agent
@@ -934,11 +927,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     //-------------------parse callback methods--------------------------------
 
-    void setServerAttributeData(String extnam,
-                                String srvclsnm,
+    void setServerAttributeData(String srvclsnm,
                                 String srvnam,
                                 String srvrlslv) {
-        targetExtnam_ = extnam;          // any of these could be null
         targetSrvclsnm_ = srvclsnm;      // since then can be optionally returned from the
         targetSrvnam_ = srvnam;          // server
         targetSrvrlslv_ = srvrlslv;
@@ -1146,10 +1137,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // by the secmgr.
     private void checkSecmgrForSecmecSupport(int securityMechanism) throws SqlException {
         boolean secmecSupported = false;
-        int[] supportedSecmecs = null;
 
         // Point to a list (array) of supported security mechanisms.
-        supportedSecmecs = NetConfiguration.SECMGR_SECMECS;
+        int[] supportedSecmecs = NetConfiguration.SECMGR_SECMECS;
 
         // check to see if the security mechanism is on the supported list.
         for (int i = 0; (i < supportedSecmecs.length) && (!secmecSupported); i++) {
@@ -1240,13 +1230,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // starts with '0' thru '9', it will be mapped to 'G' thru 'P'.
     // Reason for mapping the IP address is in order to use the crrtkn as the LUWID when using SNA in a hop site.
     protected void constructCrrtkn() throws SqlException {
-        byte[] localAddressBytes = null;
-        long time = 0;
-        int num = 0;
-        int halfByte = 0;
-        int i = 0;
-        int j = 0;
-
         // allocate the crrtkn array.
         if (crrtkn_ == null) {
             crrtkn_ = new byte[19];
@@ -1254,16 +1237,16 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             java.util.Arrays.fill(crrtkn_, (byte) 0);
         }
 
-        localAddressBytes = netAgent_.socket_.getLocalAddress().getAddress();
+        byte [] localAddressBytes = netAgent_.socket_.getLocalAddress().getAddress();
 
         // IP addresses are returned in a 4 byte array.
         // Obtain the character representation of each half byte.
-        for (i = 0, j = 0; i < 4; i++, j += 2) {
+        for (int i = 0, j = 0; i < 4; i++, j += 2) {
 
             // since a byte is signed in java, convert any negative
             // numbers to positive before shifting.
-            num = localAddressBytes[i] < 0 ? localAddressBytes[i] + 256 : localAddressBytes[i];
-            halfByte = (num >> 4) & 0x0f;
+            int num = localAddressBytes[i] < 0 ? localAddressBytes[i] + 256 : localAddressBytes[i];
+            int halfByte = (num >> 4) & 0x0f;
 
             // map 0 to G
             // The first digit of the IP address is is replaced by
@@ -1286,9 +1269,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         // Java returns port numbers in an int so the value is not negative.
         // Get the character representation by converting the
         // 4 low order half bytes to the character representation.
-        num = netAgent_.socket_.getLocalPort();
+        int num = netAgent_.socket_.getLocalPort();
 
-        halfByte = (num >> 12) & 0x0f;
+        int halfByte = (num >> 12) & 0x0f;
         crrtkn_[9] = netAgent_.getCurrentCcsidManager().numToSnaRequiredCrrtknChar_[halfByte];
         halfByte = (num >> 8) & 0x0f;
         crrtkn_[10] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
@@ -1301,9 +1284,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         // crrtkn unique, which is usually the time stamp/process id.
         // If the new time stamp is the
         // same as one of the already created ones, then recreate the time stamp.
-        time = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
 
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             // store 6 bytes of 8 byte time into crrtkn
             crrtkn_[i + 13] = (byte) (time >>> (40 - (i * 8)));
         }
@@ -1437,9 +1420,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             String dataSourceUserName = dataSource_.getUser();
             if (!dataSourceUserName.equals("") &&
                 userName.equalsIgnoreCase(
-                    dataSource_.propertyDefault_user) &&
+                    ClientDataSourceInterface.propertyDefault_user) &&
                 !dataSourceUserName.equalsIgnoreCase(
-                    dataSource_.propertyDefault_user))
+                    ClientDataSourceInterface.propertyDefault_user))
             {
                 userName = dataSourceUserName;
             }
@@ -1607,13 +1590,24 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         super.readTransactionStart();
     }
 
-    public void setIndoubtTransactions(java.util.Hashtable indoubtTransactions) {
+    public void setIndoubtTransactions(
+            HashMap<Xid, NetIndoubtTransaction> indoubtTransactions) {
+
         if (isXAConnection_) {
             if (indoubtTransactions_ != null) {
                 indoubtTransactions_.clear();
             }
             indoubtTransactions_ = indoubtTransactions;
         }
+    }
+
+    public NetIndoubtTransaction getIndoubtTransaction(Xid xid) {
+        return indoubtTransactions_.get(xid);
+    }
+
+    public Xid[] getIndoubtTransactionIds() {
+        Xid[] result = new Xid[0];
+        return indoubtTransactions_.keySet().toArray(result);
     }
 
     protected void setReadOnlyTransactionFlag(boolean flag) {
@@ -1655,7 +1649,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     public byte[] getTargetPublicKey() {
-        return targetPublicKey_;
+        byte[] cpy = new byte[targetPublicKey_.length];
+        System.arraycopy(targetPublicKey_, 0, cpy, 0, cpy.length);
+        return cpy;
     }
 
     public String getProductID() {
@@ -1674,7 +1670,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     /**
      * @return Returns the connectionNull.
      */
-    public boolean isConnectionNull() {
+    public final boolean isConnectionNull() {
         return connectionNull;
     }
     /**
@@ -1792,11 +1788,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     synchronized public void close() throws SQLException {
         // call super.close*() to do the close*
         super.close();
-        if (!isXAConnection_)
-            return;
-        if (isOpen()) {
-            return; // still open, return
-        }
     }
     
     /**
@@ -1805,11 +1796,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     synchronized public void closeX() throws SQLException {
         // call super.close*() to do the close*
         super.closeX();
-        if (!isXAConnection_)
-            return;
-        if (isOpen()) {
-            return; // still open, return
-        }
     }
     
     /**
@@ -1818,11 +1804,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     synchronized public void closeForReuse() throws SqlException {
         // call super.close*() to do the close*
         super.closeForReuse(closeStatementsOnClose);
-        if (!isXAConnection_)
-            return;
-        if (isOpen()) {
-            return; // still open, return
-        }
     }
     
     /**
@@ -1832,12 +1813,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     synchronized public void closeResources() throws SQLException {
         // call super.close*() to do the close*
         super.closeResources();
-        if (!isXAConnection_)
-            return;
-        
-        if (isOpen()) {
-            return; // still open, return
-        }
     }
     
     

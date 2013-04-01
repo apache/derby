@@ -436,7 +436,6 @@ public class NetXAResource implements XAResource {
         }
 
         Xid[] xidList = null;
-        int numXid = 0;
 
         NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
         callInfo.xaFlags_ = flag;
@@ -454,15 +453,8 @@ public class NetXAResource implements XAResource {
                 callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
             netAgent.endReadChain();
-            if (conn_.indoubtTransactions_ != null) {
-                numXid = conn_.indoubtTransactions_.size();
-                xidList = new Xid[numXid];
-                int i = 0;
-                for (Enumeration e = conn_.indoubtTransactions_.keys();
-                     e.hasMoreElements(); i++) {
-                    xidList[i] = (Xid) e.nextElement();
-                }
-            }
+            xidList = conn_.getIndoubtTransactionIds();
+
         } catch (SqlException sqle) {
             rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException

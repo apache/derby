@@ -143,8 +143,7 @@ public class NetXAConnection {
     }
 
     public byte[] getUOWID(Xid xid) {
-        NetIndoubtTransaction indoubtTxn = 
-                (NetIndoubtTransaction) netCon.indoubtTransactions_.get(xid);
+        NetIndoubtTransaction indoubtTxn = netCon.getIndoubtTransaction(xid);
         if (indoubtTxn == null) {
             return null;
         }
@@ -153,7 +152,7 @@ public class NetXAConnection {
     }
 
     public int getPort(Xid xid) {
-        NetIndoubtTransaction indoubtTxn = (NetIndoubtTransaction) netCon.indoubtTransactions_.get(xid);
+        NetIndoubtTransaction indoubtTxn = netCon.getIndoubtTransaction(xid);
         if (indoubtTxn == null) {
             return -1;
         }

@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.util.HashMap;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
@@ -290,22 +291,20 @@ public class NetXAConnectionReply extends NetResultSetReply {
         return new org.apache.derby.client.ClientXid(formatId, gtrid, bqual);
     }
 
-    protected java.util.Hashtable parseIndoubtList() throws DisconnectException {
-        boolean found = false;
+    protected HashMap<Xid, NetIndoubtTransaction> parseIndoubtList()
+            throws DisconnectException {
         int port = 0;
-        int numXid = 0;
         String sIpAddr = null;
-        int peekCP = peekCodePoint();
+        peekCodePoint();
         parseLengthAndMatchCodePoint(CodePoint.PRPHRCLST);
-        peekCP = peekCodePoint();
+        int peekCP = peekCodePoint();
         if (peekCP == CodePoint.XIDCNT) {
-            found = true;
-            numXid = parseXIDCNT();
+            int numXid = parseXIDCNT();
             peekCP = peekCodePoint();
         }
 
-        java.util.Hashtable<Xid, NetIndoubtTransaction> indoubtTransactions =
-                new java.util.Hashtable<Xid, NetIndoubtTransaction>();
+        java.util.HashMap<Xid, NetIndoubtTransaction> indoubtTransactions =
+                new java.util.HashMap<Xid, NetIndoubtTransaction>();
         while (peekCP == CodePoint.XID) {
             Xid xid = parseXID();
             indoubtTransactions.put(xid, new NetIndoubtTransaction(xid, null, null, null, sIpAddr, port));

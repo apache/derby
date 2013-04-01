@@ -80,9 +80,10 @@ public abstract class Version {
             printWriter.println(header + "Driver: " + getDriverNameAndVersion());
 
             printWriter.print(header + "Compatible JRE versions: { ");
-            for (int i = 0; i < Configuration.dncCompatibleJREVersions.length; i++) {
-                printWriter.print(Configuration.dncCompatibleJREVersions[i]);
-                if (i != Configuration.dncCompatibleJREVersions.length - 1) {
+            String [] cv = Configuration.getDncCompatibleJREVersions();
+            for (int i = 0; i < cv.length; i++) {
+                printWriter.print(cv[i]);
+                if (i != cv.length - 1) {
                     printWriter.print(", ");
                 }
             }

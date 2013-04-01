@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.util.HashMap;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.Connection;
@@ -31,7 +32,6 @@ import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Sqlca;
-import java.io.UnsupportedEncodingException;
 import org.apache.derby.client.am.UnitOfWorkListener;
 
 import org.apache.derby.shared.common.error.ExceptionSeverity;
@@ -39,6 +39,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 
 public class NetConnectionReply extends Reply
@@ -146,10 +147,10 @@ public class NetConnectionReply extends Reply
     // This method handles the parsing of all command replies and reply data
     // for the rdbcmm command.
     private void parseRDBCMMreply(ConnectionCallbackInterface connection) throws DisconnectException {
-        int peekCP = parseTypdefsOrMgrlvlovrs();
+        parseTypdefsOrMgrlvlovrs();
 
         parseENDUOWRM(connection);
-        peekCP = parseTypdefsOrMgrlvlovrs();
+        int peekCP = parseTypdefsOrMgrlvlovrs();
 
         if (peekCP == CodePoint.SQLCARD) {
             NetSqlca netSqlca = parseSQLCARD(null);
@@ -163,10 +164,10 @@ public class NetConnectionReply extends Reply
     // This method handles the parsing of all command replies and reply data
     // for the rdbrllbck command.
     private void parseRDBRLLBCKreply(ConnectionCallbackInterface connection) throws DisconnectException {
-        int peekCP = parseTypdefsOrMgrlvlovrs();
+        parseTypdefsOrMgrlvlovrs();
 
         parseENDUOWRM(connection);
-        peekCP = parseTypdefsOrMgrlvlovrs();
+        int peekCP = parseTypdefsOrMgrlvlovrs();
 
         if (peekCP == CodePoint.SQLCARD) {
             NetSqlca netSqlca = parseSQLCARD(null);
@@ -213,10 +214,12 @@ public class NetConnectionReply extends Reply
         netAgent_.exceptionConvertingRdbnam = null;
 
         peekCP = peekCodePoint();
-        if (peekCP == Reply.END_OF_SAME_ID_CHAIN) {
-            return;
-        }
 
+        if (SanityManager.DEBUG) {
+            if (peekCP != Reply.END_OF_SAME_ID_CHAIN) {
+                SanityManager.THROWASSERT("expected END_OF_SAME_ID_CHAIN");
+            }
+        }
     }
 
     // Parse the reply for the Security Check Command.
@@ -239,8 +242,7 @@ public class NetConnectionReply extends Reply
             // incorrect but consider it a conversation protocol error
             // 0x03 - OBJDSS sent when not allowed.
             //parseSECTKN (true);
-            boolean done = false;
-            byte[] bytes = parseSECTKN(false);
+            parseSECTKN(false);
         }
     }
 
@@ -1652,8 +1654,6 @@ public class NetConnectionReply extends Reply
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
         String rdbnam = null;
-        boolean srvdgnReceived = false;
-        byte[] srvdgn = null;
         boolean codpntReceived = false;
         int codpnt = 0;
 
@@ -1720,7 +1720,6 @@ public class NetConnectionReply extends Reply
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
-        String rdbnam = null;
 
         parseLengthAndMatchCodePoint(CodePoint.ABNUOWRM);
         pushLengthOnCollectionStack();
@@ -1743,7 +1742,7 @@ public class NetConnectionReply extends Reply
                 // not having to convert this to a string is a time saver also.
                 foundInPass = true;
                 rdbnamReceived = checkAndGetReceivedFlag(rdbnamReceived);
-                rdbnam = parseRDBNAM(true);
+                String rdbnam = parseRDBNAM(true);
                 peekCP = peekCodePoint();
             }
 
@@ -1778,7 +1777,6 @@ public class NetConnectionReply extends Reply
     // SRVRLSLV - optional
     private void parseEXCSATRD(NetConnection netConnection) throws DisconnectException {
         boolean extnamReceived = false;
-        String extnam = null;
         boolean mgrlvllsReceived = false;
         boolean srvclsnmReceived = false;
         String srvclsnm = null;
@@ -1802,11 +1800,9 @@ public class NetConnectionReply extends Reply
                 // or activates to run the DDM server.
                 // No semantic meaning is assigned to external names in DDM.
                 // External names are transmitted to aid in problem determination.
-                // This driver will save the external name of the target (the
-                // driver may use it for logging purposes later).
                 foundInPass = true;
                 extnamReceived = checkAndGetReceivedFlag(extnamReceived);
-                extnam = parseEXTNAM();
+                String extnam = parseEXTNAM();
                 peekCP = peekCodePoint();
             }
 
@@ -1862,13 +1858,12 @@ public class NetConnectionReply extends Reply
         }
         popCollectionStack();
         // according the the DDM book, all these instance variables are optional
-        netConnection.setServerAttributeData(extnam, srvclsnm, srvnam, srvrlslv);
+        netConnection.setServerAttributeData(srvclsnm, srvnam, srvrlslv);
     }
 
     // Must make a version that does not change state in the associated connection
     private void parseDummyEXCSATRD(NetConnection netConnection) throws DisconnectException {
         boolean extnamReceived = false;
-        String extnam = null;
         boolean mgrlvllsReceived = false;
         boolean srvclsnmReceived = false;
         String srvclsnm = null;
@@ -1896,7 +1891,7 @@ public class NetConnectionReply extends Reply
                 // driver may use it for logging purposes later).
                 foundInPass = true;
                 extnamReceived = checkAndGetReceivedFlag(extnamReceived);
-                extnam = parseEXTNAM();
+                String extnam = parseEXTNAM();
                 peekCP = peekCodePoint();
             }
 
@@ -2428,7 +2423,8 @@ public class NetConnectionReply extends Reply
         return null;
     }
 
-    protected java.util.Hashtable parseIndoubtList() throws DisconnectException {
+    protected HashMap<Xid, NetIndoubtTransaction> parseIndoubtList()
+            throws DisconnectException {
         return null;
     }
 
@@ -2606,15 +2602,15 @@ public class NetConnectionReply extends Reply
                     sqlcode,
                     sqlstate,
                     sqlerrproc);
+            parseSQLCAXGRP(netSqlca);
+
+            if (netAgent_.targetSqlam_ >= NetConfiguration.MGRLVL_7) {
+                netSqlca.setRowsetRowCount(parseSQLDIAGGRP(rowsetSqlca));
+            }
         }
         catch(SqlException sqle)
         {
             throw new DisconnectException(netAgent_,sqle);
-        }
-        parseSQLCAXGRP(netSqlca);
-
-        if (netAgent_.targetSqlam_ >= NetConfiguration.MGRLVL_7) {
-            netSqlca.setRowsetRowCount(parseSQLDIAGGRP(rowsetSqlca));
         }
 
         return netSqlca;
@@ -2691,7 +2687,7 @@ public class NetConnectionReply extends Reply
         }
 
 
-        int sqlerrmcCcsid = 0;
+        int sqlerrmcCcsid;
         byte[] sqlerrmc = readFastLDBytes();
         if (sqlerrmc != null) {
             sqlerrmcCcsid = netAgent_.targetTypdef_.getCcsidMbc();
@@ -2827,7 +2823,6 @@ public class NetConnectionReply extends Reply
                 break;
             default:
                 // should never be in this default case...
-                cpValue = 0;
                 break;
             }
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
@@ -2876,8 +2871,8 @@ public class NetConnectionReply extends Reply
     }
 
     private void doMgrlvlrmSemantics(int[] nameList, int[] levelList) throws DisconnectException {
-        StringBuffer managerNames = new StringBuffer(100);
-        StringBuffer managerLevels = new StringBuffer(100);
+        StringBuilder managerNames = new StringBuilder(100);
+        StringBuilder managerLevels = new StringBuilder(100);
 
         int count = nameList.length;
         for (int i = 0; i < count; i++) {
@@ -3203,10 +3198,8 @@ public class NetConnectionReply extends Reply
 
     private String parseFastNVCMorNVCS() throws DisconnectException {
         String stringToBeSet = null;
-        int vcm_length = 0;
-        int vcs_length = 0;
         if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-            vcm_length = readFastUnsignedShort();
+            int vcm_length = readFastUnsignedShort();
             if (vcm_length > 0) {
                 stringToBeSet = readFastString(vcm_length, netAgent_.targetTypdef_.getCcsidMbcEncoding());
             }
@@ -3218,7 +3211,7 @@ public class NetConnectionReply extends Reply
             }
         } else {
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-                vcs_length = readFastUnsignedShort();
+                int vcs_length = readFastUnsignedShort();
                 if (vcs_length > 0) {
                     stringToBeSet = readFastString(vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
                 }
@@ -3228,10 +3221,8 @@ public class NetConnectionReply extends Reply
     }
 
     private void skipFastNVCMorNVCS() throws DisconnectException {
-        int vcm_length = 0;
-        int vcs_length = 0;
         if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-            vcm_length = readFastUnsignedShort();
+            int vcm_length = readFastUnsignedShort();
             if (vcm_length > 0)
             //stringToBeSet = readString (vcm_length, netAgent_.targetTypdef_.getCcsidMbcEncoding());
             {
@@ -3245,7 +3236,7 @@ public class NetConnectionReply extends Reply
             }
         } else {
             if (readFastUnsignedByte() != CodePoint.NULLDATA) {
-                vcs_length = readFastUnsignedShort();
+                int vcs_length = readFastUnsignedShort();
                 if (vcs_length > 0)
                 //stringToBeSet = readString (vcs_length, netAgent_.targetTypdef_.getCcsidSbcEncoding());
                 {

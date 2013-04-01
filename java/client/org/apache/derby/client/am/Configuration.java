@@ -32,17 +32,12 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class Configuration {
 
-
-    public static int traceFileSuffixIndex__ = 0;
     public static final String jreLevel;// = "1.3.0"; // default level if unable to read
     public static final int jreLevelMajor;// = 1;
     public static final int jreLevelMinor;// = 3;
 
     private Configuration() {
     }
-
-    public static boolean[] enableConnectivityToTargetServer__;
-    public static boolean jvmSupportsMicrosClock__ = false;
 
     // -------------------------- versioning -------------------------------------
 
@@ -73,12 +68,17 @@ public class Configuration {
     // If we have to change the package version in the future then we can.
     public static final String dncPackageVersion = null;
 
-    // for Driver.jdbcCompliant()
+    // for ClientDriver.jdbcCompliant()
     public final static boolean jdbcCompliant = true;
 
-    // for Driver.getCompatibileJREVersions()
-    public final static String[] dncCompatibleJREVersions =
-            {"1.5", "1.6", "1.7"};
+    private final static String[] dncCompatibleJREVersions =
+            {"1.5", "1.6", "1.7", "1.8"};
+
+    public static String[] getDncCompatibleJREVersions() {
+        String[] cpy = new String[dncCompatibleJREVersions.length];
+        System.arraycopy(dncCompatibleJREVersions, 0, cpy, 0, cpy.length);
+        return cpy;
+    }
 
     //---------------------- database URL protocols ------------------------------
 
