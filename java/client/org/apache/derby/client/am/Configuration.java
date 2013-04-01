@@ -28,7 +28,6 @@ import java.security.PrivilegedExceptionAction;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Configuration {
@@ -61,8 +60,14 @@ public class Configuration {
     // Hard-wired for JDBC
     //
     // Currently ASCII hex value of "SYSLVL01".
-    public final static byte[] dncPackageConsistencyToken =
+    private final static byte[] dncPackageConsistencyToken =
             {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
+
+    public static byte[] getDncPackageConsistencyToken() {
+        byte [] cpy = new byte[dncPackageConsistencyToken.length];
+        System.arraycopy(dncPackageConsistencyToken, 0, cpy, 0, cpy.length);
+        return cpy;
+    }
 
     // We will not set package VERSION in the initial release.
     // If we have to change the package version in the future then we can.
@@ -189,8 +194,7 @@ public class Configuration {
     // Create ProductVersionHolder in security block for Java 2 security.
     private static ProductVersionHolder buildProductVersionHolder() throws
             java.security.PrivilegedActionException, IOException {
-        ProductVersionHolder myPVH = null;
-        myPVH = AccessController.doPrivileged(
+        return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<ProductVersionHolder>() {
 
                     public ProductVersionHolder run() throws IOException {
@@ -199,8 +203,6 @@ public class Configuration {
                         return ProductVersionHolder.getProductVersionHolderFromMyEnv(versionStream);
                     }
                 });
-
-        return myPVH;
     }
     
     /**

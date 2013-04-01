@@ -23,21 +23,20 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Properties;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class LogWriter {
-    protected java.io.PrintWriter printWriter_;
-    protected int traceLevel_;
+    final protected PrintWriter printWriter_;
+    final private int traceLevel_;
+
     private boolean driverConfigurationHasBeenWrittenToJdbc1Stream_ = false;
     private boolean driverConfigurationHasBeenWrittenToJdbc2Stream_ = false;
 
@@ -48,8 +47,14 @@ public class LogWriter {
     }
 
     final protected boolean loggingEnabled(int traceLevel) {
-        // It is an invariant that the printWriter is never null, so remove the
-        return printWriter_ != null && (traceLevel & traceLevel_) != 0;
+        if (SanityManager.DEBUG) {
+            if (printWriter_ == null) {
+                SanityManager.THROWASSERT(
+                        "Broken invariant: printWriter_ == null");
+            }
+        }
+
+        return (traceLevel & traceLevel_) != 0;
     }
 
     // When garbage collector doesn't kick in in time
@@ -110,10 +115,6 @@ public class LogWriter {
                 "[tracepoint:" + tracepoint + "]" +
                 "[" + classContext + "." + methodContext + "]";
         dncprintln(staticContextTracepointRecord);
-    }
-
-    private String getMemoryMapDisplay(java.util.Map memory) {
-        return memory.toString(); // need to loop thru all keys in the map and print values
     }
 
     // ------------- API entry and exit trace methods ----------------------------
@@ -877,7 +878,7 @@ public class LogWriter {
     }
 
     private String escapePassword(String pw) {
-        StringBuffer sb = new StringBuffer(pw);
+        StringBuilder sb = new StringBuilder(pw);
         for (int j = 0; j < pw.length(); j++) {
             sb.setCharAt(j, '*');
         }

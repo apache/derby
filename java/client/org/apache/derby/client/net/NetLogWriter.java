@@ -125,6 +125,14 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
 
         // Initialize the codepoint name table if not previously initialized.
         // This is done lazily so that it is not created if the trace isn't used (save some init time).
+
+        if (codePointNameTable__ == null) {
+            initCodePointTable();
+        }
+    }
+
+    // synchonized so only one thread can initialize the table
+    private synchronized void initCodePointTable() {
         if (codePointNameTable__ == null) {
             codePointNameTable__ = new CodePointNameTable();
         }
@@ -187,13 +195,13 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
             return;
         }
         synchronized (printWriter_) {
-            super.tracepoint("[net]", tracepoint, className, methodName);
+            tracepoint("[net]", tracepoint, className, methodName);
 
             int fullLen = len;
             boolean printColPos = true;
             while (fullLen >= 2) { // format each DssHdr seperately
                 // get the length of this DssHdr
-                len = ((buff[offset] & 0xff) << 8) + ((buff[offset + 1] & 0xff) << 0);
+                len = ((buff[offset] & 0xff) << 8) + (buff[offset + 1] & 0xff);
 
                 // check for valid dss header or not all of dss block
                 if ((len < 10) || (len > fullLen)) {
@@ -334,7 +342,7 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
     // Gets the int value of the two byte unsigned codepoint.
     private static int getCodePoint(byte[] buff, int offset) {
         return ((buff[offset++] & 0xff) << 8) +
-                ((buff[offset] & 0xff) << 0);
+                (buff[offset] & 0xff);
     }
 
     private static String getHeader(int type) {

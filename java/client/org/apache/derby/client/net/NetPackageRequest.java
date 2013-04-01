@@ -68,8 +68,8 @@ public class NetPackageRequest extends NetConnectionRequest {
         byte[] pkgNameBytes = ccsidMgr.convertFromJavaString(
                 section.getPackageName(), netAgent_);
 
-        boolean scldtalenRequired = false;
-        scldtalenRequired = checkPKGNAMlengths(netAgent_.netConnection_.databaseName_,
+        boolean scldtalenRequired =
+                checkPKGNAMlengths(netAgent_.netConnection_.databaseName_,
                 dbnameBytes.length,
                 maxIdentifierLength,
                 NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
@@ -128,7 +128,8 @@ public class NetPackageRequest extends NetConnectionRequest {
                 // Mark the beginning of PKGNAMCSN bytes.
                 markForCachingPKGNAMCSN();
                 buildCommonPKGNAMinfo(section);
-                writeScalarPaddedBytes(Configuration.dncPackageConsistencyToken,
+                writeScalarPaddedBytes(
+                        Configuration.getDncPackageConsistencyToken(),
                         NetConfiguration.PKGCNSTKN_FIXED_LEN,
                         NetConfiguration.NON_CHAR_DDM_DATA_PAD_BYTE);
                 // store the PKGNAMCbytes
@@ -188,7 +189,7 @@ public class NetPackageRequest extends NetConnectionRequest {
         if (string == null) {
             write2Bytes(0xffff);
         } else {
-            byte[] sqlBytes = null;
+            byte[] sqlBytes;
 
             if (netAgent_.typdef_.isCcsidMbcSet()) {
                 sqlBytes = getBytes(string, netAgent_.typdef_.getCcsidMbcEncoding());
@@ -218,7 +219,6 @@ public class NetPackageRequest extends NetConnectionRequest {
     //   SQLSTATEMENT_s; PROTOCOL TYPE NOCS; ENVLID 0xCB; Length Override 4
     private void buildSQLSTTGRP(String string) throws SqlException {
         buildNOCMorNOCS(string);
-        return;
     }
 
     // SQLSTT : FDOCA EARLY ROW

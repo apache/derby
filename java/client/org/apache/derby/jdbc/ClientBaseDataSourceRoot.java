@@ -601,50 +601,6 @@ public abstract class ClientBaseDataSourceRoot implements
         return dncLogWriter;
     }
 
-    // Compute a DNC log writer after a connection is created.
-    // Declared public for use by am.Connection.  Not a public external.
-    public static LogWriter computeDncLogWriter(
-        Connection connection,
-        PrintWriter logWriter,
-        String traceDirectory,
-        String traceFile,
-        boolean traceFileAppend,
-        String logWriterInUseSuffix,
-        int traceFileSuffixIndex,
-        int traceLevel) throws SqlException {
-
-        // Otherwise, the trace file will still be created even TRACE_NONE.
-        if (traceLevel == TRACE_NONE) {
-            return null;
-        }
-
-        PrintWriter printWriter = computePrintWriter(
-            logWriter,
-            traceDirectory,
-            traceFile,
-            traceFileAppend,
-            logWriterInUseSuffix,
-            traceFileSuffixIndex);
-
-        if (printWriter == null) {
-            return null;
-        }
-
-        LogWriter dncLogWriter =
-            connection.agent_.newLogWriter_(printWriter, traceLevel);
-
-        if (printWriter != logWriter &&
-                (traceDirectory != null || traceFile != null))
-        // When printWriter is an internal trace file and
-        // traceDirectory is not null, each connection has
-        // its own trace file and the trace file is not cached,
-        // so we can close it when DNC log writer is closed.
-        {
-            dncLogWriter.printWriterNeedsToBeClosed_ = true;
-        }
-        return dncLogWriter;
-    }
-
     // This method handles all the override semantics.  The logWriter
     // overrides the traceFile, and traceDirectory settings.  If neither
     // traceFile, nor logWriter, nor traceDirectory are set, then null is
