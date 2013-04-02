@@ -367,7 +367,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 						// Columns is really a Storable[]
 						for (int i = 0; i < columns.length; i++)
 						{
-							if (! (columns[0] instanceof Storable))
+                           if (! (columns[i] instanceof Storable))
 							{
 								SanityManager.THROWASSERT(
 								"columns[" + i + "] expected to be Storable, not " +
