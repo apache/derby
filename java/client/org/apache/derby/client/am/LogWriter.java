@@ -27,11 +27,11 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class LogWriter {
     final protected PrintWriter printWriter_;
