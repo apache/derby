@@ -905,7 +905,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     //  with >256 rows)
     // Following test shows that we should continue using index scan 
     //  even after adding extra rows to the table.
-    public void xtestDerby6045()
+    public void testDerby6045()
         throws SQLException
     {
         Statement s = createStatement();
@@ -962,7 +962,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     //    doing table scan rather than index scan.
     //    If the unique key is removed from the table, the same query
     //    will start doing index scan.
-    public void xtestDerby6045InsertAllRowsAdditionalUniqueIndex() 
+    public void testDerby6045InsertAllRowsAdditionalUniqueIndex() 
             throws SQLException
     {
          Statement s = createStatement();
