@@ -139,6 +139,17 @@ public class JDBC {
         HAVE_REFERENCEABLE = ok;
     }
 
+    private static final boolean HAVE_SQLTYPE;
+    static {
+        boolean ok = false;
+        try {
+            Class.forName("java.sql.SQLType");
+            ok = true;
+        } catch (Throwable t) {
+        }
+        HAVE_SQLTYPE = ok;
+    }
+    
     /**
      * Is javax.management.MBeanServer available? Indicates whether the
      * JVM supports the Java Management Extensions (JMX).
@@ -159,6 +170,14 @@ public class JDBC {
         } catch (Throwable e) {
         	return false;
         }    	
+    }
+
+    /**
+     * Return true if the virtual machine environment supports JDBC 4.2 or
+     * later.
+     */
+    public static boolean vmSupportsJDBC42() {
+        return vmSupportsJDBC41() && HAVE_SQLTYPE;
     }
 
     /**

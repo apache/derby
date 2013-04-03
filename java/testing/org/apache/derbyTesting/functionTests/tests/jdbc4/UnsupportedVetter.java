@@ -174,13 +174,13 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getTimestamp", new Class[] { String.class, java.util.Calendar.class } ),
 					new MD( "getURL", new Class[] { int.class } ),
 					new MD( "getURL", new Class[] { String.class } ),
-						new MD( "registerOutParameter", new Class[] { String.class, int.class } ),
-						new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
-						new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
-						new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
-                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType" }, true ),
-                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "int" }, true ),
-                        makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "java.lang.String" }, true ),
+                    new MD( "registerOutParameter", new Class[] { String.class, int.class } ),
+                    new MD( "registerOutParameter", new Class[] { String.class, int.class, int.class } ),
+                    new MD( "registerOutParameter", new Class[] { String.class, int.class, String.class } ),
+                    new MD( "registerOutParameter", new Class[] { int.class, int.class, String.class } ),
+                    makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType" }, JDBC.vmSupportsJDBC42() ),
+                    makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "int" }, JDBC.vmSupportsJDBC42() ),
+                    makeMD( "registerOutParameter", new String[] { "java.lang.String", "java.sql.SQLType", "java.lang.String" }, JDBC.vmSupportsJDBC42() ),
 						new MD( "setArray", new Class[] { int.class, java.sql.Array.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class } ),
 						new MD( "setAsciiStream", new Class[] { String.class, java.io.InputStream.class, int.class } ),
@@ -356,6 +356,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		throws Exception
 	{
         getTestConfiguration().setVerbosity( true );
+
+        println( "Supports JDBC 4.2 = " + JDBC. vmSupportsJDBC42() );
 
 		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
