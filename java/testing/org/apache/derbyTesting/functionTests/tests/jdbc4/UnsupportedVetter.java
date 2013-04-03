@@ -330,6 +330,12 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	{
         getTestConfiguration().setVerbosity( true );
 
+        println( "Supports JDBC 4.2 = " + JDBC. vmSupportsJDBC42() );
+
+        // this test will fail if run on Java 8 or higher because the JDBC 4.2
+        // support does not exist on 10.9 and earlier
+        if ( JDBC.vmSupportsJDBC42() ) { return; }
+
 		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
 		HashSet<String>	notUnderstoodList = new HashSet<String>();
