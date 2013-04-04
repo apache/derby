@@ -118,15 +118,13 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             method_.invoke(object,
                            getNullArguments(method_.getParameterTypes()));
 
-            // so far, only one method is allowed to be called (and is a NOP)
-            // on a closed JDBC object
-
-            if ( !"public abstract void java.sql.Connection.abort(java.util.concurrent.Executor) throws java.sql.SQLException".equals( method_.toString() ) )
-            {
-                assertFalse("No exception was thrown for method " + method_,
+            // If we get here, and we expected an exception to be thrown,
+            // report that as a failure.
+            assertFalse("No exception was thrown for method " + method_,
                             decorator_.expectsException(method_));
-            }
         } catch (InvocationTargetException ite) {
+            // An exception was thrown. Check if we expected that an exception
+            // was thrown, and if it was the exception we expected.
             try {
                 throw ite.getCause();
             } catch (SQLException sqle) {
@@ -388,19 +386,16 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         /**
          * Checks whether a method expects an exception to be thrown
          * when the object is closed. Currently, only
-         * <code>close()</code>, <code>isClosed()</code> and
-         * <code>isValid()</code> don't expect exceptions.
+         * {@code close()}, {@code isClosed()}, {@code isValid()} and
+         * {@code abort()} don't expect exceptions.
          *
          * @param method a method
          * @return <code>true</code> if an exception is expected
          */
         public boolean expectsException(Method method) {
             String name = method.getName();
-            if (name.equals("close") || name.equals("isClosed")
-                    || name.equals("isValid")) {
-                return false;
-            }
-            return true;
+            return !(name.equals("close") || name.equals("isClosed")
+                    || name.equals("isValid") || name.equals("abort"));
         }
 
         /**
