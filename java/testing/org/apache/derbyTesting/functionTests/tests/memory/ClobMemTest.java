@@ -294,10 +294,12 @@ public class ClobMemTest extends BaseJDBCTestCase {
         // just a single fetch will build the hash table and consume the memory.
         assertTrue(rs.next());
         // derby.tests.debug prints memory usage
-        System.gc();
-        println("TotalMemory:" + Runtime.getRuntime().totalMemory()
-                + " " + "Free Memory:"
-                + Runtime.getRuntime().freeMemory());
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            System.gc();
+            println("TotalMemory:" + Runtime.getRuntime().totalMemory()
+                    + " " + "Free Memory:"
+                    + Runtime.getRuntime().freeMemory());
+        }
         rs.close();
     }
 }
