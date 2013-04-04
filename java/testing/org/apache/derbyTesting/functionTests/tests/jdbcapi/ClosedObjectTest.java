@@ -117,9 +117,19 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
         TestSuite suite = new TestSuite("ClosedObjectTest suite");
-        suite.addTest(baseSuite("ClosedObjectTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-            baseSuite("ClosedObjectTest:client")));
+
+        // DERBY-6147: This version of Derby only supports JDBC
+        // versions up to JDBC 4.1. When running on a newer platform
+        // than that (Java 8 and higher), it will fail when trying to
+        // invoke methods that are found in the interfaces, but not
+        // implemented in the Derby classes. Skip the test on those
+        // platforms.
+        if (!JDBC.vmSupportsJDBC42()) {
+            suite.addTest(baseSuite("ClosedObjectTest:embedded"));
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                baseSuite("ClosedObjectTest:client")));
+        }
+
         return suite;
     }
 
