@@ -94,8 +94,26 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         try {
             Object object = decorator_.getClosedObject();
 
+            String implClassName = object.getClass().getName();
+
             // update name of test with real class name
-            name_ = object.getClass() + "." + method_.getName();
+            name_ = implClassName + "." + method_.getName();
+
+            // DERBY-6147: If the test runs on a newer version of the JVM
+            // than the JDBC driver supports, we should skip those methods
+            // that are not implemented.
+            //
+            // Limit the check to platforms that support JDBC 4 or higher
+            // since the isImplemented() method uses a method only available
+            // in Java 5 and higher. We know that all JDBC 3 and JSR-169
+            // methods are implemented, so no tests need to be skipped on
+            // those older platforms anyway.
+            if (JDBC.vmSupportsJDBC4() && !isImplemented()) {
+                println("Skipping testing of " + method_ + " on " +
+                        implClassName + " because it is not implemented");
+                name_ += "_SKIPPED";
+                return;
+            }
 
             method_.invoke(object,
                            getNullArguments(method_.getParameterTypes()));
@@ -115,6 +133,34 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                 decorator_.checkException(method_, sqle);
             }
         }
+    }
+
+    /**
+     * Check if the JDBC interface method tested by this test case is
+     * actually implemented by the Derby object being tested.
+     */
+    private boolean isImplemented() throws NoSuchMethodException {
+        // Check if the method is implemented in one of the Derby classes
+        // that the JDBC object belongs to.
+        for (Class c = decorator_.getClosedObject().getClass();
+                c != null; c = c.getSuperclass()) {
+            if (c.getName().startsWith("org.apache.derby.")) {
+                try {
+                    Method m = c.getDeclaredMethod(
+                        method_.getName(), method_.getParameterTypes());
+                    if (!m.isSynthetic()) {
+                        // Found a real implementation of the method.
+                        return true;
+                    }
+                } catch (NoSuchMethodException e) {
+                    // Method was not declared in this class. Try again in
+                    // the superclass.
+                }
+            }
+        }
+
+        // No implementation was found.
+        return false;
     }
 
     /** Creates a suite with all tests in the class. */
