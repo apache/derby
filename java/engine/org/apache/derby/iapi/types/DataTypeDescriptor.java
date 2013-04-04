@@ -1491,6 +1491,8 @@ public final class DataTypeDescriptor implements Formatable
 		switch (typeId.getTypeFormatId())
 		{
 			case StoredFormatIds.LONGVARBIT_TYPE_ID:
+            //DERBY-6096 Need to estimate usage for BLOB and clob
+            case StoredFormatIds.BLOB_TYPE_ID:
 				/* Who knows?  Let's just use some big number */
 				return 10000.0;
 
@@ -1505,6 +1507,8 @@ public final class DataTypeDescriptor implements Formatable
 				return (double) (2.0 * getMaximumWidth());
 
 			case StoredFormatIds.LONGVARCHAR_TYPE_ID:
+            //DERBY-6096 Need to estimate usage for BLOB and clob
+            case StoredFormatIds.CLOB_TYPE_ID:
 				/* Who knows? Let's just use some big number */
 				return 10000.0;
 

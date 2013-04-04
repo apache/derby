@@ -34,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -182,7 +183,10 @@ public class ClobMemTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        Test suite =  TestConfiguration.defaultSuite(ClobMemTest.class);
+        TestSuite suite =  new TestSuite();
+        // Just add Derby-6096 embedded as it takes time to run
+        suite.addTest(new ClobMemTest("xtestderby6096ClobHashJoin"));
+        suite.addTest(TestConfiguration.defaultSuite(ClobMemTest.class));
         Properties p = new Properties();
         // use small pageCacheSize so we don't run out of memory on the insert.
         p.setProperty("derby.storage.pageCacheSize", "100");
@@ -263,4 +267,38 @@ public class ClobMemTest extends BaseJDBCTestCase {
 
         rollback();
     }
+
+    
+    /**
+     * 
+     * DERBY-6096 Make clob hash join does not run out of memory.
+     * Prior to fix clobs were estimated at 0. We will test with
+     * 32K clobs even though the estimatedUsage is at 10k. The default
+     * max memory per table is only 1MB.
+     * 
+     * @throws SQLException
+     */
+    public void xtestderby6096ClobHashJoin() throws SQLException {
+        char[] c = new char[32000];
+        Arrays.fill(c, 'a'); 
+        String cdata  = new String(new char[32000]);
+        Statement s = createStatement();
+        s.execute("create table d6096(i int, c clob)");
+        PreparedStatement ps = prepareStatement("insert into d6096 values (?, ?)");
+        ps.setString(2, cdata);
+        for (int i = 0; i < 2000; i++) {
+            ps.setInt(1, i);
+            ps.execute();
+        }
+        ResultSet rs = s.executeQuery("select * from d6096 t1, d6096 t2 where t1.i=t2.i");
+        // just a single fetch will build the hash table and consume the memory.
+        assertTrue(rs.next());
+        // derby.tests.debug prints memory usage
+        System.gc();
+        println("TotalMemory:" + Runtime.getRuntime().totalMemory()
+                + " " + "Free Memory:"
+                + Runtime.getRuntime().freeMemory());
+        rs.close();
+    }
 }
+

@@ -32,6 +32,8 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
 import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -199,7 +201,11 @@ public class BlobMemTest extends BaseJDBCTestCase {
         testBlobLength(false, 10000);  
     }
        public static Test suite() {
-        Test suite =  TestConfiguration.defaultSuite(BlobMemTest.class);
+        TestSuite suite =  new TestSuite();
+        // Just add Derby-6096 embedded as it takes time to run
+        suite.addTest(new BlobMemTest("xtestderby6096BlobhashJoin"));
+        suite.addTest(TestConfiguration.defaultSuite(BlobMemTest.class));
+        
         Properties p = new Properties();
         // use small pageCacheSize so we don't run out of memory on the insert.
         p.setProperty("derby.storage.pageCacheSize", "100");
@@ -319,4 +325,36 @@ public class BlobMemTest extends BaseJDBCTestCase {
             assertEquals(lobSize, blobs[i].length());
         }
     }
+    
+    /**
+     * 
+     * DERBY-6096 Make blob hash join does not run out of memory.
+     * Prior to fix blobs were estimated at 0. We will test with
+     * 32K blobs even though the estimatedUsage is at 10k. The default
+     * max memory per table is only 1MB.
+     * 
+     * @throws SQLException
+     */
+    public void xtestderby6096BlobhashJoin() throws SQLException {
+        byte[] b = new byte[32000];
+        Arrays.fill(b, (byte) 'a'); 
+        Statement s = createStatement();
+        s.execute("create table d6096(i int, b blob)");
+        PreparedStatement ps = prepareStatement("insert into d6096 values (?, ?)");
+        ps.setBytes(2, b);
+        for (int i = 0; i < 2000; i++) {
+            ps.setInt(1, i);
+            ps.execute();
+        }
+        ResultSet rs = s.executeQuery("select * from d6096 t1, d6096 t2 where t1.i=t2.i");
+        // just a single fetch will build the hash table and consume the memory.
+        assertTrue(rs.next());
+        // derby.tests.debug prints memory usage
+        System.gc();
+        println("TotalMemory:" + Runtime.getRuntime().totalMemory()
+                + " " + "Free Memory:"
+                + Runtime.getRuntime().freeMemory());
+        rs.close();
+    }
+
 }
