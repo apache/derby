@@ -60,6 +60,7 @@ import org.apache.derby.vti.Restriction;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.ResultSetMetaData;
 
 
@@ -426,7 +427,10 @@ class VTIResultSet extends NoPutResultSetImpl
                         result = getAllocatedRow();
                         populateFromResultSet(result);
                         if (fastPath != null)
-                            fastPath.currentRow(userVTI, result.getRowArray());
+                        { fastPath.currentRow(userVTI, result.getRowArray()); }
+
+                        SQLWarning  warnings = userVTI.getWarnings();
+                        if ( warnings != null ) { addWarning( warnings ); }
                     }
 				}
 			}

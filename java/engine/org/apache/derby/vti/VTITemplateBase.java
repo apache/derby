@@ -86,7 +86,7 @@ class VTITemplateBase implements ResultSet
     public java.io.InputStream getAsciiStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getAsciiStream" ); }
     public java.io.InputStream getUnicodeStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getUnicodeStream" ); }
     public java.io.InputStream getBinaryStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getBinaryStream" ); }
-    public SQLWarning getWarnings() throws SQLException { throw notImplemented( "getWarnings" ); }
+    public SQLWarning getWarnings() throws SQLException { return null; }
     public void clearWarnings() throws SQLException { throw notImplemented( "clearWarnings" ); }
     public String getCursorName() throws SQLException { throw notImplemented( "getCursorName" ); }
     public Object getObject(int columnIndex) throws SQLException { throw notImplemented( "getObject" ); }
