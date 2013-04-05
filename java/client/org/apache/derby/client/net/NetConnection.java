@@ -374,10 +374,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
     }
 
-    public final void completeConnect() throws SqlException {
-        super.completeConnect();
-    }
-
     protected void completeReset(boolean isDeferredReset)
             throws SqlException {
         super.completeReset(isDeferredReset, closeStatementsOnClose, xares_);
@@ -1649,9 +1645,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     public byte[] getTargetPublicKey() {
-        byte[] cpy = new byte[targetPublicKey_.length];
-        System.arraycopy(targetPublicKey_, 0, cpy, 0, cpy.length);
-        return cpy;
+        return targetPublicKey_.clone();
     }
 
     public String getProductID() {
@@ -1781,40 +1775,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     public boolean isOpen() {
         return open_;
     }
-    
-    /**
-     * closes underlying connection and associated resource.
-     */
-    synchronized public void close() throws SQLException {
-        // call super.close*() to do the close*
-        super.close();
-    }
-    
-    /**
-     * closes underlying connection and associated resource.
-     */
-    synchronized public void closeX() throws SQLException {
-        // call super.close*() to do the close*
-        super.closeX();
-    }
-    
-    /**
-     * Invalidates connection but keeps socket open.
-     */
-    synchronized public void closeForReuse() throws SqlException {
-        // call super.close*() to do the close*
-        super.closeForReuse(closeStatementsOnClose);
-    }
-    
-    /**
-     * closes resources connection will be not available 
-     * for reuse.
-     */
-    synchronized public void closeResources() throws SQLException {
-        // call super.close*() to do the close*
-        super.closeResources();
-    }
-    
     
     /**
      * Invokes write commit on NetXAConnection

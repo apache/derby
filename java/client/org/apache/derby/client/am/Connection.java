@@ -764,7 +764,7 @@ public abstract class Connection
     }
 
     // This is a no-op if the connection is already closed.
-    synchronized public void closeX() throws SQLException {
+    private void closeX() throws SQLException {
         if (!open_ && !isAborting()) {
             return;
         }
@@ -2048,7 +2048,7 @@ public abstract class Connection
     // All callbacks must be client-side only operations.
 
 
-    public void completeConnect() throws SqlException {
+    public final void completeConnect() throws SqlException {
         open_ = true;
         databaseMetaData_ = newDatabaseMetaData_();
 

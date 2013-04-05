@@ -59,9 +59,7 @@ public class Configuration {
             {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
 
     public static byte[] getDncPackageConsistencyToken() {
-        byte [] cpy = new byte[dncPackageConsistencyToken.length];
-        System.arraycopy(dncPackageConsistencyToken, 0, cpy, 0, cpy.length);
-        return cpy;
+        return dncPackageConsistencyToken.clone();
     }
 
     // We will not set package VERSION in the initial release.
@@ -75,9 +73,7 @@ public class Configuration {
             {"1.5", "1.6", "1.7", "1.8"};
 
     public static String[] getDncCompatibleJREVersions() {
-        String[] cpy = new String[dncCompatibleJREVersions.length];
-        System.arraycopy(dncCompatibleJREVersions, 0, cpy, 0, cpy.length);
-        return cpy;
+        return dncCompatibleJREVersions.clone();
     }
 
     //---------------------- database URL protocols ------------------------------
