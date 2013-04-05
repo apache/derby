@@ -130,6 +130,12 @@ public class TableFunctionTest extends BaseJDBCTestCase
         { "2", "blue" },
     };
     
+    private static  final   String[][]  WARNING_VTI_ROWS =
+    {
+        { "1", "red" },
+        { "2", "blue" },
+    };
+    
     private static  final   String[][]  ALL_TYPES_ROWS =
     {
         {
@@ -1928,6 +1934,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         derby_4092();
+        derby_6151();
     }
     
     /**
@@ -1962,6 +1969,34 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "42ZB6",
              "select derby_4092(), tablename from sys.systables"
              );
+    }
+    
+    /**
+     * <p>
+     * Verify that warnings percolate back from table functions.
+     * </p>
+     */
+    private void  derby_6151()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function warningVTI() returns table( a int, b varchar( 5 ) )\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name '" + getClass().getName() + ".warningVTI'\n"
+             );
+
+        ResultSet   rs = getConnection().prepareStatement( "select * from table( warningVTI() ) t" ).executeQuery();
+
+        rs.next();
+        assertEquals( "Warning for row 1", rs.getWarnings().getMessage() );
+        rs.clearWarnings();
+        rs.next();
+        assertEquals( "Warning for row 2", rs.getWarnings().getMessage() );
+
+        rs.close();
+        
+        goodStatement( "drop function warningVTI" );
     }
     
     /**
@@ -2632,4 +2667,35 @@ public class TableFunctionTest extends BaseJDBCTestCase
         return retval;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  static  WarningVTI  warningVTI()    { return new WarningVTI(); }
+    
+    public  static  final   class   WarningVTI  extends StringArrayVTI
+    {
+        private int _count;
+        
+        public  WarningVTI()
+        {
+            super( makeColumnNames( 2, "mycol" ), WARNING_VTI_ROWS );
+        }
+
+        // override
+        public  boolean next()  throws SQLException
+        {
+            boolean retval = super.next();
+            if ( retval ) { _count++; }
+
+            return retval;
+        }
+        public  SQLWarning  getWarnings()
+        {
+            return new SQLWarning( "Warning for row " + _count );
+        }
+    }
+    
 }
