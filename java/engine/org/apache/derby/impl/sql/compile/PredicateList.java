@@ -1516,13 +1516,31 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				else if (andNode.getLeftOperand() instanceof InListOperatorNode)
 				{
 					inNode = (InListOperatorNode) andNode.getLeftOperand();
-					if (! (inNode.getRightOperandList().isConstantExpression()))
+
+                    if (!(inNode.getLeftOperand() instanceof ColumnReference))
+                    {
+                        // A predicate can be pushed into an underlying select 
+                        // if the source of every ColumnReference in the 
+                        // predicate is itself a ColumnReference.
+                        // In this case the left operand is not a 
+                        // ColumnReference so do not push.
+
+                        continue;
+                    }
+                    else if (!(inNode.getRightOperandList().isConstantExpression()))
+                    {
+                        // only push down constant expressions, 
+                        // skipping this one that is not
+
 						continue;
+                    }
 
 					crNode = (ColumnReference) inNode.getLeftOperand();
 				}
 				else
+                {
 					continue;
+                }
 
 				// Remap this crNode to underlying column reference in the select, if possible.
 				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.columnName);

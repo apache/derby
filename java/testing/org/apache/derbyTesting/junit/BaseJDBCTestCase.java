@@ -1053,6 +1053,42 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Execute a DROP VIEW command using the passed in viewName as-is
+     * and the default connection.
+     * If the DROP VIEW fails because the view does not exist then
+     * the exception is ignored.
+     * @param viewName Table to be dropped.
+     * @throws SQLException
+     */
+    public final void dropView(String viewName) throws SQLException
+    {
+       dropView(getConnection(), viewName);
+    }
+    
+    /**
+     * Execute a DROP VIEW command using the passed in viewName as-is.
+     * If the DROP VIEW fails because the view does not exist then
+     * the exception is ignored.
+     * @param conn Connection to execute the DROP VIEW
+     * @param viewName Table to be dropped.
+     * @throws SQLException
+     */
+    public static void dropView(Connection conn, String viewName) throws SQLException
+    {
+        Statement statement = conn.createStatement();
+        String dropSQL = "DROP VIEW " + viewName;
+        try { 
+            
+            statement.executeUpdate(dropSQL); 
+        } catch (SQLException e) {
+            assertSQLState("42Y55", e);
+        }
+        finally {
+            statement.close();
+        }
+    }
+
+    /**
      * Assert that the query fails (either in compilation,
      * execution, or retrieval of results--doesn't matter)
      * and throws a SQLException with the expected states.
