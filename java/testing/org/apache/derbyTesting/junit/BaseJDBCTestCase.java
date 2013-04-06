@@ -72,6 +72,13 @@ public abstract class BaseJDBCTestCase
      * them at teardown.
      */
     private List statements;
+
+    /**
+     * Maintain a list of connection objects that
+     * were returned by utility methods and close
+     * them at teardown.
+     */
+    private List connections;
     
     /**
      * Create a test case with the given name.
@@ -154,7 +161,18 @@ public abstract class BaseJDBCTestCase
             statements = new ArrayList();
         statements.add(s);
     }
-
+    
+    /**
+     * Add connection to the list. We will close at tearDown
+     * @param c
+     */
+    private void addConnection(Connection c)
+    {
+        if (connections == null)
+            connections = new ArrayList();
+        connections.add(c);     
+    }
+    
     /**
      * Close a statement and remove it from the list of statements to close
      * at tearDown(). Useful for test cases that create a large number of
@@ -464,8 +482,15 @@ public abstract class BaseJDBCTestCase
             // Allow gc'ing of all those statements.
             statements = null;
         }
-        
-        JDBC.cleanup(conn);
+        if (connections != null) {
+            for (Iterator i = connections.iterator(); i.hasNext(); )
+            {
+                Connection c = (Connection) i.next();
+                JDBC.cleanup(c);
+            }
+            // Allow gc'ing of all those connections.
+            connections = null;
+        }
         conn = null;
     }
 
@@ -486,6 +511,7 @@ public abstract class BaseJDBCTestCase
     public Connection openDefaultConnection()
         throws SQLException {
         Connection conn =  getTestConfiguration().openDefaultConnection();
+        addConnection(conn);
         initializeConnection(conn);
         return conn;
     }
@@ -508,6 +534,7 @@ public abstract class BaseJDBCTestCase
     public Connection openDefaultConnection(TestConfiguration tc)
         throws SQLException {
         Connection conn =  tc.openDefaultConnection();
+        addConnection(conn);
         initializeConnection(conn);
         return conn;
     }
@@ -531,6 +558,7 @@ public abstract class BaseJDBCTestCase
     {
         Connection conn =  getTestConfiguration().openDefaultConnection(user,
                 password);
+        addConnection(conn);
         initializeConnection(conn);
         return conn;        
     }
@@ -584,6 +612,7 @@ public abstract class BaseJDBCTestCase
     public Connection openConnection(String databaseName)
         throws SQLException {
         Connection conn =  getTestConfiguration().openConnection(databaseName);
+        addConnection(conn);
         initializeConnection(conn);
         return conn;
     }
