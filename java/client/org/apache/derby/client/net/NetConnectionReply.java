@@ -2699,7 +2699,7 @@ public class NetConnectionReply extends Reply
 
         netSqlca.setSqlerrd(sqlerrd);
         netSqlca.setSqlwarnBytes(sqlwarn);
-        netSqlca.setSqlerrmcBytes(sqlerrmc, sqlerrmcCcsid); // sqlerrmc may be null
+        netSqlca.setSqlerrmcBytes(sqlerrmc); // sqlerrmc may be null
     }
 
     // SQLDIAGGRP : FDOCA EARLY GROUP
@@ -3115,8 +3115,7 @@ public class NetConnectionReply extends Reply
             if (rowsetSqlca[sqldcRown] != null) {
                 rowsetSqlca[sqldcRown].resetRowsetSqlca(netAgent_.netConnection_,
                         sqldcCode,
-                        sqldcState,
-                        null);
+                        sqldcState);
             } else {
                 rowsetSqlca[sqldcRown] = new NetSqlca(netAgent_.netConnection_,
                         sqldcCode,

@@ -89,10 +89,12 @@ public class SqlException extends Exception implements Diagnosable {
     public static final String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
     
-    //SQLException factory initialised with default factory
-    //It will be over written by the SQLException factory of the 
-    //supported jdbc version    
-    protected static SQLExceptionFactory 
+    /**
+     * SQLException factory is initialized with default factory.
+     * It will be over written by the SQLException factory of the
+     * supported JDBC version.
+     */
+    static SQLExceptionFactory
             exceptionFactory = new SQLExceptionFactory ();
     
     /** 

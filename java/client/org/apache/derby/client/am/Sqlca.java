@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.DataTruncation;
 import org.apache.derby.client.net.Typdef;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
@@ -43,13 +44,13 @@ public abstract class Sqlca {
     /** A string representation of <code>sqlErrmcBytes_</code>. */
     private String sqlErrmc_;
     /** Array of errmc strings for each message in the chain. */
-    protected String[] sqlErrmcMessages_;
+    private String[] sqlErrmcMessages_;
     /** SQL states for all the messages in the exception chain. */
     private String[] sqlStates_;
     // contain an error token
-    protected String sqlErrp_;        // function name issuing error
+    private String sqlErrp_;        // function name issuing error
     protected int[] sqlErrd_;        // 6 diagnostic Information
-    protected char[] sqlWarn_;        // 11 warning Flags
+    private String sqlWarn_;        // 11 warning Flags
     protected String sqlState_;       // SQLSTATE
 
     // raw sqlca data fields before unicode conversion
@@ -57,9 +58,8 @@ public abstract class Sqlca {
     protected byte[] sqlErrpBytes_;
     protected byte[] sqlWarnBytes_;
     
-    protected int sqlErrmcCcsid_;
-    protected boolean containsSqlcax_ = true;
-    protected long rowsetRowCount_;
+    private boolean containsSqlcax_ = true;
+    private long rowsetRowCount_;
 
     /**
      * Character sequence that separates the different messages in the errmc.
@@ -217,7 +217,7 @@ public abstract class Sqlca {
         }
     }
 
-    public int[] getSqlErrd() {
+    private int[] getSqlErrd() {
         if (sqlErrd_ != null) {
             return sqlErrd_;
         }
@@ -226,22 +226,31 @@ public abstract class Sqlca {
         return sqlErrd_;
     }
 
-    synchronized public char[] getSqlWarn() {
-        if (sqlWarn_ != null) {
-            return sqlWarn_;
-        }
+    public String formatSqlErrd() {
+        return Utils.getStringFromInts(getSqlErrd());
+    }
 
-        try {
-            if (sqlWarnBytes_ == null) {
-                sqlWarn_ = new char[]{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 11 blank.
+    // what is this for??
+    public int getReturnValue() {
+        return getSqlErrd()[0];
+    }
+
+    private final static String elevenBlanks = "           ";
+
+    synchronized public String getSqlWarn() {
+        if (sqlWarn_ == null) {
+            if (sqlWarnBytes_ != null) {
+                try {
+                    sqlWarn_ =
+                        bytes2String(sqlWarnBytes_, 0, sqlWarnBytes_.length);
+                } catch (UnsupportedEncodingException e) {
+                    sqlWarn_ = elevenBlanks;
+                }
             } else {
-                sqlWarn_ = bytes2String(sqlWarnBytes_, 0, sqlWarnBytes_.length).toCharArray();
+                sqlWarn_ = elevenBlanks;
             }
-            return sqlWarn_;
-        } catch (java.io.UnsupportedEncodingException e) {
-            sqlWarn_ = new char[]{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}; // 11 blank.
-            return sqlWarn_;
         }
+        return sqlWarn_;
     }
 
     synchronized public String getSqlState() {
@@ -302,7 +311,7 @@ public abstract class Sqlca {
                 cs.setIntX(9, getSqlErrd()[4]);
                 cs.setIntX(10, getSqlErrd()[5]);
                 // SQLWarn: SQL warning flags.
-                cs.setStringX(11, new String(getSqlWarn()));
+                cs.setStringX(11, getSqlWarn());
                 // SQLState: standard SQL state.
                 cs.setStringX(12, sqlState);
                 // MessageFileName: Not used by our driver, so set to null.
@@ -480,14 +489,15 @@ public abstract class Sqlca {
         if (sqlErrd_ == null) {
             return 0L;
         }
-        long    result = sqlErrd_[ LOW_ORDER_UPDATE_COUNT ];
+        long    result = getSqlErrd()[ LOW_ORDER_UPDATE_COUNT ];
         result &= 0xFFFFFFFFL;
-        result |= ((long) sqlErrd_[ HIGH_ORDER_UPDATE_COUNT ] << 32);
+        result |= ((long) getSqlErrd()[ HIGH_ORDER_UPDATE_COUNT ] << 32);
         return result;
     }
 
     public long getRowCount() throws org.apache.derby.client.am.DisconnectException {
-        return ((long) sqlErrd_[ HIGH_ORDER_ROW_COUNT ] << 32) + sqlErrd_[ LOW_ORDER_ROW_COUNT ];
+        return ((long) getSqlErrd()[ HIGH_ORDER_ROW_COUNT ] << 32) +
+                getSqlErrd()[ LOW_ORDER_ROW_COUNT ];
     }
 
     public void setContainsSqlcax(boolean containsSqlcax) {
@@ -500,12 +510,11 @@ public abstract class Sqlca {
 
     public void resetRowsetSqlca(org.apache.derby.client.am.Connection connection,
                                  int sqlCode,
-                                 String sqlState,
-                                 byte[] sqlErrpBytes) {
+                                 String sqlState) {
         connection_ = connection;
         sqlCode_ = sqlCode;
         sqlState_ = sqlState;
-        sqlErrpBytes_ = sqlErrpBytes;
+        sqlErrpBytes_ = null;
     }
 
     public void setRowsetRowCount(long rowCount) {

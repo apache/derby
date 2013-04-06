@@ -118,7 +118,7 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
                 // define event interface and use the event method
                 // only get the rowCount_ if sqlca is not null and rowCount_ is unknown
                 if (sqlca != null && sqlca.containsSqlcax()) {
-                    ((ResultSet) resultSetI).setRowCountEvent(sqlca.getRowCount(netAgent_.targetTypdef_));
+                    ((ResultSet) resultSetI).setRowCountEvent(sqlca.getRowCount());
                 }
 
                 peekCP = peekCodePoint();
@@ -162,7 +162,7 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
             // atomic.  (the only operation that is not atomic is multi-row insert).
             if (((ResultSet) resultSetI).sensitivity_ != ResultSet.sensitivity_sensitive_dynamic__) {
                 if (netSqlca != null && netSqlca.containsSqlcax() && netSqlca.getRowsetRowCount() == 0) {
-                    ((ResultSet) resultSetI).setRowCountEvent(netSqlca.getRowCount(netAgent_.targetTypdef_));
+                    ((ResultSet) resultSetI).setRowCountEvent(netSqlca.getRowCount());
                 }
             }
             resultSetI.completeSqlca(netSqlca);

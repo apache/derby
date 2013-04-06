@@ -264,7 +264,7 @@ public class Typdef implements java.lang.Cloneable {
     // constructor calls should be the corresponding constant from
     // DRDAConstants.
     //
-    protected static final FdocaSimpleDataArray[] environmentTables_ = {
+    private static final FdocaSimpleDataArray[] environmentTables_ = {
         /* 0x00 Empties */
         null,
         /* 0x01 Empties */
@@ -1049,10 +1049,6 @@ public class Typdef implements java.lang.Cloneable {
             ccsidMbcEncoding_ = UTF8ENCODING;
         }
         return ccsidMbcEncoding_;
-    }
-
-    int getByteOrder() {
-        return SignedBinary.BIG_ENDIAN;
     }
 
     public Object clone() {

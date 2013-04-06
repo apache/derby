@@ -896,7 +896,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             try {
                 rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
                         (netAgent_,
-                        (NetStatement) statement.materialStatement_,
+                        (NetStatement) statement.getMaterialStatement(),
                         statement.cachedCursor_,
                         qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
                                    //              CodePoint.LMTBLKPRC
@@ -917,7 +917,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             try {
                 rs = (NetResultSet)ClientDriver.getFactory().newNetResultSet
                         (netAgent_,
-                        (NetStatement) statement.materialStatement_,
+                        (NetStatement) statement.getMaterialStatement(),
                         new NetCursor(netAgent_, qryprctyp),
                         qryprctyp, //protocolType, CodePoint.FIXROWPRC | 
                                    //              CodePoint.LMTBLKPRC

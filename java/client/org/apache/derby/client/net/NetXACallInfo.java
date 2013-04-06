@@ -117,10 +117,6 @@ public class NetXACallInfo {
         return out_;
     }
 
-    public byte[] getCorrelatorToken() {
-        return crrtkn_;
-    }
-
     protected void setUOWID(byte[] uowid) {
         uowid_ = uowid;
     }

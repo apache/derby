@@ -77,10 +77,6 @@ public class NetXAConnection {
         checkPlatformVersion();
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        netCon.finalize();
-    }
-
     public void setCorrelatorToken(byte[] crttoken) {
         netCon.crrtkn_ = crttoken;
     }

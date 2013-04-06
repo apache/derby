@@ -42,7 +42,7 @@ public class NetResultSetRequest extends NetStatementRequest
         // - for forward-only cursors we do not send qryrowset on OPNQRY, fetchSize is ignored.
         //   but qryrowset is sent on EXCSQLSTT for a stored procedure call.
         boolean sendQryrowset =
-                ((NetStatement) resultSet.statement_.materialStatement_).qryrowsetSentOnOpnqry_;
+                ((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_;
 
         boolean sendRtnextdta = false;
         if (sendQryrowset && resultSet.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY &&
@@ -92,7 +92,7 @@ public class NetResultSetRequest extends NetStatementRequest
         //       then the fetch is going fetch next row as opposed to fetch next rowset.
         boolean sendQryrowset =
                 (resultSet.isRowsetCursor_ ||
-                (((NetStatement) resultSet.statement_.materialStatement_).qryrowsetSentOnOpnqry_ &&
+                (((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_ &&
                 (resultSet.sensitivity_ == ResultSet.sensitivity_sensitive_static__ ||
                 ((NetCursor) resultSet.cursor_).blocking_)));
 
@@ -119,7 +119,7 @@ public class NetResultSetRequest extends NetStatementRequest
         // do not send qryrowste if the cursor is a non-rowset, sensitive dynamic cursor
         boolean sendQryrowset =
                 resultSet.isRowsetCursor_ ||
-                (((NetStatement) resultSet.statement_.materialStatement_).qryrowsetSentOnOpnqry_ &&
+                (((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_ &&
                 resultSet.sensitivity_ != resultSet.sensitivity_sensitive_dynamic__);
 
         buildPositioningCNTQRY(protocolOrientation,

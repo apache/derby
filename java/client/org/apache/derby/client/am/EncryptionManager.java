@@ -488,14 +488,6 @@ public class EncryptionManager {
         return plainText;
     }
 
-    public void setInitVector(byte[] initVector) {
-        token_ = initVector;
-    }
-
-    public void setSecKey(byte[] secKey) {
-        secKey_ = secKey;
-    }
-
     public void resetSecurityKeys() {
         token_ = null;
         secKey_ = null;

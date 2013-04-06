@@ -71,7 +71,7 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
         netAgent_ = netAgent;
         netConnection_ = netConnection;
         statement_ = statement;
-        statement_.materialStatement_ = this;
+        statement_.setMaterialStatement(this);
     }
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 1 statements

@@ -21,6 +21,8 @@
 package org.apache.derby.client;
 
 import javax.transaction.xa.Xid;
+import org.apache.derby.client.net.NetXAResource;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class ClientXid implements Xid {
     //
@@ -182,7 +184,7 @@ public class ClientXid implements Xid {
     // return fields of Xid
     //
     public byte[] getData() {
-        return data_;
+        return data_.clone();
     }
 
     public int getGtridLength() {
@@ -201,6 +203,19 @@ public class ClientXid implements Xid {
     }
 
     public boolean equals(Object obj) {
-        return org.apache.derby.client.net.NetXAResource.xidsEqual(this, (javax.transaction.xa.Xid) obj);
+        if (obj == null) {
+            return false;
+        }
+
+        if(obj instanceof Xid) {
+            return NetXAResource.xidsEqual(this, (Xid)obj);
+        } else {
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT(
+                        "ClientXid#equals: object of unexpected type: " +
+                        obj.getClass().getName());
+            }
+            return false;
+        }
     }
 } // class Xid

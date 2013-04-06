@@ -26,6 +26,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import java.io.UnsupportedEncodingException;
+import org.apache.derby.client.am.DisconnectException;
 
 public class NetSqlca extends Sqlca {
     // these are the same variables that are in the Sqlca except ccsids
@@ -57,24 +58,17 @@ public class NetSqlca extends Sqlca {
                        "sqlstate bytes", "SQLSTATE",uee);
        }
        sqlErrpBytes_ = sqlErrpBytes;
-   }
-    protected void setSqlerrd(int[] sqlErrd) {
+    }
+
+    void setSqlerrd(int[] sqlErrd) {
         sqlErrd_ = sqlErrd;
     }
 
-    protected void setSqlwarnBytes(byte[] sqlWarnBytes) {
+    void setSqlwarnBytes(byte[] sqlWarnBytes) {
         sqlWarnBytes_ = sqlWarnBytes;
     }
 
-    protected void setSqlerrmcBytes(byte[] sqlErrmcBytes, int sqlErrmcCcsid) {
+    void setSqlerrmcBytes(byte[] sqlErrmcBytes) {
         sqlErrmcBytes_ = sqlErrmcBytes;
-        sqlErrmcCcsid_ = sqlErrmcCcsid;
-    }
-
-    public long getRowCount(Typdef typdef) throws org.apache.derby.client.am.DisconnectException {
-        int byteOrder = typdef.getByteOrder();
-        long num = (byteOrder == org.apache.derby.client.am.SignedBinary.BIG_ENDIAN) ?
-                super.getRowCount() : ((long) sqlErrd_[1] << 32) + sqlErrd_[0];
-        return num;
     }
 }

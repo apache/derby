@@ -171,8 +171,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
                         if (netResultSet_ != null && 
                                 netSqlca[i].containsSqlcax()) {
                             netResultSet_.setRowCountEvent(
-                                    netSqlca[i].getRowCount(
-                                        qrydscTypdef_));
+                                    netSqlca[i].getRowCount());
                         }
                     } else if (netResultSet_ != null && sqlcode > 0) {
                         String sqlState = netSqlca[i].getSqlState();
@@ -691,7 +690,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
         netSqlca.setSqlerrd(sqlerrd);
         netSqlca.setSqlwarnBytes(sqlwarn);
-        netSqlca.setSqlerrmcBytes(sqlerrmc, sqlerrmcCcsid);
+        netSqlca.setSqlerrmcBytes(sqlerrmc);
     }
 
     // SQLDIAGGRP : FDOCA EARLY GROUP
@@ -801,8 +800,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         String sqldcMsg = parseVCS(qrydscTypdef_); // MESSAGE_TEXT
 
         if (sqldcMsg != null) {
-            sqlca.setSqlerrmcBytes(sqldcMsg.getBytes(), 
-                    netAgent_.targetTypdef_.getByteOrder());
+            sqlca.setSqlerrmcBytes(sqldcMsg.getBytes());
         }
 
         skipFdocaBytes(12);  // COLUMN_NAME + PARAMETER_NAME + EXTENDED_NAMES

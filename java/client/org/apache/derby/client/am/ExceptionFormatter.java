@@ -149,11 +149,11 @@ public class ExceptionFormatter {
         synchronized (printWriter) {
             printWriter.println(header + " DERBY SQLCA from server");
             printWriter.println(header + " SqlCode        = " + sqlca.getSqlCode());
-            printWriter.println(header + " SqlErrd        = " + Utils.getStringFromInts(sqlca.getSqlErrd()));
+            printWriter.println(header + " SqlErrd        = " + sqlca.formatSqlErrd());
             printWriter.println(header + " SqlErrmc       = " + sqlca.getSqlErrmc());
             printWriter.println(header + " SqlErrp        = " + sqlca.getSqlErrp());
             printWriter.println(header + " SqlState       = " + sqlca.getSqlState());
-            printWriter.println(header + " SqlWarn        = " + new String(sqlca.getSqlWarn()));
+            printWriter.println(header + " SqlWarn        = " + sqlca.getSqlWarn());
         }
     }
 

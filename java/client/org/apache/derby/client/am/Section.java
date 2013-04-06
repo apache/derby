@@ -64,13 +64,21 @@ public class Section {
     }
 
     /**
-     * Store the Packagename and consistency token information for reuse. Case 1: if it is generated section, just store
-     * the byte array in PKGNAMCBytes Case 2: for not a generated section, information is stored in the correct byte
-     * array depending on the holdability in SectionManager
+     * Store the Packagename and consistency token information for
+     * reuse.
+     * <ul>
+     *    <li>Case 1: if it is generated section, just store the byte
+     *        array in PKGNAMCBytes.</li>
+     *    <li>Case 2: for not a generated section, information is
+     *        stored in the correct byte array depending on the holdability
+     *        in SectionManager.</li>
+     * </ul>
+     * @arg b the Packagename and consistency token information to store;
+     *      should never be null.
      */
     public void setPKGNAMCBytes(byte[] b) {
         if (isGenerated) {
-            PKGNAMCBytes = b;
+            PKGNAMCBytes = b.clone();
         } else {
             agent_.sectionManager_.setPKGNAMCBytes(b, resultSetHoldability_);
         }
@@ -80,7 +88,9 @@ public class Section {
      * retrieve the package name and consistency token information
      */
     public byte[] getPKGNAMCBytes() {
-        return PKGNAMCBytes;
+        return PKGNAMCBytes != null ?
+               PKGNAMCBytes.clone() :
+               null;
     }
 
     public String getPackageName() {

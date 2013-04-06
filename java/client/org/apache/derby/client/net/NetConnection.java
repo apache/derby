@@ -582,10 +582,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
     protected byte[] getCnnToken() {
         return cnntkn_;
     }
@@ -1029,7 +1025,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     protected void resetStatement_(Statement statement, int type, int concurrency, int holdability) throws SqlException {
-        ((NetStatement) statement.materialStatement_).resetNetStatement(netAgent_, this, type, concurrency, holdability);
+        ((NetStatement) statement.getMaterialStatement()).resetNetStatement(netAgent_, this, type, concurrency, holdability);
     }
 
     protected PreparedStatement newPositionedUpdatePreparedStatement_(String sql,
@@ -1645,7 +1641,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     public byte[] getTargetPublicKey() {
-        return targetPublicKey_.clone();
+        return targetPublicKey_ != null ?
+               targetPublicKey_.clone() :
+               null;
     }
 
     public String getProductID() {

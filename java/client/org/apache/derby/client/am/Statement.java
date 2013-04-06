@@ -33,7 +33,21 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     
     //---------------------navigational members-----------------------------------
 
-    public MaterialStatement materialStatement_ = null;
+    private MaterialStatement materialStatement_ = null;
+
+    /**
+     * @return the materialStatement
+     */
+    public MaterialStatement getMaterialStatement() {
+        return materialStatement_;
+    }
+
+    /**
+     * @param materialStatement the materialStatement to set
+     */
+    public void setMaterialStatement(MaterialStatement materialStatement) {
+        this.materialStatement_ = materialStatement;
+    }
 
     Connection connection_;
     public Section section_;
@@ -1766,7 +1780,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             // sqlMode_ is not set for statements, only for prepared statements
             if (sqlMode_ == isCall__) {
                 updateCount_ = -1L;
-                returnValueFromProcedure_ = sqlca.getSqlErrd()[0];  ////what is this for??
+                returnValueFromProcedure_ = sqlca.getReturnValue();
             }
             // Sqlcode 466 indicates a call statement has issued and result sets returned.
             // This is a good place to set some state variable to indicate result sets are open
@@ -3274,5 +3288,4 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     {
         return ( (rs != null) && (!rs.isClosed()) );
     }
-    
 }
