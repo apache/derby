@@ -230,4 +230,22 @@ public class Utilities {
             waited = System.currentTimeMillis() - started;
         }
     }
+
+    /**
+     * Function to eliminate known package prefixes given a class full path
+     * 
+     * @param test
+     *            class name prefixed with package
+     */
+    public static String formatTestClassNames(String test) {
+        final String COMMON_FUNCTIONTEST_PREFIX = "org.apache.derbyTesting.functionTests.tests.";
+        final String COMMON_TEST_PREFIX = "org.apache.derbyTesting.";
+        if (test.startsWith(COMMON_FUNCTIONTEST_PREFIX)) {
+            return test.substring(COMMON_FUNCTIONTEST_PREFIX.length());
+        } else if (test.startsWith(COMMON_TEST_PREFIX)) {
+            return test.substring(COMMON_TEST_PREFIX.length());
+        } else {
+            return test;
+        }
+    }
 }

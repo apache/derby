@@ -93,7 +93,10 @@ public abstract class BaseTestCase
         {
             startTime = System.currentTimeMillis();
             out.println();
-            out.print(getName() + " ");
+            String  junitClassName = this.getClass().getName();
+            junitClassName=Utilities.formatTestClassNames(junitClassName);
+            out.print(traceClientType());
+            out.print(junitClassName+"."+getName() + " ");
         }
 
         // install a default security manager if one has not already been
@@ -829,5 +832,13 @@ public abstract class BaseTestCase
         AssertionFailedError ae = new AssertionFailedError(msg);
         ae.initCause(t);
         throw ae;
+    }
+
+    private static String traceClientType() {
+       if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
+            return "(emb)";
+        } else {
+            return "(net)";
+        }
     }
 } // End class BaseTestCase
