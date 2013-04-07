@@ -95,7 +95,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
             String inputEnc, String outputEnc, String user)
     {
         super(script, outputEnc);
-
+        setSystemProperty("ij.showNoConnectionsAtStart", "true");
+        setSystemProperty("ij.showNoCountForSelect", "true");
         inputEncoding = (inputEnc == null) ? DEFAULT_ENCODING : inputEnc;
 
 		this.user = user;
