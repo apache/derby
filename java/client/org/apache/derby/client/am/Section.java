@@ -73,7 +73,7 @@ public class Section {
      *        stored in the correct byte array depending on the holdability
      *        in SectionManager.</li>
      * </ul>
-     * @arg b the Packagename and consistency token information to store;
+     * @param b the Packagename and consistency token information to store;
      *      should never be null.
      */
     public void setPKGNAMCBytes(byte[] b) {
