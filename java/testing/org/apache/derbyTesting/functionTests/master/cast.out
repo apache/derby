@@ -25,18 +25,19 @@ ij> --
 
 -- shrink/grow bit and char
 -- no exceptions should be raised.
--- once we have warnings we'll expect
--- a warning when shrinking non space/zeros
+-- expect a warning when shrinking non-space
 
 -- shrink
 values (cast ('hell' as char(2)));
 1 
 --
 he
+WARNING 01004: Data truncation
 ij> values (cast ('hell' as varchar(2)));
 1 
 --
 he
+WARNING 01004: Data truncation
 ij> -- shrink, whitespace only
 values (cast ('he  ' as char(2)));
 1 
@@ -67,11 +68,13 @@ values (cast (X'1111' as char(1) for bit data));
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> -- shrink, zero only
 values (cast (X'1100' as char(1) for bit data));
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> -- expand
 values (cast (X'1111' as char(2) for bit data));
 1   
@@ -87,150 +90,187 @@ values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00011111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00011111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00001111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00011111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00001111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00011111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00001111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000011' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'11111111' as char(1) for bit data);
 1 
 --
 11
+WARNING 01004: Data truncation
 ij> values cast (X'01111111' as char(1) for bit data);
 1 
 --
 01
+WARNING 01004: Data truncation
 ij> values cast (X'00111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00011111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00001111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000011' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'00000001' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'0011111111111111' as char(1) for bit data);
 1 
 --
 00
+WARNING 01004: Data truncation
 ij> values cast (X'1111111100111111' as char(2) for bit data);
 1   
 ----
 1111
+WARNING 01004: Data truncation
 ij> ---------
 --numbers
 ---------
@@ -1369,8 +1409,10 @@ create table x(c1 char(1));
 ij> prepare param1 as 'insert into x values cast(? as char(1))';
 ij> insert into x values cast('12' as char(1));
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> execute param1 using 'values ''34''';
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> select * from x;
 C1  
 ----
@@ -1382,6 +1424,7 @@ ij> insert into x values cast(12 as char(1));
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '12' to length 1.
 ij> execute param1 using 'values 34';
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> select * from x;
 C1  
 ----
@@ -1392,6 +1435,7 @@ ij> insert into x values cast(time('12:12:12') as char(1));
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '12:12:12' to length 1.
 ij> execute param1 using 'values time(''21:12:12'')';
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> select * from x;
 C1  
 ----
@@ -1513,6 +1557,7 @@ ij> values (char('abcde', 4));
 1   
 ----
 abcd
+WARNING 01004: Data truncation
 ij> values (varchar('', 20));
 1                   
 --------------------

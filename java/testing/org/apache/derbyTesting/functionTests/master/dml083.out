@@ -115,6 +115,7 @@ ij> -- PASS:0500 If WARNING, null value eliminated in set function?
          SELECT MAX(GRADE) 
                FROM HU.STAFF;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> -- PASS:0500 If WARNING, null value eliminated in set function?
 -- PASS:0500 OR SQLSTATE = 01003?
 

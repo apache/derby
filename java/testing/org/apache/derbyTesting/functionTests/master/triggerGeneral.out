@@ -835,12 +835,14 @@ ij> select id, cast (cl as clob(60)) from t438 order by 1;
 ID         |2                                                           
 ------------------------------------------------------------------------
 0          |NULL                                                        
+WARNING 01004: Data truncation
 1          |Italy's centre-left leader Romano Prodi insists his poll vic
 2          |free                                                        
 ij> select id, cast (cl as clob(60)) from t438_t order by 1;
 ID         |2                                                           
 ------------------------------------------------------------------------
 0          |NULL                                                        
+WARNING 01004: Data truncation
 1          |Italy's centre-left leader Romano Prodi insists his poll vic
 2          |free                                                        
 ij> drop table t438;

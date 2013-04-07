@@ -166,6 +166,7 @@ ij> -- PASS:0846 If 1 row selected and OSPREY = '-12       '?
 1    
 -----
 -12.0
+WARNING 01004: Data truncation
 ij> -- PASS:0846 If ERROR, string data, right truncation, 0 rows selected?
 
    UPDATE NO_DUCK

@@ -119,6 +119,8 @@ ij(XA)> select * from global_xactTable order by gxid, status, username, type;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
 -------------------------------------------------------------
 (0  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 NULL|IDLE    |NULL |APP       |UserTransaction               
 ij(XA)> disconnect;
 ij> xa_end xa_fail 0;
@@ -147,6 +149,9 @@ ij(XA)> select * from global_xactTable order by gxid, status, username, type;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
 -------------------------------------------------------------
 (2  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 NULL|IDLE    |NULL |APP       |UserTransaction               
 NULL|IDLE    |NULL |NEGATIVETE|UserTransaction               
 ij(XA)> xa_end xa_success 2;
@@ -216,6 +221,10 @@ ij(XA)> select * from global_xactTable order by gxid, status, username, type;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
 -------------------------------------------------------------
 (1  |PREPARED|false|NEGATIVETE|UserTransaction               
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 (3  |IDLE    |NULL |NEGATIVETE|UserTransaction               
 NULL|IDLE    |NULL |APP       |UserTransaction               
 ij(XA)> drop table foo;
@@ -250,6 +259,8 @@ ij(XA)> select * from global_xactTable order by gxid, status, username, type;
 GXID|STATUS  |READ&|USERNAME  |TYPE                          
 -------------------------------------------------------------
 (3  |ACTIVE  |false|NEGATIVETE|UserTransaction               
+WARNING 01004: Data truncation
+WARNING 01004: Data truncation
 NULL|IDLE    |NULL |APP       |UserTransaction               
 ij(XA)> -- ERROR: bad flag
 xa_end xa_noflags 3;

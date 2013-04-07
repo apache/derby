@@ -180,6 +180,7 @@ ij> insert into b values(cast(X'0102030405' as blob(5)));
 1 row inserted/updated/deleted
 ij> insert into b values(cast(X'010203040506' as blob(5)));
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> -- clob/nclob
 --   ok in spite of not being cast
 insert into c values('1234');
@@ -201,6 +202,7 @@ ij> insert into c values(cast('12345' as clob(5)));
 1 row inserted/updated/deleted
 ij> insert into c values(cast('123456' as clob(5)));
 1 row inserted/updated/deleted
+WARNING 01004: Data truncation
 ij> insert into n values(cast('1234' as nclob(5)));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> insert into n values(cast('12345' as nclob(5)));

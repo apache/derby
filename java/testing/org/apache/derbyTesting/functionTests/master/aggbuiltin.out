@@ -391,12 +391,14 @@ create table tmp (x int, y smallint);
 0 rows inserted/updated/deleted
 ij> insert into tmp (x, y) select avg(i), avg(s) from t;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
 0          |107   
 ij> insert into tmp (x, y) select avg(i), avg(s) from t group by b;
 3 rows inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
@@ -1077,12 +1079,14 @@ create table tmp (x int, y smallint);
 0 rows inserted/updated/deleted
 ij> insert into tmp (x, y) select count(i), count(c) from t;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
 15         |15    
 ij> insert into tmp (x, y) select count(i), count(c) from t group by b;
 3 rows inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
@@ -1684,12 +1688,14 @@ create table tmp (x int, y smallint);
 0 rows inserted/updated/deleted
 ij> insert into tmp (x, y) select sum(i), sum(s) from t;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
 1          |1600  
 ij> insert into tmp (x, y) select sum(i), sum(s) from t group by b;
 3 rows inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y     
 ------------------
@@ -2247,12 +2253,14 @@ create table tmp (x int, y char(20));
 0 rows inserted/updated/deleted
 ij> insert into tmp (x, y) select max(i), max(c) from t;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y                   
 --------------------------------
 1          |goodbye             
 ij> insert into tmp (x, y) select max(i), max(c) from t group by b;
 3 rows inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y                   
 --------------------------------
@@ -2778,12 +2786,14 @@ create table tmp (x int, y char(20));
 0 rows inserted/updated/deleted
 ij> insert into tmp (x, y) select min(i), min(c) from t;
 1 row inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y                   
 --------------------------------
 0          |duplicate           
 ij> insert into tmp (x, y) select min(i), min(c) from t group by b;
 3 rows inserted/updated/deleted
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select * from tmp;
 X          |Y                   
 --------------------------------
