@@ -542,7 +542,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			** they don't have to be in any order.
 			**
 			** NOTE: We can logically delete the current element when
-			** traversing the Vector in the next loop,
+            ** traversing the list in the next loop,
 			** so we must build an array of elements to
 			** delete while looping and then delete them
 			** in reverse order after completing the loop.
@@ -4011,7 +4011,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		PredicateWrapperList pwl = predArray[position];
 		List uniquepreds = pwl.createLeadingUnique();
 		
-		/* uniqueprds is a vector of predicate (along with wrapper) that I'm
+        /* uniqueprds is a list of predicates (along with wrapper) that I'm
 		   going  to use to get statistics from-- we now have to delete these
 		   predicates from all the predicateWrapperLists!
 		*/

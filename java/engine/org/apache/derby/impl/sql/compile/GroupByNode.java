@@ -1248,12 +1248,14 @@ public class GroupByNode extends SingleChildResultSetNode
 
                         // Holder list for the FromBaseTable. We expect no more
                         // than one table, hence initial capacity is 1.
-						ArrayList tableVector = new ArrayList(1);
+                        ArrayList fbtHolder = new ArrayList(1);
 
-						boolean minMaxOptimizationPossible = isOrderedOn(crs, false, tableVector);
+                        boolean minMaxOptimizationPossible = isOrderedOn(crs, false, fbtHolder);
 						if (SanityManager.DEBUG)
 						{
-							SanityManager.ASSERT(tableVector.size() <= 1, "bad number of FromBaseTables returned by isOrderedOn() -- "+tableVector.size());
+                            SanityManager.ASSERT(fbtHolder.size() <= 1,
+                                "bad number of FromBaseTables returned by isOrderedOn() -- " +
+                                fbtHolder.size());
 						}
 
 						if (minMaxOptimizationPossible)
@@ -1292,7 +1294,7 @@ public class GroupByNode extends SingleChildResultSetNode
 							}
 
                             FromBaseTable fbt =
-                                    (FromBaseTable) tableVector.get(0);
+                                    (FromBaseTable) fbtHolder.get(0);
 							MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)ad;
 
 							/*  MAX   ASC      NULLABLE 

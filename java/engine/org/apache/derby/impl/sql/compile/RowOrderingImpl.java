@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -32,7 +33,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 class RowOrderingImpl implements RowOrdering {
 
-	/* This vector contains ColumnOrderings */
+    /** List of ColumnOrderings. */
 	private final ArrayList ordering = new ArrayList();
 
 	/*
@@ -45,15 +46,15 @@ class RowOrderingImpl implements RowOrdering {
 	*/
 	ColumnOrdering	columnsAlwaysOrdered;
 
-	/*
-	** This vector contains table numbers for tables that are always ordered.
-	** This happens for one-row tables.
-	*/
+    /**
+     * List of table numbers for tables that are always ordered.
+     * This happens for one-row tables.
+     */
     private final ArrayList alwaysOrderedOptimizables = new ArrayList();
 
 	ColumnOrdering	currentColumnOrdering;
 
-	/* This vector contains unordered Optimizables */
+    /** List of unordered Optimizables. */
     private final ArrayList unorderedOptimizables = new ArrayList();
 
 	RowOrderingImpl() {
@@ -79,7 +80,7 @@ class RowOrderingImpl implements RowOrdering {
 		/*
 		** Return true if the table is always ordered.
 		*/
-		if (vectorContainsOptimizable(tableNumber, alwaysOrderedOptimizables))
+        if (alwaysOrdered(tableNumber))
 		{
 			return true;
 		}
@@ -120,7 +121,7 @@ class RowOrderingImpl implements RowOrdering {
 		/*
 		** Return true if the table is always ordered.
 		*/
-		if (vectorContainsOptimizable(tableNumber, alwaysOrderedOptimizables))
+        if (alwaysOrdered(tableNumber))
 		{
 			return true;
 		}
@@ -152,31 +153,6 @@ class RowOrderingImpl implements RowOrdering {
 		}
 
 		return ordered;
-	}
-
-	/**
-	 * Return true if the given vector of Optimizables contains an Optimizable
-	 * with the given table number.
-	 */
-	private boolean vectorContainsOptimizable(int tableNumber, ArrayList vec)
-	{
-		int i;
-
-		for (i = vec.size() - 1; i >= 0; i--)
-		{
-			Optimizable optTable =
-							(Optimizable) vec.get(i);
-
-			if (optTable.hasTableNumber())
-			{
-				if (optTable.getTableNumber() == tableNumber)
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	/** @see RowOrdering#addOrderedColumn */
@@ -280,10 +256,18 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#alwaysOrdered */
 	public boolean alwaysOrdered(int tableNumber)
 	{
-		return vectorContainsOptimizable(
-										tableNumber,
-										alwaysOrderedOptimizables
-										);
+        Iterator it = alwaysOrderedOptimizables.iterator();
+        while (it.hasNext()) {
+            Optimizable optTable = (Optimizable) it.next();
+
+            if (optTable.hasTableNumber()) {
+                if (optTable.getTableNumber() == tableNumber) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
 	}
 
 	/** @see RowOrdering#removeOptimizable */
@@ -310,32 +294,27 @@ class RowOrderingImpl implements RowOrdering {
 		columnsAlwaysOrdered.removeColumns(tableNumber);
 
 		/* Also remove from list of unordered optimizables */
-		removeOptimizableFromVector(tableNumber, unorderedOptimizables);
+        removeOptimizable(tableNumber, unorderedOptimizables);
 
 		/* Also remove from list of always ordered optimizables */
-		removeOptimizableFromVector(tableNumber, alwaysOrderedOptimizables);
+        removeOptimizable(tableNumber, alwaysOrderedOptimizables);
 	}
 
 	/**
 	 * Remove all optimizables with the given table number from the
-	 * given vector of optimizables.
+     * given list of optimizables.
 	 */
-	private void removeOptimizableFromVector(int tableNumber, ArrayList vec)
+    private void removeOptimizable(int tableNumber, ArrayList list)
 	{
-		int i;
-
-		for (i = vec.size() - 1; i >= 0; i--)
+        Iterator it = list.iterator();
+        while (it.hasNext())
 		{
-			Optimizable optTable =
-							(Optimizable) vec.get(i);
+            Optimizable optTable = (Optimizable) it.next();
 
-			if (optTable.hasTableNumber())
-			{
-				if (optTable.getTableNumber() == tableNumber)
-				{
-					vec.remove(i);
-				}
-			}
+            if (optTable.hasTableNumber()
+                    && (optTable.getTableNumber() == tableNumber)) {
+                it.remove();
+            }
 		}
 	}
 

@@ -492,17 +492,17 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @param	crs					The specified ColumnReference[]
 	 * @param	permuteOrdering		Whether or not the order of the CRs in the array can be permuted
-	 * @param	fbtVector			Vector that is to be filled with the FromBaseTable	
+     * @param   fbtHolder           List that is to be filled with the FromBaseTable
 	 *
 	 * @return	Whether the underlying ResultSet tree
 	 * is ordered on the specified column.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtVector)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
 				throws StandardException
 	{
-		return childResult.isOrderedOn(crs, permuteOrdering, fbtVector);
+        return childResult.isOrderedOn(crs, permuteOrdering, fbtHolder);
 	}
 
 	/**

@@ -876,7 +876,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
     )
 		throws StandardException
 	{
-		ArrayList							fkVector = new ArrayList();
+        ArrayList                           fkList = new ArrayList();
 		int 								type;
 		UUID[] 								uuids = null;
 		long[] 								conglomNumbers = null;
@@ -987,7 +987,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			ConglomerateDescriptor pkIndexConglom = pktd.getConglomerateDescriptor(pkuuid);
 
 			TableDescriptor refTd = cd.getTableDescriptor();
-			fkVector.add(new FKInfo(
+            fkList.add(new FKInfo(
 									fkNames,							// foreign key names
 									refTd.getName(),				// table being modified
 									statementType,						// INSERT|UPDATE|DELETE
@@ -1004,14 +1004,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		}
 		
-		/*
-		** Now convert the vector into an array.
-		*/
-        if (!fkVector.isEmpty()) {
-            fkInfo = (FKInfo[]) fkVector.toArray(new FKInfo[fkVector.size()]);
+        // Now convert the list into an array.
+        if (!fkList.isEmpty()) {
+            fkInfo = (FKInfo[]) fkList.toArray(new FKInfo[fkList.size()]);
         }
 
-		//convert the ref action info vectors to  to arrays
+        // Convert the ref action info lists to arrays.
 		int size = refActions.size();
 		if (size > 0)
 		{
@@ -1686,11 +1684,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	)
 					throws StandardException
 	{
-		ArrayList conglomVector = new ArrayList();
+        ArrayList conglomerates = new ArrayList();
 
-		DMLModStatementNode.getXAffectedIndexes(td, updatedColumns, colBitSet, conglomVector );
+        DMLModStatementNode.getXAffectedIndexes(
+                td, updatedColumns, colBitSet, conglomerates);
 
-		markAffectedIndexes( conglomVector );
+        markAffectedIndexes(conglomerates);
 	}
 	/**
 	  *	Marks which indexes are affected by an UPDATE of the
@@ -1705,7 +1704,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  *
 	  *	@param	updatedColumns	a list of updated columns
 	  *	@param	colBitSet		OUT: evolving bitmap of affected columns
-	  *	@param	conglomVector	OUT: vector of affected indices
+      * @param  conglomerates   OUT: list of affected indices
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
@@ -1713,8 +1712,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	(
 		TableDescriptor		baseTable,
 		ResultColumnList	updatedColumns,
-		FormatableBitSet				colBitSet,
-		List				conglomVector
+        FormatableBitSet    colBitSet,
+        List                conglomerates
 	)
 		throws StandardException
 	{
@@ -1741,7 +1740,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					cd.getIndexDescriptor().baseColumnPositions())))
 			{ continue; }
 
-			if ( conglomVector != null )
+            if ( conglomerates != null )
 			{
 				int i;
 				for (i = 0; i < distinctCount; i++)
@@ -1752,7 +1751,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				if (i == distinctCount)		// first appearence
 				{
 					distinctConglomNums[distinctCount++] = cd.getConglomerateNumber();
-					conglomVector.add( cd );
+                    conglomerates.add( cd );
 				}
 			}
 

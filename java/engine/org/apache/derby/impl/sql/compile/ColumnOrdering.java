@@ -28,16 +28,16 @@ import org.apache.derby.iapi.util.ReuseFactory;
 
 class ColumnOrdering {
 
-	/* See RowOrdering for possible values */
+    /** See {@link RowOrdering} for possible values. */
 	int	myDirection;
 
-	/* A vector of column numbers (Integers) */
+    /** A list of column numbers (Integers). */
     private final ArrayList columns = new ArrayList();
 
-	/*
-	** A vector of table numbers (Integers), corresponding to the column
-	** vector by position.
-	*/
+    /**
+     * A list of table numbers (Integers), corresponding to the {@code columns}
+     * list by position.
+     */
     private final ArrayList tables = new ArrayList();
 
 	/**

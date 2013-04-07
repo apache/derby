@@ -1407,7 +1407,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * FromBaseTable that match the columns in the given update column list.
 	 * If the list is null, it means all the columns are updatable.
 	 *
-	 * @param updateColumns		A Vector representing the columns
+     * @param updateColumns     A list representing the columns
 	 *							that can be updated.
 	 */
 	protected void markUpdatableByCursor(List updateColumns)

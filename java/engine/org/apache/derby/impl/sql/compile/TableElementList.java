@@ -171,7 +171,7 @@ public class TableElementList extends QueryTreeNodeVector
         HashSet columnNames = new HashSet(size + 2, 0.999f);
         HashSet constraintNames = new HashSet(size + 2, 0.999f);
 		//all the primary key/unique key constraints for this table
-        ArrayList constraintsVector = new ArrayList();
+        ArrayList constraints = new ArrayList();
 
 		//special case for alter table (td is not null in case of alter table)
 		if (td != null)
@@ -191,7 +191,7 @@ public class TableElementList extends QueryTreeNodeVector
 					if (cd.getConstraintType() == DataDictionary.PRIMARYKEY_CONSTRAINT ||
 					cd.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT)
                     {
-                        constraintsVector.add(cd);
+                        constraints.add(cd);
                     }
 				}
 			}
@@ -252,11 +252,11 @@ public class TableElementList extends QueryTreeNodeVector
 
 			cdn.bind(ddlStmt, dd);
 
-			//if constraint is primary key or unique key, add it to the vector
+            // If constraint is primary key or unique key, add it to the list.
 			if (cdn.getConstraintType() == DataDictionary.PRIMARYKEY_CONSTRAINT ||
 			cdn.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT)
 			{
-				/* In case of create table, the vector can have only ConstraintDefinitionNode
+                /* In case of create table, the list can have only ConstraintDefinitionNode
 				* elements. In case of alter table, it can have both ConstraintDefinitionNode
 				* (for new constraints) and ConstraintDescriptor(for pre-existing constraints).
 				*/
@@ -265,10 +265,10 @@ public class TableElementList extends QueryTreeNodeVector
 				String destName = null;
 				String[] destColumnNames = null;
 
-				for (int i=0; i<constraintsVector.size();i++)
+                for (int i = 0; i < constraints.size(); i++)
 				{
 
-					destConstraint = constraintsVector.get(i);
+                    destConstraint = constraints.get(i);
 					if (destConstraint instanceof ConstraintDefinitionNode)
 					{
 						ConstraintDefinitionNode destCDN = (ConstraintDefinitionNode)destConstraint;
@@ -287,7 +287,7 @@ public class TableElementList extends QueryTreeNodeVector
 						throw StandardException.newException(SQLState.LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS,
 						cdn.getConstraintMoniker(), destName);
 				}
-				constraintsVector.add(cdn);
+                constraints.add(cdn);
 			}
 
 			/* Make sure that there are no duplicate constraint names in the list */

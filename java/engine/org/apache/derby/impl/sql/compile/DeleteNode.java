@@ -690,12 +690,13 @@ public class DeleteNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-		ArrayList conglomVector = new ArrayList();
+        ArrayList conglomerates = new ArrayList();
 		relevantTriggers = new GenericDescriptorList();
 
-		FormatableBitSet	columnMap = DeleteNode.getDeleteReadMap(baseTable,conglomVector, relevantTriggers, needsDeferredProcessing);
-		
-		markAffectedIndexes( conglomVector );
+        FormatableBitSet columnMap = DeleteNode.getDeleteReadMap(baseTable,
+                conglomerates, relevantTriggers, needsDeferredProcessing);
+
+        markAffectedIndexes(conglomerates);
 
 		adjustDeferredFlag( needsDeferredProcessing[0] );
 
@@ -901,7 +902,7 @@ public class DeleteNode extends DMLModStatementNode
 	  *      reference.
 	  *	6)	adds the triggers to an evolving list of triggers
 	  *
-	  *	@param	conglomVector		OUT: vector of affected indices
+      * @param  conglomerates       OUT: list of affected indices
 	  *	@param	relevantTriggers	IN/OUT. Passed in as an empty list. Filled in as we go.
 	  *	@param	needsDeferredProcessing			IN/OUT. true if the statement already needs
 	  *											deferred processing. set while evaluating this
@@ -915,7 +916,7 @@ public class DeleteNode extends DMLModStatementNode
 	private static FormatableBitSet getDeleteReadMap
 	(
 		TableDescriptor				baseTable,
-		List						conglomVector,
+        List                        conglomerates,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing
 	)
@@ -939,7 +940,8 @@ public class DeleteNode extends DMLModStatementNode
 		** Adding indexes also takes care of the replication 
 		** requirement of having the primary key.
 		*/
-		DMLModStatementNode.getXAffectedIndexes(baseTable,  null, columnMap, conglomVector );
+        DMLModStatementNode.getXAffectedIndexes(
+                baseTable, null, columnMap, conglomerates);
 
 		/*
 	 	** If we have any DELETE triggers, then do one of the following

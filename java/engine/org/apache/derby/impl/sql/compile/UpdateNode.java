@@ -888,16 +888,16 @@ public final class UpdateNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-		ArrayList conglomVector = new ArrayList();
+        ArrayList conglomerates = new ArrayList();
 		relevantCdl = new ConstraintDescriptorList();
 		relevantTriggers =  new GenericDescriptorList();
 
 		FormatableBitSet	columnMap = getUpdateReadMap
             (
-             dd, baseTable, updateColumnList, conglomVector, relevantCdl,
+             dd, baseTable, updateColumnList, conglomerates, relevantCdl,
              relevantTriggers, needsDeferredProcessing, affectedGeneratedColumns );
 
-		markAffectedIndexes( conglomVector );
+        markAffectedIndexes(conglomerates);
 
 		adjustDeferredFlag( needsDeferredProcessing[0] );
 
@@ -971,7 +971,7 @@ public final class UpdateNode extends DMLModStatementNode
 	  *	@param	dd	Data Dictionary
 	  *	@param	baseTable	Table on which update is issued
 	  *	@param	updateColumnList	a list of updated columns
-	  *	@param	conglomVector		OUT: vector of affected indices
+      * @param  conglomerates       OUT: list of affected indices
 	  *	@param	relevantConstraints	IN/OUT. Empty list is passed in. We hang constraints on it as we go.
 	  *	@param	relevantTriggers	IN/OUT. Passed in as an empty list. Filled in as we go.
 	  *	@param	needsDeferredProcessing	IN/OUT. true if the statement already needs
@@ -989,7 +989,7 @@ public final class UpdateNode extends DMLModStatementNode
 		DataDictionary		dd,
 		TableDescriptor				baseTable,
 		ResultColumnList			updateColumnList,
-		List						conglomVector,
+        List                        conglomerates,
 		ConstraintDescriptorList	relevantConstraints,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing,
@@ -1025,7 +1025,8 @@ public final class UpdateNode extends DMLModStatementNode
 		** columns where 1 or more columns in the index
 		** are going to be modified.
 		*/
-		DMLModStatementNode.getXAffectedIndexes(baseTable, updateColumnList, columnMap, conglomVector );
+        DMLModStatementNode.getXAffectedIndexes(
+                baseTable, updateColumnList, columnMap, conglomerates);
  
 		/* 
 		** Add all columns needed for constraints.  We don't

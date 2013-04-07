@@ -2863,7 +2863,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Mark all the columns in the select sql that this result column list represents
 	 * as updatable if they match the columns in the given update column list.
 	 *
-	 * @param updateColumns		A Vector representing the columns
+     * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
 	void markColumnsInSelectListUpdatableByCursor(List updateColumns)
@@ -2925,7 +2925,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Mark as updatable all the columns in this result column list
 	 * that match the columns in the given update column list
 	 *
-	 * @param updateColumns		A Vector representing the columns
+     * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
 	void markUpdatableByCursor(List updateColumns)

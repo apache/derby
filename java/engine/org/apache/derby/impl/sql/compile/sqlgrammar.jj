@@ -11336,17 +11336,17 @@ rowOrStatement() :
 List
 triggerReferencingClause() throws StandardException :
 {
-	ArrayList vector = new ArrayList();
+	ArrayList expressions = new ArrayList();
 }
 {
-	<REFERENCING> triggerReferencingExpression(vector) ( triggerReferencingExpression(vector) )*
+	<REFERENCING> triggerReferencingExpression(expressions) ( triggerReferencingExpression(expressions) )*
 	{
-		return vector;
+		return expressions;
 	}
 }
 
 void
-triggerReferencingExpression(List vector) throws StandardException :
+triggerReferencingExpression(List expressions) throws StandardException :
 {
 	String	identifier;
 	boolean isNew = true;
@@ -11365,7 +11365,7 @@ triggerReferencingExpression(List vector) throws StandardException :
 
 	<AS> identifier = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		vector.add(new TriggerReferencingStruct(isRow, isNew, identifier));
+		expressions.add(new TriggerReferencingStruct(isRow, isNew, identifier));
 	}
 }
  
