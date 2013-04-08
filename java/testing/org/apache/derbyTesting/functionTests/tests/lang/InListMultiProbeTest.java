@@ -903,6 +903,97 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
 
     // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
     //  with >256 rows)
+    // Following test shows that we use index scan for 10, 24 and 10K rows
+    //  after running the update statistics. This test does not use
+    //  parameters in the WHERE clause of the SELECT sql.
+    public void testDerby6045WithUpdateStatistics()
+        throws SQLException
+    {
+        //The reason behind running the test with 2 sets of small rows,
+        // namely 10 and 24 rows is in DERBY-6045, user found that we 
+        // used index scan for 10 rows but switched to table scan for 
+        // 24 rows. 10000 rows case used index scan. This test shows
+        // that after fixing DERBY-6045, we use index scan for all
+        // three cases below
+        //In the following call, first param is number of rows in the
+        // table. 2nd param says to run update statisitcs after 
+        // inserting data in the table. 3rd param says do not use
+        // parameter in the SELECT sql to identify the rows in the
+        // where clause
+    	helperDerby6045(10, true, false);
+    	helperDerby6045(24, true, false);
+    	helperDerby6045(10000, true, false);
+    }
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows that we use index scan for 10, 24 and 10K rows
+    //  even though update statistics was not run. This test does not use
+    //  parameters in the WHERE clause of the SELECT sql.
+    public void testDerby6045WithoutUpdateStatistics()
+        throws SQLException
+    {
+        //The reason behind running the test with 2 sets of small rows,
+        // namely 10 and 24 rows is in DERBY-6045, user found that we 
+        // used index scan for 10 rows but switched to table scan for 
+        // 24 rows. 10000 rows case used index scan. This test shows
+        // that after fixing DERBY-6045, we use index scan for all
+        // three cases below
+        //In the following call, first param is number of rows in the
+        // table. 2nd param says to DO Not run update statisitcs after
+        // inserting data in the table. 3rd param says do not use
+        // parameter in the SELECT sql to identify the rows in the
+        // WHERE clause
+    	helperDerby6045(10, false, false);
+    	helperDerby6045(24, false, false);
+    	helperDerby6045(10000, false, false);
+    }
+
+    // Following method will create a brand new table with primary key,
+    //  insert passed number of rows, run update statistics if the
+    //  passed parameter to method requests for one and then run
+    //  three queries and check that they all use index scan
+    // @param numberOfRows number of rows to be inserted into a brand new table
+    // @param updateStatistics if True, run update statistics after inserting
+    //    data into the table
+    // @param useParameterMarkers if True, use parameter in the SELECT sql 
+    //    to identify the rows in the WHERE clause
+    public void helperDerby6045(int numberOfRows, 
+            boolean updateStatistics,
+            boolean useParameterMarkers)
+        throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        dropTable(DERBY_6045_DATA_TABLE);
+        // Create the test table, primary key and insert data
+        s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE);
+        s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE +
+            " ADD CONSTRAINT kb_variable_term_term_id_pk" + 
+            " PRIMARY KEY (term_id)");
+
+        //insert requested number of rows in the table
+        PreparedStatement ps = s.getConnection().prepareStatement(
+            "insert into " + DERBY_6045_DATA_TABLE +
+            " VALUES (?, '?var0', 1)");
+        for (int i=1; i<=numberOfRows; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+        
+        if (updateStatistics) {
+            s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
+        }
+
+        runThreeQueries(0, useParameterMarkers);
+
+        dropTable(DERBY_6045_DATA_TABLE);
+        ps.close();
+        s.close();
+    }
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
     // Following test shows that we should continue using index scan 
     //  even after adding extra rows to the table.
     public void testDerby6045()
@@ -925,7 +1016,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             ps.setInt(1, i);
             ps.executeUpdate();
         }
-        runThreeQueries(0);
+        runThreeQueries(0, false);
 
         //Add 14 more rows
         for (int i=11; i<=25; i++) {
@@ -938,7 +1029,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         // exactly like the earlier queries in this fixture, we would 
         // end up using the earloer query plan rather than creating a 
         // new query plan which is going recognize the additional rows.
-        runThreeQueries(1);
+        runThreeQueries(1, false);
 
         //Add 10K more rows
         for (int i=26; i<=10000; i++) {
@@ -949,7 +1040,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         // it looks different from the queries run earlier and hence they will
         // get compiled rather than existing query plan getting picked up from
         // statement cache.
-        runThreeQueries(2);
+        runThreeQueries(2, false);
         s.close();
     }
     
@@ -987,7 +1078,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      	         " VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ")");
          }
          s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
-         runThreeQueries(0);
+         runThreeQueries(0, false);
          s.close();
     }
 
@@ -1018,7 +1109,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     		" VALUES (" + i + ", \'?var"+i+"\',"+ (((i %2) == 0) ? 1 : 4) + ")");
         }
         s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'VARIABLE_TERM', null)");
-        runThreeQueries(0);
+        runThreeQueries(0, false);
         s.close();
     }
 
@@ -1028,11 +1119,13 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     // plans to be created based on the current number of rows in the table
     // @param numOfWhiteSpace Number of white spaces that will be put in 
     //  SELECT queries below
-    private void runThreeQueries(int numOfWhiteSpace)
+    private void runThreeQueries(int numOfWhiteSpace, 
+            boolean useParameterMarkers)
         throws SQLException
     {
         RuntimeStatisticsParser rtsp;
         Statement s = createStatement();
+        PreparedStatement ps;
         
         String whiteSpace = "";
         for (int i=1; i<=numOfWhiteSpace; i++)
@@ -1040,21 +1133,55 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             whiteSpace = whiteSpace + " ";
         }
         
-        s.executeQuery("SELECT * FROM " + whiteSpace + DERBY_6045_DATA_TABLE + 
-            " WHERE TERM_ID = 11");
+        if (useParameterMarkers) {
+            ps = prepareStatement("SELECT * FROM " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE +
+                    " WHERE TERM_ID = ?");
+            ps.setInt(1, 11);
+            ps.execute();
+        } else {
+            s.executeQuery("SELECT * FROM " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE + 
+                    " WHERE TERM_ID = 11");
+        }
+        
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
 
-        s.executeQuery("SELECT  *  FROM  " + whiteSpace + DERBY_6045_DATA_TABLE + 
-            " WHERE (TERM_ID = 11) OR " +
-            "(TERM_ID =21) OR (TERM_ID = 31)");
+        if (useParameterMarkers) {
+            ps = prepareStatement("SELECT * FROM " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE +
+                    " WHERE (TERM_ID = ?) OR " +
+                    "(TERM_ID = ?) OR (TERM_ID = ?)");
+            ps.setInt(1, 11);
+            ps.setInt(2, 21);
+            ps.setInt(3, 31);
+            ps.execute();
+        } else {
+            s.executeQuery("SELECT  *  FROM  " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE + 
+                    " WHERE (TERM_ID = 11) OR " +
+                    "(TERM_ID =21) OR (TERM_ID = 31)");
+        }
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
 
-        s.executeQuery("SELECT  *  FROM " + whiteSpace + DERBY_6045_DATA_TABLE 
-            + " WHERE (TERM_ID IN (11, 21, 31))");
+        if (useParameterMarkers) {
+            ps = prepareStatement("SELECT * FROM " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE +
+                    " WHERE (TERM_ID IN (?, ?, ?))");
+            ps.setInt(1, 11);
+            ps.setInt(2, 21);
+            ps.setInt(3, 31);
+            ps.execute();
+        } else {
+            s.executeQuery("SELECT  *  FROM " + whiteSpace + 
+                    DERBY_6045_DATA_TABLE + 
+                    " WHERE (TERM_ID IN (11, 21, 31))");
+        }
         rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
         assertTrue(rtsp.usedIndexScan());
+        s.close();
     }
 
     public void testDerby3603()
