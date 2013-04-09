@@ -710,7 +710,7 @@ public final class TestConfiguration {
      * name.  This decorator expects the database file to be local so it can be
      * removed.
      * @param test Test to be decorated
-     * @param dbName We sometimes need to know outside to be able topass it on
+     * @param dbName We sometimes need to know outside to be able to pass it on
      *               to other VMs/processes.
      * @return decorated test.
      */

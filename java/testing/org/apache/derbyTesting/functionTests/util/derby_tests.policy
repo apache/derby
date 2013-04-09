@@ -134,6 +134,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
 
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
+
   // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
   permission java.sql.SQLPermission "callAbort";
 };
@@ -145,6 +148,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
+  permission java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "write";
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
@@ -153,11 +157,21 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   // Need to be able to write to trace file for NetworkServerControlApiTest
-  permission java.io.FilePermission "${user.dir}${/}system${/}trace", "write"; 
-  permission java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "write"; 
+  permission java.io.FilePermission "${user.dir}${/}system${/}trace", "read,write";
+  permission java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "read,write";
+
+  // Need read/write to trace file for RestrictiveFilePermissionsTest
+  permission java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr", "read,write";
+  permission java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax", "read,write";
+  permission java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_restr${/}-", "read,write";
+  permission java.io.FilePermission "${user.dir}${/}system${/}RFPT_db_tracefiles_lax${/}-", "read,write";
+
     // Needed for NetworkServerMBean access (see JMX section above)
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
-  
+
+  // For NetworkServerControlApiTest:
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -263,6 +277,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   
   // These permissions are needed when testing code instrumented with EMMA.
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -335,6 +352,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
+
 };
 
 // JUnit jar file tries to read junit.properties in the user's
