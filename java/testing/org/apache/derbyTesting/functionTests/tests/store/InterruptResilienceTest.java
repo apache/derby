@@ -135,8 +135,23 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         thisConf = TestConfiguration.getCurrent();
         threadNo = 0;    // counter for multiple threads tests
 
-        // test that we recover from login timeouts
-        DriverManager.setLoginTimeout( 10 );
+        // DERBY-6122
+        //
+        // Set a big enough timeout such that no fixture in this test encounters
+        // a timeout.  The point is to force the Derby tests to exercise a new 
+        // block of code added to Driver20 to handle interrupts raised during 
+        // login attempts. As InterruptResilienceTest runs, interrupts are 
+        // supposed to happen--although it's hard to force the exact timing of 
+        // the interrupts. The login timeout added to this test is only 
+        // supposed to test the following case:
+        //
+        // 1) An interrupt occurs within the time limit set 
+        //    by DriverManager.setLoginTimeout()
+        //
+        // 2) The new code added to Driver20 fields the interrupt and continues
+        //    attempting to log in.
+        //
+        DriverManager.setLoginTimeout( 1000 );
         
         allDone = false; // flag for threads to terminate
     }
