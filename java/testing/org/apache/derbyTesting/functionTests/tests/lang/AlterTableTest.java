@@ -740,7 +740,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(rs, expRS, true);
     }
 
-    public void testDropConstraint() throws Exception {
+    // Disable testDropConstraint because it tests 
+    // system tables which might change.
+    public void xtestDropConstraint() throws Exception {
         Statement st = createStatement();
         createTestObjects(st);
         // drop constraint negative tests drop non-existent constraint
