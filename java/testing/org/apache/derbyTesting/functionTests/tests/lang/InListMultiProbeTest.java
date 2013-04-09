@@ -904,7 +904,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
     //  with >256 rows)
     // Following test shows that we use index scan for 10, 24 and 10K rows
-    //  after running the update statistics. This test does not use
+    //  after running the update statistics. This test DOES NOT use
     //  parameters in the WHERE clause of the SELECT sql.
     public void testDerby6045WithUpdateStatistics()
         throws SQLException
@@ -928,7 +928,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
     //  with >256 rows)
     // Following test shows that we use index scan for 10, 24 and 10K rows
-    //  even though update statistics was not run. This test does not use
+    //  even though update statistics was not run. This test DOES NOT use
     //  parameters in the WHERE clause of the SELECT sql.
     public void testDerby6045WithoutUpdateStatistics()
         throws SQLException
@@ -947,6 +947,52 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     	helperDerby6045(10, false, false);
     	helperDerby6045(24, false, false);
     	helperDerby6045(10000, false, false);
+    }
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows that we use index scan for 10, 24 and 10K rows
+    //  after running the update statistics. This test USES parameters
+    //  in the WHERE clause of the SELECT sql.
+    public void testDerby6045WithUpdateStatisticsAndParams()
+        throws SQLException
+    {
+        //The reason behind running the test with 2 sets of small rows,
+        // namely 10 and 24 rows is in DERBY-6045, user found that we 
+        // used index scan for 10 rows but switched to table scan for 
+        // 24 rows. 10000 rows case used index scan. This test shows
+        // that after fixing DERBY-6045, we use index scan for all
+        // three cases below.
+        //In the following call, first param is number of rows in the
+        // table. 2nd param says to run update statisitcs after 
+        // inserting data in the table. 3rd param says to use parameters
+        // in the SELECT sql to identify the rows in the where clause
+        helperDerby6045(10, true, true);
+        helperDerby6045(24, true, true);
+        helperDerby6045(10000, true, true);
+    }
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows that we use index scan for 10, 24 and 10K rows
+    //  even though no update statistics were run. This test USES parameters
+    //  in the WHERE clause of the SELECT sql.
+    public void testDerby6045WithoutUpdateStatisticsAndWithParams()
+        throws SQLException
+    {
+        //The reason behind running the test with 2 sets of small rows,
+        // namely 10 and 24 rows is in DERBY-6045, user found that we 
+        // used index scan for 10 rows but switched to table scan for 
+        // 24 rows. 10000 rows case used index scan. This test shows
+        // that after fixing DERBY-6045, we use index scan for all
+        // three cases below.
+        //In the following call, first param is number of rows in the
+        // table. 2nd param says to DO Not run update statisitcs after
+        // inserting data in the table. 3rd param says to use parameters
+        // in the SELECT sql to identify the rows in the where clause
+        helperDerby6045(10, false, true);
+        helperDerby6045(24, false, true);
+        helperDerby6045(10000, false, true);
     }
 
     // Following method will create a brand new table with primary key,
@@ -1138,7 +1184,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
                     DERBY_6045_DATA_TABLE +
                     " WHERE TERM_ID = ?");
             ps.setInt(1, 11);
-            ps.execute();
+            JDBC.assertDrainResults(ps.executeQuery());
         } else {
             s.executeQuery("SELECT * FROM " + whiteSpace + 
                     DERBY_6045_DATA_TABLE + 
@@ -1156,7 +1202,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             ps.setInt(1, 11);
             ps.setInt(2, 21);
             ps.setInt(3, 31);
-            ps.execute();
+            JDBC.assertDrainResults(ps.executeQuery());
         } else {
             s.executeQuery("SELECT  *  FROM  " + whiteSpace + 
                     DERBY_6045_DATA_TABLE + 
@@ -1173,7 +1219,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             ps.setInt(1, 11);
             ps.setInt(2, 21);
             ps.setInt(3, 31);
-            ps.execute();
+            JDBC.assertDrainResults(ps.executeQuery());
         } else {
             s.executeQuery("SELECT  *  FROM " + whiteSpace + 
                     DERBY_6045_DATA_TABLE + 
