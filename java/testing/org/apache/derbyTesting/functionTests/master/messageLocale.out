@@ -97,7 +97,7 @@ ERROR 42Y55: 'DROP TABLE' kann nicht f EnC:>252< r 'T3' ausgef EnC:>252< hrt wer
 ij> -- should be in German;
 disconnect;
 ij> connect 'jdbc:derby:;shutdown=true';
-ERROR XJ015: Das Derby-System wird heruntergefahren.
+ERROR XJ015: Derby-System wird heruntergefahren.
 ij> -- Now, all Enlish messages;
 connect 'jdbc:derby:enTest;create=true;territory=en_US';
 ij> -- create table t1 (i longe);

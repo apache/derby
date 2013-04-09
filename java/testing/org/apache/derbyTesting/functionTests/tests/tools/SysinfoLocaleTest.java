@@ -197,10 +197,10 @@ public class SysinfoLocaleTest extends BaseTestCase {
      * localized to German.
      */
     private static final String[] GERMAN_STRINGS = {
-        "Name des Betriebssystems",
-        "Java-Benutzerausgangsverzeichnis",
+        "BS-Name",
+        "Java-Benutzername",
         "Derby-Informationen",
-        "Informationen zur L\u00E4ndereinstellung",
+        "Informationen zum Gebietsschema",
     };
 
     /**
@@ -211,7 +211,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         "Nome SO",
         "Home utente Java",
         "Informazioni su Derby",
-        "Informazioni sulla locale",
+        "Informazioni sulle impostazioni nazionali",
     };
 
     /**
