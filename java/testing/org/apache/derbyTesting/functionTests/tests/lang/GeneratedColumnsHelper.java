@@ -106,6 +106,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  BAD_CAST = "42846";
     protected static  final   String  DUPLICATE_CLAUSE = "42XAJ";
     protected static  final   String  FORBIDDEN_DROP_TRIGGER = "X0Y24";
+    protected static  final   String  STRING_TRUNCATION = "22001";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
