@@ -63,8 +63,9 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LOBLocatorReleaseTest.suite());
         suite.addTest(OutBufferedStreamTest.suite());
         suite.addTest(GetCurrentPropertiesTest.suite());
-        suite.addTest(Utf8CcsidManagerTest.suite());
-        suite.addTest(Utf8CcsidManagerClientTest.suite());
+        // Exclude Utf8CcsidManager unit tests 
+        //suite.addTest(Utf8CcsidManagerTest.suite());
+        //suite.addTest(Utf8CcsidManagerClientTest.suite());
         suite.addTest(DerbyNetAutoStartTest.suite());
 
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
