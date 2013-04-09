@@ -57,7 +57,7 @@ public class BadConnectionTest extends BaseJDBCTestCase
             fail("Connection with no user or password succeeded");
 		} catch (SQLException e) {
 			assertSQLState("08004", e);
-			assertEquals(40000, e.getErrorCode());
+            assertErrorCode(40000, e);
 		}
 	}
 	
@@ -78,7 +78,7 @@ public class BadConnectionTest extends BaseJDBCTestCase
 		} catch (SQLException e)
 		{
 			assertSQLState("08004", e);
-			assertEquals(40000, e.getErrorCode());
+            assertErrorCode(40000, e);
 		}
 	}
 	
@@ -99,7 +99,7 @@ public class BadConnectionTest extends BaseJDBCTestCase
 		} catch (SQLException e)
 		{
 			assertSQLState("XJ05B", e);
-			assertEquals(-1, e.getErrorCode());
+            assertErrorCode(40000, e);
 		}
 	}
 

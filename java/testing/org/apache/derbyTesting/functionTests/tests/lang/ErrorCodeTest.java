@@ -48,7 +48,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
     {
         TestSuite suite = new TestSuite("errorcode Test");
         
-        suite.addTest(TestConfiguration.embeddedSuite(ErrorCodeTest.class));
+        suite.addTest(TestConfiguration.defaultSuite(ErrorCodeTest.class));
         
         return new LocaleTestSetup(suite, Locale.ENGLISH);
     }

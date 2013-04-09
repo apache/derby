@@ -44,18 +44,18 @@ ij(CONNECTION2)> connect 'wombat' USER 'APP' PASSWORD 'APP';
 ij(CONNECTION3)> connect  'testij2;create=true;user=usr;password=pwd';
 ij(CONNECTION4)> connect 'testij2;upgrade=true;user=usr;password=pwd';
 ij(CONNECTION5)> connect 'testij2;shutdown=true;user=usr;password=pwd';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
+ERROR 08006: DERBY SQL error: ERRORCODE: 45000, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
 ij(CONNECTION5)> connect './testij2;create=true;user=usr;password=pwd';
 ij(CONNECTION6)> connect './testij2;create=true;user=usr;password=pwd';
 ij(CONNECTION7)> connect  'testij2;create=true;user=usr;password=pwd';
 ij(CONNECTION8)> connect 'testij2;upgrade=true;user=usr;password=pwd';
 ij(CONNECTION9)> connect 'testij2;shutdown=true;user=usr;password=pwd';
-ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
+ERROR 08006: DERBY SQL error: ERRORCODE: 45000, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
 ij(CONNECTION9)> -- retrieveMessageText Testing
 connect 'testij2;create=true;user=usr;password=pwd;retrieveMessageText=false';
 ij(CONNECTION10)> -- Should not get message text
 select * from APP.notthere;
-ERROR 42X05: DERBY SQL error: SQLCODE: -1, SQLSTATE: 42X05, SQLERRMC: APP.NOTTHERE42X05
+ERROR 42X05: DERBY SQL error: ERRORCODE: 30000, SQLSTATE: 42X05, SQLERRMC: APP.NOTTHERE42X05
 ij(CONNECTION10)> connect 'testij2;create=true;user=usr;password=pwd;retrieveMessageText=true';
 ij(CONNECTION11)> -- Should see message text
 select * from APP.notthere;
