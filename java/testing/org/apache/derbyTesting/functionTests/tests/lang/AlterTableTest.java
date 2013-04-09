@@ -20,11 +20,8 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.sql.CallableStatement;
-import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
@@ -45,17 +42,6 @@ import junit.framework.Assert;
 
 public final class AlterTableTest extends BaseJDBCTestCase {
 
-    ResultSet rs = null;
-    ResultSetMetaData rsmd;
-    DatabaseMetaData dbmd;
-    SQLWarning sqlWarn = null;
-    PreparedStatement pSt;
-    CallableStatement cSt;
-    //Statement st;
-    Connection conn;
-    String[][] expRS;
-    String[] expColNames;
-
     /**
      * Public constructor required for running test as standalone JUnit.
      */
@@ -70,7 +56,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     }
 
     private void createTestObjects(Statement st) throws SQLException {
-        conn = getConnection();
+        Connection conn = getConnection();
         conn.setAutoCommit(false);
         CleanDatabaseTestSetup.cleanDatabase(conn, false);
 
@@ -105,21 +91,16 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
     private void checkWarning(Statement st, String expectedWarning)
             throws Exception {
-        if ((sqlWarn == null) && (st != null)) {
-            sqlWarn = st.getWarnings();
-        }
-        if (sqlWarn == null) {
-            sqlWarn = getConnection().getWarnings();
-        }
+        SQLWarning sqlWarn = (st == null) ?
+                getConnection().getWarnings() : st.getWarnings();
         assertNotNull("Expected warning but found none", sqlWarn);
         assertSQLState(expectedWarning, sqlWarn);
-        sqlWarn = null;
     }
 
     public void testAddColumn() throws Exception {
         Statement st = createStatement();
         createTestObjects(st);
-        conn.commit();
+        commit();
 
         // add column negative tests alter a non-existing table
         assertStatementError("42Y55", st,
@@ -178,11 +159,11 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("alter table t1 add column c4 int check(c4 = 1)");
 
         // Newly-added column does not appear in existing view:
-        rs = st.executeQuery("select * from v1");
+        ResultSet rs = st.executeQuery("select * from v1");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
         JDBC.assertFullResultSet(rs, new String[][]{{"1"}, {"2"}});
 
-        pSt = prepareStatement("select * from t2");
+        PreparedStatement pSt = prepareStatement("select * from t2");
 
         rs = pSt.executeQuery();
         JDBC.assertColumnNames(rs, new String[]{"C1"});
@@ -199,19 +180,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // select * prepared statements do see added columns after 
         // alter table
 
-        if (usingEmbedded()) // client/server doesn't keep cursor open.
-        {
             rs = pSt.executeQuery();
             JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
             JDBC.assertFullResultSet(rs, new String[][]{
                         {"1", null},
                         {"2", null}
                     });
-        } else {
-            rs = pSt.executeQuery();
-            JDBC.assertColumnNames(rs, new String[]{"C1"});
-            JDBC.assertFullResultSet(rs, new String[][]{{"1"}, {"2"}});
-        }
 
         // add non-nullable column to 0 row table and verify
         st.executeUpdate("alter table t0 add column c2 int not null default 0");
@@ -222,7 +196,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, new String[][]{{"1", "0"}});
 
         st.executeUpdate("drop table t0");
-        conn.rollback();
+        rollback();
         rs = st.executeQuery(" select  * from t0");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
         JDBC.assertDrainResults(rs, 0);
@@ -243,7 +217,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
         JDBC.assertFullResultSet(rs, new String[][]{{"1", "1"}});
 
-        conn.rollback();
+        rollback();
 
         // add unique constraint to 0 and 1 row tables and verify
 
@@ -277,7 +251,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"T0", "1"},
                     {"T0_1", "1"},
                     {"T0_2", "1"},
@@ -291,7 +265,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         JDBC.assertUnorderedResultSet(rs, expRS, true);
 
-        conn.rollback();
+        rollback();
 
         st.executeUpdate(
                 " create function countopens() returns varchar(128) " +
@@ -299,7 +273,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "'org.apache.derbyTesting.functionTests.util.T_ConsistencyChecker." +
                 "countOpens'");
 
-        conn.commit();
+        commit();
         // do consistency check on scans, etc.
 
         rs = st.executeQuery("values countopens()");
@@ -349,7 +323,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // tr1 is dropped, tr2 still OK
         st.executeUpdate("drop trigger tr1");
-        rs = st.executeQuery("select * from tab5");
+        ResultSet rs = st.executeQuery("select * from tab5");
         JDBC.assertColumnNames(rs, new String[]{"C1"});
         JDBC.assertDrainResults(rs, 0);
 
@@ -369,7 +343,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery("select * from tab2");
 
-        expColNames = new String[]{"C1", "C2", "C3", "C4", "C5"};
+        String[] expColNames = {"C1", "C2", "C3", "C4", "C5"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
 
@@ -398,7 +372,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         expColNames = new String[]{"C2", "C3", "C4"};
         JDBC.assertColumnNames(rs, expColNames);
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"9", "2.5", "88"},
                     {"10", "3.5", "99"},
                     {"8", "4.4", "8"},
@@ -497,7 +471,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate("drop view vw4");
 
-        conn.rollback();
+        rollback();
 
         // check that dropping a column will drop backing index on 
         // referencing table
@@ -529,7 +503,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "t.tablename = 'REFTT1'");
         JDBC.assertSingleValueResultSet(rs, "1");
 
-        conn.rollback();
+        rollback();
     }
 
     public void testAddConstraint() throws Exception {
@@ -577,7 +551,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         //duplicating a key value in a primary key not allowed
         assertStatementError("23505", st, "insert into t0_1 values (1, 1)");
 
-        rs = st.executeQuery("select * from t0_1");
+        ResultSet rs = st.executeQuery("select * from t0_1");
         JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
         JDBC.assertFullResultSet(rs, new String[][]{{"1", "1"}});
 
@@ -647,10 +621,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs = st.executeQuery(
                 " select * from t0_1");
 
-        expColNames = new String[]{"C1", "C2"};
+        String[] expColNames = {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"1", "1"},
                     {"2", "2"},
                     {"2", "2"},
@@ -729,7 +703,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         assertCompileError("42Y55", "alter table xxx add check(c2 = 1)");
         st.executeUpdate("create table xxx(c1 int, c2 int)");
-        pSt = prepareStatement("alter table xxx add check(c2 = 1)");
+        PreparedStatement pSt =
+                prepareStatement("alter table xxx add check(c2 = 1)");
         assertUpdateCount(pSt, 0);
         st.executeUpdate("drop table xxx");
         st.executeUpdate("create table xxx(c1 int)");
@@ -807,15 +782,15 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // verify the consistency of the indexes on the user tables
 
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
                 "select tablename, " + "SYSCS_UTIL.SYSCS_CHECK_TABLE('" +
                 DerbyConstants.TEST_DBO + "', tablename) from " +
                 "sys.systables where tabletype = 'T' and tablename = 'T0_1'");
 
-        expColNames = new String[]{"TABLENAME", "2"};
+        String[] expColNames = {"TABLENAME", "2"};
         JDBC.assertColumnNames(rs, expColNames);
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"T0_1", "1"}
                 };
 
@@ -823,7 +798,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // verify that alter table works after drop/recreate of table
 
-        pSt = prepareStatement("alter table t0_1 drop constraint p2");
+        PreparedStatement pSt =
+                prepareStatement("alter table t0_1 drop constraint p2");
 
         assertUpdateCount(pSt, 0);
 
@@ -967,7 +943,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // schemaname should be DerbyConstants.TEST_DBO
 
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
                 "select schemaname, constraintname from " +
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
@@ -1103,12 +1079,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("alter table t1 drop primary key");
         st.executeUpdate("insert into t1 values (1, 1)");
 
-        rs = st.executeQuery("select * from t1");
+        ResultSet rs = st.executeQuery("select * from t1");
 
-        expColNames = new String[]{"C1", "C2"};
+        String[] expColNames = {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"1", "1"},
                     {"1", "1"}
                 };
@@ -1133,7 +1109,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " alter table t1 add constraint C1_PLUS_C2 check " +
                 "((c1 + c2) < 100)");
 
-        pSt = prepareStatement(
+        PreparedStatement pSt = prepareStatement(
                 "alter table t1 drop constraint C1_PLUS_C2");
 
         st.executeUpdate(
@@ -1251,12 +1227,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate("insert into atmcn_1 values (1,1)");
 
-        rs = st.executeQuery("select * from atmcn_1");
+        ResultSet rs = st.executeQuery("select * from atmcn_1");
 
-        expColNames = new String[]{"A", "B"};
+        String[] expColNames = {"A", "B"};
         JDBC.assertColumnNames(rs, expColNames);
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"1", "1"}
                 };
 
@@ -1450,7 +1426,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate("rename column renc_2.c1 to c2");
 
-        dbmd = conn.getMetaData();
+        DatabaseMetaData dbmd = getConnection().getMetaData();
         rs = dbmd.getColumns(null, null, "RENC_2", "C2");
         assertTrue(rs.next());
         assertEquals("C2", rs.getString("COLUMN_NAME"));
@@ -1464,7 +1440,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertFalse(rs.next());
 
         if (usingEmbedded()) {
-            dbmd = conn.getMetaData();
+            dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_2", false, false);
             assertTrue(rs.next());
             assertEquals("RENC_2", rs.getString("TABLE_NAME"));
@@ -1493,7 +1469,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "rename column renc_3.b to newbie");
 
-        dbmd = conn.getMetaData();
+        dbmd = getConnection().getMetaData();
         rs = dbmd.getColumns(null, null, "RENC_3", "NEWBIE");
         assertTrue(rs.next());
         assertEquals("NEWBIE", rs.getString("COLUMN_NAME"));
@@ -1507,7 +1483,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertFalse(rs.next());
 
         if (usingEmbedded()) {
-            dbmd = conn.getMetaData();
+            dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_3", false, false);
             assertTrue(rs.next());
             assertEquals("RENC_3", rs.getString("TABLE_NAME"));
@@ -1561,7 +1537,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "rename column renc_4.c1 to unq_c1");
         
         if (usingEmbedded()) {
-            dbmd = conn.getMetaData();
+            dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_4", false, false);
             assertTrue(rs.next());
             assertEquals("RENC_4", rs.getString("TABLE_NAME"));
@@ -1586,7 +1562,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "rename column renc_5.c5 to unq_c5");
         
         if (usingEmbedded()) {
-            dbmd = conn.getMetaData();
+            dbmd = getConnection().getMetaData();
             rs = dbmd.getIndexInfo(null, null, "RENC_5", false, false);
             assertTrue(rs.next());
             assertEquals("RENC_5", rs.getString("TABLE_NAME"));
@@ -1706,12 +1682,13 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // prepared statement on it. The rename of the column will 
         // be successful; the open statement will get errors when 
         // it tries to re-execute.
-        conn.setAutoCommit(false);
-        pSt = prepareStatement("select * from renc_6 where a = ?");
+        setAutoCommit(false);
+        PreparedStatement pSt =
+                prepareStatement("select * from renc_6 where a = ?");
         rs = st.executeQuery("values (30)");
 
         rs.next();
-        rsmd = rs.getMetaData();
+        ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1;
                 i <= rsmd.getColumnCount(); i++) {
             pSt.setObject(i, rs.getObject(i));
@@ -1737,8 +1714,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError(
                 "42X04", pSt);
 
-        conn.setAutoCommit(
-                true);
+        setAutoCommit(true);
 
         // Demonstrate that you cannot rename a column in a 
         // synonym, and demonstrate that renaming a column in the 
@@ -1799,7 +1775,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // cause the following test to fail. Right now, the following
         // test accepts the incorrect metadata length obtained through
         // the resultset's metadata after ALTER TABLE has been performed.
-        conn.setAutoCommit(false);
+        setAutoCommit(false);
         //Create table and load data
         st.executeUpdate(
                 "create table derby_3823_t1 (c11 int, c12 varchar(5))");
@@ -1809,7 +1785,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         	ps.setInt(1, i); 
         	ps.executeUpdate(); 
     	} 
-        conn.commit();
+        commit();
         //Open a resultset on the table which will be altered because
         // the resultset has been exhausted. The alter table will fail
         // in embedded mode because of the open resulset but will succeed
@@ -2120,7 +2096,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(st.executeQuery(" select * from atdc_1"),
                 new String[][]{{"1", "1"}});
 
-        rs =
+        ResultSet rs =
                 st.executeQuery(
                 " select columnname,columnnumber,columndatatype from " +
                 "sys.syscolumns where referenceid in (select tableid " +
@@ -2223,19 +2199,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("alter table atdc_1_01 drop column c cascade");
 
         if (usingEmbedded()) {
-            if ((sqlWarn == null) && (st != null)) {
-                sqlWarn = st.getWarnings();
+            checkWarning(st, "01500");
             }
-
-            if (sqlWarn == null) {
-                sqlWarn = getConnection().getWarnings();
-            }
-
-            assertNotNull("Expected warning but found none", sqlWarn);
-            assertSQLState("01500", sqlWarn);
-            sqlWarn =
-                    null;
-        }
 
         st.executeUpdate(
                 " create table atdc_1_02 (a int not null primary key, b int)");
@@ -2248,34 +2213,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 " alter table atdc_1_02 drop column a cascade");
 
         if (usingEmbedded()) {
-            if ((sqlWarn == null) && (st != null)) {
-                sqlWarn = st.getWarnings();
+            checkWarning(st, "01500");
             }
-
-            if (sqlWarn == null) {
-                sqlWarn = getConnection().getWarnings();
-            }
-
-            assertNotNull("Expected warning but found none", sqlWarn);
-            assertSQLState("01500", sqlWarn);
-            sqlWarn =
-                    null;
-        }
-
-        if (usingEmbedded()) {
-            if ((sqlWarn == null) && (st != null)) {
-                sqlWarn = st.getWarnings();
-            }
-
-            if (sqlWarn == null) {
-                sqlWarn = getConnection().getWarnings();
-            }
-
-            assertNotNull("Expected warning but found none", sqlWarn);
-            assertSQLState("01500", sqlWarn);
-            sqlWarn =
-                    null;
-        }
 
 // drop column restrict should fail because column is used 
 // in a constraint:
@@ -2493,8 +2432,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs =
                 st.executeQuery("select * from atdc_vw_1");
 
-        expColNames =
-                new String[]{"VW_B"};
+        String[] expColNames = {"VW_B"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
 
@@ -3236,7 +3174,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "create table d3175 (x varchar(12), y varchar(12), " +
                 "id int primary key generated by default as identity)");
 
-        rs =
+        ResultSet rs =
                 st.executeQuery(
                 " select COLUMNNAME, COLUMNNUMBER, COLUMNDATATYPE, " +
                 " COLUMNDEFAULT, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, " +
@@ -3325,7 +3263,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "Message_Data_ID INTEGER NOT NULL , CONSTRAINT " +
                 "d3177_MESSAGES_id_pk PRIMARY KEY(id) )");
 
-        rs =
+        ResultSet rs =
                 st.executeQuery(
                 " select COLUMNNAME, COLUMNNUMBER, COLUMNDATATYPE, " +
                 " COLUMNDEFAULT, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, " +
@@ -3630,16 +3568,15 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         
         //increase the maximum size of the clob 
         
-        Clob clob = null;
-        Blob blob=null;
         int val = 1;
         int size = 15 * 1024;
         InputStream stream;
                
         st.executeUpdate("create table clob_tab(c1 int,clob_col clob(10K))");
-        conn.commit();
+        commit();
         
-        pSt=conn.prepareStatement("INSERT INTO clob_tab values (?,?)");   
+        PreparedStatement pSt =
+                prepareStatement("INSERT INTO clob_tab values (?,?)");
         stream = new TestInputStream(size, val);
         
         //this insert fails(size>10K) 
@@ -3648,12 +3585,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("XJ001", pSt);
         pSt.close();
         
-        conn.rollback();
+        rollback();
         
         st.executeUpdate("ALTER TABLE clob_tab ALTER COLUMN "
                 +"clob_col SET DATA TYPE clob(20K)");
         
-        pSt=conn.prepareStatement("INSERT INTO clob_tab values (?,?)");
+        pSt = prepareStatement("INSERT INTO clob_tab values (?,?)");
         stream = new TestInputStream(size, val);
         
         //this insert succeed (maximum blob size not increased to 20K)
@@ -3668,9 +3605,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("CREATE TABLE blob_tab ( C1 INTEGER," +
                                 "blob_col BLOB(10K) NOT NULL)");
         
-        conn.commit();
+        commit();
         
-        pSt=conn.prepareStatement("INSERT INTO blob_tab values (?,?)");
+        pSt = prepareStatement("INSERT INTO blob_tab values (?,?)");
         stream = new TestInputStream(size, val);
         
         //this insert fails(size>10K) 
@@ -3679,12 +3616,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("22001", pSt);
         pSt.close();
         
-        conn.rollback();
+        rollback();
         
         st.executeUpdate("ALTER TABLE blob_tab ALTER COLUMN "
                 +"blob_col SET DATA TYPE blob(20K)");  
         
-        pSt=conn.prepareStatement("INSERT INTO blob_tab values (?,?)");
+        pSt = prepareStatement("INSERT INTO blob_tab values (?,?)");
         stream = new TestInputStream(size, val);
         
         //this insert succeed (maximum blob size not increased to 20K)
@@ -3693,7 +3630,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         pSt.executeUpdate();
         pSt.close();   
         
-        conn.rollback();
+        rollback();
     }
 
     /**
