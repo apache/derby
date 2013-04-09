@@ -218,7 +218,7 @@ public abstract class Cursor {
         return allRowsReceivedFromServer_;
     }
 
-    public final boolean currentRowPositionIsEqualToNextRowPosition() {
+    final boolean currentRowPositionIsEqualToNextRowPosition() {
         return (currentRowPosition_ == nextRowPosition_);
     }
 
@@ -235,7 +235,7 @@ public abstract class Cursor {
         dataBufferStream_.reset();
     }
 
-    public final boolean dataBufferHasUnprocessedData() {
+    final boolean dataBufferHasUnprocessedData() {
         return (lastValidBytePosition_ - position_) > 0;
     }
 
@@ -1096,8 +1096,7 @@ public abstract class Cursor {
         }
     }
 
-    public final java.io.InputStream getBinaryStream(int column) 
-            throws SqlException 
+    final java.io.InputStream getBinaryStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.BINARY:
@@ -1119,8 +1118,7 @@ public abstract class Cursor {
         }
     }
 
-    public final java.io.InputStream getAsciiStream(int column) 
-            throws SqlException
+    final java.io.InputStream getAsciiStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.CLOB:
@@ -1210,7 +1208,7 @@ public abstract class Cursor {
         }
     }
 
-    public final java.io.Reader getCharacterStream(int column) 
+    final java.io.Reader getCharacterStream(int column)
             throws SqlException 
     {
         switch (jdbcTypes_[column - 1]) {
@@ -1259,7 +1257,7 @@ public abstract class Cursor {
             }
     }
 
-    public final java.sql.Blob getBlob(int column) throws SqlException {
+    final java.sql.Blob getBlob(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case Types.BLOB:
             return getBlobColumn_(column, agent_, true);
@@ -1268,7 +1266,7 @@ public abstract class Cursor {
         }
     }
 
-    public final java.sql.Clob getClob(int column) throws SqlException {
+    final java.sql.Clob getClob(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case Types.CLOB:
             return getClobColumn_(column, agent_, true);
@@ -1277,18 +1275,18 @@ public abstract class Cursor {
         }
     }
 
-    public final java.sql.Array getArray(int column) throws SqlException {
+    final java.sql.Array getArray(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
             new ClientMessageId (SQLState.NOT_IMPLEMENTED),
             "getArray(int)");
     }
 
-    public final java.sql.Ref getRef(int column) throws SqlException {
+    final java.sql.Ref getRef(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
             new ClientMessageId (SQLState.NOT_IMPLEMENTED), "getRef(int)");
     }
 
-    public final Object getObject(int column) throws SqlException {
+    final Object getObject(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.BOOLEAN:
             return get_BOOLEAN(column);
@@ -1350,7 +1348,7 @@ public abstract class Cursor {
         charBuffer_ = new char[maxCharLength];
     }
 
-    private final String getStringWithoutConvert(int position, int actualLength) {
+    private String getStringWithoutConvert(int position, int actualLength) {
         int start = position;
         int end = position + actualLength;
 
@@ -1388,11 +1386,11 @@ public abstract class Cursor {
         charBuffer_ = null;
     }
 
-    private final int getColumnPrecision(int column) {
+    private int getColumnPrecision(int column) {
         return ((fdocaLength_[column] >> 8) & 0xff);
     }
 
-    private final int getColumnScale(int column) {
+    private int getColumnScale(int column) {
         return (fdocaLength_[column] & 0xff);
     }
 }

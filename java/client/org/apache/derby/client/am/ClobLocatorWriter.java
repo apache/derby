@@ -28,10 +28,10 @@ import java.io.IOException;
  * Clob value into the server.
  * <p>
  * This <code>Writer</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #write(char[])
+ * buffering of data is done.  Hence, for efficiency #write(char[])
  * should be used instead of #write(int).
  */
-public class ClobLocatorWriter extends java.io.Writer {
+class ClobLocatorWriter extends java.io.Writer {
     /**
      * Connection used to read Clob from server.
      */
@@ -67,7 +67,7 @@ public class ClobLocatorWriter extends java.io.Writer {
      *        to start writing; the first position is 1
      * @throws org.apache.derby.client.am.SqlException
      */
-    public ClobLocatorWriter(Connection connection, Clob clob, long pos)
+    ClobLocatorWriter(Connection connection, Clob clob, long pos)
     throws SqlException {
         if (pos-1 > clob.sqlLength()) {
             throw new IndexOutOfBoundsException();

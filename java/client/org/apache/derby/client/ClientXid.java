@@ -64,7 +64,7 @@ public class ClientXid implements Xid {
     //
     // The maximum size of the branch qualifier.
     //
-    static public final int MAXBQUALSIZE = 64;
+    static private final int MAXBQUALSIZE = 64;
 
     static private final String hextab_ = "0123456789ABCDEF";
 
@@ -94,7 +94,7 @@ public class ClientXid implements Xid {
     }
 
     //
-    // Return a string representing this Xid for debuging
+    // Return a string representing this Xid for debugging
     //
     // @return the string representation of this Xid
     //
@@ -166,7 +166,6 @@ public class ClientXid implements Xid {
     //
     public void setFormatID(int formatID) {
         formatID_ = formatID;
-        return;
     }
 
     //

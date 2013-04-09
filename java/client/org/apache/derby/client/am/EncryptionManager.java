@@ -40,7 +40,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 // This class also have methods for the SECMEC_USRSSBPWD security mechanism.
 
 public class EncryptionManager {
-    transient Agent agent_; // for obtaining an exception log writer only
+     // for obtaining an exception log writer only
+    private transient Agent agent_;
 
     // PROTOCOL's Diffie-Hellman agreed public value: prime.
     private static final byte modulusBytes__[] = {

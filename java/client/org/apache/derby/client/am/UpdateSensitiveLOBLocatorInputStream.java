@@ -36,7 +36,7 @@ import java.io.InputStream;
  * streams.
  *
  */
-public abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
+abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
     //The ClobLocatorInputStream or
     //BlobLocatorInputStream instance
     //wrapped inside a BufferedInputStream
@@ -208,7 +208,6 @@ public abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
         } else {
             //The underlying LOB value is
             //the same. Hence do nothing.
-            return;
         }
     }
     

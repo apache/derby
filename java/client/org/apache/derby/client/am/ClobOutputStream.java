@@ -22,11 +22,12 @@
 package org.apache.derby.client.am;
 
 
-public class ClobOutputStream extends java.io.OutputStream {
+
+class ClobOutputStream extends java.io.OutputStream {
     private Clob clob_;
     private long offset_;
 
-    public ClobOutputStream(Clob clob, long offset) throws SqlException {
+    ClobOutputStream(Clob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
         

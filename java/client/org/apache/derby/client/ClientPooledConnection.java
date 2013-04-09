@@ -60,7 +60,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     private int eventIterators;
 
     org.apache.derby.client.am.Connection physicalConnection_ = null;
-    org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
+    private org.apache.derby.client.net.NetConnection
+            netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
 
     /**
@@ -72,11 +73,12 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
     /** The logical connection using the physical connection. */
     //@GuardedBy("this")
-    org.apache.derby.client.am.LogicalConnection logicalConnection_ = null;
+    private org.apache.derby.client.am.LogicalConnection
+        logicalConnection_ = null;
 
     protected org.apache.derby.client.am.LogWriter logWriter_ = null;
 
-    /** Resource manager identificator. */
+    /** Resource manager identifier. */
     protected int rmId_ = 0;
 
     /**
@@ -159,11 +161,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
 
         try {
-            netXAPhysicalConnection_ = getNetXAConnection(ds,
-                    (NetLogWriter) logWriter_,
+            netXAPhysicalConnection_ = new NetXAConnection(
+                    (NetLogWriter)logWriter,
                     user,
                     password,
-                    rmId);
+                    ds,
+                    rmId,
+                    true,
+                    this);
         } catch ( SqlException se ) {
             throw se.getSQLException();
         }
@@ -188,7 +193,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
     /**
      * Closes the physical connection to the data source and frees all
-     * assoicated resources.
+     * associated resources.
      * 
      * @throws SQLException if closing the connection causes an error. Note that
      *      this connection can still be considered closed even if an error
@@ -452,31 +457,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      */
     public void onStatementErrorOccurred(PreparedStatement statement,
                     SQLException sqle) {
-        
-    }
-    
-    /**
-     * creates and returns NetXAConnection. 
-     * Overwrite this method to create different version of NetXAConnection
-     * @param ds 
-     * @param logWriter 
-     * @param user 
-     * @param password 
-     * @param rmId 
-     * @return NetXAConnection
-     */
-    protected NetXAConnection getNetXAConnection (ClientBaseDataSourceRoot ds,
-                                  NetLogWriter logWriter,
-                                  String user,
-                                  String password,
-                                  int rmId) throws SqlException {
-          return new NetXAConnection(logWriter,
-                    user,
-                    password,
-                    ds,
-                    rmId,
-                    true,
-                    this);
         
     }
 }

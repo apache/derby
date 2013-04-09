@@ -31,7 +31,7 @@ import java.io.InputStream;
  * which re-creates the underlying Blob locator stream whenever a
  * update happens on the Blob object associated with this stream.
  */
-public class UpdateSensitiveBlobLocatorInputStream 
+class UpdateSensitiveBlobLocatorInputStream
         extends UpdateSensitiveLOBLocatorInputStream {
     //Stores the Blob instance associated with
     //this InputStream.
@@ -50,7 +50,7 @@ public class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
-    public UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob)
+    UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob)
     throws SqlException {
         super(con, blob, new BlobLocatorInputStream(con, blob));
         this.blob = blob;
@@ -71,7 +71,7 @@ public class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
-    public UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob,
+    UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob,
             long position, long length) throws SqlException {
         super(con, blob, 
                 new BlobLocatorInputStream(con, blob, position, length), 
@@ -88,7 +88,7 @@ public class UpdateSensitiveBlobLocatorInputStream
      *                      re-creating the underlying streams.
      */
     protected InputStream reCreateStream() throws SqlException {
-        InputStream is_ = null;
+        InputStream is_;
         
         //Verify if a subset of the underlying
         //LOB data was requested.

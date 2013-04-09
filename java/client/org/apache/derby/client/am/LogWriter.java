@@ -76,7 +76,7 @@ public class LogWriter {
 
     // ---------------------------------------------------------------------------
 
-    public void dncprintln(String s) {
+    private void dncprintln(String s) {
         synchronized (printWriter_) {
             printWriter_.println("[derby] " + s);
             printWriter_.flush();
@@ -231,58 +231,66 @@ public class LogWriter {
         }
     }
 
-    public void traceExit(Object instance, String methodName, ResultSet resultSet) {
+    void traceExit(Object instance, String methodName, ResultSet resultSet) {
         String returnValue = (resultSet == null) ? "ResultSet@null" : "ResultSet@" + Integer.toHexString(resultSet.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
-    public void traceExit(Object instance, String methodName, CallableStatement returnValue) {
+    void traceExit(
+            Object instance,
+            String methodName,
+            CallableStatement returnValue) {
+
         traceExit(instance, methodName, "CallableStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    public void traceExit(Object instance, String methodName, PreparedStatement returnValue) {
+    void traceExit(
+            Object instance,
+            String methodName,
+            PreparedStatement returnValue) {
+
         traceExit(instance, methodName, "PreparedStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    public void traceExit(Object instance, String methodName, Statement returnValue) {
+    void traceExit(Object instance, String methodName, Statement returnValue) {
         traceExit(instance, methodName, "Statement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    public void traceExit(Object instance, String methodName, Blob blob) {
+    void traceExit(Object instance, String methodName, Blob blob) {
         String returnValue = (blob == null) ? "Blob@null" : "Blob@" + Integer.toHexString(blob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
-    public void traceExit(Object instance, String methodName, Clob clob) {
+    void traceExit(Object instance, String methodName, Clob clob) {
         String returnValue = (clob == null) ? "Clob@null" : "Clob@" + Integer.toHexString(clob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
-    public void traceExit(Object instance, String methodName, DatabaseMetaData returnValue) {
+    void traceExit(
+            Object instance,
+            String methodName,
+            DatabaseMetaData returnValue) {
+
         traceExit(instance, methodName, "DatabaseMetaData@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    public void traceExit(Object instance, String methodName, Connection returnValue) {
+    void traceExit(Object instance, String methodName, Connection returnValue) {
         traceExit(instance, methodName, "Connection@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    public void traceExit(Object instance, String methodName, ColumnMetaData returnValue) {
+    void traceExit(
+            Object instance,
+            String methodName,
+            ColumnMetaData returnValue) {
+
         traceExit(instance, methodName, "MetaData@" + (returnValue != null ? Integer.toHexString(returnValue.hashCode()) : null));
     }
 
-    public void traceExit(Object instance, String methodName, byte[] returnValue) {
+    void traceExit(Object instance, String methodName, byte[] returnValue) {
         traceExit(instance, methodName, Utils.getStringFromBytes(returnValue));
     }
 
-    public void traceExit(Object instance, String methodName, int[] returnValue) {
-        traceExit(instance, methodName, Utils.getStringFromInts(returnValue));
-    }
-
-    public void traceDeprecatedExit(Object instance, String methodName, byte[] returnValue) {
-        traceDeprecatedExit(instance, methodName, Utils.getStringFromBytes(returnValue));
-    }
-
-    public void traceExit(Object instance, String methodName, byte returnValue) {
+    void traceExit(Object instance, String methodName, byte returnValue) {
         traceExit(instance, methodName, "0x" + Integer.toHexString(returnValue & 0xff));
     }
 
@@ -294,15 +302,15 @@ public class LogWriter {
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
-    public void traceExit(Object instance, String methodName, long returnValue) {
+    void traceExit(Object instance, String methodName, long returnValue) {
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
-    public void traceExit(Object instance, String methodName, float returnValue) {
+    void traceExit(Object instance, String methodName, float returnValue) {
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
-    public void traceExit(Object instance, String methodName, double returnValue) {
+    void traceExit(Object instance, String methodName, double returnValue) {
         traceExit(instance, methodName, String.valueOf(returnValue));
     }
 
@@ -345,7 +353,7 @@ public class LogWriter {
                 "(" + argument + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, boolean argument) {
+    void traceEntry(Object instance, String methodName, boolean argument) {
         traceEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
@@ -355,12 +363,20 @@ public class LogWriter {
                 "(" + argument + ")");
     }
 
-    public void traceDeprecatedEntry(Object instance, String methodName, int argument) {
+    void traceDeprecatedEntry(
+            Object instance,
+            String methodName,
+            int argument) {
+
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
 
-    public void traceDeprecatedEntry(Object instance, String methodName, Object argument) {
+    void traceDeprecatedEntry(
+            Object instance,
+            String methodName,
+            Object argument) {
+
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + argument + ")");
     }
@@ -372,72 +388,102 @@ public class LogWriter {
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, Object arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, Object arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, byte[] arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, byte[] arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + Utils.getStringFromBytes(arg2) + ")");
     }
 
-    public void traceDeprecatedEntry(Object instance, String methodName, int arg1, int arg2) {
+    void traceDeprecatedEntry(
+            Object instance,
+            String methodName,
+            int arg1,
+            int arg2) {
+
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceDeprecatedEntry(Object instance, String methodName, Object arg1, int arg2) {
+    void traceDeprecatedEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            int arg2) {
+
         traceDeprecatedEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, boolean arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            int arg1,
+            boolean arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, byte arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, byte arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, short arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, short arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, int arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, int arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, long arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, long arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, float arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, float arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, int arg1, double arg2) {
+    void traceEntry(Object instance, String methodName, int arg1, double arg2) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, boolean arg2) {
+    public void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            boolean arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, byte arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            byte arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, short arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            short arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
@@ -447,116 +493,119 @@ public class LogWriter {
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, long arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            long arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, float arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            float arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName, Object arg1, double arg2) {
+    void traceEntry(
+            Object instance,
+            String methodName,
+            Object arg1,
+            double arg2) {
+
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ")");
     }
 
     // ---------------------- trace entry of methods w/ 3 args -------------------
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, Object arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceDeprecatedEntry(Object instance, String methodName,
+    void traceDeprecatedEntry(Object instance, String methodName,
                                      int arg1, Object arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, int arg2, Object arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, int arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, Object arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    public void traceEntry(Object instance, String methodName,
-                           Object arg1, boolean arg2, boolean arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    public void traceEntry(Object instance, String methodName,
-                           Object arg1, boolean arg2, int arg3) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
     }
 
     // ---------------------- trace entry of methods w/ 4 args -------------------
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, Object arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, Object arg3, Object arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, int arg3, int arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, int arg2, int arg3, int arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, int arg3, int arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
@@ -564,13 +613,13 @@ public class LogWriter {
 
     // ---------------------- trace entry of methods w/ 5 args -------------------
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, int arg4, boolean arg5) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
     }
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, boolean arg4, boolean arg5) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
@@ -578,7 +627,7 @@ public class LogWriter {
 
     // ---------------------- trace entry of methods w/ 6 args -------------------
 
-    public void traceEntry(Object instance, String methodName,
+    void traceEntry(Object instance, String methodName,
                            Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ", " + arg6 + ")");
@@ -586,7 +635,7 @@ public class LogWriter {
 
     // ---------------------------tracing exceptions and warnings-----------------
 
-    public void traceDiagnosable(SqlException e) {
+    void traceDiagnosable(SqlException e) {
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -607,7 +656,7 @@ public class LogWriter {
         }
     }
 
-    public void traceDiagnosable(javax.transaction.xa.XAException e) {
+    void traceDiagnosable(javax.transaction.xa.XAException e) {
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -619,7 +668,10 @@ public class LogWriter {
     }
     // ------------------------ meta data tracing --------------------------------
 
-    public void traceParameterMetaData(Statement statement, ColumnMetaData columnMetaData) {
+    void traceParameterMetaData(
+            Statement statement,
+            ColumnMetaData columnMetaData) {
+
         if (!loggingEnabled(
                 ClientDataSourceInterface.TRACE_PARAMETER_META_DATA) ||
                 columnMetaData == null) {
@@ -640,7 +692,10 @@ public class LogWriter {
         }
     }
 
-    public void traceResultSetMetaData(Statement statement, ColumnMetaData columnMetaData) {
+    void traceResultSetMetaData(
+            Statement statement,
+            ColumnMetaData columnMetaData) {
+
         if (!loggingEnabled(
                 ClientDataSourceInterface.TRACE_RESULT_SET_META_DATA) ||
                 columnMetaData == null) {
@@ -721,7 +776,7 @@ public class LogWriter {
     // Including protocol manager levels, and driver configuration
 
     // Jdbc 2
-    public void traceConnectEntry(ClientBaseDataSourceRoot dataSource) {
+    void traceConnectEntry(ClientBaseDataSourceRoot dataSource) {
         if (loggingEnabled(
                 ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc2();
@@ -732,7 +787,7 @@ public class LogWriter {
     }
 
     // Jdbc 1
-    public void traceConnectEntry(String server,
+    void traceConnectEntry(String server,
                                   int port,
                                   String database,
                                   java.util.Properties properties) {
@@ -745,7 +800,7 @@ public class LogWriter {
         }
     }
 
-    public void traceConnectResetEntry(
+    void traceConnectResetEntry(
             Object instance, LogWriter logWriter,
             String user, ClientBaseDataSourceRoot ds) {
 
@@ -755,7 +810,7 @@ public class LogWriter {
         }
     }
 
-    public void traceConnectExit(Connection connection) {
+    void traceConnectExit(Connection connection) {
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
         }
@@ -837,7 +892,7 @@ public class LogWriter {
         }
     }
 
-    public void traceConnectsResetExit(org.apache.derby.client.am.Connection c) {
+    public void traceConnectsResetExit(Connection c) {
         synchronized (printWriter_) {
             String header = "[Connection@" + Integer.toHexString(c.hashCode()) + "]";
             try {
@@ -904,8 +959,8 @@ public class LogWriter {
         }
     }
 
-    public void writeDriverConfiguration() {
-        org.apache.derby.client.am.Version.writeDriverConfiguration(printWriter_);
+    private void writeDriverConfiguration() {
+        Version.writeDriverConfiguration(printWriter_);
     }
 
     public static java.io.PrintWriter getPrintWriter(final String fileName, final boolean fileAppend) throws SqlException {

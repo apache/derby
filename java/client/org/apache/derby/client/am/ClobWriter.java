@@ -24,14 +24,11 @@ package org.apache.derby.client.am;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
-public class ClobWriter extends java.io.Writer {
-    private Clob clob_;
+class ClobWriter extends java.io.Writer {
+    private final Clob clob_;
     private long offset_;
 
-    public ClobWriter() {
-    }
-
-    public ClobWriter(Clob clob, long offset) throws SqlException {
+    ClobWriter(Clob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
 

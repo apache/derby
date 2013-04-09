@@ -214,10 +214,9 @@ public abstract class Connection
     }
 
     // For jdbc 2 connections
-    protected void initConnection(
-            org.apache.derby.client.am.LogWriter logWriter,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
-            throws SqlException {
+    private void initConnection(
+            LogWriter logWriter,
+            ClientBaseDataSourceRoot dataSource) throws SqlException {
 
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);

@@ -113,6 +113,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
         return new CallableStatement40(agent,connection,sql,type,concurrency,
                 holdability,cpc);
     }
+
     /**
      * Returns an instance of LogicalConnection.
      * This method returns an instance of LogicalConnection
@@ -199,7 +200,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     }
 
     /**
-     * Returns a new logcial prepared statement object.
+     * Returns a new logical prepared statement object.
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
@@ -273,6 +274,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
         (new NetConnection40((NetLogWriter)netLogWriter,user,password,dataSource,
                 rmId,isXAConn));
     }
+
     /**
      * returns an instance of org.apache.derby.client.net.NetConnection40
      */

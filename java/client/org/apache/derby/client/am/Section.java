@@ -21,16 +21,23 @@ package org.apache.derby.client.am;
 
 public class Section {
 
-    protected int sectionNumber;
-    protected String packageName;
-    protected String serverCursorName; // As given by dnc package set
-    int resultSetHoldability_;
+    private int sectionNumber;
+    private String packageName;
+    private String serverCursorName; // As given by dnc package set
+    private int resultSetHoldability_;
 
     // Stores the package name and consistency token
-    byte[] PKGNAMCBytes;
-    boolean isGenerated; // flag to identify server generated sections
+    private byte[] PKGNAMCBytes;
+    private boolean isGenerated; // flag to identify server generated sections
 
-    public Section(Agent agent, String name, int sectionNumber, String cursorName, int resultSetHoldability) {
+    private Agent agent_;
+
+
+    Section(Agent agent,
+            String name,
+            int sectionNumber,
+            String cursorName,
+            int resultSetHoldability) {
         // default for all sections except for generated section , isGenerated is set to false
         init(agent, name, sectionNumber, cursorName, resultSetHoldability, false);
     }
@@ -112,14 +119,17 @@ public class Section {
         return this.serverCursorName;
     }
 
-    // ------------------------ transient members --------------------------------
-
-    public String serverCursorNameForPositionedUpdate_ = null; // member for positioned update sections only
-    transient protected String clientCursorName_; // As given by jdbc setCursorName(), this can change
+    // member for positioned update sections only
+    String serverCursorNameForPositionedUpdate_ = null;
 
     public String getServerCursorNameForPositionedUpdate() {
         return serverCursorNameForPositionedUpdate_;
     }
+
+    // ------------------------ transient members --------------------------------
+
+    // As given by jdbc setCursorName(), this can change
+    transient private String clientCursorName_;
 
     public String getClientCursorName() {
         return clientCursorName_;
@@ -130,10 +140,7 @@ public class Section {
         this.clientCursorName_ = clientCursorName;
     }
 
-    protected Agent agent_;
-
-
-    public void free() {
+    void free() {
         if (resultSetHoldability_ != -1) {
             this.agent_.sectionManager_.freeSection(this, resultSetHoldability_);
         }

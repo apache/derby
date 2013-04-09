@@ -32,7 +32,7 @@ import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
  *
  * The methods of this interface are used to return JDBC interface
  * implementations to the user depending on the JDBC version supported
- * by the jdk
+ * by the JDK.
  *
  */
 
@@ -185,7 +185,7 @@ public interface ClientJDBCObjectFactory {
     
     
     /**
-     * Returns a new logcial prepared statement object.
+     * Returns a new logical prepared statement object.
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
