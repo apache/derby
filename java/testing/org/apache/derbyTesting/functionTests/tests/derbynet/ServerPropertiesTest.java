@@ -579,12 +579,12 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
 
         String[] cmd = new String[] {
             "org.apache.derby.drda.NetworkServerControl", "logconnections", "on","-p",String.valueOf(port) };
-        assertSuccessfulCmd("Log Connections changed to on.", cmd);
+        assertSuccessfulCmd("Log Connections turned on.", cmd);
         verifyProperties(expectedLogConnectionsOn);     
 
         cmd = new String[] {
                 "org.apache.derby.drda.NetworkServerControl", "logconnections", "off", "-p",String.valueOf(port) };
-        assertSuccessfulCmd("Log Connections changed to off.", cmd);
+        assertSuccessfulCmd("Log Connections turned off.", cmd);
         // traceAll should be back to false
         verifyProperties(expectedLogConnectionsOff);    
     }
