@@ -1934,7 +1934,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         derby_4092();
-        derby_6151();
+        // Disable DERBY-6151 for compat. Fix not in 10.10.1.1 rc
+        //derby_6151();
     }
     
     /**
