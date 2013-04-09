@@ -76,7 +76,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
      *  Test Classpath Checker output for 3 supported variations
      */
     public void testClassPathChecker() throws IOException {
-        String Success = "SUCCESS: All Derby related classes found in class path.";
+        String Success = "Success: All Derby related classes found in class path.";
         // for testing the -cp with valid class
         String thisclass = "org.apache.derbyTesting.functionTests.tests.tools." +
         "SysinfoCPCheckTest.class";
@@ -96,7 +96,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 {
                         "a",
                         "0",
-                        "USAGE: java org.apache.derby.tools.sysinfo -cp ["
+                        "Usage: java org.apache.derby.tools.sysinfo -cp ["
                                 + " [ embedded ][ server ][ client] [ tools ]"
                                 + " [ anyClass.class ] ]", null },
                 {"embedded", "6", Success, "derby.jar"}, 

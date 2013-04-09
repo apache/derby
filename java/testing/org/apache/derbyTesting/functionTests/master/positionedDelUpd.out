@@ -120,7 +120,7 @@ ERROR 42X23: Cursor C3 is not updatable.
 ij> close c3;
 ij> -- .target cursor does not exist
 delete from t2 where current of c44;
-ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is off.
 ij> -- .target cursor after last row
 get cursor c4 as 'select * from t1 for update';
 ij> next c4;
@@ -138,7 +138,7 @@ ij> -- .target cursor exists, closed
 get cursor c5 as 'select * from t1';
 ij> close c5;
 ij> delete from t1 where current of c5;
-ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is off.
 ij> -- .target cursor on row
 get cursor c6 as 'select * from t1 for update';
 ij> next c6;
@@ -487,7 +487,7 @@ ERROR 42X23: Cursor C3 is not updatable.
 ij> close c3;
 ij> -- .target cursor does not exist
 update t2 set s = s where current of c44;
-ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C44' not found. Verify that autocommit is off.
 ij> -- .target cursor after last row
 get cursor c4 as 'select * from t1 for update';
 ij> next c4;
@@ -505,7 +505,7 @@ ij> -- .target cursor exists, closed
 get cursor c5 as 'select * from t1';
 ij> close c5;
 ij> update t1 set i = i where current of c5;
-ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C5' not found. Verify that autocommit is off.
 ij> -- .target cursor on row
 get cursor c6 as 'select * from t1 for update';
 ij> next c6;
@@ -822,7 +822,7 @@ I          |V
 1          |1111111111
 ij> close c17;
 ij> update t1 set v = '999' where current of c17;
-ERROR 42X30: Cursor 'C17' not found. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C17' not found. Verify that autocommit is off.
 ij> select * from t1;
 I          |V         |D                     |T       
 ------------------------------------------------------

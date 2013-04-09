@@ -50,8 +50,8 @@ ij> create index T1_IndexLname on T1 (Lname, Account);
 ij> -- second line of data file is not complete - should give error message re EOF
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/TwoLineBadEOF.dat' , 
                                     null, null, null, 0) ;
-ERROR XIE0R: Import error on line 2 of file extin/TwoLineBadEOF.dat: Read endOfFile at unexpected place on line 2. 
-ERROR XIE0E: Read endOfFile at unexpected place on line 2.
+ERROR XIE0R: Import error on line 2 of file extin/TwoLineBadEOF.dat: Read end of file at unexpected place on line 2. 
+ERROR XIE0E: Read end of file at unexpected place on line 2.
 ij> -- should work, default format (i.e. field sep , column delimiter ".)
 -- (last two lines have extra white space (tabs, spaces) which should not matter).
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/AccountData_defaultformat.dat' , 

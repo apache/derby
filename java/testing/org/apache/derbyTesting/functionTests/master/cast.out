@@ -662,19 +662,19 @@ ij> -------------------
 --char -> date/time
 -------------------
 values (cast ('TIME''11:11:11''' as time));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values (cast ('11:11:11' as time));
 1       
 --------
 11:11:11
 ij> values (cast ('DATE''1999-09-09''' as date));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values (cast ('1999-09-09' as date));
 1         
 ----------
 1999-09-09
 ij> values (cast ('TIMESTAMP''1999-09-09 11:11:11''' as timestamp));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values (cast ('1999-09-09 11:11:11' as timestamp));
 1                            
 -----------------------------
@@ -986,15 +986,15 @@ ERROR 42846: Cannot convert types 'CHAR' to 'DOUBLE'.
 ij> select cast(c as date) from tab1;
 1         
 ----------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select cast(c as time) from tab1;
 1       
 --------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select cast(c as timestamp) from tab1;
 1                            
 -----------------------------
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> select cast(c as dec) from tab1;
 1     
 ------
@@ -1482,11 +1482,11 @@ ij> values cast('asdf' as decimal(5,4));
 -------
 ERROR 22018: Invalid character string format for type DECIMAL.
 ij> values cast('asdf' as date);
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values cast('asdf' as time);
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values cast('asdf' as timestamp);
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+ERROR 22007: The syntax of the string representation of a date/time value is incorrect.
 ij> values cast('2999999999' as int);
 ERROR 22003: The resulting value is outside the range for the data type INTEGER.
 ij> values cast(2999999999 as int);
