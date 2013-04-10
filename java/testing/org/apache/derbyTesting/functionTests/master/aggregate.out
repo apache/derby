@@ -770,7 +770,7 @@ ij> insert into ovf_real values (+3.402E+38 - 2);
 1 row inserted/updated/deleted
 ij> select avg(i) from ovf_real;
 1            
--------------
+---------------
 3.402E38     
 ij> drop table ovf_real;
 0 rows inserted/updated/deleted
@@ -786,7 +786,7 @@ ij> insert into ovf_double values (+1.79769E+308 - 2);
 1 row inserted/updated/deleted
 ij> select avg(i) from ovf_double;
 1                     
-----------------------
+------------------------
 1.79769E308           
 ij> drop table ovf_double;
 0 rows inserted/updated/deleted

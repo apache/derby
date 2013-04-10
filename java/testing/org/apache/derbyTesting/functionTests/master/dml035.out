@@ -43,7 +43,7 @@ ij> -- PASS:0157 If 1 row is inserted?
           FROM JJ
           ORDER BY FLOATTEST DESC;
 FLOATTEST             
-----------------------
+------------------------
 66.3                  
 66.2                  
 0.2222                

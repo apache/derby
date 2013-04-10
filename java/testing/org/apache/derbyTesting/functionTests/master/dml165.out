@@ -56,7 +56,7 @@ ij> -- PASS:0870 If 1 row inserted successfully?
    SELECT * FROM APPLES UNION ALL SELECT * FROM ORANGES
      ORDER BY 1;
 1                     |2              
---------------------------------------
+----------------------------------------
 1.0                   |Granny Smith   
 1.5                   |Navel          
 2.0                   |Red Delicious  

@@ -160,7 +160,7 @@ ij> -- NOTE:0497 If we have not inserted enough big values into FOUR_TYPES,
  
    SELECT SUM(T_REAL) FROM FOUR_TYPES;
 1            
--------------
+---------------
 ERROR 22003: The resulting value is outside the range for the data type REAL.
 ij> -- PASS:0497 If ERROR, data exception/numeric value out of range?
 -- PASS:0497 OR 0 rows selected OR SQLSTATE = 22003 OR SQLCODE < 0?

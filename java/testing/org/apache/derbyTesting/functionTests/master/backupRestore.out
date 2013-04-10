@@ -101,7 +101,7 @@ ij> ---perform a rollforward recovery
 connect 'wombat;rollForwardRecoveryFrom=extinout/mybackup/wombat';
 ij> select * from x;
 X                     |Y          
-----------------------------------
+------------------------------------
 1.0                   |1          
 10.0                  |1          
 20.0                  |1          

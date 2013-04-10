@@ -1056,7 +1056,7 @@ insert into fake values -11;
 
 -- ============================================================
 
--- DB2 MAX_VALUES (first succeed, second fail)
+-- DB2 MAX_VALUES (first succeed, second used to fail)
 insert into fake values( -3.4019E+38 );
 insert into fake values( -3.4021E+38 );
 insert into fake values -21;
@@ -1065,7 +1065,7 @@ insert into fake values( +3.4019E+38 );
 insert into fake values( +3.4021E+38 ); 
 insert into fake values -22;
 
--- DB2 MIN_VALUES (first fail, second succeed)
+-- DB2 MIN_VALUES (first used to fail, second succeed)
 insert into fake values( -1.1749E-37 ); 
 insert into fake values( -1.1751E-37 ); 
 insert into fake values -23;
@@ -1074,7 +1074,7 @@ insert into fake values( +1.1749E-37 );
 insert into fake values( +1.1751E-37 );
 insert into fake values -24;
 
--- CS (fail)
+-- CS (used to fail pre DERBY-3398)
 insert into fake values( -3.4028234E38 );
 insert into fake values( -3.40282349E38 );
 insert into fake values( -3.40282351E38 );
@@ -1133,7 +1133,7 @@ values cast(5e-37 / 1e300 as real);
 values cast(cast(0.0e0 as real) - cast(0.0e0 as real) as real);
 values cast(cast(1.0e-30 as real) - cast(1.0e-30 as real) as real);
 
--- java (and CS previously) rounded result to zero, but now gives errors like DB2 (fail)
+-- used to fail pre DERBY-3398
 values cast(cast(5e-37 as real) - cast(4e-37 as real) as real);
 values cast(5e-37 - 4e-37 as real);
 values cast(5e-37 - 4.99e-37 as real);
@@ -1172,8 +1172,8 @@ insert into t1 values -1.40129846432481700e-46;
 insert into t1 values +1.40129846432481700e-46;
 select * from t1;
 
--- these 2 insert statements should raise an error msg in compat mode
--- because the values are greater db2's limits (fail)
+-- these 2 insert statements used to raise error pre DERBY-3398
+-- because the values were greater than db2's limits
 insert into t1 values 3.40282346638528860e+38;
 insert into t1 values -3.40282346638528860e+38;
 select * from t1;
@@ -1188,8 +1188,8 @@ insert into t1 values -1.40129846432481700e-46;
 insert into t1 values +1.40129846432481700e-46;
 select * from t1;
 
--- these 2 insert statements raise ERROR 22003 because
--- the values are greater db2's limits (fail)
+-- these 2 insert statements used to raise error pre DERBY-3398
+-- because the values were greater than db2's limits
 insert into t1 values 3.40282346638528860e+38;
 insert into t1 values -3.40282346638528860e+38;
 select * from t1;

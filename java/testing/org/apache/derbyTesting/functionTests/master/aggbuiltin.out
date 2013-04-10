@@ -202,7 +202,7 @@ ij> select avg(s) from empty;
 NULL  
 ij> select avg(d) from empty;
 1                     
-----------------------
+------------------------
 NULL                  
 ij> select avg(l) from empty;
 1                   
@@ -210,7 +210,7 @@ ij> select avg(l) from empty;
 NULL                
 ij> select avg(r) from empty;
 1            
--------------
+---------------
 NULL         
 ij> select avg(dc) from empty;
 1          
@@ -219,7 +219,7 @@ NULL
 ij> -- variations
 select avg(i), avg(s), avg(r), avg(l) from empty;
 1          |2     |3            |4                   
------------------------------------------------------
+-------------------------------------------------------
 NULL       |NULL  |NULL         |NULL                
 ij> select avg(i+1) from empty;
 1          
@@ -234,13 +234,13 @@ ij> select avg(s) from empty group by s;
 ------
 ij> select avg(d) from empty group by d;
 1                     
-----------------------
+------------------------
 ij> select avg(l) from empty group by l;
 1                   
 --------------------
 ij> select avg(r) from empty group by r;
 1            
--------------
+---------------
 ij> select avg(dc) from empty group by dc;
 1          
 -----------
@@ -259,7 +259,7 @@ ij> select avg(s) from t;
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(d) from t;
 1                     
-----------------------
+------------------------
 192.85714285714286    
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(l) from t;
@@ -269,7 +269,7 @@ ij> select avg(l) from t;
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(r) from t;
 1            
--------------
+---------------
 192.85715    
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(dc) from t;
@@ -293,7 +293,7 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(d) from t group by d;
 1                     
-----------------------
+------------------------
 100.0                 
 200.0                 
 NULL                  
@@ -306,7 +306,7 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select avg(r) from t group by r;
 1            
--------------
+---------------
 100.0        
 200.0        
 NULL         
@@ -329,7 +329,7 @@ ij> select avg(1.1) from t;
 1.1000   
 ij> select avg(1e1) from t;
 1                     
-----------------------
+------------------------
 10.0                  
 ij> select avg(1) from t group by i;
 1          
@@ -345,14 +345,14 @@ ij> select avg(1.1) from t group by r;
 1.1000   
 ij> select avg(1e1) from t group by r;
 1                     
-----------------------
+------------------------
 10.0                  
 10.0                  
 10.0                  
 ij> -- multicolumn grouping
 select avg(i), avg(l), avg(r) from t group by i, dt, b;
 1          |2                   |3            
-----------------------------------------------
+------------------------------------------------
 0          |1000000             |190.90909    
 0          |1000000             |200.0        
 0          |1000000             |200.0        
@@ -361,7 +361,7 @@ NULL       |NULL                |NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select i, dt, avg(i), avg(r), avg(l), l from t group by i, dt, b, l;
 I          |DT        |3          |4            |5                   |L                   
-------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 0          |1992-01-01|0          |190.90909    |1000000             |1000000             
 0          |1992-01-01|0          |200.0        |1000000             |1000000             
 0          |1992-09-09|0          |200.0        |1000000             |1000000             
@@ -372,7 +372,7 @@ ij> -- group by expression
 select avg(expr1), avg(expr2)
 from (select i * s, r * 2 from t) t (expr1, expr2) group by expr2, expr1;
 1          |2            
--------------------------
+---------------------------
 0          |200.0        
 0          |400.0        
 100        |400.0        
@@ -466,81 +466,81 @@ ij> insert into tmp values (1,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 1.0                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 1.0                   
 ij> insert into tmp values (2,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 1.5                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 1.5                   
 ij> insert into tmp values (3,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 2.0                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 2.0                   
 ij> insert into tmp values (4,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 2.5                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 2.5                   
 ij> insert into tmp values (5,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 3.0                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 3.0                   
 ij> insert into tmp values (6,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 3.5                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 3.5                   
 ij> insert into tmp values (7,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 4.0                   
 ij> execute vector;
 1                     
-----------------------
+------------------------
 4.0                   
 ij> insert into tmp values (10000,1);
 1 row inserted/updated/deleted
 ij> execute scalar;
 1                     
-----------------------
+------------------------
 1253.5                
 ij> execute vector;
 1                     
-----------------------
+------------------------
 1253.5                
 ij> remove vector;
 ij> remove scalar;
@@ -1497,7 +1497,7 @@ ij> select sum(s) from empty;
 NULL  
 ij> select sum(d) from empty;
 1                     
-----------------------
+------------------------
 NULL                  
 ij> select sum(l) from empty;
 1                   
@@ -1505,7 +1505,7 @@ ij> select sum(l) from empty;
 NULL                
 ij> select sum(r) from empty;
 1            
--------------
+---------------
 NULL         
 ij> select sum(dc) from empty;
 1          
@@ -1514,7 +1514,7 @@ NULL
 ij> -- variations
 select sum(i), sum(s), sum(r), sum(l) from empty;
 1          |2     |3            |4                   
------------------------------------------------------
+-------------------------------------------------------
 NULL       |NULL  |NULL         |NULL                
 ij> select sum(i+1) from empty;
 1          
@@ -1529,13 +1529,13 @@ ij> select sum(s) from empty group by s;
 ------
 ij> select sum(d) from empty group by d;
 1                     
-----------------------
+------------------------
 ij> select sum(l) from empty group by l;
 1                   
 --------------------
 ij> select sum(r) from empty group by r;
 1            
--------------
+---------------
 ij> select sum(dc) from empty group by dc;
 1          
 -----------
@@ -1554,7 +1554,7 @@ ij> select sum(s) from t;
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(d) from t;
 1                     
-----------------------
+------------------------
 2900.0                
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(l) from t;
@@ -1564,7 +1564,7 @@ ij> select sum(l) from t;
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(r) from t;
 1            
--------------
+---------------
 2900.0       
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(dc) from t;
@@ -1588,7 +1588,7 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(d) from t group by d;
 1                     
-----------------------
+------------------------
 100.0                 
 2800.0                
 NULL                  
@@ -1602,7 +1602,7 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select sum(r) from t group by r;
 1            
--------------
+---------------
 100.0        
 2800.0       
 NULL         
@@ -1625,7 +1625,7 @@ ij> select sum(1.1) from t;
 18.7  
 ij> select sum(1e1) from t;
 1                     
-----------------------
+------------------------
 170.0                 
 ij> select sum(1) from t group by i;
 1          
@@ -1641,14 +1641,14 @@ ij> select sum(1.1) from t group by r;
 2.2   
 ij> select sum(1e1) from t group by r;
 1                     
-----------------------
+------------------------
 10.0                  
 140.0                 
 20.0                  
 ij> -- multicolumn grouping
 select sum(i), sum(l), sum(r) from t group by i, dt, b;
 1          |2                   |3            
-----------------------------------------------
+------------------------------------------------
 0          |13000000            |2300.0       
 0          |1000000             |200.0        
 0          |1000000             |200.0        
@@ -1657,7 +1657,7 @@ NULL       |NULL                |NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select i, dt, sum(i), sum(r), sum(l), l from t group by i, dt, b, l;
 I          |DT        |3          |4            |5                   |L                   
-------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 0          |1992-01-01|0          |2100.0       |11000000            |1000000             
 0          |1992-01-01|0          |200.0        |2000000             |2000000             
 0          |1992-01-01|0          |200.0        |1000000             |1000000             
@@ -1669,7 +1669,7 @@ ij> -- group by expression
 select sum(expr1), sum(expr2)
 from (select i * s, r * 2 from t) t (expr1, expr2) group by expr2, expr1;
 1          |2            
--------------------------
+---------------------------
 0          |200.0        
 0          |5200.0       
 100        |400.0        
@@ -1731,7 +1731,7 @@ ij> insert into tmp values (2147483647),
 9 rows inserted/updated/deleted
 ij> select sum(x) from tmp;
 1                     
-----------------------
+------------------------
 1.9327352823E10       
 ij> drop table tmp;
 0 rows inserted/updated/deleted
@@ -1890,11 +1890,11 @@ ij> select max(v) from empty;
 NULL                                              
 ij> select max(d) from empty;
 1                     
-----------------------
+------------------------
 NULL                  
 ij> select max(r) from empty;
 1            
--------------
+---------------
 NULL         
 ij> select max(dt) from empty;
 1         
@@ -1947,10 +1947,10 @@ ij> select max(v) from empty group by v;
 --------------------------------------------------
 ij> select max(d) from empty group by d;
 1                     
-----------------------
+------------------------
 ij> select max(r) from empty group by r;
 1            
--------------
+---------------
 ij> select max(dt) from empty group by dt;
 1         
 ----------
@@ -1999,12 +1999,12 @@ this is duplicated
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(d) from t;
 1                     
-----------------------
+------------------------
 200.0                 
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(r) from t;
 1            
--------------
+---------------
 200.0        
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(dt) from t;
@@ -2074,14 +2074,14 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(d) from t group by d;
 1                     
-----------------------
+------------------------
 100.0                 
 200.0                 
 NULL                  
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(r) from t group by r;
 1            
--------------
+---------------
 100.0        
 200.0        
 NULL         
@@ -2143,7 +2143,7 @@ ij> select max(1.1) from t;
 1.1 
 ij> select max(1e1) from t;
 1                     
-----------------------
+------------------------
 10.0                  
 ij> select max(X'11') from t;
 1   
@@ -2181,7 +2181,7 @@ ij> select max(1.1) from t group by dc;
 1.1 
 ij> select max(1e1) from t group by d;
 1                     
-----------------------
+------------------------
 10.0                  
 10.0                  
 10.0                  
@@ -2423,11 +2423,11 @@ ij> select min(v) from empty;
 NULL                                              
 ij> select min(d) from empty;
 1                     
-----------------------
+------------------------
 NULL                  
 ij> select min(r) from empty;
 1            
--------------
+---------------
 NULL         
 ij> select min(dt) from empty;
 1         
@@ -2480,10 +2480,10 @@ ij> select min(v) from empty group by v;
 --------------------------------------------------
 ij> select min(d) from empty group by d;
 1                     
-----------------------
+------------------------
 ij> select min(r) from empty group by r;
 1            
--------------
+---------------
 ij> select min(dt) from empty group by dt;
 1         
 ----------
@@ -2532,12 +2532,12 @@ noone is here
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(d) from t;
 1                     
-----------------------
+------------------------
 100.0                 
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(r) from t;
 1            
--------------
+---------------
 100.0        
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(dt) from t;
@@ -2607,14 +2607,14 @@ NULL
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(d) from t group by d;
 1                     
-----------------------
+------------------------
 100.0                 
 200.0                 
 NULL                  
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(r) from t group by r;
 1            
--------------
+---------------
 100.0        
 200.0        
 NULL         
@@ -2676,7 +2676,7 @@ ij> select min(1.1) from t;
 1.1 
 ij> select min(1e1) from t;
 1                     
-----------------------
+------------------------
 10.0                  
 ij> select min(X'11') from t;
 1   
@@ -2714,7 +2714,7 @@ ij> select min(1.1) from t group by dc;
 1.1 
 ij> select min(1e1) from t group by d;
 1                     
-----------------------
+------------------------
 10.0                  
 10.0                  
 10.0                  

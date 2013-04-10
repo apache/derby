@@ -36,7 +36,7 @@ ij> -- PASS:0582 If 1 row is inserted?
 
    SELECT C1, C2, C3 FROM ICAST2;
 C1         |C2                    |C3     
-------------------------------------------
+--------------------------------------------
 3          |3.0                   |3.142  
 ij> -- PASS:0582 If 1 row is selected with C1 = 3 and C3 = 3.142?
 
@@ -46,7 +46,7 @@ ij> -- PASS:0582 If 1 row is updated?
 
    SELECT C1, C2, C3 FROM ICAST2;
 C1         |C2                    |C3     
-------------------------------------------
+--------------------------------------------
 5          |5.0                   |5.241  
 ij> -- PASS:0582 If 1 row is selected with C1 = 5 and C3 = 5.241?
 
@@ -60,7 +60,7 @@ ij> -- PASS:0582 If 1 row is updated?
 
    SELECT C1, C2, C3 FROM ICAST2;
 C1         |C2                    |C3     
-------------------------------------------
+--------------------------------------------
 2          |2.1                   |9.100  
 ij> -- PASS:0582 If 1 row is selected with C1 = 2 and C3 = 9.100?
 
