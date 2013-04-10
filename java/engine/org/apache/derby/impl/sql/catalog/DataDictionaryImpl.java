@@ -1310,8 +1310,10 @@ public final class	DataDictionaryImpl
 						/* Switch the caching mode to DDL */
 						setCacheMode(DataDictionary.DDL_MODE);
 	
-						/* Clear out all the caches */
-						clearCaches();
+						// Until we implement ALTER SEQUENCE, there should be no need
+                        // to clear the sequence cache. Always clearing the sequence cache
+                        // here gives rise to DERBY-6137.
+						clearCaches( false );
 					}
 		
 					/* Keep track of the number of DDL users */
@@ -9122,11 +9124,21 @@ public final class	DataDictionaryImpl
 	 */
 	public void clearCaches() throws StandardException
 	{
+        clearCaches( true );
+    }
+    
+	/**
+	 * Clear the DataDictionary caches, including the sequence caches if requested..
+	 *
+	 * @exception StandardException Standard Derby error policy
+	 */
+	public void clearCaches( boolean clearSequenceCaches ) throws StandardException
+	{
 		nameTdCache.cleanAll();
 		nameTdCache.ageOut();
 		OIDTdCache.cleanAll();
 		OIDTdCache.ageOut();
-        clearSequenceCaches();
+        if ( clearSequenceCaches ) { clearSequenceCaches(); }
 		if (spsNameCache != null)
 		{
 			//System.out.println("CLEARING SPS CACHE");

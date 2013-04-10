@@ -218,6 +218,13 @@ public interface DataDictionary
 	public static final int DDL_MODE = 1;
 
 	/**
+	 * Clear the DataDictionary caches, including the sequence caches if requested..
+	 *
+	 * @exception StandardException Standard Derby error policy
+	 */
+	public void clearCaches( boolean clearSequenceCaches ) throws StandardException;
+
+	/**
 	 * Clear all of the DataDictionary caches.
 	 *
 	 * @exception StandardException Standard Derby error policy
