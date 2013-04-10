@@ -531,8 +531,22 @@ class LOBStreamControl {
      * @throws IOException if the file cannot be closed or deleted
      */
     private void releaseTempFile(LOBFile file) throws IOException {
-        file.close();
+        // Remove the file from the list of open files *first*, then close it.
+        //
+        // Why? This code may be called from finalize(), and may end up running
+        // at the same time the transaction is committed or rolled back. If two
+        // threads call RandomAccessFile.close() at the same time, Java 5 could
+        // fail (see DERBY-6092). By removing it from the list before closing
+        // it, we make sure that EmbedConnection.clearLOBMapping() won't see
+        // it if we get to the file first. Conversely, if clearLOBMapping()
+        // gets to it first, the call to removeLobFile() will block until
+        // clearLOBMapping() is done, so we won't attempt to close the file
+        // until after clearLOBMapping() is done, rather than at the same time.
+        //
+        // Calling close() concurrently is safe on Java 6 and newer, after the
+        // fix for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6322678 .
         conn.removeLobFile(file);
+        file.close();
         deleteFile(file.getStorageFile());
     }
     
