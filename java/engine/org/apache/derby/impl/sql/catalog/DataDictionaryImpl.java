@@ -10505,7 +10505,19 @@ public final class	DataDictionaryImpl
                     ( schemaName + "." + sequenceName) );
         }
         
-        return ((SequenceUpdater) sequenceGeneratorCache.find( uuid )).peekAtCurrentValue();
+        SequenceUpdater sequenceUpdater = null;
+
+        try {
+            sequenceUpdater = (SequenceUpdater) sequenceGeneratorCache.find( uuid );
+            return sequenceUpdater.peekAtCurrentValue();
+        }
+        finally
+        {
+            if ( sequenceUpdater != null )
+            {
+                sequenceGeneratorCache.release( sequenceUpdater );
+            }
+        }
     }
     
     public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
