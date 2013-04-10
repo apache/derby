@@ -78,6 +78,8 @@ import org.apache.derby.iapi.types.RowLocation;
  */
 public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
+	public void clearCaches( boolean clearSequenceCaches ) {}
+    
 	public void clearCaches() throws StandardException {
 		// Auto-generated method stub
 

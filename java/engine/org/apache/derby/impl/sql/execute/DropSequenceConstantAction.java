@@ -91,6 +91,7 @@ class DropSequenceConstantAction extends DDLConstantAction {
         ** the transaction.
         */
         dd.startWriting(lcc);
+        dd.clearSequenceCaches();
 
         SequenceDescriptor sequenceDescriptor = dd.getSequenceDescriptor(schemaDescriptor, sequenceName);
 
@@ -101,6 +102,5 @@ class DropSequenceConstantAction extends DDLConstantAction {
         }
 
         sequenceDescriptor.drop(lcc);
-
     }
 }

@@ -556,4 +556,82 @@ public class SequenceTest extends GeneratedColumnsHelper {
         goodStatement( conn, "create table t_5254( cycle int, minvalue int, maxvalue int )" );
         goodStatement( conn, "drop table t_5254" );
     }
+    
+    /**
+     * Verify that trigger recompilation doesn't choke trying to create
+     * two nested writable transactions.
+     */
+    public void test_16_6137() throws Exception
+    {
+        Connection conn = openUserConnection( TEST_DBO );
+
+        goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '2' )" );
+        goodStatement( conn, "create table t_6137( rateID int generated always as identity primary key, amount decimal( 5,2 ) )" );
+        goodStatement( conn, "create table t_history_6137( changeID int primary key, amount decimal( 5,2 ) )" );
+        goodStatement( conn, "create sequence seq_6137 start with 1" );
+        goodStatement
+            (
+             conn,
+             "create trigger trg_t_6137_hist_del\n" +
+             "after delete on t_6137\n" +
+             "referencing old row as old\n" +
+             "for each row\n" +
+             " insert into t_history_6137 ( changeID, amount ) values (( next value for seq_6137 ), old.amount )\n"
+             );
+        goodStatement( conn, "insert into t_6137( amount ) values ( 30.04 ), ( 60.04 ), ( 90.04 )" );
+
+        // invalidate the stored statements so that the trigger will have to be recompiled
+        goodStatement( conn, "call syscs_util.syscs_invalidate_stored_statements()" );
+
+        // put the sequence in the cache
+        assertResults
+            (
+             conn,
+             "values next value for seq_6137",
+             new String[][]
+             {
+                 { "1" },
+             },
+             true
+             );
+
+        // verify that the trigger recompiles and fires correctly
+        goodStatement( conn, "delete from t_6137 where rateID = 1" );
+        goodStatement( conn, "delete from t_6137 where rateID = 2" );
+        assertResults
+            (
+             conn,
+             "select * from t_history_6137 order by changeID",
+             new String[][]
+             {
+                 { "2", "30.04" },
+                 { "3", "60.04" },
+             },
+             true
+             );
+
+        // verify current value of sequence
+        String  peekAtSequence = "values syscs_util.syscs_peek_at_sequence('" + TEST_DBO + "', 'SEQ_6137')";
+        assertResults
+            (
+             conn,
+             peekAtSequence,
+             new String[][]
+             {
+                 { "4" },
+             },
+             true
+             );
+
+        // tidy up
+        goodStatement( conn, "drop trigger trg_t_6137_hist_del" );
+        goodStatement( conn, "drop table t_history_6137" );
+        goodStatement( conn, "drop table t_6137" );
+        goodStatement( conn, "drop sequence seq_6137 restrict" );
+        goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', null )" );
+
+        // verify that the uncleared cache does not leave a phantom sequence hanging around
+        expectExecutionError( conn, MISSING_OBJECT, peekAtSequence );
+        expectCompilationError( conn, OBJECT_DOES_NOT_EXIST, "values next value for seq_6137" );
+    }
 }
