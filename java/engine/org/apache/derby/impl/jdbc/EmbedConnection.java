@@ -3322,7 +3322,7 @@ public class EmbedConnection implements EngineConnection
 	* Called when a commit or rollback of the transaction
 	* happens.
 	*/
-	public void clearLOBMapping() throws SQLException {
+    private void clearLOBMapping() throws SQLException {
 
 		//free all the lob resources in the HashMap
 		Map map = rootConnection.lobReferences;

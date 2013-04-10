@@ -86,13 +86,6 @@ public interface EngineConnection extends Connection {
         throws SQLException;
 
     /**
-    * Clear the HashTable of all entries.
-    * Called when a commit or rollback of the transaction
-    * happens.
-    */
-    public void clearLOBMapping() throws SQLException;
-
-    /**
     * Get the LOB reference corresponding to the locator.
     * @param key the integer that represents the LOB locator value.
     * @return the LOB Object corresponding to this locator.

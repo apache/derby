@@ -742,17 +742,6 @@ public class BrokeredConnection implements EngineConnection
         return holdability;
         
     }
-    
-	/**
-	* Clear the HashMap of all entries.
-	* Called when a commit or rollback of the transaction
-	* happens.
-	*/
-	public void clearLOBMapping() throws SQLException {
-            //Forward the methods implementation to the implementation in the
-            //underlying EmbedConnection object. 
-            getRealConnection().clearLOBMapping();
-	}
 
 	/**
 	* Get the LOB reference corresponding to the locator.
