@@ -84,7 +84,9 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(PredicateTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
         suite.addTest(ReferentialActionsTest.suite());
-        suite.addTest(RolesTest.suite());
+        // Skip RolesTest for compat testing. Too many system
+        // table checks
+        //suite.addTest(RolesTest.suite());
         suite.addTest(RolesConferredPrivilegesTest.suite());
         suite.addTest(SQLSessionContextTest.suite());
         suite.addTest(RoutineSecurityTest.suite());
@@ -111,7 +113,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UnaryArithmeticParameterTest.suite());
         suite.addTest(HoldCursorTest.suite());
         suite.addTest(ShutdownDatabaseTest.suite());
-        suite.addTest(StalePlansTest.suite());
+        // omit SystemCatalogTest for compat testing
+        //suite.addTest(StalePlansTest.suite());
         suite.addTest(SystemCatalogTest.suite());
         suite.addTest(ForBitDataTest.suite());
         suite.addTest(DistinctTest.suite());

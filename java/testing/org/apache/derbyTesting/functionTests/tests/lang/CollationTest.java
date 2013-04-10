@@ -1345,10 +1345,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE CASE WHEN " +
     		" 1=1 THEN NAMECHAR ELSE NAME END = NAMECHAR",
     		new String[][] {{"7"} });   
-    //The query below will work for the same reason. 
+    //The query below will work for the same reason.
+    /* Omit system table query for compat testing
     checkLangBasedQuery(s, "SELECT count(*) FROM SYS.SYSTABLES WHERE CASE " +
     		" WHEN 1=1 THEN TABLENAME ELSE TABLEID END = TABLENAME",
     		new String[][] {{"25"} });
+    */
 
     //Do some testing using CONCATENATION
     //following will fail because result string of concatenation has 
