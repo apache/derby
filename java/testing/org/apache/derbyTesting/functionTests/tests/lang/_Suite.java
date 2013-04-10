@@ -76,7 +76,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(InbetweenTest.suite());
         suite.addTest(InsertTest.suite());
         suite.addTest(JoinTest.suite());
-	  suite.addTest(LangScripts.suite());
+        //suite.addTest(LangScripts.suite());
         suite.addTest(LikeTest.suite());
         suite.addTest(LojReorderTest.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
@@ -162,7 +162,7 @@ public class _Suite extends BaseTestCase  {
          
         // Add the NIST suite in from the nist package since
         // it is a SQL language related test.
-        suite.addTest(NistScripts.suite());
+        //suite.addTest(NistScripts.suite());
         
         // Add the java tests that run using a master
         // file (ie. partially converted).
