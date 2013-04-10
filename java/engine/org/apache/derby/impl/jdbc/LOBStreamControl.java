@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import org.apache.derby.iapi.error.StandardException;
@@ -55,7 +56,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  * blob data irrespective of if its in memory or in file.
  */
 
-class LOBStreamControl {
+final class LOBStreamControl {
     private LOBFile tmpFile;
     private byte [] dataBytes = new byte [0];
     private boolean isBytes = true;
@@ -92,34 +93,30 @@ class LOBStreamControl {
 
     private void init(byte [] b, long len)
             throws IOException, StandardException {
+        Object monitor = Monitor.findService(
+                Property.DATABASE_MODULE, conn.getDBName());
+        final DataFactory df = (DataFactory) Monitor.findServiceModule(
+                monitor, DataFactory.MODULE);
         try {
             AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException, StandardException {
-                    Object monitor = Monitor.findService(
-                            Property.DATABASE_MODULE, conn.getDBName());
-                    DataFactory df =  (DataFactory) Monitor.findServiceModule(
-                            monitor, DataFactory.MODULE);
+                public Object run() throws IOException {
                     //create a temporary file
                     StorageFile lobFile =
                         df.getStorageFactory().createTemporaryFile("lob", null);
                     if (df.databaseEncrypted()) {
                         tmpFile = new EncryptedLOBFile (lobFile, df);
-                    }
-                    else
+                    } else {
                         tmpFile = new LOBFile (lobFile);
-                    conn.addLobFile(tmpFile);
+                    }
                     return null;
                 }
             });
         }
         catch (PrivilegedActionException pae) {
-            Exception e = pae.getException();
-            if (e instanceof StandardException)
-                throw (StandardException)e;
-            if (e instanceof IOException)
-                throw (IOException) e;
-            throw Util.newIOException(e);
+            throw (IOException) pae.getCause();
         }
+
+        conn.addLobFile(tmpFile);
         isBytes = false;
         //now this call will write into the file
         if (len != 0)
@@ -196,8 +193,9 @@ class LOBStreamControl {
      * Writes one byte.
      * @param b byte
      * @param pos
-     * @return new postion
-     * @throws IOException, StandardException
+     * @return new position
+     * @throws IOException if writing to the LOB file fails
+     * @throws StandardException if encrypting/decrypting the LOB file fails
      */
     synchronized long write(int b, long pos)
             throws IOException, StandardException {
@@ -257,9 +255,10 @@ class LOBStreamControl {
 
     /**
      * Reads one byte.
-     * @param pos postion from where to read
+     * @param pos position from where to read
      * @return byte
-     * @throws IOException, StandardException
+     * @throws IOException if reading the LOB file fails
+     * @throws StandardException if decrypting an encrypted LOB file fails
      */
     synchronized int read(long pos)
             throws IOException, StandardException {
@@ -294,9 +293,10 @@ class LOBStreamControl {
      * @param buff array into the bytes will be copied
      * @param off offset from where the array has to be populated
      * @param len number of bytes to read
-     * @param pos initial postion before reading
-     * @return number new postion
-     * @throws IOException, StandardException
+     * @param pos initial position before reading
+     * @return number new position
+     * @throws IOException if reading the LOB file fails
+     * @throws StandardException if decrypting an encrypted LOB file fails
      */
     synchronized int read(byte[] buff, int off, int len, long pos)
             throws IOException, StandardException {
@@ -340,7 +340,7 @@ class LOBStreamControl {
 
     /**
      * Resets the size.
-     * @param size new size should be smaller than exisiting size
+     * @param size new size should be smaller than existing size
      * @throws IOException
      */
     synchronized void truncate(long size)
@@ -373,7 +373,8 @@ class LOBStreamControl {
      * @param inStream the stream to copy from
      * @param length number of bytes to be copied, or {@code Long.MAX_VALUE} to
      *      copy everything until EOF is reached
-     * @throws IOException, StandardException
+     * @throws IOException if reading or writing a LOB file fails
+     * @throws StandardException if encrypting or decrypting a LOB file fails
      */
     synchronized void copyData(InputStream inStream, long length)
             throws IOException, StandardException {
@@ -492,27 +493,18 @@ class LOBStreamControl {
         free();
     }
 
-    private void deleteFile (StorageFile file) throws IOException {
-        try {
-            final StorageFile sf = file;
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    sf.delete();
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException pae) {
-            Exception e = pae.getException();
-            if (e instanceof IOException)
-                throw (IOException) e;
-            if (e instanceof RuntimeException)
-                throw (RuntimeException) e;
-            throw Util.newIOException(e);
-        }
+    private void deleteFile(final StorageFile file) {
+        AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                file.delete();
+                return null;
+            }
+        });
     }
+
     /**
      * Invalidates all the variables and closes file handle if open.
-     * @throws IOexception
+     * @throws IOException if closing the file fails
      */
     void free() throws IOException {
         dataBytes = null;
@@ -561,7 +553,7 @@ class LOBStreamControl {
      * @param stPos inclusive starting position of current block
      * @param endPos exclusive end position of current block
      * @return Current position after write.
-     * @throws IOExcepton if writing to temporary file fails
+     * @throws IOException if writing to the temporary file fails
      * @throws StandardException
      */
     synchronized long replaceBytes (byte [] buf, long stPos, long endPos)
@@ -623,7 +615,7 @@ class LOBStreamControl {
     }
 
     /**
-     * Returns the running secquence number to check if the lob is updated since
+     * Returns the running sequence number to check if the lob is updated since
      * last access.
      *
      * @return The current update sequence number.

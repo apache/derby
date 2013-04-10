@@ -130,7 +130,7 @@ class EncryptedLOBFile extends LOBFile {
      * Writes one byte into the file.
      * @param b byte value
      * @throws IOException if disk operation fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during encryption/decryption
      */
     void write (int b) throws IOException, StandardException {
         long length = super.length();
@@ -174,7 +174,7 @@ class EncryptedLOBFile extends LOBFile {
      * data should be written to the file
      * @param len number of bytes to be written
      * @throws IOException if disk operation fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during encryption/decryption
      */
     void write(byte[] b, int off, int len)
                                     throws IOException, StandardException {
@@ -248,25 +248,17 @@ class EncryptedLOBFile extends LOBFile {
      * the file if the total length exceeds the file size.
      * @param b byte array to be written
      * @throws IOException if disk operation fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during encryption/decryption
      */
     void write(byte[] b) throws IOException, StandardException {
         write (b, 0, b.length);
     }
 
     /**
-     * closes the file.
-     * @throws IOException
-     */
-    void close() throws IOException {
-        super.close();
-    }
-
-    /**
      * Reads one byte from file.
      * @return byte
      * @throws IOException if disk operation fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during decryption
      */
     int readByte() throws IOException, StandardException {
         long fileLength = super.length();
@@ -289,7 +281,7 @@ class EncryptedLOBFile extends LOBFile {
      * @param len number of bytes to be read
      * @return number of bytes read
      * @throws IOException if disk operation fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during decryption
      */
     int read(byte[] buff, int off, int len)
                                         throws IOException, StandardException {
@@ -337,7 +329,7 @@ class EncryptedLOBFile extends LOBFile {
      *
      * @param size new  file size. Must be lower than file length.
      * @throws IOException if file i/o fails
-     * @throws StandardException if error occured during encryption/decryption
+     * @throws StandardException if error occurred during decryption
      */
     void setLength(long size) throws IOException, StandardException {
         long fileLength = super.length();
