@@ -22,8 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derbyTesting.functionTests.tests.lang.SecurityPolicyReloadingTest;
-import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
@@ -38,12 +37,10 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.AccessController;
-import java.security.Policy;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -191,50 +188,28 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         }
     }
     
-        /**
-         * Wraps InitAddress.getByName in privilege block.
-         * 
-         * @param host  host to resolve
-         * @return InetAddress of host
-         * @throws UnknownHostException
-         */
-        private InetAddress privInetAddressGetByName(final String host) throws UnknownHostException
-        {
-            InetAddress inetAddr = null;
-            try {
-                inetAddr = (InetAddress) AccessController
-                    .doPrivileged(new PrivilegedExceptionAction() {
-                        public Object run() throws UnknownHostException {
-                            return InetAddress.getByName(host);
-                        }
-                    });
-            } catch (PrivilegedActionException pe) {
-                Exception e = pe.getException();
-                if (e instanceof UnknownHostException)
-                    throw (UnknownHostException) e;
-                else
-                    throw (SecurityException) e;
-            }
-        return inetAddr;
-            
-        }
-        
-        
-    
-    
-    private boolean fileExists(String filename) {
-        final File file = new File(filename);
+    /**
+     * Wraps InitAddress.getByName in privilege block.
+     *
+     * @param host host to resolve
+     * @return InetAddress of host
+     */
+    private InetAddress privInetAddressGetByName(final String host)
+            throws UnknownHostException {
         try {
-            return ((Boolean)AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws SecurityException {
-                        return new Boolean(file.exists());
-                    }
-                })).booleanValue();
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<InetAddress>() {
+                public InetAddress run() throws UnknownHostException {
+                    return InetAddress.getByName(host);
+                }
+            });
         } catch (PrivilegedActionException pae) {
-            throw (SecurityException)pae.getException();
+            throw (UnknownHostException) pae.getCause();
         }
-        
+    }
+
+    private boolean fileExists(String filename) {
+        return PrivilegedFileOpsForTests.exists(new File(filename));
     }
     
     /**

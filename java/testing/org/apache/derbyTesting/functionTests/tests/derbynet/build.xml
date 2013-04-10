@@ -87,6 +87,7 @@
       <exclude name="${this.dir}/dataSourcePermissions_net.java"/>
       <exclude name="${this.dir}/SqlExceptionTest.java"/>
       <exclude name="${this.dir}/ProtocolTest.java"/>
+      <exclude name="${this.dir}/NetworkServerControlApiTest.java"/>
     </javac>
   </target>
 
@@ -131,7 +132,9 @@
         <pathelement path="${junit}"/>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint"/>
       <include name="${this.dir}/ProtocolTest.java"/>
+      <include name="${this.dir}/NetworkServerControlApiTest.java"/>
     </javac>
   </target>
 

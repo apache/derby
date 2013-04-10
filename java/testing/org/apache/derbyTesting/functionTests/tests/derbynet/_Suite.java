@@ -46,7 +46,6 @@ public class _Suite extends BaseTestCase  {
 
         TestSuite suite = new TestSuite("derbynet");
         suite.addTest(PrepareStatementTest.suite());
-        suite.addTest(NetworkServerControlApiTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
         suite.addTest(ClientSideSystemPropertiesTest.suite());
@@ -81,6 +80,7 @@ public class _Suite extends BaseTestCase  {
             // Test does not run on J2ME    
             suite.addTest(DerbyNetNewServerTest.suite());
             suite.addTest(ProtocolTest.suite());
+            suite.addTest(NetworkServerControlApiTest.suite());
         }
 
         // These tests references a client class directly
