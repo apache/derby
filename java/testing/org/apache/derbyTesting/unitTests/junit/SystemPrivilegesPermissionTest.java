@@ -53,13 +53,13 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * The policy file name for the subject authorization tests.
      */
-    static private String POLICY_FILE_NAME
+    private static final String POLICY_FILE_NAME
         = "org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest.policy";
 
     /**
      * The policy file name for the DatabasePermission API test.
      */
-    static private String POLICY_FILE_NAME1
+    private static final String POLICY_FILE_NAME1
         = "org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest1.policy";
 
     /**

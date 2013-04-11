@@ -30,14 +30,12 @@ import java.util.LinkedList;
 import java.util.Properties;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -49,11 +47,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class Derby3980DeadlockTest extends BaseJDBCTestCase {
     private final int THREAD_COUNT = 2;
-    private LinkedList  listExceptions = new LinkedList();
-    private Object syncObject = new Object();
+    private final LinkedList listExceptions = new LinkedList();
+    private final Object syncObject = new Object();
     private int startedCount = 0;
-    private String fprefix = "javacore";
-    private static String TARGET_POLICY_FILE_NAME="derby3980deadlock.policy";
+    private static final String fprefix = "javacore";
+    private static final String POLICY_FILE_NAME =
+        "org/apache/derbyTesting/functionTests/tests/store/Derby3980DeadlockTest.policy";
     
     public Derby3980DeadlockTest(String name) {
         super(name);
@@ -88,7 +87,6 @@ public class Derby3980DeadlockTest extends BaseJDBCTestCase {
      * @return the decorated test
      */
     private static Test decorateTest() {
-        String policyName = new Derby3980DeadlockTest("test").makePolicyName();
         Test test = TestConfiguration.clientServerSuite(Derby3980DeadlockTest.class);
         Properties diagProperties = new Properties();
         diagProperties.setProperty("derby.stream.error.extendedDiagSeverityLevel", "30000");
@@ -96,41 +94,7 @@ public class Derby3980DeadlockTest extends BaseJDBCTestCase {
         test = new SystemPropertyTestSetup(test, diagProperties, true);
      
         // Install a security manager using the initial policy file.
-        test = new SecurityManagerSetup(test, policyName);
-
-        // Copy over the policy file we want to use.
-        String POLICY_FILE_NAME=
-            "functionTests/tests/store/Derby3980DeadlockTest.policy";
-
-        test = new SupportFilesSetup
-        (
-                test,
-                null,
-                new String[] { POLICY_FILE_NAME },
-                null,
-                new String[] { TARGET_POLICY_FILE_NAME}
-        );
-        return test;
-    }
-    /**
-     * Generate the name of the local policy file
-     * @return the name of the local testing policy file
-     **/
-    private String makePolicyName() {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + 
-            SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e) {
-            fail("Unexpected exception caught by " +
-                    "makePolicyName(): " + e );
-            return null;
-        }
+        return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     
     private void waitForThreads(Thread[] t) {

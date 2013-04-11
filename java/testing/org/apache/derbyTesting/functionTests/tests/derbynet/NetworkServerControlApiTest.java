@@ -28,7 +28,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -48,8 +47,8 @@ import junit.framework.TestSuite;
 
 public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
-    private static String POLICY_FILE_NAME="functionTests/tests/derbynet/NetworkServerControlApiTest.policy";
-    private static String TARGET_POLICY_FILE_NAME="server.policy";
+    private static final String POLICY_FILE_NAME =
+            "org/apache/derbyTesting/functionTests/tests/derbynet/NetworkServerControlApiTest.policy";
     
     public NetworkServerControlApiTest(String name) {
         super(name);
@@ -213,28 +212,6 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Construct the name of the server policy file.
-     */
-    private String makeServerPolicyName()
-    {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            System.out.println( "Unexpected exception caught by makeServerPolicyName(): " + e );
-
-            return null;
-        }
-    }
-    
-    
-    /**
      * Add decorators to a test run. Context is established in the reverse order
      * that decorators are declared here. That is, decorators compose in reverse
      * order. The order of the setup methods is:
@@ -247,9 +224,6 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      */
     private static Test decorateTest()
     {
-        
-        String serverPolicyName = new NetworkServerControlApiTest("test").makeServerPolicyName();
-
         // Use a fixed ordering of the test cases. Some of the test cases set
         // properties that will be seen by subsequent test cases, but only if
         // they run in one particular order. Also, some test cases depend on
@@ -262,23 +236,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         //
         // Install a security manager using the initial policy file.
         //
-        test = new SecurityManagerSetup( test,serverPolicyName );
-        
-        
-        //
-        // Copy over the policy file we want to use.
-        //
-        test = new SupportFilesSetup
-            (
-             test,
-             null,
-             new String[] { POLICY_FILE_NAME },
-             null,
-             new String[] { TARGET_POLICY_FILE_NAME}
-             );
-
-       
-        return test;
+        return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     
     public static Test suite()

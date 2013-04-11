@@ -21,7 +21,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,7 +35,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -55,13 +53,12 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
 			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };
 	
-	private static String POLICY_FILE_NAME=
-    	"functionTests/tests/derbynet/RuntimeInfoTest.policy";
-    private static String TARGET_POLICY_FILE_NAME="runtimeinfo.policy";
+    private static final String POLICY_FILE_NAME =
+        "org/apache/derbyTesting/functionTests/tests/derbynet/RuntimeInfoTest.policy";
 
-    private static Locale englishLocale = new Locale("en","US");
-	private static Locale germanLocale = new Locale("de","DE");
-	private static String stdout_err_tags = "<[^<>]*STD.*>";
+    private static final Locale englishLocale = new Locale("en", "US");
+    private static final Locale germanLocale = new Locale("de", "DE");
+    private static final String stdout_err_tags = "<[^<>]*STD.*>";
 	
 	/**
 	 * Constructor
@@ -228,27 +225,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		println(s);
 		println("<<<" + name + "<<<\n\n");
     }
-    
-    /**
-     * Construct the name of the server policy file.
-     */
-    private String makePolicyName()
-    {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURI().toURL().toExternalForm();
 
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            fail(e.getMessage());
-            return null;
-        }
-    }
-	
 	/**
 	 * Decorate a test with SecurityManagerSetup, clientServersuite, and
 	 * SupportFilesSetup.
@@ -256,8 +233,6 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 * @return the decorated test
 	 */
 	private static Test decorateTest(Locale serverLocale) {
-        String policyName = new RuntimeInfoTest("test").makePolicyName();
-
         Test test = new TestSuite(RuntimeInfoTest.class);
         
         test = TestConfiguration.clientServerDecorator(test);
@@ -268,19 +243,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
         test = TestConfiguration.singleUseDatabaseDecorator(test);
         test = new LocaleTestSetup(test, serverLocale);
         // Install a security manager using the initial policy file.
-        test = new SecurityManagerSetup(test, policyName);
-
-        // Copy over the policy file we want to use.
-        test = new SupportFilesSetup
-            (
-             test,
-             null,
-             new String[] { POLICY_FILE_NAME },
-             null,
-             new String[] { TARGET_POLICY_FILE_NAME}
-             );
-        
-        return test;
+        return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
 	
 	private static final HashMap outputs;

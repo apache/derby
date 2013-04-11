@@ -144,13 +144,12 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
      */
     private static Test decorateTest()
     {
-        SecurityPolicyReloadingTest undecoratedTest = new SecurityPolicyReloadingTest();
-        Test                                        test = undecoratedTest;
+        Test test = new SecurityPolicyReloadingTest();
 
         //
         // Install a security manager using the initial policy file.
         //
-        test = new SecurityManagerSetup( test, undecoratedTest.makeServerPolicyName() );
+        test = new SecurityManagerSetup(test, makeServerPolicyName());
         
         //
         // Set up authorization with a DBO and non-DBO user
@@ -169,9 +168,9 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
             (
              test,
              null,
-             new String[] { undecoratedTest.getSourcePolicy() },
+             new String[] { getSourcePolicy() },
              null,
-             new String[] { undecoratedTest.makeTargetPolicyStub() }
+             new String[] { makeTargetPolicyStub() }
              );
 
         // No need to run with default testing policy file because we install our 
@@ -373,15 +372,13 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     /**
      * Construct the name of the server policy file.
      */
-    private String makeServerPolicyName()
+    private static String makeServerPolicyName()
     {
         try {
             String  userDir = getSystemProperty( "user.dir" );
             String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + makeTargetPolicyStub();
             File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
+            return file.toURI().toURL().toExternalForm();
         }
         catch (Exception e)
         {
@@ -394,7 +391,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     /**
      * Get the stub name (no directory spec) for the server policy file we create.
      */
-    private String makeTargetPolicyStub()
+    private static String makeTargetPolicyStub()
     {
         return TARGET_POLICY;
    }
@@ -402,7 +399,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     /**
      * Get the source file which has the correct permissions.
      */
-    private String getSourcePolicy()
+    private static String getSourcePolicy()
     {
         return RELOADABLE_INITIAL_SOURCE_POLICY;
     }

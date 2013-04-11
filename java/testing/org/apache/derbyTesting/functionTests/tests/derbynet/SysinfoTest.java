@@ -21,7 +21,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -46,7 +44,8 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
 public class SysinfoTest extends BaseJDBCTestCase {
 
-    private static String TARGET_POLICY_FILE_NAME="sysinfo.policy";
+    private static final String POLICY_FILE_NAME=
+        "org/apache/derbyTesting/functionTests/tests/derbynet/SysinfoTest.policy";
     private ArrayList OUTPUT;
 
     /**
@@ -143,23 +142,6 @@ public class SysinfoTest extends BaseJDBCTestCase {
         return suite;
     }
 
-    private String makePolicyName() {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + 
-            SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e) {
-            fail("Unexpected exception caught by " +
-                    "makeServerPolicyName(): " + e );
-            return null;
-        }
-    }
-
     /**
      * Decorate a test with SecurityManagerSetup, clientServersuite, and
      * SupportFilesSetup.
@@ -167,26 +149,11 @@ public class SysinfoTest extends BaseJDBCTestCase {
      * @return the decorated test
      */
     private static Test decorateTest() {
-        String policyName = new SysinfoTest("test").makePolicyName();
         Test test = TestConfiguration.clientServerSuite(SysinfoTest.class);
 
         // Install a security manager using the initial policy file.
-        test = TestConfiguration.singleUseDatabaseDecorator(
-                new SecurityManagerSetup(test, policyName));
-
-        // Copy over the policy file we want to use.
-        String POLICY_FILE_NAME=
-            "functionTests/tests/derbynet/SysinfoTest.policy";
-
-        test = new SupportFilesSetup
-        (
-                test,
-                null,
-                new String[] { POLICY_FILE_NAME },
-                null,
-                new String[] { TARGET_POLICY_FILE_NAME}
-        );
-        return test;
+        return TestConfiguration.singleUseDatabaseDecorator(
+                new SecurityManagerSetup(test, POLICY_FILE_NAME));
     }
 
     /**
@@ -252,7 +219,6 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         super.tearDown();
-        TARGET_POLICY_FILE_NAME = null;
         OUTPUT = null;
     }
 

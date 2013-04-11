@@ -29,7 +29,6 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 /**
  * This tests getCurrentProperties
@@ -37,16 +36,11 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  */
 public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
     // create own policy file
-    private static String POLICY_FILE_NAME = 
-        "functionTests/tests/derbynet/GetCurrentPropertiesTest.policy";
-    private static String TARGET_POLICY_FILE_NAME = "server.policy";
+    private static final String POLICY_FILE_NAME =
+        "org/apache/derbyTesting/functionTests/tests/derbynet/GetCurrentPropertiesTest.policy";
 
     public GetCurrentPropertiesTest(String name) {
         super(name);
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public static Test suite()
@@ -60,49 +54,17 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         Test test =
                 TestConfiguration.orderedSuite(GetCurrentPropertiesTest.class);
         test = TestConfiguration.clientServerDecorator(test);
+
         // Install a security manager using the special policy file.
-        test = decorateWithPolicy(test);
+        // Grant ALL FILES execute, and getPolicy permissions,
+        // as well as write for the trace files.
+        test = new SecurityManagerSetup(test, POLICY_FILE_NAME);
+
         // return suite; to ensure that nothing interferes with setting of
         // properties, wrap in singleUseDatabaseDecorator 
         return TestConfiguration.singleUseDatabaseDecorator(test);
     }
-    /**
-     * Construct the name of the server policy file.
-     */
-    private static String makeServerPolicyName()
-    {
-        try {
-            
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
 
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            fail("Exception in REading Server policy file",e);
-            return null;
-        }
-    }
-    // grant ALL FILES execute, and getPolicy permissions,
-    // as well as write for the trace files.
-    private static Test decorateWithPolicy(Test test) {
-        String serverPolicyName = makeServerPolicyName(); 
-        //
-        // Install a security manager using the initial policy file.
-        //
-        test = new SecurityManagerSetup(test,serverPolicyName );
-        // Copy over the policy file we want to use.
-        //
-        test = new SupportFilesSetup(
-                test, null, new String[] {POLICY_FILE_NAME},
-                null, new String[] {TARGET_POLICY_FILE_NAME}
-        );
-        return test;
-        
-    }
     /**
      * Testing the properties before connecting to a database
      * 
@@ -127,7 +89,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
 
         Enumeration expectedProps = expectedValues.propertyNames();
-        for ( expectedProps = expectedValues.propertyNames(); expectedProps.hasMoreElements();) {
+        while (expectedProps.hasMoreElements()) {
             String propName = (String)expectedProps.nextElement();
             String propVal = (String)p.get(propName);
             //for debug
@@ -165,7 +127,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         nsctrl.logConnections(true);
         p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
         Enumeration expectedProps = expectedValues.propertyNames();
-        for ( expectedProps = expectedValues.propertyNames(); expectedProps.hasMoreElements();) {
+        while (expectedProps.hasMoreElements()) {
             String propName = (String) expectedProps.nextElement();
             String propVal = (String)p.get(propName);
             //for debug
@@ -201,7 +163,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         expectedValues.setProperty("derby.drda.traceAll","true");
         p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
         Enumeration expectedProps = expectedValues.propertyNames();
-        for ( expectedProps = expectedValues.propertyNames(); expectedProps.hasMoreElements();) {
+        while (expectedProps.hasMoreElements()) {
             String propName = (String) expectedProps.nextElement();
             String propVal = (String)p.get(propName);
             //for debug

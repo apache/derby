@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -37,9 +36,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.OsName;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /** 
@@ -59,9 +56,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     //create own policy file
-    private static String POLICY_FILE_NAME = 
-        "functionTests/tests/derbynet/ServerPropertiesTest.policy";
-    private static String TARGET_POLICY_FILE_NAME = "server.policy";
+    private static final String POLICY_FILE_NAME =
+        "org/apache/derbyTesting/functionTests/tests/derbynet/ServerPropertiesTest.policy";
     private int[] portsSoFar;
     private int basePort;
     
@@ -126,8 +122,6 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         super.tearDown();
-        POLICY_FILE_NAME = null;
-        TARGET_POLICY_FILE_NAME = null;
         if (portsSoFar != null)
         {
             for (int i = 0 ; i < portsSoFar.length ; i++)
@@ -178,42 +172,13 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         return test;
     }   
     
-    /**
-     * Construct the name of the server policy file.
-     */
-    private String makeServerPolicyName()
-    {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            System.out.println( "Unexpected exception caught by makeServerPolicyName(): " + e );
-
-            return null;
-        }
-    }
-    
     // grant ALL FILES execute, and getPolicy permissions,
     // as well as write for the trace files.
     private static Test decorateWithPolicy(Test test) {
-        String serverPolicyName = new ServerPropertiesTest("test").makeServerPolicyName();
         //
         // Install a security manager using the initial policy file.
         //
-        test = new SecurityManagerSetup(test,serverPolicyName );
-        // Copy over the policy file we want to use.
-        //
-        test = new SupportFilesSetup(
-            test, null, new String[] {POLICY_FILE_NAME},
-            null, new String[] {TARGET_POLICY_FILE_NAME}
-        );
-        return test;
+        return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
     
     private static Properties getTheProperties() {

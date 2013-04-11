@@ -22,7 +22,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.io.File;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,8 +40,6 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 // tests that appropriate and invalid connections can be made to 
@@ -61,9 +58,8 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         // if not passed in with -DderbyTesting.ldapContextFactory, uses sun's
 
     // create own policy file, so we can connect to the ldap server
-    private static String POLICY_FILE_NAME = 
-        "functionTests/tests/jdbcapi/LDAPTests.policy";
-    private static String TARGET_POLICY_FILE_NAME = "derby_tests.policy";
+    private static final String POLICY_FILE_NAME =
+        "org/apache/derbyTesting/functionTests/tests/jdbcapi/LDAPTests.policy";
     
     /** Creates a new instance of the Test */
     public LDAPAuthenticationTest(String name) {
@@ -113,8 +109,10 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
             "testLDAPConnection"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("LDAPAuthenticationTest:client", "testLDAPConnection")));
-        Test test = decorateWithPolicy(suite);
-        return test;            
+
+        // Grant ALL FILES execute, and getPolicy permissions, as well as
+        // resolve/connect for the LDAP server identified with the property.
+        return new SecurityManagerSetup(suite, POLICY_FILE_NAME);
     }
 
     public static Test baseSuite(String name, String fixture) {
@@ -139,42 +137,6 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         suite.addTest(new DatabasePropertyTestSetup (test, props, true));
     }
 
-    // grant ALL FILES execute, and getPolicy permissions, as well
-    // as resolve/connect for the ldap server identified with the property
-    private static Test decorateWithPolicy(Test test) {
-        String ldapPolicyName = new LDAPAuthenticationTest("test").makeServerPolicyName();
-        //
-        // Install a security manager using the initial policy file.
-        //
-        test = new SecurityManagerSetup(test,ldapPolicyName );
-        // Copy over the policy file we want to use.
-        //
-        test = new SupportFilesSetup(
-            test, null, new String[] {POLICY_FILE_NAME},
-            null, new String[] {TARGET_POLICY_FILE_NAME}
-        );
-        return test;
-    }
-    
-    /**
-     * Construct the name of the server policy file.
-     */
-    private String makeServerPolicyName()
-    {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
-    
     protected void tearDown() throws Exception {
         removeSystemProperty("derby.connection.requireAuthentication");
         super.tearDown();
