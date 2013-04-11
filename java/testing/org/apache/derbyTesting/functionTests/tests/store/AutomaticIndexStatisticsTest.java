@@ -329,7 +329,14 @@ public class AutomaticIndexStatisticsTest
         for (int i=0; i < statsObj.length; i++) {
             IdxStats s = statsObj[i];
             assertEquals(rows, s.rows);
-            assertTrue(s.created.before(now));
+            
+            // DERBY-6144 
+            // Stats cannot have been created after the current time (future).
+            assertFalse(
+                "expected stat created in past:now = " + now + 
+                ";s.created = " + s.created,
+                s.created.compareTo(now) > 0);
+
             switch (s.lcols) {
                 case 1:
                     assertEquals(100, s.card);
@@ -358,7 +365,11 @@ public class AutomaticIndexStatisticsTest
                     ", previous stats created " + earlier,
                     s.created.after(earlier));
             // Stats cannot have been created after the current time (future).
-            assertFalse(s.created.compareTo(now) > 0);
+            assertFalse(
+                "expected stat created in past:now = " + now + 
+                ";s.created = " + s.created,
+                s.created.compareTo(now) > 0);
+
             switch (s.lcols) {
                 case 1:
                     assertEquals(10, s.card);
