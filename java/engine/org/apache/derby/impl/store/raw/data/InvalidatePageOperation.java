@@ -21,20 +21,15 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -59,7 +54,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 */
 public final class InvalidatePageOperation extends PhysicalPageOperation
 {
-	public InvalidatePageOperation(BasePage page)
+    InvalidatePageOperation(BasePage page)
 	{
 		super(page);
 	}

@@ -23,11 +23,8 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
@@ -41,14 +38,11 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -84,7 +78,7 @@ public final class UpdateFieldOperation extends LogicalPageOperation
 
 	transient protected ByteArray preparedLog;
 
-	public UpdateFieldOperation(
+    UpdateFieldOperation(
     RawTransaction      t, 
     BasePage            page, 
     int                 slot, 

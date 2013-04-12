@@ -23,9 +23,6 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.Page;
@@ -41,14 +38,10 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
-import java.io.InputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -79,7 +72,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	@see Loggable
 */
 
-public abstract class PageBasicOperation implements Loggable, RePreparable 
+abstract class PageBasicOperation implements Loggable, RePreparable
 {
 
 
@@ -93,7 +86,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 	transient protected RawContainerHandle	containerHdl;
 	transient protected boolean	            foundHere;
 
-	protected PageBasicOperation(BasePage page) 
+    PageBasicOperation(BasePage page)
     {
 		if (SanityManager.DEBUG) 
         {
@@ -111,7 +104,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 	}
 
 	// no-arg constructor, required by Formatable
-	public PageBasicOperation() 
+    PageBasicOperation()
     {
 	}
 

@@ -21,15 +21,11 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.raw.Compensation;
 import org.apache.derby.iapi.store.raw.Loggable;
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Undoable;
 
@@ -38,8 +34,6 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.ByteArray;
 
-import java.io.OutputStream;
-import java.io.ObjectInput;
 import java.io.IOException;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
@@ -53,7 +47,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	@derby.formatId	LOGOP_PAGE_PHYSICAL_UNDO
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@derby.purpose	update a physiacl log operation
+    @derby.purpose  update a physical log operation
 	@derby.upgrade
 	@derby.diskLayout
 		PageBasicOperation	the super class
@@ -62,18 +56,19 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 
 */
-public class PhysicalUndoOperation extends PageBasicOperation implements Compensation {
+public final class PhysicalUndoOperation extends PageBasicOperation
+        implements Compensation {
 
 	/** The operation to be rolled back */
 	transient private	PhysicalPageOperation undoOp; 
 
-	protected PhysicalUndoOperation(BasePage page)
+    PhysicalUndoOperation(BasePage page)
 	{
 		super(page);
 	}
 
 	/** Set up a compensation operation during run time rollback */
-	public PhysicalUndoOperation(BasePage page, PhysicalPageOperation op)
+    PhysicalUndoOperation(BasePage page, PhysicalPageOperation op)
 	{
 		super(page);
 		undoOp = op;

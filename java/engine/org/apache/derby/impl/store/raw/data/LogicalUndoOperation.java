@@ -21,9 +21,6 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -39,7 +36,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.util.ByteArray;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -67,20 +63,21 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 
 */
-public class LogicalUndoOperation extends PageBasicOperation implements Compensation {
+public final class LogicalUndoOperation extends PageBasicOperation
+        implements Compensation {
 
 	protected int recordId;				// the record id to call undoOp.undoMe with
 
 	/** The operation to be rolled back */
 	transient private	LogicalPageOperation undoOp = null; 
 
-	protected LogicalUndoOperation(BasePage page)
+    LogicalUndoOperation(BasePage page)
 	{
 		super(page);
 	}
 
 	/** Set up a compensation operation during run time rollback */
-	public LogicalUndoOperation(BasePage page, int recordId, LogicalPageOperation op)
+    LogicalUndoOperation(BasePage page, int recordId, LogicalPageOperation op)
 	{
 		super(page);
 		undoOp = op;

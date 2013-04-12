@@ -21,28 +21,17 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.store.raw.log.LogInstant;
-import org.apache.derby.iapi.store.raw.xact.RawTransaction; 
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
-import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -52,14 +41,14 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents shrinking of the reserved space of a particular row on a page.
 	This operation is not undoable.
 */
-public class SetReservedSpaceOperation extends PageBasicOperation {
+public final class SetReservedSpaceOperation extends PageBasicOperation {
 
 	protected int	doMeSlot;	// slot where record is at
 	protected int	recordId;	// recordId
 	protected int	newValue;	// the new reserved space value
 	protected int	oldValue;	// the old reserved space value (for BI_logging)
 
-	public SetReservedSpaceOperation(BasePage page, int slot, 
+    SetReservedSpaceOperation(BasePage page, int slot,
 									 int recordId, int newValue, int oldValue)
 	{
 		super(page);

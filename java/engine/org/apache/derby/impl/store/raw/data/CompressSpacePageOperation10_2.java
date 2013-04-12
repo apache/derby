@@ -21,26 +21,20 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.CompressSpacePageOperation;
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.IOException;
 import java.io.ObjectInput;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * This class overrides the CompressSpacePageOperation class to write
  * CompressSpaceOperation Log Records that do not support negative values
  * for new_highest_page. No other changes are added to the superclass behavior.
- * This class ensures backword compatibility for Soft upgrades. 
+ * This class ensures backward compatibility for Soft upgrades.
  */
 public final class CompressSpacePageOperation10_2 extends CompressSpacePageOperation {
     
@@ -48,7 +42,7 @@ public final class CompressSpacePageOperation10_2 extends CompressSpacePageOpera
 	* Constructors for This class:
 	**************************************************************************
 	*/
-	public CompressSpacePageOperation10_2(
+    CompressSpacePageOperation10_2(
 		AllocPage   allocPage, 
 		int         highest_page, 
 		int         num_truncated)

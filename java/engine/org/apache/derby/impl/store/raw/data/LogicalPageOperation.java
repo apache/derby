@@ -21,9 +21,6 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.RecordId;
-import org.apache.derby.impl.store.raw.data.BasePage;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
@@ -32,7 +29,6 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Compensation;
 import org.apache.derby.iapi.store.raw.LogicalUndoable;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Undoable;
@@ -42,8 +38,6 @@ import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
@@ -71,7 +65,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 
 */
-public abstract class LogicalPageOperation 
+abstract class LogicalPageOperation
     extends PageBasicOperation implements LogicalUndoable
 {
 
@@ -88,7 +82,7 @@ public abstract class LogicalPageOperation
 	// no-arg constructor, required by Formatable 
 	public LogicalPageOperation() { super(); }
 
-	protected LogicalPageOperation(BasePage page, LogicalUndo undo, int recordId)
+    LogicalPageOperation(BasePage page, LogicalUndo undo, int recordId)
 	{
 		super(page);
 		this.undo = undo;

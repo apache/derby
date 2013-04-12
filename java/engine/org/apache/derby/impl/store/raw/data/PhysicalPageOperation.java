@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
 
 import org.apache.derby.iapi.store.raw.Compensation;
 
@@ -32,8 +31,6 @@ import org.apache.derby.iapi.store.raw.Undoable;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import java.io.InputStream;
-import java.io.ObjectInput;
 import java.io.IOException;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
@@ -56,9 +53,10 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	</PRE>
 */
 
-public abstract class PhysicalPageOperation extends PageBasicOperation implements Undoable
+abstract class PhysicalPageOperation extends PageBasicOperation
+        implements Undoable
 {
-	protected PhysicalPageOperation(BasePage page)
+    PhysicalPageOperation(BasePage page)
 	{
 		super(page);
 	}

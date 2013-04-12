@@ -82,7 +82,7 @@ public final class DeleteOperation extends LogicalPageOperation
 
 	transient protected ByteArray preparedLog;
 
-	public DeleteOperation(RawTransaction t, BasePage page, int slot, int recordId, 
+    DeleteOperation(RawTransaction t, BasePage page, int slot, int recordId,
 						   boolean delete, LogicalUndo undo)
 		throws StandardException
 	{

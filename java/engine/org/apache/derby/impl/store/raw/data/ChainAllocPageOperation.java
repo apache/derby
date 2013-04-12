@@ -21,22 +21,16 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.PhysicalPageOperation;
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.IOException;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
@@ -50,7 +44,7 @@ public final class ChainAllocPageOperation extends PhysicalPageOperation
 	protected long newAllocPageNum;	// the next alloc page's page number
 	protected long newAllocPageOffset; // the next alloc page's page offset 
 
-	public ChainAllocPageOperation(AllocPage allocPage, long pageNumber, long pageOffset)
+    ChainAllocPageOperation(AllocPage allocPage, long pageNumber, long pageOffset)
 		 throws StandardException
 	{
 		super(allocPage);

@@ -21,21 +21,15 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.PhysicalPageOperation;
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -50,7 +44,7 @@ public final class AllocPageOperation extends PhysicalPageOperation
 	protected int doStatus;		// what the doMe operation should set the status to
 	protected int undoStatus;	// what the undoMe operation should set the status to
 
-	public AllocPageOperation(AllocPage allocPage, long pageNumber, int doStatus, int undoStatus)
+    AllocPageOperation(AllocPage allocPage, long pageNumber, int doStatus, int undoStatus)
 		 throws StandardException
 	{
 		super(allocPage);

@@ -21,15 +21,15 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-public class RawField {
+final class RawField {
 
-	private byte[] data;
+    private final byte[] data;
 
-	public RawField(byte[] data) {
+    RawField(byte[] data) {
 		this.data = data;
 	}
 
-	public byte[] getData() {
+    byte[] getData() {
 		return data;
 	}
 }

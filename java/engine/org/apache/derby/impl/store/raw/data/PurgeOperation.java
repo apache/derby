@@ -23,11 +23,7 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
@@ -44,8 +40,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
-
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -86,7 +80,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 
 	transient protected ByteArray preparedLog;
 
-	public PurgeOperation(RawTransaction t, BasePage page, int slot, int
+    PurgeOperation(RawTransaction t, BasePage page, int slot, int
 						  num_rows, int[] recordIds, boolean needDataLogged)
 		throws StandardException
 	{

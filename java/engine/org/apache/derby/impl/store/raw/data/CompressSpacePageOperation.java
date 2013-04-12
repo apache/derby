@@ -21,22 +21,15 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.impl.store.raw.data.PhysicalPageOperation;
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
-import java.io.OutputStream;
 import java.io.ObjectOutput;
 import java.io.IOException;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
@@ -77,7 +70,7 @@ public class CompressSpacePageOperation extends PhysicalPageOperation
      * Constructors for This class:
      **************************************************************************
      */
-	public CompressSpacePageOperation(
+    CompressSpacePageOperation(
     AllocPage   allocPage, 
     int         highest_page, 
     int         num_truncated)
