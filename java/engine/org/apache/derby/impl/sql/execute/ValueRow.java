@@ -24,13 +24,12 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.RowLocation;
 
 /**
 	Basic implementation of ExecRow.
 
  */
-public class ValueRow implements ExecRow
+class ValueRow implements ExecRow
 {
 	///////////////////////////////////////////////////////////////////////
 	//

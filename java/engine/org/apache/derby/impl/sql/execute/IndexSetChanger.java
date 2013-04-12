@@ -43,7 +43,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
   Perform Index maintenace associated with DML operations for a table's
   indexes.
   */
-public class IndexSetChanger
+class IndexSetChanger
 {
 	//
 	//Index row generators.

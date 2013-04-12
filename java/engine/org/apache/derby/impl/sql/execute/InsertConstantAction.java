@@ -120,7 +120,7 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	 *  @param autoincRowLocation Array of rowlocations of autoincrement values
 	 * 							  in SYSCOLUMNS for each ai column.
 	 */
-	public	InsertConstantAction(TableDescriptor tableDescriptor,
+    InsertConstantAction(TableDescriptor tableDescriptor,
 								long				conglomId,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,

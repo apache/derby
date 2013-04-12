@@ -57,7 +57,8 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * were holding from when the trigger fired.
  *
  */
-public class InternalTriggerExecutionContext implements TriggerExecutionContext, ExecutionStmtValidator
+class InternalTriggerExecutionContext
+        implements TriggerExecutionContext, ExecutionStmtValidator
 {
 	/*
 	** Immutable
@@ -137,7 +138,7 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 	 *
 	 * @exception StandardException on error
 	 */
-	public InternalTriggerExecutionContext
+    InternalTriggerExecutionContext
 	(
 		LanguageConnectionContext	lcc,
 		ConnectionContext			cc,

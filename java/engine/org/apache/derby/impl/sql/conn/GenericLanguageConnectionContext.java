@@ -25,7 +25,6 @@ import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.cache.CacheManager;
 
 import org.apache.derby.impl.sql.compile.CompilerContextImpl;
-import org.apache.derby.impl.sql.execute.InternalTriggerExecutionContext;
 import org.apache.derby.impl.sql.execute.AutoincrementCounter;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
@@ -85,7 +84,6 @@ import org.apache.derby.iapi.reference.Property;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.AbstractMap;
 import java.util.IdentityHashMap;
 import java.util.WeakHashMap;
 import java.util.Iterator;
@@ -3379,8 +3377,8 @@ public class GenericLanguageConnectionContext
         for (int i = size - 1; i >= 0; i--)
         {
             // first loop through triggers.
-            InternalTriggerExecutionContext itec = 
-                (InternalTriggerExecutionContext)triggerExecutionContexts.get(i);
+            TriggerExecutionContext itec =
+                (TriggerExecutionContext) triggerExecutionContexts.get(i);
             Long value = itec.getAutoincrementValue(aiKey);
             if (value == null)
                 continue;

@@ -98,7 +98,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param positionedUpdate	is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 */
-	public	UpdateConstantAction(
+    UpdateConstantAction(
 								long				conglomId,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,

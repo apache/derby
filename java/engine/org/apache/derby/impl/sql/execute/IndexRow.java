@@ -21,21 +21,15 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
 
 /**
 	Basic implementation of ExecIndexRow.
 
  */
-public class IndexRow extends ValueRow implements ExecIndexRow
+class IndexRow extends ValueRow implements ExecIndexRow
 {
 	///////////////////////////////////////////////////////////////////////
 	//

@@ -91,7 +91,7 @@ public class DeleteConstantAction extends WriteCursorConstantAction
 	 *  @param numColumns	Number of columns to read.
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 */
-	public	DeleteConstantAction(
+    DeleteConstantAction(
 								long				conglomId,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,

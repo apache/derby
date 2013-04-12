@@ -22,15 +22,9 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.iapi.services.io.Storable;
-
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.types.RowLocation;
 
 /**
@@ -41,7 +35,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * the cardinality of all the leading columns.
  */
 
-public class CardinalityCounter implements RowLocationRetRowSource
+class CardinalityCounter implements RowLocationRetRowSource
 {
 	private RowLocationRetRowSource rowSource;
 	private DataValueDescriptor[] prevKey;

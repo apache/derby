@@ -189,4 +189,11 @@ public interface TriggerExecutionContext
 	 * completed
 	 */
 	public ResultSet getNewRow() throws SQLException;
+
+    /**
+     * Get the last auto-increment value for the specified column.
+     * @param identity the fully qualified name of the identity column
+     * @return the last auto-increment value, or {@code null} if not found
+     */
+    Long getAutoincrementValue(String identity);
 }

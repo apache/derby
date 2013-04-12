@@ -53,15 +53,11 @@ import java.util.Enumeration;
  * it should be done based on whether the resultset has dependent resultsets or not.
  *
  */
-public class DeleteCascadeResultSet extends DeleteResultSet
+class DeleteCascadeResultSet extends DeleteResultSet
 {
 
-
-	public ResultSet[] dependentResultSets;
+    ResultSet[] dependentResultSets;
 	private int noDependents =0;
-	private CursorResultSet parentSource;
-	private FKInfo parentFKInfo;
-	private long fkIndexConglomNumber;
 	private String resultSetId;
 	private boolean mainNodeForTable = true;
 	private boolean affectedRows = false;

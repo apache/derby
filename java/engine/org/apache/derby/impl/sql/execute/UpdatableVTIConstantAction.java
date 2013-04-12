@@ -61,7 +61,7 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
      * @param changedColumnIds Array of ids of changed columns
 	 *
 	 */
-	public	UpdatableVTIConstantAction( int statementType,
+    UpdatableVTIConstantAction(int statementType,
                                         boolean deferred,
                                         int[] changedColumnIds)
 	{

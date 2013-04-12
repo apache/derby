@@ -31,11 +31,11 @@ import org.apache.derby.iapi.types.UserDataValue;
  * This sort observer performs aggregation.
  *
  */
-public class AggregateSortObserver extends BasicSortObserver
+class AggregateSortObserver extends BasicSortObserver
 {
 
-	protected GenericAggregator[]	aggsToProcess;
-	protected GenericAggregator[]	aggsToInitialize;
+    private final GenericAggregator[] aggsToProcess;
+    private final GenericAggregator[] aggsToInitialize;
 
 	private int firstAggregatorColumn;
 
