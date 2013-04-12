@@ -563,6 +563,11 @@ public class SequenceTest extends GeneratedColumnsHelper {
      */
     public void test_16_6137() throws Exception
     {
+        //DERBY-6176 (Couple failures in SequenceGeneratorTest suite on 
+        // trunk(1466748) with weme 6.2. Disabling the test for small
+        // devices.
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
         Connection conn = openUserConnection( TEST_DBO );
 
         goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '2' )" );
