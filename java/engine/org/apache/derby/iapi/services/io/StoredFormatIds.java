@@ -37,17 +37,17 @@ package org.apache.derby.iapi.services.io;
   <UL>
   <LI>The interface(s) the stored object must support. Any implementation
   which reads the object must support these interfaces.
-  <LI>The format of the stored object. All implementaions which support
+  <LI>The format of the stored object. All implementations which support
   the format must be able to read and write it.
   </UL>
 
-  <P>An object should implement the Formatable inteface to support a
+  <P>An object should implement the Formatable interface to support a
   stored format. In addition, the module which contains the object
   should register the object's class with the Monitor (See
   FormatIdUtil.register.)
 
   <P>When you add a format id to this file, please include the list
-  of interfaces an implementaion must support when it supports
+  of interfaces an implementation must support when it supports
   the format id. When Derby code reads a stored form it returns an 
   object of a Class which supports the stored form. A reader may
   cast this object to any interface listed in this file. It is an error for
@@ -1025,192 +1025,10 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 155);
 
     /**
-        class org.apache.derby.impl.sql.execute.RunTimeStatisticsImpl
-     */
-    static public final int RUN_TIME_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 173);
-
-    /**
         class org.apache.derby.Database.Language.Execution.LockTableConstantAction
     */
     static public final int UNUSED_2_275 =
             (MIN_ID_2 + 275);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealProjectRestrictStatistics
-     */
-    static public final int REAL_PROJECT_RESTRICT_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 177);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealDistinctScalarAggregateStatistics
-     */
-    static public final int REAL_DISTINCT_SCALAR_AGGREGATE_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 284);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealScalarAggregateStatistics
-    */
-    static public final int REAL_SCALAR_AGGREGATE_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 283);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealGroupedAggregateStatistics
-     */
-    static public final int REAL_GROUPED_AGGREGATE_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 285);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealSortStatistics
-     */
-    static public final int REAL_SORT_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 178);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealTableScanStatistics
-     */
-    static public final int REAL_TABLE_SCAN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 179);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealHashJoinStatistics
-     */
-    static public final int REAL_HASH_JOIN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 304);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealNestedLoopJoinStatistics
-     */
-    static public final int REAL_NESTED_LOOP_JOIN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 180);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealIndexRowToBaseRowStatistics
-     */
-    static public final int REAL_INDEX_ROW_TO_BASE_ROW_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 181);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealAnyResultSetStatistics
-     */
-    static public final int REAL_ANY_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 182);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealOnceResultSetStatistics
-     */
-    static public final int REAL_ONCE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 183);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealCurrentOfStatistics
-     */
-    static public final int REAL_CURRENT_OF_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 184);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealRowResultSetStatistics
-     */
-    static public final int REAL_ROW_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 185);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealUnionResultSetStatistics
-     */
-    static public final int REAL_UNION_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 186);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealHashLeftOuterJoinStatistics
-     */
-    static public final int REAL_HASH_LEFT_OUTER_JOIN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 305);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealNestedLoopLeftOuterJoinStatistics
-     */
-    static public final int REAL_NESTED_LOOP_LEFT_OUTER_JOIN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 187);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealNormalizeResultSetStatistics
-     */
-    static public final int REAL_NORMALIZE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 188);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealInsertResultSetStatistics
-     */
-    static public final int REAL_INSERT_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 189);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealInsertVTIResultSetStatistics
-     */
-    static public final int REAL_INSERT_VTI_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 379);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealUpdateResultSetStatistics
-     */
-    static public final int REAL_UPDATE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 190);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealDeleteResultSetStatistics
-     */
-    static public final int REAL_DELETE_VTI_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 380);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealDeleteResultSetStatistics
-     */
-    static public final int REAL_DELETE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 191);
-
-    /**
-       org.apache.derby.impl.sql.execute.rts.RealDeleteCascadeResultSetStatistics"
-     */
-    static public final int REAL_DELETE_CASCADE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 439);
-
-
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealHashScanStatistics
-     */
-    static public final int REAL_HASH_SCAN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 203);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealDistinctScanStatistics
-     */
-    static public final int REAL_DISTINCT_SCAN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 334);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealHashTableStatistics
-     */
-    static public final int REAL_HASH_TABLE_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 306);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealVTIStatistics
-     */
-    static public final int REAL_VTI_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 214);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealMaterializedResultSetStatistics
-     */
-    static public final int REAL_MATERIALIZED_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 308);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealScrollInsensitiveResultSetStatistics
-     */
-    static public final int REAL_SCROLL_INSENSITIVE_RESULT_SET_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 330);
 
     /**
     class org.apache.derby.Database.Language.Execution.CreateSPSConstantAction
@@ -1342,12 +1160,6 @@ public interface StoredFormatIds {
      */
     static public final int REP_SET_TRIGGERS_CONSTANT_ACTION_V01_ID =
             (MIN_ID_2 + 322);
-
-    /**
-        class org.apache.derby.impl.sql.execute.RealLastIndexKeyScanStatistics
-     */
-    static public final int REAL_LAST_INDEX_KEY_SCAN_STATISTICS_IMPL_V01_ID =
-            (MIN_ID_2 + 327);
 
     ////////////////////////////////////////////////////////////////////////////
     //
