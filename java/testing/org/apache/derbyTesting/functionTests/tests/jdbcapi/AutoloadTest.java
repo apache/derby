@@ -91,6 +91,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         if (!JDBC.vmSupportsJDBC3())
             return new TestSuite("empty: no java.sql.DriverManager");
 
+
         boolean embeddedAutoLoad = false;
         boolean clientAutoLoad = false;
         boolean jdbc4Autoload = false;
@@ -225,6 +226,21 @@ public class AutoloadTest extends BaseJDBCTestCase
      * </ul>
      */
     static Test fullAutoloadSuite() {
+        if (!TestConfiguration.getCurrent().isDefaultBasePort())
+        {
+            // DERBY-6178
+            //     test is not currently coded to work properly when calling
+            //     system is depending on setting -Dderby.tests.basePort=3500
+            //     to avoid conflict on concurrent tests starting and stopping
+            //     network server.
+
+            // for now just skip this test if tests are setting a non-default
+            // base port.
+            return new TestSuite(
+                    "empty: test not supported with non-default base port: " + 
+                    TestConfiguration.getCurrent().getBasePort());
+        }
+
         TestSuite suite = new TestSuite("AutoloadTest:All");
         suite.addTest(new AutoloadTest(AutoloadTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
