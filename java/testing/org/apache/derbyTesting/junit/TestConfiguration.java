@@ -1620,6 +1620,15 @@ public final class TestConfiguration {
         return hostName;
     }
 
+    /**
+     * Return if the base port is default or not.
+     *
+     * @return true if base port is default.
+     */
+    public static boolean isDefaultBasePort() {
+        return (basePort == DEFAULT_PORT);
+    }
+
     public static int getBasePort() {
         return basePort;
     }
