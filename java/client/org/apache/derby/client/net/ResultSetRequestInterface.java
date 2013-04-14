@@ -22,6 +22,7 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Section;
+import org.apache.derby.client.am.SqlException;
 
 // In general, required data is passed.
 // In addition, ResultSet objects are passed for convenient access to any material result set caches.
@@ -31,21 +32,22 @@ import org.apache.derby.client.am.Section;
 public interface ResultSetRequestInterface {
     public void writeFetch(NetResultSet resultSet,
                            Section section,
-                           int fetchSize) throws org.apache.derby.client.am.SqlException;
+                           int fetchSize) throws SqlException;
 
-    public void writeScrollableFetch(NetResultSet resultSet,
-                                     Section section,
-                                     int fetchSize,
-                                     int orientation,
-                                     long rowToFetch,
-                                     boolean resetQueryBlocks) throws org.apache.derby.client.am.SqlException;
+    public void writeScrollableFetch(
+            NetResultSet resultSet,
+            Section section,
+            int fetchSize,
+            int orientation,
+            long rowToFetch,
+            boolean resetQueryBlocks) throws SqlException;
 
     public void writePositioningFetch(NetResultSet resultSet,
                                       Section section,
                                       int orientation,
-                                      long rowToFetch) throws org.apache.derby.client.am.SqlException;
+                                      long rowToFetch) throws SqlException;
 
     public void writeCursorClose(NetResultSet resultSet,
-                                 Section section) throws org.apache.derby.client.am.SqlException;
+                                 Section section) throws SqlException;
 
 }

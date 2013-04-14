@@ -57,11 +57,6 @@ public class ClientXid implements Xid {
     static private final int XidDATASIZE = 128;
 
     //
-    // The maximum size of the global transaction identifier.
-    //
-    static public final int MAXGTRIDSIZE = 64;
-
-    //
     // The maximum size of the branch qualifier.
     //
     static private final int MAXBQUALSIZE = 64;

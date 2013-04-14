@@ -21,9 +21,11 @@
 
 package org.apache.derby.client.am;
 
+import java.io.IOException;
+import java.io.OutputStream;
 
 
-class ClobOutputStream extends java.io.OutputStream {
+class ClobOutputStream extends OutputStream {
     private Clob clob_;
     private long offset_;
 
@@ -41,14 +43,13 @@ class ClobOutputStream extends java.io.OutputStream {
         }
     }
 
-    public void write(int b) throws java.io.IOException {
+    public void write(int b) throws IOException {
         byte[] newByte = new byte[1];
         newByte[0] = (byte)b;
         writeBytes(newByte);
     }
 
-
-    public void write(byte b[], int off, int len) throws java.io.IOException {
+    public void write(byte b[], int off, int len) throws IOException {
         if (b == null) {
             throw new NullPointerException();
         } else if ((off < 0) || (off > b.length) || (len < 0) ||
@@ -64,7 +65,7 @@ class ClobOutputStream extends java.io.OutputStream {
     }
 
 
-    private void writeBytes(byte b[])  throws java.io.IOException
+    private void writeBytes(byte b[])  throws IOException
     {
         // Since this is an OutputStream returned by Clob.setAsciiStream 
         // use Ascii encoding when creating the String from bytes

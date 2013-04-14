@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 
 import java.sql.SQLException;
 import java.util.Map;
+import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -45,7 +46,7 @@ public class LogicalConnection implements java.sql.Connection {
      * Set to {@code null} when this logical connection is closed.
      */
     Connection physicalConnection_;
-    private org.apache.derby.client.ClientPooledConnection pooledConnection_ = null;
+    private ClientPooledConnection pooledConnection_ = null;
     /**
      * Logical database metadata object created on demand and then cached.
      * The lifetime of the metadata object is the same as this logical
@@ -54,8 +55,10 @@ public class LogicalConnection implements java.sql.Connection {
      */
     private LogicalDatabaseMetaData logicalDatabaseMetaData = null;
 
-    public LogicalConnection(Connection physicalConnection,
-                             org.apache.derby.client.ClientPooledConnection pooledConnection) throws SqlException {
+    public LogicalConnection(
+            Connection physicalConnection,
+            ClientPooledConnection pooledConnection) throws SqlException {
+
         physicalConnection_ = physicalConnection;
         pooledConnection_ = pooledConnection;
         try {

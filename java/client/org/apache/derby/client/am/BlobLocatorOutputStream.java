@@ -48,7 +48,6 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      *        the <code>Blob</code> value on the server.
      * @param pos the position in the <code>BLOB</code> value at which
      *        to start writing; the first position is 1
-     * @throws org.apache.derby.client.am.SqlException 
      */
     public BlobLocatorOutputStream(Connection connection, Blob blob, long pos)
         throws SqlException

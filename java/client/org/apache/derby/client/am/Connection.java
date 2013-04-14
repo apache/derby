@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 import org.apache.derby.client.net.NetXAResource;
@@ -173,7 +174,7 @@ public abstract class Connection
     public int xaHostVersion_ = 0;
 
     public int loginTimeout_;
-    public org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource_;
+    public ClientBaseDataSourceRoot dataSource_;
     public String serverNameIP_;
     public int portNumber_;
     public int clientSSLMode_ = ClientBaseDataSourceRoot.SSL_OFF;
@@ -190,10 +191,10 @@ public abstract class Connection
 
     // For jdbc 2 connections
     protected Connection(
-            org.apache.derby.client.am.LogWriter logWriter,
+            LogWriter logWriter,
             String user,
             String password,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
+            ClientBaseDataSourceRoot dataSource)
             throws SqlException {
 
         this.user_ = user;
@@ -201,12 +202,11 @@ public abstract class Connection
     }
 
     protected Connection(
-            org.apache.derby.client.am.LogWriter logWriter,
+            LogWriter logWriter,
             String user,
             String password,
             boolean isXAConn,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
-            throws SqlException {
+            ClientBaseDataSourceRoot dataSource) throws SqlException {
 
         this.user_ = user;
         isXAConnection_ = isXAConn;
@@ -266,10 +266,9 @@ public abstract class Connection
 
     // For jdbc 2 connections
     protected Connection(
-            org.apache.derby.client.am.LogWriter logWriter,
+            LogWriter logWriter,
             boolean isXAConn,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource)
-            throws SqlException {
+            ClientBaseDataSourceRoot dataSource) throws SqlException {
 
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
@@ -326,7 +325,7 @@ public abstract class Connection
                          String serverName,
                          int portNumber,
                          String databaseName,
-                         java.util.Properties properties) throws SqlException {
+                         Properties properties) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectEntry(serverName, portNumber, databaseName, properties);
         }
@@ -358,7 +357,7 @@ public abstract class Connection
     // and this will give the driver a chance to close (or otherwise clean up) the objects.
     // Note, however, that there is no guarantee that the garbage collector will ever run.
     // If that is the case, the finalizers will not be called.
-    protected void finalize() throws java.lang.Throwable {
+    protected void finalize() throws Throwable {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "finalize");
         }
@@ -509,7 +508,8 @@ public abstract class Connection
 
     // Driver-specific determination if local COMMIT/ROLLBACK is allowed;
     // primary usage is distinction between local and global trans. envs.;
-    protected abstract boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException;
+    protected abstract boolean allowLocalCommitRollback_()
+            throws SqlException;
 
     synchronized public void setAutoCommit(boolean autoCommit) throws SQLException {
         try
@@ -623,7 +623,7 @@ public abstract class Connection
         return false;
     }
 
-    public boolean willAutoCommitGenerateFlow() throws org.apache.derby.client.am.SqlException {
+    public boolean willAutoCommitGenerateFlow() throws SqlException {
         if (!autoCommit_) {
             return false;
         }
@@ -1657,7 +1657,8 @@ public abstract class Connection
                     throw new SqlException(agent_.logWriter_,
                             new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
-            } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
+            } catch (java.lang.ClassCastException e) {
+                // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
@@ -1718,10 +1719,12 @@ public abstract class Connection
                     throw new SqlException(agent_.logWriter_, new ClientMessageId 
                             (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
-            } catch (java.lang.ClassCastException e) { // savepoint is not an instance of am.Savepoint
-                    throw new SqlException(agent_.logWriter_, new ClientMessageId 
-                            (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
-
+            } catch (ClassCastException e) {
+                // savepoint is not an instance of am.Savepoint
+                throw new SqlException(
+                    agent_.logWriter_,
+                    new ClientMessageId
+                    (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
 
             // Construct and flow a savepoint release statement to server.
@@ -2435,9 +2438,6 @@ public abstract class Connection
         //stored procedure CLOBCREATELOCATOR.
         int locator = INVALID_LOCATOR;
 
-        //Stores the Clob instance that is returned.
-        org.apache.derby.client.am.Clob clob = null;
-
         //Call the CLOBCREATELOCATOR stored procedure
         //that will return a locator value.
         try {
@@ -2453,14 +2453,17 @@ public abstract class Connection
         //The code here has been disabled because the Lob implementations
         //have still not been completely converted to use locators. Once
         //the Lob implementations are completed then this code can be enabled.
+
+        //Stores the Clob instance that is returned.
+        Clob clob;
+
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
-            clob = new org.apache.derby.client.am.Clob(this.agent_, locator);
+            clob = new Clob(this.agent_, locator);
         }
         else {
             //A valid locator value could not be obtained.
-            clob = new org.apache.derby.client.am.Clob
-                    (this.agent_, "");
+            clob = new Clob(this.agent_, "");
         }
 
         if (agent_.loggingEnabled()) {
@@ -2495,9 +2498,6 @@ public abstract class Connection
         //stored procedure BLOBCREATELOCATOR.
         int locator = INVALID_LOCATOR;
         
-        //Stores the Blob instance that is returned.
-        org.apache.derby.client.am.Blob blob = null;
-
         //Call the BLOBCREATELOCATOR stored procedure
         //that will return a locator value.
         try {
@@ -2510,14 +2510,16 @@ public abstract class Connection
         //If the locator value is -1 it means that we do not
         //have locator support on the server.
         
+        //Stores the Blob instance that is returned.
+        Blob blob;
+
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
-            blob = new org.apache.derby.client.am.Blob(this.agent_, locator);
+            blob = new Blob(this.agent_, locator);
         } 
         else {
             //A valid locator value could not be obtained.
-            blob = new org.apache.derby.client.am.Blob
-                    (new byte[0],this.agent_, 0);
+            blob = new Blob(new byte[0],this.agent_, 0);
         }
         
         if (agent_.loggingEnabled()) {

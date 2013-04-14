@@ -43,9 +43,9 @@ class UpdateSensitiveClobLocatorInputStream
      * super class constructor with appropriate initializers.
      *
      * @param con connection to be used to read the
-     *        <code>Clob</code> value from the server
-     * @param clob <code>Clob</code> object that contains locator for
-     *        the <code>Clob</code> value on the server.
+     *        {@code Clob} value from the server
+     * @param clob {@code Clob} object that contains locator for
+     *        the {@code Clob} value on the server.
      *
      * @throws SqlException If any exception occurs during stream
      *                      creation.

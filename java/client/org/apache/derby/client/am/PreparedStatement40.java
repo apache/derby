@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import org.apache.derby.client.ClientPooledConnection;
 
-public class  PreparedStatement40 extends  org.apache.derby.client.am.PreparedStatement{
+public class PreparedStatement40 extends PreparedStatement {
 
     /**
      * The PreparedStatement used for JDBC 4 positioned update statements.

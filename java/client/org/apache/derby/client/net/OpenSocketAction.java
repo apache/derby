@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.security.PrivilegedExceptionAction;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
@@ -51,14 +52,14 @@ public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
-        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.SSL_BASIC:
+        case ClientBaseDataSourceRoot.SSL_BASIC:
             sf = NaiveTrustManager.getSocketFactory();
             break;
-        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.
+        case ClientBaseDataSourceRoot.
                 SSL_PEER_AUTHENTICATION:
             sf = (SocketFactory)SSLSocketFactory.getDefault();
             break;
-        case org.apache.derby.jdbc.ClientBaseDataSourceRoot.SSL_OFF:
+        case ClientBaseDataSourceRoot.SSL_OFF:
             sf = SocketFactory.getDefault();
             break;
         default: 

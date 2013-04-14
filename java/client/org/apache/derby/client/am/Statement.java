@@ -1688,8 +1688,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         if (resultSet_.fetchSize_ == 0 &&
                 (resultSet_.resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE ||
                 resultSet_.resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE)) {
-            resultSet_.setFetchSize_(org.apache.derby.client.am.
-                                     Configuration.defaultFetchSize);
+            resultSet_.setFetchSize_(Configuration.defaultFetchSize);
         }
     }
 
@@ -1715,7 +1714,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         // fetchSize_ is not set, we do not send any default value.  Here since we always send
         // the fetchSize_, we need to set it to what we sent.
         if (resultSet.fetchSize_ == 0) {
-            resultSet.fetchSize_ = org.apache.derby.client.am.Configuration.defaultFetchSize;
+            resultSet.fetchSize_ = Configuration.defaultFetchSize;
         }
     }
 

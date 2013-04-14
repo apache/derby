@@ -22,10 +22,15 @@
 package org.apache.derby.client.net;
 
 // network traffic tracer.
+
+import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.jdbc.ClientDataSource;
+
 // This class traces communication buffers for both sends and receives.
 // The value of the hex bytes are traced along with the ascii and ebcdic translations.
 
-public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
+public class NetLogWriter extends LogWriter {
 
     // The recevie constant is used to indicate that the bytes were read to a Stream.
     // It indicates to this class that a receive header should be used.
@@ -141,7 +146,7 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
     //------------------------------entry points----------------------------------
 
     // Specialization of LogWriter.traceConnectsExit()
-    public void traceConnectsExit(org.apache.derby.client.am.Connection connection) {
+    public void traceConnectsExit(Connection connection) {
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsExit(c);
@@ -159,7 +164,7 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
         }
     }
 
-    public void traceConnectsResetExit(org.apache.derby.client.am.Connection connection) {
+    public void traceConnectsResetExit(Connection connection) {
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsResetExit(c);
@@ -191,7 +196,7 @@ public class NetLogWriter extends org.apache.derby.client.am.LogWriter {
                                                String className,
                                                String methodName,
                                                int tracepoint) {
-        if (!loggingEnabled(org.apache.derby.jdbc.ClientDataSource.TRACE_PROTOCOL_FLOWS)) {
+        if (!loggingEnabled(ClientDataSource.TRACE_PROTOCOL_FLOWS)) {
             return;
         }
         synchronized (printWriter_) {

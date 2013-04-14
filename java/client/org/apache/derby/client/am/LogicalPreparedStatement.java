@@ -27,14 +27,8 @@ import java.net.URL;
 import java.util.Calendar;
 
 import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.ParameterMetaData;
 import java.sql.Ref;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Time;
@@ -182,11 +176,11 @@ public class LogicalPreparedStatement
          getPhysPs().setArray(i, x);
     }
 
-    public void setBlob(int i, Blob x) throws SQLException {
+    public void setBlob(int i, java.sql.Blob x) throws SQLException {
          getPhysPs().setBlob(i, x);
     }
 
-    public void setClob(int i, Clob x) throws SQLException {
+    public void setClob(int i, java.sql.Clob x) throws SQLException {
          getPhysPs().setClob(i, x);
     }
 
@@ -194,7 +188,8 @@ public class LogicalPreparedStatement
          getPhysPs().setDate(parameterIndex, x);
     }
 
-    public ParameterMetaData getParameterMetaData() throws SQLException {
+    public java.sql.ParameterMetaData getParameterMetaData()
+            throws SQLException {
         return getPhysPs().getParameterMetaData();
     }
 
@@ -202,11 +197,11 @@ public class LogicalPreparedStatement
          getPhysPs().setRef(i, x);
     }
 
-    public ResultSet executeQuery() throws SQLException {
+    public java.sql.ResultSet executeQuery() throws SQLException {
         return getPhysPs().executeQuery();
     }
 
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
         return getPhysPs().getMetaData();
     }
 
@@ -355,15 +350,15 @@ public class LogicalPreparedStatement
         return getPhysPs().execute(sql, columnIndexes);
     }
 
-    public Connection getConnection() throws SQLException {
+    public java.sql.Connection getConnection() throws SQLException {
         return getPhysPs().getConnection();
     }
 
-    public ResultSet getGeneratedKeys() throws SQLException {
+    public java.sql.ResultSet getGeneratedKeys() throws SQLException {
         return getPhysPs().getGeneratedKeys();
     }
 
-    public ResultSet getResultSet() throws SQLException {
+    public java.sql.ResultSet getResultSet() throws SQLException {
         return getPhysPs().getResultSet();
     }
 
@@ -381,7 +376,7 @@ public class LogicalPreparedStatement
         return getPhysPs().execute(sql, columnNames);
     }
 
-    public ResultSet executeQuery(String sql) throws SQLException {
+    public java.sql.ResultSet executeQuery(String sql) throws SQLException {
         return getPhysPs().executeQuery(sql);
     }
 

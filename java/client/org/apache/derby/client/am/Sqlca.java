@@ -79,7 +79,7 @@ public abstract class Sqlca {
      * procedure to get the same message). */
     private String[] cachedMessages;
 
-    protected Sqlca(org.apache.derby.client.am.Connection connection) {
+    protected Sqlca(Connection connection) {
         connection_ = connection;
         agent_ = connection_ != null ? connection_.agent_ : null;
     }
@@ -495,7 +495,7 @@ public abstract class Sqlca {
         return result;
     }
 
-    public long getRowCount() throws org.apache.derby.client.am.DisconnectException {
+    public long getRowCount() throws DisconnectException {
         return ((long) getSqlErrd()[ HIGH_ORDER_ROW_COUNT ] << 32) +
                 getSqlErrd()[ LOW_ORDER_ROW_COUNT ];
     }
@@ -508,7 +508,7 @@ public abstract class Sqlca {
         return containsSqlcax_;
     }
 
-    public void resetRowsetSqlca(org.apache.derby.client.am.Connection connection,
+    public void resetRowsetSqlca(Connection connection,
                                  int sqlCode,
                                  String sqlState) {
         connection_ = connection;

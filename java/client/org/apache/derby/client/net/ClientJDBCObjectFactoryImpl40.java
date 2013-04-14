@@ -22,6 +22,7 @@
 package org.apache.derby.client.net;
 
 import java.sql.SQLException;
+import java.util.Properties;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientPooledConnection40;
 import org.apache.derby.client.ClientXAConnection;
@@ -30,7 +31,9 @@ import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.CachingLogicalConnection40;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.CallableStatement40;
+import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.Cursor;
+import org.apache.derby.client.am.DatabaseMetaData;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.client.am.LogicalCallableStatement40;
@@ -38,8 +41,10 @@ import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.LogicalConnection40;
 import org.apache.derby.client.am.LogicalPreparedStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement40;
+import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.PreparedStatement40;
+import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.SQLExceptionFactory40;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
@@ -56,14 +61,15 @@ import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     
     /**
-     * Sets SQLExceptionFactpry40  om SqlException to make sure jdbc40 
-     * exception and sub classes are thrown when running with jdbc4.0 support
+     * Sets SQLExceptionFactory40 to SqlException to make sure JDBC 4.0
+     * exception and sub classes are thrown when running with JDBC 4.0 support.
      */
     public ClientJDBCObjectFactoryImpl40 () {
         SqlException.setExceptionFactory (new SQLExceptionFactory40 ());
     }
     /**
-     * Returns an instance of org.apache.derby.client.ClientPooledConnection40 
+     * @return an instance of
+     * {@link org.apache.derby.client.ClientPooledConnection40}
      */
     public ClientPooledConnection newClientPooledConnection(
             ClientBaseDataSourceRoot ds, LogWriter logWriter,String user,
@@ -71,7 +77,8 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
         return new ClientPooledConnection40(ds,logWriter,user,password);
     }
     /**
-     * Returns an instance of org.apache.derby.client.ClientPooledConnection40 
+     * @return an instance of
+     * {@link org.apache.derby.client.ClientPooledConnection40}
      */
     public ClientPooledConnection newClientPooledConnection(
             ClientBaseDataSourceRoot ds, LogWriter logWriter,String user,
@@ -79,7 +86,8 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
         return new ClientPooledConnection40(ds,logWriter,user,password,rmId);
     }
     /**
-     * Returns an instance of org.apache.derby.client.ClientXAConnection40 
+     * @return an instance of
+     * {@link org.apache.derby.client.ClientXAConnection40}
      */
     public ClientXAConnection newClientXAConnection(
         ClientBaseDataSourceRoot ds, LogWriter logWriter,String user,
@@ -89,7 +97,8 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
             (NetLogWriter)logWriter,user,password);
     }
     /**
-     * Returns an instance of org.apache.derby.client.am.CallableStatement.
+     * Returns an instance of
+     * {@link org.apache.derby.client.am.CallableStatement}.
      *
      * @param agent       The instance of NetAgent associated with this
      *                    CallableStatement object.
@@ -107,7 +116,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
      * @throws SqlException
      */
     public CallableStatement newCallableStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection,
+            Connection connection,
             String sql,int type,int concurrency,
             int holdability,ClientPooledConnection cpc) throws SqlException {
         return new CallableStatement40(agent,connection,sql,type,concurrency,
@@ -117,12 +126,12 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     /**
      * Returns an instance of LogicalConnection.
      * This method returns an instance of LogicalConnection
-     * (or LogicalConnection40) which implements java.sql.Connection.
+     * (or LogicalConnection40) which implements {@link java.sql.Connection}.
      */
     public LogicalConnection newLogicalConnection(
-                    org.apache.derby.client.am.Connection physicalConnection,
-                    ClientPooledConnection pooledConnection)
-        throws SqlException {
+            Connection physicalConnection,
+            ClientPooledConnection pooledConnection) throws SqlException {
+
         return new LogicalConnection40(physicalConnection, pooledConnection);
     }
     
@@ -138,7 +147,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     * @throws SqlException if creation of the logical connection fails
     */
     public LogicalConnection newCachingLogicalConnection(
-            org.apache.derby.client.am.Connection physicalConnection,
+            Connection physicalConnection,
             ClientPooledConnection pooledConnection,
             JDBCStatementCache stmtCache) throws SqlException {
         return new CachingLogicalConnection40(physicalConnection,
@@ -147,10 +156,11 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     }
 
     /**
-     * Returns an instance of org.apache.derby.client.am.CallableStatement40
+     * @return an instance of {@link
+     * org.apache.derby.client.am.CallableStatement40}
      */
     public PreparedStatement newPreparedStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection,
+            Connection connection,
             String sql,Section section,ClientPooledConnection cpc) 
             throws SqlException {
         return new PreparedStatement40(agent,connection,sql,section,cpc);
@@ -159,7 +169,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     /**
      *
      * This method returns an instance of PreparedStatement
-     * which implements java.sql.PreparedStatement.
+     * which implements {@link java.sql.PreparedStatement}.
      * It has the ClientPooledConnection as one of its parameters
      * this is used to raise the Statement Events when the prepared
      * statement is closed.
@@ -189,7 +199,7 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
      *
      */
     public PreparedStatement newPreparedStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection,
+            Connection connection,
             String sql,int type,int concurrency,
             int holdability,int autoGeneratedKeys,
             String [] columnNames,
@@ -230,65 +240,76 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     }
 
     /**
-     * returns an instance of org.apache.derby.client.net.NetConnection40
+     * @return an instance of {@link NetConnection40}
      */
-    public org.apache.derby.client.am.Connection newNetConnection
-            (org.apache.derby.client.am.LogWriter netLogWriter,
-            String databaseName,java.util.Properties properties)
-            throws SqlException {
-        return (org.apache.derby.client.am.Connection) 
-        (new NetConnection40((NetLogWriter)netLogWriter,databaseName,properties));
+    public Connection newNetConnection(
+            LogWriter netLogWriter,
+            String databaseName,
+            Properties properties) throws SqlException {
+
+        return new NetConnection40(
+                (NetLogWriter)netLogWriter,
+                databaseName,
+                properties);
     }
     /**
-     * returns an instance of org.apache.derby.client.net.NetConnection40
+     * @return an instance of {@link NetConnection40}
      */
-    public org.apache.derby.client.am.Connection newNetConnection
-            (org.apache.derby.client.am.LogWriter netLogWriter,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot clientDataSource,
-            String user,String password) throws SqlException {
-        return (org.apache.derby.client.am.Connection)
-        (new NetConnection40((NetLogWriter)netLogWriter,clientDataSource,user,password));
+    public Connection newNetConnection
+            (LogWriter netLogWriter,
+            ClientBaseDataSourceRoot clientDataSource,
+            String user,
+            String password) throws SqlException {
+
+        return new NetConnection40(
+                (NetLogWriter)netLogWriter,
+                clientDataSource,
+                user,
+                password);
     }
     /**
-     * returns an instance of org.apache.derby.client.net.NetConnection40
+     * @return  an instance of
+     * {@link org.apache.derby.client.net.NetConnection40}
      */
-    public org.apache.derby.client.am.Connection
-            newNetConnection(org.apache.derby.client.am.LogWriter netLogWriter,
-            int driverManagerLoginTimeout,String serverName,
-            int portNumber,String databaseName,
-            java.util.Properties properties) throws SqlException {
-        return (org.apache.derby.client.am.Connection)
-        (new NetConnection40((NetLogWriter)netLogWriter,driverManagerLoginTimeout,
-                serverName,portNumber,databaseName,properties));
+    public Connection newNetConnection(
+            LogWriter netLogWriter,
+            int driverManagerLoginTimeout,
+            String serverName,
+            int portNumber,
+            String databaseName,
+            Properties properties) throws SqlException {
+
+        return  new NetConnection40(
+                (NetLogWriter)netLogWriter,
+                driverManagerLoginTimeout,
+                serverName,
+                portNumber,
+                databaseName,
+                properties);
     }
     /**
-     * returns an instance of org.apache.derby.client.net.NetConnection40
+     * @return an instance of
+     * {@link org.apache.derby.client.net.NetConnection40}
      */
-    public org.apache.derby.client.am.Connection
-            newNetConnection(org.apache.derby.client.am.LogWriter netLogWriter,
+    public Connection newNetConnection(
+            LogWriter netLogWriter,
             String user,
             String password,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
-            int rmId,boolean isXAConn) throws SqlException {
-        return (org.apache.derby.client.am.Connection)
-        (new NetConnection40((NetLogWriter)netLogWriter,user,password,dataSource,
-                rmId,isXAConn));
+            ClientBaseDataSourceRoot dataSource,
+            int rmId,
+            boolean isXAConn) throws SqlException {
+
+        return new NetConnection40(
+                (NetLogWriter)netLogWriter,
+                user,
+                password,
+                dataSource,
+                rmId,
+                isXAConn);
     }
 
     /**
-     * returns an instance of org.apache.derby.client.net.NetConnection40
-     */
-    public org.apache.derby.client.am.Connection
-            newNetConnection(org.apache.derby.client.am.LogWriter netLogWriter,
-            String ipaddr,int portNumber,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
-            boolean isXAConn) throws SqlException {
-        return (org.apache.derby.client.am.Connection)
-        (new NetConnection40((NetLogWriter)netLogWriter,ipaddr,portNumber,dataSource,
-                isXAConn));
-    }
-    /**
-     * Returns an instance of org.apache.derby.client.net.NetConnection.
+     * Returns an instance of {@link NetConnection}.
      * @param netLogWriter placeholder for NetLogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
@@ -300,29 +321,44 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
      *                     NetConnection constructor was called. This is used
      *                     to pass StatementEvents back to the pooledConnection
      *                     object
-     * @return a org.apache.derby.client.am.Connection object
+     * @return a Connection object
      * @throws             SqlException
      */
-    public org.apache.derby.client.am.Connection newNetConnection(
-            org.apache.derby.client.am.LogWriter netLogWriter,String user,
+    public Connection newNetConnection(
+            LogWriter netLogWriter,
+            String user,
             String password,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
-            int rmId,boolean isXAConn,ClientPooledConnection cpc) 
-            throws SqlException {
-        return (org.apache.derby.client.am.Connection)
-        (new NetConnection40((NetLogWriter)netLogWriter,user,password,dataSource,rmId,
-                isXAConn,cpc));
+            ClientBaseDataSourceRoot dataSource,
+            int rmId,
+            boolean isXAConn,
+            ClientPooledConnection cpc) throws SqlException {
+
+        return new NetConnection40(
+                (NetLogWriter)netLogWriter,
+                user,
+                password,
+                dataSource,
+                rmId,
+                isXAConn,
+                cpc);
         
     }
     /**
-     * returns an instance of org.apache.derby.client.net.NetResultSet
+     * @return an instance of {@link NetResultSet}
      */
-    public org.apache.derby.client.am.ResultSet newNetResultSet(Agent netAgent,
-            org.apache.derby.client.am.MaterialStatement netStatement,
-            Cursor cursor,int qryprctyp,int sqlcsrhld,
-            int qryattscr,int qryattsns,int qryattset,long qryinsid,
-            int actualResultSetType,int actualResultSetConcurrency,
+    public ResultSet newNetResultSet(Agent netAgent,
+            MaterialStatement netStatement,
+            Cursor cursor,
+            int qryprctyp,
+            int sqlcsrhld,
+            int qryattscr,
+            int qryattsns,
+            int qryattset,
+            long qryinsid,
+            int actualResultSetType,
+            int actualResultSetConcurrency,
             int actualResultSetHoldability) throws SqlException {
+
         return new NetResultSet40((NetAgent)netAgent,(NetStatement)netStatement,
                 cursor,
                 qryprctyp, sqlcsrhld, qryattscr, qryattsns, qryattset, qryinsid,
@@ -330,10 +366,10 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
                 actualResultSetHoldability);
     }
     /**
-     * returns an instance of org.apache.derby.client.net.NetDatabaseMetaData
+     * @return an instance of {@link NetDatabaseMetaData}
      */
-    public org.apache.derby.client.am.DatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
-            org.apache.derby.client.am.Connection netConnection) {
+    public DatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
+           Connection netConnection) {
         return new NetDatabaseMetaData40((NetAgent)netAgent,
                 (NetConnection)netConnection);
     }

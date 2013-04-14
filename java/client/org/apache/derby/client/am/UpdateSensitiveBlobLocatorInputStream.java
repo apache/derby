@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 
 /**
@@ -43,9 +42,9 @@ class UpdateSensitiveBlobLocatorInputStream
      * appropriate initializers.
      *
      * @param con connection to be used to read the
-     *        <code>Blob</code> value from the server
-     * @param blob <code>Blob</code> object that contains locator for
-     *        the <code>Blob</code> value on the server.
+     *        {@code Blob} value from the server
+     * @param blob {@code Blob} object that contains locator for
+     *        the {@code Blob} value on the server.
      *
      * @throws SqlException If any exception occurs during stream
      *                      creation.
@@ -60,13 +59,13 @@ class UpdateSensitiveBlobLocatorInputStream
      * Creates an instance of the BlobLocatorInputStream.
      *
      * @param con connection to be used to read the
-     *        <code>Blob</code> value from the server
-     * @param blob <code>Blob</code> object that contains locator for
-     *        the <code>Blob</code> value on the server.
-     * @param position the position in the <code>Blob</code> of the first
+     *        {@code Blob} value from the server
+     * @param blob {@code Blob} object that contains locator for
+     *        the {@code Blob} value on the server.
+     * @param position the position in the {@code Blob} of the first
      *        byte to read.
      * @param length the maximum number of bytes to read from
-     *        the <code>Blob</code>.
+     *        the {@code Blob}.
      *
      * @throws SqlException If any exception occurs during stream
      *                      creation.

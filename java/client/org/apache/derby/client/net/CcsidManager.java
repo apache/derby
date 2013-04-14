@@ -60,7 +60,9 @@ public abstract class CcsidManager {
     //
     // @param sourceString A Java String to convert.
     // @return A new byte array representing the String in a particular ccsid.
-    public abstract byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
+    public abstract byte[] convertFromJavaString(
+        String sourceString,
+        Agent agent) throws SqlException;
 
     // Convert a byte array representing characters in a particular ccsid into a Java String.
     //

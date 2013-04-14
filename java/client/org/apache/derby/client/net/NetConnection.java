@@ -20,11 +20,15 @@
 */
 package org.apache.derby.client.net;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.sql.SQLException;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 import javax.transaction.xa.Xid;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.DatabaseMetaData;
@@ -40,12 +44,17 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.Section;
+import org.apache.derby.client.am.SectionManager;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public class NetConnection extends org.apache.derby.client.am.Connection {
+public class NetConnection extends Connection {
     
     // Use this to get internationalized strings...
     protected static final MessageUtil msgutil = SqlException.getMessageUtil();
@@ -180,7 +189,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     public NetConnection(NetLogWriter netLogWriter,
                          String databaseName,
-                         java.util.Properties properties) throws SqlException {
+                         Properties properties) throws SqlException {
         super(netLogWriter, 0, "", -1, databaseName, properties);
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
@@ -188,7 +197,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     public NetConnection(
             NetLogWriter netLogWriter,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            ClientBaseDataSourceRoot dataSource,
             String user,
             String password) throws SqlException {
 
@@ -204,7 +213,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          String serverName,
                          int portNumber,
                          String databaseName,
-                         java.util.Properties properties) throws SqlException {
+                         Properties properties) throws SqlException {
         super(netLogWriter, driverManagerLoginTimeout, serverName, portNumber, databaseName, properties);
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
@@ -322,7 +331,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     // preferably without password in the method signature.
     // We can probally get rid of flowReconnect method.
-    public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter)
+    public void resetNetConnection(LogWriter logWriter)
             throws SqlException {
         super.resetConnection(logWriter);
         //----------------------------------------------------
@@ -350,7 +359,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
 
-    protected void reset_(org.apache.derby.client.am.LogWriter logWriter)
+    protected void reset_(LogWriter logWriter)
             throws SqlException {
         if (inUnitOfWork_) {
             throw new SqlException(logWriter, 
@@ -360,7 +369,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         resetNetConnection(logWriter);
     }
 
-    java.util.List getSpecialRegisters() {
+    List getSpecialRegisters() {
         if (xares_ != null) {
             return xares_.getSpecialRegisters();
         } else {
@@ -427,8 +436,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                     new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
                     securityMechanism);
             }
-        } catch (java.lang.Throwable e) { // if *anything* goes wrong, make sure the connection is destroyed
-            // always mark the connection closed in case of an error.
+        } catch (Throwable e) {
+            // If *anything* goes wrong, make sure the connection is
+            // destroyed always mark the connection closed in case of
+            // an error.
             // This prevents attempts to use this closed connection
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
@@ -474,8 +485,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
         try {
             flowServerAttributes();
-        } catch (java.lang.Throwable e) { // if *anything* goes wrong, make sure the connection is destroyed
-            // always mark the connection closed in case of an error.
+        } catch (Throwable e) {
+            // If *anything* goes wrong, make sure the connection is
+            // destroyed always mark the connection closed in case of
+            // an error.
             // This prevents attempts to use this closed connection
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
@@ -514,7 +527,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     {
         for ( Throwable cause = original; cause != null; cause = cause.getCause() )
         {
-            if ( cause instanceof java.net.SocketTimeoutException )
+            if ( cause instanceof SocketTimeoutException )
             {
                 throw new SqlException
                     ( agent_.logWriter_, new ClientMessageId( SQLState.LOGIN_TIMEOUT ), original );
@@ -1009,8 +1022,12 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     //-------------------Abstract object factories--------------------------------
 
-    protected org.apache.derby.client.am.Agent newAgent_(org.apache.derby.client.am.LogWriter logWriter, int loginTimeout, String serverName, int portNumber, int clientSSLMode)
-            throws SqlException {
+    protected Agent newAgent_(LogWriter logWriter,
+            int loginTimeout,
+            String serverName,
+            int portNumber,
+            int clientSSLMode) throws SqlException {
+
         return new NetAgent(this,
                 (NetLogWriter) logWriter,
                 loginTimeout,
@@ -1028,8 +1045,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         ((NetStatement) statement.getMaterialStatement()).resetNetStatement(netAgent_, this, type, concurrency, holdability);
     }
 
-    protected PreparedStatement newPositionedUpdatePreparedStatement_(String sql,
-                                                                      org.apache.derby.client.am.Section section) throws SqlException {
+    protected PreparedStatement newPositionedUpdatePreparedStatement_(
+            String sql,
+            Section section) throws SqlException {
         //passing the pooledConnection_ object which will be used to raise 
         //StatementEvents to the PooledConnection
         return new NetPreparedStatement(netAgent_, this, sql, section,pooledConnection_).preparedStatement_;
@@ -1226,7 +1244,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         if (crrtkn_ == null) {
             crrtkn_ = new byte[19];
         } else {
-            java.util.Arrays.fill(crrtkn_, (byte) 0);
+            Arrays.fill(crrtkn_, (byte) 0);
         }
 
         byte [] localAddressBytes = netAgent_.socket_.getLocalAddress().getAddress();
@@ -1287,7 +1305,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     private void constructExtnam() throws SqlException {
         /* Construct the EXTNAM based on the thread name */
-        char[] chars = java.lang.Thread.currentThread().getName().toCharArray();
+        char[] chars = Thread.currentThread().getName().toCharArray();
 
         /* DERBY-4584: Replace non-EBCDIC characters (> 0xff) with '?' */
         for (int i = 0; i < chars.length; i++) {
@@ -1301,7 +1319,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             prddta_ = ByteBuffer.allocate(NetConfiguration.PRDDTA_MAXSIZE);
         } else {
             prddta_.clear();
-            java.util.Arrays.fill(prddta_.array(), (byte) 0);
+            Arrays.fill(prddta_.array(), (byte) 0);
         }
 
         CcsidManager ccsidMgr = netAgent_.getCurrentCcsidManager();
@@ -1558,19 +1576,19 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return false;
     }
 
-    public void setInputStream(java.io.InputStream inputStream) {
+    public void setInputStream(InputStream inputStream) {
         netAgent_.setInputStream(inputStream);
     }
 
-    public void setOutputStream(java.io.OutputStream outputStream) {
+    public void setOutputStream(OutputStream outputStream) {
         netAgent_.setOutputStream(outputStream);
     }
 
-    public java.io.InputStream getInputStream() {
+    public InputStream getInputStream() {
         return netAgent_.getInputStream();
     }
 
-    public java.io.OutputStream getOutputStream() {
+    public OutputStream getOutputStream() {
         return netAgent_.getOutputStream();
     }
 
@@ -1606,11 +1624,11 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         readOnlyTransaction_ = flag;
     }
 
-    public org.apache.derby.client.am.SectionManager newSectionManager
+    public SectionManager newSectionManager
             (String collection,
-             org.apache.derby.client.am.Agent agent,
+             Agent agent,
              String databaseName) {
-        return new org.apache.derby.client.am.SectionManager(collection, agent, databaseName);
+        return new SectionManager(collection, agent, databaseName);
     }
 
     public boolean willAutoCommitGenerateFlow() {

@@ -790,7 +790,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
     public boolean hasLobColumns() {
         for (int i = 0; i < columns_; i++) {
-            switch (org.apache.derby.client.am.Utils.getNonNullableSqlType(sqlType_[i])) {
+            switch (Utils.getNonNullableSqlType(sqlType_[i])) {
             case DRDAConstants.DB2_SQLTYPE_BLOB:
             case DRDAConstants.DB2_SQLTYPE_CLOB:
                 return true;

@@ -21,9 +21,9 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.SQLException;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientXAConnection;
-import java.sql.SQLException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
@@ -39,9 +39,10 @@ import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 public interface ClientJDBCObjectFactory {
     
     /**
-     * This method is used to return an instance of
-     * ClientPooledConnection (or ClientPooledConnection40) class which
-     * implements javax.sql.PooledConnection
+     * This method is used to return an instance of {@link
+     * org.apache.derby.client.ClientPooledConnection} (or {@link
+     * org.apache.derby.client.ClientPooledConnection40}) class which
+     * implements {@code javax.sql.PooledConnection}.
      */
     ClientPooledConnection newClientPooledConnection(
             ClientBaseDataSourceRoot ds,
@@ -52,7 +53,7 @@ public interface ClientJDBCObjectFactory {
     /**
      * This method is used to return an instance of
      * ClientPooledConnection(or ClientPooledConnection40) class which
-     * implements javax.sql.PooledConnection
+     * implements {@code javax.sql.PooledConnection}.
      */
     ClientPooledConnection newClientPooledConnection(
             ClientBaseDataSourceRoot ds,
@@ -64,15 +65,15 @@ public interface ClientJDBCObjectFactory {
     /**
      * This method is used to return an instance of
      * ClientXAConnection (or ClientXAConnection40) class which
-     * implements javax.sql.XAConnection
+     * implements {@code javax.sql.XAConnection}.
      */
     ClientXAConnection newClientXAConnection(ClientBaseDataSourceRoot ds,
             LogWriter logWriter,String user,String password)
             throws SQLException;
     
     /**
-     * Returns an instance of org.apache.derby.client.am.CallableStatement.
-     * or CallableStatement40 which implements java.sql.CallableStatement
+     * Returns an instance of CallableStatement or
+     * CallableStatement40 which implements {@code java.sql.CallableStatement}
      *
      * @param agent       The instance of NetAgent associated with this
      *                    CallableStatement object.
@@ -90,17 +91,17 @@ public interface ClientJDBCObjectFactory {
      * @throws SqlException
      */
     CallableStatement newCallableStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection, String sql,
+            Connection connection, String sql,
             int type,int concurrency,int holdability,
             ClientPooledConnection cpc) throws SqlException;
     
     /**
      * Returns an instance of LogicalConnection.
      * This method returns an instance of LogicalConnection
-     * (or LogicalConnection40) which implements java.sql.Connection.
+     * (or LogicalConnection40) which implements {@code java.sql.Connection}.
      */
     LogicalConnection newLogicalConnection(
-                    org.apache.derby.client.am.Connection physicalConnection,
+                    Connection physicalConnection,
                     ClientPooledConnection pooledConnection)
         throws SqlException;
     
@@ -116,14 +117,15 @@ public interface ClientJDBCObjectFactory {
     * @throws SqlException if creation of the logical connection fails
     */
     public LogicalConnection newCachingLogicalConnection(
-            org.apache.derby.client.am.Connection physicalConnection,
+            Connection physicalConnection,
             ClientPooledConnection pooledConnection,
             JDBCStatementCache stmtCache) throws SqlException;
 
     /**
      * This method returns an instance of PreparedStatement
-     * (or PreparedStatement40) which implements java.sql.PreparedStatement
-     * It has the ClientPooledConnection as one of its parameters 
+     * (or PreparedStatement40) which implements
+     * {@code java.sql.PreparedStatement}.
+     * It has the {@link ClientPooledConnection} as one of its parameters
      * this is used to raise the Statement Events when the prepared
      * statement is closed
      *
@@ -143,13 +145,15 @@ public interface ClientJDBCObjectFactory {
      * @throws SqlException
      */
     PreparedStatement newPreparedStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection,
+            Connection connection,
             String sql,Section section,ClientPooledConnection cpc) 
             throws SqlException;
     
     /**
-     * Returns an instance of PreparedStatement
-     * (or PreparedStatement40) which implements java.sql.PreparedStatement
+     * Returns an instance of PreparedStatement (or
+     * PreparedStatement40) which implements {@code
+     * java.sql.PreparedStatement}.
+
      * It has the ClientPooledConnection as one of its parameters 
      * this is used to raise the Statement Events when the prepared
      * statement is closed
@@ -178,7 +182,7 @@ public interface ClientJDBCObjectFactory {
      * @throws SqlException
      */
     PreparedStatement newPreparedStatement(Agent agent,
-            org.apache.derby.client.am.Connection connection,String sql,
+            Connection connection,String sql,
             int type,int concurrency,int holdability,int autoGeneratedKeys,
             String [] columnNames, int[] columnIndexes, ClientPooledConnection cpc) 
             throws SqlException;
@@ -211,23 +215,23 @@ public interface ClientJDBCObjectFactory {
             StatementCacheInteractor cacheInteractor);
 
     /**
-     * This method returns an instance of NetConnection (or NetConnection40) class
-     * which extends from org.apache.derby.client.am.Connection
-     * this implements the java.sql.Connection interface
+     * This method returns an instance of NetConnection (or
+     * NetConnection40) class which extends from Connection.  This
+     * implements the {@code java.sql.Connection} interface.
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
             String databaseName,java.util.Properties properties)
             throws SqlException;
     
     /**
      * This method returns an instance of NetConnection (or NetConnection40) class
-     * which extends from org.apache.derby.client.am.Connection
-     * this implements the java.sql.Connection interface
+     * which extends from Connection
+     * this implements the {@code java.sql.Connection} interface
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot clientDataSource,
+            ClientBaseDataSourceRoot clientDataSource,
             String user,
             String password) throws SqlException;
     
@@ -236,42 +240,42 @@ public interface ClientJDBCObjectFactory {
      * class which extends from org.apache.derby.client.am.Connection
      * this implements the java.sql.Connection interface
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
             int driverManagerLoginTimeout,String serverName,
             int portNumber,String databaseName,java.util.Properties properties)
             throws SqlException;
     
     /**
-     * This method returns an instance of NetConnection (or NetConnection40)
-     * class which extends from org.apache.derby.client.am.Connection
-     * this implements the java.sql.Connection interface
+     * This method returns an instance of NetConnection (or
+     * NetConnection40) class which extends from Connection.  This
+     * implements the {@code java.sql.Connection} interface.
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
             String user,
             String password,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            ClientBaseDataSourceRoot dataSource,
             int rmId,
             boolean isXAConn) throws SqlException;
     
     /**
-     * This methos returns an instance of NetConnection
+     * This method returns an instance of NetConnection
      * (or NetConnection40) class which extends from
-     * org.apache.derby.client.am.Connection this implements the
-     * java.sql.Connection interface
+     * Connection this implements the
+     * {@code java.sql.Connection interface}.
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
             String ipaddr,
             int portNumber,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,
+            ClientBaseDataSourceRoot dataSource,
             boolean isXAConn) throws SqlException;
     
     /**
      * This method returns an instance of NetConnection (or NetConnection40)
-     * class which extends from org.apache.derby.client.am.Connection
-     * this implements the java.sql.Connection interface
+     * class which extends Connection.
+     * This implements the {@code java.sql.Connection} interface.
      * This method is used to pass the ClientPooledConnection
      * object to the NetConnection object which can then be used to pass the 
      * statement events back to the user
@@ -289,16 +293,16 @@ public interface ClientJDBCObjectFactory {
      *                     object
      * @throws             SqlException
      */
-    org.apache.derby.client.am.Connection newNetConnection(
+    Connection newNetConnection(
             LogWriter netLogWriter,
             String user,String password,
-            org.apache.derby.jdbc.ClientBaseDataSourceRoot dataSource,int rmId,
+            ClientBaseDataSourceRoot dataSource,int rmId,
             boolean isXAConn,ClientPooledConnection cpc) throws SqlException;
     
     /**
-     * This method returns an instance of NetResultSet(or NetResultSet40)
-     * which extends from org.apache.derby.client.am.ResultSet
-     * which implements java.sql.ResultSet
+     * This method returns an instance of NetResultSet(or
+     * NetResultSet40) which extends from ResultSet which implements
+     * {@code java.sql.ResultSet}.
      */
     ResultSet newNetResultSet(Agent netAgent,MaterialStatement netStatement,
             Cursor cursor,
@@ -308,25 +312,24 @@ public interface ClientJDBCObjectFactory {
             throws SqlException;
     
     /**
-     * This method provides an instance of NetDatabaseMetaData
-     * (or NetDatabaseMetaData40) which extends from
-     * org.apache.derby.client.am.DatabaseMetaData which implements
-     * java.sql.DatabaseMetaData
+     * This method provides an instance of NetDatabaseMetaData (or
+     * NetDatabaseMetaData40) which extends from DatabaseMetaData
+     * which implements {@code java.sql.DatabaseMetaData}.
      */
     DatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
-            org.apache.derby.client.am.Connection netConnection);
+            Connection netConnection);
     
     /**
      * This method provides an instance of Statement or Statement40 
      * depending on the jdk version under use
      * @param  agent      Agent
      * @param  connection Connection
-     * @return a java.sql.Statement implementation 
+     * @return a {@code java.sql.Statement} implementation
      * @throws SqlException
      *
      */
      Statement newStatement(Agent agent, 
-             org.apache.derby.client.am.Connection connection) 
+             Connection connection)
              throws SqlException;
      
      /**
@@ -340,12 +343,12 @@ public interface ClientJDBCObjectFactory {
      * @param autoGeneratedKeys int
      * @param columnNames       String[]
      * @param columnIndexes     int[]
-     * @return a java.sql.Statement implementation 
+     * @return a {@code java.sql.Statement} implementation
      * @throws SqlException
      *
      */
      Statement newStatement(Agent agent, 
-                     org.apache.derby.client.am.Connection connection, int type, 
+                     Connection connection, int type,
                      int concurrency, int holdability,
                      int autoGeneratedKeys, String[] columnNames,
                      int[] columnIndexes) 

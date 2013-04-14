@@ -78,10 +78,10 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      * and the connection to the appropriate values.
      *
      * @param con connection to be used to read the
-     *        <code>Lob</code> value from the server
-     * @param lob <code>Lob</code> object which could be a
-     *            <code>Blob</code> or a <code>Clob</code>.
-     * @param is an <code>InputStream</code> that contains the
+     *        {@code Lob} value from the server
+     * @param lob {@code Lob} object which could be a
+     *            {@code Blob} or a {@code Clob}.
+     * @param is an {@code InputStream} that contains the
      *           appropriate locator stream instance.
      */
     protected UpdateSensitiveLOBLocatorInputStream(Connection con, Lob lob,
@@ -110,10 +110,10 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      * length and the connection to the appropriate values.
      *
      * @param con connection to be used to read the
-     *        <code>Lob</code> value from the server
-     * @param lob <code>Lob</code> object which could be a
-     *            <code>Blob</code> or a <code>Clob</code>.
-     * @param is an <code>InputStream</code> that contains the
+     *        {@code Lob} value from the server
+     * @param lob {@code Lob} object which could be a
+     *            {@code Blob} or a {@code Clob}.
+     * @param is an {@code InputStream} that contains the
      *           appropriate locator stream instance.
      * @param pos the position from which the first read begins.
      * @param len the length in bytes of the partial value to be

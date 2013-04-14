@@ -21,10 +21,11 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Configuration;
+import org.apache.derby.client.am.DatabaseMetaData;
 import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 
-public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMetaData {
+public class NetDatabaseMetaData extends DatabaseMetaData {
 
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse

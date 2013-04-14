@@ -64,7 +64,6 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
      *        the <code>Clob</code> value on the server.
      * @param pos the position in the <code>CLOB</code> value at which
      *        to start writing; the first position is 1
-     * @throws org.apache.derby.client.am.SqlException
      */
     public ClobLocatorOutputStream(Connection connection, Clob clob, long pos)
     throws SqlException {

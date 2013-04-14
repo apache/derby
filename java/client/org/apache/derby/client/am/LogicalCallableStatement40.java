@@ -22,8 +22,6 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -264,12 +262,12 @@ public class LogicalCallableStatement40
         return getPhysCs().getCharacterStream(arg0);
     }
 
-    public void setBlob(String arg0, Blob arg1)
+    public void setBlob(String arg0, java.sql.Blob arg1)
             throws SQLException {
          getPhysCs().setBlob(arg0, arg1);
     }
 
-    public void setClob(String arg0, Clob arg1)
+    public void setClob(String arg0, java.sql.Clob arg1)
             throws SQLException {
          getPhysCs().setClob(arg0, arg1);
     }

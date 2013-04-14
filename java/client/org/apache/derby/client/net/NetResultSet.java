@@ -22,11 +22,12 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
+import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 
 
-public class NetResultSet extends org.apache.derby.client.am.ResultSet {
+public class NetResultSet extends ResultSet {
     // Alias for (NetConnection) super.statement.connection
     private final NetConnection netConnection_;
 

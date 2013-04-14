@@ -20,8 +20,6 @@
  */
 package org.apache.derby.client.am;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -559,92 +557,104 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().dataDefinitionIgnoredInTransactions();
     }
 
-    public ResultSet getProcedures(
+    public java.sql.ResultSet getProcedures(
             String catalog, String schemaPattern, String procedureNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getProcedures(
                 catalog, schemaPattern, procedureNamePattern);
     }
 
-    public ResultSet getProcedureColumns(String catalog, String schemaPattern,
-            String procedureNamePattern, String columnNamePattern)
-            throws SQLException {
+    public java.sql.ResultSet getProcedureColumns(
+            String catalog,
+            String schemaPattern,
+            String procedureNamePattern,
+            String columnNamePattern) throws SQLException {
+
         return getRealMetaDataObject().getProcedureColumns(catalog,
                 schemaPattern, procedureNamePattern, columnNamePattern);
     }
 
-    public ResultSet getTables(String catalog, String schemaPattern,
+    public java.sql.ResultSet getTables(String catalog, String schemaPattern,
             String tableNamePattern, String[] types)
             throws SQLException {
         return getRealMetaDataObject().getTables(
                 catalog, schemaPattern, tableNamePattern, types);
     }
 
-    public ResultSet getSchemas() throws SQLException {
+    public java.sql.ResultSet getSchemas() throws SQLException {
         return getRealMetaDataObject().getSchemas();
     }
 
-    public ResultSet getCatalogs() throws SQLException {
+    public java.sql.ResultSet getCatalogs() throws SQLException {
         return getRealMetaDataObject().getCatalogs();
     }
 
-    public ResultSet getTableTypes() throws SQLException {
+    public java.sql.ResultSet getTableTypes() throws SQLException {
         return getRealMetaDataObject().getTableTypes();
     }
 
-    public ResultSet getColumns(String catalog, String schemaPattern,
+    public java.sql.ResultSet getColumns(String catalog, String schemaPattern,
             String tableNamePattern, String columnNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getColumns(
                 catalog, schemaPattern, tableNamePattern, columnNamePattern);
     }
 
-    public ResultSet getColumnPrivileges(String catalog, String schema,
+    public java.sql.ResultSet getColumnPrivileges(String catalog, String schema,
             String table, String columnNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getColumnPrivileges(
                 catalog, schema, table, columnNamePattern);
     }
 
-    public ResultSet getTablePrivileges(String catalog, String schemaPattern,
-            String tableNamePattern)
-            throws SQLException {
+    public java.sql.ResultSet getTablePrivileges(
+            String catalog,
+            String schemaPattern,
+            String tableNamePattern) throws SQLException {
+
         return getRealMetaDataObject().getTablePrivileges(
                 catalog, schemaPattern, tableNamePattern);
     }
 
-    public ResultSet getBestRowIdentifier(String catalog, String schema,
-            String table, int scope, boolean nullable)
-            throws SQLException {
+    public java.sql.ResultSet getBestRowIdentifier(
+            String catalog,
+            String schema,
+            String table,
+            int scope,
+            boolean nullable) throws SQLException {
+
         return getRealMetaDataObject().getBestRowIdentifier(
                 catalog, schema, table, scope, nullable);
     }
 
-    public ResultSet getVersionColumns(
+    public java.sql.ResultSet getVersionColumns(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getVersionColumns(
                 catalog, schema, table);
     }
 
-    public ResultSet getPrimaryKeys(String catalog, String schema, String table)
-            throws SQLException {
+    public java.sql.ResultSet getPrimaryKeys(
+            String catalog,
+            String schema,
+            String table) throws SQLException {
+
         return getRealMetaDataObject().getPrimaryKeys(catalog, schema, table);
     }
 
-    public ResultSet getImportedKeys(
+    public java.sql.ResultSet getImportedKeys(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getImportedKeys(catalog, schema, table);
     }
 
-    public ResultSet getExportedKeys(
+    public java.sql.ResultSet getExportedKeys(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getExportedKeys(catalog, schema, table);
     }
 
-    public ResultSet getCrossReference(String parentCatalog,
+    public java.sql.ResultSet getCrossReference(String parentCatalog,
             String parentSchema, String parentTable, String foreignCatalog,
             String foreignSchema, String foreignTable)
             throws SQLException {
@@ -653,13 +663,17 @@ public class LogicalDatabaseMetaData
                 foreignSchema, foreignTable);
     }
 
-    public ResultSet getTypeInfo() throws SQLException {
+    public java.sql.ResultSet getTypeInfo() throws SQLException {
         return getRealMetaDataObject().getTypeInfo();
     }
 
-    public ResultSet getIndexInfo(String catalog, String schema, String table,
-            boolean unique, boolean approximate)
-            throws SQLException {
+    public java.sql.ResultSet getIndexInfo(
+            String catalog,
+            String schema,
+            String table,
+            boolean unique,
+            boolean approximate) throws SQLException {
+
         return getRealMetaDataObject().getIndexInfo(
                 catalog, schema, table, unique, approximate);
     }
@@ -714,14 +728,14 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().supportsBatchUpdates();
     }
 
-    public ResultSet getUDTs(String catalog, String schemaPattern,
+    public java.sql.ResultSet getUDTs(String catalog, String schemaPattern,
             String typeNamePattern, int[] types)
             throws SQLException {
         return getRealMetaDataObject().getUDTs(
                 catalog, schemaPattern, typeNamePattern, types);
     }
 
-    public Connection getConnection() throws SQLException {
+    public java.sql.Connection getConnection() throws SQLException {
         getRealMetaDataObject(); // Just check if the connection is still open.
         return this.logicalCon;
     }
@@ -742,23 +756,26 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().supportsGetGeneratedKeys();
     }
 
-    public ResultSet getSuperTypes(
+    public java.sql.ResultSet getSuperTypes(
             String catalog, String schemaPattern, String typeNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getSuperTypes(
                 catalog, schemaPattern, typeNamePattern);
     }
 
-    public ResultSet getSuperTables(
+    public java.sql.ResultSet getSuperTables(
             String catalog, String schemaPattern, String tableNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getSuperTables(
                 catalog, schemaPattern, tableNamePattern);
     }
 
-    public ResultSet getAttributes(String catalog, String schemaPattern,
-            String typeNamePattern, String attributeNamePattern)
-            throws SQLException {
+    public java.sql.ResultSet getAttributes(
+            String catalog,
+            String schemaPattern,
+            String typeNamePattern,
+            String attributeNamePattern) throws SQLException {
+
         return getRealMetaDataObject().getAttributes(
                 catalog, schemaPattern, typeNamePattern, attributeNamePattern);
     }

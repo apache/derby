@@ -25,8 +25,6 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Ref;
 import java.sql.SQLException;
@@ -216,11 +214,11 @@ public class LogicalCallableStatement
         return getPhysCs().getArray(i);
     }
 
-    public Blob getBlob(int i) throws SQLException {
+    public java.sql.Blob getBlob(int i) throws SQLException {
         return getPhysCs().getBlob(i);
     }
 
-    public Clob getClob(int i) throws SQLException {
+    public java.sql.Clob getClob(int i) throws SQLException {
         return getPhysCs().getClob(i);
     }
 
@@ -308,11 +306,11 @@ public class LogicalCallableStatement
         return getPhysCs().getArray(parameterName);
     }
 
-    public Blob getBlob(String parameterName) throws SQLException {
+    public java.sql.Blob getBlob(String parameterName) throws SQLException {
         return getPhysCs().getBlob(parameterName);
     }
 
-    public Clob getClob(String parameterName) throws SQLException {
+    public java.sql.Clob getClob(String parameterName) throws SQLException {
         return getPhysCs().getClob(parameterName);
     }
 

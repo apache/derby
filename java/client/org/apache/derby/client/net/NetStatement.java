@@ -22,12 +22,13 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.ColumnMetaData;
+import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.jdbc.ClientDriver;
 
-public class NetStatement implements org.apache.derby.client.am.MaterialStatement {
+public class NetStatement implements MaterialStatement {
 
     Statement statement_;
 
@@ -57,17 +58,23 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
     }
 
     // Relay constructor for NetPreparedStatement.
-    NetStatement(org.apache.derby.client.am.Statement statement, NetAgent netAgent, NetConnection netConnection) {
+    NetStatement(Statement statement,
+                 NetAgent netAgent,
+                 NetConnection netConnection) {
         this();
         initNetStatement(statement, netAgent, netConnection);
     }
 
-    void resetNetStatement(org.apache.derby.client.am.Statement statement, NetAgent netAgent, NetConnection netConnection) {
+    void resetNetStatement(Statement statement,
+                           NetAgent netAgent,
+                           NetConnection netConnection) {
         resetNetStatement();
         initNetStatement(statement, netAgent, netConnection);
     }
 
-    private void initNetStatement(org.apache.derby.client.am.Statement statement, NetAgent netAgent, NetConnection netConnection) {
+    private void initNetStatement(Statement statement,
+                                  NetAgent netAgent,
+                                  NetConnection netConnection) {
         netAgent_ = netAgent;
         netConnection_ = netConnection;
         statement_ = statement;

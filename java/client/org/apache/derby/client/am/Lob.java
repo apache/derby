@@ -140,7 +140,6 @@ public abstract class Lob implements UnitOfWorkListener {
      * subclasses.  A stored procedure call will be made to get the
      * length from the server.
      * 
-     * @throws org.apache.derby.client.am.SqlException 
      * @return length of Lob
      */
     long getLocatorLength() throws SqlException

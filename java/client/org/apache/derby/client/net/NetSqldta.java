@@ -21,6 +21,8 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.SqlException;
+
 
 public class NetSqldta extends NetCursor {
     private NetConnection netConnection_;
@@ -31,7 +33,7 @@ public class NetSqldta extends NetCursor {
         netConnection_ = netAgent.netConnection_;
     }
 
-    public boolean next() throws org.apache.derby.client.am.SqlException {
+    public boolean next() throws SqlException {
         if (allRowsReceivedFromServer()) {
             return false;
         } else {

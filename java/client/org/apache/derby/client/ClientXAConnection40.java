@@ -21,11 +21,11 @@
 
 package org.apache.derby.client;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
+import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 /**
@@ -50,7 +50,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * @param password 
      */
     public ClientXAConnection40 (ClientBaseDataSourceRoot ds,
-                              org.apache.derby.client.net.NetLogWriter logWtr,
+                              NetLogWriter logWtr,
                               String userId,
                               String password) throws SQLException {
         super(ds, logWtr, userId, password);
@@ -101,7 +101,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * corresponding events occurs
      * @param statement The PreparedStatement that was closed
      */
-    public void onStatementClose(PreparedStatement statement) {
+    public void onStatementClose(java.sql.PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
             for (StatementEventListener l : statementEventListeners) {
@@ -120,7 +120,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      *                  caused the invalidation of the PreparedStatements
      *
      */
-    public void onStatementErrorOccurred(PreparedStatement statement,
+    public void onStatementErrorOccurred(java.sql.PreparedStatement statement,
                     SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);

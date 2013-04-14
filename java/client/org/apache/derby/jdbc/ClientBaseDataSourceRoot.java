@@ -38,6 +38,7 @@ import javax.sql.XAConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetConfiguration;
@@ -74,7 +75,7 @@ public abstract class ClientBaseDataSourceRoot implements
             // required security algorithms that are needed for EUSRIDPWD An
             // exception will be thrown if support is not available in the JCE
             // implementation in the JVM in which the client is loaded.
-            new org.apache.derby.client.am.EncryptionManager(null);
+            new EncryptionManager(null);
             supports_eusridpwd = true;
         }catch(Exception e)
         {

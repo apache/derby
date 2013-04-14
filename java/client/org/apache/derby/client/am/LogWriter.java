@@ -27,6 +27,7 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Properties;
+import javax.transaction.xa.XAException;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.Attribute;
@@ -656,7 +657,7 @@ public class LogWriter {
         }
     }
 
-    void traceDiagnosable(javax.transaction.xa.XAException e) {
+    void traceDiagnosable(XAException e) {
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }

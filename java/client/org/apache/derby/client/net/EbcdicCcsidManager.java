@@ -129,7 +129,10 @@ public class EbcdicCcsidManager extends CcsidManager {
         );
     }
 
-    public byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws SqlException {
+    public byte[] convertFromJavaString(
+            String sourceString,
+            Agent agent) throws SqlException {
+
         CharBuffer src = CharBuffer.wrap(sourceString);
         ByteBuffer dest = ByteBuffer.allocate(sourceString.length());
         startEncoding();

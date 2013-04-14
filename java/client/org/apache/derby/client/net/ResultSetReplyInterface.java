@@ -21,14 +21,19 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 
 public interface ResultSetReplyInterface {
-    public void readFetch(ResultSetCallbackInterface resultSet) throws org.apache.derby.client.am.DisconnectException;
+    public void readFetch(ResultSetCallbackInterface resultSet)
+            throws DisconnectException;
 
-    public void readScrollableFetch(ResultSetCallbackInterface resultSet) throws org.apache.derby.client.am.DisconnectException;
+    public void readScrollableFetch(ResultSetCallbackInterface resultSet)
+            throws DisconnectException;
 
-    public void readPositioningFetch(ResultSetCallbackInterface resultSet) throws org.apache.derby.client.am.DisconnectException;
+    public void readPositioningFetch(ResultSetCallbackInterface resultSet)
+            throws DisconnectException;
 
-    public void readCursorClose(ResultSetCallbackInterface resultSet) throws org.apache.derby.client.am.DisconnectException;
+    public void readCursorClose(ResultSetCallbackInterface resultSet)
+            throws DisconnectException;
 }

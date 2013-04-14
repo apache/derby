@@ -4908,7 +4908,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // has been received.
         if (!openOnServer_) {
             SqlException sqlException = null;
-            int sqlcode = org.apache.derby.client.am.Utils.getSqlcodeFromSqlca(queryTerminatingSqlca_);
+            int sqlcode = Utils.getSqlcodeFromSqlca(queryTerminatingSqlca_);
+
             if (sqlcode < 0) {
                 sqlException = new SqlException(agent_.logWriter_, queryTerminatingSqlca_);
             } else if (sqlcode > 0 && sqlcode != 100) {

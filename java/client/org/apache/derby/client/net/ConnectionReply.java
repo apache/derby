@@ -21,15 +21,19 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 
 
 public class ConnectionReply {
     private ConnectionReplyInterface materialConnectionReply_;
-    org.apache.derby.client.am.Agent agent_;
+    Agent agent_;
 
-    ConnectionReply(org.apache.derby.client.am.Agent agent, ConnectionReplyInterface materialConnectionReply) {
+    ConnectionReply(
+            Agent agent,
+            ConnectionReplyInterface materialConnectionReply) {
+
         agent_ = agent;
         materialConnectionReply_ = materialConnectionReply;
     }

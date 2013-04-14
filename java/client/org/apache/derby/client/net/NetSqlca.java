@@ -26,13 +26,14 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import java.io.UnsupportedEncodingException;
+import org.apache.derby.client.am.Connection;
 import org.apache.derby.client.am.DisconnectException;
 
 public class NetSqlca extends Sqlca {
     // these are the same variables that are in the Sqlca except ccsids
     // are a little different
 
-    NetSqlca(org.apache.derby.client.am.Connection connection,
+    NetSqlca(Connection connection,
              int sqlCode,
              String sqlState,
              byte[] sqlErrpBytes) {
@@ -42,7 +43,7 @@ public class NetSqlca extends Sqlca {
         sqlErrpBytes_ = sqlErrpBytes;
     }
 
-    NetSqlca(org.apache.derby.client.am.Connection connection,
+    NetSqlca(Connection connection,
             int sqlCode,
             byte[] sqlState,
             byte[] sqlErrpBytes) throws SqlException {

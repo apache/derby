@@ -99,7 +99,6 @@ class CallableLocatorProcedures
      * subsequent operations on this BLOB value will be stored in temporary
      * space on the server.
      *
-     * @throws org.apache.derby.client.am.SqlException
      * @return locator that identifies the created BLOB.
      */
     int blobCreateLocator() throws SqlException
@@ -161,7 +160,6 @@ class CallableLocatorProcedures
      * This method frees the BLOB and releases the resources that it
      * holds. (E.g., temporary space used to store this BLOB on the server.)
      * @param locator locator that designates the BLOB to be released.
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void blobReleaseLocator(int locator) throws SqlException
     {
@@ -195,7 +193,6 @@ class CallableLocatorProcedures
      *        search
      * @param fromPosition the position in the BLOB value
      *        at which to begin searching; the first position is 1
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern begins, else -1
      */
     long blobGetPositionFromLocator(int locator, 
@@ -242,7 +239,6 @@ class CallableLocatorProcedures
      * @param searchLiteral the byte array for which to search
      * @param fromPosition the position at which to begin searching; the
      *        first position is 1
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern appears, else -1
      */
     long blobGetPositionFromBytes(int locator, 
@@ -321,7 +317,6 @@ class CallableLocatorProcedures
      *        for. It is assumed that this length is smaller than the maximum
      *        size of a VARCHAR FOR BIT DATA column.  Otherwise, an exception
      *        will be thrown.
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern appears, else -1
      */
     private long blobGetPositionFromBytes(int locator,
@@ -370,7 +365,6 @@ class CallableLocatorProcedures
      * designated by this <code>sourceLocator</code>.
      * 
      * @param sourceLocator locator that identifies the BLOB
-     * @throws org.apache.derby.client.am.SqlException 
      * @return length of the <code>BLOB</code> in bytes 
      */
     long blobGetLength(int sourceLocator) throws SqlException
@@ -414,7 +408,6 @@ class CallableLocatorProcedures
      *        for length must be 0 or greater.  Specifying a length that goes
      *        beyond the end of the BLOB (i.e., <code>fromPosition + forLength
      *        > blob.length()</code>), will result in an error.
-     * @throws org.apache.derby.client.am.SqlException 
      * @return a byte array containing up to <code>forLength</code> consecutive
      *         bytes from the <code>BLOB</code> value designated by
      *         <code>sourceLocator</code>, starting with the byte at position
@@ -492,7 +485,6 @@ class CallableLocatorProcedures
      *        of the BLOB (i.e., <code>fromPosition + forLength >
      *        blob.length()</code>, will result in an error.
      * @param bytes the array of bytes to be written
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void blobSetBytes(int sourceLocator, 
                       long fromPosition, 
@@ -551,7 +543,6 @@ class CallableLocatorProcedures
      * @param sourceLocator locator identifying the Blob to be truncated
      * @param length the length, in bytes, to which the <code>BLOB</code> value
      *        should be truncated
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void blobTruncate(int sourceLocator, long length) throws SqlException
     {
@@ -580,7 +571,6 @@ class CallableLocatorProcedures
      * subsequent operations on this CLOB value will be stored in temporary
      * space on the server.
      * 
-     * @throws org.apache.derby.client.am.SqlException 
      * @return locator that identifies the created CLOB.
      */
     int clobCreateLocator() throws SqlException
@@ -642,7 +632,6 @@ class CallableLocatorProcedures
      * This method frees the CLOB and releases the resources that it
      * holds. (E.g., temporary space used to store this CLOB on the server.)
      * @param locator locator that designates the CLOB to be released.
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void clobReleaseLocator(int locator) throws SqlException
     {
@@ -681,7 +670,6 @@ class CallableLocatorProcedures
      * @param searchLiteral the substring for which to search
      * @param fromPosition the position at which to begin searching; the
      *        first position is 1
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern appears, else -1
      */
     long clobGetPositionFromString(int locator, 
@@ -757,7 +745,6 @@ class CallableLocatorProcedures
      *        for. It is assumed that this length is smaller than the maximum
      *        size of a VARCHAR column.  Otherwise, an exception will be
      *        thrown.
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern appears, else -1
      */
     private long clobGetPositionFromString(int locator, 
@@ -809,7 +796,6 @@ class CallableLocatorProcedures
      *        search
      * @param fromPosition the position in the CLOB value
      *        at which to begin searching; the first position is 1
-     * @throws org.apache.derby.client.am.SqlException 
      * @return the position at which the pattern begins, else -1
      */
     long clobGetPositionFromLocator(int locator, 
@@ -846,7 +832,6 @@ class CallableLocatorProcedures
      * designated by this <code>sourceLocator</code>.
      * 
      * @param sourceLocator locator that identifies the CLOB
-     * @throws org.apache.derby.client.am.SqlException 
      * @return length of the <code>CLOB</code> in characters 
      */
     long clobGetLength(int sourceLocator) throws SqlException
@@ -890,7 +875,6 @@ class CallableLocatorProcedures
      *        value for length must be 0 or greater.  Specifying a length that
      *        goes beyond the end of the CLOB (i.e., <code>fromPosition +
      *        forLength > clob.length()</code>, will result in an error.
-     * @throws org.apache.derby.client.am.SqlException 
      * @return a string containing up to <code>forLength</code> consecutive
      *         characters from the <code>CLOB</code> value designated by
      *         <code>sourceLocator</code>, starting with the character at
@@ -971,7 +955,6 @@ class CallableLocatorProcedures
      *        <code>fromPosition + forLength > clob.length()</code>, will
      *        result in an error.
      * @param string the string to be written
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void clobSetString(int sourceLocator, 
                        long fromPosition, 
@@ -1026,7 +1009,6 @@ class CallableLocatorProcedures
      * @param sourceLocator locator identifying the Clob to be truncated
      * @param length the length, in characters, to which the <code>CLOB</code>
      *        value should be truncated
-     * @throws org.apache.derby.client.am.SqlException 
      */
     void clobTruncate(int sourceLocator, long length) throws SqlException
     {

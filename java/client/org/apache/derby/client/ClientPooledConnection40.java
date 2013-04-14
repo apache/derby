@@ -21,11 +21,11 @@
 
 package org.apache.derby.client;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEventListener;
 import javax.sql.StatementEvent;
+import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
 /**
@@ -48,7 +48,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
                     new CopyOnWriteArrayList<StatementEventListener>();
 
     public ClientPooledConnection40(ClientBaseDataSourceRoot ds,
-        org.apache.derby.client.am.LogWriter logWriter,
+        LogWriter logWriter,
         String user,
         String password) throws SQLException {
         super(ds,logWriter,user,password);
@@ -57,7 +57,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
     
     
     public ClientPooledConnection40(ClientBaseDataSourceRoot ds,
-        org.apache.derby.client.am.LogWriter logWriter,
+        LogWriter logWriter,
         String user,
         String password,
         int rmId) throws SQLException {
@@ -110,7 +110,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param statement The PreparedStatement that was closed
      *
      */
-    public void onStatementClose(PreparedStatement statement) {
+    public void onStatementClose(java.sql.PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
             for (StatementEventListener l : statementEventListeners) {
@@ -129,7 +129,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      *                  caused the invalidation of the PreparedStatements
      *
      */
-    public void onStatementErrorOccurred(PreparedStatement statement,
+    public void onStatementErrorOccurred(java.sql.PreparedStatement statement,
                                          SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);

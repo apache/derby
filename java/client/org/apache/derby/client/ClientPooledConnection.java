@@ -20,15 +20,18 @@
 */
 package org.apache.derby.client;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
+import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -59,10 +62,9 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      */
     private int eventIterators;
 
-    org.apache.derby.client.am.Connection physicalConnection_ = null;
-    private org.apache.derby.client.net.NetConnection
-            netPhysicalConnection_ = null;
-    org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
+    Connection physicalConnection_ = null;
+    private NetConnection netPhysicalConnection_ = null;
+    NetXAConnection netXAPhysicalConnection_ = null;
 
     /**
      * The statement cache for the underlying physical connection.
@@ -73,10 +75,9 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
     /** The logical connection using the physical connection. */
     //@GuardedBy("this")
-    private org.apache.derby.client.am.LogicalConnection
-        logicalConnection_ = null;
+    private LogicalConnection logicalConnection_ = null;
 
-    protected org.apache.derby.client.am.LogWriter logWriter_ = null;
+    protected LogWriter logWriter_ = null;
 
     /** Resource manager identifier. */
     protected int rmId_ = 0;
@@ -95,7 +96,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      *      in the database, or problems communicating with the database
      */
     public ClientPooledConnection(ClientBaseDataSourceRoot ds,
-                                  org.apache.derby.client.am.LogWriter logWriter,
+                                  LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
         logWriter_ = logWriter;
@@ -115,7 +116,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             //PooledConnection which will then raise the events
             //on the listeners
             
-            netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
+            netPhysicalConnection_ = (NetConnection)
             ClientDriver.getFactory().newNetConnection(
                     (NetLogWriter) logWriter_,
                     user,
@@ -123,7 +124,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                     ds,
                     -1,
                     false,
-                    this);
+                    ClientPooledConnection.this);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -145,7 +146,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      *      in the database, or problems communicating with the database
      */
     public ClientPooledConnection(ClientBaseDataSourceRoot ds,
-                                  org.apache.derby.client.am.LogWriter logWriter,
+                                  LogWriter logWriter,
                                   String user,
                                   String password,
                                   int rmId) throws SQLException {
@@ -184,11 +185,18 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         return this.statementCache != null;
     }
 
-    protected void finalize() throws java.lang.Throwable {
+    protected void finalize() throws Throwable {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "finalize");
         }
-        close();
+
+        try {
+            close();
+        } finally {
+            // Any exception ignored if thrown from finalizer anyway, so no
+            // need to catch it.
+            super.finalize();
+        }
     }
 
     /**
@@ -441,7 +449,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param statement The PreparedStatement that was closed
      *
      */
-    public void onStatementClose(PreparedStatement statement) {
+    public void onStatementClose(java.sql.PreparedStatement statement) {
         
     }
     
@@ -455,7 +463,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param sqle      The SQLException associated with the error that caused
      *                  the invalidation of this PreparedStatement
      */
-    public void onStatementErrorOccurred(PreparedStatement statement,
+    public void onStatementErrorOccurred(java.sql.PreparedStatement statement,
                     SQLException sqle) {
         
     }

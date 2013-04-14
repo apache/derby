@@ -27,6 +27,8 @@ import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.Decimal;
+import org.apache.derby.client.am.FloatingPoint;
 import org.apache.derby.shared.common.reference.SQLState;
 
 //
@@ -209,7 +211,7 @@ public class Typdef implements java.lang.Cloneable {
         /* 0x2D */ 0,
         /* 0x2E */ 0,
         /* 0x2F */ 0,
-        /* 0x30 */ org.apache.derby.client.am.Decimal.PACKED_DECIMAL, /* FDOCA_TYPE_DECIMAL */
+        /* 0x30 */ Decimal.PACKED_DECIMAL, /* FDOCA_TYPE_DECIMAL */
         /* 0x31 */ 0,
         /* 0x32 */ 0,
         /* 0x33 */ 0,
@@ -233,7 +235,7 @@ public class Typdef implements java.lang.Cloneable {
         /* 0x45 */ 0,
         /* 0x46 */ 0,
         /* 0x47 */ 0,
-        /* 0x48 */ org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, /* FDOCA_TYPE_FLOAT_IEEE */
+        /* 0x48 */ FloatingPoint.IEEE_754_FLOATING_POINT, /* FDOCA_TYPE_FLOAT_IEEE */
         /* 0x49 */ 0,
         /* 0x4A */ 0,
         /* 0x4B */ 0,
@@ -282,21 +284,21 @@ public class Typdef implements java.lang.Cloneable {
         /* 0x07 null 1-byte int */
         new FdocaSimpleDataArray(0x07, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 1, FIXEDLENGTH),
         /* 0x08 16-byte bin float */
-        new FdocaSimpleDataArray(0x08, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x08, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
         /* 0x09 null 16-byte bin float */
-        new FdocaSimpleDataArray(0x09, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x09, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
         /* 0x0A 8-byte bin float */
-        new FdocaSimpleDataArray(0x0A, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0A, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
         /* 0x0B null 8-byte bin float */
-        new FdocaSimpleDataArray(0x0B, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0B, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
         /* 0x0C 4-byte bin float */
-        new FdocaSimpleDataArray(0x0C, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0C, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
         /* 0x0D null 4-byte bin float */
-        new FdocaSimpleDataArray(0x0D, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, org.apache.derby.client.am.FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0D, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
         /* 0x0E Fixed Decimal */
-        new FdocaSimpleDataArray(0x0E, FdocaConstants.FDOCA_TYPE_DECIMAL, org.apache.derby.client.am.Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
+        new FdocaSimpleDataArray(0x0E, FdocaConstants.FDOCA_TYPE_DECIMAL, Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
         /* 0x0F null Fixed Decimal */
-        new FdocaSimpleDataArray(0x0F, FdocaConstants.FDOCA_TYPE_NDECIMAL, org.apache.derby.client.am.Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
+        new FdocaSimpleDataArray(0x0F, FdocaConstants.FDOCA_TYPE_NDECIMAL, Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
         /* 0x10 empties */
         null,
         /* 0x11 empties */

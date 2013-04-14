@@ -142,7 +142,6 @@ public class Blob extends Lob implements java.sql.Blob {
      * this locator based <Blob> object.  
      * 
      * A stored procedure call will be made to get it from the server.
-     * @throws org.apache.derby.client.am.SqlException 
      * @return length of Blob in bytes
      */
     long getLocatorLength() throws SqlException

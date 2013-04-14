@@ -24,6 +24,7 @@ package org.apache.derby.client.net;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import org.apache.derby.client.am.Agent;
 
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
@@ -35,7 +36,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
 public class Reply {
-    protected org.apache.derby.client.am.Agent agent_;
+    protected Agent agent_;
     protected NetAgent netAgent_; //cheat-link to (NetAgent) agent_
 
     protected final static int DEFAULT_BUFFER_SIZE = 32767;

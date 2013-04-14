@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.net;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.derby.client.am.ClientMessageId;
@@ -2317,9 +2316,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
     private int calculateResultSetHoldability(int sqlcsrhld) {
         if (sqlcsrhld == 0xF0) {
-            return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+            return java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT;
         } else {
-            return ResultSet.HOLD_CURSORS_OVER_COMMIT;
+            return java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
     }
 

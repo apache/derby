@@ -50,7 +50,7 @@ public interface StatementRequestInterface {
 
     public void writeExecute(NetPreparedStatement materialPreparedStatement,
                              Section section,
-                             org.apache.derby.client.am.ColumnMetaData parameterMetaData,
+                             ColumnMetaData parameterMetaData,
                              Object[] inputs,
                              int numInputColumns,
                              boolean outputExpected,

@@ -27,6 +27,8 @@ import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -104,13 +106,13 @@ public class NetAgent extends Agent {
     
     //---------------------constructors/finalizer---------------------------------
     public NetAgent(NetConnection netConnection,
-                    org.apache.derby.client.am.LogWriter logWriter) throws SqlException {
+                    LogWriter logWriter) throws SqlException {
         super(netConnection, logWriter);
         this.netConnection_ = netConnection;
     }
 
     NetAgent(NetConnection netConnection,
-             org.apache.derby.client.am.LogWriter netLogWriter,
+             LogWriter netLogWriter,
              int loginTimeout,
              String server,
              int port,
@@ -228,7 +230,7 @@ public class NetAgent extends Agent {
         }
     }
 
-    protected void resetAgent_(org.apache.derby.client.am.LogWriter netLogWriter,
+    protected void resetAgent_(LogWriter netLogWriter,
                                //CcsidManager sourceCcsidManager,
                                //CcsidManager targetCcsidManager,
                                int loginTimeout,
@@ -417,20 +419,20 @@ public class NetAgent extends Agent {
     }
 
     public void throwCommunicationsFailure(Throwable cause) 
-        throws org.apache.derby.client.am.DisconnectException {
+            throws DisconnectException {
         //org.apache.derby.client.am.DisconnectException
         //accumulateReadExceptionAndDisconnect
         // note when {6} = 0 it indicates the socket was closed.
         // need to still validate any token values against message publications.
         accumulateChainBreakingReadExceptionAndThrow(
-            new org.apache.derby.client.am.DisconnectException(this,
+            new DisconnectException(this,
                 new ClientMessageId(SQLState.COMMUNICATION_ERROR),
                 cause.getMessage(), cause));
     }
         
     // ----------------------- call-down methods ---------------------------------
 
-    public org.apache.derby.client.am.LogWriter newLogWriter_(java.io.PrintWriter printWriter,
+    public LogWriter newLogWriter_(java.io.PrintWriter printWriter,
                                                               int traceLevel) {
         return new NetLogWriter(printWriter, traceLevel);
     }
@@ -468,7 +470,7 @@ public class NetAgent extends Agent {
         super.beginWriteChainOutsideUOW();
     }
 
-    public void beginWriteChain(org.apache.derby.client.am.Statement statement) throws SqlException {
+    public void beginWriteChain(Statement statement) throws SqlException {
         request_.initialize();
         writeDeferredResetConnection();
         super.beginWriteChain(statement);
@@ -493,7 +495,7 @@ public class NetAgent extends Agent {
         }
     }
 
-    protected void beginReadChain(org.apache.derby.client.am.Statement statement) throws SqlException {
+    protected void beginReadChain(Statement statement) throws SqlException {
         readDeferredResetConnection();
         super.beginReadChain(statement);
     }

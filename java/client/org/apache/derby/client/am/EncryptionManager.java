@@ -365,7 +365,7 @@ public class EncryptionManager {
                               byte[] targetPublicKey) throws SqlException {
 
         byte[] cipherText = null;
-        java.security.Key key = null;
+        java.security.Key key;
 
         if (token_ == null) {
             token_ = calculateEncryptionToken(securityMechanism, initVector);
@@ -435,7 +435,7 @@ public class EncryptionManager {
                               byte[] targetPublicKey) throws SqlException {
 
         byte[] plainText = null;
-        java.security.Key key = null;
+        java.security.Key key;
 
         if (token_ == null) {
             token_ = calculateEncryptionToken(securityMechanism, initVector);
@@ -622,14 +622,14 @@ public class EncryptionManager {
             };
 
     /**
-        Convert a byte array to a String with a hexidecimal format.
+        Convert a byte array to a String with a hexadecimal format.
         The String may be converted back to a byte array using fromHexString.
         <BR>
-        For each byte (b) two characaters are generated, the first character
-        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
-        the second character represents the low nibble (<code>b & 0x0f</code>).
+        For each byte (b) two characters are generated, the first character
+        represents the high nibble (4 bits) in hexadecimal ({@code b & 0xf0}),
+        the second character represents the low nibble ({@code b & 0x0f}).
         <BR>
-        The byte at <code>data[offset]</code> is represented by the first two
+        The byte at {@code data[offset]} is represented by the first two
         characters in the returned String.
 
         @param  data    byte array
@@ -640,7 +640,7 @@ public class EncryptionManager {
     */
     private String toHexString(byte[] data, int offset, int length)
     {
-        StringBuffer s = new StringBuffer(length*2);
+        StringBuilder s = new StringBuilder(length*2);
         int end = offset+length;
 
         for (int i = offset; i < end; i++)
@@ -659,17 +659,17 @@ public class EncryptionManager {
         Convert a string into a byte array in hex format.
         <BR>
         For each character (b) two bytes are generated, the first byte 
-        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
-        the second byte represents the low nibble (<code>b & 0x0f</code>).
+        represents the high nibble (4 bits) in hexadecimal ({@code b & 0xf0}),
+        the second byte represents the low nibble ({@code b & 0x0f}).
         <BR>
-        The character at <code>str.charAt(0)</code> is represented by the first two bytes 
-        in the returned String.
+        The character at {@code str.charAt(0)} is represented by the
+        first two bytes in the returned String.
 
         @param  str string
         @param  offset  starting character (zero based) to convert.
         @param  length  number of characters to convert.
 
-        @return the byte[]  (with hexidecimal format) form of the string (str) 
+        @return the byte[]  (with hexadecimal format) form of the string (str)
     */
     private byte[] toHexByte(String str, int offset, int length)
     {

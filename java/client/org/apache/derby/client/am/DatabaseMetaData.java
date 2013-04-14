@@ -2901,7 +2901,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     private PreparedStatement prepareMetaDataQuery(String cmd) throws SqlException {
         PreparedStatement ps;
 
-        ps = (org.apache.derby.client.am.PreparedStatement)
+        ps = (PreparedStatement)
                 connection_.prepareStatementX("CALL " + cmd,
                         java.sql.ResultSet.TYPE_FORWARD_ONLY,
                         java.sql.ResultSet.CONCUR_READ_ONLY,

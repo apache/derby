@@ -29,6 +29,7 @@ import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.ColumnMetaData;
+import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.DateTime;
 import org.apache.derby.client.am.DateTimeValue;
 import org.apache.derby.client.am.Lob;
@@ -166,7 +167,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                int fetchSize,
                                int resultSetType,
                                int numInputColumns,
-                               org.apache.derby.client.am.ColumnMetaData parameterMetaData,
+                               ColumnMetaData parameterMetaData,
                                Object[] inputs) throws SqlException {
         boolean sendQryrowset = checkSendQryrowset(fetchSize, resultSetType);
         fetchSize = checkFetchsize(fetchSize, resultSetType);
@@ -269,7 +270,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     {
         // always send QRYROWSET on EXCSQLSTT
         boolean sendQryrowset = true;
-        fetchSize = (fetchSize == 0) ? org.apache.derby.client.am.Configuration.defaultFetchSize : fetchSize;
+        fetchSize = (fetchSize == 0) ?
+            Configuration.defaultFetchSize :
+            fetchSize;
 
         boolean sendPrcnam = (procedureName != null) ? true : false;
         int numParameters = (parameterMetaData != null) ? parameterMetaData.columns_ : 0;
@@ -960,7 +963,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             || parameterType == Types.LONGVARBINARY) {
                         Blob o = (Blob) retrievePromotedParameterIfExists(index);
                         java.sql.Blob b = (o == null) ? (java.sql.Blob) inputRow[index] : o;
-                        boolean isExternalBlob = !(b instanceof org.apache.derby.client.am.Blob);
+                        boolean isExternalBlob = !(b instanceof Blob);
                         if (isExternalBlob) {
                             try {
                                 writeScalarStream(chainFlag,
@@ -1016,7 +1019,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             || parameterType == Types.LONGVARCHAR) {
                         Clob o = (Clob) retrievePromotedParameterIfExists(index);
                         java.sql.Clob c = (o == null) ? (java.sql.Clob) inputRow[index] : o;
-                        boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
+                        boolean isExternalClob = !(c instanceof Clob);
 
                         if (isExternalClob) {
                             try {
@@ -1439,7 +1442,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     {
                         // use columnMeta.singleMixedByteOrDouble_ to decide protocolType
                         java.sql.Clob c = (java.sql.Clob) inputRow[i];
-                        boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
+                        boolean isExternalClob = !(c instanceof Clob);
                         long lobLength = 0;
                         
                         boolean doesLayerBStreaming = false;
@@ -1809,7 +1812,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     private int checkFetchsize(int fetchSize, int resultSetType) {
         // if fetchSize is not set for scrollable cursors, set it to the default fetchSize
         if (resultSetType != java.sql.ResultSet.TYPE_FORWARD_ONLY && fetchSize == 0) {
-            fetchSize = org.apache.derby.client.am.Configuration.defaultFetchSize;
+            fetchSize = Configuration.defaultFetchSize;
         }
         return fetchSize;
     }

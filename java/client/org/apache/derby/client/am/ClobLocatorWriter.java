@@ -24,12 +24,12 @@ package org.apache.derby.client.am;
 import java.io.IOException;
 
 /**
- * An <code>Writer</code> that will use an locator to write the
+ * An {@code Writer} that will use an locator to write the
  * Clob value into the server.
  * <p>
- * This <code>Writer</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficiency #write(char[])
- * should be used instead of #write(int).
+ * This {@code Writer} implementation is pretty basic.  No
+ * buffering of data is done.  Hence, for efficiency {@code #write(char[])}
+ * should be used instead of {@code #write(int)}.
  */
 class ClobLocatorWriter extends java.io.Writer {
     /**
@@ -56,16 +56,15 @@ class ClobLocatorWriter extends java.io.Writer {
     private boolean isClosed = false;
     
     /**
-     * Create a <code>Writer</code> for writing to the
-     * <code>Clob</code> value represented by the given locator based
-     * <code>Clob</code> object.
+     * Create a {@code Writer} for writing to the
+     * {@code Clob} value represented by the given locator based
+     * {@code Clob} object.
      * @param connection connection to be used to write to the
-     *        <code>Clob</code> value on the server
-     * @param clob <code>Clob</code> object that contains locator for
-     *        the <code>Clob</code> value on the server.
-     * @param pos the position in the <code>CLOB</code> value at which
+     *        {@code Clob} value on the server
+     * @param clob {@code Clob} object that contains locator for
+     *        the {@code Clob} value on the server.
+     * @param pos the position in the {@code CLOB} value at which
      *        to start writing; the first position is 1
-     * @throws org.apache.derby.client.am.SqlException
      */
     ClobLocatorWriter(Connection connection, Clob clob, long pos)
     throws SqlException {
@@ -89,8 +88,8 @@ class ClobLocatorWriter extends java.io.Writer {
     }
     
     /**
-     * Check to see if this <code>Writer</code> is closed. If it
-     * is closed throw an <code>IOException</code> that states that
+     * Check to see if this {@code Writer} is closed. If it
+     * is closed throw an {@code IOException} that states that
      * the stream is closed.
      *
      * @throws IOException if isClosed = true.
@@ -152,7 +151,7 @@ class ClobLocatorWriter extends java.io.Writer {
     }
     
     /**
-     * Write the <code>char[]</code> to the <code>Clob</code> value on
+     * Write the {@code char[]} to the {@code Clob} value on
      * the server; starting from the current position of this stream.
      *
      * @param c The character array containing the chars to be written

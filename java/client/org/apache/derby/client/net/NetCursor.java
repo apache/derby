@@ -27,6 +27,7 @@ import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Clob;
+import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.SignedBinary;
@@ -34,10 +35,11 @@ import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SqlWarning;
 import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public class NetCursor extends org.apache.derby.client.am.Cursor {
+public class NetCursor extends Cursor {
 
     NetResultSet netResultSet_;
     NetAgent netAgent_;
@@ -392,7 +394,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
     }
 
-    private int readFdocaInt() throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int readFdocaInt() throws DisconnectException, SqlException {
         checkForSplitRowAndComplete(4);
         int i = SignedBinary.getInt(dataBuffer_, position_);
         position_ += 4;
@@ -401,14 +403,16 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
-    private int readFdocaOneByte() throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int readFdocaOneByte() throws DisconnectException, SqlException {
         checkForSplitRowAndComplete(1);
         return dataBuffer_[position_++] & 0xff;
     }
 
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
-    private int readFdocaOneByte(int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int readFdocaOneByte(int index)
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(1, index);
         return dataBuffer_[position_++] & 0xff;
     }
@@ -417,7 +421,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // current position.  Returns a new byte array which contains the bytes read.
     // If current position plus length goes past the lastValidBytePosition, send
     // CNTQRY to get more data.
-    private byte[] readFdocaBytes(int length) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private byte[] readFdocaBytes(int length)
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(length);
 
         byte[] b = new byte[length];
@@ -430,14 +436,18 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // Reads 2-bytes from the dataBuffer starting from the current position, and
     // returns an integer constructed from the 2-bytes.  If current position plus
     // 2 bytes goes past the lastValidBytePosition, send CNTQRY to get more data.
-    private int readFdocaTwoByteLength() throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int readFdocaTwoByteLength()
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(2);
         return
                 ((dataBuffer_[position_++] & 0xff) << 8) +
                 ((dataBuffer_[position_++] & 0xff) << 0);
     }
 
-    private int readFdocaTwoByteLength(int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int readFdocaTwoByteLength(int index)
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(2, index);
         return
                 ((dataBuffer_[position_++] & 0xff) << 8) +
@@ -448,13 +458,17 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // If so, send CNTQRY to get more data.
     // length - number of bytes to skip
     // returns the number of bytes skipped
-    private int skipFdocaBytes(int length) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int skipFdocaBytes(int length)
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(length);
         position_ += length;
         return length;
     }
 
-    private int skipFdocaBytes(int length, int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private int skipFdocaBytes(int length, int index)
+            throws DisconnectException, SqlException {
+
         checkForSplitRowAndComplete(length, index);
         position_ += length;
         return length;
@@ -563,7 +577,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     //
     // FORMAT FOR ALL SQLAM LEVELS
     //   SQLCAGRP; GROUP LID 0x54; ELEMENT TAKEN 0(all); REP FACTOR 1
-    NetSqlca[] parseSQLCARD(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    NetSqlca[] parseSQLCARD(Typdef typdef)
+            throws DisconnectException, SqlException {
+
         return parseSQLCAGRP(typdef);
     }
 
@@ -582,7 +598,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     //   SQLERRPROC; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 8
     //   SQLCAXGRP; PROTOCOL TYPE N-GDA; ENVLID 0x52; Length Override 0
     //   SQLDIAGGRP; PROTOCOL TYPE N-GDA; ENVLID 0x56; Length Override 0
-    private NetSqlca[] parseSQLCAGRP(Typdef typdef) throws org.apache.derby.client.am.DisconnectException, SqlException {
+    private NetSqlca[] parseSQLCAGRP(Typdef typdef)
+            throws DisconnectException, SqlException {
+
         if (readFdocaOneByte() == CodePoint.NULLDATA) {
             return null;
         }
@@ -862,7 +880,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             s = new String(dataBuffer_, position_, length, encoding);
         } catch (java.io.UnsupportedEncodingException e) {
             netAgent_.accumulateChainBreakingReadExceptionAndThrow(
-                new org.apache.derby.client.am.DisconnectException(
+                new DisconnectException(
                     netAgent_, 
                     new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
                     e));
@@ -1088,7 +1106,9 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         // has been received.
         if (!netResultSet_.openOnServer_) {
             SqlException sqlException = null;
-            int sqlcode = org.apache.derby.client.am.Utils.getSqlcodeFromSqlca(netResultSet_.queryTerminatingSqlca_);
+            int sqlcode = Utils.getSqlcodeFromSqlca(
+                netResultSet_.queryTerminatingSqlca_);
+
             if (sqlcode < 0) {
                 sqlException = new SqlException(agent_.logWriter_, netResultSet_.queryTerminatingSqlca_);
             } else {

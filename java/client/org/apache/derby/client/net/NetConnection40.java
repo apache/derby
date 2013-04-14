@@ -23,8 +23,6 @@ package org.apache.derby.client.net;
 
 import java.sql.Array;
 import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLPermission;
@@ -40,13 +38,13 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class  NetConnection40 extends org.apache.derby.client.net.NetConnection {
+public class  NetConnection40 extends NetConnection {
     /**
      * Prepared statement that is used each time isValid() is called on this
      * connection. The statement is created the first time isValid is called
      * and closed when the connection is closed (by the close call).
      */
-    private PreparedStatement isValidStmt = null;
+    private java.sql.PreparedStatement isValidStmt = null;
 
     /*
      *-------------------------------------------------------
@@ -198,7 +196,7 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
                 isValidStmt.setQueryTimeout(timeout);
 
                 // Run the query against the database
-                ResultSet rs = isValidStmt.executeQuery();
+                java.sql.ResultSet rs = isValidStmt.executeQuery();
                 rs.close();
 
                 // Restore the previous timeout value

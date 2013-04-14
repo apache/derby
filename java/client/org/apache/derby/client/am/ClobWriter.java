@@ -21,10 +21,10 @@
 
 package org.apache.derby.client.am;
 
+import java.io.Writer;
 import org.apache.derby.shared.common.reference.SQLState;
 
-
-class ClobWriter extends java.io.Writer {
+class ClobWriter extends Writer {
     private final Clob clob_;
     private long offset_;
 

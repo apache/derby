@@ -30,7 +30,10 @@ import org.apache.derby.client.am.Utils;
 import org.apache.derby.client.am.Version;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
+import org.apache.derby.client.net.NetConnection;
+import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
@@ -93,7 +96,7 @@ public class ClientDriver implements java.sql.Driver {
 
     public java.sql.Connection connect(String url,
                                        java.util.Properties properties) throws java.sql.SQLException {
-        org.apache.derby.client.net.NetConnection conn;
+        NetConnection conn;
         
         checkURLNotNull( url );
 
@@ -151,7 +154,7 @@ public class ClientDriver implements java.sql.Driver {
             // driver-wide basis using the jdbc 1 driver manager log writer.
             // This log writer may be narrowed to the connection-level
             // This log writer will be passed to the agent constructor.
-            org.apache.derby.client.am.LogWriter dncLogWriter =
+            LogWriter dncLogWriter =
                 ClientBaseDataSourceRoot.computeDncLogWriterForNewConnection(
                     java.sql.DriverManager.getLogWriter(),
                     ClientBaseDataSourceRoot.getTraceDirectory(
@@ -165,8 +168,8 @@ public class ClientDriver implements java.sql.Driver {
                     traceFileSuffixIndex_++);
             
             
-            conn = (org.apache.derby.client.net.NetConnection)getFactory().
-                    newNetConnection((org.apache.derby.client.net.NetLogWriter) 
+            conn = (NetConnection)getFactory().
+                    newNetConnection((NetLogWriter)
                     dncLogWriter,
                     java.sql.DriverManager.getLoginTimeout(),
                     server,

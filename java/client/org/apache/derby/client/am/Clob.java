@@ -1063,7 +1063,6 @@ public class Clob extends Lob implements java.sql.Clob {
      * this locator based <code>Clob</code> object.
      *
      * A stored procedure call will be made to get it from the server.
-     * @throws org.apache.derby.client.am.SqlException
      * @return length of <code>Clob</code> in bytes
      */
     long getLocatorLength() throws SqlException

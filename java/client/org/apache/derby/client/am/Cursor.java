@@ -26,10 +26,17 @@ import java.sql.SQLException;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Date;
+import java.sql.Ref;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -49,7 +56,7 @@ public abstract class Cursor {
 
     public final static int BYTES = 4;
     public final static int VARIABLE_BYTES = 5;
-    public final static int VARIABLE_SHORT_BYTES = 6;
+    // unused protocol element: VARIABLE_SHORT_BYTES = 6;
     public final static int NULL_TERMINATED_BYTES = 7;
 
     public final static int SBCS_CLOB = 8;
@@ -147,13 +154,10 @@ public abstract class Cursor {
      *
      * @param allowServerFetch if false, don't fetch more data from
      * the server even if more data is needed
-     * @return <code>true</code> if current row position is valid
+     * @return {@code true} if current row position is valid
      * @exception SqlException if an error occurs
      */
     protected boolean stepNext(boolean allowServerFetch) throws SqlException {
-        // local variable usd to hold the returned value from calculateColumnOffsetsForRow()
-        boolean rowPositionIsValid = true;
-
         // reset lob data
         // clears out Cursor.lobs_ calculated for the current row when cursor is moved.
         clearLobData_();
@@ -179,7 +183,8 @@ public abstract class Cursor {
         // The parameter passed in here is used as an index into the cached rowset for
         // scrollable cursors, for the arrays to be reused.  It is not used for forward-only
         // cursors, so just pass in 0.
-        rowPositionIsValid = calculateColumnOffsetsForRow_(0, allowServerFetch);
+        boolean rowPositionIsValid =
+            calculateColumnOffsetsForRow_(0, allowServerFetch);
         markNextRowPosition();
         return rowPositionIsValid;
     }
@@ -188,7 +193,7 @@ public abstract class Cursor {
      * Makes the next row the current row. Returns true if the current
      * row position is a valid row position.
      *
-     * @return <code>true</code> if current row position is valid
+     * @return {@code true} if current row position is valid
      * @exception SqlException if an error occurs
      */
     public boolean next() throws SqlException {
@@ -200,7 +205,7 @@ public abstract class Cursor {
     /**
      * Set the value of value of allRowsReceivedFromServer_.
      *
-     * @param b a <code>boolean</code> value indicating whether all
+     * @param b a {@code boolean} value indicating whether all
      * rows are received from the server
      */
     public void setAllRowsReceivedFromServer(boolean b) {
@@ -208,10 +213,10 @@ public abstract class Cursor {
     }
 
     /**
-     * Return <code>true</code> if all rows are received from the
+     * Return {@code true} if all rows are received from the
      * server.
      *
-     * @return <code>true</code> if all rows are received from the
+     * @return {@code true} if all rows are received from the
      * server.
      */
     public final boolean allRowsReceivedFromServer() {
@@ -245,7 +250,7 @@ public abstract class Cursor {
      * @param row row index
      * @param allowServerFetch if true, allow fetching more data from
      * server
-     * @return <code>true</code> if the current row position is a
+     * @return {@code true} if the current row position is a
      * valid row position.
      * @exception SqlException
      * @exception DisconnectException
@@ -322,47 +327,47 @@ public abstract class Cursor {
     // Direct conversions only, cross conversions are handled by another set of getters.
 
     // Build a Java boolean from a 1-byte signed binary representation.
-    private final boolean get_BOOLEAN(int column) {
-        if ( org.apache.derby.client.am.SignedBinary.getByte
+    private boolean get_BOOLEAN(int column) {
+        if ( SignedBinary.getByte
              ( dataBuffer_, columnDataPosition_[column - 1] ) == 0 )
         { return false; }
         else { return true; }
     }
 
     // Build a Java short from a 2-byte signed binary representation.
-    private final short get_SMALLINT(int column) {
-        return org.apache.derby.client.am.SignedBinary.getShort(dataBuffer_,
+    private short get_SMALLINT(int column) {
+        return SignedBinary.getShort(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }
 
     // Build a Java int from a 4-byte signed binary representation.
     protected final int get_INTEGER(int column) {
-        return org.apache.derby.client.am.SignedBinary.getInt(dataBuffer_,
+        return SignedBinary.getInt(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }
 
     // Build a Java long from an 8-byte signed binary representation.
-    private final long get_BIGINT(int column) {
-        return org.apache.derby.client.am.SignedBinary.getLong(dataBuffer_,
+    private long get_BIGINT(int column) {
+        return SignedBinary.getLong(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }
 
     // Build a Java float from a 4-byte floating point representation.
-    private final float get_FLOAT(int column) {
-        return org.apache.derby.client.am.FloatingPoint.getFloat(dataBuffer_,
+    private float get_FLOAT(int column) {
+        return FloatingPoint.getFloat(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }
 
     // Build a Java double from an 8-byte floating point representation.
-    private final double get_DOUBLE(int column) {
-        return org.apache.derby.client.am.FloatingPoint.getDouble(dataBuffer_,
+    private double get_DOUBLE(int column) {
+        return FloatingPoint.getDouble(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }
 
     // Build a java.math.BigDecimal from a fixed point decimal byte representation.
-    private final java.math.BigDecimal get_DECIMAL(int column) throws SqlException {
+    private BigDecimal get_DECIMAL(int column) throws SqlException {
         try {
-            return org.apache.derby.client.am.Decimal.getBigDecimal(dataBuffer_,
+            return Decimal.getBigDecimal(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
@@ -375,9 +380,9 @@ public abstract class Cursor {
 
 
     // Build a Java double from a fixed point decimal byte representation.
-    private final double getDoubleFromDECIMAL(int column) throws SqlException {
+    private double getDoubleFromDECIMAL(int column) throws SqlException {
         try {
-            return org.apache.derby.client.am.Decimal.getDouble(dataBuffer_,
+            return Decimal.getDouble(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
@@ -393,10 +398,10 @@ public abstract class Cursor {
     }
 
     // Build a Java long from a fixed point decimal byte representation.
-    private final long getLongFromDECIMAL(int column, String targetType) 
+    private long getLongFromDECIMAL(int column, String targetType)
             throws SqlException {
         try {
-            return org.apache.derby.client.am.Decimal.getLong(dataBuffer_,
+            return Decimal.getLong(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
@@ -421,8 +426,7 @@ public abstract class Cursor {
     // For 2-byte character ccsids, length is the number of characters,
     // for all other cases length is the number of bytes.
     // The length does not include the null terminator.
-    private final String getVARCHAR(int column) throws SqlException {
-        String tempString = null;
+    private String getVARCHAR(int column) throws SqlException {
         try {
             if (ccsid_[column - 1] == 1200) {
                 return getStringWithoutConvert(columnDataPosition_[column - 1] + 2, columnDataComputedLength_[column - 1] - 2);
@@ -438,7 +442,7 @@ public abstract class Cursor {
                     new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
-            tempString = new String(dataBuffer_,
+            String tempString = new String(dataBuffer_,
                     columnDataPosition_[column - 1] + 2,
                     columnDataComputedLength_[column - 1] - 2,
                     charsetName_[column - 1]);
@@ -452,8 +456,7 @@ public abstract class Cursor {
     }
 
     // Build a Java String from a database CHAR field.
-    private final String getCHAR(int column) throws SqlException {
-        String tempString = null;
+    private String getCHAR(int column) throws SqlException {
         if (ccsid_[column - 1] == 1200) {
             return getStringWithoutConvert(columnDataPosition_[column - 1], columnDataComputedLength_[column - 1]);
         }
@@ -469,7 +472,7 @@ public abstract class Cursor {
                     new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
             }
 
-            tempString = new String(dataBuffer_,
+            String tempString = new String(dataBuffer_,
                     columnDataPosition_[column - 1],
                     columnDataComputedLength_[column - 1],
                     charsetName_[column - 1]);
@@ -483,9 +486,9 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Date object from the DERBY ISO DATE field.
-    private final Date getDATE(int column, Calendar cal) throws SqlException {
+    private Date getDATE(int column, Calendar cal) throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
+            return DateTime.dateBytesToDate(dataBuffer_,
                 columnDataPosition_[column - 1],
                 cal,
                 charsetName_[column - 1]);
@@ -499,9 +502,9 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Time object from the DERBY ISO TIME field.
-    private final Time getTIME(int column, Calendar cal) throws SqlException {
+    private Time getTIME(int column, Calendar cal) throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
+            return DateTime.timeBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
                     cal,
                     charsetName_[column - 1]);
@@ -513,11 +516,11 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Timestamp getTIMESTAMP(int column, Calendar cal)
+    private Timestamp getTIMESTAMP(int column, Calendar cal)
             throws SqlException {
 
         try {
-            return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(
+            return DateTime.timestampBytesToTimestamp(
                 dataBuffer_,
                 columnDataPosition_[column - 1],
                 cal,
@@ -531,10 +534,10 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO DATE field.
-    private final java.sql.Timestamp getTimestampFromDATE(
+    private Timestamp getTimestampFromDATE(
             int column, Calendar cal) throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.dateBytesToTimestamp(dataBuffer_,
+            return DateTime.dateBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
                     cal,
                     charsetName_[column -1]);
@@ -546,10 +549,10 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIME field.
-    private final java.sql.Timestamp getTimestampFromTIME(
+    private java.sql.Timestamp getTimestampFromTIME(
             int column, Calendar cal) throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.timeBytesToTimestamp(dataBuffer_,
+            return DateTime.timeBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
                     cal,
                     charsetName_[column -1]);
@@ -561,10 +564,10 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Date object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Date getDateFromTIMESTAMP(int column, Calendar cal)
+    private Date getDateFromTIMESTAMP(int column, Calendar cal)
             throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.timestampBytesToDate(dataBuffer_,
+            return DateTime.timestampBytesToDate(dataBuffer_,
                     columnDataPosition_[column - 1],
                     cal,
                     charsetName_[column -1]);
@@ -576,10 +579,10 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Time object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Time getTimeFromTIMESTAMP(int column, Calendar cal)
+    private Time getTimeFromTIMESTAMP(int column, Calendar cal)
             throws SqlException {
         try {
-            return org.apache.derby.client.am.DateTime.timestampBytesToTime(dataBuffer_,
+            return DateTime.timestampBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
                     cal,
                     charsetName_[column -1]);
@@ -590,23 +593,23 @@ public abstract class Cursor {
         }
     }
 
-    private final String getStringFromDATE(int column) throws SqlException {
+    private String getStringFromDATE(int column) throws SqlException {
         return getDATE(column, getRecyclableCalendar()).toString();
     }
 
     // Build a string object from the DERBY byte TIME representation.
-    private final String getStringFromTIME(int column) throws SqlException {
+    private String getStringFromTIME(int column) throws SqlException {
         return getTIME(column, getRecyclableCalendar()).toString();
     }
 
     // Build a string object from the DERBY byte TIMESTAMP representation.
-    private final String getStringFromTIMESTAMP(int column) throws SqlException {
+    private String getStringFromTIMESTAMP(int column) throws SqlException {
         return getTIMESTAMP(column, getRecyclableCalendar()).toString();
     }
 
     // Extract bytes from a database java.sql.Types.BINARY field.
     // This is the DERBY type CHAR(n) FOR BIT DATA.
-    private final byte[] get_CHAR_FOR_BIT_DATA(int column) throws SqlException {
+    private byte[] get_CHAR_FOR_BIT_DATA(int column) throws SqlException {
         // There is no limit to the size of a column if maxFieldSize is zero.
         // Otherwise, use the smaller of maxFieldSize and the actual column length.
         int columnLength = (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] :
@@ -621,11 +624,11 @@ public abstract class Cursor {
     // This includes the DERBY types:
     //   VARCHAR(n) FOR BIT DATA
     //   LONG VARCHAR(n) FOR BIT DATA
-    private final byte[] get_VARCHAR_FOR_BIT_DATA(int column) throws SqlException {
+    private byte[] get_VARCHAR_FOR_BIT_DATA(int column) throws SqlException {
         byte[] bytes;
-        int columnLength = 0;
-        columnLength = (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
-                java.lang.Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
+        int columnLength =
+            (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
+            Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
         bytes = new byte[columnLength];
         System.arraycopy(dataBuffer_, columnDataPosition_[column - 1] + 2, bytes, 0, bytes.length);
         return bytes;
@@ -633,11 +636,11 @@ public abstract class Cursor {
 
     // Deserialize a UDT from a database java.sql.Types.JAVA_OBJECT field.
     // This is used for user defined types.
-    private final Object get_UDT(int column) throws SqlException {
+    private Object get_UDT(int column) throws SqlException {
         byte[] bytes;
-        int columnLength = 0;
-        columnLength = (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
-                java.lang.Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
+        int columnLength =
+            (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
+            Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
         bytes = new byte[columnLength];
         System.arraycopy(dataBuffer_, columnDataPosition_[column - 1] + 2, bytes, 0, bytes.length);
 
@@ -1013,7 +1016,7 @@ public abstract class Cursor {
 
     final String getString(int column) throws SqlException {
         try {
-            String tempString = null;
+            String tempString;
             switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.BOOLEAN:
                 if ( get_BOOLEAN( column ) ) { return Boolean.TRUE.toString(); }
@@ -1096,7 +1099,7 @@ public abstract class Cursor {
         }
     }
 
-    final java.io.InputStream getBinaryStream(int column) throws SqlException
+    final InputStream getBinaryStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.BINARY:
@@ -1118,7 +1121,7 @@ public abstract class Cursor {
         }
     }
 
-    final java.io.InputStream getAsciiStream(int column) throws SqlException
+    final InputStream getAsciiStream(int column) throws SqlException
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.CLOB:
@@ -1159,56 +1162,7 @@ public abstract class Cursor {
         }
     }
  
-    public final java.io.InputStream getUnicodeStream(int column) throws SqlException {
-        try {
-            switch (jdbcTypes_[column - 1]) {
-            case java.sql.Types.CLOB:
-                {
-                    Clob c = getClobColumn_(column, agent_, false);
-                    String s = c.getSubString(1L, (int) c.length());
-                    try {
-                        return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
-                    } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(agent_.logWriter_, 
-                                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                                "CLOB", "UnicodeStream", e);
-                    }
-                }
-            case java.sql.Types.CHAR:
-                {
-                    try {
-                        return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("UTF-8"));
-                    } catch (java.io.UnsupportedEncodingException e) {
-                        throw new SqlException(agent_.logWriter_, 
-                                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                                "CHAR", "UnicodeStream", e);
-                    }
-                }
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-                try {
-                    return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("UTF-8"));
-                } catch (java.io.UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "VARCHAR/LONGVARCHAR", "UnicodeStream", e);
-                }
-            case java.sql.Types.BINARY:
-                return new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
-            case java.sql.Types.VARBINARY:
-            case java.sql.Types.LONGVARBINARY:
-                return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
-            case java.sql.Types.BLOB:
-                return getBinaryStream(column);
-            default:
-                throw coercionError( "UnicodeStream", column );
-            }
-        } catch ( SQLException se ) {
-            throw new SqlException(se);
-        }
-    }
-
-    final java.io.Reader getCharacterStream(int column)
+    final Reader getCharacterStream(int column)
             throws SqlException 
     {
         switch (jdbcTypes_[column - 1]) {
@@ -1228,8 +1182,9 @@ public abstract class Cursor {
                 return new java.io.StringReader(getVARCHAR(column));
             case java.sql.Types.BINARY:
                 try {
-                    return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-                } catch (java.io.UnsupportedEncodingException e) {
+                    return new InputStreamReader(new ByteArrayInputStream(
+                            get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
+                } catch (UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
                             new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                             "BINARY", "java.io.Reader", e);
@@ -1237,17 +1192,18 @@ public abstract class Cursor {
             case java.sql.Types.VARBINARY:
             case java.sql.Types.LONGVARBINARY:
                 try {
-                    return new java.io.InputStreamReader(new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-                } catch (java.io.UnsupportedEncodingException e) {
+                    return new InputStreamReader(new ByteArrayInputStream(
+                            get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
+                } catch (UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
                             new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                             "VARBINARY/LONGVARBINARY", "java.io.Reader", e);
                 }
             case java.sql.Types.BLOB:
                 try {
-                    return new java.io.InputStreamReader(getBinaryStream(column),
+                    return new InputStreamReader(getBinaryStream(column),
                                                          "UTF-16BE");
-                } catch (java.io.UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
                             new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                             "BLOB", "java.io.Reader", e);
@@ -1275,13 +1231,13 @@ public abstract class Cursor {
         }
     }
 
-    final java.sql.Array getArray(int column) throws SqlException {
+    final Array getArray(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
             new ClientMessageId (SQLState.NOT_IMPLEMENTED),
             "getArray(int)");
     }
 
-    final java.sql.Ref getRef(int column) throws SqlException {
+    final Ref getRef(int column) throws SqlException {
         throw new SqlException(agent_.logWriter_, 
             new ClientMessageId (SQLState.NOT_IMPLEMENTED), "getRef(int)");
     }

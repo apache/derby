@@ -24,6 +24,7 @@ package org.apache.derby.client.net;
 import java.util.HashMap;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import org.apache.derby.client.ClientXid;
 
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
@@ -288,7 +289,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
         byte[] gtrid = readBytes(gtridLen);
         byte[] bqual = readBytes(bqualLen);
 
-        return new org.apache.derby.client.ClientXid(formatId, gtrid, bqual);
+        return new ClientXid(formatId, gtrid, bqual);
     }
 
     protected HashMap<Xid, NetIndoubtTransaction> parseIndoubtList()

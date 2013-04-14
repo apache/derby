@@ -22,8 +22,6 @@
 package org.apache.derby.client.am;
 
 import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
@@ -63,7 +61,7 @@ public class LogicalConnection40
         }
     }
     
-    public Blob createBlob()
+    public java.sql.Blob createBlob()
         throws SQLException {
         try
         {
@@ -75,7 +73,7 @@ public class LogicalConnection40
         }
     }
 
-    public Clob createClob()
+    public java.sql.Clob createClob()
         throws SQLException {
         try
         {

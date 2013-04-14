@@ -27,32 +27,33 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.am.MaterialPreparedStatement;
 
 
 public class NetPreparedStatement extends NetStatement
-        implements org.apache.derby.client.am.MaterialPreparedStatement {
+        implements MaterialPreparedStatement {
 
     // Alias for (NetPreparedStatement) super.statement.
     /*final*/
-    org.apache.derby.client.am.PreparedStatement preparedStatement_;
+    PreparedStatement preparedStatement_;
 
 
     // Relay constructor for NetCallableStatement.
-    NetPreparedStatement(org.apache.derby.client.am.PreparedStatement statement,
+    NetPreparedStatement(PreparedStatement statement,
                          NetAgent netAgent,
                          NetConnection netConnection) {
         super(statement, netAgent, netConnection);
         initNetPreparedStatement(statement);
     }
 
-    void resetNetPreparedStatement(org.apache.derby.client.am.PreparedStatement statement,
+    void resetNetPreparedStatement(PreparedStatement statement,
                                    NetAgent netAgent,
                                    NetConnection netConnection) {
         super.resetNetStatement(statement, netAgent, netConnection);
         initNetPreparedStatement(statement);
     }
 
-    private void initNetPreparedStatement(org.apache.derby.client.am.PreparedStatement statement) {
+    private void initNetPreparedStatement(PreparedStatement statement) {
         preparedStatement_ = statement;
         preparedStatement_.materialPreparedStatement_ = this;
     }
