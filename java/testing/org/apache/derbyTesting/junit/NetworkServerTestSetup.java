@@ -240,10 +240,36 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void waitForAvailablePort()
             throws InterruptedException, UnknownHostException {
+        waitForAvailablePort(-1);
+    }
+
+
+    /**
+     * Wait until the specified port has been released by
+     * by earlier test cases, or until the timeout specified by
+     * {@link #getWaitTime()} has elapsed.
+     *
+     * @param port If -1, use default port for configuration, else use this
+     *             value.
+     * @throws AssertionFailedError if the port didn't become available before
+     * the timeout
+     * @throws InterruptedException if the thread was interrupted while waiting
+     * for the port to become available
+     * @throws UnknownHostException if the host name couldn't be resolved
+     */
+    public static void waitForAvailablePort(int port)
+            throws InterruptedException, UnknownHostException {
+
         TestConfiguration conf = TestConfiguration.getCurrent();
         InetAddress serverAddress = InetAddress.getByName(conf.getHostName());
-        int port = conf.getPort();
+
+        if (port == -1) {
+            port = conf.getPort();
+        }
+
         long giveUp = System.currentTimeMillis() + getWaitTime();
+        BaseTestCase.println(
+                "probing port for availability: " + serverAddress + ":" + port);
 
         while (true) {
             try {
@@ -254,7 +280,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     Thread.sleep(SLEEP_TIME);
                 } else {
                     BaseTestCase.fail(
-                        getTimeoutErrorMsg("server port to become available"),
+                        getTimeoutErrorMsg("server port to become available",
+                            port),
                         ioe);
                 }
             }
@@ -714,11 +741,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     }
 
     /** Returns an error message for timeouts including the port and host. */
-    private static String getTimeoutErrorMsg(String failedAction) {
+    private static String getTimeoutErrorMsg(String failedAction, int port) {
         TestConfiguration conf = TestConfiguration.getCurrent();
-        int port = conf.getPort();
         String host = conf.getHostName();
         return "Timed out waiting for " +
                 failedAction + " (" + host + ":" + port + ")";
+    }
+
+    private static String getTimeoutErrorMsg(String failedAction) {
+        TestConfiguration conf = TestConfiguration.getCurrent();
+        int port = conf.getPort();
+        return getTimeoutErrorMsg(failedAction, port);
     }
 }

@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -103,6 +104,10 @@ public class ReplicationRun_Local extends ReplicationRun
         initMaster(masterServerHost,
                 replicatedDb);
         
+        NetworkServerTestSetup.waitForAvailablePort(masterServerPort);
+        NetworkServerTestSetup.waitForAvailablePort(slaveServerPort);
+        NetworkServerTestSetup.waitForAvailablePort(slaveReplPort);
+
         startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
