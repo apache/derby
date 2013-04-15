@@ -172,9 +172,9 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
 		super(methodName);
 		this.parameterCount = parameterCount;
-		this.parameterNames = parameterNames;
-		this.parameterTypes = parameterTypes;
-		this.parameterModes = parameterModes;
+		this.parameterNames = ArrayUtil.copy( parameterNames );
+		setParameterTypes( parameterTypes );
+		this.parameterModes = ArrayUtil.copy( parameterModes );
 		this.dynamicResultSets = dynamicResultSets;
 		this.parameterStyle = parameterStyle;
 		this.sqlOptions = (short) (sqlAllowed & SQL_ALLOWED_MASK);
@@ -232,22 +232,25 @@ public class RoutineAliasInfo extends MethodAliasInfo
      * Types of the parameters. If there are no parameters
      * then this may return null (or a zero length array).
      */
-	public TypeDescriptor[] getParameterTypes() {
-		return parameterTypes;
+	public TypeDescriptor[] getParameterTypes()
+    {
+        return TypeDescriptorImpl.copyTypeDescriptors( parameterTypes );
 	}
 
-	public int[] getParameterModes() {
-		return parameterModes;
-	}
+    /** Set the paramter types. Useful if they need to be bound. */
+    public  void    setParameterTypes( TypeDescriptor[] parameterTypes )
+    {
+		this.parameterTypes = TypeDescriptorImpl.copyTypeDescriptors( parameterTypes );
+    }
+
+	public int[] getParameterModes() { return ArrayUtil.copy( parameterModes ); }
         /**
          * Returns an array containing the names of the parameters.
          * As of DERBY 10.3, parameter names are optional (see DERBY-183
          * for more information). If the i-th parameter was unnamed,
          * parameterNames[i] will contain a string of length 0.
          */
-	public String[] getParameterNames() {
-		return parameterNames;
-	}
+	public String[] getParameterNames() { return ArrayUtil.copy( parameterNames );}
 
 	public int getMaxDynamicResultSets() {
 		return dynamicResultSets;

@@ -21,6 +21,7 @@
 
 package org.apache.derby.catalog.types;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 
@@ -116,7 +117,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 */
 	public String[] getReferencedColumnNames()
 	{
-		return referencedColumnNames;
+        return ArrayUtil.copy( referencedColumnNames );
 	}
 
 	/**

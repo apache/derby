@@ -204,6 +204,12 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.maximumWidth = maximumWidth;
 	}
 
+    /** copy an array of type descriptors */
+    public  static TypeDescriptor[]    copyTypeDescriptors( TypeDescriptor[] original )
+    {
+        return (original == null) ? null : (TypeDescriptor[]) original.clone();
+    }
+    
 	/**
 	 * @see TypeDescriptor#getMaximumWidth
 	 */

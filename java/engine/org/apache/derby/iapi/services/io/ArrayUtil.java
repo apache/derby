@@ -29,12 +29,37 @@ import java.lang.reflect.Array;
 
 /**
   Utility class for constructing and reading and writing arrays from/to
-  formatId streams.
+  formatId streams and for performing other operations on arrays.
  
   @version 0.1
  */
 public abstract class ArrayUtil
 {
+	///////////////////////////////////////////////////////////////////
+	//
+	// Methods to copy arrays. We'd like to use java.util.copyOf(), but
+    // we have to run on Java 5.
+	//
+	///////////////////////////////////////////////////////////////////
+
+    /** Copy an array of strings; the original array could be null */
+    public  static  String[]    copy( String[] original )
+    {
+        return (original == null) ? null : (String[]) original.clone();
+    }
+
+    /** Copy a (possibly null) array of booleans */
+    public  static  boolean[]   copy( boolean[] original )
+    {
+        return (original == null) ? null : (boolean[]) original.clone();
+    }
+
+    /** Copy a (possibly null) array of ints */
+    public  static  int[]   copy( int[] original )
+    {
+        return (original == null) ? null : (int[]) original.clone();
+    }
+
 	///////////////////////////////////////////////////////////////////
 	//
 	// Methods for Arrays of OBJECTS.  Cannot be used for an

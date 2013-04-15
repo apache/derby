@@ -2766,17 +2766,27 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 				boolean[] isAscending = compressIRGs[j].isAscending();
 				boolean reMakeArrays = false;
+				boolean rewriteBaseColumnPositions = false;
 				int size = baseColumnPositions.length;
 				for (int k = 0; k < size; k++)
 				{
 					if (baseColumnPositions[k] > droppedColumnPosition)
+                    {
 						baseColumnPositions[k]--;
+                        rewriteBaseColumnPositions = true;
+                    }
 					else if (baseColumnPositions[k] == droppedColumnPosition)
 					{
 						baseColumnPositions[k] = 0;		// mark it
 						reMakeArrays = true;
 					}
 				}
+
+                if ( rewriteBaseColumnPositions )
+                {
+                    compressIRGs[j].setBaseColumnPositions( baseColumnPositions );
+                }
+                
 				if (reMakeArrays)
 				{
 					size--;

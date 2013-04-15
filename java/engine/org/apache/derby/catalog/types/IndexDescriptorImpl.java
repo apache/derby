@@ -23,6 +23,7 @@ package org.apache.derby.catalog.types;
 
 import org.apache.derby.catalog.IndexDescriptor;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -98,8 +99,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		this.indexType = indexType;
 		this.isUnique = isUnique;
 		this.isUniqueWithDuplicateNulls = isUniqueWithDuplicateNulls;
-		this.baseColumnPositions = baseColumnPositions;
-		this.isAscending = isAscending;
+		this.baseColumnPositions = ArrayUtil.copy( baseColumnPositions );
+		this.isAscending = ArrayUtil.copy( isAscending );
 		this.numberOfOrderedColumns = numberOfOrderedColumns;
 	}
 
@@ -127,7 +128,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	/** @see IndexDescriptor#baseColumnPositions */
 	public int[] baseColumnPositions()
 	{
-		return baseColumnPositions;
+        return ArrayUtil.copy( baseColumnPositions );
 	}
 
 	/** @see IndexDescriptor#getKeyColumnPosition */
@@ -182,19 +183,19 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	/** @see IndexDescriptor#isAscending */
 	public boolean[]		isAscending()
 	{
-		return isAscending;
+        return ArrayUtil.copy( isAscending );
 	}
 
 	/** @see IndexDescriptor#setBaseColumnPositions */
 	public void		setBaseColumnPositions(int[] baseColumnPositions)
 	{
-		this.baseColumnPositions = baseColumnPositions;
+		this.baseColumnPositions = ArrayUtil.copy( baseColumnPositions );
 	}
 
 	/** @see IndexDescriptor#setIsAscending */
 	public void		setIsAscending(boolean[] isAscending)
 	{
-		this.isAscending = isAscending;
+		this.isAscending = ArrayUtil.copy( isAscending );
 	}
 
 	/** @see IndexDescriptor#setNumberOfOrderedColumns */

@@ -22,6 +22,7 @@
 package org.apache.derby.catalog.types;
 
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.catalog.ReferencedColumns;
@@ -80,7 +81,7 @@ public class ReferencedColumnsDescriptorImpl
 
 	public ReferencedColumnsDescriptorImpl(	int[] referencedColumns)
 	{
-		this.referencedColumns = referencedColumns;
+		this.referencedColumns = ArrayUtil.copy( referencedColumns );
 	}
 
 	/**
@@ -94,8 +95,8 @@ public class ReferencedColumnsDescriptorImpl
 	public ReferencedColumnsDescriptorImpl(	int[] referencedColumns,
 			int[] referencedColumnsInTriggerAction)
 	{
-		this.referencedColumns = referencedColumns;
-		this.referencedColumnsInTriggerAction = referencedColumnsInTriggerAction;
+		this.referencedColumns = ArrayUtil.copy( referencedColumns );
+		this.referencedColumnsInTriggerAction = ArrayUtil.copy( referencedColumnsInTriggerAction );
 	}
 
 	/** Zero-argument constructor for Formatable interface */
@@ -107,7 +108,7 @@ public class ReferencedColumnsDescriptorImpl
 	*/
 	public int[] getReferencedColumnPositions()
 	{
-		return referencedColumns;
+		return ArrayUtil.copy( referencedColumns );
 	}
 	
 	/**
@@ -115,7 +116,7 @@ public class ReferencedColumnsDescriptorImpl
 	*/
 	public int[] getTriggerActionReferencedColumnPositions()
 	{
-		return referencedColumnsInTriggerAction;
+		return ArrayUtil.copy( referencedColumnsInTriggerAction );
 	}
 
 	/* Externalizable interface */

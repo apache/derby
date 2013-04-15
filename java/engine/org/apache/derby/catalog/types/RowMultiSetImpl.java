@@ -22,6 +22,7 @@
 package org.apache.derby.catalog.types;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -86,8 +87,8 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
      */
     public RowMultiSetImpl( String[] columnNames, TypeDescriptor[] types )
     {
-        _columnNames = columnNames;
-        _types = types;
+        _columnNames = ArrayUtil.copy( columnNames );
+        setTypes( types );
 
         if (
             (columnNames == null ) ||
@@ -107,10 +108,13 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
     ///////////////////////////////////////////////////////////////////////////////////
 
     /** Get the names of the columns in this row set */
-    public  String[]    getColumnNames()    { return _columnNames; }
+    public  String[]    getColumnNames()    { return ArrayUtil.copy( _columnNames ); }
     
     /** Get the types of the columns in this row set */
-    public  TypeDescriptor[]    getTypes() { return _types; }
+    public  TypeDescriptor[]    getTypes() { return TypeDescriptorImpl.copyTypeDescriptors( _types ); }
+    
+    /** Set the types of the columns in this row set */
+    public  void    setTypes( TypeDescriptor[] types ) { _types = TypeDescriptorImpl.copyTypeDescriptors( types ); }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //

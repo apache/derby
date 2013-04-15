@@ -531,6 +531,8 @@ public class CreateAliasNode extends DDLStatementNode
         {
             parameterTypes[ i ] = bindUserCatalogType( parameterTypes[ i ] );
         }
+
+        aliasInfo.setParameterTypes( parameterTypes );
     }
 
 	/**

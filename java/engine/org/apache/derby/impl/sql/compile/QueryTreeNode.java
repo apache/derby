@@ -1678,7 +1678,6 @@ public abstract class QueryTreeNode implements Node, Visitable
         if ( !originalDTD.getCatalogType().isRowMultiSet() ) { return originalDTD; }
 
         RowMultiSetImpl originalMultiSet = (RowMultiSetImpl) originalDTD.getTypeId().getBaseTypeId();
-        String[] columnNames = originalMultiSet.getColumnNames();
         TypeDescriptor[] columnTypes = originalMultiSet.getTypes();
         int columnCount = columnTypes.length;
 
@@ -1686,6 +1685,7 @@ public abstract class QueryTreeNode implements Node, Visitable
         {
             columnTypes[ i ] = bindUserCatalogType( columnTypes[ i ] );
         }
+        originalMultiSet.setTypes( columnTypes );
 
         return originalDTD;
     }
