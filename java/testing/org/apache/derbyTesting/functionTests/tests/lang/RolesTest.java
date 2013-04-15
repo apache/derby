@@ -1160,7 +1160,7 @@ public class RolesTest extends BaseJDBCTestCase
         throws SQLException
     {
         // For compat tests do not check system table row count
-        return;
+        /*
         ResultSet rs = _stm.executeQuery(
                 "SELECT COUNT(*) FROM " + table);
         rs.next();
@@ -1169,6 +1169,7 @@ public class RolesTest extends BaseJDBCTestCase
                      (isDbo() ? rcDbo : rcMereMortal),
                      rs.getInt(1));
         rs.close();
+    */
     }
 
 
