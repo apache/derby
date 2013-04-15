@@ -42,6 +42,12 @@ public abstract class ArrayUtil
 	//
 	///////////////////////////////////////////////////////////////////
 
+    /** Copy an array of objects; the original array could be null */
+    public  static  Object[]    copy( Object[] original )
+    {
+        return (original == null) ? null : (Object[]) original.clone();
+    }
+
     /** Copy an array of strings; the original array could be null */
     public  static  String[]    copy( String[] original )
     {

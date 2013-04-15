@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -113,10 +114,7 @@ public class StandardException extends Exception
 	 * Returns the arguments for this exception,
 	 * if there are any.
 	 */
-	public final Object[] getArguments()
-	{
-		return arguments;
-	}
+	public final Object[] getArguments()    { return ArrayUtil.copy( arguments ); }
 
 	/**
 		Yes, report me. Errors that need this method to return
