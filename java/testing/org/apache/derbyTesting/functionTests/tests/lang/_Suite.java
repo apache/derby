@@ -114,8 +114,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(HoldCursorTest.suite());
         suite.addTest(ShutdownDatabaseTest.suite());
         // omit SystemCatalogTest for compat testing
-        //suite.addTest(StalePlansTest.suite());
-        suite.addTest(SystemCatalogTest.suite());
+        suite.addTest(StalePlansTest.suite());
+        //suite.addTest(SystemCatalogTest.suite());
         suite.addTest(ForBitDataTest.suite());
         suite.addTest(DistinctTest.suite());
         suite.addTest(GroupByTest.suite());
@@ -130,7 +130,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GrantRevokeDDLTest.suite());
         suite.addTest(ReleaseCompileLocksTest.suite());
         suite.addTest(LazyDefaultSchemaCreationTest.suite());
-        suite.addTest(ErrorCodeTest.suite());
+        //suite.addTest(ErrorCodeTest.suite());
         suite.addTest(TimestampArithTest.suite());
         suite.addTest(SpillHashTest.suite());
         suite.addTest(CaseExpressionTest.suite());

@@ -176,12 +176,13 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 		s.close();
 	}
 	
+	// Disable for compat testing. columns may change
 	/**
 	 * Check that all the tables for their expected columns.
 	 *
 	 * @throws SQLException
 	 */
-	public void testSystemCatalogColumns() throws SQLException {
+	public void xtestSystemCatalogColumns() throws SQLException {
 		String [][] expected = {
 				{"SYSALIASES", "ALIAS", "2", "VARCHAR(128) NOT NULL"},
 				{"SYSALIASES", "ALIASID", "1", "CHAR(36) NOT NULL"},
