@@ -109,7 +109,10 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
      * 
      * To avoid possible conflict with other tests running concurrently,
      * this test may only run if baseport is not set and we are 
-     * using the default 1527 port
+     * using the default 1527 port.  This is accomplished by naming the
+     * test starting with "ttest" vs "test", and then code in
+     * baseSuite explitly runs test if can.
+     *
      * 
      * @throws Exception
      */
