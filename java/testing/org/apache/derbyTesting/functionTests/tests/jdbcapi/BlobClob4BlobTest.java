@@ -383,7 +383,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     /**
      * Test triggers on CLOB columns.
      */
-    public void testTriggersWithClobColumn() throws Exception {
+    public void baseTestTriggersWithClobColumn(boolean useOrderBy) 
+        throws Exception {
+
         insertDefaultData();
 
         Statement stmt = createStatement();
@@ -413,12 +415,32 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         Statement trigASt = createStatement();
         Statement trigBSt = createStatement();
 
-        ResultSet origRS = origSt.executeQuery(
-                "select a, length(a), b  from testClob order by b");
-        ResultSet trigARS = trigASt.executeQuery(
-                "select a, length(a), b from testClobTriggerA order by b");
-        ResultSet trigBRS = trigBSt.executeQuery(
-                "select a, length(a), b from testClobTriggerB order by b");
+        ResultSet origRS  = null;
+        ResultSet trigARS = null;
+        ResultSet trigBRS = null;
+
+        if (useOrderBy) {
+            origRS = 
+                origSt.executeQuery(
+                    "select a, length(a), b  from testClob order by b");
+            trigARS = 
+                trigASt.executeQuery(
+                    "select a, length(a), b from testClobTriggerA order by b");
+            trigBRS = 
+                trigBSt.executeQuery(
+                    "select a, length(a), b from testClobTriggerB order by b");
+
+        } else {
+            origRS = 
+                origSt.executeQuery(
+                        "select a, length(a), b  from testClob");
+            trigARS = 
+                trigASt.executeQuery(
+                        "select a, length(a), b from testClobTriggerA");
+            trigBRS = 
+                trigBSt.executeQuery(
+                        "select a, length(a), b from testClobTriggerB");
+        }
 
         int count = 0;
         while (origRS.next()) {
@@ -464,6 +486,31 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.close();
         commit();
     }
+
+    /**
+     * Test triggers on CLOB columns.
+     * <p>
+     * Call with order by in the query, this causes a path through the
+     * sorter.
+     **/
+    public void testTriggersWithClobColumnOrderBy() 
+        throws Exception {
+
+        baseTestTriggersWithClobColumn(true);
+    }
+
+    /**
+     * Test triggers on CLOB columns.
+     * <p>
+     * Call with no order by in the query, thus a code path not through
+     * the sorter.
+     **/
+    public void testTriggersWithClobColumn() 
+        throws Exception {
+
+        baseTestTriggersWithClobColumn(false);
+    }
+
 
     /**
      * test Clob.getSubString() method
