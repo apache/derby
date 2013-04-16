@@ -678,20 +678,13 @@ public class TableElementList extends QueryTreeNodeVector
 				cc.setReliability(previousReliability);
 			}
 	
-			/* We have a valid check constraint, now build an array of
-			 * 1-based columnIds that the constraint references.
-			 */
-			ResultColumnList rcl = table.getResultColumns();
-			int		numReferenced = rcl.countReferencedColumns();
-			int[]	checkColumnReferences = new int[numReferenced];
-
-			rcl.recordColumnReferences(checkColumnReferences, 1);
-			cdn.setCheckColumnReferences(checkColumnReferences);
-
-			/* Now we build a list with only the referenced columns and
+            /* We have a valid check constraint.
+             * Now we build a list with only the referenced columns and
 			 * copy it to the cdn.  Thus we can build the array of
 			 * column names for the referenced columns during generate().
 			 */
+            ResultColumnList rcl = table.getResultColumns();
+            int numReferenced = rcl.countReferencedColumns();
 			ResultColumnList refRCL =
 						(ResultColumnList) getNodeFactory().getNode(
 												C_NodeTypes.RESULT_COLUMN_LIST,

@@ -1861,7 +1861,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 
-	public void setRefActionInfo(long fkIndexConglomId, 
+    void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
 								 boolean dependentScan)

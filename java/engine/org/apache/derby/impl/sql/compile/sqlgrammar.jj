@@ -7050,7 +7050,7 @@ ValueNode
 					C_NodeTypes.XML_PARSE_OPERATOR_NODE,
 					value,
 					ReuseFactory.getInteger(UnaryOperatorNode.XMLPARSE_OP),
-					new Object[] {(wsOption ? Boolean.TRUE : Boolean.FALSE)},
+					Boolean.valueOf(wsOption),
 					getContextManager());
 	}
 }
@@ -7117,7 +7117,7 @@ ValueNode
 					C_NodeTypes.XML_SERIALIZE_OPERATOR_NODE,
 					value,
 					ReuseFactory.getInteger(UnaryOperatorNode.XMLSERIALIZE_OP),
-					new Object[] {targetType},
+					targetType,
 					getContextManager());
 	}
 }

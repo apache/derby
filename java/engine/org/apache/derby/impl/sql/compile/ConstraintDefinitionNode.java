@@ -23,17 +23,13 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.StatementType;
 
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.catalog.UUID;
@@ -59,7 +55,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 
 	String			backingIndexName;
 	UUID			backingIndexUUID;
-	int[]			 checkColumnReferences;
 	ResultColumnList columnList;
 	String			 constraintText;
 	ValueNode		 checkCondition;
@@ -464,27 +459,6 @@ public class ConstraintDefinitionNode extends TableElementNode
 	public String getConstraintText()
 	{
 		return constraintText;
-	}
-
-	/**
-	 * Get the array of 1-based column references for a check constraint.
-	 *
-	 * @return	The array of 1-based column references for a check constraint.
-	 */
-	public int[] getCheckColumnReferences()
-	{
-		return checkColumnReferences;
-	}
-
-	/**
-	 * Set the array of 1-based column references for a check constraint.
-	 *
-	 * @param checkColumnReferences	The array of 1-based column references
-	 *								for the check constraint.
-	 */
-	public void setCheckColumnReferences(int[] checkColumnReferences)
-	{
-		this.checkColumnReferences = checkColumnReferences;
 	}
 
 	/**

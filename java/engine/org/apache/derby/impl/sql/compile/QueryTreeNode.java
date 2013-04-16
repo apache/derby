@@ -1527,9 +1527,9 @@ public abstract class QueryTreeNode implements Node, Visitable
 
 	/**
 	 * set the Information gathered from the parent table that is 
-	 * required to peform a referential action on dependent table.
+     * required to perform a referential action on dependent table.
 	 */
-	public void setRefActionInfo(long fkIndexConglomId, 
+    void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
 								 boolean dependentScan)

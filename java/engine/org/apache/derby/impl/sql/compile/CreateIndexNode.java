@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.Property;
@@ -34,7 +33,6 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -48,18 +46,16 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 public class CreateIndexNode extends DDLStatementNode
 {
-	boolean				unique;
-	DataDictionary		dd = null;
-	Properties			properties;
-	String				indexType;
-	TableName			indexName;
-	TableName			tableName;
-	List				columnNameList;
-	String[]			columnNames = null;
-	boolean[]			isAscending;
-	int[]				boundColumnIDs;
-
-	TableDescriptor		td;
+    private boolean             unique;
+    private Properties          properties;
+    private String              indexType;
+    private TableName           indexName;
+    private TableName           tableName;
+    private List                columnNameList;
+    private String[]            columnNames;
+    private boolean[]           isAscending;
+    private int[]               boundColumnIDs;
+    private TableDescriptor     td;
 
 	/**
 	 * Initializer for a CreateIndexNode
@@ -120,19 +116,6 @@ public class CreateIndexNode extends DDLStatementNode
 	{
 		return "CREATE INDEX";
 	}
-
-
-	public	boolean				getUniqueness() { return unique; }
-	public	String				getIndexType() { return indexType; }
-	public	TableName			getIndexName() { return indexName; }
-	public	UUID				getBoundTableID() { return td.getUUID(); }
-    public	Properties			getProperties() { return properties; }
-	public  TableName			getIndexTableName() {return tableName; }
-	public  String[]			getColumnNames() { return columnNames; }
-
-	// get 1-based column ids
-	public	int[]				getKeyColumnIDs() { return boundColumnIDs; }
-	public	boolean[]			getIsAscending() { return isAscending; }
 
 	// We inherit the generate() method from DDLStatementNode.
 
@@ -247,8 +230,6 @@ public class CreateIndexNode extends DDLStatementNode
 
 		int columnCount = columnNames.length;
 		int approxLength = 0;
-		boolean index_has_long_column = false;
-
 
 		// bump the page size for the index,
 		// if the approximate sizes of the columns in the key are

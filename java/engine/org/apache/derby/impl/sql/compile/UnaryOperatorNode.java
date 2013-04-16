@@ -110,9 +110,11 @@ public class UnaryOperatorNode extends OperatorNode
 		ClassName.XMLDataValue			// XMLSerialize
 	};
 
-	// Array to hold Objects that contain primitive
-	// args required by the operator method call.
-	private Object [] additionalArgs;
+    /** Target type for XMLSerialize operator. */
+    private DataTypeDescriptor targetType;
+
+    /** Whether or not an XMLParse operator should preserve whitespace. */
+    private boolean preserveWhitespace;
 
 	/**
 	 * Initializer for a UnaryOperatorNode.
@@ -146,8 +148,8 @@ public class UnaryOperatorNode extends OperatorNode
 			if (SanityManager.DEBUG) {
 				SanityManager.ASSERT(
 					((operatorOrOpType instanceof Integer) &&
-						((methodNameOrAddedArgs == null) ||
-						(methodNameOrAddedArgs instanceof Object[]))),
+                      ((methodNameOrAddedArgs instanceof DataTypeDescriptor) ||
+                       (methodNameOrAddedArgs instanceof Boolean))),
 					"Init params in UnaryOperator node have the " +
 					"wrong type.");
 			}
@@ -156,7 +158,15 @@ public class UnaryOperatorNode extends OperatorNode
 			this.methodName = UnaryMethodNames[this.operatorType];
 			this.resultInterfaceType = UnaryResultTypes[this.operatorType];
 			this.receiverInterfaceType = UnaryArgTypes[this.operatorType];
-			this.additionalArgs = (Object[])methodNameOrAddedArgs;
+            if (operatorType == XMLSERIALIZE_OP) {
+                targetType = (DataTypeDescriptor) methodNameOrAddedArgs;
+            } else if (operatorType == XMLPARSE_OP) {
+                preserveWhitespace =
+                    ((Boolean) methodNameOrAddedArgs).booleanValue();
+            } else if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT(
+                    "Don't know how to handle operator type " + operatorType);
+            }
 		}
 	}
 
@@ -401,12 +411,9 @@ public class UnaryOperatorNode extends OperatorNode
         // it from there.
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
-                ((additionalArgs != null) && (additionalArgs.length > 0)),
+                (targetType != null),
                 "Failed to locate target type for XMLSERIALIZE operator");
         }
-
-        DataTypeDescriptor targetType =
-            (DataTypeDescriptor)additionalArgs[0];
 
         TypeId targetTypeId = targetType.getTypeId();
         switch (targetTypeId.getJDBCTypeId())
@@ -739,8 +746,6 @@ public class UnaryOperatorNode extends OperatorNode
         // StringDataValue, then we should use the collation to
         // decide whether we need to generate collation sensitive
         // StringDataValue.
-            DataTypeDescriptor targetType =
-                (DataTypeDescriptor)additionalArgs[0];
             mb.push(targetType.getJDBCTypeId());
             mb.push(targetType.getMaximumWidth());
             mb.push(getSchemaDescriptor(null, false).getCollationType());
@@ -763,7 +768,7 @@ public class UnaryOperatorNode extends OperatorNode
         mb.swap();
 
         // Push whether or not we want to preserve whitespace.
-        mb.push(((Boolean)additionalArgs[0]).booleanValue());
+        mb.push(preserveWhitespace);
 
         // Push the SqlXmlUtil instance as the next argument.
         pushSqlXmlUtil(acb, mb, null, null);

@@ -167,11 +167,7 @@ public class CreateViewNode extends DDLStatementNode
 
 	// accessors
 
-	public	int				getCheckOption() { return checkOption; }
-
 	public	ProviderInfo[]	getProviderInfo() { return providerInfos; }
-
-	public	ColumnInfo[]	getColumnInfo() { return colInfos; }
 
 	// We inherit the generate() method from DDLStatementNode.
 

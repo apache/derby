@@ -4409,12 +4409,12 @@ public class ResultColumnList extends QueryTreeNodeVector
     }
 
 
-    public class ColumnMapping {
+    static class ColumnMapping {
 
-        public final int[] mapArray;
-        public final boolean[] cloneMap;
+        final int[] mapArray;
+        final boolean[] cloneMap;
 
-        public ColumnMapping(int[] mapArray, boolean[] cloneMap) {
+        private ColumnMapping(int[] mapArray, boolean[] cloneMap) {
             this.mapArray = mapArray;
             this.cloneMap = cloneMap;
         }
