@@ -558,7 +558,7 @@ public class TriggerTest extends BaseJDBCTestCase {
                     modifiedRowCount > 1 ? (order >= lastOrder) :
                         (order > lastOrder);
                 assertTrue("matching triggers need to be fired in order creation:"
-                        +info, orderOk);
+                        +info+". Triggers got fired in this order:"+TRIGGER_INFO.get().toString(), orderOk);
                 lastOrder = order;
                 continue;
             }
