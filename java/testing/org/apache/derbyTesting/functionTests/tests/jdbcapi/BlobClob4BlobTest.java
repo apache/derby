@@ -992,7 +992,17 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     /**
      * Test Clob.position()
      */
-    public void testPositionAgressive() throws Exception {
+    public void testPositionAgressiveUseOrderBy() 
+        throws Exception {
+            baseTestPositionAgressive(true);
+    }
+    public void testPositionAgressiveDoNotUseOrderBy() 
+        throws Exception {
+            baseTestPositionAgressive(false);
+    }
+
+    public void baseTestPositionAgressive(boolean useOrderBy) 
+        throws Exception {
         Statement s = createStatement();
 
         s.execute("CREATE TABLE C8.T8POS" +
@@ -1053,12 +1063,12 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         psp.setString(1, pstr);
         psp.executeUpdate();
 
-        checkClob8(s, pstr);
+        checkClob8(s, pstr, useOrderBy);
         commit();
 
         ResultSet rsc = s.executeQuery("SELECT PATT FROM C8.T8PATT");
         rsc.next();
-        checkClob8(s, rsc.getClob(1));
+        checkClob8(s, rsc.getClob(1), useOrderBy);
 
         rsc.close();
 
@@ -1086,12 +1096,12 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         commit();
 
 
-        checkClob8(s, pstr);
+        checkClob8(s, pstr, useOrderBy);
         commit();
 
         rsc = s.executeQuery("SELECT PATT FROM C8.T8PATT");
         rsc.next();
-        checkClob8(s, rsc.getClob(1));
+        checkClob8(s, rsc.getClob(1), useOrderBy);
 
         s.execute("DELETE FROM C8.T8POS");
         s.execute("DELETE FROM C8.T8PATT");
@@ -1113,12 +1123,12 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         commit();
 
 
-        checkClob8(s, pstr);
+        checkClob8(s, pstr, useOrderBy);
         commit();
 
         rsc = s.executeQuery("SELECT PATT FROM C8.T8PATT");
         rsc.next();
-        checkClob8(s, rsc.getClob(1));
+        checkClob8(s, rsc.getClob(1), useOrderBy);
 
         s.execute("DELETE FROM C8.T8POS");
         s.execute("DELETE FROM C8.T8PATT");
@@ -1199,11 +1209,24 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         return pos;
     }
 
-    private static void checkClob8(Statement s, String pstr) throws SQLException
+    private static void checkClob8(
+    Statement   s, 
+    String      pstr,
+    boolean     useOrderBy) 
+        throws SQLException
     {
+        ResultSet rs = null;
 
-        ResultSet rs = s.executeQuery(
-                "SELECT ID, DD, POS, L FROM C8.T8POS ORDER BY 1");
+        if (useOrderBy)
+        {
+            rs = s.executeQuery(
+                    "SELECT ID, DD, POS, L FROM C8.T8POS ORDER BY 1");
+        }
+        else
+        {
+            rs = s.executeQuery(
+                    "SELECT ID, DD, POS, L FROM C8.T8POS");
+        }
 
         while (rs.next()) {
 
@@ -1221,9 +1244,25 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         rs.close();
     }
 
-    private static void checkClob8(Statement s, Clob pstr) throws SQLException {
-        ResultSet rs = s.executeQuery(
+    private static void checkClob8(
+    Statement   s, 
+    Clob        pstr,
+    boolean     useOrderBy) 
+        throws SQLException {
+
+
+        ResultSet rs = null;
+
+        if (useOrderBy)
+        {
+            rs = s.executeQuery(
                 "SELECT ID, DD, POS, L FROM C8.T8POS ORDER BY 1");
+        }
+        else
+        {
+            rs = s.executeQuery(
+                "SELECT ID, DD, POS, L FROM C8.T8POS");
+        }
 
         while (rs.next()) {
 
