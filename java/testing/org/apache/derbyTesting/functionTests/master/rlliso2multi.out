@@ -1002,18 +1002,21 @@ from
 on l.xid = t.xid where l.tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij(DDL)> -- lock table with no join.
+-- DERBY-6183, removing CAST's to avoid background locks causing
+-- data trunction warnings.
+
 create view lock_table2 as
 select 
-    cast(l.xid as char(8)) as xid,
-    cast(l.type as char(8)) as type,
-    cast(lockcount as char(3)) as cnt,
+    xid,
+    type,
+    lockcount as cnt,
     mode,
-    cast(tablename as char(12)) as tabname,
-    cast(lockname as char(10)) as lockname,
+    tablename as tabname,
+    lockname,
     state
 from 
-    syscs_diag.lock_table l  
-where l.tableType <> 'S' ;
+    syscs_diag.lock_table
+where tableType <> 'S' ;
 0 rows inserted/updated/deleted
 ij(DDL)> -- transaction table with no join.
 create view tran_table as
@@ -1182,11 +1185,11 @@ ij(T11SCANNER)> --
 get cursor update_cursor3 as
     'select b from test_11 where a=8 for update of b';
 ij(T11SCANNER)> select type, cnt, mode, tabname, lockname, state from lock_table2 order by tabname, type desc, mode, cnt, lockname;
-TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
------------------------------------------------
-TABLE   |1  |IX  |TEST_11     |Tablelock |GRANT
-TABLE   |1  |IX  |TEST_11     |Tablelock |GRANT
-ROW     |1  |U   |TEST_11     |(1,7)     |GRANT
+TYPE |CNT  |MODE|TABNAME                                                                                                                         |LOCKNAME            |STATE
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TABLE|1    |IX  |TEST_11                                                                                                                         |Tablelock           |GRANT
+TABLE|1    |IX  |TEST_11                                                                                                                         |Tablelock           |GRANT
+ROW  |1    |U   |TEST_11                                                                                                                         |(1,7)               |GRANT
 ij(T11SCANNER)> next update_cursor3;
 B          
 -----------
