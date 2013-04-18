@@ -60,6 +60,15 @@ public class EmbeddedConnectionPoolDataSource40
     implements javax.sql.ConnectionPoolDataSource // compile-time check for
                                                   // 4.1 extension
 {
+    // This explicit UID was missing for releases 10.10.1.1 and lower.
+    // The default changed between 10.7 and 10.8,
+    // so even with this explicit UID in place, serialized data sources
+    // created with 10.7 or older would not be readable.
+    // The default UID in 10.7 was -2155993232624542236.
+    // This was not caught by the serialization tests at the time since
+    // the "40"-suffixed data sources were not tested back then, cf DERBY-5955
+    // http://svn.apache.org/viewvc?view=revision&revision=1438035 .
+    private static final long serialVersionUID = -4368824293743156916L;
     
     ////////////////////////////////////////////////////////////////////
     //
