@@ -117,12 +117,11 @@ public class AutomaticIndexStatisticsTest
                 "select * from " + TAB + " where id = ?");
         ps.close();
 
-        // Get statistics
+        // Get statistics for the non-unique index.
         IdxStats[] myStats = new IndexStatsUtil(
                 ds.getConnection(), DEFAULT_TIMEOUT).getStatsTable(TAB, 1);
         assertEquals(1, myStats.length);
         assertTrue(myStats[0].rows == 300);
-        assertTrue(myStats[0].card == 300);
 
         // Shutdown database and try to delete it.
         JDBCDataSource.shutdownDatabase(ds);
@@ -222,7 +221,7 @@ public class AutomaticIndexStatisticsTest
         IndexStatsUtil myStats =
                 new IndexStatsUtil(ds.getConnection(), DEFAULT_TIMEOUT);
         myStats.assertNoStatsTable(TAB2);
-        ps = con.prepareStatement("select * from " + TAB2 + " where id = ?");
+        con.prepareStatement("select * from " + TAB2 + " where id = ?");
         myStats.assertTableStats(TAB2, 1);
         myStats.release();
 
@@ -267,7 +266,7 @@ public class AutomaticIndexStatisticsTest
         // Trigger stats update on secondary table, make sure the daemon can
         // still process work.
         myStats.assertNoStatsTable(TAB2);
-        ps = con.prepareStatement("select * from " + TAB2 + " where id = ?");
+        con.prepareStatement("select * from " + TAB2 + " where id = ?");
         myStats.assertTableStats(TAB2, 1);
         myStats.release();
     }
@@ -367,7 +366,7 @@ public class AutomaticIndexStatisticsTest
             }
         }
 
-        // Finally, create a unique index on the val column.
+        // Finally, create a non-unique index on the val column.
         stmt.executeUpdate("create index IDXVAL on " + TAB + "(val)");
         ResultSet rs = stmt.executeQuery(
                 "select val from " + TAB + " order by val");
@@ -424,11 +423,68 @@ public class AutomaticIndexStatisticsTest
 
         // Select from the view, using index.
         stats.assertNoStatsTable(table);
-        ps = prepareStatement("select * from " + view + " where vcol2 = 7");
+        prepareStatement("select * from " + view + " where vcol2 = 7");
         stats.assertNoStatsTable(table);
         // Trigger update of the base table.
-        ps = prepareStatement("select * from " + table + " where col2 = 7");
-        stats.assertTableStats(table, 2);
+        prepareStatement("select * from " + table + " where col2 = 7");
+        stats.assertTableStats(table, 1);
+    }
+
+    /**
+     * Verifies that queries on a table with single-column unique indexes only
+     * don't trigger a statistics update with the istat daemon.
+     */
+    public void testNoUpdateTriggeredBySingleColumnUniqueIndex()
+            throws SQLException {
+        // Create table.
+        String TAB = "STAT_SCUI";
+        dropTable(TAB);
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table " + TAB +
+                " (id int primary key, val int unique not null)");
+        stats.assertNoStatsTable(TAB);
+        PreparedStatement ps = prepareStatement(
+                "insert into " + TAB + " values (?,?)");
+        setAutoCommit(false);
+        for (int i=0; i < 2000; i++) {
+            ps.setInt(1, i);
+            ps.setInt(2, i);
+            ps.executeUpdate();
+        }
+        commit();
+        // The queries below would trigger a stats update in earlier releases.
+        PreparedStatement psSel1 = prepareStatement(
+                "select id from " + TAB + " where id = ?");
+        psSel1.setInt(1, 98);
+        JDBC.assertSingleValueResultSet(psSel1.executeQuery(), "98");
+        PreparedStatement psSel2 = prepareStatement(
+                "select val from " + TAB + " where val = ?");
+        psSel2.setInt(1, 1573);
+        JDBC.assertSingleValueResultSet(psSel2.executeQuery(), "1573");
+        Utilities.sleep(100); 
+        stats.assertNoStatsTable(TAB);
+
+        // Try again after inserting more data.
+        for (int i=2000; i < 4000; i++) {
+            ps.setInt(1, i);
+            ps.setInt(2, i);
+            ps.executeUpdate();
+        }
+        commit();
+        forceRowCountEstimateUpdate(TAB);
+        psSel1 = prepareStatement(
+                "select id from " + TAB + " where id = ?");
+        psSel1.setInt(1, 117);
+        JDBC.assertSingleValueResultSet(psSel1.executeQuery(), "117");
+        psSel2 = prepareStatement(
+                "select val from " + TAB + " where val = ?");
+        psSel2.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(psSel2.executeQuery(), "1");
+        Utilities.sleep(100); 
+        stats.assertNoStatsTable(TAB);
+
+        // Cleanup
+        dropTable(TAB);
     }
 
     // Utility methods
@@ -545,8 +601,9 @@ public class AutomaticIndexStatisticsTest
     /**
      * Default method to create and populate a simple test table.
      * <p>
-     * The table consists of a single integer column, which is also the primary
-     * key of the table.
+     * The table consists of a two integer columns, where the first is the
+     * primary key of the table and the second is a value with a non-unique
+     * index on it.
      *
      * @param table target table
      * @param rows number of rows to insert
@@ -560,8 +617,9 @@ public class AutomaticIndexStatisticsTest
     /**
      * Default method to create and populate a simple test table.
      * <p>
-     * The table consists of a single integer column, which is also the primary
-     * key of the table.
+     * The table consists of a two integer columns, where the first is the
+     * primary key of the table and the second is a value with a non-unique
+     * index on it.
      *
      * @param con the connection to use (may be {@code null}, in which case
      *      the default connection will be used)
@@ -584,7 +642,10 @@ public class AutomaticIndexStatisticsTest
         // See if the table exists, and if so, drop it.
         dropIfExists(con, table);
         // Create table.
-        s.executeUpdate("create table " + table + "(id int primary key)");
+        s.executeUpdate(
+                "create table " + table + "(id int primary key, val int)");
+        s.executeUpdate("create index NON_UNIQUE_INDEX_" + table + " on " +
+                table + "(val)");
 
         myStats.assertNoStatsTable(table);
 
@@ -593,6 +654,7 @@ public class AutomaticIndexStatisticsTest
         println("created " + table + ", inserting " + rows + " rows");
         insertSimple(con, table, rows, 0);
         println("completed in " + (System.currentTimeMillis() - start) + " ms");
+        myStats.assertNoStatsTable(table);
     }
 
     /**
@@ -624,11 +686,12 @@ public class AutomaticIndexStatisticsTest
     private void insertSimple(Connection con, String table, int rows, int start)
             throws SQLException {
         PreparedStatement ps = con.prepareStatement(
-                                    "insert into " + table + " values ?");
+                                    "insert into " + table + " values (?,?)");
         boolean autoCommit = con.getAutoCommit();
         con.setAutoCommit(false);
         for (int i=start; i < start+rows; i++) {
             ps.setInt(1, i);
+            ps.setInt(2, i % 20);
             ps.addBatch();
             if (i % 5000 == 0) {
                 ps.executeBatch();
