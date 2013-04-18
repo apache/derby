@@ -153,7 +153,7 @@ public class TriggerDescriptor extends TupleDescriptor
 	 * @param oldReferencingName old referencing table name, if any, that appears in REFERCING clause
 	 * @param newReferencingName new referencing table name, if any, that appears in REFERCING clause
 	 */
-	public TriggerDescriptor
+    TriggerDescriptor
 	(
 		DataDictionary		dataDictionary,
 		SchemaDescriptor	sd,

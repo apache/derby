@@ -24,10 +24,6 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.sql.Timestamp;
 import java.util.Arrays;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 /**
  * A Descriptor for a user stored in SYSUSERS.
  */
@@ -47,8 +43,7 @@ public final class  UserDescriptor extends TupleDescriptor
 	 * @param password  The user's password.
 	 * @param lastModified  Time that the password was last modified.
 	 */
-
-	public UserDescriptor
+    UserDescriptor
         (
          DataDictionary dataDictionary,
          String userName,

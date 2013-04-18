@@ -25,15 +25,10 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
-import org.apache.derby.iapi.types.SQLTimestamp;
 import org.apache.derby.iapi.types.SQLVarchar;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.UserType;
 
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
@@ -42,13 +37,11 @@ import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.catalog.ReferencedColumns;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.catalog.UUID;
@@ -399,8 +392,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		col = row.getColumn(17);
 		newReferencingName = col.getString();
 
-		descriptor = new TriggerDescriptor(
-									dd,
+        descriptor = ddg.newTriggerDescriptor(
 									dd.getSchemaDescriptor(suuid, null),
 									uuid, 
 									name, 
