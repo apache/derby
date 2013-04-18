@@ -240,7 +240,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      */
     public static void waitForAvailablePort()
             throws InterruptedException, UnknownHostException {
-        waitForAvailablePort(-1);
+        waitForAvailablePort(TestConfiguration.getCurrent().getPort());
     }
 
 
@@ -249,8 +249,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * by earlier test cases, or until the timeout specified by
      * {@link #getWaitTime()} has elapsed.
      *
-     * @param port If -1, use default port for configuration, else use this
-     *             value.
+     * @param port value.
      * @throws AssertionFailedError if the port didn't become available before
      * the timeout
      * @throws InterruptedException if the thread was interrupted while waiting
@@ -260,12 +259,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public static void waitForAvailablePort(int port)
             throws InterruptedException, UnknownHostException {
 
-        TestConfiguration conf = TestConfiguration.getCurrent();
-        InetAddress serverAddress = InetAddress.getByName(conf.getHostName());
-
-        if (port == -1) {
-            port = conf.getPort();
-        }
+        InetAddress serverAddress = InetAddress.getByName(
+                TestConfiguration.getCurrent().getHostName());
 
         long giveUp = System.currentTimeMillis() + getWaitTime();
         BaseTestCase.println(
