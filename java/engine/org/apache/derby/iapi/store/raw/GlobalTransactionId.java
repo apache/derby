@@ -33,31 +33,5 @@ import org.apache.derby.iapi.services.io.Formatable;
 */
 public interface GlobalTransactionId extends Formatable 
 {
-    /**
-     * Obtain the format id part of the GlobalTransactionId.
-     * <p>
-     *
-	 * @return Format identifier. O means the OSI CCR format.
-     **/
-    public int getFormat_Id();
-
-    /**
-     * Obtain the global transaction identifier part of GlobalTransactionId 
-     * as an array of bytes.
-     * <p>
-     *
-	 * @return A byte array containing the global transaction identifier.
-     **/
-    public byte[] getGlobalTransactionId();
-
-    /**
-     * Obtain the transaction branch qualifier part of the GlobalTransactionId
-     * in a byte array.
-     * <p>
-     *
-	 * @return A byte array containing the branch qualifier of the transaction.
-     **/
-    public byte[] getBranchQualifier();
-
 	/* need to write a value based HashCode() method. */
 }

@@ -33,7 +33,6 @@ import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 
-import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
 
@@ -253,7 +252,7 @@ public class XactXAResourceManager implements XAResourceManager
                     Xact xact = entry.getXact();
                     if (xact.isPrepared())
                     {
-                        GlobalTransactionId xa_id = xact.getGlobalId();
+                        GlobalXactId xa_id = (GlobalXactId) xact.getGlobalId();
 
                         xid_list.add(
                             new XAXactId(

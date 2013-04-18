@@ -23,14 +23,10 @@ package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.access.GlobalXact;
-
-import org.apache.derby.iapi.util.ByteArray;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -47,16 +43,14 @@ public class GlobalXactId extends GlobalXact implements GlobalTransactionId
      * Constructors for This class:
      **************************************************************************
      */
-	public GlobalXactId(
+    GlobalXactId(
 						int     format_id,
 						byte[]  global_id,
 						byte[]  branch_id)
     {
 		this.format_id = format_id;
-		this.global_id = new byte[global_id.length];
-		System.arraycopy(global_id, 0, this.global_id, 0, global_id.length);
-		this.branch_id = new byte[branch_id.length];
-		System.arraycopy(branch_id, 0, this.branch_id, 0, branch_id.length);
+        this.global_id = (byte[]) global_id.clone();
+        this.branch_id = (byte[]) branch_id.clone();
 	}
 
     /**************************************************************************
@@ -142,21 +136,29 @@ public class GlobalXactId extends GlobalXact implements GlobalTransactionId
      **************************************************************************
      */
 
-    /**************************************************************************
-     * Public Methods of This class:
-     **************************************************************************
+    /**
+     * Obtain the format id part of the GlobalTransactionId.
+     * @return format identifier, 0 means the OSI CCR format
      */
-    public int getFormat_Id()
+    int getFormat_Id()
     {
         return(format_id);
     }
 
-    public byte[] getGlobalTransactionId()
+    /**
+     * Obtain the global transaction identifier as an array of bytes.
+     * @return a byte array containing the global transaction identifier
+     */
+    byte[] getGlobalTransactionId()
     {
         return(global_id);
     }
 
-    public byte[] getBranchQualifier()
+    /**
+     * Obtain the transaction branch qualifier as an array of bytes.
+     * @return a byte array containing the branch qualifier of the transaction
+     */
+    byte[] getBranchQualifier()
     {
         return(branch_id);
     }

@@ -35,7 +35,6 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 
@@ -43,14 +42,8 @@ import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 
-import org.apache.derby.iapi.store.access.AccessFactory;
-
-import org.apache.derby.iapi.store.access.xa.XAResourceManager;
-
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
@@ -60,7 +53,6 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.xact.TransactionId;
-import org.apache.derby.impl.store.raw.xact.XactXAResourceManager;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 
@@ -68,9 +60,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Hashtable;
 
 public class XactFactory implements TransactionFactory, ModuleControl, ModuleSupportable
 {
@@ -311,7 +301,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	private RawTransaction startCommonTransaction(
+    private Xact startCommonTransaction(
     RawStoreFactory     rsf, 
     ContextManager      cm,
     boolean             readOnly,
@@ -421,7 +411,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
             throw StandardException.newException(SQLState.STORE_XA_XAER_DUPID);
         }
 
-        RawTransaction xact = 
+        Xact xact =
             startCommonTransaction(
                 rsf, 
                 cm, 

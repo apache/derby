@@ -479,7 +479,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 	/**
 		Set my transaction identifier.
 	*/
-	public void setTransactionId(GlobalTransactionId extid, TransactionId localid) {
+    void setTransactionId(GlobalTransactionId extid, TransactionId localid) {
 
 		if (SanityManager.DEBUG) {
 

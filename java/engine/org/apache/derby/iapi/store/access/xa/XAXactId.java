@@ -64,10 +64,8 @@ public class XAXactId extends GlobalXact implements Xid
 							   byte[]  branch_id)
     {
 		this.format_id = format_id;
-		this.global_id = new byte[global_id.length];
-		System.arraycopy(global_id, 0, this.global_id, 0, global_id.length);
-		this.branch_id = new byte[branch_id.length];
-		System.arraycopy(branch_id, 0, this.branch_id, 0, branch_id.length);
+        this.global_id = (byte[]) global_id.clone();
+        this.branch_id = (byte[]) branch_id.clone();
     }
     
     /**
@@ -229,7 +227,7 @@ public class XAXactId extends GlobalXact implements Xid
      **/
     public byte[] getGlobalTransactionId()
     {
-        return(global_id);
+        return (byte[]) global_id.clone();
     }
 
     /**
@@ -240,7 +238,7 @@ public class XAXactId extends GlobalXact implements Xid
      **/
     public byte[] getBranchQualifier()
     {
-        return(branch_id);
+        return (byte[]) branch_id.clone();
     }
 
 

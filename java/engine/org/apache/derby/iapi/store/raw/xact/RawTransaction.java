@@ -38,8 +38,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.catalog.UUID;
-
 
 import java.util.Observable;
 
@@ -117,11 +115,6 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		throws StandardException;
 
 	/** Methods to help logging and recovery */
-
-	/** 
-		Set the transaction Ids (Global and internal) of this transaction
-	*/
-	public abstract void setTransactionId(GlobalTransactionId id, TransactionId shortId);
 
 	/**
 		Set the transactionId (Global and internal) of this transaction using a
