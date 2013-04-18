@@ -228,7 +228,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSLA1","Log Record has been sent to the stream, but it cannot be applied to the store (Object {0}).  This may cause recovery problems also.","45000"},
         		{"XSLA2","System will shutdown, got I/O Exception while accessing log file.","45000"},
         		{"XSLA3","Log Corrupted, has invalid data in the log stream.","45000"},
-        		{"XSLA4","Cannot write to the log, most likely the log is full.  Please delete unnecessary files.  It is also possible that the file system is read only, or the disk has failed, or some other problems with the media.  ","45000"},
+        		{"XSLA4","Error encountered when attempting to write the transaction recovery log. Most likely the disk holding the recovery log is full. If the disk is full, the only way to proceed is to free up space on the disk by either expanding it or deleting files not related to Derby. It is also possible that the file system and/or disk where the Derby transaction log resides is read-only. The error can also be encountered if the disk or file system has failed.","45000"},
         		{"XSLA5","Cannot read log stream for some reason to rollback transaction {0}.","45000"},
         		{"XSLA6","Cannot recover the database.","45000"},
         		{"XSLA7","Cannot redo operation {0} in the log.","45000"},
