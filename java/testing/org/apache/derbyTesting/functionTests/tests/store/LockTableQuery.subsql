@@ -49,18 +49,21 @@ from
 on l.xid = t.xid where l.tableType <> 'S' ;
 
 -- lock table with no join.
+-- DERBY-6183, removing CAST's to avoid background locks causing
+-- data trunction warnings.
+
 create view lock_table2 as
 select 
-    cast(l.xid as char(8)) as xid,
-    cast(l.type as char(8)) as type,
-    cast(lockcount as char(3)) as cnt,
+    xid,
+    type,
+    lockcount as cnt,
     mode,
-    cast(tablename as char(12)) as tabname,
-    cast(lockname as char(10)) as lockname,
+    tablename as tabname,
+    lockname,
     state
 from 
-    syscs_diag.lock_table l  
-where l.tableType <> 'S' ;
+    syscs_diag.lock_table
+where tableType <> 'S' ;
 
 -- transaction table with no join.
 create view tran_table as
