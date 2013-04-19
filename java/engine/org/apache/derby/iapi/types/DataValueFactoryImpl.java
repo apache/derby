@@ -102,8 +102,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     		DataValueDescriptor decimalImplementation = getNullDecimal(null);
     		
     		TypeId.decimalImplementation = decimalImplementation;
-    		RegisteredFormatIds.TwoByte[StoredFormatIds.SQL_DECIMAL_ID]
-    									= decimalImplementation.getClass().getName();
+    		RegisteredFormatIds.setDecimalClassName( decimalImplementation.getClass().getName() );
     		    		
     		// Generate a DECIMAL value represetentation of 0
     		decimalImplementation = decimalImplementation.getNewNull();

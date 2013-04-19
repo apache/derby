@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.services.io;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.ReuseFactory;
 
@@ -133,7 +134,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet(byte[] newValue)
 	{
-		value = newValue;
+		value = ArrayUtil.copy( newValue );
 		bitsInLastByte = 8;
 		lengthAsBits = calculateLength(newValue.length);
 	}
@@ -273,7 +274,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 			value = data;
 		}
 
-		return value;
+		return ArrayUtil.copy( value );
 	}
 
 	/**
@@ -745,6 +746,15 @@ public final class FormatableBitSet implements Formatable, Cloneable
 			SanityManager.ASSERT(invariantHolds(),"or() broke invariant");
 		}
 	}
+
+    /**
+     * Copy the bytes from another FormatableBitSet. Assumes that this bit set
+     * is at least as large as the argument's bit set.
+     */
+    public  void    copyFrom( FormatableBitSet that )
+    {
+        System.arraycopy( that.getByteArray(), 0, value, 0, that.getLengthInBytes());
+    }
 
 	/**
 	 * Bitwise AND this FormatableBitSet with another

@@ -41,14 +41,14 @@ package org.apache.derby.iapi.services.io;
         </UL>
 */
 
-public interface RegisteredFormatIds {
+public class RegisteredFormatIds {
 
 /* one byte  format identifiers never used
-String[] OneByte = {
+private static final String[] OneByte = {
 };
 */
 
-String[] TwoByte = {
+private static final    String[] TwoByte = {
         /* 0 */         null, // null marker
         /* 1 */         null, // String marker
         /* 2 */         null, // Serializable marker
@@ -535,4 +535,19 @@ String[] TwoByte = {
         /* 474 */       "org.apache.derby.catalog.types.UDTAliasInfo",
         /* 475 */       "org.apache.derby.catalog.types.AggregateAliasInfo",
 };
+
+    /** Return the number of two-byte format ids */
+    public  static  int countTwoByteIDs() { return TwoByte.length; }
+
+    /** Return the class name bound to an index into TwoByte */
+    public  static  String  classNameForTwoByteID( int idx ) { return TwoByte[ idx ]; }
+
+    /**
+     * Set the class name associated with the DECIMAL datatype. When we
+     * stop supporting CDC, we can remove this method.
+     */
+    public  static  void    setDecimalClassName( String decimalClassName )
+    {
+        TwoByte[ StoredFormatIds.SQL_DECIMAL_ID ] = decimalClassName;
+    }
 }

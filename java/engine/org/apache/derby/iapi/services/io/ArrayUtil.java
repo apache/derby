@@ -48,7 +48,7 @@ public abstract class ArrayUtil
         return (original == null) ? null : (Object[]) original.clone();
     }
 
-    /** Copy an array of strings; the original array could be null */
+    /** Copy a (possibly null) array of strings */
     public  static  String[]    copy( String[] original )
     {
         return (original == null) ? null : (String[]) original.clone();
@@ -58,6 +58,12 @@ public abstract class ArrayUtil
     public  static  boolean[]   copy( boolean[] original )
     {
         return (original == null) ? null : (boolean[]) original.clone();
+    }
+
+    /** Copy a (possibly null) array of bytes */
+    public  static  byte[]   copy( byte[] original )
+    {
+        return (original == null) ? null : (byte[]) original.clone();
     }
 
     /** Copy a (possibly null) array of ints */

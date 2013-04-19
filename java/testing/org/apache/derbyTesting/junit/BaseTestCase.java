@@ -470,11 +470,47 @@ public abstract class BaseTestCase
     
     /**
      * <p>
+     * Assert the equivalence of two byte arrays.
+     * </p>
+     */
+    public  static  void    assertEquals( byte[] expected, byte[] actual )
+    {
+        if ( assertSameNullness( expected, actual ) ) { return; }
+        
+        assertEquals( expected.length, actual.length );
+        for ( int i = 0; i < expected.length; i++ )
+        {
+            assertEquals( Integer.toString( i ), expected[ i ], actual[ i ] );
+        }
+    }
+
+    /**
+     * Assert that two objects are either both null or neither null.
+     * Returns true if they are null.
+     */
+    public  static  boolean assertSameNullness( Object expected, Object actual )
+    {
+        if ( expected ==  null )
+        {
+            assertNull( actual );
+            return true;
+        }
+        else
+        {
+            assertNotNull( actual );
+            return false;
+        }
+    }
+
+    /**
+     * <p>
      * Assert the equivalence of two int arrays.
      * </p>
      */
     public  static  void    assertEquals( int[] expected, int[] actual )
     {
+        if ( assertSameNullness( expected, actual ) ) { return; }
+        
         assertEquals( expected.length, actual.length );
         for ( int i = 0; i < expected.length; i++ )
         {
@@ -489,6 +525,8 @@ public abstract class BaseTestCase
      */
     public  static  void    assertEquals( long[] expected, long[] actual )
     {
+        if ( assertSameNullness( expected, actual ) ) { return; }
+        
         assertEquals( expected.length, actual.length );
         for ( int i = 0; i < expected.length; i++ )
         {

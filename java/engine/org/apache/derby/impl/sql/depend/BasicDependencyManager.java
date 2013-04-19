@@ -404,9 +404,7 @@ public class BasicDependencyManager implements DependencyManager {
 
 									if (tab.getObjectID().equals(td.getObjectID()))
 									{
-										System.arraycopy(affectedCols.getByteArray(), 0, 
-											subsetCols.getByteArray(), 0, 
-											affectedCols.getLengthInBytes());
+                                        subsetCols.copyFrom( affectedCols );
 										subsetCols.and(colMap);
 										if (subsetCols.anySetBit() != -1)
 										{
@@ -424,7 +422,7 @@ public class BasicDependencyManager implements DependencyManager {
 					}	// if providingCols == null
 					else
 					{
-						System.arraycopy(affectedCols.getByteArray(), 0, subsetCols.getByteArray(), 0, affectedCols.getLengthInBytes());
+                        subsetCols.copyFrom( affectedCols );
 						subsetCols.and(providingCols);
 						if (subsetCols.anySetBit() == -1)
 							continue;

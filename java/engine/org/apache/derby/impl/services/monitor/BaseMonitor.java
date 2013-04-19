@@ -602,14 +602,14 @@ abstract class BaseMonitor
 			off = fmtId - StoredFormatIds.MIN_TWO_BYTE_FORMAT_ID;
 			iga = rc2;
 			if (iga == null) {
-				iga = rc2 = new InstanceGetter[RegisteredFormatIds.TwoByte.length];
+				iga = rc2 = new InstanceGetter[ RegisteredFormatIds.countTwoByteIDs() ];
 			}
 
 			ig = iga[off];
 			if (ig != null) {
 				return ig;
 			}
-			className = RegisteredFormatIds.TwoByte[off];
+			className = RegisteredFormatIds.classNameForTwoByteID( off );
 
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			className = null;
