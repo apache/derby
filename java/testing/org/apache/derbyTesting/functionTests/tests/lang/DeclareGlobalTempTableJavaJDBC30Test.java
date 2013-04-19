@@ -946,14 +946,7 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
 
         conn.rollback();
 
-        try {
-            pStmtInsert.execute();
-            fail( "Should fail!" );
-        }
-        catch ( SQLException se)
-        {
-            assertEquals( "42X05", se.getSQLState() );
-        }
+        assertStatementError("42X05", pStmtInsert); 
     }
     
 }
