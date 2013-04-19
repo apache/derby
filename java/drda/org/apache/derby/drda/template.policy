@@ -111,7 +111,8 @@ grant codeBase "${derby.install.url}derbynet.jar"
 // Needed for server tracing.
 //
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
-  // Needed by file permissions restriction system:
+
+// Needed by file permissions restriction system:
   permission java.lang.RuntimePermission "accessUserInformation";
   permission java.lang.RuntimePermission "getFileStoreAttributes";
   permission java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "read, write";
