@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.services.io;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.ObjectOutput;
@@ -73,7 +74,7 @@ public class FormatableArrayHolder implements Formatable
 					"array input to constructor is null, code can't handle this.");
 		}
 
-		this.array = array;
+		setArray( array );
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class FormatableArrayHolder implements Formatable
 					"array input to setArray() is null, code can't handle this.");
 		}
 
-		this.array = array;
+		this.array = ArrayUtil.copy( array );
 	}
 
 	/**
