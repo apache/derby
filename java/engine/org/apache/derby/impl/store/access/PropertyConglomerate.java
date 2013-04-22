@@ -727,10 +727,11 @@ class PropertyConglomerate
 		scan.close();
 
 		// add the known properties from the service properties set
-		for (int i = 0; i < PropertyUtil.servicePropertyList.length; i++) {
+        String[]    servicePropertyList = PropertyUtil.getServicePropertyList();
+		for (int i = 0; i < servicePropertyList.length; i++) {
 			String value =
-				serviceProperties.getProperty(PropertyUtil.servicePropertyList[i]);
-			if (value != null) set.put(PropertyUtil.servicePropertyList[i], value);
+				serviceProperties.getProperty(servicePropertyList[i]);
+			if (value != null) set.put(servicePropertyList[i], value);
 		}
 		return set;
 	}

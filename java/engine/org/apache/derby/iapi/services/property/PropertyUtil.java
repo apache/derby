@@ -25,6 +25,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.error.StandardException;
@@ -66,7 +67,7 @@ import java.util.Enumeration;
 public class PropertyUtil {
 
 	// List of properties that are stored in the service.properties file
-	public static final String[] servicePropertyList = {
+	private static final String[] servicePropertyList = {
 		EngineType.PROPERTY,
 		Property.NO_AUTO_BOOT,
 		Property.STORAGE_TEMP_DIRECTORY,
@@ -142,6 +143,12 @@ public class PropertyUtil {
 
 		return dbOnly;
 	}
+
+    /** Get the list of properties which are normally stored in service.properties */
+    public  static  String[]    getServicePropertyList()
+    {
+        return ArrayUtil.copy( servicePropertyList );
+    }
 	
 	/**
 		Find a system wide property.
