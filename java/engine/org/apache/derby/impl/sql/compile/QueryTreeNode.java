@@ -803,23 +803,6 @@ public abstract class QueryTreeNode implements Node, Visitable
 		return StatementType.UNKNOWN;
 	}
 
-	public boolean foundString(String[] list, String search)
-	{
-		if (list == null)
-		{
-			return false;
-		}
-
-		for (int i = 0; i < list.length; i++)
-		{
-			if (list[i].equals(search))
-			{	
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Get a ConstantNode to represent a typed null value. 
 	 *
@@ -1266,11 +1249,6 @@ public abstract class QueryTreeNode implements Node, Visitable
 		return false;
 	}
 	
-	public Object getCursorInfo() throws StandardException
-	{
-		return null;
-	}
-
 	/**
 	 * Get the descriptor for the named table within the given schema.
 	 * If the schema parameter is NULL, it looks for the table in the

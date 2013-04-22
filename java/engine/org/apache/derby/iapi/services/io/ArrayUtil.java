@@ -344,18 +344,13 @@ public abstract class ArrayUtil
 	public static String[] readStringArray(ObjectInput in) 
 		throws IOException, ClassNotFoundException
 	{
-		Object[] objArray = readObjectArray(in);
-		int size = 0;
+        String[] stringArray = null;
 
-		if (objArray == null)
-			return null;
-
-		String[] stringArray = new String[size = objArray.length];
-
-		for (int i = 0; i < size; i++)
-		{
-			stringArray[i] = (String)objArray[i];
-		} 
+        int size = readArrayLength(in);
+        if (size > 0) {
+            stringArray = new String[size];
+            readArrayItems(in, stringArray);
+        }
 
 		return stringArray;
 	}

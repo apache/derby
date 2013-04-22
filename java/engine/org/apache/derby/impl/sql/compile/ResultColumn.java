@@ -1680,18 +1680,6 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
-	 * Is this column in this array of strings?
-	 *
-	 * @param list the array of column names to compare
-	 *
-	 * @return true/false
-	 */
-	public boolean foundInList(String[] list)
-	{
-		return foundString(list, name);
-	}
-
-	/**
 	 * Verify that this RC is orderable.
 	 *
 	 * @exception StandardException		Thrown on error

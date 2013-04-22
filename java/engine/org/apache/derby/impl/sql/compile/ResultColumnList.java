@@ -50,6 +50,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.store.access.ConglomerateController;
@@ -2267,12 +2268,13 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Verify that all of the columns in the SET clause of a positioned update
 	 * appear in the cursor's FOR UPDATE OF list.
 	 *
-	 * @param ucl			The cursor's FOR UPDATE OF list.  (May be null.)
+     * @param cursorStmt the statement that owns the cursor
 	 * @param cursorName	The cursor's name.
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void checkColumnUpdateability(String[] ucl, String cursorName) 
+    void checkColumnUpdateability(
+            ExecPreparedStatement cursorStmt, String cursorName)
 			throws StandardException
 	{
 		int size = size();
@@ -2282,7 +2284,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
 
 			if (resultColumn.updated() &&
-				! resultColumn.foundInList(ucl))
+                    !cursorStmt.isUpdateColumn(resultColumn.getName()))
 			{
 				throw StandardException.newException(SQLState.LANG_COLUMN_NOT_UPDATABLE_IN_CURSOR, 
 							resultColumn.getName(),

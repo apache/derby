@@ -47,7 +47,6 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
@@ -126,8 +125,7 @@ public class GenericPreparedStatement
 
 	// fields used for cursors
 	protected ExecCursorTableReference	targetTable; 
-	protected ResultColumnDescriptor[]	targetColumns; 
-	protected String[] 					updateColumns; 
+    protected List                      updateColumns;
 	protected int 						updateMode;
 
 	protected ConstantAction	executionConstants;
@@ -983,7 +981,6 @@ recompileOutOfDatePlan:
 			targetTable = null;
 			updateMode = 0;
 			updateColumns = null;
-			targetColumns = null;
 		}
 
 		// get the result description (null for non-cursor statements)
@@ -1000,14 +997,7 @@ recompileOutOfDatePlan:
 			/*
 				For cursors, we carry around some extra information.
 			 */
-			CursorInfo cursorInfo = (CursorInfo)qt.getCursorInfo();
-			if (cursorInfo != null)
-			{
-				targetTable = cursorInfo.targetTable;
-				targetColumns = cursorInfo.targetColumns;
-				updateColumns = cursorInfo.updateColumns;
-				updateMode = cursorInfo.updateMode;
-			}
+            setCursorInfo((CursorInfo) qt.getCursorInfo());
 		}
 		isValid = true;
 
@@ -1052,24 +1042,13 @@ recompileOutOfDatePlan:
 		return targetTable;
 	}
 
-	/**
-	 * the target columns of the cursor as a result column list
-	 *
-	 * @return	target columns of the cursor as a result column list
-	 */
-	public ResultColumnDescriptor[]	getTargetColumns() {
-		return targetColumns;
-	}
+    public boolean hasUpdateColumns() {
+        return updateColumns != null && !updateColumns.isEmpty();
+    }
 
-	/**
-	 * the update columns of the cursor as a update column list
-	 *
-	 * @return	update columns of the cursor as a array of strings
-	 */
-	public String[]	getUpdateColumns() 
-	{
-		return updateColumns;
-	}
+    public boolean isUpdateColumn(String columnName) {
+        return updateColumns != null && updateColumns.contains(columnName);
+    }
 
 	/**
 	 * Return the cursor info in a single chunk.  Used
@@ -1080,7 +1059,6 @@ recompileOutOfDatePlan:
 		return new CursorInfo(
 			updateMode,
 			targetTable, 
-			targetColumns,
 			updateColumns);
 	}
 
@@ -1090,7 +1068,6 @@ recompileOutOfDatePlan:
 		{
 			updateMode = cursorInfo.updateMode;
 			targetTable = cursorInfo.targetTable;
-			targetColumns = cursorInfo.targetColumns;
 			updateColumns = cursorInfo.updateColumns;
 		}
 	}
@@ -1194,7 +1171,6 @@ recompileOutOfDatePlan:
 		clone.isAtomic = isAtomic;
 		clone.sourceTxt = sourceTxt;
 		clone.targetTable = targetTable;
-		clone.targetColumns = targetColumns;
 		clone.updateColumns = updateColumns;
 		clone.updateMode = updateMode;	
 		clone.needsSavepoint = needsSavepoint;

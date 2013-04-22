@@ -136,6 +136,13 @@ public abstract class StatementNode extends QueryTreeNode
 		return null;
 	}
 
+    /**
+     * Get an object with information about the cursor if there is one.
+     */
+    public Object getCursorInfo() throws StandardException {
+        return null;
+    }
+
 	/**
 	 * Convert this object to a String. See comments in QueryTreeNode.java for
 	 * how this should be done for tree printing.

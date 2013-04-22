@@ -390,13 +390,12 @@ public final class UpdateNode extends DMLModStatementNode
 			}
 
 			ExecPreparedStatement	 cursorStmt = currentOfNode.getCursorStatement();
-			String[] ucl = cursorStmt.getUpdateColumns();
 
 			/*
 			** If there is no update column list, we need to build
 			** out the result column list to have all columns.
 			*/
-			if (ucl == null || (ucl.length == 0))
+            if (!cursorStmt.hasUpdateColumns())
 			{
 				/*
 				** Get the resultColumnList representing ALL of the columns in the 
@@ -426,8 +425,8 @@ public final class UpdateNode extends DMLModStatementNode
 			else
 			{
 				/* Check the updatability */
-				resultSet.getResultColumns().checkColumnUpdateability(ucl,
-								currentOfNode.getCursorName());
+                resultSet.getResultColumns().checkColumnUpdateability(
+                        cursorStmt, currentOfNode.getCursorName());
 			}
 		}
 

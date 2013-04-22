@@ -21,18 +21,20 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A basic holder for information about cursors
  * for execution.
@@ -57,8 +59,7 @@ public class CursorInfo
 	********************************************************/
 
 	ExecCursorTableReference	targetTable; 
-	ResultColumnDescriptor[]	targetColumns; 
-	String[] 					updateColumns; 
+    List                        updateColumns;
 	int 						updateMode;
 
 	/**
@@ -75,14 +76,13 @@ public class CursorInfo
 	(
 		int							updateMode,
 		ExecCursorTableReference	targetTable,
-		ResultColumnDescriptor[]	targetColumns,
-		String[]					updateColumns
+        List                        updateColumns
 	)
 	{
 		this.updateMode = updateMode;
 		this.targetTable = targetTable;
-		this.targetColumns = targetColumns;
-		this.updateColumns = updateColumns;
+        this.updateColumns = (updateColumns == null) ?
+                null : new ArrayList(updateColumns);
 	}
 
 	//////////////////////////////////////////////
@@ -101,8 +101,13 @@ public class CursorInfo
 	{
 		out.writeInt(updateMode);
 		out.writeObject(targetTable);
-		ArrayUtil.writeArray(out, targetColumns);
-		ArrayUtil.writeArray(out, updateColumns);
+
+        // For backwards compatibility. Used to write an array of
+        // target column descriptors here.
+        ArrayUtil.writeArray(out, (Object[]) null);
+
+        ArrayUtil.writeArray(out, updateColumns == null ?
+                null : updateColumns.toArray());
 	}
 
 	/**
@@ -118,18 +123,15 @@ public class CursorInfo
 	{
 		updateMode = in.readInt();
 		targetTable = (ExecCursorTableReference)in.readObject();
-		int len = ArrayUtil.readArrayLength(in);
-		if (len != 0)
-		{
-			targetColumns = new ResultColumnDescriptor[len];
-			ArrayUtil.readArrayItems(in, targetColumns);
-		}
-		len = ArrayUtil.readArrayLength(in);
-		if (len != 0)
-		{
-			updateColumns = new String[len];
-			ArrayUtil.readArrayItems(in, updateColumns);
-		}
+
+        // For backwards compatibility. Read and discard array that's no
+        // longer used.
+        ArrayUtil.readObjectArray(in);
+
+        int len = ArrayUtil.readArrayLength(in);
+        if (len > 0) {
+            updateColumns = Arrays.asList(ArrayUtil.readStringArray(in));
+        }
 	}
 	
 	/**
@@ -143,43 +145,10 @@ public class CursorInfo
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer strbuf = new StringBuffer();
-		
-			strbuf.append("CursorInfo"+
+            return "CursorInfo" +
 				"\n\tupdateMode: "+updateMode+
 				"\n\ttargetTable: "+targetTable+
-				"\n\tupdateColumns: ");
-
-			if (updateColumns == null)
-			{
-				strbuf.append("NULL\n");
-			}
-			else
-			{
-				strbuf.append("{");
-				for (int i = 0; i < updateColumns.length; i++)
-				{
-					if (i > 0)
-						strbuf.append(",");
-					strbuf.append(updateColumns[i]);
-				}
-				strbuf.append(")\n");
-			}
-
-			strbuf.append("\tTargetColumnDescriptors: \n");
-			if (targetColumns == null)
-			{
-				strbuf.append("NULL");
-			}
-			else
-			{
-				for (int i = 0; i < targetColumns.length; i++)
-				{
-					strbuf.append(targetColumns[i]);
-				}
-				strbuf.append("\n");
-			}
-			return strbuf.toString();	
+                "\n\tupdateColumns: " + updateColumns + '\n';
 		}
 		else
 		{

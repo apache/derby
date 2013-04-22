@@ -28,7 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 import java.util.List;
 
@@ -149,20 +148,16 @@ public interface ExecPreparedStatement
 	 */
 	ExecCursorTableReference getTargetTable();
 
-	/**
-	 * the target columns of the cursor; this is a superset of
-	 * the updatable columns, describing the row available
-	 *
-	 * @return	target columns of the cursor as an array of column descriptors
-	 */
-	ResultColumnDescriptor[]	getTargetColumns();
+    /**
+     * Check if this prepared statement has a cursor with columns that
+     * can be updated.
+     */
+    boolean hasUpdateColumns();
 
-	/**
-	 * the update columns of the cursor
-	 *
-	 * @return	update columns of the cursor as a string of column names
-	 */
-	String[]	getUpdateColumns();
+    /**
+     * Check if the specified column name is one of the update columns.
+     */
+    boolean isUpdateColumn(String columnName);
 
 	/**
 	 * set this parepared statement to be valid

@@ -339,9 +339,7 @@ public final class CurrentOfNode extends FromTable {
 				// If so, verify that the column is updatable as well
 				notfound = 
 					(resultColumn.updatableByCursor() &&
-					!foundString(
-							preStmt.getUpdateColumns(), 
-							columnReference.getColumnName()));
+                     !preStmt.isUpdateColumn(columnReference.getColumnName()));
 			}
 			else 
 			{

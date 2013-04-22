@@ -28,7 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -66,7 +65,6 @@ public class CursorNode extends DMLStatementNode
 	*/
 	private List updatableColumns;
 	private FromTable updateTable;
-	private ResultColumnDescriptor[]	targetColumnDescriptors;
     /**
      * List of {@code TableDescriptor}s for base tables whose associated
      * indexes should be checked for stale statistics.
@@ -550,15 +548,7 @@ public class CursorNode extends DMLStatementNode
 		if (updateTable.markAsCursorTargetTable()) {
 			/* Cursor is updatable - remember to generate the position code */
 			needTarget = true;
-
-			/* We must generate the target column list at bind time
-			 * because the optimizer may transform the FromBaseTable from
-			 * a table scan into an index scan.
-			 */
-			genTargetResultColList();
 		}
-
-
 
 
 		return UPDATE;
@@ -688,82 +678,6 @@ public class CursorNode extends DMLStatementNode
 	}
 
 	/**
-	 * Return String[] of names from the FOR UPDATE OF List
-	 *
-	 * @return	String[] of names from the FOR UPDATE OF list.
-	 */
-	private String[] getUpdatableColumns()
-	{
-		return (updatableColumns == null) ?
-				(String[])null :
-				getUpdateColumnNames();
-	}
-
-	/**
-		Positioned update needs to know what the target result set
-		looks like. This is generated from the UpdateColumnList
-		available for the cursor, to describe the rows coming from
-		the target result set under the cursor. This result set contains
-		a superset of the updatable columns; the caller must verify that
-		only those listed in the FOR UPDATE clause are used.
-
-		@return a result column list containing a description of
-		the target table (this may contain non-updatable columns).
-	 * @exception StandardException		Thrown on error
-	 */
-	private ResultColumnDescriptor[] genTargetResultColList()
-		throws StandardException
-	{
-		ResultColumnList newList;
-
-		/*
-		   updateTable holds the FromTable that is the target.
-		   copy its ResultColumnList, making BaseColumn references
-		   for use in the CurrentOfNode, which behaves as if it had
-		   base columns for the statement it is in.
-
-			updateTable is null if the cursor is not updatable.
-		 */
-		if (updateTable == null) return null;
-
-		if (targetColumnDescriptors != null) return targetColumnDescriptors;
-
-		newList = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
-		ResultColumnList rcl = updateTable.getResultColumns();
-		int rclSize = rcl.size();
-		for (int index = 0; index < rclSize; index++)
-		{
-			ResultColumn origCol, newCol;
-			ValueNode newNode;
-
-			origCol = (ResultColumn) rcl.elementAt(index);
-
-			// Build a ResultColumn/BaseColumnNode pair for the column
-			newNode = (ValueNode) getNodeFactory().getNode(
-							C_NodeTypes.BASE_COLUMN_NODE,
-							origCol.getName(),
-							makeTableName(origCol.getSchemaName(),
-										  origCol.getTableName()),								
-							origCol.getTypeServices(),
-							getContextManager());
-			newCol = (ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									origCol.columnDescriptor,
-									newNode,
-									getContextManager());
-
-			/* Build the ResultColumnList to return */
-			newList.addResultColumn(newCol);
-		}
-
-		// we save the result so we only do this once
-		targetColumnDescriptors = newList.makeResultDescriptors();
-		return targetColumnDescriptors;
-	}
-
-	/**
 	 * Returns whether or not this Statement requires a set/clear savepoint
 	 * around its execution.  The following statement "types" do not require them:
 	 *		Cursor	- unnecessary and won't work in a read only environment
@@ -795,8 +709,7 @@ public class CursorNode extends DMLStatementNode
 										getUpdateExposedTableName(),
 										getUpdateBaseTableName(),
 										getUpdateSchemaName()),
-								genTargetResultColList(),
-								getUpdatableColumns());
+                                updatableColumns);
 	}
 
 	/**
@@ -843,23 +756,6 @@ public class CursorNode extends DMLStatementNode
 		}
 	}
 
-	/**
-	 * Get an array of strings for each updatable column
-	 * in this list.
-	 *
-	 * @return an array of strings
-	 */
-	private String[] getUpdateColumnNames()
-	{
-		int size = updatableColumns.size();
-		if (size == 0)
-		{
-			return (String[])null;
-		}
-
-        return (String[]) updatableColumns.toArray(new String[size]);
-	}
-	
 	public String getXML()
 	{
 		return null;
