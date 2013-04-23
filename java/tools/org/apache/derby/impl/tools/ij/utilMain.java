@@ -139,7 +139,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		ijTokMgr = new ijTokenManager(charStream);
 		ijParser = new ij(ijTokMgr, this);
 		this.out = out;
-		this.ignoreErrors = ignoreErrors;
+		if ( ignoreErrors != null ) { this.ignoreErrors = (Hashtable) ignoreErrors.clone(); }
 		
 		showErrorCode = 
 			Boolean.valueOf(
