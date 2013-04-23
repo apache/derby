@@ -34,6 +34,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
 
@@ -100,7 +101,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      */
     public  StringColumnVTI( String[] columnNames )
     {
-        _columnNames = columnNames;
+        _columnNames = ArrayUtil.copy( columnNames );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

@@ -41,6 +41,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.util.IdUtil;
 
 /**
@@ -315,7 +316,7 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
         ( String[] columnNames, Restriction restriction )
         throws SQLException
     {
-        _columnNames = columnNames;
+        _columnNames = ArrayUtil.copy( columnNames );
         _restriction = restriction;
 
         int columnCount = _columnNames.length;
@@ -324,7 +325,7 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
         int foreignColumnID = 1;
         for ( int i = 0; i < columnCount; i++ )
         {
-            if ( columnNames[ i ] != null ) { _columnNumberMap[ i ] = foreignColumnID++; }
+            if ( _columnNames[ i ] != null ) { _columnNumberMap[ i ] = foreignColumnID++; }
         }
     }
 

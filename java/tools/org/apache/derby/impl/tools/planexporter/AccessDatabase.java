@@ -27,6 +27,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.tools.ToolUtils;
+
 /**
  * This class will perform the database connection establishment,
  * querying the database, shut downing the database.
@@ -581,6 +583,6 @@ public class AccessDatabase {
      * @return data array of TreeNode Objects
      */
     public TreeNode[] getData() {
-        return data;
+        return (TreeNode[]) ToolUtils.copy( data );
     }
 }

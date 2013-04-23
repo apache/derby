@@ -62,12 +62,18 @@ public class JDBCDisplayUtil {
 	// used to control display
 	static final private int MINWIDTH = 4;
 	static private int maxWidth = 128;
-    static public boolean showSelectCount = false;
+    static private boolean showSelectCount = false;
 
     static {
         // initialize the locale support functions to default value of JVM 
         LocalizedResource.getInstance();
     }
+
+	//-----------------------------------------------------------------
+	// Accessors
+
+    public  static  boolean getShowSelectCount() { return showSelectCount; }
+    public  static  void    setShowSelectCount( boolean newValue ) { showSelectCount = newValue; }
 
 	//-----------------------------------------------------------------
 	// Methods for displaying and checking errors
