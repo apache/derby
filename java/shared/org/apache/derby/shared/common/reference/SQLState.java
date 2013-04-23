@@ -453,6 +453,7 @@ public interface SQLState {
 	String XACT_INTERNAL_TRANSACTION_EXCEPTION                  = "40XT5";
 	String XACT_CANNOT_ACTIVATE_TRANSACTION                     = "40XT6";
 	String XACT_NOT_SUPPORTED_IN_INTERNAL_XACT                  = "40XT7";
+	String XACT_PROTOCOL_VIOLATION_DETAILED                     = "40XT8";
 
 	/*
 	** RawStore - Transactions.Basic system exceptions

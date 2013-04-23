@@ -1106,6 +1106,12 @@ Guide.
                 <text>Operation is not supported in an internal transaction.</text>
             </msg>
 
+            <msg>
+                <name>40XT8</name>
+                <text>An internal error was identified by RawStore module. Internal state detail from the transaction is as follows: {0}</text>
+                <arg>internalTransactionState</arg>
+            </msg>
+
         </family>
 
 

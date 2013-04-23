@@ -757,7 +757,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (state == CLOSED)
         {
 			throw StandardException.newException(
-                    SQLState.XACT_PROTOCOL_VIOLATION);
+                    SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                    toInternalDetailString());
         }
 
 		if (SanityManager.DEBUG)
@@ -929,7 +930,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 				if (!sanityCheck_xaclosed)
                 {
 					throw StandardException.newException(
-                            SQLState.XACT_PROTOCOL_VIOLATION);
+                                    SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                                    toInternalDetailString());
                 }
 			}
 
@@ -1041,7 +1043,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (state == CLOSED)
         {
 			throw StandardException.newException(
-                    SQLState.XACT_PROTOCOL_VIOLATION);
+                                    SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                                    toInternalDetailString());
         }
 
         // Should only be called during recovery on global transactions, 
@@ -1761,7 +1764,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
         if (readOnly)
         {
             throw StandardException.newException(
-                SQLState.XACT_PROTOCOL_VIOLATION);
+                                    SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                                    toInternalDetailString());
         }
 
 		state = UPDATE;
@@ -1821,7 +1825,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
         {
             // This is where we catch attempted activity on a prepared xact.
 			throw StandardException.newException(
-                    SQLState.XACT_PROTOCOL_VIOLATION);
+                                SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                                toInternalDetailString());
         }
 
 		if (SanityManager.DEBUG)
@@ -1880,7 +1885,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (state == PREPARED || state == CLOSED)
         {
 			throw StandardException.newException(
-                    SQLState.XACT_PROTOCOL_VIOLATION);
+                    SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                    toInternalDetailString());
         }
 
 		if (SanityManager.DEBUG)
@@ -2575,7 +2581,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
             if (state == PREPARED)
             {
                 throw StandardException.newException(
-                        SQLState.XACT_PROTOCOL_VIOLATION);
+                        SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                        toInternalDetailString());
             }
 
             prepareCommit(COMMIT_SYNC);
@@ -2587,7 +2594,8 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
             if (state != PREPARED)
             {
                 throw StandardException.newException(
-                        SQLState.XACT_PROTOCOL_VIOLATION);
+                        SQLState.XACT_PROTOCOL_VIOLATION_DETAILED, 
+                        toInternalDetailString());
             }
 
             prepareCommit(COMMIT_SYNC);
@@ -2694,6 +2702,32 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
             return("null");
         }
 	}
+
+    public String toInternalDetailString()
+    {
+
+	    return (
+            "savedEndStatus = "            + savedEndStatus         + "\n" +
+            "needSync = "                  + needSync               + "\n" +
+            "justCreated = "               + justCreated            + "\n" +
+            "myGlobalId = "                + myGlobalId             + "\n" +
+            "myId = "                      + myId                   + "\n" +
+            "state = "                     + state                  + "\n" +
+            "inComplete = "                + inComplete             + "\n" +
+            "seenUpdates = "               + seenUpdates            + "\n" +
+            "inPostCommitProcessing = "    + inPostCommitProcessing + "\n" +
+            "logStart = "                  + logStart               + "\n" +
+            "logLast = "                   + logLast                + "\n" +
+            "recoveryTransaction = "       + recoveryTransaction    + "\n" +
+            "postCompleteMode = "          + postCompleteMode       + "\n" +
+            "sanityCheck_xaclosed = "      + sanityCheck_xaclosed   + "\n" +
+            "transName = "                 + transName              + "\n" +
+            "readOnly = "                  + readOnly               + "\n" +
+            "flush_log_on_xact_end = "     + flush_log_on_xact_end  + "\n" +
+            "backupBlocked = "             + backupBlocked          + "\n" +
+            "dontWaitForLocks = "          + dontWaitForLocks       + "\n");
+    }
+
 
 	
 	/**
