@@ -21,6 +21,8 @@
  */
 package org.apache.derby.impl.tools.ij;
 
+import org.apache.derby.iapi.tools.ToolUtils;
+
 /**
  * This exception is thrown when parse errors are encountered.
  * You can explicitly create objects of this exception type by
@@ -51,8 +53,8 @@ public class ParseException extends Exception {
     super("");
     specialConstructor = true;
     currentToken = currentTokenVal;
-    expectedTokenSequences = expectedTokenSequencesVal;
-    tokenImage = tokenImageVal;
+    expectedTokenSequences = ToolUtils.copy2( expectedTokenSequencesVal );
+    tokenImage = ToolUtils.copy( tokenImageVal );
   }
 
   /**
@@ -80,28 +82,28 @@ public class ParseException extends Exception {
    * this object and thereby affects the semantics of the
    * "getMessage" method (see below).
    */
-  protected boolean specialConstructor;
+  private boolean specialConstructor;
 
   /**
    * This is the last token that has been consumed successfully.  If
    * this object has been created due to a parse error, the token
    * followng this token will (therefore) be the first error token.
    */
-  public Token currentToken;
+  private Token currentToken;
 
   /**
    * Each entry in this array is an array of integers.  Each array
    * of integers represents a sequence of tokens (by their ordinal
    * values) that is expected at this point of the parse.
    */
-  public int[][] expectedTokenSequences;
+  private int[][] expectedTokenSequences;
 
   /**
    * This is a reference to the "tokenImage" array of the generated
    * parser within which the parse error occurred.  This array is
    * defined in the generated ...Constants interface.
    */
-  public String[] tokenImage;
+  private String[] tokenImage;
 
   /**
    * This method has the standard behavior when this object has been
@@ -160,14 +162,14 @@ public class ParseException extends Exception {
   /**
    * The end of line string for this machine.
    */
-  protected String eol = System.getProperty("line.separator", "\n");
+  private String eol = System.getProperty("line.separator", "\n");
 
   /**
    * Used to convert raw characters to their escaped version
    * when these raw version cannot be used as part of an ASCII
    * string literal.
    */
-  protected String add_escapes(String str) {
+  private String add_escapes(String str) {
       StringBuffer retval = new StringBuffer();
       char ch;
       for (int i = 0; i < str.length(); i++) {

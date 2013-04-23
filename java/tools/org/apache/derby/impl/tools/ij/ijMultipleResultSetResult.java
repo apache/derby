@@ -31,16 +31,18 @@ import java.sql.SQLWarning;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.derby.iapi.tools.ToolUtils;
+
 /**
  * This impl is intended to be used with multiple resultsets, where
  * the execution of the statement is already complete.
  */
 public class ijMultipleResultSetResult extends ijResultImpl {
 
-    List resultSets = null;
+    private ArrayList resultSets = null;
 
-    int[] displayColumns = null;
-    int[] columnWidths = null;
+    private int[] displayColumns = null;
+    private int[] columnWidths = null;
 
     /**
      * Create a ijResultImpl that represents multiple result sets, only
@@ -57,8 +59,8 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         this.resultSets = new ArrayList();
         this.resultSets.addAll(resultSets);
 
-        displayColumns = display;
-        columnWidths   = widths;
+        displayColumns = ToolUtils.copy( display );
+        columnWidths   = ToolUtils.copy( widths );
     }
 
 
@@ -71,7 +73,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
     }
 
     public List getMultipleResultSets() {
-        return resultSets;
+        return (List) resultSets.clone();
     }
 
     public void closeStatement() throws SQLException {
@@ -85,8 +87,8 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         }
     }
 
-    public int[] getColumnDisplayList() { return displayColumns; }
-    public int[] getColumnWidthList() { return columnWidths; }
+    public int[] getColumnDisplayList() { return ToolUtils.copy( displayColumns ); }
+    public int[] getColumnWidthList() { return ToolUtils.copy( columnWidths ); }
 
     /**
      * @return the warnings from all resultsets as one SQLWarning chain

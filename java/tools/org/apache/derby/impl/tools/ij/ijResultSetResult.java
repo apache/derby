@@ -28,17 +28,19 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
+import org.apache.derby.iapi.tools.ToolUtils;
+
 /**
  * This impl is intended to be used with a resultset,
  * where the execution of the statement is already complete.
  */
 public class ijResultSetResult extends ijResultImpl {
 
-	ResultSet resultSet;
-	Statement statement;
+	private ResultSet resultSet;
+	private Statement statement;
 
-	int[]     displayColumns = null;
-	int[]     columnWidths = null;
+	private int[]     displayColumns = null;
+	private int[]     columnWidths = null;
 
 	/**
 	 * Create a ijResultImpl that represents a result set.
@@ -63,8 +65,8 @@ public class ijResultSetResult extends ijResultImpl {
 		resultSet = r;
 		statement = resultSet.getStatement();
 
-		displayColumns = display;
-		columnWidths   = widths;
+		displayColumns = ToolUtils.copy( display );
+		columnWidths   = ToolUtils.copy( widths );
 	}
 
 	public boolean isResultSet() throws SQLException { return statement==null || statement.getUpdateCount() == -1; }
@@ -73,8 +75,8 @@ public class ijResultSetResult extends ijResultImpl {
 
 	public void closeStatement() throws SQLException { if(statement!=null) statement.close(); else resultSet.close(); }
 
-	public int[] getColumnDisplayList() { return displayColumns; }
-	public int[] getColumnWidthList() { return columnWidths; }
+	public int[] getColumnDisplayList() { return ToolUtils.copy( displayColumns ); }
+	public int[] getColumnWidthList() { return ToolUtils.copy( columnWidths ); }
 
 	public SQLWarning getSQLWarnings() throws SQLException { return resultSet.getWarnings(); }
 	public void clearSQLWarnings() throws SQLException { resultSet.clearWarnings(); }

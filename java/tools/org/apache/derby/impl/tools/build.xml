@@ -31,6 +31,8 @@
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
+  <property name="ijConstants.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijConstants.java"/>
+  <property name="ijTokenManager.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijTokenManager.java"/>
 
 <!-- Targets -->
   <target name="compile" depends="compile_tools_impl,optional"/>
@@ -82,6 +84,10 @@
         <include name="ParseException.java"/>
       </fileset>
     </delete>
+
+    <!-- reduce the visibility of these files from public to package protection -->
+    <replaceregexp file="${ijConstants.src}" match="public interface" replace="interface"/>
+    <replaceregexp file="${ijTokenManager.src}" match="public class" replace="class"/>
 
   </target>
 

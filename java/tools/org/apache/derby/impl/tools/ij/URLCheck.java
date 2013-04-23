@@ -42,11 +42,11 @@ import java.sql.SQLException;
 
 public class URLCheck {
 
-  public Vector attributes;
-  public static Vector booleanAttributes;
+  private   Vector attributes;
+  private   static Vector booleanAttributes;
   //Need so that AppUI class does not get garbage collected
-  LocalizedResource langUtil = LocalizedResource.getInstance();
-  Vector validProps;
+  private   LocalizedResource langUtil = LocalizedResource.getInstance();
+  private   Vector validProps;
 
   public URLCheck(String anURL) {
 
