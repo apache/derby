@@ -53,14 +53,28 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * @param operator		The name of the operator
 	 * @param methodName	The name of the method to call in the generated
 	 *						class
+	 * @param forQueryRewrite Can be true only if if this node has been 
+	 *                      added by an internal rewrite of the query. This
+	 *                      allows binding to be more liberal when checking 
+	 *                      it against allowed syntax.
+	 *                      This parameter will be passed FALSE when a new 
+	 *                      instance of the node is being created(which is 
+	 *                      the majority of the cases). But when an  
+	 *                      existing node is getting cloned, the value of
+	 *                      this parameter should be passed as the 
+	 *                      originalNode.getForQueryRewrite(). Examples of
+	 *                      this can be found in Predicate.Java and 
+	 *                      PredicateList.java
 	 */
 
 	public void init(
 				Object	leftOperand,
 				Object	rightOperand,
 				Object		operator,
-				Object		methodName)
+				Object		methodName,
+                Object      forQueryRewrite)
 	{
+        this.forQueryRewrite = ((Boolean)forQueryRewrite).booleanValue();
 		super.init(leftOperand, rightOperand, operator, methodName,
 				ClassName.DataValueDescriptor, ClassName.DataValueDescriptor);
 	}

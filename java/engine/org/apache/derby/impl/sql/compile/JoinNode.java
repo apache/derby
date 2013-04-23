@@ -903,6 +903,7 @@ public class JoinNode extends TableOperatorNode
 										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 										leftCR,
 										rightCR,
+										Boolean.FALSE,
 										getContextManager());
 				equalsNode.bindComparisonOperator();
 

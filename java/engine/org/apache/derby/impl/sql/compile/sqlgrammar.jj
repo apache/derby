@@ -5671,6 +5671,7 @@ additiveExpression(ValueNode farLeftOperand, int compOp) throws StandardExceptio
 							nodeType,
 							farLeftOperand,
 							leftOperand,
+							Boolean.FALSE,
 							getContextManager());
 	}
 }
@@ -12621,6 +12622,7 @@ valueSpecification() throws StandardException :
 														C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 														leftExpression,
 														rightExpression,
+														Boolean.FALSE,
 														cm),
 											thenElseList,
 											Boolean.TRUE,//this node is for nullif 
