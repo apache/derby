@@ -199,6 +199,8 @@ public class _Suite extends BaseTestCase  {
         
         suite.addTest(BigDataTest.suite());
         suite.addTest(MixedCaseExpressionTest.suite());
+        // Disable for compat test.
+        // DERBY-3790. Investigate cases where update statistics can be skipped
         suite.addTest(UpdateStatisticsTest.suite());
         suite.addTest(MiscErrorsTest.suite());
         suite.addTest(NullsTest.suite());
@@ -217,7 +219,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(OffsetFetchNextTest.suite());
         suite.addTest(SequenceTest.suite());
         suite.addTest(SequencePermsTest.suite());
-        suite.addTest(SequenceGeneratorTest.suite());
+        // Disable for compat tests DERBY-5493 
+        //suite.addTest(SequenceGeneratorTest.suite());
         suite.addTest(DBOAccessTest.suite());
         suite.addTest(OLAPTest.suite());
         suite.addTest(OrderByAndOffsetFetchInSubqueries.suite());

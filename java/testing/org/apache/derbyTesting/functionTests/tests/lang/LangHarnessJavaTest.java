@@ -61,7 +61,8 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         "concateTests",
         // "currentof", CONVERTED (CurrentOfTest)
         // "cursor", CONVERTED: (CursorTest)
-        "dbManagerLimits",
+        // Disable for compat testing DERBY-6033. Remove limit on number of params
+        //"dbManagerLimits",
         //"deadlockMode", CONVERTED (DeadlockModeTest)
         // "declareGlobalTempTableJava", CONVERTED DeclareGlobalTempTableJavaTest)
         // "declareGlobalTempTableJavaJDBC30", CONVERTED DeclareGlobalTempTableJavaJDBC30Test)
