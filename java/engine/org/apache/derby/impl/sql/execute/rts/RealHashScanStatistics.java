@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.PropertyUtil;
 import org.apache.derby.iapi.util.StringUtil;
@@ -116,7 +117,7 @@ public class RealHashScanStatistics
 		this.indexName = indexName;
 		this.isConstraint = isConstraint;
 		this.hashtableSize = hashtableSize;
-		this.hashKeyColumns = hashKeyColumns;
+		this.hashKeyColumns = ArrayUtil.copy( hashKeyColumns );
 		this.scanQualifiers = scanQualifiers;
 		this.nextQualifiers = nextQualifiers;
 		this.scanProperties = new FormatableProperties();

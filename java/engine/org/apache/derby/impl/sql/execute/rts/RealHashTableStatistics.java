@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -98,7 +99,7 @@ public class RealHashTableStatistics
 			optimizerEstimatedCost
 			);
 		this.hashtableSize = hashtableSize;
-		this.hashKeyColumns = hashKeyColumns;
+		this.hashKeyColumns = ArrayUtil.copy( hashKeyColumns );
 		this.nextQualifiers = nextQualifiers;
 		this.scanProperties = new FormatableProperties();
 		if (scanProperties != null)
@@ -109,7 +110,7 @@ public class RealHashTableStatistics
 				this.scanProperties.put(key, scanProperties.get(key));
 			}
 		}
-		this.subqueryTrackingArray = subqueryTrackingArray;
+		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
 		this.childResultSetStatistics = childResultSetStatistics;
 	}
 

@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
@@ -36,8 +37,7 @@ public class RealDeleteCascadeResultSetStatistics
 	extends RealDeleteResultSetStatistics
 {
 
-	/* Leave these fields public for object inspectors */
-	public 	ResultSetStatistics[] 	dependentTrackingArray;
+	private 	ResultSetStatistics[] 	dependentTrackingArray;
 
 	// CONSTRUCTORS
 
@@ -56,7 +56,7 @@ public class RealDeleteCascadeResultSetStatistics
 								)
 	{
 		super(rowCount, deferred, indexesUpdated, tableLock, executeTime, sourceResultSetStatistics);
-		this.dependentTrackingArray = dependentTrackingArray;
+		this.dependentTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( dependentTrackingArray );
 	}
 
 

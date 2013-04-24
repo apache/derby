@@ -26,6 +26,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -96,7 +97,7 @@ public class RealProjectRestrictStatistics
 		this.doesProjection = doesProjection;
 		this.restrictionTime = restrictionTime;
 		this.projectionTime = projectionTime;
-		this.subqueryTrackingArray = subqueryTrackingArray;
+		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
 		this.childResultSetStatistics = childResultSetStatistics;
 	}
 
