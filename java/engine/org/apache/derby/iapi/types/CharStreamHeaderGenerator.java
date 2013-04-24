@@ -44,6 +44,9 @@ import java.io.ObjectOutput;
 public final class CharStreamHeaderGenerator
     implements StreamHeaderGenerator {
 
+    /** The Derby-specific end-of-stream marker. */
+    private static  final   byte[] DERBY_EOF_MARKER = new byte[] {(byte)0xE0, 0x00, 0x00};
+
     /** The maximum length that can be encoded by the header. */
     private static final int MAX_ENCODABLE_LENGTH = 65535;
 
@@ -54,6 +57,20 @@ public final class CharStreamHeaderGenerator
      */
     public boolean expectsCharCount() {
         return false;
+    }
+
+    /** Write the EOF marker to a byte array and return the EOF marker's length */
+    public  static  int  writeEOFMarker( byte[] buffer, int offset )
+    {
+        System.arraycopy( DERBY_EOF_MARKER, 0, buffer, offset, DERBY_EOF_MARKER.length );
+        return DERBY_EOF_MARKER.length;
+    }
+
+    /** Write the EOF marker to an Object stream  and return the EOF marker's length */
+    public  static  int  writeEOFMarker( ObjectOutput out ) throws IOException
+    {
+        out.write( DERBY_EOF_MARKER );
+        return DERBY_EOF_MARKER.length;
     }
 
     /**

@@ -202,9 +202,7 @@ public final class ClobStreamHeaderGenerator
         }
         if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
-                System.arraycopy(DERBY_EOF_MARKER, 0,
-                                 buffer, offset, DERBY_EOF_MARKER.length);
-                return DERBY_EOF_MARKER.length;
+                return CharStreamHeaderGenerator.writeEOFMarker( buffer, offset );
             } else {
                 return 0;
             }
@@ -228,8 +226,7 @@ public final class ClobStreamHeaderGenerator
         }
         if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
-                out.write(DERBY_EOF_MARKER);
-                return DERBY_EOF_MARKER.length;
+                return CharStreamHeaderGenerator.writeEOFMarker( out );
             } else {
                 return 0;
             }

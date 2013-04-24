@@ -28,9 +28,6 @@ import java.io.ObjectOutput;
  */
 public interface StreamHeaderGenerator {
 
-    /** The Derby-specific end-of-stream marker. */
-    byte[] DERBY_EOF_MARKER = new byte[] {(byte)0xE0, 0x00, 0x00};
-
     /**
      * Tells if the header encodes a character or byte count.
      *
