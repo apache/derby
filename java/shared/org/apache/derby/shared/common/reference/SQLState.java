@@ -524,6 +524,8 @@ public interface SQLState {
 	String FILE_UNEXPECTED_EXCEPTION                            = "XSDFF.S";
     String BACKUP_FILE_IO_ERROR                                 = "XSDFH.S";
 	String FILE_NEW_PAGE_DURING_RECOVERY                        = "XSDFI.S";
+	String FILE_CANNOT_REMOVE_ENCRYPT_FILE                      = "XSDFJ.S";
+	String FILE_CANNOT_REMOVE_JAR_FILE                          = "XSDFK.S";
 
 	/*
 	** RawStore - Data.FSLDemo transaction exceptions

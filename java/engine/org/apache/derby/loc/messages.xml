@@ -5873,6 +5873,16 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Error encountered while trying to write data to disk during database recovery.  Check that the database disk is not full. If it is then delete unnecessary files, and retry connecting to the database.  It is also possible that the file system is read only, or the disk has failed, or some other problem with the media.  System encountered error while processing page {0}.</text>
                 <arg>page</arg>
             </msg>
+            <msg>
+                <name>XSDFJ.S</name>
+                <text>Error encountered while trying to remove database file {0}, as part of encrypting or decrypting database files. Incorrect file or directory ownership or permissions could cause remove of the file to fail.  Processes not controlled by Derby like backup or virus checkers could also be responsible.</text>
+                <arg>fileName</arg>
+            </msg>
+            <msg>
+                <name>XSDFK.S</name>
+                <text>Error encountered while trying to remove a jar file {0} stored in the database. Incorrect file or directory ownership or permissions could cause remove of the file to fail.  Processes not controlled by Derby like backup or virus checkers could also be responsible.</text>
+                <arg>fileName</arg>
+            </msg>
 
         </family>
 

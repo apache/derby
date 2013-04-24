@@ -288,12 +288,12 @@ final class RemoveFile implements Serviceable, PrivilegedExceptionAction
             if (fileToGo.isDirectory()) {
                 if (!fileToGo.deleteAll()) {
                     throw StandardException.newException(
-                            SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+                            SQLState.FILE_CANNOT_REMOVE_JAR_FILE, fileToGo);
                 }
             } else {
                 if (!fileToGo.delete()) {
                     throw StandardException.newException(
-                            SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+                            SQLState.FILE_CANNOT_REMOVE_JAR_FILE, fileToGo);
                 }
             }
         }

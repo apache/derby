@@ -356,8 +356,8 @@ public class EncryptOrDecryptData implements PrivilegedAction {
                     StorageFile oldFile = getFile(files[i]);
                     if (!privDelete(oldFile)) {
                         throw StandardException.newException(
-                                      SQLState.FILE_CANNOT_REMOVE_FILE,
-                                      oldFile);
+                                  SQLState.FILE_CANNOT_REMOVE_ENCRYPT_FILE,
+                                  oldFile);
                     }
                 }
             }

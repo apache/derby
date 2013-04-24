@@ -1680,7 +1680,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  catch (SecurityException se)
                  {
                      throw StandardException.newException(
-                         SQLState.FILE_CANNOT_REMOVE_FILE, se, file, stub);
+                         SQLState.FILE_CANNOT_REMOVE_FILE, se, file, se.toString());
                  }
              }
 	
