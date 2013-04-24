@@ -70,7 +70,7 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	/**
 	 * Constructor given referenced column bit map byte array as in FormatableBitSet
 	 */
-	public  DDColumnDependableFinder(int formatId, byte[] columnBitMap)
+    DDColumnDependableFinder(int formatId, byte[] columnBitMap)
 	{
 		super(formatId);
 		this.columnBitMap = columnBitMap;
@@ -81,28 +81,6 @@ public class DDColumnDependableFinder extends DDdependableFinder
     //  DDColumnDependable METHODS
     //
     ////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Get the byte array encoding the bitmap of referenced columns in
-	 * a table.
-	 *
-	 * @return		byte array as in a FormatableBitSet encoding column bit map
-	 */
-	public 	byte[]	getColumnBitMap()
-	{
-		return columnBitMap;
-	}
-
-	/**
-	 * Set the byte array encoding the bitmap of referenced columns in
-	 * a table.
-	 *
-	 * @param	columnBitMap	byte array as in a FormatableBitSet encoding column bit map
-	 */
-	public	void	setColumnBitMap(byte[] columnBitMap)
-	{
-		this.columnBitMap = columnBitMap;
-	}
 
 	/**
 	 * Find a dependable object, which is essentially a table descriptor with

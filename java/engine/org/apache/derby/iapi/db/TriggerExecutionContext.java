@@ -83,16 +83,6 @@ public interface TriggerExecutionContext
 	public String getEventStatementText();
 
 	/**
-	 * Get the columns that have been modified by the statement
-	 * that caused this trigger to fire.  If all columns are
-	 * modified, will return null (e.g. for INSERT or DELETE
-	 * return null).
-	 *
-	 * @return an array of Strings
-	 */
-	public String[] getModifiedColumns();
-
-	/**
 	 * Find out if a column was changed, by column name.
 	 *
 	 * @param columnName the column to check

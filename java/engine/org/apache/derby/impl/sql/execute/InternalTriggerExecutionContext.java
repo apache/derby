@@ -396,19 +396,6 @@ class InternalTriggerExecutionContext
 	}
 
 	/**
-	 * Get the columns that have been modified by the statement
-	 * that caused this trigger to fire.  If all columns are
-	 * modified, will return null (e.g. for INSERT or DELETE will
-	 * return null).
-	 *
-	 * @return an array of Strings
-	 */
-	public String[] getModifiedColumns()
-	{
-		return changedColNames;
-	}
-
-	/**
 	 * Find out of a column was changed, by column name
 	 *
 	 * @param columnName the column to check
