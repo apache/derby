@@ -39,6 +39,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.IndexStatsUtil.IdxStats;
 import org.apache.derbyTesting.junit.JDBC;
@@ -75,15 +76,16 @@ public class AutomaticIndexStatisticsTest
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(AutomaticIndexStatisticsTest.class);
+        Test test = new TestSuite(AutomaticIndexStatisticsTest.class);
+        test = new CleanDatabaseTestSetup(test);
+        test = TestConfiguration.additionalDatabaseDecorator(test, MASTERDB);
+
         // DERBY-5964: The test needs to check the timestamp stored in
         // SYSSTATISTICS, which is in the local timezone. Since those
         // timestamps may be ambiguous around the transition to or from DST,
         // run this test in a timezone that doesn't observe DST. The
         // TimeZoneTestSetup can probably be removed once DERBY-5974 is fixed.
-        return new TimeZoneTestSetup(
-                TestConfiguration.additionalDatabaseDecorator(suite, MASTERDB),
-                "GMT");
+        return new TimeZoneTestSetup(test, "GMT");
     }
 
     /** Initialize the default statistics helper object. */
@@ -240,7 +242,7 @@ public class AutomaticIndexStatisticsTest
 
     /**
      * Tests that compressing the table while scanned makes the daemon fail
-     * gracefully, and that the daemon can do other work afterwords.
+     * gracefully, and that the daemon can do other work afterwards.
      */
     public void testCompressWhileScanning()
             throws IOException, SQLException {
@@ -277,6 +279,10 @@ public class AutomaticIndexStatisticsTest
         con.prepareStatement("select * from " + TAB2 + " where id = ?");
         myStats.assertTableStats(TAB2, 1);
         myStats.release();
+
+        // Shutdown database and try to delete it.
+        JDBCDataSource.shutdownDatabase(ds);
+        assertDirectoryDeleted(constructDbPath(db));
     }
 
     /**
