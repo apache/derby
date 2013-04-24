@@ -66,6 +66,8 @@ public class TriggerTest extends BaseJDBCTestCase {
      * allow recording information about the firing.
      */
     private static ThreadLocal TRIGGER_INFO = new ThreadLocal();
+    StringBuffer listOfCreatedTriggers = new StringBuffer();
+
 
     public TriggerTest(String name) {
         super(name);
@@ -390,6 +392,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         // so pick enough triggers to get some
         // distribution across all 12.
         int triggerCount = r.nextInt(45) + 45;
+        listOfCreatedTriggers = new StringBuffer();
         for (int i = 0; i < triggerCount; i++)
         {
             StringBuffer sb = new StringBuffer();
@@ -439,6 +442,7 @@ public class TriggerTest extends BaseJDBCTestCase {
             sb.append("')");
 
             s.execute(sb.toString());
+            listOfCreatedTriggers.append(sb.toString());
         }
         commit();
         s.close();
@@ -558,7 +562,7 @@ public class TriggerTest extends BaseJDBCTestCase {
                     modifiedRowCount > 1 ? (order >= lastOrder) :
                         (order > lastOrder);
                 assertTrue("matching triggers need to be fired in order creation:"
-                        +info+". Triggers got fired in this order:"+TRIGGER_INFO.get().toString(), orderOk);
+                        +info+". Triggers got fired in this order:"+TRIGGER_INFO.get().toString()+". Tiggers got created in this order:"+listOfCreatedTriggers.toString(), false);
                 lastOrder = order;
                 continue;
             }
