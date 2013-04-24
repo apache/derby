@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.cache.Cacheable;
 
@@ -706,9 +707,11 @@ recompileOutOfDatePlan:
 	 *
 	 *	@return all the saved objects
 	 */
-	public	final Object[]	getSavedObjects()
+    public final List getSavedObjects()
 	{
-		return	savedObjects;
+        // Return an unmodifiable view of the underlying array, so that
+        // the caller cannot modify the internal state.
+        return ArrayUtil.asReadOnlyList(savedObjects);
 	}
 
 	//

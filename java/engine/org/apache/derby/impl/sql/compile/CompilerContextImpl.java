@@ -346,17 +346,12 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/** @see CompilerContext#setSavedObjects */
-	public void setSavedObjects(Object[] objs) 
+    public void setSavedObjects(List objs)
 	{
-		if (objs == null)
-		{
-			return;
-		}
-
-		for (int i = 0; i < objs.length; i++)
-		{
-			addSavedObject(objs[i]);
-		}		
+        Iterator it = objs.iterator();
+        while (it.hasNext()) {
+            addSavedObject(it.next());
+        }
 	}
 
 	/** @see CompilerContext#setCursorInfo */

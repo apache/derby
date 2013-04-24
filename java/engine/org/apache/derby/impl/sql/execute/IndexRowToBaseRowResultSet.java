@@ -103,9 +103,8 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		final GenericPreparedStatement gp =
 			(GenericPreparedStatement)a.getPreparedStatement();
-		final Object[] saved = gp.getSavedObjects();
 
-		scoci = (StaticCompiledOpenConglomInfo)saved[scociItem];
+        scoci = (StaticCompiledOpenConglomInfo) gp.getSavedObject(scociItem);
 		TransactionController tc = activation.getTransactionController();
 		dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
         this.source = source;
@@ -120,20 +119,24 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		// retrieve the valid column list from
 		// the saved objects, if it exists
 		if (heapColRefItem != -1) {
-			this.accessedHeapCols = (FormatableBitSet)saved[heapColRefItem];
+            this.accessedHeapCols =
+                    (FormatableBitSet) gp.getSavedObject(heapColRefItem);
 		}
 		if (allColRefItem != -1) {
-			this.accessedAllCols = (FormatableBitSet)saved[allColRefItem];
+            this.accessedAllCols =
+                    (FormatableBitSet) gp.getSavedObject(allColRefItem);
 		}
 
 		// retrieve the array of columns coming from the index
 		indexCols = 
 			((ReferencedColumnsDescriptorImpl)
-			 saved[indexColMapItem]).getReferencedColumnPositions();
+                gp.getSavedObject(indexColMapItem))
+                .getReferencedColumnPositions();
 
 		/* Get the result row template */
-        ExecRow resultRow = ((ExecRowBuilder) saved[resultRowAllocator])
-                                .build(a.getExecutionFactory());
+        ExecRow resultRow =
+                ((ExecRowBuilder) gp.getSavedObject(resultRowAllocator))
+                    .build(a.getExecutionFactory());
 
 		// Note that getCompactRow will assign its return value to the
 		// variable compactRow which can be accessed through
@@ -154,7 +157,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			final DataValueDescriptor[] resultRowArray =
 				resultRow.getRowArray();
 			final FormatableBitSet heapOnly =
-				(FormatableBitSet)saved[heapOnlyColRefItem];
+                (FormatableBitSet) gp.getSavedObject(heapOnlyColRefItem);
 			final int heapOnlyLen = heapOnly.getLength();
 
 			// Need a separate DataValueDescriptor array in this case

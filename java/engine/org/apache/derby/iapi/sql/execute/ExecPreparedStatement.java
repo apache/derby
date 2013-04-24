@@ -67,9 +67,9 @@ public interface ExecPreparedStatement
 	 *	Get all the saved objects.  Used for stored prepared
 	 * 	statements.
 	 *
-	 *	@return	Object[]	the saved objects
+     *  @return a list with all the saved objects
 	 */
-	Object[]	getSavedObjects();
+    List getSavedObjects();
 
 	/**
 	 *	Get the saved cursor info.  Used for stored prepared

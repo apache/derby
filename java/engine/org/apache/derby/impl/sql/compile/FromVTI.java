@@ -91,7 +91,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	boolean				isRestrictedTableFunction;
 	ResultSet			rs;
 
-	private	FormatableHashtable	compileTimeConstants;
+    private final FormatableHashtable compileTimeConstants =
+            new FormatableHashtable();
 
 	// Number of columns returned by the VTI
 	protected int numVTICols;
@@ -1656,7 +1657,13 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			erdNumber = acb.addItem(referencedCols);
 		}
 
-		// compileTimeConstants can be null
+        // compileTimeConstants cannot be null, even if there are no
+        // constants, since VTIResultSet.setSharedState() may want to
+        // add constants to it during execution.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(compileTimeConstants != null,
+                                 "compileTimeConstants is null");
+        }
 		int ctcNumber = acb.addItem(compileTimeConstants);
 
 		acb.pushThisAsActivation(mb); // arg 1
@@ -1957,15 +1964,13 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		if (key == null)
 			return;
 
-		if (compileTimeConstants == null)
-			compileTimeConstants = new FormatableHashtable();
-
 		compileTimeConstants.put(key, value);
 	}
 
 	public Object getSharedState(String key) {
-		if ((key == null) || (compileTimeConstants == null))
+        if (key == null) {
 			return null;
+        }
 
 		return compileTimeConstants.get(key);
 	}

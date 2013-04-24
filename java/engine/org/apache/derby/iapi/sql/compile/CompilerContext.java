@@ -342,8 +342,9 @@ public interface CompilerContext extends Context
 	 *	Set the saved object pool (for putting into the prepared statement).
 	 *
 	 * @param objs	 The new saved objects
+     * @throws NullPointerException if {@code objs} is null
 	 */
-	public void setSavedObjects(Object[] objs); 
+    void setSavedObjects(List objs);
 
 	/**
 	 * Set the in use state for the compiler context.

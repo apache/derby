@@ -21,11 +21,12 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
   Utility class for constructing and reading and writing arrays from/to
@@ -70,6 +71,16 @@ public abstract class ArrayUtil
     public  static  int[]   copy( int[] original )
     {
         return (original == null) ? null : (int[]) original.clone();
+    }
+
+    /**
+     * Make the contents of an array available as a read-only list. If the
+     * array is null, an empty list will be returned.
+     */
+    public static List asReadOnlyList(Object[] array) {
+        return array == null ?
+                Collections.EMPTY_LIST :
+                Collections.unmodifiableList(Arrays.asList(array));
     }
 
 	///////////////////////////////////////////////////////////////////

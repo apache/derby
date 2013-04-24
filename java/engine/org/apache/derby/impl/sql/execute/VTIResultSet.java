@@ -81,8 +81,7 @@ class VTIResultSet extends NoPutResultSetImpl
 	private boolean version2;
 	private boolean reuseablePs;
 	private boolean isTarget;
-	private FormatableHashtable compileTimeConstants;
-	private int ctcNumber;
+    private final FormatableHashtable compileTimeConstants;
 
 	private boolean pushedProjection;
 	private IFastPath	fastPath;
@@ -161,9 +160,16 @@ class VTIResultSet extends NoPutResultSetImpl
 								getSavedObject(erdNumber));
 		}
 
-		this.ctcNumber = ctcNumber;
 		compileTimeConstants = (FormatableHashtable) (activation.getPreparedStatement().
 								getSavedObject(ctcNumber));
+
+        // compileTimeConstants cannot be null, even if there are no
+        // constants, since VTIResultSet.setSharedState() may want to
+        // add constants to it during execution.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(compileTimeConstants != null,
+                                 "compileTimeConstants is null");
+        }
 
 		recordConstructorTime();
     }
@@ -705,20 +711,6 @@ class VTIResultSet extends NoPutResultSetImpl
 	public final void setSharedState(String key, java.io.Serializable value) {
 		if (key == null)
 			return;
-
-		if (compileTimeConstants == null) {
-
-			Object[] savedObjects = activation.getPreparedStatement().getSavedObjects();
-
-			synchronized (savedObjects) {
-
-				compileTimeConstants = (FormatableHashtable) savedObjects[ctcNumber];
-				if (compileTimeConstants == null) {
-					compileTimeConstants = new FormatableHashtable();
-					savedObjects[ctcNumber] = compileTimeConstants;
-				}
-			}
-		}
 
 		if (value == null)
 			compileTimeConstants.remove(key);
