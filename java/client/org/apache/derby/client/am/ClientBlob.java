@@ -21,14 +21,16 @@
 
 package org.apache.derby.client.am;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Blob;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class Blob extends Lob implements java.sql.Blob {
+public class ClientBlob extends Lob implements Blob {
 
     //-----------------------------state------------------------------------------
 
@@ -36,12 +38,12 @@ public class Blob extends Lob implements java.sql.Blob {
 
     // Only used for input purposes.  For output, each getBinaryStream call
     // must generate an independent stream.
-    java.io.InputStream binaryStream_ = null;
+    InputStream binaryStream_ = null;
     int dataOffset_;
     
     //---------------------constructors/finalizer---------------------------------
 
-    public Blob(byte[] binaryString,
+    public ClientBlob(byte[] binaryString,
                 Agent agent,
                 int dataOffset) {
         
@@ -55,8 +57,8 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     // CTOR for input:
-    public Blob(Agent agent,
-                java.io.InputStream binaryStream,
+    public ClientBlob(Agent agent,
+                InputStream binaryStream,
                 int length) {
         
         super(agent,
@@ -87,7 +89,7 @@ public class Blob extends Lob implements java.sql.Blob {
      * @param agent
      * @param binaryStream the stream to get data from
      */
-    public Blob(Agent agent, java.io.InputStream binaryStream) {
+    public ClientBlob(Agent agent, InputStream binaryStream) {
         
         super(agent,
               isLayerBStreamingPossible(agent));
@@ -102,7 +104,7 @@ public class Blob extends Lob implements java.sql.Blob {
      * @param agent context for this Blob object (incl. connection)
      * @param locator reference id to Blob value on server
      */
-    public Blob(Agent agent, int locator)  
+    public ClientBlob(Agent agent, int locator)
     {
         super(agent, false);
         locator_ = locator;
@@ -142,6 +144,7 @@ public class Blob extends Lob implements java.sql.Blob {
      * this locator based <Blob> object.  
      * 
      * A stored procedure call will be made to get it from the server.
+     * @throws org.apache.derby.client.am.SqlException
      * @return length of Blob in bytes
      */
     long getLocatorLength() throws SqlException
@@ -230,7 +233,7 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
 
-    public java.io.InputStream getBinaryStream() throws SQLException {
+    public InputStream getBinaryStream() throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
@@ -240,7 +243,7 @@ public class Blob extends Lob implements java.sql.Blob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getBinaryStream");
                 }
-                java.io.InputStream retVal = getBinaryStreamX();
+                InputStream retVal = getBinaryStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
                 }
@@ -253,7 +256,7 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    java.io.InputStream getBinaryStreamX() throws SqlException {
+    InputStream getBinaryStreamX() throws SqlException {
         checkForClosedConnection();
 
         if (isBinaryStream())    // this Lob is used for input
@@ -267,7 +270,7 @@ public class Blob extends Lob implements java.sql.Blob {
             return new UpdateSensitiveBlobLocatorInputStream
                     (agent_.connection_, this);
         } else {  // binary string
-            return new java.io.ByteArrayInputStream(binaryString_, dataOffset_,
+            return new ByteArrayInputStream(binaryString_, dataOffset_,
                                            binaryString_.length - dataOffset_);
         }
     }
@@ -314,7 +317,7 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    public long position(java.sql.Blob pattern, long start) throws SQLException {
+    public long position(Blob pattern, long start) throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
@@ -345,18 +348,19 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    private long positionX(java.sql.Blob pattern, long start) throws SqlException {
+    private long positionX(Blob pattern, long start) throws SqlException {
         checkForClosedConnection();
 
         try {
             if (isLocator()) {
-                if ((pattern instanceof Blob) 
-                    && ((Blob )pattern).isLocator()) {
+                if ((pattern instanceof ClientBlob)
+                    && ((ClientBlob )pattern).isLocator()) {
                     // Send locator for pattern to server
                     return agent_.connection_.locatorProcedureCall()
-                        .blobGetPositionFromLocator(locator_, 
-                                                 ((Blob )pattern).getLocator(),
-                                                 start);
+                        .blobGetPositionFromLocator(
+                            locator_,
+                            ((ClientBlob )pattern).getLocator(),
+                            start);
                 } else {
                     // Convert pattern to byte array before sending to server
                     return agent_.connection_.locatorProcedureCall()
@@ -369,7 +373,7 @@ public class Blob extends Lob implements java.sql.Blob {
                                   pattern.getBytes(1L, (int )pattern.length()),
                                   start);
             }
-        } catch (java.sql.SQLException e) {
+        } catch (SQLException e) {
             throw new SqlException(e);
         }
     }
@@ -498,13 +502,13 @@ public class Blob extends Lob implements java.sql.Blob {
             System.arraycopy(bytes, offset, 
                              binaryString_, (int) pos + dataOffset_ - 1, 
                              length);
-            binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
+            binaryStream_ = new ByteArrayInputStream(binaryString_);
             setSqlLength(binaryString_.length - dataOffset_);
         }
         return length;
     }
 
-    public java.io.OutputStream setBinaryStream(long pos) throws SQLException {
+    public OutputStream setBinaryStream(long pos) throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
@@ -574,7 +578,7 @@ public class Blob extends Lob implements java.sql.Blob {
                                      newbuf, 0, (int) newLength);
                     binaryString_ = newbuf;
                     binaryStream_ 
-                        = new java.io.ByteArrayInputStream(binaryString_);
+                        = new ByteArrayInputStream(binaryString_);
                     setSqlLength(binaryString_.length - dataOffset_);
                 }
             }
@@ -669,7 +673,7 @@ public class Blob extends Lob implements java.sql.Blob {
                                                        pos,
                                                        length);
                 } else {  // binary string
-                    retVal = new java.io.ByteArrayInputStream
+                    retVal = new ByteArrayInputStream
                         (binaryString_, 
                          (int)(dataOffset_ + pos - 1), 
                          (int)length);

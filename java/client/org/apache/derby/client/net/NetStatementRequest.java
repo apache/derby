@@ -20,23 +20,32 @@
 */
 package org.apache.derby.client.net;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.derby.client.am.Blob;
+import java.util.Hashtable;
+import org.apache.derby.client.am.ClientBlob;
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Clob;
+import org.apache.derby.client.am.ClientClob;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.DateTime;
 import org.apache.derby.client.am.DateTimeValue;
 import org.apache.derby.client.am.Lob;
-import org.apache.derby.client.am.ResultSet;
+import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.ClientTypes;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -271,8 +280,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         // always send QRYROWSET on EXCSQLSTT
         boolean sendQryrowset = true;
         fetchSize = (fetchSize == 0) ?
-            Configuration.defaultFetchSize :
-            fetchSize;
+            Configuration.defaultFetchSize : fetchSize;
 
         boolean sendPrcnam = (procedureName != null) ? true : false;
         int numParameters = (parameterMetaData != null) ? parameterMetaData.columns_ : 0;
@@ -314,12 +322,13 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
     // Write the message to execute an SQL Set Statement.
 /*
-  public void writeSetGenericSQLSetInfo (org.apache.derby.client.am.SetGenericSQLSetPiggybackCommand setGenericSQLSetPiggybackCommand,
-                                  org.apache.derby.client.am.JDBCSection section) throws SqlException
+  public void writeSetGenericSQLSetInfo (
+         SetGenericSQLSetPiggybackCommand setGenericSQLSetPiggybackCommand,
+         JDBCSection section) throws SqlException
   {
     buildEXCSQLSET (section);
 
-    java.util.List sqlsttList = setGenericSQLSetPiggybackCommand.getList();
+    List sqlsttList = setGenericSQLSetPiggybackCommand.getList();
     for (int i = 0; i < sqlsttList.size(); i++) {
       String sql = (String)sqlsttList.get(i);
       // Build SQLSTT only for the SET statement that coming from the server after RLSCONV
@@ -529,8 +538,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
         int[][] protocolTypesAndLengths = allocateLidAndLengthsArray(parameterMetaData);
 
-        java.util.Hashtable protocolTypeToOverrideLidMapping = null;
-        java.util.ArrayList mddOverrideArray = null;
+        Hashtable protocolTypeToOverrideLidMapping = null;
+        ArrayList mddOverrideArray = null;
         protocolTypeToOverrideLidMapping =
                 computeProtocolTypesAndLengths(inputRow, parameterMetaData, protocolTypesAndLengths,
                         protocolTypeToOverrideLidMapping);
@@ -565,8 +574,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     private void buildFDODSC(int numColumns,
                              int[][] protocolTypesAndLengths,
                              boolean overrideExists,
-                             java.util.Hashtable overrideMap,
-                             java.util.ArrayList overrideArray) throws SqlException {
+                             Hashtable overrideMap,
+                             ArrayList overrideArray) throws SqlException {
         markLengthBytes(CodePoint.FDODSC);
         buildSQLDTA(numColumns, protocolTypesAndLengths, overrideExists, overrideMap, overrideArray);
         updateLengthBytes();
@@ -578,8 +587,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     protected void buildSQLDTA(int numColumns,
                                int[][] lidAndLengthOverrides,
                                boolean overrideExists,
-                               java.util.Hashtable overrideMap,
-                               java.util.ArrayList overrideArray) throws SqlException {
+                               Hashtable overrideMap,
+                               ArrayList overrideArray) throws SqlException {
         // mdd overrides need to be built first if any before the descriptors are built.
         if (overrideExists) {
             buildMddOverrides(overrideArray);
@@ -599,7 +608,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     protected void buildSQLDTAGRP(int numVars,
                                   int[][] lidAndLengthOverrides,
                                   boolean mddRequired,
-                                  java.util.Hashtable overrideMap) throws SqlException {
+                                  Hashtable overrideMap) throws SqlException {
         int n = 0;
         int offset = 0;
 
@@ -626,7 +635,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 /////////// perf end
 
 
-    protected void buildOUTOVR(ResultSet resultSet,
+    protected void buildOUTOVR(ClientResultSet resultSet,
                                ColumnMetaData resultSetMetaData) throws SqlException {
         createCommandData();
         markLengthBytes(CodePoint.OUTOVR);
@@ -636,21 +645,23 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         updateLengthBytes();
     }
 
-    private int[][] calculateOUTOVRLidAndLengthOverrides(ResultSet resultSet,
-                                                         ColumnMetaData resultSetMetaData) {
+    private int[][] calculateOUTOVRLidAndLengthOverrides(
+            ClientResultSet resultSet,
+            ColumnMetaData resultSetMetaData) {
+
         int numVars = resultSetMetaData.columns_;
         int[][] lidAndLengths = new int[numVars][2]; //everything initialized to "default triplet"
 
         for (int i=0; i<numVars; ++i) {
             switch (resultSetMetaData.types_[i]) {
-                case java.sql.Types.BLOB:
+                case Types.BLOB:
                     lidAndLengths[i][0] = (resultSetMetaData.nullable_[i])
                             ? DRDAConstants.DRDA_TYPE_NLOBLOC
                             : DRDAConstants.DRDA_TYPE_LOBLOC;
                     lidAndLengths[i][1] = 4;
                     break;
  
-                case java.sql.Types.CLOB:
+                case Types.CLOB:
                     lidAndLengths[i][0] = (resultSetMetaData.nullable_[i])
                             ? DRDAConstants.DRDA_TYPE_NCLOBLOC
                             : DRDAConstants.DRDA_TYPE_CLOBLOC;
@@ -706,7 +717,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             writeSingleorMixedCcsidLDString((String) inputs[i], netAgent_.typdef_.getCcsidMbcEncoding());
                         } else { // use the promototed object instead
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Clob) o,
+                                         (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
@@ -720,7 +731,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         } else { // use the promototed object instead
                             
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Clob) o,
+                                         (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                             
@@ -743,7 +754,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         writeDouble(((Double) inputs[i]).doubleValue());
                         break;
                     case DRDAConstants.DRDA_TYPE_NDECIMAL:
-                        writeBigDecimal((java.math.BigDecimal) inputs[i],
+                        writeBigDecimal((BigDecimal) inputs[i],
                                 (protocolTypesAndLengths[i][1] >> 8) & 0xff, // described precision not actual
                                 protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
                         break;
@@ -791,7 +802,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         } else { // use the promototed object instead
                             
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Clob) o,
+                                         (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
@@ -806,26 +817,26 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         if (o == null) {
                             try {
 
-                                java.sql.Clob c = (java.sql.Clob) inputs[i];
+                                Clob c = (Clob) inputs[i];
                                 
-                                if( c instanceof Clob &&
-                                    ( (Clob) c ).willBeLayerBStreamed() ) {
-                                    setFDODTALobLengthUnknown( i );
-                                    
-                                }else{
+                                if(c instanceof ClientClob &&
+                                    ((ClientClob)c).willBeLayerBStreamed()) {
+
+                                    setFDODTALobLengthUnknown(i);
+                                } else {
                                     long dataLength = c.length();
                                     setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
 
                                 }
                                 
-                            } catch (java.sql.SQLException e) {
+                            } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
                         } else {
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Clob) o,
+                                         (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
@@ -837,27 +848,26 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         if (o == null) {
                             try {
 
-                                java.sql.Blob b = (java.sql.Blob) inputs[i];
+                                Blob b = (Blob) inputs[i];
                                 
-                                if(  b instanceof Blob &&
-                                     ( (Blob) b ).willBeLayerBStreamed() ) {
+                                if(b instanceof ClientBlob &&
+                                   ((ClientBlob)b).willBeLayerBStreamed()) {
                                     
                                     setFDODTALobLengthUnknown( i );
-                                    
-                                }else{
+                                } else {
                                     long dataLength = b.length();
                                     setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                                     
                                 }
                                 
-                            } catch (java.sql.SQLException e) {
+                            } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
                         } else { // use promoted Blob
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Blob) o,
+                                         (ClientBlob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
@@ -867,7 +877,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
                             
-                            final Clob c = (Clob) inputs[i];
+                            final ClientClob c = (ClientClob) inputs[i];
 
                             if (c.isString()) {
                                 setFDODTALobLength(protocolTypesAndLengths, 
@@ -887,7 +897,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             
                         } else { // use promoted Clob
                             setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
-                                         (Clob) o,
+                                         (ClientClob) o,
                                          protocolTypesAndLengths,
                                          i);
                         }
@@ -897,14 +907,14 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         //The FD:OCA data or the FDODTA contains the locator
                         //value corresponding to the LOB. write the integer
                         //value representing the locator here.
-                        writeIntFdocaData(((Blob)inputs[i]).
+                        writeIntFdocaData(((ClientBlob)inputs[i]).
                                 getLocator());
                         break;
                     case DRDAConstants.DRDA_TYPE_NCLOBLOC:
                         //The FD:OCA data or the FDODTA contains the locator
                         //value corresponding to the LOB. write the integer
                         //value representing the locator here.
-                        writeIntFdocaData(((Clob)inputs[i]).
+                        writeIntFdocaData(((ClientClob)inputs[i]).
                                 getLocator());
                         break;
                     default:
@@ -916,7 +926,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             }
             updateLengthBytes(); // for fdodta
         }
-        catch ( java.sql.SQLException se )
+        catch ( SQLException se )
         {
             throw new SqlException(se);
         }
@@ -957,13 +967,16 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
 
                     // the follow types are possible due to promotion to BLOB
-                    if (parameterType == Types.BLOB
-                            || parameterType == Types.BINARY
-                            || parameterType == Types.VARBINARY
-                            || parameterType == Types.LONGVARBINARY) {
-                        Blob o = (Blob) retrievePromotedParameterIfExists(index);
-                        java.sql.Blob b = (o == null) ? (java.sql.Blob) inputRow[index] : o;
-                        boolean isExternalBlob = !(b instanceof Blob);
+                    if (parameterType == ClientTypes.BLOB
+                            || parameterType == ClientTypes.BINARY
+                            || parameterType == ClientTypes.VARBINARY
+                            || parameterType == ClientTypes.LONGVARBINARY) {
+
+                        ClientBlob o =
+                          (ClientBlob)retrievePromotedParameterIfExists(index);
+
+                        Blob b = (o == null) ? (Blob) inputRow[index] : o;
+                        boolean isExternalBlob = !(b instanceof ClientBlob);
                         if (isExternalBlob) {
                             try {
                                 writeScalarStream(chainFlag,
@@ -973,28 +986,30 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                         b.getBinaryStream(),
                                         writeNullByte,
                                         index + 1);
-                            } catch (java.sql.SQLException e) {
+                            } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
-                        } else if ( ( (Blob) b).isBinaryStream()) {
+                        } else if ( ( (ClientBlob) b).isBinaryStream()) {
                             
-                            if( ( (Blob) b).willBeLayerBStreamed() ){
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  ((Blob) b).getBinaryStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                            if( ( (ClientBlob) b).willBeLayerBStreamed() ){
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    ((ClientBlob)b).getBinaryStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }else{
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  (int) ((Blob) b).length(),
-                                                  ((Blob) b).getBinaryStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int)((ClientBlob)b).length(),
+                                    ((ClientBlob)b).getBinaryStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }
                         } else { // must be a binary string
                             // note: a possible optimization is to use writeScalarLobBytes
@@ -1005,21 +1020,24 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             writeScalarStream(chainFlag,
                                     chainedWithSameCorrelator,
                                     CodePoint.EXTDTA,
-                                    (int) ((Blob) b).length(),
-                                    ((Blob) b).getBinaryStream(),
+                                    (int) ((ClientBlob) b).length(),
+                                    ((ClientBlob) b).getBinaryStream(),
                                     writeNullByte,
                                     index + 1);
                         }
                     }
                     // the follow types are possible due to promotion to CLOB
                     else if (
-                            parameterType == Types.CLOB
-                            || parameterType == Types.CHAR
-                            || parameterType == Types.VARCHAR
-                            || parameterType == Types.LONGVARCHAR) {
-                        Clob o = (Clob) retrievePromotedParameterIfExists(index);
-                        java.sql.Clob c = (o == null) ? (java.sql.Clob) inputRow[index] : o;
-                        boolean isExternalClob = !(c instanceof Clob);
+                            parameterType == ClientTypes.CLOB
+                            || parameterType == ClientTypes.CHAR
+                            || parameterType == ClientTypes.VARCHAR
+                            || parameterType == ClientTypes.LONGVARCHAR) {
+
+                        ClientClob o =
+                          (ClientClob)retrievePromotedParameterIfExists(index);
+
+                        Clob c = (o == null) ? (Clob) inputRow[index] : o;
+                        boolean isExternalClob = !(c instanceof ClientClob);
 
                         if (isExternalClob) {
                             try {
@@ -1030,85 +1048,93 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                         c.getCharacterStream(),
                                         writeNullByte,
                                         index + 1);
-                            } catch (java.sql.SQLException e) {
+                            } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
-                        } else if ( ( (Clob) c).isCharacterStream()) {
+                        } else if ( ( (ClientClob) c).isCharacterStream()) {
                             
-                            if( ( (Clob) c).willBeLayerBStreamed() ) {
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  ((Clob) c).getCharacterStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                            if( ( (ClientClob) c).willBeLayerBStreamed() ) {
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    ((ClientClob)c).getCharacterStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }else{
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  (int) ((Clob) c).length(),
-                                                  ((Clob) c).getCharacterStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int)((ClientClob)c).length(),
+                                    ((ClientClob)c).getCharacterStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }
                             
-                        } else if (((Clob) c).isAsciiStream()) {
+                        } else if (((ClientClob) c).isAsciiStream()) {
                             
-                            if( ( (Clob) c).willBeLayerBStreamed() ){
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  ((Clob) c).getAsciiStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                            if( ( (ClientClob) c).willBeLayerBStreamed() ){
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    ((ClientClob)c).getAsciiStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }else { 
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  (int) ((Clob) c).length(),
-                                                  ((Clob) c).getAsciiStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int)((ClientClob)c).length(),
+                                    ((ClientClob)c).getAsciiStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }
                                 
-                        } else if (((Clob) c).isUnicodeStream()) {
+                        } else if (((ClientClob) c).isUnicodeStream()) {
                             
-                            if( ( (Clob) c).willBeLayerBStreamed() ){
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  ((Clob) c).getUnicodeStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                            if( ( (ClientClob) c).willBeLayerBStreamed() ){
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    ((ClientClob)c).getUnicodeStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }else{
-                                writeScalarStream(chainFlag,
-                                                  chainedWithSameCorrelator,
-                                                  CodePoint.EXTDTA,
-                                                  (int) ((Clob) c).length(),
-                                                  ((Clob) c).getUnicodeStream(),
-                                                  writeNullByte,
-                                                  index + 1);
+                                writeScalarStream(
+                                    chainFlag,
+                                    chainedWithSameCorrelator,
+                                    CodePoint.EXTDTA,
+                                    (int)((ClientClob)c).length(),
+                                    ((ClientClob)c).getUnicodeStream(),
+                                    writeNullByte,
+                                    index + 1);
                             }
                         } else { // must be a String
                             // note: a possible optimization is to use writeScalarLobBytes
                             //       when the input is small.
                             //   use this: if (c.length () < DssConstants.MAX_DSS_LEN - 6 - 4)
                             //               writeScalarLobBytes (...)
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) ((Clob) c).getUTF8Length(),
-                                    new java.io.ByteArrayInputStream(((Clob) c).getUtf8String()),
-                                    writeNullByte,
-                                    index + 1);
+                            writeScalarStream(
+                                chainFlag,
+                                chainedWithSameCorrelator,
+                                CodePoint.EXTDTA,
+                                (int)((ClientClob)c).getUTF8Length(),
+                                new ByteArrayInputStream(
+                                    ((ClientClob) c).getUtf8String()),
+                                writeNullByte,
+                                index + 1);
                         }
                     }
                 }
             }
         }
-        catch ( java.sql.SQLException se )
+        catch ( SQLException se )
         {
             throw new SqlException(se);
         }
@@ -1141,10 +1167,12 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // Comment: I don't think that it is possible to send decimal values without looking at the data for 
     // precision and scale (Kathey Marsden 10/11)
     // backburner: after refactoring this, later on, think about replacing case statements with table lookups
-    private java.util.Hashtable computeProtocolTypesAndLengths(Object[] inputRow,
-                                                               ColumnMetaData parameterMetaData,
-                                                               int[][] lidAndLengths,
-                                                               java.util.Hashtable overrideMap) throws SqlException {
+    private Hashtable computeProtocolTypesAndLengths(
+            Object[] inputRow,
+            ColumnMetaData parameterMetaData,
+            int[][] lidAndLengths,
+            Hashtable overrideMap) throws SqlException {
+
         try
         {
             int numVars = parameterMetaData.columns_;
@@ -1176,8 +1204,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 }
 
                 switch (jdbcType) {
-                case java.sql.Types.CHAR:
-                case java.sql.Types.VARCHAR:
+                case Types.CHAR:
+                case Types.VARCHAR:
                     // lid: PROTOCOL_TYPE_NVARMIX, length override: 32767 (max)
                     // dataFormat: String
                     // this won't work if 1208 is not supported
@@ -1189,12 +1217,13 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                        java.io.ByteArrayInputStream bais = null;
+                        ByteArrayInputStream bais = null;
                         byte[] ba = null;
                         try {
                             ba = s.getBytes("UTF-8");
-                            bais = new java.io.ByteArrayInputStream(ba);
-                            Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
+                            bais = new ByteArrayInputStream(ba);
+                            ClientClob c = new ClientClob(
+                                netAgent_, bais, "UTF-8", ba.length);
                             // inputRow[i] = c;
                             // Place the new Lob in the promototedParameter_ collection for
                             // NetStatementRequest use
@@ -1212,21 +1241,21 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 
                             }
                             
-                        } catch (java.io.UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                                 "byte array", "Clob", e);
                         }
                     }
                     break;
-                case java.sql.Types.INTEGER:
+                case Types.INTEGER:
                     // lid: PROTOCOL_TYPE_NINTEGER, length override: 4
                     // dataFormat: Integer
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
                     lidAndLengths[i][1] = 4;
                     break;
-                case java.sql.Types.BIT:
-                case java.sql.Types.BOOLEAN:
+                case Types.BIT:
+                case Types.BOOLEAN:
                     if ( netAgent_.netConnection_.databaseMetaData_.
                             serverSupportsBooleanParameterTransport() )
                     {
@@ -1246,34 +1275,34 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         }
                     }
                     break;
-                case java.sql.Types.SMALLINT:
-                case java.sql.Types.TINYINT:
+                case Types.SMALLINT:
+                case Types.TINYINT:
                     // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
                     // dataFormat: Short
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
                     lidAndLengths[i][1] = 2;
                     break;
-                case java.sql.Types.REAL:
+                case Types.REAL:
                     // lid: PROTOCOL_TYPE_NFLOAT4, length override: 4
                     // dataFormat: Float
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT4;
                     lidAndLengths[i][1] = 4;
                     break;
-                case java.sql.Types.DOUBLE:
-                case java.sql.Types.FLOAT:
+                case Types.DOUBLE:
+                case Types.FLOAT:
                     // lid: PROTOCOL_TYPE_NFLOAT8, length override: 8
                     // dataFormat: Double
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NFLOAT8;
                     lidAndLengths[i][1] = 8;
                     break;
-                case java.sql.Types.NUMERIC:
-                case java.sql.Types.DECIMAL:
+                case Types.NUMERIC:
+                case Types.DECIMAL:
                     // lid: PROTOCOL_TYPE_NDECIMAL
                     // dataFormat: java.math.BigDecimal
                     // if null - guess with precision 1, scale 0
                     // if not null - get scale from data and calculate maximum precision.
                     // DERBY-2073. Get scale and precision from data so we don't lose fractional digits.
-                    java.math.BigDecimal bigDecimal = (java.math.BigDecimal) inputRow[i];
+                    BigDecimal bigDecimal = (BigDecimal) inputRow[i];
                     int scale;
                     int precision;
                     
@@ -1300,35 +1329,35 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         (scale << 0);
                     
                     break;
-                case java.sql.Types.DATE:
+                case Types.DATE:
                     // for input, output, and inout parameters
                     // lid: PROTOCOL_TYPE_NDATE, length override: 8
                     // dataFormat: java.sql.Date
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDATE;
                     lidAndLengths[i][1] = 10;
                     break;
-                case java.sql.Types.TIME:
+                case Types.TIME:
                     // for input, output, and inout parameters
                     // lid: PROTOCOL_TYPE_NTIME, length override: 8
                     // dataFormat: java.sql.Time
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIME;
                     lidAndLengths[i][1] = 8;
                     break;
-                case java.sql.Types.TIMESTAMP:
+                case Types.TIMESTAMP:
                     // for input, output, and inout parameters
                     // lid: PROTOCOL_TYPE_NTIMESTAMP, length overrid: 26 or 29
                     // dataFormat: java.sql.Timestamp
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
                     lidAndLengths[i][1] = DateTime.getTimestampLength( netAgent_.netConnection_.serverSupportsTimestampNanoseconds() );
                     break;
-                case java.sql.Types.BIGINT:
+                case Types.BIGINT:
                     // if SQLAM < 6 this should be mapped to decimal (19,0) in common layer
                     // if SQLAM >=6, lid: PROTOCOL_TYPE_NINTEGER8, length override: 8
                     // dataFormat: Long
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER8;
                     lidAndLengths[i][1] = 8;
                     break;
-                case java.sql.Types.LONGVARCHAR:
+                case Types.LONGVARCHAR:
                     // Is this the right thing to do  // should this be 32700
                     s = (String) inputRow[i];
                     if (s == null || s.length() <= 32767 / 3) {
@@ -1336,12 +1365,13 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                        java.io.ByteArrayInputStream bais = null;
+                        ByteArrayInputStream bais = null;
                         byte[] ba = null;
                         try {
                             ba = s.getBytes("UTF-8");
-                            bais = new java.io.ByteArrayInputStream(ba);
-                            Clob c = new Clob(netAgent_, bais, "UTF-8", ba.length);
+                            bais = new ByteArrayInputStream(ba);
+                            ClientClob c = new ClientClob(
+                                netAgent_, bais, "UTF-8", ba.length);
 
                             // inputRow[i] = c;
                             // Place the new Lob in the promototedParameter_ collection for
@@ -1350,15 +1380,15 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(c.length());
-                        } catch (java.io.UnsupportedEncodingException e) {
+                        } catch (UnsupportedEncodingException e) {
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                                 "byte array", "Clob");
                         }
                     }
                     break;
-                case java.sql.Types.BINARY:
-                case java.sql.Types.VARBINARY:
+                case Types.BINARY:
+                case Types.VARBINARY:
                     byte[] ba = (byte[]) inputRow[i];
                     if (ba == null) {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NVARBYTE;
@@ -1368,7 +1398,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Promote to a BLOB. Only reach this path in the absence of describe information.
-                        Blob b = new Blob(ba, netAgent_, 0);
+                        ClientBlob b = new ClientBlob(ba, netAgent_, 0);
 
                         // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
@@ -1379,7 +1409,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
                     break;
-                case java.sql.Types.LONGVARBINARY:
+                case Types.LONGVARBINARY:
                     ba = (byte[]) inputRow[i];
                     if (ba == null) {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLONGVARBYTE;
@@ -1389,7 +1419,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Promote to a BLOB. Only reach this path in the absensce of describe information.
-                        Blob b = new Blob(ba, netAgent_, 0);
+                        ClientBlob b = new ClientBlob(ba, netAgent_, 0);
 
                         // inputRow[i] = b;
                         // Place the new Lob in the promototedParameter_ collection for
@@ -1400,17 +1430,18 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
                     break;
-                case java.sql.Types.JAVA_OBJECT:
+                case Types.JAVA_OBJECT:
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NUDT;
                     lidAndLengths[i][1] = 32767;
                     break;
-                case java.sql.Types.BLOB:
-                    java.sql.Blob b = (java.sql.Blob) inputRow[i];
+                case Types.BLOB:
+                    Blob b = (Blob) inputRow[i];
                     if (b == null) {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] =
                                 buildPlaceholderLength(parameterMetaData.sqlLength_[i]);
-                    } else if (b instanceof Blob && ((Blob)b).isLocator()){
+                    } else if (b instanceof ClientBlob &&
+                               ((ClientBlob)b).isLocator()) {
                         //we are sending locators.
                         //Here the LID local identifier in the FDODSC
                         //FD:OCA descriptor should be initialized as
@@ -1422,8 +1453,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         try {
                             
-                            if( b instanceof Blob && 
-                                ( (Blob) b).willBeLayerBStreamed() ){
+                            if( b instanceof ClientBlob &&
+                                ( (ClientBlob) b).willBeLayerBStreamed() ){
                                 
                                 //Correspond to totalLength 0 as default length for unknown
                                 lidAndLengths[i][1] = 0x8002;
@@ -1432,24 +1463,25 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 lidAndLengths[i][1] = buildPlaceholderLength(b.length());
                                 
                             }
-                        } catch (java.sql.SQLException e) {
+                        } catch (SQLException e) {
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH), e);
                         }
                     }
                     break;
-                case java.sql.Types.CLOB:
+                case Types.CLOB:
                     {
                         // use columnMeta.singleMixedByteOrDouble_ to decide protocolType
-                        java.sql.Clob c = (java.sql.Clob) inputRow[i];
-                        boolean isExternalClob = !(c instanceof Clob);
+                        Clob c = (Clob) inputRow[i];
+                        boolean isExternalClob = !(c instanceof ClientClob);
                         long lobLength = 0;
                         
                         boolean doesLayerBStreaming = false;
                         
                         if (c == null) {
                             lobLength = parameterMetaData.sqlLength_[i];
-                        } else if (c instanceof Clob && ((Clob)c).isLocator()) {
+                        } else if (c instanceof ClientClob &&
+                                   ((ClientClob)c).isLocator()) {
                             //The inputRow contains an Integer meaning that
                             //we are sending locators.
                             //Here the LID local identifier in the FDODSC
@@ -1461,17 +1493,17 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         } else if (isExternalClob) {
                             try {
                                 lobLength = c.length();
-                            } catch (java.sql.SQLException e) {
+                            } catch (SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
                         } else {
-                            if( ( (Clob) c ).willBeLayerBStreamed() ){
+                            if( ( (ClientClob) c ).willBeLayerBStreamed() ){
                                 doesLayerBStreaming = true;
                                 
                             }else{
-                                lobLength = ((Clob) c).length();
+                                lobLength = ((ClientClob) c).length();
                                 
                             }
                             
@@ -1483,7 +1515,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         } else if (isExternalClob) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                             lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
-                        } else if (((Clob) c).isCharacterStream()) {
+                        } else if (((ClientClob) c).isCharacterStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
                             
                             if( doesLayerBStreaming ) {
@@ -1495,7 +1527,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
-                        } else if (((Clob) c).isUnicodeStream()) {
+                        } else if (((ClientClob) c).isUnicodeStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             
                             if( doesLayerBStreaming ) {
@@ -1507,7 +1539,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
-                        } else if (((Clob) c).isAsciiStream()) {
+                        } else if (((ClientClob) c).isAsciiStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
 
                             if( doesLayerBStreaming ) {
@@ -1519,7 +1551,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                             }
                             
-                        } else if (((Clob) c).isString()) {
+                        } else if (((ClientClob) c).isString()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             
                             if( doesLayerBStreaming ) {
@@ -1546,7 +1578,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             }
             return overrideMap;
         }
-        catch ( java.sql.SQLException se )
+        catch ( SQLException se )
         {
             throw new SqlException(se);
         }
@@ -1803,7 +1835,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         // as many rows as fit in the query block.
         // if the cursor is scrollable, send qryrowset if it is supported by the server
         boolean sendQryrowset = false;
-        if (resultSetType != java.sql.ResultSet.TYPE_FORWARD_ONLY) {
+        if (resultSetType != ResultSet.TYPE_FORWARD_ONLY) {
             sendQryrowset = true;
         }
         return sendQryrowset;
@@ -1811,7 +1843,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
     private int checkFetchsize(int fetchSize, int resultSetType) {
         // if fetchSize is not set for scrollable cursors, set it to the default fetchSize
-        if (resultSetType != java.sql.ResultSet.TYPE_FORWARD_ONLY && fetchSize == 0) {
+        if (resultSetType != ResultSet.TYPE_FORWARD_ONLY && fetchSize == 0) {
             fetchSize = Configuration.defaultFetchSize;
         }
         return fetchSize;
@@ -1821,7 +1853,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         return CodePoint.RSLSETFLG_EXTENDED_SQLDA;
     }
 
-    public void writeSetSpecialRegister(Section section, java.util.ArrayList sqlsttList) throws SqlException {
+    public void writeSetSpecialRegister(Section section, ArrayList sqlsttList)
+            throws SqlException {
         buildEXCSQLSET(section);
 
         // SQLSTT:
@@ -1840,7 +1873,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         return lidAndLengths;
     }
 
-    private void buildMddOverrides(java.util.ArrayList sdaOverrides) throws SqlException {
+    private void buildMddOverrides(ArrayList sdaOverrides) throws SqlException {
         byte[] mddBytes;
         for (int i = 0; i < sdaOverrides.size(); i++) {
             mddBytes = (byte[]) (sdaOverrides.get(i));
@@ -1852,7 +1885,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                               Lob lob,
                               int[][] protocolTypesAndLengths,
                               int i) 
-        throws SqlException, java.sql.SQLException{
+        throws SqlException, SQLException{
         
         if( lob.willBeLayerBStreamed() ) {
             

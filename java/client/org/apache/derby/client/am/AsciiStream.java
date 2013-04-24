@@ -20,10 +20,13 @@
 */
 package org.apache.derby.client.am;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 
-public class AsciiStream extends java.io.InputStream {
-    private java.io.Reader reader_;
+public class AsciiStream extends InputStream {
+    private Reader reader_;
     private String materializedString_;
     private int charsRead_ = 0;
     
@@ -31,12 +34,12 @@ public class AsciiStream extends java.io.InputStream {
         this(materializedString,new StringReader(materializedString));
     }
     
-    public AsciiStream(String materializedString, java.io.Reader reader) {
+    public AsciiStream(String materializedString, Reader reader) {
         reader_ = reader;
         materializedString_ = materializedString;
     }
 
-    public int read() throws java.io.IOException {
+    public int read() throws IOException {
         int oneChar = reader_.read();
         ++charsRead_;
         if (oneChar != -1) // if not eos

@@ -22,12 +22,15 @@
 package org.apache.derby.client.net;
 
 // This mapping is used by DssTrace only.
+
+import java.util.Hashtable;
+
 // This is not part of the driver and is not initialized unless dss tracing is enabled.
 // This is an abstract mapping from 2-byte code point to a string representing the name of the code point.
 // This data type may be modified for performance to adapt to any sort of lookup implementation,
 // such as binary search on an underlying sorted array.
 
-class CodePointNameTable extends java.util.Hashtable<Integer, String> {
+class CodePointNameTable extends Hashtable<Integer, String> {
     CodePointNameTable() {
         put(CodePoint.ACCSECRD, "ACCSECRD");
         put(CodePoint.TYPDEFNAM, "TYPDEFNAM");

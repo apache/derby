@@ -21,14 +21,21 @@
 
 package org.apache.derby.client.net;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.SocketException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -78,9 +85,9 @@ public class NetAgent extends Agent {
 
     //-----------------------------state------------------------------------------
 
-    java.net.Socket socket_;
-    java.io.InputStream rawSocketInputStream_;
-    java.io.OutputStream rawSocketOutputStream_;
+    Socket socket_;
+    InputStream rawSocketInputStream_;
+    OutputStream rawSocketOutputStream_;
 
     String server_;
     int port_;
@@ -131,8 +138,9 @@ public class NetAgent extends Agent {
         }
 
         try {
-            socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, clientSSLMode_));
-        } catch (java.security.PrivilegedActionException e) {
+            socket_ = (Socket)AccessController.doPrivileged(
+                new OpenSocketAction(server, port, clientSSLMode_));
+        } catch (PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),
                 new Object[] { e.getException().getClass().getName(), server, 
@@ -147,10 +155,10 @@ public class NetAgent extends Agent {
                 socket_.setKeepAlive(true); // PROTOCOL Manual: TCP/IP connection allocation rule #2
                 socket_.setSoTimeout(loginTimeout * 1000);
             }
-        } catch (java.net.SocketException e) {
+        } catch (SocketException e) {
             try {
                 socket_.close();
-            } catch (java.io.IOException doNothing) {
+            } catch (IOException doNothing) {
             }
             exceptionOpeningSocket_ = new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_SOCKET_EXCEPTION),
@@ -162,10 +170,10 @@ public class NetAgent extends Agent {
                 rawSocketOutputStream_ = socket_.getOutputStream();
                 rawSocketInputStream_ = socket_.getInputStream();
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             try {
                 socket_.close();
-            } catch (java.io.IOException doNothing) {
+            } catch (IOException doNothing) {
             }
             exceptionOpeningSocket_ = new DisconnectException(this, 
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_OPEN_SOCKET_STREAM),
@@ -245,10 +253,10 @@ public class NetAgent extends Agent {
         // Set TCP/IP Socket Properties
         try {
             socket_.setSoTimeout(loginTimeout * 1000);
-        } catch (java.net.SocketException e) {
+        } catch (SocketException e) {
             try {
                 socket_.close();
-            } catch (java.io.IOException doNothing) {
+            } catch (IOException doNothing) {
             }
             throw new SqlException(logWriter_, 
                 new ClientMessageId(SQLState.SOCKET_EXCEPTION),
@@ -283,7 +291,7 @@ public class NetAgent extends Agent {
         if (rawSocketInputStream_ != null) {
             try {
                 rawSocketInputStream_.close();
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 // note when {6} = 0 it indicates the socket was closed.
                 // this should be ok since we are going to go an close the socket
                 // immediately following this call.
@@ -299,7 +307,7 @@ public class NetAgent extends Agent {
         if (rawSocketOutputStream_ != null) {
             try {
                 rawSocketOutputStream_.close();
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 // note when {6} = 0 it indicates the socket was closed.
                 // this should be ok since we are going to go an close the socket
                 // immediately following this call.
@@ -316,7 +324,7 @@ public class NetAgent extends Agent {
         if (socket_ != null) {
             try {
                 socket_.close();
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 // again {6} = 0, indicates the socket was closed.
                 // maybe set {4} to e.getMessage().
                 // do this for now and but may need to modify or
@@ -393,12 +401,12 @@ public class NetAgent extends Agent {
     protected void sendRequest() throws DisconnectException {
         try {
             request_.flush(rawSocketOutputStream_);
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throwCommunicationsFailure(e);
         }
     }
 
-    public java.io.InputStream getInputStream() {
+    public InputStream getInputStream() {
         return rawSocketInputStream_;
     }
 
@@ -406,21 +414,21 @@ public class NetAgent extends Agent {
         return currentCcsidManager_;
     }
     
-    public java.io.OutputStream getOutputStream() {
+    public OutputStream getOutputStream() {
         return rawSocketOutputStream_;
     }
 
-    void setInputStream(java.io.InputStream inputStream) {
+    void setInputStream(InputStream inputStream) {
         rawSocketInputStream_ = inputStream;
     }
 
-    void setOutputStream(java.io.OutputStream outputStream) {
+    void setOutputStream(OutputStream outputStream) {
         rawSocketOutputStream_ = outputStream;
     }
 
     public void throwCommunicationsFailure(Throwable cause) 
-            throws DisconnectException {
-        //org.apache.derby.client.am.DisconnectException
+        throws DisconnectException {
+        //DisconnectException
         //accumulateReadExceptionAndDisconnect
         // note when {6} = 0 it indicates the socket was closed.
         // need to still validate any token values against message publications.
@@ -432,7 +440,7 @@ public class NetAgent extends Agent {
         
     // ----------------------- call-down methods ---------------------------------
 
-    public LogWriter newLogWriter_(java.io.PrintWriter printWriter,
+    public LogWriter newLogWriter_(PrintWriter printWriter,
                                                               int traceLevel) {
         return new NetLogWriter(printWriter, traceLevel);
     }
@@ -470,7 +478,7 @@ public class NetAgent extends Agent {
         super.beginWriteChainOutsideUOW();
     }
 
-    public void beginWriteChain(Statement statement) throws SqlException {
+    public void beginWriteChain(ClientStatement statement) throws SqlException {
         request_.initialize();
         writeDeferredResetConnection();
         super.beginWriteChain(statement);
@@ -495,7 +503,8 @@ public class NetAgent extends Agent {
         }
     }
 
-    protected void beginReadChain(Statement statement) throws SqlException {
+    protected void beginReadChain(ClientStatement statement)
+            throws SqlException {
         readDeferredResetConnection();
         super.beginReadChain(statement);
     }

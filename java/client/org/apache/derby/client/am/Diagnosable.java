@@ -21,8 +21,10 @@
 
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
+
 public interface Diagnosable {
     public Sqlca getSqlca();
 
-    public void printTrace(java.io.PrintWriter printWriter, String messageHeader);
+    public void printTrace(PrintWriter printWriter, String messageHeader);
 }

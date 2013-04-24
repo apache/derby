@@ -49,7 +49,7 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
     //this LOB is obtained.
     //Will be used while re-creating the stream
     //in the sub-class hence protected.
-    protected Connection con = null;
+    protected ClientConnection con = null;
     
     //Stores the Blob instance
     //this class refers to.
@@ -84,8 +84,11 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      * @param is an {@code InputStream} that contains the
      *           appropriate locator stream instance.
      */
-    protected UpdateSensitiveLOBLocatorInputStream(Connection con, Lob lob,
+    protected UpdateSensitiveLOBLocatorInputStream(
+            ClientConnection con,
+            Lob lob,
             InputStream is) throws SqlException {
+
         //check if the locator associated with the
         //underlying Lob is valid.
         lob.checkForLocatorValidity();
@@ -120,8 +123,13 @@ abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      *            retrieved.
      *
      */
-    protected UpdateSensitiveLOBLocatorInputStream(Connection con, Lob lob,
-            InputStream is, long pos, long len) throws SqlException {
+    protected UpdateSensitiveLOBLocatorInputStream(
+            ClientConnection con,
+            Lob lob,
+            InputStream is,
+            long pos,
+            long len) throws SqlException {
+
         this(con, lob, is);
         //Initialize with the mentioned
         //position and length values.

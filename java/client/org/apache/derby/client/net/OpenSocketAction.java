@@ -21,8 +21,16 @@
 
 package org.apache.derby.client.net;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivilegedExceptionAction;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
@@ -40,14 +48,14 @@ public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
 
     @Override
     public Socket run()
-        throws java.net.UnknownHostException, 
-               java.io.IOException,
-               java.security.NoSuchAlgorithmException,
-               java.security.KeyManagementException,
-               java.security.NoSuchProviderException,
-               java.security.KeyStoreException,
-               java.security.UnrecoverableKeyException,
-               java.security.cert.CertificateException
+        throws UnknownHostException,
+               IOException,
+               NoSuchAlgorithmException,
+               KeyManagementException,
+               NoSuchProviderException,
+               KeyStoreException,
+               UnrecoverableKeyException,
+               CertificateException
     {
         
         SocketFactory sf;

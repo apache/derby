@@ -20,6 +20,13 @@
 */
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
+import java.sql.BatchUpdateException;
+import java.sql.DataTruncation;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import javax.transaction.xa.XAException;
+
 public class ExceptionFormatter {
     // returnTokensOnly is true only when exception tracing is enabled so
     // that we don't try to go to the server for a message while we're in
@@ -27,7 +34,7 @@ public class ExceptionFormatter {
     // Without this, if e.getMessage() fails, we would have infinite recursion
     // when TRACE_DIAGNOSTICS is on  because tracing occurs within the exception constructor.
     static public void printTrace(SqlException e,
-                                  java.io.PrintWriter printWriter,
+                                  PrintWriter printWriter,
                                   String messageHeader,
                                   boolean returnTokensOnly) {
         String header;
@@ -36,7 +43,7 @@ public class ExceptionFormatter {
                 header = messageHeader + "[" + "SQLException@" + Integer.toHexString(e.hashCode()) + "]";
                 printWriter.println(header + " java.sql.SQLException");
 
-                java.lang.Throwable throwable = e.getCause();
+                Throwable throwable = e.getCause();
                 if (throwable != null) {
                     printTrace(throwable, printWriter, header);
                 }
@@ -95,23 +102,23 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(java.sql.SQLException e,
-                                  java.io.PrintWriter printWriter,
+    static public void printTrace(SQLException e,
+                                  PrintWriter printWriter,
                                   String messageHeader,
                                   boolean returnTokensOnly) {
         String header;
         synchronized (printWriter) {
             while (e != null) {
-                if (e instanceof java.sql.DataTruncation) {
+                if (e instanceof DataTruncation) {
                     header = messageHeader + "[" + "DataTruncation@" + Integer.toHexString(e.hashCode()) + "]";
                     printWriter.println(header + " java.sql.DataTruncation");
-                } else if (e instanceof java.sql.SQLWarning) {
+                } else if (e instanceof SQLWarning) {
                     header = messageHeader + "[" + "SQLWarning@" + Integer.toHexString(e.hashCode()) + "]";
                     printWriter.println(header + " java.sql.SQLWarning");
-                } else if (e instanceof java.sql.BatchUpdateException) {
+                } else if (e instanceof BatchUpdateException) {
                     header = messageHeader + "[" + "BatchUpdateException@" + Integer.toHexString(e.hashCode()) + "]";
                     printWriter.println(header + " java.sql.BatchUpdateException");
-                } else { // e instanceof java.sql.SQLException
+                } else { // e instanceof SQLException
                     header = messageHeader + "[" + "SQLException@" + Integer.toHexString(e.hashCode()) + "]";
                     printWriter.println(header + " java.sql.SQLException");
                 }
@@ -120,16 +127,24 @@ public class ExceptionFormatter {
                 printWriter.println(header + " Error code = " + String.valueOf(e.getErrorCode()));
                 printWriter.println(header + " Message    = " + e.getMessage());
 
-                if (e instanceof java.sql.DataTruncation) {
-                    printWriter.println(header + " Index         = " + ((java.sql.DataTruncation) e).getIndex());
-                    printWriter.println(header + " Parameter     = " + ((java.sql.DataTruncation) e).getParameter());
-                    printWriter.println(header + " Read          = " + ((java.sql.DataTruncation) e).getRead());
-                    printWriter.println(header + " Data size     = " + ((java.sql.DataTruncation) e).getDataSize());
-                    printWriter.println(header + " Transfer size = " + ((java.sql.DataTruncation) e).getTransferSize());
+                if (e instanceof DataTruncation) {
+                    printWriter.println(header + " Index         = " +
+                                        ((DataTruncation) e).getIndex());
+                    printWriter.println(header + " Parameter     = " +
+                                        ((DataTruncation) e).getParameter());
+                    printWriter.println(header + " Read          = " +
+                                        ((DataTruncation) e).getRead());
+                    printWriter.println(header + " Data size     = " +
+                                        ((DataTruncation) e).getDataSize());
+                    printWriter.println(header + " Transfer size = " +
+                                        ((DataTruncation) e).getTransferSize());
                 }
 
-                if (e instanceof java.sql.BatchUpdateException) {
-                    printWriter.println(header + " Update counts = " + Utils.getStringFromInts(((java.sql.BatchUpdateException) e).getUpdateCounts()));
+                if (e instanceof BatchUpdateException) {
+                    printWriter.println(
+                        header + " Update counts = " +
+                        Utils.getStringFromInts(
+                            ((BatchUpdateException)e).getUpdateCounts()));
                 }
 
                 printWriter.println(header + " Stack trace follows");
@@ -143,7 +158,7 @@ public class ExceptionFormatter {
     }
 
     static public void printTrace(Sqlca sqlca,
-                                  java.io.PrintWriter printWriter,
+                                  PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Sqlca@" + Integer.toHexString(sqlca.hashCode()) + "]";
         synchronized (printWriter) {
@@ -157,8 +172,8 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(java.lang.Throwable e,
-                                  java.io.PrintWriter printWriter,
+    static public void printTrace(Throwable e,
+                                  PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Throwable@" + Integer.toHexString(e.hashCode()) + "]";
         synchronized (printWriter) {
@@ -169,8 +184,8 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(javax.transaction.xa.XAException e,
-                                  java.io.PrintWriter printWriter,
+    static public void printTrace(XAException e,
+                                  PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "XAException@" + Integer.toHexString(e.hashCode()) + "]";
         synchronized (printWriter) {

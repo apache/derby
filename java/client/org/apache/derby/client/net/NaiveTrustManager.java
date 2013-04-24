@@ -22,12 +22,18 @@
 package org.apache.derby.client.net;
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.net.ssl.KeyManagerFactory;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
 
@@ -55,13 +61,13 @@ public class NaiveTrustManager
      * interface.
      **/
     public static SocketFactory getSocketFactory()
-        throws java.security.NoSuchAlgorithmException,
-               java.security.KeyManagementException,
-               java.security.NoSuchProviderException,
-               java.security.KeyStoreException,
-               java.security.UnrecoverableKeyException,
-               java.security.cert.CertificateException,
-               java.io.IOException
+        throws NoSuchAlgorithmException,
+               KeyManagementException,
+               NoSuchProviderException,
+               KeyStoreException,
+               UnrecoverableKeyException,
+               CertificateException,
+               IOException
     {
         if (thisManager == null) {
             thisManager = new TrustManager [] {new NaiveTrustManager()};

@@ -90,7 +90,7 @@ public class NetDatabaseMetaData40 extends NetDatabaseMetaData {
      * @throws java.sql.SQLExption if no object if found that implements the 
      * interface
      */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
+    public <T> T unwrap(Class<T> interfaces)
                                    throws SQLException {
         try { 
             return interfaces.cast(this);

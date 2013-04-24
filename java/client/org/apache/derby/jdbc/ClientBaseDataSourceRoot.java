@@ -29,7 +29,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -37,7 +39,8 @@ import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.Configuration;
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
+import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
@@ -725,8 +728,8 @@ public abstract class ClientBaseDataSourceRoot implements
         }
 
         for (int i = 0; i < choices.length; i++) {
-            if (value.toUpperCase(java.util.Locale.ENGLISH).equals(
-                        choices[i].toUpperCase(java.util.Locale.ENGLISH))) {
+            if (value.toUpperCase(Locale.ENGLISH).equals(
+                        choices[i].toUpperCase(Locale.ENGLISH))) {
                 return;
             }
         }
@@ -1158,7 +1161,7 @@ public abstract class ClientBaseDataSourceRoot implements
      *
      * @throws java.sql.SQLException if a database-access error occurs.
      */
-    public java.sql.Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         LogWriter dncLogWriter = null;
         try {
             updateDataSourceValues(
@@ -1185,7 +1188,7 @@ public abstract class ClientBaseDataSourceRoot implements
      *
      * @throws java.sql.SQLException if a database-access error occurs.
      */
-    public java.sql.Connection getConnection(String user, String password)
+    public Connection getConnection(String user, String password)
             throws SQLException {
         // Jdbc 2 connections will write driver trace info on a
         // datasource-wide basis using the jdbc 2 data source log writer.
@@ -1210,7 +1213,7 @@ public abstract class ClientBaseDataSourceRoot implements
 
     }
 
-    private java.sql.Connection getConnectionX(LogWriter dncLogWriter,
+    private Connection getConnectionX(LogWriter dncLogWriter,
                                       String user, String password)
             throws SqlException {
         return ClientDriver.getFactory().newNetConnection(
@@ -1416,7 +1419,7 @@ public abstract class ClientBaseDataSourceRoot implements
                 //          s                 to lower case (3,4)
                 //           omeProperty      use as is (4->)
                 String propertyName = methodName.substring(3, 4).toLowerCase(
-                        java.util.Locale.ENGLISH).concat(
+                        Locale.ENGLISH).concat(
                         methodName.substring(4));
 
                 try {

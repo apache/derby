@@ -37,10 +37,12 @@
  **********************************************************************/
 package org.apache.derby.client.net;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 
 public class NetXACallInfo {
     Xid xid_;                         // current xid
@@ -67,8 +69,8 @@ public class NetXACallInfo {
      */
 
     private byte[] crrtkn_;
-    private java.io.InputStream in_;
-    private java.io.OutputStream out_;
+    private InputStream in_;
+    private OutputStream out_;
 
     private byte[] uowid_;  // Unit of Work ID
 
@@ -109,11 +111,11 @@ public class NetXACallInfo {
         crrtkn_ = actualConn_.getCorrelatorToken();
     }
 
-    public java.io.InputStream getInputStream() {
+    public InputStream getInputStream() {
         return in_;
     }
 
-    public java.io.OutputStream getOutputStream() {
+    public OutputStream getOutputStream() {
         return out_;
     }
 

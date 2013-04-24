@@ -22,33 +22,35 @@
 package org.apache.derby.client.net;
 
 import java.sql.BatchUpdateException;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.am.CachingLogicalConnection;
-import org.apache.derby.client.am.CallableStatement;
+import org.apache.derby.client.am.ClientCallableStatement;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogicalConnection;
-import org.apache.derby.client.am.ParameterMetaData;
-import org.apache.derby.client.am.PreparedStatement;
+import org.apache.derby.client.am.ClientParameterMetaData;
+import org.apache.derby.client.am.ClientPreparedStatement;
 import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.Section;
-import org.apache.derby.client.am.Statement;
+import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.client.am.ColumnMetaData;
-import org.apache.derby.client.am.Connection;
-import org.apache.derby.client.am.DatabaseMetaData;
+import org.apache.derby.client.am.ClientConnection;
+import org.apache.derby.client.am.ClientDatabaseMetaData;
 import org.apache.derby.client.am.MaterialStatement;
-import org.apache.derby.client.am.ResultSet;
+import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.StatementCacheInteractor;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.i18n.MessageUtil;
@@ -56,9 +58,8 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * Implements the the ClientJDBCObjectFactory interface and returns the classes
- * that implement the JDBC3.0/2.0 interfaces.
- * For example newCallableStatement would return
- * {@link  CallableStatement}.
+ * that implement the JDBC3.0/2.0 interfaces
+ * For example, newCallableStatement would return ClientCallableStatement
  */
 
 public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
@@ -106,8 +107,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
             (NetLogWriter)logWriter,user,password);
     }
     /**
-     * Returns an instance of {@link
-     * org.apache.derby.client.am.CallableStatement}.
+     * Returns an instance of ClientCallableStatement.
      *
      * @param agent       The instance of NetAgent associated with this
      *                    {@link org.apache.derby.client.am.CallableStatement}
@@ -126,11 +126,11 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *         object
      * @throws SqlException
      */
-    public CallableStatement newCallableStatement(Agent agent,
-            Connection connection,
+    public ClientCallableStatement newCallableStatement(Agent agent,
+            ClientConnection connection,
             String sql,int type,int concurrency,
             int holdability,ClientPooledConnection cpc) throws SqlException {
-        return new CallableStatement(agent,connection,sql,type,
+        return new ClientCallableStatement(agent,connection,sql,type,
                 concurrency,holdability,cpc);
     }
    
@@ -139,7 +139,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * org.apache.derby.client.am.LogicalConnection}
      */
     public LogicalConnection newLogicalConnection(
-            Connection physicalConnection,
+                    ClientConnection physicalConnection,
                     ClientPooledConnection pooledConnection)
         throws SqlException {
         return new LogicalConnection(physicalConnection, pooledConnection);
@@ -158,7 +158,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     * @throws SqlException if creation of the logical connection fails
     */
     public LogicalConnection newCachingLogicalConnection(
-            Connection physicalConnection,
+            ClientConnection physicalConnection,
             ClientPooledConnection pooledConnection,
             JDBCStatementCache stmtCache) throws SqlException {
         return new CachingLogicalConnection(physicalConnection,
@@ -167,11 +167,11 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     }
 
     /**
-     * This method returns an instance of PreparedStatement which
-     * implements {@code java.sql.PreparedStatement}. It has the {@link
-     * org.apache.derby.client.ClientPooledConnection} as one of its
-     * parameters this is used to raise the Statement Events when the
-     * prepared statement is closed.
+     * This method returns an instance of ClientPreparedStatement
+     * which implements java.sql.PreparedStatement. It has the
+     * ClientPooledConnection as one of its parameters
+     * this is used to raise the Statement Events when the prepared
+     * statement is closed.
      *
      * @param agent The instance of NetAgent associated with this
      *              {@link org.apache.derby.client.am.CallableStatement}
@@ -189,16 +189,16 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return a PreparedStatement object
      * @throws SqlException
      */
-    public PreparedStatement newPreparedStatement(Agent agent,
-            Connection connection,
+    public ClientPreparedStatement newPreparedStatement(Agent agent,
+            ClientConnection connection,
             String sql,Section section,ClientPooledConnection cpc) 
             throws SqlException {
-        return new PreparedStatement(agent,connection,sql,section,cpc);
+        return new ClientPreparedStatement(agent,connection,sql,section,cpc);
     }
     
     /**
      *
-     * This method returns an instance of PreparedStatement
+     * This method returns an instance of ClientPreparedStatement
      * which implements {@code java.sql.PreparedStatement}.
      * It has the {@link org.apache.derby.client.ClientPooledConnection} as one
      * of its parameters this is used to raise the Statement Events when the
@@ -227,19 +227,29 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @throws SqlException
      *
      */
-    public PreparedStatement newPreparedStatement(Agent agent,
-            Connection connection,
+    public ClientPreparedStatement newPreparedStatement(Agent agent,
+            ClientConnection connection,
             String sql,int type,int concurrency,int holdability,
             int autoGeneratedKeys,String [] columnNames,
             int[] columnIndexes,
             ClientPooledConnection cpc)
             throws SqlException {
-        return new PreparedStatement(agent,connection,sql,type,concurrency,
-                holdability,autoGeneratedKeys,columnNames, columnIndexes, cpc);
+
+        return new ClientPreparedStatement(
+            agent,
+            connection,
+            sql,
+            type,
+            concurrency,
+            holdability,
+            autoGeneratedKeys,
+            columnNames,
+            columnIndexes,
+            cpc);
     }
 
     /**
-     * Returns a new logcial prepared statement object.
+     * Returns a new logical prepared statement object.
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
@@ -247,7 +257,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return A logical prepared statement.
      */
     public LogicalPreparedStatement newLogicalPreparedStatement(
-            java.sql.PreparedStatement ps,
+            PreparedStatement ps,
             StatementKey stmtKey,
             StatementCacheInteractor cacheInteractor) {
         return new LogicalPreparedStatement(ps, stmtKey, cacheInteractor);
@@ -262,7 +272,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return A logical callable statement.
      */
     public LogicalCallableStatement newLogicalCallableStatement(
-            java.sql.CallableStatement cs,
+            CallableStatement cs,
             StatementKey stmtKey,
             StatementCacheInteractor cacheInteractor) {
         return new LogicalCallableStatement(cs, stmtKey, cacheInteractor);
@@ -271,10 +281,10 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return a new connection, see {@link NetConnection}
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
             LogWriter netLogWriter,
             String databaseName,
-            java.util.Properties properties) throws SqlException {
+            Properties properties) throws SqlException {
 
         return new NetConnection(
                 (NetLogWriter)netLogWriter,
@@ -284,7 +294,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return a new connection, see {@link NetConnection}
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
            LogWriter netLogWriter,
            ClientBaseDataSourceRoot clientDataSource,
            String user,
@@ -299,7 +309,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link org.apache.derby.client.net.NetConnection}
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
             LogWriter netLogWriter,
             int driverManagerLoginTimeout,
             String serverName,
@@ -318,7 +328,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link org.apache.derby.client.net.NetConnection}
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
             LogWriter netLogWriter,String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
@@ -336,7 +346,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link org.apache.derby.client.net.NetConnection}
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
             LogWriter netLogWriter,
             String ipaddr,
             int portNumber,
@@ -368,7 +378,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return a {@link Connection} object
      * @throws             SqlException
      */
-    public Connection newNetConnection(
+    public ClientConnection newNetConnection(
             LogWriter netLogWriter,String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
@@ -387,7 +397,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link NetResultSet}
      */
-    public ResultSet newNetResultSet(Agent netAgent,
+    public ClientResultSet newNetResultSet(Agent netAgent,
             MaterialStatement netStatement,
             Cursor cursor,
             int qryprctyp,int sqlcsrhld,int qryattscr,int qryattsns,
@@ -402,8 +412,8 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link NetDatabaseMetaData}
      */
-    public DatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
-            Connection netConnection) {
+    public ClientDatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
+            ClientConnection netConnection) {
         return new NetDatabaseMetaData((NetAgent)netAgent,
                 (NetConnection)netConnection);
     }
@@ -412,13 +422,15 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * This method provides an instance of Statement 
      * @param  agent      Agent
      * @param  connection Connection
-     * @return a {@code java.sql.Statement} implementation
+     * @return a ClientStatement implementation
      * @throws SqlException
      *
      */
-     public Statement newStatement(Agent agent, Connection connection)
-                                            throws SqlException {
-         return new Statement(agent,connection);
+     public ClientStatement newStatement(
+             Agent agent,
+             ClientConnection connection) throws SqlException {
+
+         return new ClientStatement(agent,connection);
      }
      
      /**
@@ -431,18 +443,25 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @param autoGeneratedKeys int
      * @param columnNames       String[]
      * @param columnIndexes     int[]
-     * @return a {@code java.sql.Statement} implementation
+     * @return a ClientStatement implementation
      * @throws SqlException
      *
      */
-     public Statement newStatement(Agent agent, 
-                     Connection connection, int type,
+     public ClientStatement newStatement(Agent agent,
+                     ClientConnection connection, int type,
                      int concurrency, int holdability,
                      int autoGeneratedKeys, String[] columnNames,
                      int[] columnIndexes) 
                      throws SqlException {
-         return new Statement(agent,connection,type,concurrency,holdability,
-                 autoGeneratedKeys,columnNames, columnIndexes);
+         return new ClientStatement(
+             agent,
+             connection,
+             type,
+             concurrency,
+             holdability,
+             autoGeneratedKeys,
+             columnNames,
+             columnIndexes);
      }
      
      /**
@@ -477,8 +496,9 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return a ParameterMetaData implementation
      *
      */
-    public ParameterMetaData newParameterMetaData(ColumnMetaData columnMetaData) {
-        return new ParameterMetaData(columnMetaData);
+    public ClientParameterMetaData newParameterMetaData(
+            ColumnMetaData columnMetaData) {
+        return new ClientParameterMetaData(columnMetaData);
     }
 
     /**

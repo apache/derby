@@ -23,6 +23,8 @@ package org.apache.derby.client.net;
 
 import java.sql.Array;
 import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLPermission;
@@ -44,7 +46,7 @@ public class  NetConnection40 extends NetConnection {
      * connection. The statement is created the first time isValid is called
      * and closed when the connection is closed (by the close call).
      */
-    private java.sql.PreparedStatement isValidStmt = null;
+    private PreparedStatement isValidStmt = null;
 
     /*
      *-------------------------------------------------------
@@ -54,7 +56,7 @@ public class  NetConnection40 extends NetConnection {
 
     public NetConnection40(NetLogWriter netLogWriter,
                          String databaseName,
-                         java.util.Properties properties) throws SqlException {
+                         Properties properties) throws SqlException {
     super(netLogWriter,databaseName,properties);
     }
     public NetConnection40(NetLogWriter netLogWriter,
@@ -68,7 +70,7 @@ public class  NetConnection40 extends NetConnection {
                          String serverName,
                          int portNumber,
                          String databaseName,
-                         java.util.Properties properties) throws SqlException{
+                         Properties properties) throws SqlException{
     super(netLogWriter,driverManagerLoginTimeout,serverName,portNumber,databaseName,properties);
      }
      public NetConnection40(NetLogWriter netLogWriter,
@@ -196,7 +198,7 @@ public class  NetConnection40 extends NetConnection {
                 isValidStmt.setQueryTimeout(timeout);
 
                 // Run the query against the database
-                java.sql.ResultSet rs = isValidStmt.executeQuery();
+                ResultSet rs = isValidStmt.executeQuery();
                 rs.close();
 
                 // Restore the previous timeout value
@@ -352,7 +354,7 @@ public class  NetConnection40 extends NetConnection {
      * @throws java.sql.SQLException if no object if found that implements the 
      * interface
      */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
+    public <T> T unwrap(Class<T> interfaces)
                                    throws SQLException {
         try { 
             checkForClosedConnection();

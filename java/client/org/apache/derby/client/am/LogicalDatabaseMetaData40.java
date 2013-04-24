@@ -20,6 +20,7 @@
  */
 package org.apache.derby.client.am;
 
+import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -51,19 +52,19 @@ public class LogicalDatabaseMetaData40
         return getRealMetaDataObject().autoCommitFailureClosesAllResultSets();
     }
 
-    public java.sql.ResultSet getClientInfoProperties()
+    public ResultSet getClientInfoProperties()
             throws SQLException {
         return getRealMetaDataObject().getClientInfoProperties();
     }
 
-    public java.sql.ResultSet getFunctions(String catalog, String schemaPattern,
+    public ResultSet getFunctions(String catalog, String schemaPattern,
                                   String functionNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getFunctions(
                 catalog, schemaPattern, functionNamePattern);
     }
 
-    public java.sql.ResultSet getFunctionColumns(
+    public ResultSet getFunctionColumns(
             String catalog, String schemaPattern,
             String functionNamePattern,
             String columnNamePattern) throws SQLException {
@@ -77,7 +78,7 @@ public class LogicalDatabaseMetaData40
         return getRealMetaDataObject().getRowIdLifetime();
     }
 
-    public java.sql.ResultSet getSchemas(String catalog, String schemaPattern)
+    public ResultSet getSchemas(String catalog, String schemaPattern)
             throws SQLException {
         return getRealMetaDataObject().getSchemas(catalog, schemaPattern);
     }
@@ -116,7 +117,7 @@ public class LogicalDatabaseMetaData40
     /** See DatabaseMetaData javadoc */
     public  boolean generatedKeyAlwaysReturned() throws SQLException
     {
-        return ((DatabaseMetaData) getRealMetaDataObject()).
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
             generatedKeyAlwaysReturned();
     }
 
@@ -124,12 +125,15 @@ public class LogicalDatabaseMetaData40
     * See DatabaseMetaData javadoc. Empty ResultSet because Derby does
     * not support pseudo columns.
     */
-    public java.sql.ResultSet getPseudoColumns
+    public ResultSet getPseudoColumns
         ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
         throws SQLException
     {
-        return ((DatabaseMetaData) getRealMetaDataObject()).getPseudoColumns
-            ( catalog, schemaPattern, tableNamePattern, columnNamePattern );
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
+            getPseudoColumns(catalog,
+                             schemaPattern,
+                             tableNamePattern,
+                             columnNamePattern);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -141,12 +145,12 @@ public class LogicalDatabaseMetaData40
     /** See DatabaseMetaData javadoc */
     public  long getMaxLogicalLobSize() throws SQLException
     {
-        return ((DatabaseMetaData) getRealMetaDataObject()).
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
             getMaxLogicalLobSize();
     }
     public  boolean supportsRefCursors() throws SQLException
     {
-        return ((DatabaseMetaData) getRealMetaDataObject()).
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
             supportsRefCursors();
     }
 

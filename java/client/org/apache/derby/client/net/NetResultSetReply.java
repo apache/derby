@@ -22,7 +22,7 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
-import org.apache.derby.client.am.ResultSet;
+import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
@@ -111,14 +111,16 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
 
                 int ddmLength = getDdmLength();
                 ensureBLayerDataInBuffer(ddmLength);
-                ((ResultSet) resultSetI).expandRowsetSqlca();
-                NetSqlca sqlca = parseSQLCARDrow(((ResultSet) resultSetI).rowsetSqlca_);
+                ((ClientResultSet) resultSetI).expandRowsetSqlca();
+                NetSqlca sqlca = parseSQLCARDrow(
+                    ((ClientResultSet) resultSetI).rowsetSqlca_);
                 int daNullIndicator = readFastByte();
                 adjustLengths(getDdmLength());
                 // define event interface and use the event method
                 // only get the rowCount_ if sqlca is not null and rowCount_ is unknown
                 if (sqlca != null && sqlca.containsSqlcax()) {
-                    ((ResultSet) resultSetI).setRowCountEvent(sqlca.getRowCount());
+                    ((ClientResultSet)resultSetI).setRowCountEvent(
+                        sqlca.getRowCount());
                 }
 
                 peekCP = peekCodePoint();
@@ -140,7 +142,7 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         if (peekCP == CodePoint.EXTDTA) {
             found = true;
             do {
-                copyEXTDTA((NetCursor) ((ResultSet) resultSetI).cursor_);
+                copyEXTDTA((NetCursor) ((ClientResultSet) resultSetI).cursor_);
                 if (longBufferForDecryption_ != null) {//encrypted EXTDTA
                     buffer_ = longBufferForDecryption_;
                     pos_ = longPosForDecryption_;
@@ -155,14 +157,18 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
 
         if (peekCP == CodePoint.SQLCARD) {
             found = true;
-            ((ResultSet) resultSetI).expandRowsetSqlca();
-            NetSqlca netSqlca = parseSQLCARD(((ResultSet) resultSetI).rowsetSqlca_);
+            ((ClientResultSet) resultSetI).expandRowsetSqlca();
+            NetSqlca netSqlca =
+                parseSQLCARD(((ClientResultSet)resultSetI).rowsetSqlca_);
             // for an atomic operation, the SQLCA contains the sqlcode for the first (statement
             // terminating)error, the last warning, or zero.  all multi-row fetch operatons are
             // atomic.  (the only operation that is not atomic is multi-row insert).
-            if (((ResultSet) resultSetI).sensitivity_ != ResultSet.sensitivity_sensitive_dynamic__) {
+            if (((ClientResultSet)resultSetI).sensitivity_ !=
+                ClientResultSet.sensitivity_sensitive_dynamic__) {
+
                 if (netSqlca != null && netSqlca.containsSqlcax() && netSqlca.getRowsetRowCount() == 0) {
-                    ((ResultSet) resultSetI).setRowCountEvent(netSqlca.getRowCount());
+                    ((ClientResultSet)resultSetI).setRowCountEvent(
+                        netSqlca.getRowCount());
                 }
             }
             resultSetI.completeSqlca(netSqlca);

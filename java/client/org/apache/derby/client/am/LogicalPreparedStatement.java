@@ -27,8 +27,15 @@ import java.net.URL;
 import java.util.Calendar;
 
 import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
 import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Time;
@@ -50,7 +57,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
  */
 public class LogicalPreparedStatement
     extends LogicalStatementEntity
-    implements java.sql.PreparedStatement {
+    implements PreparedStatement {
 
     /**
      * Creates a new logical prepared statement.
@@ -60,7 +67,7 @@ public class LogicalPreparedStatement
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalPreparedStatement(java.sql.PreparedStatement physicalPs,
+    public LogicalPreparedStatement(PreparedStatement physicalPs,
                                     StatementKey stmtKey,
                                     StatementCacheInteractor cacheInteractor) {
         super(physicalPs, stmtKey, cacheInteractor);
@@ -176,11 +183,11 @@ public class LogicalPreparedStatement
          getPhysPs().setArray(i, x);
     }
 
-    public void setBlob(int i, java.sql.Blob x) throws SQLException {
+    public void setBlob(int i, Blob x) throws SQLException {
          getPhysPs().setBlob(i, x);
     }
 
-    public void setClob(int i, java.sql.Clob x) throws SQLException {
+    public void setClob(int i, Clob x) throws SQLException {
          getPhysPs().setClob(i, x);
     }
 
@@ -188,7 +195,7 @@ public class LogicalPreparedStatement
          getPhysPs().setDate(parameterIndex, x);
     }
 
-    public java.sql.ParameterMetaData getParameterMetaData()
+    public ParameterMetaData getParameterMetaData()
             throws SQLException {
         return getPhysPs().getParameterMetaData();
     }
@@ -197,11 +204,11 @@ public class LogicalPreparedStatement
          getPhysPs().setRef(i, x);
     }
 
-    public java.sql.ResultSet executeQuery() throws SQLException {
+    public ResultSet executeQuery() throws SQLException {
         return getPhysPs().executeQuery();
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
+    public ResultSetMetaData getMetaData() throws SQLException {
         return getPhysPs().getMetaData();
     }
 
@@ -350,15 +357,15 @@ public class LogicalPreparedStatement
         return getPhysPs().execute(sql, columnIndexes);
     }
 
-    public java.sql.Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         return getPhysPs().getConnection();
     }
 
-    public java.sql.ResultSet getGeneratedKeys() throws SQLException {
+    public ResultSet getGeneratedKeys() throws SQLException {
         return getPhysPs().getGeneratedKeys();
     }
 
-    public java.sql.ResultSet getResultSet() throws SQLException {
+    public ResultSet getResultSet() throws SQLException {
         return getPhysPs().getResultSet();
     }
 
@@ -376,7 +383,7 @@ public class LogicalPreparedStatement
         return getPhysPs().execute(sql, columnNames);
     }
 
-    public java.sql.ResultSet executeQuery(String sql) throws SQLException {
+    public ResultSet executeQuery(String sql) throws SQLException {
         return getPhysPs().executeQuery(sql);
     }
 
@@ -388,7 +395,7 @@ public class LogicalPreparedStatement
 
     public  long    executeLargeUpdate() throws SQLException
     {
-        return ((PreparedStatement) getPhysPs()).executeLargeUpdate();
+        return ((ClientPreparedStatement) getPhysPs()).executeLargeUpdate();
     }
 
 }

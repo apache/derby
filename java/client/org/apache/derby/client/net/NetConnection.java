@@ -25,27 +25,29 @@ import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import javax.transaction.xa.Xid;
-import org.apache.derby.client.am.CallableStatement;
-import org.apache.derby.client.am.DatabaseMetaData;
+import org.apache.derby.client.am.ClientCallableStatement;
+import org.apache.derby.client.am.ClientDatabaseMetaData;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.EncryptionManager;
-import org.apache.derby.client.am.PreparedStatement;
+import org.apache.derby.client.am.ClientPreparedStatement;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
-import org.apache.derby.client.am.Statement;
+import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.Agent;
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SectionManager;
@@ -54,7 +56,7 @@ import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public class NetConnection extends Connection {
+public class NetConnection extends ClientConnection {
     
     // Use this to get internationalized strings...
     protected static final MessageUtil msgutil = SqlException.getMessageUtil();
@@ -438,8 +440,8 @@ public class NetConnection extends Connection {
             }
         } catch (Throwable e) {
             // If *anything* goes wrong, make sure the connection is
-            // destroyed always mark the connection closed in case of
-            // an error.
+            // destroyed.
+            // Always mark the connection closed in case of an error.
             // This prevents attempts to use this closed connection
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
@@ -487,8 +489,8 @@ public class NetConnection extends Connection {
             flowServerAttributes();
         } catch (Throwable e) {
             // If *anything* goes wrong, make sure the connection is
-            // destroyed always mark the connection closed in case of
-            // an error.
+            // destroyed.
+            // Always mark the connection closed in case of an error.
             // This prevents attempts to use this closed connection
             // to retrieve error message text if an error SQLCA
             // is returned in one of the connect flows.
@@ -1022,7 +1024,8 @@ public class NetConnection extends Connection {
 
     //-------------------Abstract object factories--------------------------------
 
-    protected Agent newAgent_(LogWriter logWriter,
+    protected Agent newAgent_(
+            LogWriter logWriter,
             int loginTimeout,
             String serverName,
             int portNumber,
@@ -1037,23 +1040,39 @@ public class NetConnection extends Connection {
     }
 
 
-    protected Statement newStatement_(int type, int concurrency, int holdability) throws SqlException {
+    protected ClientStatement newStatement_(
+            int type,
+            int concurrency,
+            int holdability) throws SqlException {
+
         return new NetStatement(netAgent_, this, type, concurrency, holdability).statement_;
     }
 
-    protected void resetStatement_(Statement statement, int type, int concurrency, int holdability) throws SqlException {
+    protected void resetStatement_(
+            ClientStatement statement,
+            int type,
+            int concurrency,
+            int holdability) throws SqlException {
+
         ((NetStatement) statement.getMaterialStatement()).resetNetStatement(netAgent_, this, type, concurrency, holdability);
     }
 
-    protected PreparedStatement newPositionedUpdatePreparedStatement_(
+    protected ClientPreparedStatement newPositionedUpdatePreparedStatement_(
             String sql,
             Section section) throws SqlException {
+
         //passing the pooledConnection_ object which will be used to raise 
         //StatementEvents to the PooledConnection
         return new NetPreparedStatement(netAgent_, this, sql, section,pooledConnection_).preparedStatement_;
     }
 
-    protected PreparedStatement newPreparedStatement_(String sql, int type, int concurrency, int holdability, int autoGeneratedKeys, String[] columnNames,
+    protected ClientPreparedStatement newPreparedStatement_(
+            String sql,
+            int type,
+            int concurrency,
+            int holdability,
+            int autoGeneratedKeys,
+            String[] columnNames,
             int[] columnIndexes) throws SqlException {
         
         //passing the pooledConnection_ object which will be used to raise 
@@ -1062,7 +1081,7 @@ public class NetConnection extends Connection {
                 columnIndexes, pooledConnection_).preparedStatement_;
     }
 
-    protected void resetPreparedStatement_(PreparedStatement ps,
+    protected void resetPreparedStatement_(ClientPreparedStatement ps,
                                            String sql,
                                            int resultSetType,
                                            int resultSetConcurrency,
@@ -1075,13 +1094,18 @@ public class NetConnection extends Connection {
     }
 
 
-    protected CallableStatement newCallableStatement_(String sql, int type, int concurrency, int holdability) throws SqlException {
+    protected ClientCallableStatement newCallableStatement_(
+            String sql,
+            int type,
+            int concurrency,
+            int holdability) throws SqlException {
+
         //passing the pooledConnection_ object which will be used to raise 
         //StatementEvents to the PooledConnection
         return new NetCallableStatement(netAgent_, this, sql, type, concurrency, holdability,pooledConnection_).callableStatement_;
     }
 
-    protected void resetCallableStatement_(CallableStatement cs,
+    protected void resetCallableStatement_(ClientCallableStatement cs,
                                            String sql,
                                            int resultSetType,
                                            int resultSetConcurrency,
@@ -1090,7 +1114,7 @@ public class NetConnection extends Connection {
     }
 
 
-    protected DatabaseMetaData newDatabaseMetaData_() {
+    protected ClientDatabaseMetaData newDatabaseMetaData_() {
             return ClientDriver.getFactory().newNetDatabaseMetaData(netAgent_, this);
     }
 
@@ -1593,7 +1617,8 @@ public class NetConnection extends Connection {
     }
 
 
-    public void writeTransactionStart(Statement statement) throws SqlException {
+    public void writeTransactionStart(ClientStatement statement)
+            throws SqlException {
     }
 
     public void readTransactionStart() throws SqlException {
@@ -1821,7 +1846,8 @@ public class NetConnection extends Connection {
     }
     
     
-    protected void writeXATransactionStart(Statement statement) throws SqlException {
+    protected void writeXATransactionStart(ClientStatement statement)
+            throws SqlException {
         xares_.netXAConn_.writeTransactionStart(statement);
     }
 }

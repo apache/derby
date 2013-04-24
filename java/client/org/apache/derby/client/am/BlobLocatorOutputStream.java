@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -33,10 +34,10 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * closed without generating an <code>IOException</code>.
  * <p>
  * This <code>OutputStream</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #write(byte[])
+ * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).  
  */
-public class BlobLocatorOutputStream extends java.io.OutputStream {
+public class BlobLocatorOutputStream extends OutputStream {
     
     /**
      * Create an <code>OutputStream</code> for writing to the
@@ -49,9 +50,11 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      * @param pos the position in the <code>BLOB</code> value at which
      *        to start writing; the first position is 1
      */
-    public BlobLocatorOutputStream(Connection connection, Blob blob, long pos)
-        throws SqlException
-    {
+    public BlobLocatorOutputStream(
+        ClientConnection connection,
+        ClientBlob blob,
+        long pos) throws SqlException {
+
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(blob.isLocator());
         }
@@ -129,12 +132,12 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
     /**
      * Connection used to read Blob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
 
     /**
      * The Blob to be accessed.
      */
-    private final Blob blob;
+    private final ClientBlob blob;
 
     /**
      * Current position in the underlying Blob.

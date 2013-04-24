@@ -21,16 +21,17 @@
 
 package org.apache.derby.client.net;
 
+import java.util.ArrayList;
 import org.apache.derby.client.am.ColumnMetaData;
-import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Statement;
+import org.apache.derby.client.am.ClientStatement;
+import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.jdbc.ClientDriver;
 
 public class NetStatement implements MaterialStatement {
 
-    Statement statement_;
+    ClientStatement statement_;
 
 
     // Alias for (NetConnection) statement_.connection
@@ -58,23 +59,29 @@ public class NetStatement implements MaterialStatement {
     }
 
     // Relay constructor for NetPreparedStatement.
-    NetStatement(Statement statement,
-                 NetAgent netAgent,
-                 NetConnection netConnection) {
+    NetStatement(
+            ClientStatement statement,
+            NetAgent netAgent,
+            NetConnection netConnection) {
+
         this();
         initNetStatement(statement, netAgent, netConnection);
     }
 
-    void resetNetStatement(Statement statement,
-                           NetAgent netAgent,
-                           NetConnection netConnection) {
+    void resetNetStatement(
+            ClientStatement statement,
+            NetAgent netAgent,
+            NetConnection netConnection) {
+
         resetNetStatement();
         initNetStatement(statement, netAgent, netConnection);
     }
 
-    private void initNetStatement(Statement statement,
-                                  NetAgent netAgent,
-                                  NetConnection netConnection) {
+    private void initNetStatement(
+            ClientStatement statement,
+            NetAgent netAgent,
+            NetConnection netConnection) {
+
         netAgent_ = netAgent;
         netConnection_ = netConnection;
         statement_ = statement;
@@ -99,22 +106,38 @@ public class NetStatement implements MaterialStatement {
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 2 statements with scroll attributes
     NetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        this(ClientDriver.getFactory().newStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
-                null,null
-                ),
-                netAgent,
-                netConnection);
+        this(ClientDriver.getFactory().newStatement(
+                 netAgent,
+                 netConnection,
+                 type,
+                 concurrency,
+                 holdability,
+                 ClientStatement.NO_GENERATED_KEYS,
+                 null,
+                 null),
+             netAgent,
+             netConnection);
     }
 
     void resetNetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        statement_.resetStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
-                null, null);
+        statement_.resetStatement(
+            netAgent,
+            netConnection,
+            type,
+            concurrency,
+            holdability,
+            ClientStatement.NO_GENERATED_KEYS,
+            null,
+            null);
         resetNetStatement(statement_, netAgent, netConnection);
     }
 
     // ------------------------abstract box car methods-----------------------------------------------
 
-    public void writeSetSpecialRegister_(Section section, java.util.ArrayList sqlsttList) throws SqlException {
+    public void writeSetSpecialRegister_(
+            Section section,
+            ArrayList sqlsttList) throws SqlException {
+
         netAgent_.statementRequest_.writeSetSpecialRegister(section,sqlsttList);
     }
 

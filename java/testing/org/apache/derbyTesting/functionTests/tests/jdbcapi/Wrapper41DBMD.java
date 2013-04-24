@@ -24,7 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.sql.SQLException;
 
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
-import org.apache.derby.client.am.DatabaseMetaData;
+import org.apache.derby.client.am.ClientDatabaseMetaData;
 
 /**
  * A wrapper around the new DatabaseMetaData methods added by JDBC 4.1.
@@ -40,7 +40,7 @@ public  class   Wrapper41DBMD
     ///////////////////////////////////////////////////////////////////////
 
     protected EmbedDatabaseMetaData    _embedded;
-    protected DatabaseMetaData      _netclient;
+    protected ClientDatabaseMetaData      _netclient;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -51,7 +51,7 @@ public  class   Wrapper41DBMD
     public Wrapper41DBMD( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbedDatabaseMetaData ) { _embedded = (EmbedDatabaseMetaData) wrapped; }
-        else if ( wrapped instanceof DatabaseMetaData ) { _netclient = (DatabaseMetaData) wrapped; }
+        else if ( wrapped instanceof ClientDatabaseMetaData ) { _netclient = (ClientDatabaseMetaData) wrapped; }
         else { throw nothingWrapped(); }
     }
     

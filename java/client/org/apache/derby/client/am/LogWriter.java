@@ -21,11 +21,17 @@
 
 package org.apache.derby.client.am;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import javax.transaction.xa.XAException;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
@@ -42,7 +48,7 @@ public class LogWriter {
     private boolean driverConfigurationHasBeenWrittenToJdbc2Stream_ = false;
 
     // It is assumed that this constructor is never called when logWriter is null.
-    public LogWriter(java.io.PrintWriter printWriter, int traceLevel) {
+    public LogWriter(PrintWriter printWriter, int traceLevel) {
         printWriter_ = printWriter;
         traceLevel_ = traceLevel;
     }
@@ -145,42 +151,44 @@ public class LogWriter {
         if (instance == null) // this prevents NPE from instance.getClass() used below
         {
             return null;
-        } else if (instance instanceof Connection && loggingEnabled(
+        } else if (instance instanceof ClientConnection && loggingEnabled(
                 ClientDataSourceInterface.TRACE_CONNECTION_CALLS)) {
-            return "Connection";
-        } else if (instance instanceof ResultSet && loggingEnabled(
+            return "ClientConnection";
+        } else if (instance instanceof ClientResultSet && loggingEnabled(
                 ClientDataSourceInterface.TRACE_RESULT_SET_CALLS)) {
-            return "ResultSet";
-        } else if (instance instanceof CallableStatement && loggingEnabled(
+            return "ClientResultSet";
+        } else if (instance instanceof ClientCallableStatement &&
+                   loggingEnabled(
+                       ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
+            return "ClientCallableStatement";
+        } else if (instance instanceof ClientPreparedStatement &&
+                   loggingEnabled(
+                       ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
+            return "ClientPreparedStatement";
+        } else if (instance instanceof ClientStatement && loggingEnabled(
                 ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
-            return "CallableStatement";
-        } else if (instance instanceof PreparedStatement && loggingEnabled(
-                ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
-            return "PreparedStatement";
-        } else if (instance instanceof Statement && loggingEnabled(
-                ClientDataSourceInterface.TRACE_STATEMENT_CALLS)) {
-            return "Statement";
+            return "ClientStatement";
         }
         // Not yet externalizing Blob tracing, except for trace_all
-        else if (instance instanceof Blob && loggingEnabled(
+        else if (instance instanceof ClientBlob && loggingEnabled(
                 ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
                                                       // lobs !!
         {
-            return "Blob";
+            return "ClientBlob";
         }
-        // Not yet externalizing Clob tracing, except for trace_all
-        else if (instance instanceof Clob && loggingEnabled(
+        // Not yet externalizing ClientClob tracing, except for trace_all
+        else if (instance instanceof ClientClob && loggingEnabled(
                 ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
                                                       // bobs !!
         {
-            return "Clob";
+            return "ClientClob";
         }
         // Not yet externalizing dbmd catalog call tracing, except for trace_all
-        else if (instance instanceof DatabaseMetaData && loggingEnabled(
+        else if (instance instanceof ClientDatabaseMetaData && loggingEnabled(
                 ClientDataSourceInterface.TRACE_ALL)) // add a trace level for
                                                       // dbmd ??
         {
-            return "DatabaseMetaData";
+            return "ClientDatabaseMetaData";
         }
         // we don't use instanceof javax.transaction.XAResource to avoid dependency on j2ee.jar
         else if (loggingEnabled(ClientDataSourceInterface.TRACE_XA_CALLS) &&
@@ -232,37 +240,45 @@ public class LogWriter {
         }
     }
 
-    void traceExit(Object instance, String methodName, ResultSet resultSet) {
+    public void traceExit(
+            Object instance,
+            String methodName,
+            ClientResultSet resultSet) {
+
         String returnValue = (resultSet == null) ? "ResultSet@null" : "ResultSet@" + Integer.toHexString(resultSet.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
-    void traceExit(
+    public void traceExit(
             Object instance,
             String methodName,
-            CallableStatement returnValue) {
+            ClientCallableStatement returnValue) {
 
         traceExit(instance, methodName, "CallableStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    void traceExit(
+    public void traceExit(
             Object instance,
             String methodName,
-            PreparedStatement returnValue) {
+            ClientPreparedStatement returnValue) {
 
         traceExit(instance, methodName, "PreparedStatement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    void traceExit(Object instance, String methodName, Statement returnValue) {
+    public void traceExit(
+            Object instance,
+            String methodName,
+            ClientStatement returnValue) {
+
         traceExit(instance, methodName, "Statement@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    void traceExit(Object instance, String methodName, Blob blob) {
+    void traceExit(Object instance, String methodName, ClientBlob blob) {
         String returnValue = (blob == null) ? "Blob@null" : "Blob@" + Integer.toHexString(blob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
 
-    void traceExit(Object instance, String methodName, Clob clob) {
+    void traceExit(Object instance, String methodName, ClientClob clob) {
         String returnValue = (clob == null) ? "Clob@null" : "Clob@" + Integer.toHexString(clob.hashCode());
         traceExit(instance, methodName, returnValue);
     }
@@ -270,12 +286,16 @@ public class LogWriter {
     void traceExit(
             Object instance,
             String methodName,
-            DatabaseMetaData returnValue) {
+            ClientDatabaseMetaData returnValue) {
 
         traceExit(instance, methodName, "DatabaseMetaData@" + Integer.toHexString(returnValue.hashCode()));
     }
 
-    void traceExit(Object instance, String methodName, Connection returnValue) {
+    void traceExit(
+            Object instance,
+            String methodName,
+            ClientConnection returnValue) {
+
         traceExit(instance, methodName, "Connection@" + Integer.toHexString(returnValue.hashCode()));
     }
 
@@ -646,7 +666,7 @@ public class LogWriter {
             dncprintln("END TRACE_DIAGNOSTICS");
         }
     }
-    public void traceDiagnosable(java.sql.SQLException e) {
+    public void traceDiagnosable(SQLException e) {
         if (!loggingEnabled(ClientDataSourceInterface.TRACE_DIAGNOSTICS)) {
             return;
         }
@@ -670,7 +690,7 @@ public class LogWriter {
     // ------------------------ meta data tracing --------------------------------
 
     void traceParameterMetaData(
-            Statement statement,
+            ClientStatement statement,
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
@@ -694,7 +714,7 @@ public class LogWriter {
     }
 
     void traceResultSetMetaData(
-            Statement statement,
+            ClientStatement statement,
             ColumnMetaData columnMetaData) {
 
         if (!loggingEnabled(
@@ -791,7 +811,7 @@ public class LogWriter {
     void traceConnectEntry(String server,
                                   int port,
                                   String database,
-                                  java.util.Properties properties) {
+                                  Properties properties) {
         if (loggingEnabled(
                 ClientDataSourceInterface.TRACE_DRIVER_CONFIGURATION)) {
             traceDriverConfigurationJdbc1();
@@ -811,13 +831,13 @@ public class LogWriter {
         }
     }
 
-    void traceConnectExit(Connection connection) {
+    void traceConnectExit(ClientConnection connection) {
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsExit(connection);
         }
     }
 
-    public void traceConnectResetExit(Connection connection) {
+    public void traceConnectResetExit(ClientConnection connection) {
         if (loggingEnabled(ClientDataSourceInterface.TRACE_CONNECTS)) {
             traceConnectsResetExit(connection);
         }
@@ -852,7 +872,7 @@ public class LogWriter {
     private void traceConnectsResetEntry(String server,
                                          int port,
                                          String database,
-                                         java.util.Properties properties) {
+                                         Properties properties) {
         dncprintln("BEGIN TRACE_CONNECT_RESET");
         dncprintln("Connection reset requested for " + server + ":" + port + "/" + database);
         dncprint("Using properties: ");
@@ -863,7 +883,7 @@ public class LogWriter {
     private void traceConnectsEntry(String server,
                                     int port,
                                     String database,
-                                    java.util.Properties properties) {
+                                    Properties properties) {
         synchronized (printWriter_) {
             dncprintln("BEGIN TRACE_CONNECTS");
             dncprintln("Attempting connection to " + server + ":" + port + "/" + database);
@@ -874,7 +894,7 @@ public class LogWriter {
     }
 
     // Specialized by NetLogWriter.traceConnectsExit()
-    public void traceConnectsExit(Connection c) {
+    public void traceConnectsExit(ClientConnection c) {
         synchronized (printWriter_) {
             String header = "[Connection@" + Integer.toHexString(c.hashCode()) + "]";
             try {
@@ -886,14 +906,14 @@ public class LogWriter {
                 dncprintln(header, "Driver name: " + c.databaseMetaData_.getDriverName());
                 dncprintln(header, "Driver version: " + c.databaseMetaData_.getDriverVersion());
                 dncprintln(header, "END TRACE_CONNECTS");
-            } catch (java.sql.SQLException e) {
+            } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace connection exit");
                 dncprintln(header, "END TRACE_CONNECTS");
             }
         }
     }
 
-    public void traceConnectsResetExit(Connection c) {
+    public void traceConnectsResetExit(ClientConnection c) {
         synchronized (printWriter_) {
             String header = "[Connection@" + Integer.toHexString(c.hashCode()) + "]";
             try {
@@ -905,7 +925,7 @@ public class LogWriter {
                 dncprintln(header, "Driver name: " + c.databaseMetaData_.getDriverName());
                 dncprintln(header, "Driver version: " + c.databaseMetaData_.getDriverVersion());
                 dncprintln(header, "END TRACE_CONNECT_RESET");
-            } catch (java.sql.SQLException e) {
+            } catch (SQLException e) {
                 dncprintln(header, "Encountered an SQL exception while trying to trace connection reset exit");
                 dncprintln(header, "END TRACE_CONNECT_RESET");
             }
@@ -916,10 +936,10 @@ public class LogWriter {
     // properties.toString() will print out passwords,
     // so this method was written to escape the password property value.
     // printWriter_ synchronized by caller.
-    private void writeProperties(java.util.Properties properties) {
+    private void writeProperties(Properties properties) {
         printWriter_.print("{ ");
-        for (java.util.Iterator i = properties.entrySet().iterator(); i.hasNext();) {
-            java.util.Map.Entry e = (java.util.Map.Entry) (i.next());
+        for (Iterator i = properties.entrySet().iterator(); i.hasNext();) {
+            Map.Entry e = (Map.Entry) (i.next());
             if ("password".equals(e.getKey())) {
                 printWriter_.print("password=" + escapePassword((String) e.getValue()));
             } else {
@@ -964,8 +984,11 @@ public class LogWriter {
         Version.writeDriverConfiguration(printWriter_);
     }
 
-    public static java.io.PrintWriter getPrintWriter(final String fileName, final boolean fileAppend) throws SqlException {
-        java.io.PrintWriter printWriter = null;
+    public static PrintWriter getPrintWriter(
+            final String fileName,
+            final boolean fileAppend) throws SqlException {
+
+        PrintWriter printWriter = null;
         //Using an anonymous class to deal with the PrintWriter because the  
         //method java.security.AccessController.doPrivileged requires an 
         //instance of a class(which implements 
@@ -980,14 +1003,15 @@ public class LogWriter {
             printWriter = AccessController.doPrivileged(
                 new PrivilegedExceptionAction<PrintWriter>(){
                     public PrintWriter run() throws IOException {
-                        String fileCanonicalPath = new java.io.File(fileName).getCanonicalPath();
-                        return new java.io.PrintWriter(
-                                new java.io.BufferedOutputStream(
-                                        new java.io.FileOutputStream(
+                        String fileCanonicalPath =
+                            new File(fileName).getCanonicalPath();
+                        return new PrintWriter(
+                                new BufferedOutputStream(
+                                        new FileOutputStream(
                                                 fileCanonicalPath, fileAppend), 4096), true);
                         }
                     });
-        } catch (java.security.PrivilegedActionException pae) {
+        } catch (PrivilegedActionException pae) {
             throw new SqlException(null, 
                 new ClientMessageId(SQLState.UNABLE_TO_OPEN_FILE),
                 new Object[] { fileName, pae.getMessage() },

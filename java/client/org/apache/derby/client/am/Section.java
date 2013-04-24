@@ -19,6 +19,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.ResultSet;
+
 public class Section {
 
     private int sectionNumber;

@@ -24,6 +24,8 @@ package org.apache.derby.client.am;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.RowId;
@@ -35,7 +37,7 @@ import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
-public class CallableStatement40 extends CallableStatement {
+public class ClientCallableStatement40 extends ClientCallableStatement {
     
     /**
      * Calls the superclass constructor and passes the parameters
@@ -54,8 +56,8 @@ public class CallableStatement40 extends CallableStatement {
      *                    Occurred and the Close events.
      * @throws SqlException
      */
-    public CallableStatement40(Agent agent,
-        Connection connection,
+    public ClientCallableStatement40(Agent agent,
+        ClientConnection connection,
         String sql,
         int type, int concurrency, int holdability,
         ClientPooledConnection cpc) throws SqlException {
@@ -100,12 +102,12 @@ public class CallableStatement40 extends CallableStatement {
         throw SQLExceptionFactory.notImplemented ("setRowId (String, RowId)");
     }
     
-    public void setBlob(String parameterName, java.sql.Blob x)
+    public void setBlob(String parameterName, Blob x)
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("setBlob(String, Blob)");
     }
     
-    public void setClob(String parameterName, java.sql.Clob x)
+    public void setClob(String parameterName, Clob x)
         throws SQLException {
         throw SQLExceptionFactory.notImplemented("setClob(String, Clob)");
     }
@@ -306,20 +308,10 @@ public class CallableStatement40 extends CallableStatement {
         else if ( Date.class.equals( type ) ) { retval = getDate( parameterIndex ); }
         else if ( Time.class.equals( type ) ) { retval = getTime( parameterIndex ); }
         else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( parameterIndex ); }
-
-        else if ( java.sql.Blob.class.equals( type ) ) {
-            retval = getBlob( parameterIndex );
-
-        } else if ( java.sql.Clob.class.equals( type ) ) {
-            retval = getClob( parameterIndex );
-
-        } else if ( type.isArray() &&
-                    type.getComponentType().equals( byte.class ) ) {
-            retval = getBytes( parameterIndex );
-
-        } else {
-            retval = getObject( parameterIndex );
-        }
+        else if ( Blob.class.equals( type ) ) { retval = getBlob( parameterIndex ); }
+        else if ( Clob.class.equals( type ) ) { retval = getClob( parameterIndex ); }
+        else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( parameterIndex ); }
+        else { retval = getObject( parameterIndex ); }
 
         if ( wasNull() ) { retval = null; }
 

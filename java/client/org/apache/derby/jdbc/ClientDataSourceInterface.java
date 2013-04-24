@@ -21,6 +21,7 @@
 
 package org.apache.derby.jdbc;
 
+import javax.sql.DataSource;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetConfiguration;
 
@@ -28,7 +29,7 @@ import org.apache.derby.client.net.NetConfiguration;
  * Specifies Derby extensions to the {@code java.sqlx.DataSource}
  * API common to all Derby client driver data sources.
  */
-public interface ClientDataSourceInterface extends javax.sql.DataSource {
+public interface ClientDataSourceInterface extends DataSource {
 
     public void setPassword(String password);
     public String getPassword();

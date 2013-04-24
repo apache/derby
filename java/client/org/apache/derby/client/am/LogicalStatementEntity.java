@@ -20,7 +20,10 @@
  */
 package org.apache.derby.client.am;
 
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -46,7 +49,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  */
 //@ThreadSafe
 abstract class LogicalStatementEntity
-        implements java.sql.Statement {
+        implements Statement {
 
     /**
      * Tells if we're holding a callable statement or not.
@@ -60,16 +63,16 @@ abstract class LogicalStatementEntity
      * If this is {@code null}, the logical entity is closed.
      */
     //@GuardedBy("this")
-    private java.sql.PreparedStatement physicalPs;
+    private PreparedStatement physicalPs;
     /**
-     * Assoicated physical callable statement, if any.
+     * Associated physical callable statement, if any.
      * <p>
      * This is a convenience reference, to avoid having to cast on every
-     * invokation of {@link #getPhysCs} if the logical entity represents a
+     * invocation of {@link #getPhysCs} if the logical entity represents a
      * callable statement.
      */
     //@GuardedBy("this)
-    private java.sql.CallableStatement physicalCs;
+    private CallableStatement physicalCs;
     /** The owner of this logical entity. */
     private StatementCacheInteractor owner;
     /** The key for the associated statement. */
@@ -86,7 +89,7 @@ abstract class LogicalStatementEntity
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    protected LogicalStatementEntity(java.sql.PreparedStatement physicalPs,
+    protected LogicalStatementEntity(PreparedStatement physicalPs,
                                      StatementKey stmtKey,
                                      StatementCacheInteractor cacheInteractor) {
         if (cacheInteractor.getCache() == null) {
@@ -99,14 +102,14 @@ abstract class LogicalStatementEntity
         this.cache = cacheInteractor.getCache();
         this.owner = cacheInteractor;
         this.physicalPs = physicalPs;
-        if (physicalPs instanceof java.sql.CallableStatement) {
+        if (physicalPs instanceof CallableStatement) {
             this.hasCallableStmt = true;
-            this.physicalCs = (java.sql.CallableStatement)physicalPs;
+            this.physicalCs = (CallableStatement)physicalPs;
         } else {
             this.hasCallableStmt = false;
             this.physicalCs = null;
         }
-        ((PreparedStatement)physicalPs).setOwner(this);
+        ((ClientPreparedStatement)physicalPs).setOwner(this);
     }
 
     /**
@@ -115,7 +118,7 @@ abstract class LogicalStatementEntity
      * @return A prepared statement.
      * @throws SQLException if the logical statement has been closed
      */
-    synchronized java.sql.PreparedStatement getPhysPs()
+    synchronized PreparedStatement getPhysPs()
             throws SQLException {
         if (physicalPs == null) {
             throw (new SqlException(null,
@@ -131,7 +134,7 @@ abstract class LogicalStatementEntity
      * @return A callable statement.
      * @throws SQLException if the logical statement has been closed
      */
-    synchronized java.sql.CallableStatement getPhysCs()
+    synchronized CallableStatement getPhysCs()
             throws SQLException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(hasCallableStmt,
@@ -151,7 +154,7 @@ abstract class LogicalStatementEntity
      * @return A statement.
      * @throws SQLException if the logical statement has been closed
      */
-    synchronized java.sql.Statement getPhysStmt()
+    synchronized Statement getPhysStmt()
             throws SQLException
     {
         if ( hasCallableStmt ) { return getPhysCs(); }
@@ -165,8 +168,8 @@ abstract class LogicalStatementEntity
      */
     public synchronized void close() throws SQLException {
         if (physicalPs != null) {
-            final PreparedStatement temporaryPsRef =
-                (PreparedStatement)physicalPs;
+            final ClientPreparedStatement temporaryPsRef =
+                    (ClientPreparedStatement)physicalPs;
             // Nullify both references.
             physicalPs = null;
             physicalCs = null;
@@ -245,7 +248,7 @@ abstract class LogicalStatementEntity
      * interface
      */
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (((Statement) getPhysStmt()).isClosed()) {
+        if (((ClientStatement) getPhysStmt()).isClosed()) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.ALREADY_CLOSED),
                 hasCallableStmt ? "CallableStatement" : "PreparedStatement")
@@ -269,12 +272,12 @@ abstract class LogicalStatementEntity
 
     public  void    closeOnCompletion() throws SQLException
     {
-        ((Statement) getPhysStmt()).closeOnCompletion();
+        ((ClientStatement) getPhysStmt()).closeOnCompletion();
     }
 
     public  boolean isCloseOnCompletion() throws SQLException
     {
-        return ((Statement) getPhysStmt()).isCloseOnCompletion();
+        return ((ClientStatement) getPhysStmt()).isCloseOnCompletion();
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -285,38 +288,38 @@ abstract class LogicalStatementEntity
 
     public  long[] executeLargeBatch() throws SQLException
     {
-        return ((Statement) getPhysStmt()).executeLargeBatch();
+        return ((ClientStatement) getPhysStmt()).executeLargeBatch();
     }
     public  long executeLargeUpdate( String sql ) throws SQLException
     {
-        return ((Statement) getPhysStmt()).executeLargeUpdate( sql );
+        return ((ClientStatement) getPhysStmt()).executeLargeUpdate( sql );
     }
     public  long executeLargeUpdate( String sql, int autoGeneratedKeys) throws SQLException
     {
-        return ((Statement) getPhysStmt()).
-            executeLargeUpdate( sql, autoGeneratedKeys );
+        return ((ClientStatement)getPhysStmt()).
+            executeLargeUpdate(sql, autoGeneratedKeys);
     }
     public  long executeLargeUpdate( String sql, int[] columnIndexes ) throws SQLException
     {
-        return ((Statement) getPhysStmt()).
-            executeLargeUpdate( sql, columnIndexes );
+        return ((ClientStatement)getPhysStmt()).
+            executeLargeUpdate(sql, columnIndexes);
     }
     public  long executeLargeUpdate( String sql, String[] columnNames ) throws SQLException
     {
-        return ((Statement) getPhysStmt()).
-            executeLargeUpdate( sql, columnNames );
+        return ((ClientStatement)getPhysStmt()).
+            executeLargeUpdate(sql, columnNames);
     }
     public  long getLargeUpdateCount() throws SQLException
     {
-        return ((Statement) getPhysStmt()).getLargeUpdateCount();
+        return ((ClientStatement) getPhysStmt()).getLargeUpdateCount();
     }
     public  long getLargeMaxRows() throws SQLException
     {
-        return ((Statement) getPhysStmt()).getLargeMaxRows();
+        return ((ClientStatement) getPhysStmt()).getLargeMaxRows();
     }
     public  void    setLargeMaxRows(long maxRows) throws SQLException
     {
-        ((Statement) getPhysStmt()).setLargeMaxRows( maxRows );
+        ((ClientStatement) getPhysStmt()).setLargeMaxRows( maxRows );
     }
 
 }

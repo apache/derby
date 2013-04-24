@@ -24,10 +24,9 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import org.apache.derby.client.ClientPooledConnection;
-import org.apache.derby.shared.common.reference.SQLState;
 
 
-public class CallableStatement42 extends CallableStatement40
+public class ClientCallableStatement42 extends ClientCallableStatement40
 {    
     /**
      * Calls the superclass constructor and passes the parameters
@@ -46,8 +45,8 @@ public class CallableStatement42 extends CallableStatement40
      *                    Occurred and the Close events.
      * @throws SqlException
      */
-    public CallableStatement42(Agent agent,
-        Connection connection,
+    public ClientCallableStatement42(Agent agent,
+        ClientConnection connection,
         String sql,
         int type, int concurrency, int holdability,
         ClientPooledConnection cpc) throws SqlException {
@@ -133,7 +132,7 @@ public class CallableStatement42 extends CallableStatement40
     }
 
     public  void setObject
-        ( int parameterIndex, java.lang.Object x, SQLType sqlType )
+        ( int parameterIndex, Object x, SQLType sqlType )
         throws SQLException
     {
         synchronized (connection_) {
@@ -147,7 +146,7 @@ public class CallableStatement42 extends CallableStatement40
     }
     
     public void setObject
-        ( int parameterIndex, java.lang.Object x, SQLType sqlType, int scaleOrLength )
+        ( int parameterIndex, Object x, SQLType sqlType, int scaleOrLength )
         throws SQLException
     {
         synchronized (connection_) {

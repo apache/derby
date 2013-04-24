@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.client.am.DatabaseMetaData
+   Derby - Class DatabaseMetaData
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,7 +21,12 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.StringTokenizer;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -40,7 +45,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 //   Assign an ErrorKey, ResourceKey, and Resource for each throw statement.
 //   Save for future pass to avoid maintenance during development.
 
-public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
+public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     //----------------------------- constants  -----------------------------------
 
     private final static short SQL_BEST_ROWID = 1;
@@ -52,7 +57,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //---------------------navigational members-----------------------------------
 
     protected Agent agent_;
-    protected Connection connection_;
+    protected ClientConnection connection_;
 
     //-----------------------------state------------------------------------------
 
@@ -106,7 +111,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     //---------------------constructors/finalizer---------------------------------
 
-    protected DatabaseMetaData(Agent agent, Connection connection, ProductLevel productLevel) {
+    protected ClientDatabaseMetaData(Agent agent,
+                                     ClientConnection connection,
+                                     ProductLevel productLevel) {
         agent_ = agent;
         connection_ = connection;
         productLevel_ = productLevel;
@@ -1055,7 +1062,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              ProcName    varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getProcedures(String catalog,
+    public ResultSet getProcedures(String catalog,
                                             String schemaPattern,
                                             String procedureNamePattern) throws SQLException {
         try
@@ -1074,12 +1081,13 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
 
-    private ResultSet getProceduresX(String catalog,
+    private ClientResultSet getProceduresX(String catalog,
                                      String schemaPattern,
                                      String procedureNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPROCEDURES(?,?,?,?)");
+        ClientPreparedStatement cs =
+            prepareMetaDataQuery("SYSIBM.SQLPROCEDURES(?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schemaPattern);
@@ -1097,7 +1105,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              ParamName   varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getProcedureColumns(String catalog,
+    public ResultSet getProcedureColumns(String catalog,
                                                   String schemaPattern,
                                                   String procedureNamePattern,
                                                   String columnNamePattern) throws SQLException {
@@ -1117,13 +1125,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         
     }
 
-    private ResultSet getProcedureColumnsX(String catalog,
+    private ClientResultSet getProcedureColumnsX(String catalog,
                                            String schemaPattern,
                                            String procedureNamePattern,
                                            String columnNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPROCEDURECOLS(?,?,?,?,?)");
+        ClientPreparedStatement cs =
+            prepareMetaDataQuery("SYSIBM.SQLPROCEDURECOLS(?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schemaPattern);
@@ -1162,7 +1171,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
 
-    public java.sql.ResultSet getFunctions(String catalog,
+    public ResultSet getFunctions(String catalog,
                                            String schemaPattern,
                                            String functionNamePattern) 
         throws SQLException {
@@ -1192,14 +1201,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @exception SqlException if a database error occurs
      * @see #getFunctions(String, String, String)
      */
-    private ResultSet getFunctionsX(String catalog,
+    private ClientResultSet getFunctionsX(String catalog,
                                     String schemaPattern,
                                     String functionNamePattern) 
         throws SqlException {
         checkForClosedConnectionX();
         checkServerJdbcVersionX("getFunctions(String,String,String)", 4, 0); 
 
-        PreparedStatement cs = 
+        ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLFUNCTIONS(?,?,?,?)");
 
         cs.setStringX(1, catalog);
@@ -1237,7 +1246,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
      * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
-    public java.sql.ResultSet 
+    public ResultSet
         getFunctionColumns(String catalog,
                               String schemaPattern,
                               String functionNamePattern,
@@ -1277,7 +1286,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @exception SqlException if a database error occurs
      * @see #getFunctionColumns(String, String, String, String)
      */
-    private ResultSet getFunctionColumnsX(String catalog,
+    private ClientResultSet getFunctionColumnsX(String catalog,
                                              String schemaPattern,
                                              String functionNamePattern,
                                              String parameterNamePattern) 
@@ -1286,7 +1295,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         checkServerJdbcVersionX("getFunctionColumns"+
                                 "(String,String,String,String)", 4, 0);
  
-        PreparedStatement cs = 
+        ClientPreparedStatement cs =
             prepareMetaDataQuery("SYSIBM.SQLFUNCTIONPARAMS(?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
@@ -1305,7 +1314,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              TaleType    varchar(4000),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getTables(String catalog,
+    public ResultSet getTables(String catalog,
                                         String schemaPattern,
                                         String tableNamePattern,
                                         String types[]) throws SQLException {
@@ -1324,7 +1333,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getTablesX(String catalog,
+    private ClientResultSet getTablesX(String catalog,
                                  String schemaPattern,
                                  String tableNamePattern,
                                  String types[]) throws SqlException {
@@ -1334,22 +1343,23 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             throw new SqlException(se);
         }
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
+        ClientPreparedStatement cs =
+            prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
 
         if (catalog == null) {
-            cs.setNullX(1, java.sql.Types.VARCHAR);
+            cs.setNullX(1, Types.VARCHAR);
         } else {
             cs.setStringX(1, catalog);
         }
 
         if (schemaPattern == null) {
-            cs.setNullX(2, java.sql.Types.VARCHAR);
+            cs.setNullX(2, Types.VARCHAR);
         } else {
             cs.setStringX(2, schemaPattern);
         }
 
         if (tableNamePattern == null) {
-            cs.setNullX(3, java.sql.Types.VARCHAR);
+            cs.setNullX(3, Types.VARCHAR);
         } else {
             cs.setStringX(3, tableNamePattern);
         }
@@ -1357,7 +1367,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         String tableTypes = "";
         int i = 0;
         if (types == null) {
-            cs.setNullX(4, java.sql.Types.VARCHAR);
+            cs.setNullX(4, Types.VARCHAR);
         } else if (types.length == 1 && (types[0].trim()).equals("%")) {
             cs.setStringX(4, types[0]);
         } else {
@@ -1382,7 +1392,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              TaleType    varchar(4000),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getSchemas() throws SQLException {
+    public ResultSet getSchemas() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1398,20 +1408,21 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getSchemasX() throws SqlException {
+    private ClientResultSet getSchemasX() throws SqlException {
         try {
             checkForClosedConnection();
         } catch ( SQLException se ) {
             throw new SqlException(se);
         }
         
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLES('', '', '', '', 'GETSCHEMAS=1')");
-        return (ResultSet) cs.executeQueryX();
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLTABLES('', '', '', '', 'GETSCHEMAS=1')");
+        return (ClientResultSet) cs.executeQueryX();
     }
 
 
     // DERBY does not have the notion of a catalog, so we return a result set with no rows.
-    public java.sql.ResultSet getCatalogs() throws SQLException {
+    public ResultSet getCatalogs() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1427,11 +1438,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getCatalogsX() throws SqlException {
+    private ClientResultSet getCatalogsX() throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLES('', '', '', '', 'GETCATALOGS=1')");
-        return (ResultSet) cs.executeQueryX();
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLTABLES('', '', '', '', 'GETCATALOGS=1')");
+        return (ClientResultSet) cs.executeQueryX();
     }
 
     // call stored procedure SQLTables
@@ -1441,7 +1453,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              TableName   varchar(128),
     //              TableType   varchar(4000),
     //              Options     varchar(4000))
-    public java.sql.ResultSet getTableTypes() throws SQLException {
+    public ResultSet getTableTypes() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1457,10 +1469,10 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getTableTypesX() throws SqlException {
+    private ClientResultSet getTableTypesX() throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = null;
+        ClientPreparedStatement cs = null;
         cs = prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
 
         cs.setStringX(1, "");
@@ -1486,7 +1498,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              ColumnName  varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getColumns(String catalog,
+    public ResultSet getColumns(String catalog,
                                          String schemaPattern,
                                          String tableNamePattern,
                                          String columnNamePattern) throws SQLException {
@@ -1506,13 +1518,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getColumnsX(String catalog,
+    private ClientResultSet getColumnsX(String catalog,
                                   String schemaPattern,
                                   String tableNamePattern,
                                   String columnNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLCOLUMNS(?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLCOLUMNS(?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schemaPattern);
@@ -1531,7 +1544,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              ColumnName  varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getColumnPrivileges(String catalog,
+    public ResultSet getColumnPrivileges(String catalog,
                                                   String schema,
                                                   String table,
                                                   String columnNamePattern) throws SQLException {
@@ -1550,7 +1563,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getColumnPrivilegesX(String catalog,
+    private ClientResultSet getColumnPrivilegesX(String catalog,
                                            String schema,
                                            String table,
                                            String columnNamePattern) throws SqlException {
@@ -1562,7 +1575,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         }
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLCOLPRIVILEGES(?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLCOLPRIVILEGES(?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schema);
@@ -1580,7 +1594,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              TableName   varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getTablePrivileges(String catalog,
+    public ResultSet getTablePrivileges(String catalog,
                                                  String schemaPattern,
                                                  String tableNamePattern) throws SQLException {
         try
@@ -1598,12 +1612,13 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getTablePrivilegesX(String catalog,
+    private ClientResultSet getTablePrivilegesX(String catalog,
                                           String schemaPattern,
                                           String tableNamePattern) throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLEPRIVILEGES(?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLTABLEPRIVILEGES(?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schemaPattern);
@@ -1622,7 +1637,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //                            IN NULLABLE     SMALLINT,
     //                            IN OPTIONS      VARCHAR(4000) )
     //
-    public java.sql.ResultSet getBestRowIdentifier(String catalog,
+    public ResultSet getBestRowIdentifier(String catalog,
                                                    String schema,
                                                    String table,
                                                    int scope,
@@ -1642,7 +1657,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getBestRowIdentifierX(String catalog,
+    private ClientResultSet getBestRowIdentifierX(String catalog,
                                             String schema,
                                             String table,
                                             int scope,
@@ -1657,7 +1672,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
         cs.setIntX(1, SQL_BEST_ROWID);
         cs.setStringX(2, catalog);
@@ -1674,7 +1690,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
 
-    public java.sql.ResultSet getVersionColumns(String catalog,
+    public ResultSet getVersionColumns(String catalog,
                                                 String schema,
                                                 String table) throws SQLException {
         try
@@ -1692,7 +1708,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getVersionColumnsX(String catalog,
+    private ClientResultSet getVersionColumnsX(String catalog,
                                          String schema,
                                          String table) throws SqlException {
         checkForClosedConnectionX();
@@ -1703,7 +1719,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLSPECIALCOLUMNS(?,?,?,?,?,?,?)");
 
         cs.setIntX(1, SQL_ROWVER);
         cs.setStringX(2, catalog);
@@ -1723,7 +1740,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              TableName   varchar(128),
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getPrimaryKeys(String catalog,
+    public ResultSet getPrimaryKeys(String catalog,
                                              String schema,
                                              String table) throws SQLException {
         try
@@ -1741,7 +1758,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getPrimaryKeysX(String catalog,
+    private ClientResultSet getPrimaryKeysX(String catalog,
                                       String schema,
                                       String table) throws SqlException {
         checkForClosedConnectionX();
@@ -1752,7 +1769,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
 
         }
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPRIMARYKEYS(?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLPRIMARYKEYS(?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schema);
@@ -1772,7 +1790,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              FKTableName   varchar(128),
     //              Options       varchar(4000))
     //
-    public java.sql.ResultSet getImportedKeys(String catalog,
+    public ResultSet getImportedKeys(String catalog,
                                               String schema,
                                               String table) throws SQLException {
         try
@@ -1790,7 +1808,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getImportedKeysX(String catalog,
+    private ClientResultSet getImportedKeysX(String catalog,
                                        String schema,
                                        String table) throws SqlException {
         checkForClosedConnectionX();
@@ -1800,7 +1818,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
         cs.setStringX(1, "");
         cs.setStringX(2, null);
@@ -1828,7 +1847,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              FKTableName   varchar(128),
     //              Options       varchar(4000))
     //
-    public java.sql.ResultSet getExportedKeys(String catalog,
+    public ResultSet getExportedKeys(String catalog,
                                               String schema,
                                               String table) throws SQLException {
         try
@@ -1846,7 +1865,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getExportedKeysX(String catalog,
+    private ClientResultSet getExportedKeysX(String catalog,
                                        String schema,
                                        String table) throws SqlException {
         checkForClosedConnectionX();
@@ -1856,7 +1875,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }        
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schema);
@@ -1884,7 +1904,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              FKTableName   varchar(128),
     //              Options       varchar(4000))
     //
-    public java.sql.ResultSet getCrossReference(String primaryCatalog,
+    public ResultSet getCrossReference(String primaryCatalog,
                                                 String primarySchema,
                                                 String primaryTable,
                                                 String foreignCatalog,
@@ -1907,7 +1927,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
 
-    private ResultSet getCrossReferenceX(String primaryCatalog,
+    private ClientResultSet getCrossReferenceX(String primaryCatalog,
                                          String primarySchema,
                                          String primaryTable,
                                          String foreignCatalog,
@@ -1928,7 +1948,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         }
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
         cs.setStringX(1, primaryCatalog);
         cs.setStringX(2, primarySchema);
@@ -1945,7 +1966,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //                        IN Options VARCHAR(4000))
     //
     //
-    public java.sql.ResultSet getTypeInfo() throws SQLException {
+    public ResultSet getTypeInfo() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -1961,11 +1982,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getTypeInfoX() throws SqlException {
+    private ClientResultSet getTypeInfoX() throws SqlException {
         checkForClosedConnectionX();
 
         // check if the last call's resultset is closed or not.
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLGETTYPEINFO(?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLGETTYPEINFO(?,?)");
 
         cs.setShortX(1, (short) 0);
         cs.setStringX(2, getOptions());
@@ -1982,7 +2004,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //              Reserved    Smallint,
     //              Options     varchar(4000))
     //
-    public java.sql.ResultSet getIndexInfo(String catalog,
+    public ResultSet getIndexInfo(String catalog,
                                            String schema,
                                            String table,
                                            boolean unique,
@@ -2002,7 +2024,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getIndexInfoX(String catalog,
+    private ClientResultSet getIndexInfoX(String catalog,
                                     String schema,
                                     String table,
                                     boolean unique,
@@ -2014,7 +2036,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
         }
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLSTATISTICS(?,?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLSTATISTICS(?,?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schema);
@@ -2039,7 +2062,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     //--------------------------JDBC 2.0-----------------------------
 
-    public java.sql.ResultSet getUDTs(String catalog,
+    public ResultSet getUDTs(String catalog,
                                       String schemaPattern,
                                       String typeNamePattern,
                                       int[] types) throws SQLException {
@@ -2058,13 +2081,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getUDTsX(String catalog,
+    private ClientResultSet getUDTsX(String catalog,
                                String schemaPattern,
                                String typeNamePattern,
                                int[] types) throws SqlException {
         checkForClosedConnectionX();
 
-        PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLUDTS(?,?,?,?,?)");
+        ClientPreparedStatement cs = prepareMetaDataQuery(
+            "SYSIBM.SQLUDTS(?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
         cs.setStringX(2, schemaPattern);
@@ -2097,7 +2121,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
     // Derby uses a PreparedStatement argument rather than a callable statement
-    private ResultSet executeCatalogQuery(PreparedStatement cs) 
+    private ClientResultSet executeCatalogQuery(ClientPreparedStatement cs)
         throws SqlException {
         try {
             return cs.executeQueryX();
@@ -2118,7 +2142,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    public java.sql.Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         checkForClosedConnection();
         return connection_;
     }
@@ -2140,7 +2164,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         return false;
     }
 
-    public java.sql.ResultSet getSuperTypes(String catalog,
+    public ResultSet getSuperTypes(String catalog,
                                             String schemaPattern,
                                             String typeNamePattern) throws SQLException {
         try
@@ -2158,7 +2182,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getSuperTypesX() throws SqlException {
+    private ClientResultSet getSuperTypesX() throws SqlException {
         checkForClosedConnectionX();
         String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TYPE_CAT," +
                 "CAST(NULL AS VARCHAR(128)) AS TYPE_SCHEM," +
@@ -2167,11 +2191,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "CAST(NULL AS VARCHAR(128)) AS SUPERTYPE_SCHEM," +
                 "VARCHAR('', 128) AS SUPERTYPE_NAME " +
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR ";
-        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        ClientPreparedStatement ps =
+            connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
     }
 
-    public java.sql.ResultSet getSuperTables(String catalog,
+    public ResultSet getSuperTables(String catalog,
                                              String schemaPattern,
                                              String tableNamePattern) throws SQLException {
         try
@@ -2189,19 +2214,20 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getSuperTablesX() throws SqlException {
+    private ClientResultSet getSuperTablesX() throws SqlException {
         checkForClosedConnectionX();
-        java.lang.String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TABLE_CAT," +
+        String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TABLE_CAT," +
                 "CAST(NULL AS VARCHAR(128)) AS TABLE_SCHEM," +
                 "VARCHAR('', 128) AS TABLE_NAME," +
                 "VARCHAR('', 128) AS SUPERTABLE_NAME FROM SYSIBM.SYSDUMMY1 " +
                 "WHERE 1=0 WITH UR";
-        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        ClientPreparedStatement ps =
+            connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
     }
 
 
-    public java.sql.ResultSet getAttributes(String catalog,
+    public ResultSet getAttributes(String catalog,
                                             String schemaPattern,
                                             String typeNamePattern,
                                             String attributeNamePattern) throws SQLException {
@@ -2220,9 +2246,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getAttributesX() throws SqlException {
+    private ClientResultSet getAttributesX() throws SqlException {
         checkForClosedConnectionX();
-        java.lang.String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TYPE_CAT," +
+        String sql = "SELECT CAST(NULL AS VARCHAR(128)) AS TYPE_CAT," +
                 "CAST(NULL AS VARCHAR(128)) AS TYPE_SCHEM," +
                 "VARCHAR('', 128) AS TYPE_NAME," +
                 "VARCHAR('',128) AS ATTR_NAME," +
@@ -2244,7 +2270,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 "CAST(NULL AS VARCHAR(128)) AS SCOPE_TABLE," +
                 "CAST(NULL AS SMALLINT) AS SOURCE_DATA_TYPE " +
                 "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR";
-        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        ClientPreparedStatement ps =
+            connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
     }
 
@@ -2255,7 +2282,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     public int getResultSetHoldability() throws SQLException {
         checkForClosedConnection();
-        return java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
+        return ResultSet.HOLD_CURSORS_OVER_COMMIT;
     }
 
     public int getDatabaseMajorVersion() throws SQLException {
@@ -2558,7 +2585,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
-            java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ",");
+            StringTokenizer st = new StringTokenizer(returnedFromSP, ",");
             while (st.hasMoreTokens()) {
                 if ((Integer.parseInt(st.nextToken())) == type) {
                     return true;
@@ -2596,10 +2623,10 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
-            java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ";");
+            StringTokenizer st = new StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
-                java.util.StringTokenizer stForConc = 
-            new java.util.StringTokenizer(st.nextToken(), ",");
+                StringTokenizer stForConc =
+            new StringTokenizer(st.nextToken(), ",");
                 if ((Integer.parseInt(stForConc.nextToken())) == type) {
                     while (stForConc.hasMoreTokens()) {
                         if ((Integer.parseInt(stForConc.nextToken())) == concurrency) {
@@ -2632,9 +2659,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 metaDataInfoCall();
                 returnedFromSP = (String) metaDataInfoCache_[infoCallIndex];
             }
-            java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ";");
+            StringTokenizer st = new StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
-                java.util.StringTokenizer stForType = new java.util.StringTokenizer(st.nextToken(), ",");
+                StringTokenizer stForType =
+                    new StringTokenizer(st.nextToken(), ",");
+
                 if ((Integer.parseInt(stForType.nextToken())) == fromType) {
                     while (st.hasMoreTokens()) {
                         if ((Integer.parseInt(st.nextToken())) == toType) {
@@ -2657,13 +2686,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     // need to synchronize at the higher level.
     private void metaDataInfoCall() throws SqlException {
         synchronized (connection_) {
-            ResultSet rs;
+            ClientResultSet rs;
 
             // These remote calls return a result set containing a single row.
             // Each column in the row corresponds to a particular get meta data info
             // method.
-            PreparedStatement ps = prepareMetaDataQuery("SYSIBM.MetaData()");
-            rs = (ResultSet) ps.executeQueryX();
+            ClientPreparedStatement ps = prepareMetaDataQuery(
+                "SYSIBM.MetaData()");
+            rs = (ClientResultSet) ps.executeQueryX();
             rs.nextX();
             int ColumnCount;
             try {
@@ -2733,7 +2763,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * schema description
      * @exception SQLException if a database error occurs
      */
-    public java.sql.ResultSet getSchemas(String catalog, String schemaPattern)
+    public ResultSet getSchemas(String catalog, String schemaPattern)
         throws SQLException
     {
         try {
@@ -2757,7 +2787,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @exception SqlException if a database error occurs
      * @see #getSchemas(String, String)
      */
-    private ResultSet getSchemasX(String catalog, String schemaPattern)
+    private ClientResultSet getSchemasX(String catalog, String schemaPattern)
         throws SqlException
     {
         checkForClosedConnectionX();
@@ -2770,14 +2800,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         checkServerJdbcVersionX("getSchemas(String, String)", 4, 0);
 
         String call = "SYSIBM.SQLTABLES(?, ?, '', '', 'GETSCHEMAS=2')";
-        PreparedStatement cs = prepareMetaDataQuery(call);
+        ClientPreparedStatement cs = prepareMetaDataQuery(call);
         if (catalog == null) {
-            cs.setNullX(1, java.sql.Types.VARCHAR);
+            cs.setNullX(1, Types.VARCHAR);
         } else {
             cs.setStringX(1, catalog);
         }
         if (schemaPattern == null) {
-            cs.setNullX(2, java.sql.Types.VARCHAR);
+            cs.setNullX(2, Types.VARCHAR);
         } else {
             cs.setStringX(2, schemaPattern);
         }
@@ -2803,7 +2833,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * supported client info property
      * @exception SQLException if an error occurs
      */
-    public java.sql.ResultSet getClientInfoProperties() throws SQLException {
+    public ResultSet getClientInfoProperties() throws SQLException {
         try {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
@@ -2826,7 +2856,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @exception SqlException if a database error occurs
      * @see #getClientInfoProperties
      */
-    private ResultSet getClientInfoPropertiesX() throws SqlException {
+    private ClientResultSet getClientInfoPropertiesX() throws SqlException {
         checkForClosedConnectionX();
         final String sql =
             "SELECT CAST(NULL AS VARCHAR(128)) AS NAME, " +
@@ -2834,7 +2864,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             "CAST(NULL AS VARCHAR(128)) AS DEFAULT_VALUE, " +
             "CAST(NULL AS VARCHAR(128)) AS DESCRIPTION " +
             "FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR";
-        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        ClientPreparedStatement ps =
+            connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
     }
 
@@ -2843,7 +2874,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     /** See DatabaseMetaData javadoc */
     public  boolean generatedKeyAlwaysReturned() { return true; }
 
-    public java.sql.ResultSet getPseudoColumns
+    public ResultSet getPseudoColumns
         ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
         throws SQLException
     {
@@ -2863,7 +2894,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         }
     }
 
-    private ResultSet getPseudoColumnsX() throws SqlException
+    private ClientResultSet getPseudoColumnsX() throws SqlException
     {
         checkForClosedConnectionX();
         String sql =
@@ -2882,7 +2913,8 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             "        VARCHAR('NO',128) AS IS_NULLABLE \n" +
             "    FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR"
             ;
-        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        ClientPreparedStatement ps =
+            connection_.prepareDynamicCatalogQuery(sql);
         return ps.executeQueryX();
     }
 
@@ -2898,15 +2930,16 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     //----------------------------helper methods----------------------------------
 
 
-    private PreparedStatement prepareMetaDataQuery(String cmd) throws SqlException {
-        PreparedStatement ps;
+    private ClientPreparedStatement prepareMetaDataQuery(String cmd)
+            throws SqlException {
+        ClientPreparedStatement ps;
 
-        ps = (PreparedStatement)
+        ps = (ClientPreparedStatement)
                 connection_.prepareStatementX("CALL " + cmd,
-                        java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
                         connection_.holdability(),
-                        java.sql.Statement.NO_GENERATED_KEYS,
+                        ClientStatement.NO_GENERATED_KEYS,
                         null, null);
         return ps;
     }

@@ -20,6 +20,7 @@
  */
 package org.apache.derby.client.am;
 
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import org.apache.derby.client.am.stmtcache.StatementKey;
@@ -40,7 +41,7 @@ public class LogicalCallableStatement42 extends LogicalCallableStatement40
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalCallableStatement42(java.sql.CallableStatement physicalCs,
+    public LogicalCallableStatement42(CallableStatement physicalCs,
                                       StatementKey stmtKey,
                                       StatementCacheInteractor cacheInteractor){
         super(physicalCs, stmtKey, cacheInteractor);
@@ -55,62 +56,72 @@ public class LogicalCallableStatement42 extends LogicalCallableStatement40
     public  void registerOutParameter( int parameterIndex, SQLType sqlType )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterIndex, sqlType );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterIndex, sqlType );
     }
 
     public  void registerOutParameter( int parameterIndex, SQLType sqlType, int scale )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterIndex, sqlType, scale );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterIndex, sqlType, scale );
     }
     
     public  void registerOutParameter( int parameterIndex, SQLType sqlType, String typeName )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterIndex, sqlType, typeName );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterIndex, sqlType, typeName );
     }
     
     public  void registerOutParameter( String parameterName, SQLType sqlType )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterName, sqlType );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterName, sqlType );
     }
     
     public  void registerOutParameter( String parameterName, SQLType sqlType, int scale )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterName, sqlType, scale );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterName, sqlType, scale );
     }
     
     public  void registerOutParameter( String parameterName,  SQLType sqlType, String typeName )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).registerOutParameter( parameterName, sqlType, typeName );
+        ((ClientCallableStatement42)getPhysCs()).
+            registerOutParameter( parameterName, sqlType, typeName );
     }
 
     public  void setObject
-        ( int parameterIndex, java.lang.Object x, SQLType sqlType )
+        ( int parameterIndex, Object x, SQLType sqlType )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).setObject( parameterIndex, x, sqlType );
+        ((ClientCallableStatement42)getPhysCs()).
+            setObject( parameterIndex, x, sqlType );
     }
     
     public void setObject
-        ( int parameterIndex, java.lang.Object x, SQLType sqlType, int scaleOrLength )
+        ( int parameterIndex, Object x, SQLType sqlType, int scaleOrLength )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).setObject( parameterIndex, x, sqlType, scaleOrLength );
+        ((ClientCallableStatement42)getPhysCs()).
+            setObject( parameterIndex, x, sqlType, scaleOrLength );
     }
 
     public  void setObject( String parameterName, Object x, SQLType sqlType )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).setObject( parameterName, x, sqlType );
+        ((ClientCallableStatement42)getPhysCs()).
+            setObject( parameterName, x, sqlType );
     }
     
     public  void setObject( String parameterName, Object x, SQLType sqlType, int scaleOrLength )
         throws SQLException
     {
-        ((CallableStatement42)getPhysCs()).setObject( parameterName, x, sqlType, scaleOrLength );
+        ((ClientCallableStatement42)getPhysCs()).
+            setObject( parameterName, x, sqlType, scaleOrLength );
     }
 }

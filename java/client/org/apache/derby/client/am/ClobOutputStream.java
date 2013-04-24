@@ -26,10 +26,10 @@ import java.io.OutputStream;
 
 
 class ClobOutputStream extends OutputStream {
-    private Clob clob_;
+    private ClientClob clob_;
     private long offset_;
 
-    ClobOutputStream(Clob clob, long offset) throws SqlException {
+    ClobOutputStream(ClientClob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
         

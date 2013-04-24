@@ -20,13 +20,16 @@
 */
 package org.apache.derby.client;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.SqlException;
@@ -43,7 +46,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * A physical connection to a data source, to be used for creating logical
  * connections to the same data source.
  */
-public class ClientPooledConnection implements javax.sql.PooledConnection {
+public class ClientPooledConnection implements PooledConnection {
 
     /** Tells if this pooled connection is newly created. */
     private boolean newPC_ = true;
@@ -62,8 +65,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      */
     private int eventIterators;
 
-    Connection physicalConnection_ = null;
-    private NetConnection netPhysicalConnection_ = null;
+    ClientConnection physicalConnection_ = null;
+    NetConnection netPhysicalConnection_ = null;
     NetXAConnection netXAPhysicalConnection_ = null;
 
     /**
@@ -242,7 +245,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * 
      * @throws SQLException if creating a new logical connection fails
      */
-    public synchronized java.sql.Connection getConnection() throws SQLException {
+    public synchronized Connection getConnection() throws SQLException {
         try
         {
             if (logWriter_ != null) {
@@ -449,7 +452,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param statement The PreparedStatement that was closed
      *
      */
-    public void onStatementClose(java.sql.PreparedStatement statement) {
+    public void onStatementClose(PreparedStatement statement) {
         
     }
     
@@ -463,7 +466,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * @param sqle      The SQLException associated with the error that caused
      *                  the invalidation of this PreparedStatement
      */
-    public void onStatementErrorOccurred(java.sql.PreparedStatement statement,
+    public void onStatementErrorOccurred(PreparedStatement statement,
                     SQLException sqle) {
         
     }

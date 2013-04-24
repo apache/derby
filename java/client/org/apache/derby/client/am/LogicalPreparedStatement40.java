@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.NClob;
+import java.sql.PreparedStatement;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
@@ -45,7 +46,7 @@ public class LogicalPreparedStatement40
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalPreparedStatement40(java.sql.PreparedStatement physicalPs,
+    public LogicalPreparedStatement40(PreparedStatement physicalPs,
                                       StatementKey stmtKey,
                                       StatementCacheInteractor cacheInteractor){
         super(physicalPs, stmtKey, cacheInteractor);

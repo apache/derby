@@ -20,7 +20,7 @@
 */
 package org.apache.derby.client.net;
 
-import org.apache.derby.client.am.CallableStatement;
+import org.apache.derby.client.am.ClientCallableStatement;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.MaterialPreparedStatement;
 import org.apache.derby.client.am.Section;
@@ -32,7 +32,7 @@ import org.apache.derby.client.ClientPooledConnection;
 public class NetCallableStatement extends NetPreparedStatement
         implements MaterialPreparedStatement {
 
-    CallableStatement callableStatement_;
+    ClientCallableStatement callableStatement_;
 
     //-----------------------------state------------------------------------------
 
@@ -42,8 +42,8 @@ public class NetCallableStatement extends NetPreparedStatement
         callableStatement_ = null;
     }
 
-    // Relay constructor for all NetCallableStatement constructors
-    NetCallableStatement(CallableStatement statement,
+    // Relay constructor for all NetCallableStatement, constructors
+    NetCallableStatement(ClientCallableStatement statement,
                          NetAgent netAgent,
                          NetConnection netConnection) throws SqlException {
         super(statement, netAgent, netConnection);
@@ -51,7 +51,7 @@ public class NetCallableStatement extends NetPreparedStatement
         initNetCallableStatement(statement);
     }
 
-    void resetNetCallableStatement(CallableStatement statement,
+    void resetNetCallableStatement(ClientCallableStatement statement,
                                    NetAgent netAgent,
                                    NetConnection netConnection) throws SqlException {
         super.resetNetPreparedStatement(statement, netAgent, netConnection);
@@ -59,7 +59,7 @@ public class NetCallableStatement extends NetPreparedStatement
         initNetCallableStatement(statement);
     }
 
-    private void initNetCallableStatement(CallableStatement statement) {
+    private void initNetCallableStatement(ClientCallableStatement statement) {
         callableStatement_ = statement;
         callableStatement_.materialCallableStatement_ = this;
 

@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.Reader;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -30,22 +31,22 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * Clob value from the server.
  * <p>
  * This <code>Reader</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #read(char[])
+ * buffering of data is done.  Hence, for efficiency #read(char[])
  * should be used instead of #read().  Marks are not supported, but it
  * should be pretty simple to extend the implementation to support
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
-public class ClobLocatorReader extends java.io.Reader {
+public class ClobLocatorReader extends Reader {
     /**
      * Connection used to read Clob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private final Clob clob;
+    private final ClientClob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -75,7 +76,7 @@ public class ClobLocatorReader extends java.io.Reader {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
-    public ClobLocatorReader(Connection connection, Clob clob)
+    public ClobLocatorReader(ClientConnection connection, ClientClob clob)
     throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
@@ -105,7 +106,7 @@ public class ClobLocatorReader extends java.io.Reader {
      *            retrieved.
      * @param len The length in characters of the partial value to be retrieved.
      */
-    public ClobLocatorReader(Connection connection, Clob clob, 
+    public ClobLocatorReader(ClientConnection connection, ClientClob clob,
             long pos, long len) throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());

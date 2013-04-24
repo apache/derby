@@ -21,10 +21,12 @@
 
 package org.apache.derby.client.am;
 
+import java.util.Iterator;
+
 public interface UnitOfWorkListener {
     public void listenToUnitOfWork();
 
-    public void completeLocalCommit(java.util.Iterator listenerIterator);
+    public void completeLocalCommit(Iterator listenerIterator);
 
-    public void completeLocalRollback(java.util.Iterator listenerIterator);
+    public void completeLocalRollback(Iterator listenerIterator);
 }

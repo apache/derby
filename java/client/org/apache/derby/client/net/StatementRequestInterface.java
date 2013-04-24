@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.util.ArrayList;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
@@ -88,5 +89,6 @@ public interface StatementRequestInterface {
                                  Object[] inputs) throws SqlException;
 
 
-    public void writeSetSpecialRegister(Section section, java.util.ArrayList sqlsttList) throws SqlException;
+    public void writeSetSpecialRegister(Section section, ArrayList sqlsttList)
+            throws SqlException;
 }

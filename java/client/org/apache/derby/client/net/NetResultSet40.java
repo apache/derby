@@ -24,6 +24,8 @@ package org.apache.derby.client.net;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.RowId;
@@ -180,7 +182,7 @@ public class NetResultSet40 extends NetResultSet{
      * @throws java.sql.SQLExption if no object if found that implements the 
      * interface
      */
-    public <T> T unwrap(java.lang.Class<T> interfaces)
+    public <T> T unwrap(Class<T> interfaces)
                                    throws SQLException {
         try { 
             checkForClosedResultSet("unwrap");
@@ -296,10 +298,10 @@ public class NetResultSet40 extends NetResultSet{
         else if ( Time.class.equals( type ) ) { retval = getTime( columnIndex ); }
         else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( columnIndex ); }
 
-        else if ( java.sql.Blob.class.equals( type ) ) {
+        else if ( Blob.class.equals( type ) ) {
             retval = getBlob( columnIndex );
 
-        } else if ( java.sql.Clob.class.equals( type ) ) {
+        } else if ( Clob.class.equals( type ) ) {
             retval = getClob( columnIndex );
 
         } else if ( type.isArray() &&

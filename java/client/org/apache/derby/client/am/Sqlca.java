@@ -23,6 +23,8 @@ package org.apache.derby.client.am;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.DataTruncation;
+import java.sql.Types;
+import java.util.Locale;
 import org.apache.derby.client.net.Typdef;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -35,7 +37,7 @@ public abstract class Sqlca {
     public  static  final   int LOW_ORDER_UPDATE_COUNT = 2;
     public  static  final   int HIGH_ORDER_UPDATE_COUNT = 3;
     public  static  final   int SQL_ERR_LENGTH = 6;
-    transient protected Connection connection_;
+    transient protected ClientConnection connection_;
     SqlException exceptionThrownOnStoredProcInvocation_;
     boolean messageTextRetrievedContainsTokensOnly_ = true;
 
@@ -79,7 +81,7 @@ public abstract class Sqlca {
      * procedure to get the same message). */
     private String[] cachedMessages;
 
-    protected Sqlca(Connection connection) {
+    protected Sqlca(ClientConnection connection) {
         connection_ = connection;
         agent_ = connection_ != null ? connection_.agent_ : null;
     }
@@ -211,7 +213,7 @@ public abstract class Sqlca {
                     0,
                     sqlErrpBytes_.length);
             return sqlErrp_;
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             // leave sqlErrp as null.
             return null;
         }
@@ -282,7 +284,7 @@ public abstract class Sqlca {
             return getUnformattedMessage(messageNumber);
         }
 
-        CallableStatement cs = null;
+        ClientCallableStatement cs = null;
         synchronized (connection_) {
             try {
                 cs = connection_.prepareMessageProc("call SYSIBM.SQLCAMESSAGE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -317,13 +319,13 @@ public abstract class Sqlca {
                 // MessageFileName: Not used by our driver, so set to null.
                 cs.setStringX(13, null);
                 // Locale: language preference requested for the return error message.
-                cs.setStringX(14, java.util.Locale.getDefault().toString());
+                cs.setStringX(14, Locale.getDefault().toString());
                 // server could return a locale different from what we requested
-                cs.registerOutParameterX(14, java.sql.Types.VARCHAR);
+                cs.registerOutParameterX(14, Types.VARCHAR);
                 // Message: error message returned from SQLCAMessage stored procedure.
-                cs.registerOutParameterX(15, java.sql.Types.LONGVARCHAR);
+                cs.registerOutParameterX(15, Types.LONGVARCHAR);
                 // RCode: return code from SQLCAMessage stored procedure.
-                cs.registerOutParameterX(16, java.sql.Types.INTEGER);
+                cs.registerOutParameterX(16, Types.INTEGER);
                 cs.executeX();
 
                 if (cs.getIntX(16) == 0) {
@@ -474,13 +476,13 @@ public abstract class Sqlca {
             }
             sqlStates_ = states;
             sqlErrmcMessages_ = tokens;
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             /* do nothing, the arrays continue to be null */
         }
     }
 
     protected String bytes2String(byte[] bytes, int offset, int length)
-            throws java.io.UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         // Network server uses utf8 encoding
         return new String(bytes, offset, length, Typdef.UTF8ENCODING);
     }
@@ -508,7 +510,7 @@ public abstract class Sqlca {
         return containsSqlcax_;
     }
 
-    public void resetRowsetSqlca(Connection connection,
+    public void resetRowsetSqlca(ClientConnection connection,
                                  int sqlCode,
                                  String sqlState) {
         connection_ = connection;

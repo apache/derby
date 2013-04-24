@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.derby.client.am.ClientMessageId;
@@ -30,9 +31,9 @@ import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Statement;
+import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.StatementCallbackInterface;
-import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.ClientTypes;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.i18n.MessageUtil;
@@ -275,7 +276,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // Parse the reply for the Execute SQL Statement Command.
     // This method handles the parsing of all command replies and reply data
     // for the excsqlstt command.
-    // Also called by CallableStatement.readExecuteCall()
+    // Also called by ClientCallableStatement.readExecuteCall()
     private void parseEXCSQLSTTreply(StatementCallbackInterface statementI) throws DisconnectException {
         // first handle the transaction component, which consists of one or more
         // reply messages indicating the transaction state.
@@ -326,10 +327,11 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             // has parameters or singleton select which translates to sqldtard.
             NetSqldta netSqldta = null;
             boolean useCachedSingletonRowData = false;
-            if (((Statement) statementI).cachedSingletonRowData_ == null) {
+            if (((ClientStatement)statementI).cachedSingletonRowData_ == null) {
                 netSqldta = new NetSqldta(netAgent_);
             } else {
-                netSqldta = (NetSqldta) ((Statement) statementI).cachedSingletonRowData_;
+                netSqldta = (NetSqldta)((ClientStatement) statementI).
+                    cachedSingletonRowData_;
                 netSqldta.resetDataBuffer();
                 netSqldta.extdtaData_.clear();
                 useCachedSingletonRowData = true;
@@ -885,7 +887,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         netAgent_.setSvrcod(svrcod);
 
         // hack for now until event methods are used below
-        Statement statement = (Statement) statementI;
+        ClientStatement statement = (ClientStatement) statementI;
 
         // if there is a cached Cursor object, then use the cached cursor object.
         NetResultSet rs = null;
@@ -937,7 +939,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         // QRYCLSIMP only applies to OPNQRY, not EXCSQLSTT
         final boolean qryclsimp =
             isOPNQRYreply &&
-            (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) &&
+            (rs.resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) &&
             netAgent_.netConnection_.serverSupportsQryclsimp();
         rs.netCursor_.setQryclsimpEnabled(qryclsimp);
 
@@ -1529,7 +1531,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                 longValueForDecryption_ = null;
             }
             netCursor.extdtaData_.add(data);
-        } catch (java.lang.OutOfMemoryError e) {
+        } catch (OutOfMemoryError e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                 new ClientMessageId(SQLState.NET_LOB_DATA_TOO_LARGE_FOR_JVM), null, e));
         }
@@ -1991,7 +1993,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         columnMetaData.nullable_[columnNumber] = Utils.isSqlTypeNullable(sqlType);
         columnMetaData.sqlCcsid_[columnNumber] = ccsid;
         columnMetaData.types_[columnNumber] =
-                Types.mapDERBYTypeToDriverType(true, sqlType, columnLength, ccsid); // true means isDescribed
+            ClientTypes.mapDERBYTypeToDriverType(
+                true, sqlType, columnLength, ccsid);
+            // true means isDescribed
+
         parseSQLDOPTGRP(columnMetaData, columnNumber);
     }
 
@@ -2006,8 +2011,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     {
         int jdbcType = columnMetaData.types_[columnNumber];
 
-        if ( !(jdbcType == Types.JAVA_OBJECT) || !netAgent_.netConnection_.serverSupportsUDTs() )
-        {
+        if (!(jdbcType == ClientTypes.JAVA_OBJECT) ||
+            !netAgent_.netConnection_.serverSupportsUDTs()) {
+
             if (readFastUnsignedByte() == CodePoint.NULLDATA) { return; }
         }
         else
@@ -2289,12 +2295,12 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         // but we will set it to the default.
 
         if (qryattscr == 0xF0) {
-            return java.sql.ResultSet.TYPE_FORWARD_ONLY;
+            return ResultSet.TYPE_FORWARD_ONLY;
         }
 
         switch (qryattsns) {
         case CodePoint.QRYINS:
-            return java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
+            return ResultSet.TYPE_SCROLL_INSENSITIVE;
         default:
             return defaultType;
         }
@@ -2306,9 +2312,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         // we want to set it to the actual concurrency.
         switch (qryattupd) {
         case CodePoint.QRYRDO:
-            return java.sql.ResultSet.CONCUR_READ_ONLY;
+            return ResultSet.CONCUR_READ_ONLY;
         case CodePoint.QRYUPD:
-            return java.sql.ResultSet.CONCUR_UPDATABLE;
+            return ResultSet.CONCUR_UPDATABLE;
         default:
             return defaultConcurrency;
         }
@@ -2316,9 +2322,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
     private int calculateResultSetHoldability(int sqlcsrhld) {
         if (sqlcsrhld == 0xF0) {
-            return java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT;
+            return ResultSet.CLOSE_CURSORS_AT_COMMIT;
         } else {
-            return java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
+            return ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
     }
 

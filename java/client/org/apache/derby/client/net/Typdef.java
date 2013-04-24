@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.Types;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.client.am.Cursor;
@@ -126,7 +127,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 //
 // typdef end
 
-public class Typdef implements java.lang.Cloneable {
+public class Typdef implements Cloneable {
     //---------------------navigational members-----------------------------------
 
     //-----------------------------state------------------------------------------
@@ -688,28 +689,28 @@ public class Typdef implements java.lang.Cloneable {
     private static final int[] protocolToJdbcTypes_ = {
         0x00, // 0x00 Empties
         0x00, // 0x01 Empties
-        java.sql.Types.INTEGER, // 0x02 4-byte int
-        java.sql.Types.INTEGER, // 0x03 null 4-byte int
-        java.sql.Types.SMALLINT, // 0x04 2-byte int
-        java.sql.Types.SMALLINT, // 0x05 null 2-byte int
-        java.sql.Types.TINYINT, // 0x06 1-byte int
-        java.sql.Types.TINYINT, // 0x07 null 1-byte int
-        java.sql.Types.DECIMAL, // 0x08 16-byte bin float
-        java.sql.Types.DECIMAL, // 0x09 null 16-byte bin float
-        java.sql.Types.DOUBLE, // 0x0A 8-byte bin float
-        java.sql.Types.DOUBLE, // 0x0B null 8-byte bin float
-        java.sql.Types.REAL, // 0x0C 4-byte bin float
-        java.sql.Types.REAL, // 0x0D null 4-byte bin float
-        java.sql.Types.DECIMAL, // 0x0E Fixed Decimal
-        java.sql.Types.DECIMAL, // 0x0F null Fixed Decimal
-        java.sql.Types.DECIMAL, // 0x10 Zone Decimal
-        java.sql.Types.DECIMAL, // 0x11 null Zone Decimal
-        java.sql.Types.DECIMAL, // 0x12 Numeirc
-        java.sql.Types.DECIMAL, // 0x13 null Numeric
+        Types.INTEGER, // 0x02 4-byte int
+        Types.INTEGER, // 0x03 null 4-byte int
+        Types.SMALLINT, // 0x04 2-byte int
+        Types.SMALLINT, // 0x05 null 2-byte int
+        Types.TINYINT, // 0x06 1-byte int
+        Types.TINYINT, // 0x07 null 1-byte int
+        Types.DECIMAL, // 0x08 16-byte bin float
+        Types.DECIMAL, // 0x09 null 16-byte bin float
+        Types.DOUBLE, // 0x0A 8-byte bin float
+        Types.DOUBLE, // 0x0B null 8-byte bin float
+        Types.REAL, // 0x0C 4-byte bin float
+        Types.REAL, // 0x0D null 4-byte bin float
+        Types.DECIMAL, // 0x0E Fixed Decimal
+        Types.DECIMAL, // 0x0F null Fixed Decimal
+        Types.DECIMAL, // 0x10 Zone Decimal
+        Types.DECIMAL, // 0x11 null Zone Decimal
+        Types.DECIMAL, // 0x12 Numeirc
+        Types.DECIMAL, // 0x13 null Numeric
         0x00, // 0x14 Empties
         0x00, // 0x15 Empties
-        java.sql.Types.BIGINT, // 0x16 Big int
-        java.sql.Types.BIGINT, // 0x17 null Big int
+        Types.BIGINT, // 0x16 Big int
+        Types.BIGINT, // 0x17 null Big int
         0x00,
         0x00,
         0x00,
@@ -718,28 +719,28 @@ public class Typdef implements java.lang.Cloneable {
         0x00,
         0x00,
         0x00,
-        java.sql.Types.DATE, // 0x20 Date
-        java.sql.Types.DATE, // 0x21 null Date
-        java.sql.Types.TIME, // 0x22 Time
-        java.sql.Types.TIME, // 0x23 null Time
-        java.sql.Types.TIMESTAMP, // 0x24 Timestamp
-        java.sql.Types.TIMESTAMP, // 0x25 null Timestamp
-        java.sql.Types.BINARY, // 0x26 Fixed bytes
-        java.sql.Types.BINARY, // 0x27 null Fixed bytes
-        java.sql.Types.VARBINARY, // 0x28 Variable bytes
-        java.sql.Types.VARBINARY, // 0x29 null Variable bytes
-        java.sql.Types.LONGVARBINARY, // 0x2A Long var bytes
-        java.sql.Types.LONGVARBINARY, // 0x2B null Long var bytes
-        java.sql.Types.VARBINARY, // 0x2C Nullterm bytes
-        java.sql.Types.VARBINARY, // 0x2D null Nullterm bytes
-        java.sql.Types.CHAR, // 0x2E Nullterm SBCS
-        java.sql.Types.CHAR, // 0x2F null Nullterm SBCS
-        java.sql.Types.CHAR, // 0x30 Fix char SBCS
-        java.sql.Types.CHAR, // 0x31 null Fix char SBCS
-        java.sql.Types.VARCHAR, // 0x32 Var char SBCS
-        java.sql.Types.VARCHAR, // 0x33 null Var char SBCS
-        java.sql.Types.LONGVARCHAR, // 0x34 Long var SBCS
-        java.sql.Types.LONGVARCHAR, // 0x35 null Long var SBCS
+        Types.DATE, // 0x20 Date
+        Types.DATE, // 0x21 null Date
+        Types.TIME, // 0x22 Time
+        Types.TIME, // 0x23 null Time
+        Types.TIMESTAMP, // 0x24 Timestamp
+        Types.TIMESTAMP, // 0x25 null Timestamp
+        Types.BINARY, // 0x26 Fixed bytes
+        Types.BINARY, // 0x27 null Fixed bytes
+        Types.VARBINARY, // 0x28 Variable bytes
+        Types.VARBINARY, // 0x29 null Variable bytes
+        Types.LONGVARBINARY, // 0x2A Long var bytes
+        Types.LONGVARBINARY, // 0x2B null Long var bytes
+        Types.VARBINARY, // 0x2C Nullterm bytes
+        Types.VARBINARY, // 0x2D null Nullterm bytes
+        Types.CHAR, // 0x2E Nullterm SBCS
+        Types.CHAR, // 0x2F null Nullterm SBCS
+        Types.CHAR, // 0x30 Fix char SBCS
+        Types.CHAR, // 0x31 null Fix char SBCS
+        Types.VARCHAR, // 0x32 Var char SBCS
+        Types.VARCHAR, // 0x33 null Var char SBCS
+        Types.LONGVARCHAR, // 0x34 Long var SBCS
+        Types.LONGVARCHAR, // 0x35 null Long var SBCS
         0x00, // 0x36 Empties
         0x00, // 0x37 Empties
         0x00, // 0x38 Empties
@@ -747,28 +748,28 @@ public class Typdef implements java.lang.Cloneable {
         0x00, // 0x3A Empties
         0x00, // 0x3B Empties
         // The following will have to be changed later for situations where
-        java.sql.Types.CHAR, // 0x3C Fix char MBCS
-        java.sql.Types.CHAR, // 0x3D null Fix char MBCS
-        java.sql.Types.VARCHAR, // 0x3E Var char MBCS
-        java.sql.Types.VARCHAR, // 0x3F null Var char MBCS
-        java.sql.Types.LONGVARCHAR, // 0x40 Long var MBCS
-        java.sql.Types.LONGVARCHAR, // 0x41 null Long var MBCS
-        java.sql.Types.CHAR, // 0x42 Nullterm MBCS
-        java.sql.Types.CHAR, // 0x43 null Nullterm MBCS
-        java.sql.Types.VARBINARY, // 0x44 L String bytes
-        java.sql.Types.VARBINARY, // 0x45 null L String bytes
-        java.sql.Types.VARCHAR, // 0x46 L String SBCS
-        java.sql.Types.VARCHAR, // 0x47 null L String SBCS
-        java.sql.Types.VARCHAR, // 0x48 L String MBCS
-        java.sql.Types.VARCHAR, // 0x49 null L String MBCS
+        Types.CHAR, // 0x3C Fix char MBCS
+        Types.CHAR, // 0x3D null Fix char MBCS
+        Types.VARCHAR, // 0x3E Var char MBCS
+        Types.VARCHAR, // 0x3F null Var char MBCS
+        Types.LONGVARCHAR, // 0x40 Long var MBCS
+        Types.LONGVARCHAR, // 0x41 null Long var MBCS
+        Types.CHAR, // 0x42 Nullterm MBCS
+        Types.CHAR, // 0x43 null Nullterm MBCS
+        Types.VARBINARY, // 0x44 L String bytes
+        Types.VARBINARY, // 0x45 null L String bytes
+        Types.VARCHAR, // 0x46 L String SBCS
+        Types.VARCHAR, // 0x47 null L String SBCS
+        Types.VARCHAR, // 0x48 L String MBCS
+        Types.VARCHAR, // 0x49 null L String MBCS
         0x00, // 0x4A Empties
         0x00, // 0x4B Empties
-        java.sql.Types.VARCHAR, // 0x4C SBCS
-        java.sql.Types.VARCHAR, // 0x4D null SBCS
-        java.sql.Types.VARCHAR, // 0x4E MBCS
-        java.sql.Types.VARCHAR, // 0x4F null MBCS
-        java.sql.Types.JAVA_OBJECT, // 0x50 UDT
-        java.sql.Types.JAVA_OBJECT, // 0x51 null UDT
+        Types.VARCHAR, // 0x4C SBCS
+        Types.VARCHAR, // 0x4D null SBCS
+        Types.VARCHAR, // 0x4E MBCS
+        Types.VARCHAR, // 0x4F null MBCS
+        Types.JAVA_OBJECT, // 0x50 UDT
+        Types.JAVA_OBJECT, // 0x51 null UDT
         0x00, // 0x52 Empties
         0x00, // 0x53 Empties
         0x00, // 0x54 Empties
@@ -877,8 +878,8 @@ public class Typdef implements java.lang.Cloneable {
         0x00, // 0xBB Empties
         0x00, // 0xBC Empties
         0x00, // 0xBD Empties
-        java.sql.Types.BOOLEAN, // 0xBE Boolean
-        java.sql.Types.BOOLEAN, // 0xBF null Boolean
+        Types.BOOLEAN, // 0xBE Boolean
+        Types.BOOLEAN, // 0xBF null Boolean
         0x00, // 0xC0 Empties
         0x00, // 0xC1 Empties
         0x00, // 0xC2 Empties
@@ -887,14 +888,14 @@ public class Typdef implements java.lang.Cloneable {
         0x00, // 0xC5 Empties
         0x00, // 0xC6 Empties
         0x00, // 0xC7 Empties
-        java.sql.Types.BLOB, // 0xC8 Large object bytes
-        java.sql.Types.BLOB, // 0xC9 null Large object bytes
-        java.sql.Types.CLOB, // 0xCA Large object char SBCS
-        java.sql.Types.CLOB, // 0xCB null Large object char SBCS
+        Types.BLOB, // 0xC8 Large object bytes
+        Types.BLOB, // 0xC9 null Large object bytes
+        Types.CLOB, // 0xCA Large object char SBCS
+        Types.CLOB, // 0xCB null Large object char SBCS
         0x00,
         0x00,
-        java.sql.Types.CLOB, // 0xCE Large object char MBCS
-        java.sql.Types.CLOB, // 0xCF null Large object char MBCS
+        Types.CLOB, // 0xCE Large object char MBCS
+        Types.CLOB, // 0xCF null Large object char MBCS
     };
 
 
@@ -1056,7 +1057,7 @@ public class Typdef implements java.lang.Cloneable {
     public Object clone() {
         try {
             return super.clone();
-        } catch (java.lang.CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             return null; // this shouldn't happen since we implement the cloneable interface
         }
     }

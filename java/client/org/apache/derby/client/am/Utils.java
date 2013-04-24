@@ -21,7 +21,9 @@
 
 package org.apache.derby.client.am;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Types;
 import org.apache.derby.shared.common.reference.MessageId;
 
 // Self-contained utilities.
@@ -109,11 +111,11 @@ public final class Utils {
         return stringBuffer.toString();
     }
 
-    static public int computeBigDecimalPrecision(java.math.BigDecimal decimal) {
+    static public int computeBigDecimalPrecision(BigDecimal decimal) {
         byte[] bBytes = decimal.unscaledValue().abs().toByteArray();
 
         if (byteArrayCmp(bBytes, tenRadixArr[tenRadixArr.length - 1]) >= 0) {
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 SqlException.getMessageUtil().
                     getTextMessage(MessageId.CONN_PRECISION_TOO_LARGE));
         }
@@ -225,7 +227,10 @@ public final class Utils {
         }
     }
 
-    static public void checkForNegativePositiveSqlcard(Sqlca sqlca, Statement statement) throws SqlException {
+    static public void checkForNegativePositiveSqlcard(
+            Sqlca sqlca,
+            ClientStatement statement) throws SqlException {
+
         if (sqlca != null) {
             int sqlcode = sqlca.getSqlCode();
             if (sqlcode < 0) {
@@ -238,7 +243,10 @@ public final class Utils {
         }
     }
 
-    static public void checkForNegativePositiveSqlcard(Sqlca sqlca, ResultSet resultSet) throws SqlException {
+    static public void checkForNegativePositiveSqlcard(
+            Sqlca sqlca,
+            ClientResultSet resultSet) throws SqlException {
+
         if (sqlca != null) {
             int sqlcode = sqlca.getSqlCode();
             if (sqlcode < 0) {
@@ -307,47 +315,47 @@ public final class Utils {
     // just a thought...
     static String getSQLTypeName(int sqlType) {
         switch (sqlType) {
-        case java.sql.Types.BIGINT:
+        case Types.BIGINT:
             return "BIGINT";
-        case java.sql.Types.BINARY:
+        case Types.BINARY:
             return "BINARY";
-        case java.sql.Types.BIT:
+        case Types.BIT:
             return "BIT";
-        case java.sql.Types.CHAR:
+        case Types.CHAR:
             return "CHAR";
-        case java.sql.Types.DATE:
+        case Types.DATE:
             return "DATE";
-        case java.sql.Types.DECIMAL:
+        case Types.DECIMAL:
             return "DECIMAL";
-        case java.sql.Types.DOUBLE:
+        case Types.DOUBLE:
             return "DOUBLE";
-        case java.sql.Types.REAL:
+        case Types.REAL:
             return "REAL";
-        case java.sql.Types.INTEGER:
+        case Types.INTEGER:
             return "INTEGER";
-        case java.sql.Types.LONGVARBINARY:
+        case Types.LONGVARBINARY:
             return "LONGVARBINARY";
-        case java.sql.Types.LONGVARCHAR:
+        case Types.LONGVARCHAR:
             return "LONGVARCHAR";
-        case java.sql.Types.NULL:
+        case Types.NULL:
             return "NULL";
-        case java.sql.Types.NUMERIC:
+        case Types.NUMERIC:
             return "NUMERIC";
-        case java.sql.Types.OTHER:
+        case Types.OTHER:
             return "OTHER";
-        case java.sql.Types.FLOAT:
+        case Types.FLOAT:
             return "FLOAT";
-        case java.sql.Types.SMALLINT:
+        case Types.SMALLINT:
             return "SMALLINT";
-        case java.sql.Types.TIME:
+        case Types.TIME:
             return "TIME";
-        case java.sql.Types.TIMESTAMP:
+        case Types.TIMESTAMP:
             return "TIMESTAMP";
-        case java.sql.Types.TINYINT:
+        case Types.TINYINT:
             return "TINYINT";
-        case java.sql.Types.VARBINARY:
+        case Types.VARBINARY:
             return "VARBINARY";
-        case java.sql.Types.VARCHAR:
+        case Types.VARCHAR:
             return "VARCHAR";
         default:
             return null;

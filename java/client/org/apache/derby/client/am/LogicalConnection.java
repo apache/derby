@@ -21,7 +21,14 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.Map;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -39,13 +46,13 @@ import org.apache.derby.shared.common.reference.SQLState;
  * nulled out, only the {@code PooledConnection} instance will maintain a
  * handle to the physical connection.
  */
-public class LogicalConnection implements java.sql.Connection {
+public class LogicalConnection implements Connection {
     /**
      * Underlying physical connection for this logical connection.
      * <p>
      * Set to {@code null} when this logical connection is closed.
      */
-    Connection physicalConnection_;
+    ClientConnection physicalConnection_;
     private ClientPooledConnection pooledConnection_ = null;
     /**
      * Logical database metadata object created on demand and then cached.
@@ -56,7 +63,7 @@ public class LogicalConnection implements java.sql.Connection {
     private LogicalDatabaseMetaData logicalDatabaseMetaData = null;
 
     public LogicalConnection(
-            Connection physicalConnection,
+            ClientConnection physicalConnection,
             ClientPooledConnection pooledConnection) throws SqlException {
 
         physicalConnection_ = physicalConnection;
@@ -68,7 +75,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    protected void finalize() throws java.lang.Throwable {
+    protected void finalize() throws Throwable {
         close();
     }
 
@@ -178,7 +185,7 @@ public class LogicalConnection implements java.sql.Connection {
     // ---------------------- wrapped public entry points ------------------------
     // All methods are forwarded to the physical connection in a standard way
 
-    synchronized public java.sql.Statement createStatement() throws SQLException {
+    synchronized public Statement createStatement() throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.createStatement();
@@ -188,7 +195,8 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SQLException {
+    synchronized public PreparedStatement prepareStatement(String sql)
+            throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareStatement(sql);
@@ -198,7 +206,11 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public PreparedStatement preparePositionedUpdateStatement(String sql, Section querySection) throws SqlException {
+    synchronized
+        public ClientPreparedStatement preparePositionedUpdateStatement(
+            String sql,
+            Section querySection) throws SqlException {
+
         try {
             checkForNullPhysicalConnection();
         } catch ( SQLException se ) {
@@ -207,7 +219,8 @@ public class LogicalConnection implements java.sql.Connection {
         return physicalConnection_.preparePositionedUpdateStatement(sql, querySection);
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SQLException {
+    synchronized public CallableStatement prepareCall(String sql)
+            throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareCall(sql);
@@ -287,7 +300,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.SQLWarning getWarnings() throws SQLException {
+    synchronized public SQLWarning getWarnings() throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.getWarnings();
@@ -322,7 +335,7 @@ public class LogicalConnection implements java.sql.Connection {
      * @return A database metadata object.
      * @throws SQLException if an error occurs
      */
-    public synchronized java.sql.DatabaseMetaData getMetaData()
+    public synchronized DatabaseMetaData getMetaData()
             throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -357,7 +370,7 @@ public class LogicalConnection implements java.sql.Connection {
      * @return The metadata object from the underlying physical connection.
      * @throws SQLException if the logical connection has been closed
      */
-    final synchronized java.sql.DatabaseMetaData getRealMetaDataObject()
+    final synchronized DatabaseMetaData getRealMetaDataObject()
             throws SQLException {
         // Check if the logical connection has been closed.
         // isClosed also checks if physicalConnection_ is null.
@@ -413,7 +426,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.Statement createStatement(int resultSetType,
+    synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency) throws SQLException {
         try {
             checkForNullPhysicalConnection();
@@ -424,7 +437,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql,
+    synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency) throws SQLException {
         try {
@@ -436,7 +449,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql,
+    synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency) throws SQLException {
         try {
@@ -468,8 +481,11 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.Statement createStatement(int resultSetType, int resultSetConcurrency,
-                                              int resultSetHoldability) throws SQLException {
+    synchronized public Statement createStatement(
+            int resultSetType,
+            int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
@@ -479,9 +495,12 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql, int resultSetType,
-                                                  int resultSetConcurrency,
-                                                  int resultSetHoldability) throws SQLException {
+    synchronized public CallableStatement prepareCall(
+            String sql,
+            int resultSetType,
+            int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
@@ -491,9 +510,12 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql, int resultSetType,
-                                                       int resultSetConcurrency, int resultSetHoldability)
-            throws SQLException {
+    synchronized public PreparedStatement prepareStatement(
+            String sql,
+            int resultSetType,
+            int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareStatement(sql, resultSetType, resultSetConcurrency,
@@ -504,8 +526,10 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
-            throws SQLException {
+    synchronized public PreparedStatement prepareStatement(
+            String sql,
+            int autoGeneratedKeys) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareStatement(sql, autoGeneratedKeys);
@@ -515,8 +539,10 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql, int columnIndexes[])
-            throws SQLException {
+    synchronized public PreparedStatement prepareStatement(
+            String sql,
+            int columnIndexes[]) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareStatement(sql, columnIndexes);
@@ -526,8 +552,10 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql, String columnNames[])
-            throws SQLException {
+    synchronized public PreparedStatement prepareStatement(
+            String sql,
+            String columnNames[]) throws SQLException {
+
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.prepareStatement(sql, columnNames);
@@ -557,7 +585,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.Savepoint setSavepoint() throws SQLException {
+    synchronized public Savepoint setSavepoint() throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.setSavepoint();
@@ -567,7 +595,8 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public java.sql.Savepoint setSavepoint(String name) throws SQLException {
+    synchronized public Savepoint setSavepoint(String name)
+            throws SQLException {
         try {
             checkForNullPhysicalConnection();
             return physicalConnection_.setSavepoint(name);
@@ -577,7 +606,7 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public void rollback(java.sql.Savepoint savepoint) throws SQLException {
+    synchronized public void rollback(Savepoint savepoint) throws SQLException {
         try {
             checkForNullPhysicalConnection();
             physicalConnection_.rollback(savepoint);
@@ -587,7 +616,8 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
-    synchronized public void releaseSavepoint(java.sql.Savepoint savepoint) throws SQLException {
+    synchronized public void releaseSavepoint(Savepoint savepoint)
+            throws SQLException {
         try {
             checkForNullPhysicalConnection();
             physicalConnection_.releaseSavepoint(savepoint);

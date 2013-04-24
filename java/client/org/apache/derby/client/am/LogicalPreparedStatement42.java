@@ -20,6 +20,7 @@
  */
 package org.apache.derby.client.am;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLType;
 
@@ -39,14 +40,16 @@ public class LogicalPreparedStatement42
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalPreparedStatement42
-        ( java.sql.PreparedStatement physicalPs, StatementKey stmtKey, StatementCacheInteractor cacheInteractor )
-    {
+    public LogicalPreparedStatement42 (
+            PreparedStatement physicalPs,
+            StatementKey stmtKey,
+            StatementCacheInteractor cacheInteractor ) {
+
         super(physicalPs, stmtKey, cacheInteractor);
     }
 
     public  void setObject
-        ( int parameterIndex, java.lang.Object x, SQLType targetSqlType )
+        ( int parameterIndex, Object x, SQLType targetSqlType )
         throws SQLException
     {
         getPhysPs().setObject( parameterIndex, x, targetSqlType );
@@ -54,7 +57,7 @@ public class LogicalPreparedStatement42
     
     public void setObject
         (
-         int parameterIndex, java.lang.Object x,
+         int parameterIndex, Object x,
          SQLType targetSqlType, int scaleOrLength
          )  throws SQLException
     {

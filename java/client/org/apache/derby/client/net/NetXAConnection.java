@@ -28,7 +28,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Statement;
+import org.apache.derby.client.am.ClientStatement;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
@@ -114,7 +114,8 @@ public class NetXAConnection {
         netCon.netAgent_.netConnectionReply_.readLocalXARollback(netCon);
     }
 
-    public void writeTransactionStart(Statement statement) throws SqlException {
+    public void writeTransactionStart(ClientStatement statement)
+            throws SqlException {
         //KATHEY  remove below after checking that we don't need it.
         if (!netCon.isXAConnection()) {
             return; // not a XA connection

@@ -21,6 +21,7 @@
 
 package org.apache.derby.client;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEvent;
@@ -101,7 +102,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      * corresponding events occurs
      * @param statement The PreparedStatement that was closed
      */
-    public void onStatementClose(java.sql.PreparedStatement statement) {
+    public void onStatementClose(PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
             for (StatementEventListener l : statementEventListeners) {
@@ -120,7 +121,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
      *                  caused the invalidation of the PreparedStatements
      *
      */
-    public void onStatementErrorOccurred(java.sql.PreparedStatement statement,
+    public void onStatementErrorOccurred(PreparedStatement statement,
                     SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);

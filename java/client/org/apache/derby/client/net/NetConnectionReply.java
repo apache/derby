@@ -24,7 +24,7 @@ package org.apache.derby.client.net;
 import java.util.HashMap;
 import javax.transaction.xa.Xid;
 
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.StatementCallbackInterface;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
@@ -51,7 +51,8 @@ public class NetConnectionReply extends Reply
     }
 
     // NET only entry point
-    void readExchangeServerAttributes(Connection connection) throws SqlException {
+    void readExchangeServerAttributes(ClientConnection connection)
+            throws SqlException {
         startSameIdChainParse();
         parseEXCSATreply((NetConnection) connection);
         endOfSameIdChainData();
@@ -59,7 +60,7 @@ public class NetConnectionReply extends Reply
     }
 
     // NET only entry point
-    void readAccessSecurity(Connection connection,
+    void readAccessSecurity(ClientConnection connection,
                             int securityMechanism) throws SqlException {
         startSameIdChainParse();
         parseACCSECreply((NetConnection) connection, securityMechanism);
@@ -68,7 +69,7 @@ public class NetConnectionReply extends Reply
     }
 
     // NET only entry point
-    void readSecurityCheck(Connection connection) throws SqlException {
+    void readSecurityCheck(ClientConnection connection) throws SqlException {
         startSameIdChainParse();
         parseSECCHKreply((NetConnection) connection);
         endOfSameIdChainData();
@@ -76,7 +77,7 @@ public class NetConnectionReply extends Reply
     }
 
     // NET only entry point
-    void readAccessDatabase(Connection connection) throws SqlException {
+    void readAccessDatabase(ClientConnection connection) throws SqlException {
         startSameIdChainParse();
         parseACCRDBreply((NetConnection) connection);
         endOfSameIdChainData();
@@ -3262,7 +3263,7 @@ public class NetConnectionReply extends Reply
      *
      * @throws org.apache.derby.client.am.DisconnectException
      */
-    protected void parseInitialPBSD(Connection connection)
+    protected void parseInitialPBSD(ClientConnection connection)
             throws DisconnectException {
         if (peekCodePoint() != CodePoint.PBSD) {
             return;

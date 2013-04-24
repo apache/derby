@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.client.am.ParameterMetaData
+   Derby - Class org.apache.derby.client.am.ClientParameterMetaData
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -31,10 +32,10 @@ import org.apache.derby.shared.common.reference.SQLState;
 // Once we go to JDK 1.4 as runtime pre-req, we can extend ColumnMetaData and new up ParameterMetaData instances directly,
 // and we won't have to wrap column meta data instances directly.
 
-public class ParameterMetaData implements java.sql.ParameterMetaData {
+public class ClientParameterMetaData implements ParameterMetaData {
     ColumnMetaData columnMetaData_;
 
-    public ParameterMetaData(ColumnMetaData columnMetaData) {
+    public ClientParameterMetaData(ColumnMetaData columnMetaData) {
         columnMetaData_ = columnMetaData;
     }
 
@@ -58,14 +59,21 @@ public class ParameterMetaData implements java.sql.ParameterMetaData {
         try
         {
             columnMetaData_.checkForValidColumnIndex(param);
-            if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeUnknown) {
-                return java.sql.ParameterMetaData.parameterModeUnknown;
-            } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeIn) {
-                return java.sql.ParameterMetaData.parameterModeIn;
-            } else if (columnMetaData_.sqlxParmmode_[param - 1] == java.sql.ParameterMetaData.parameterModeOut) {
-                return java.sql.ParameterMetaData.parameterModeOut;
+
+            if (columnMetaData_.sqlxParmmode_[param - 1] ==
+                ParameterMetaData.parameterModeUnknown) {
+                return ParameterMetaData.parameterModeUnknown;
+
+            } else if (columnMetaData_.sqlxParmmode_[param - 1] ==
+                       ParameterMetaData.parameterModeIn) {
+                return ParameterMetaData.parameterModeIn;
+
+            } else if (columnMetaData_.sqlxParmmode_[param - 1] ==
+                       ParameterMetaData.parameterModeOut) {
+                return ParameterMetaData.parameterModeOut;
+
             } else {
-                return java.sql.ParameterMetaData.parameterModeInOut;
+                return ParameterMetaData.parameterModeInOut;
             }
         }
         catch ( SqlException se )

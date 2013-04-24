@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am.stmtcache;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class JDBCStatementCache {
     /** Structure holding the cached prepared statement objects. */
     //@GuardedBy("this");
     private final
-        LinkedHashMap<StatementKey, java.sql.PreparedStatement> statements;
+        LinkedHashMap<StatementKey, PreparedStatement> statements;
 
     /**
      * Creates a new, empty JDBC statement cache.
@@ -76,7 +77,7 @@ public final class JDBCStatementCache {
      * @param statementKey key for the prepared statement to look up
      * @return A cached statement if one exists, <code>null</code> otherwise.
      */
-    public synchronized java.sql.PreparedStatement getCached(
+    public synchronized PreparedStatement getCached(
             StatementKey statementKey) {
         if (SanityManager.DEBUG) {
             // Getting a null here indicates a programming error, but does not
@@ -97,7 +98,7 @@ public final class JDBCStatementCache {
      */
     public synchronized boolean cacheStatement(
                                         StatementKey statementKey,
-                                        java.sql.PreparedStatement ps) {
+                                        PreparedStatement ps) {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(statementKey != null,
                                  "statementKey is not supposed to be null");
@@ -119,7 +120,7 @@ public final class JDBCStatementCache {
      */
     //@NotThreadSafe
     private static class BoundedLinkedHashMap
-            extends LinkedHashMap<StatementKey, java.sql.PreparedStatement> {
+            extends LinkedHashMap<StatementKey, PreparedStatement> {
 
         /** Maximum number of entries. */
         private final int maxSize;
@@ -149,7 +150,7 @@ public final class JDBCStatementCache {
          *      <code>false</code> if not.
          */
         protected boolean removeEldestEntry(
-                Map.Entry<StatementKey, java.sql.PreparedStatement> eldest) {
+                Map.Entry<StatementKey, PreparedStatement> eldest) {
             final boolean remove = size() > maxSize;
             if (remove && eldest != null) {
                 try {

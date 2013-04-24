@@ -23,9 +23,14 @@ package org.apache.derby.client;
 
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import javax.naming.Context;
+import javax.naming.Name;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
 
 /**
  * The data source factory for Derby client driver data sources.
@@ -51,7 +56,7 @@ import javax.naming.Reference;
  * @see org.apache.derby.jdbc.ClientConnectionPoolDataSource
  * @see org.apache.derby.jdbc.ClientXADataSource
  */
-public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
+public class ClientDataSourceFactory implements ObjectFactory {
 
     public ClientDataSourceFactory() {}
 
@@ -84,12 +89,12 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
      * @throws Exception if recreating the object fails
      */
     public Object getObjectInstance(Object refObj,
-                                    javax.naming.Name name,
-                                    javax.naming.Context nameContext,
-                                    java.util.Hashtable environment) throws java.lang.Exception {
+                                    Name name,
+                                    Context nameContext,
+                                    Hashtable environment) throws Exception {
         Object ds = null;
-        if (refObj instanceof javax.naming.Reference) {
-            javax.naming.Reference ref = (javax.naming.Reference) refObj;
+        if (refObj instanceof Reference) {
+            Reference ref = (Reference) refObj;
 
             // See if this object belongs to Derby.
             String className = ref.getClassName();
@@ -136,7 +141,7 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
 
             String methodName = "set"
                     + propertyName.substring(0, 1).toUpperCase(
-                            java.util.Locale.ENGLISH)
+                            Locale.ENGLISH)
                     + propertyName.substring(1);
 
             Method m;

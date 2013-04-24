@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -451,8 +452,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     private void verifyCachedSchema(Connection c) throws SQLException {
         if (usingDerbyNetClient()) {
             String cached =
-                    ((org.apache.derby.client.am.Connection) c).
-                    getCurrentSchemaName();
+                    ((ClientConnection) c).getCurrentSchemaName();
             Statement s = c.createStatement();
             ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
             rs.next();

@@ -23,6 +23,8 @@ package org.apache.derby.client.net;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import org.apache.derby.client.am.Agent;
 
@@ -171,7 +173,7 @@ public class Reply {
             try {
                 // oops, we shouldn't expose the agent's input stream here, collapse this into a read method on the agent
                 actualBytesRead = netAgent_.getInputStream().read(buffer_, count_, buffer_.length - count_);
-            } catch (java.io.IOException ioe) {
+            } catch (IOException ioe) {
                 netAgent_.throwCommunicationsFailure(ioe);
             } finally {
                 if (agent_.loggingEnabled()) {
@@ -679,7 +681,7 @@ public class Reply {
 
         try {
             s = new String(buffer_, pos_, length, encoding);
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
@@ -1286,7 +1288,7 @@ public class Reply {
 
         try {
             s = new String(buffer_, pos_, length, encoding);
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(agent_,
                     new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED),

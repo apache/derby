@@ -21,9 +21,11 @@
 
 package org.apache.derby.jdbc;
 
+import javax.sql.XADataSource;
+
 /**
  * Specifies Derby extensions to the {@code java.sqlx.XADataSource}.
  */
 public interface ClientXADataSourceInterface
-    extends ClientDataSourceInterface, javax.sql.XADataSource {
+    extends ClientDataSourceInterface, XADataSource {
 }

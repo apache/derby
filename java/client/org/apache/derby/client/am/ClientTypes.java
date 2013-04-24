@@ -20,66 +20,67 @@
 */
 package org.apache.derby.client.am;
 
+import java.sql.Types;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
 // This enumeration of types represents the typing scheme used by our jdbc driver.
 // Once this is finished, we need to review our switches to make sure they are exhaustive
 
-public class Types {
+public class ClientTypes {
     // -------------------------------- Driver types -------------------------------------------------
 
-    public final static int BIT        =  java.sql.Types.BIT;          // -7;
+    public final static int BIT        =  Types.BIT;          // -7;
 
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
-    //public final static int TINYINT   = java.sql.Types.TINYINT;       // -6;
+    //public final static int TINYINT   = Types.TINYINT;       // -6;
 
-    public final static int BOOLEAN = java.sql.Types.BOOLEAN;       // 16;
+    public final static int BOOLEAN = Types.BOOLEAN;       // 16;
 
-    public final static int SMALLINT = java.sql.Types.SMALLINT;      // 5;
+    public final static int SMALLINT = Types.SMALLINT;      // 5;
 
-    public final static int INTEGER = java.sql.Types.INTEGER;       // 4;
+    public final static int INTEGER = Types.INTEGER;       // 4;
 
-    public final static int BIGINT = java.sql.Types.BIGINT;        // -5;
+    public final static int BIGINT = Types.BIGINT;        // -5;
 
     // We type using DOUBLE
-    //public final static int FLOAT     = java.sql.Types.FLOAT;         // 6;
+    //public final static int FLOAT     = Types.FLOAT;         // 6;
 
-    public final static int REAL = java.sql.Types.REAL;          // 7;
+    public final static int REAL = Types.REAL;          // 7;
 
-    public final static int DOUBLE = java.sql.Types.DOUBLE;        // 8;
+    public final static int DOUBLE = Types.DOUBLE;        // 8;
 
     // We type using DECIMAL
-    //public final static int NUMERIC   = java.sql.Types.NUMERIC;       // 2;
+    //public final static int NUMERIC   = Types.NUMERIC;       // 2;
 
-    public final static int DECIMAL = java.sql.Types.DECIMAL;       // 3;
+    public final static int DECIMAL = Types.DECIMAL;       // 3;
 
-    public final static int CHAR = java.sql.Types.CHAR;          // 1;
+    public final static int CHAR = Types.CHAR;          // 1;
 
-    public final static int VARCHAR = java.sql.Types.VARCHAR;       // 12;
+    public final static int VARCHAR = Types.VARCHAR;       // 12;
 
-    public final static int LONGVARCHAR = java.sql.Types.LONGVARCHAR;   // -1;
+    public final static int LONGVARCHAR = Types.LONGVARCHAR;   // -1;
 
-    public final static int DATE = java.sql.Types.DATE;          // 91;
+    public final static int DATE = Types.DATE;          // 91;
 
-    public final static int TIME = java.sql.Types.TIME;          // 92;
+    public final static int TIME = Types.TIME;          // 92;
 
-    public final static int TIMESTAMP = java.sql.Types.TIMESTAMP;     // 93;
+    public final static int TIMESTAMP = Types.TIMESTAMP;     // 93;
 
-    public final static int BINARY = java.sql.Types.BINARY;        // -2;
+    public final static int BINARY = Types.BINARY;        // -2;
 
-    public final static int VARBINARY = java.sql.Types.VARBINARY;     // -3;
+    public final static int VARBINARY = Types.VARBINARY;     // -3;
 
-    public final static int LONGVARBINARY = java.sql.Types.LONGVARBINARY; // -4;
+    public final static int LONGVARBINARY = Types.LONGVARBINARY; // -4;
 
-    public final static int BLOB = java.sql.Types.BLOB;          // 2004;
+    public final static int BLOB = Types.BLOB;          // 2004;
 
-    public final static int CLOB = java.sql.Types.CLOB;          // 2005;
+    public final static int CLOB = Types.CLOB;          // 2005;
 
-    public final static int JAVA_OBJECT = java.sql.Types.JAVA_OBJECT;          // 2000;
+    public final static int JAVA_OBJECT = Types.JAVA_OBJECT;          // 2000;
 
     // hide the default constructor
-    private Types() {
+    private ClientTypes() {
    }
     
     static public String getTypeString(int type)
@@ -106,12 +107,12 @@ public class Types {
             case VARBINARY:     return "VARBINARY";
             case VARCHAR:       return "VARCHAR";
             // Types we don't support:
-            case java.sql.Types.ARRAY: return "ARRAY";
-            case java.sql.Types.DATALINK: return "DATALINK";
-            case java.sql.Types.REF: return "REF";
+            case Types.ARRAY: return "ARRAY";
+            case Types.DATALINK: return "DATALINK";
+            case Types.REF: return "REF";
             case JDBC40Translation.ROWID: return "ROWID";
             case JDBC40Translation.SQLXML: return "SQLXML";
-            case java.sql.Types.STRUCT: return "STRUCT";
+            case Types.STRUCT: return "STRUCT";
             // Unknown type:
             default:            return "<UNKNOWN>";
         }
@@ -170,11 +171,11 @@ public class Types {
         case DRDAConstants.DB2_SQLTYPE_TIMESTAMP:
             return TIMESTAMP;
         case DRDAConstants.DB2_SQLTYPE_CLOB:    // large object character SBCS/Mixed
-            return Types.CLOB;
+            return ClientTypes.CLOB;
         case DRDAConstants.DB2_SQLTYPE_BLOB:    // large object bytes
-            return java.sql.Types.BLOB;
+            return Types.BLOB;
         case DRDAConstants.DB2_SQLTYPE_FAKE_UDT:    // user defined types
-            return java.sql.Types.JAVA_OBJECT;
+            return Types.JAVA_OBJECT;
         default:
             return 0;
         }

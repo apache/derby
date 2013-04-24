@@ -20,12 +20,13 @@
 */
 package org.apache.derby.client;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
@@ -41,7 +42,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     private boolean fFirstGetConnection_ = true;
 
      // logicalConnection_ is inherited from ClientPooledConnection
-    private java.sql.Connection logicalCon_;
+    private Connection logicalCon_;
 
     // This connection is used to access the indoubt table
     private NetXAConnection controlCon_ = null;
@@ -63,7 +64,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         xares_ = netXares_;
     }
 
-    public java.sql.Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         if (fFirstGetConnection_) {
             // Since super.getConnection() has already been called once
             // in the constructor, we don't need to call it again for the

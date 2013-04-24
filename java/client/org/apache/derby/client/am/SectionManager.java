@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.lang.ref.WeakReference;
+import java.sql.ResultSet;
 import java.util.Hashtable;
 import java.util.Stack;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -80,9 +81,9 @@ public class SectionManager {
 
     // Cursor name to ResultSet mapping is needed for positioned updates to check whether
     // a ResultSet is scrollable.  If so, exception is thrown.
-    private final Hashtable<String, WeakReference<ResultSet>>
+    private final Hashtable<String, WeakReference<ClientResultSet>>
         positionedUpdateCursorNameToResultSet_ =
-            new Hashtable<String, WeakReference<ResultSet>>();
+            new Hashtable<String, WeakReference<ClientResultSet>>();
 
     String databaseName;
 
@@ -130,7 +131,12 @@ public class SectionManager {
         }
     }
 
-    protected Section getSection(java.util.Stack freeSections, String packageName, String cursorNamePrefix, int resultSetHoldability) throws SqlException {
+    protected Section getSection(
+            Stack freeSections,
+            String packageName,
+            String cursorNamePrefix,
+            int resultSetHoldability) throws SqlException {
+
         if (!freeSections.empty()) {
             return (Section) freeSections.pop();
         } else if (nextAvailableSectionNumber_ < (maxNumSections_ - 1)) {
@@ -158,7 +164,7 @@ public class SectionManager {
     // Get a section for a jdbc 2 positioned update/delete for the corresponding query.
     // A positioned update section must come from the same package as its query section.
     Section getPositionedUpdateSection(Section querySection) throws SqlException {
-        Connection connection = agent_.connection_;
+        ClientConnection connection = agent_.connection_;
         return getDynamicSection(connection.holdability());
     }
 
@@ -188,19 +194,24 @@ public class SectionManager {
         positionedUpdateCursorNameToQuerySection_.put(cursorName, section);
     }
 
-    void mapCursorNameToResultSet(String cursorName, ResultSet resultSet) {
+    void mapCursorNameToResultSet(
+            String cursorName,
+            ClientResultSet resultSet) {
+
         // DERBY-3316. Needs WeakReference so that ResultSet can be garbage collected
         positionedUpdateCursorNameToResultSet_.put(
-                cursorName, new WeakReference<ResultSet>(resultSet));
+                cursorName, new WeakReference<ClientResultSet>(resultSet));
     }
 
-    ResultSet getPositionedUpdateResultSet(String cursorName) throws SqlException {
-        ResultSet rs = positionedUpdateCursorNameToResultSet_.get(cursorName).get();
+    ClientResultSet getPositionedUpdateResultSet(String cursorName)
+            throws SqlException {
+        ClientResultSet rs =
+            positionedUpdateCursorNameToResultSet_.get(cursorName).get();
         if (rs == null) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_RESULT_SET_NOT_OPEN), "update");
         }
-        return (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) ? null : rs;
+        return (rs.resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) ? null : rs;
     }
 
     void removeCursorNameToResultSetMapping(String clientCursorName,

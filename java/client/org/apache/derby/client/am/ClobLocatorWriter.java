@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * An {@code Writer} that will use an locator to write the
@@ -31,16 +32,16 @@ import java.io.IOException;
  * buffering of data is done.  Hence, for efficiency {@code #write(char[])}
  * should be used instead of {@code #write(int)}.
  */
-class ClobLocatorWriter extends java.io.Writer {
+class ClobLocatorWriter extends Writer {
     /**
      * Connection used to read Clob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private final Clob clob;
+    private final ClientClob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -66,8 +67,11 @@ class ClobLocatorWriter extends java.io.Writer {
      * @param pos the position in the {@code CLOB} value at which
      *        to start writing; the first position is 1
      */
-    ClobLocatorWriter(Connection connection, Clob clob, long pos)
-    throws SqlException {
+    ClobLocatorWriter(
+            ClientConnection connection,
+            ClientClob clob,
+            long pos) throws SqlException {
+
         if (pos-1 > clob.sqlLength()) {
             throw new IndexOutOfBoundsException();
         }

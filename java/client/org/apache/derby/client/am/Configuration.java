@@ -24,7 +24,10 @@ package org.apache.derby.client.am;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.sql.Connection;
+import java.util.StringTokenizer;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
@@ -97,7 +100,8 @@ public class Configuration {
     // --------------------------- connection defaults ---------------------------
 
     // This is the DERBY default and maps to DERBY's "Cursor Stability".
-    public final static int defaultIsolation = java.sql.Connection.TRANSACTION_READ_COMMITTED;
+    public final static int defaultIsolation =
+            Connection.TRANSACTION_READ_COMMITTED;
 
     // ---------------------------- statement defaults----------------------------
 
@@ -141,14 +145,14 @@ public class Configuration {
             _jreLevel = "1.3.0";
         } // ignore it, assume 1.3.0
         jreLevel = _jreLevel;
-        java.util.StringTokenizer st = new java.util.StringTokenizer(jreLevel, ".");
+        StringTokenizer st = new StringTokenizer(jreLevel, ".");
         int jreState = 0;
         int _jreLevelMajor = 1;
         int _jreLevelMinor = 3;
         while (st.hasMoreTokens()) {
             int i;
             try {
-                i = java.lang.Integer.parseInt(st.nextToken()); // get int value
+                i = Integer.parseInt(st.nextToken()); // get int value
             } catch (NumberFormatException e) {
                 i = 0;
             }
@@ -177,11 +181,11 @@ public class Configuration {
     private static void loadProductVersionHolder() throws SqlException {
         try {
             dncProductVersionHolder__ = buildProductVersionHolder();
-        } catch (java.security.PrivilegedActionException e) {
+        } catch (PrivilegedActionException e) {
             throw new SqlException(null, 
                     new ClientMessageId (SQLState.ERROR_PRIVILEGED_ACTION),
                     e.getException());                    
-        } catch (java.io.IOException ioe) {
+        } catch (IOException ioe) {
             throw SqlException.javaException(null, ioe);
         }
     }
@@ -189,7 +193,7 @@ public class Configuration {
 
     // Create ProductVersionHolder in security block for Java 2 security.
     private static ProductVersionHolder buildProductVersionHolder() throws
-            java.security.PrivilegedActionException, IOException {
+            PrivilegedActionException, IOException {
         return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<ProductVersionHolder>() {
 

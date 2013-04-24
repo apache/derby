@@ -23,6 +23,7 @@ package org.apache.derby.jdbc;
 
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -112,7 +113,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * <p/>
  */
 public class ClientDataSource40 extends ClientDataSource
-    implements javax.sql.DataSource /* compile-time check for 4.1 extension */
+    implements DataSource /* compile-time check for 4.1 extension */
 {
    private static final long serialVersionUID = -3936981157692787843L;
     

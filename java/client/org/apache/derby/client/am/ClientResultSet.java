@@ -21,24 +21,39 @@
 
 package org.apache.derby.client.am;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.Map;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public abstract class ResultSet implements java.sql.ResultSet,
+public abstract class ClientResultSet implements ResultSet,
         ResultSetCallbackInterface {
     //---------------------navigational members-----------------------------------
 
-    public Statement statement_;
-    Statement outerStatement_; // for auto-generated keys
+    public ClientStatement statement_;
+    ClientStatement outerStatement_; // for auto-generated keys
     public ColumnMetaData resultSetMetaData_; // As obtained from the SQLDA
     private SqlWarning warnings_;
     public Cursor cursor_;
@@ -58,7 +73,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     //   That is, the state data is set by the constructor and never changes.
 
     // Alias for statement_.connection
-    public final Connection connection_;
+    public final ClientConnection connection_;
 
     //----------------------------- constants ------------------------------------
 
@@ -194,9 +209,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // between column not updated and column updated to null.
     private boolean columnUpdated_[];
 
-    private PreparedStatement preparedStatementForUpdate_;
-    private PreparedStatement preparedStatementForDelete_;
-    private PreparedStatement preparedStatementForInsert_;
+    private ClientPreparedStatement preparedStatementForUpdate_;
+    private ClientPreparedStatement preparedStatementForDelete_;
+    private ClientPreparedStatement preparedStatementForInsert_;
 
     // Nesting level of the result set in a stored procedure
     public int nestingLevel_ = -1;
@@ -219,8 +234,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     
     //---------------------constructors/finalizer---------------------------------
 
-    protected ResultSet(Agent agent,
-                        Statement statement,
+    protected ClientResultSet(Agent agent,
+                        ClientStatement statement,
                         Cursor cursor,
                         int resultSetType,
                         int resultSetConcurrency,
@@ -298,7 +313,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         moveToCurrentRowX();
         
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
@@ -306,7 +321,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         unuseStreamsAndLOBs();
 
         // for TYPE_FORWARD_ONLY ResultSet, just call cursor.next()
-        if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
+        if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             // cursor is null for singleton selects that do not return data.
             isValidCursorPosition_ = (cursor_ == null) ? false : cursor_.next();
 
@@ -546,15 +561,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkForClosedResultSet("wasNull");
 
-            if (wasNull_ == ResultSet.WAS_NULL_UNSET) {
+            if (wasNull_ == ClientResultSet.WAS_NULL_UNSET) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.WASNULL_INVALID));
             }
 
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "wasNull", wasNull_ == ResultSet.WAS_NULL);
+                agent_.logWriter_.traceExit(
+                    this, "wasNull", wasNull_ == ClientResultSet.WAS_NULL);
             }
-            return wasNull_ == ResultSet.WAS_NULL;
+            return wasNull_ == ClientResultSet.WAS_NULL;
         }
         catch ( SqlException se )
         {
@@ -648,7 +664,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     result = 0;
                 } else {
                     result = ((Short) agent_.crossConverters_.setObject(
-                            java.sql.Types.SMALLINT,
+                            Types.SMALLINT,
                             updatedColumns_[column - 1])).shortValue();
                 }
             } else {
@@ -682,7 +698,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     result = 0;
                 } else {
                     result = ((Integer) agent_.crossConverters_.setObject(
-                            java.sql.Types.INTEGER,
+                            Types.INTEGER,
                             updatedColumns_[column - 1])).intValue();
                 }
             } else {
@@ -716,7 +732,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     result = 0;
                 } else {
                     result = ((Long) agent_.crossConverters_.setObject(
-                            java.sql.Types.BIGINT,
+                            Types.BIGINT,
                             updatedColumns_[column - 1])).longValue();
                 }
             } else {
@@ -750,7 +766,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     result = 0;
                 } else {
                     result = ((Float) agent_.crossConverters_.setObject(
-                            java.sql.Types.REAL,
+                            Types.REAL,
                             updatedColumns_[column - 1])).floatValue();
                 }
             } else {
@@ -784,7 +800,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     result = 0;
                 } else {
                     result = ((Double) agent_.crossConverters_.setObject(
-                            java.sql.Types.DOUBLE,
+                            Types.DOUBLE,
                             updatedColumns_[column - 1])).doubleValue();
                 }
             } else {
@@ -804,7 +820,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // Live life on the edge and run unsynchronized
     /** @deprecated */
-    public java.math.BigDecimal getBigDecimal(int column, int scale) throws SQLException {
+    public BigDecimal getBigDecimal(int column, int scale) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -813,14 +829,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
             }
             checkGetterPreconditions(column, "getBigDecimal");
-            java.math.BigDecimal result = null;
+            BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result =
-                        ((java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
-                                updatedColumns_[column - 1])).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+                result = ((BigDecimal) agent_.crossConverters_.setObject(
+                              Types.DECIMAL,
+                              updatedColumns_[column - 1])).
+                    setScale(scale, BigDecimal.ROUND_DOWN);
             } else {
-                result =
-                        isNull(column) ? null : cursor_.getBigDecimal(column).setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+                result = isNull(column) ? null :
+                    cursor_.getBigDecimal(column).setScale(
+                        scale, BigDecimal.ROUND_DOWN);
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
@@ -835,7 +853,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.math.BigDecimal getBigDecimal(int column) throws SQLException {
+    public BigDecimal getBigDecimal(int column) throws SQLException {
         try
         {
 
@@ -845,11 +863,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
             }
             checkGetterPreconditions(column, "getBigDecimal");
-            java.math.BigDecimal result = null;
+            BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result =
-                        (java.math.BigDecimal) agent_.crossConverters_.setObject(java.sql.Types.DECIMAL,
-                                updatedColumns_[column - 1]);
+                result = (BigDecimal)agent_.crossConverters_.setObject(
+                    Types.DECIMAL,
+                    updatedColumns_[column - 1]);
             } else {
                 result = isNull(column) ? null : cursor_.getBigDecimal(column);
             }
@@ -866,7 +884,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column, Calendar cal) throws SQLException {
+    public Date getDate(int column, Calendar cal) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -881,9 +899,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
-            java.sql.Date result = null;
+            Date result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (java.sql.Date) agent_.crossConverters_.setObject(java.sql.Types.DATE, updatedColumns_[column - 1]);
+                result = (Date)agent_.crossConverters_.setObject(
+                    Types.DATE, updatedColumns_[column - 1]);
                 // updateDate() doesn't take a calendar, so the retrieved
                 // value will be in the default calendar. Convert it to
                 // the requested calendar before returning it.
@@ -904,12 +923,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column) throws SQLException {
+    public Date getDate(int column) throws SQLException {
         return getDate(column, Calendar.getInstance());
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column, Calendar cal) throws SQLException {
+    public Time getTime(int column, Calendar cal) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -924,9 +943,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
-            java.sql.Time result = null;
+            Time result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (java.sql.Time) agent_.crossConverters_.setObject(java.sql.Types.TIME, updatedColumns_[column - 1]);
+                result = (Time)agent_.crossConverters_.setObject(
+                    Types.TIME, updatedColumns_[column - 1]);
                 // updateTime() doesn't take a calendar, so the retrieved
                 // value will be in the default calendar. Convert it to
                 // the requested calendar before returning it.
@@ -947,12 +967,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column) throws SQLException {
+    public Time getTime(int column) throws SQLException {
         return getTime(column, Calendar.getInstance());
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column, Calendar calendar)
+    public Timestamp getTimestamp(int column, Calendar calendar)
             throws SQLException {
         try
         {
@@ -969,9 +989,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     new ClientMessageId(SQLState.CALENDAR_IS_NULL));
             }
 
-            java.sql.Timestamp result = null;
+            Timestamp result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (java.sql.Timestamp) agent_.crossConverters_.setObject(java.sql.Types.TIMESTAMP, updatedColumns_[column - 1]);
+                result = (Timestamp)agent_.crossConverters_.setObject(
+                    Types.TIMESTAMP, updatedColumns_[column - 1]);
                 // updateTimestamp() doesn't take a calendar, so the retrieved
                 // value will be in the default calendar. Convert it to
                 // the requested calendar before returning it.
@@ -992,7 +1013,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column) throws SQLException {
+    public Timestamp getTimestamp(int column) throws SQLException {
         return getTimestamp(column, Calendar.getInstance());
     }
 
@@ -1075,7 +1096,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column, "getString");
             int type = resultSetMetaData_.types_[column - 1];
-            if (type == Types.BLOB || type == Types.CLOB) {
+            if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
                 checkLOBMultiCall(column);
                 // If the above didn't fail, this is the first getter
                 // invocation, or only getBytes and/or getString have been
@@ -1084,7 +1105,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             String result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]);
+                result = (String)agent_.crossConverters_.setObject(
+                    Types.CHAR, updatedColumns_[column - 1]);
             } else {
                 result = isNull(column) ? null : cursor_.getString(column);
             }
@@ -1111,7 +1133,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column, "getBytes");
             int type = resultSetMetaData_.types_[column - 1];
-            if (type == Types.BLOB) {
+            if (type == ClientTypes.BLOB) {
                 checkLOBMultiCall(column);
                 // If the above didn't fail, this is the first getter
                 // invocation, or only getBytes has been invoked previously.
@@ -1120,7 +1142,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             byte[] result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]);
+                result = (byte[])agent_.crossConverters_.setObject(
+                    Types.BINARY, updatedColumns_[column - 1]);
             } else {
                 result = isNull(column) ? null : cursor_.getBytes(column);
             }
@@ -1137,7 +1160,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.io.InputStream getBinaryStream(int column) throws SQLException {
+    public InputStream getBinaryStream(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1149,9 +1172,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
             checkGetterPreconditions(column, "getBinaryStream");
             useStreamOrLOB(column);
 
-            java.io.InputStream result = null;
+            InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = new java.io.ByteArrayInputStream((byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]));
+                result = new ByteArrayInputStream(
+                    (byte[])agent_.crossConverters_.setObject(
+                        Types.BINARY, updatedColumns_[column - 1]));
             } else {
                 result = isNull(column) ? null : cursor_.getBinaryStream(column);
             }
@@ -1168,7 +1193,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.io.InputStream getAsciiStream(int column) throws SQLException {
+    public InputStream getAsciiStream(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1180,11 +1205,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
             checkGetterPreconditions(column, "getAsciiStream");
             useStreamOrLOB(column);
 
-            java.io.InputStream result = null;
+            InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
 
-            result = new AsciiStream((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR,
-                                                updatedColumns_[column - 1]));
+            result = new AsciiStream(
+                (String)agent_.crossConverters_.setObject(
+                    Types.CHAR, updatedColumns_[column - 1]));
             } else {
                 result = isNull(column) ? null : cursor_.getAsciiStream(column);
             }
@@ -1209,7 +1235,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @exception SQLException throws feature not implemented
      * @deprecated
      */
-    public java.io.InputStream getUnicodeStream(int column) throws SQLException {
+    public InputStream getUnicodeStream(int column) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream",
                                                    column);
@@ -1219,7 +1245,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.io.Reader getCharacterStream(int column) throws SQLException {
+    public Reader getCharacterStream(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1231,10 +1257,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
             checkGetterPreconditions(column, "getCharacterStream");
             useStreamOrLOB(column);
 
-            java.io.Reader result = null;
+            Reader result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = new java.io.StringReader
-                        ((String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]));
+                result = new StringReader
+                    ((String)agent_.crossConverters_.setObject(
+                        Types.CHAR, updatedColumns_[column - 1]));
             } else {
                 result = isNull(column) ? null : cursor_.getCharacterStream(column);
             }
@@ -1252,7 +1279,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Blob getBlob(int column) throws SQLException {
+    public Blob getBlob(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1262,9 +1289,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column, "getBlob");
             useStreamOrLOB(column);
-            java.sql.Blob result = null;
+            Blob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (java.sql.Blob) agent_.crossConverters_.setObject(java.sql.Types.BLOB,
+                result = (Blob) agent_.crossConverters_.setObject(Types.BLOB,
                         updatedColumns_[column - 1]);
             } else {
                 result = isNull(column) ? null : cursor_.getBlob(column);
@@ -1282,7 +1309,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Clob getClob(int column) throws SQLException {
+    public Clob getClob(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1292,9 +1319,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             checkGetterPreconditions(column, "getClob");
             useStreamOrLOB(column);
-            java.sql.Clob result = null;
+            Clob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
-                result = (java.sql.Clob) agent_.crossConverters_.setObject(java.sql.Types.CLOB,
+                result = (Clob) agent_.crossConverters_.setObject(Types.CLOB,
                         updatedColumns_[column - 1]);
             } else {
                 result = isNull(column) ? null : cursor_.getClob(column);
@@ -1312,7 +1339,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Ref getRef(int column) throws SQLException {
+    public Ref getRef(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1321,7 +1348,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getRef", column);
             }
             checkGetterPreconditions(column, "getRef");
-            java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
+            Ref result = isNull(column) ? null : cursor_.getRef(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
@@ -1339,7 +1366,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Array getArray(int column) throws SQLException {
+    public Array getArray(int column) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1348,7 +1375,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getArray", column);
             }
             checkGetterPreconditions(column, "getArray");
-            java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
+            Array result = isNull(column) ? null : cursor_.getArray(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
@@ -1390,7 +1417,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     Object getObjectX(int column) throws SqlException {
         checkGetterPreconditions(column, "getObject");
         int type = resultSetMetaData_.types_[column - 1];
-        if (type == Types.BLOB || type == Types.CLOB) {
+        if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
             useStreamOrLOB(column);
         }
         Object result = null;
@@ -1404,7 +1431,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public Object getObject(int column, java.util.Map map) throws SQLException {
+    public Object getObject(int column, Map map) throws SQLException {
         try
         {
             closeOpenStreams();
@@ -1575,7 +1602,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /** @deprecated */
-    public final java.math.BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
+    public final BigDecimal getBigDecimal(String columnName, int scale)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1589,7 +1617,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.math.BigDecimal getBigDecimal(String columnName) throws SQLException {
+    public final BigDecimal getBigDecimal(String columnName)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1603,7 +1632,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Date getDate(String columnName) throws SQLException {
+    public final Date getDate(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1617,7 +1646,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Date getDate(String columnName, java.util.Calendar cal) throws SQLException {
+    public final Date getDate(String columnName, Calendar cal)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1631,7 +1661,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Time getTime(String columnName) throws SQLException {
+    public final Time getTime(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1645,7 +1675,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Time getTime(String columnName, java.util.Calendar cal) throws SQLException {
+    public final Time getTime(String columnName, Calendar cal)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1659,7 +1690,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Timestamp getTimestamp(String columnName) throws SQLException {
+    public final Timestamp getTimestamp(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1673,7 +1704,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Timestamp getTimestamp(String columnName, java.util.Calendar cal) throws SQLException {
+    public final Timestamp getTimestamp(String columnName, Calendar cal)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1715,7 +1747,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.io.InputStream getBinaryStream(String columnName) throws SQLException {
+    public final InputStream getBinaryStream(String columnName)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1729,7 +1762,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.io.InputStream getAsciiStream(String columnName) throws SQLException {
+    public final InputStream getAsciiStream(String columnName)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1744,7 +1778,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /** @deprecated */
-    public final java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
+    public final InputStream getUnicodeStream(String columnName)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1758,7 +1793,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.io.Reader getCharacterStream(String columnName) throws SQLException {
+    public final Reader getCharacterStream(String columnName)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1772,7 +1808,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Blob getBlob(String columnName) throws SQLException {
+    public final Blob getBlob(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1786,7 +1822,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Clob getClob(String columnName) throws SQLException {
+    public final Clob getClob(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1800,7 +1836,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Array getArray(String columnName) throws SQLException {
+    public final Array getArray(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1814,7 +1850,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final java.sql.Ref getRef(String columnName) throws SQLException {
+    public final Ref getRef(String columnName) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1842,7 +1878,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public final Object getObject(String columnName, java.util.Map map) throws SQLException {
+    public final Object getObject(String columnName, Map map)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1869,7 +1906,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @exception SQLException if a database error occurs or the
      * result set is closed
      */
-    public final java.sql.SQLWarning getWarnings() throws SQLException {
+    public final SQLWarning getWarnings() throws SQLException {
         try {
             checkForClosedResultSet("getWarnings");
         } catch (SqlException se) {
@@ -1934,13 +1971,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SQLException {
+    public ResultSetMetaData getMetaData() throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getMetaData");
             }
-            java.sql.ResultSetMetaData resultSetMetaData = getMetaDataX();
+
+            ResultSetMetaData resultSetMetaData = getMetaDataX();
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getMetaData", resultSetMetaData);
             }
@@ -2218,7 +2257,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         moveToCurrentRowX();
 
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
@@ -2273,7 +2312,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         moveToCurrentRowX();
 
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
@@ -2335,7 +2374,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         checkForClosedResultSet("getRow");
         long row;
         checkThatResultSetIsNotDynamic();
-        if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY)
+        if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY)
         // for forward-only cursors, getRow() should return 0 if cursor is not on a valid row,
         // i.e. afterlast.
         {
@@ -2390,7 +2429,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         moveToCurrentRowX();
 
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
@@ -2405,7 +2444,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 afterLastX();
                 isValidCursorPosition_ = false;
                 return isValidCursorPosition_;
-            } else if (row <= 0 && java.lang.Math.abs(row) > maxRows_) {
+            } else if (row <= 0 && Math.abs(row) > maxRows_) {
                 beforeFirstX();
                 isValidCursorPosition_ = false;
                 return isValidCursorPosition_;
@@ -2475,7 +2514,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         moveToCurrentRowX();
         
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
@@ -2601,7 +2640,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         
         moveToCurrentRowX();
 
-        wasNull_ = ResultSet.WAS_NULL_UNSET;
+        wasNull_ = ClientResultSet.WAS_NULL_UNSET;
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
@@ -2649,9 +2688,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkThatResultSetTypeIsScrollable();
 
                 switch (direction) {
-                case java.sql.ResultSet.FETCH_FORWARD:
-                case java.sql.ResultSet.FETCH_REVERSE:
-                case java.sql.ResultSet.FETCH_UNKNOWN:
+                case ResultSet.FETCH_FORWARD:
+                case ResultSet.FETCH_REVERSE:
+                case ResultSet.FETCH_UNKNOWN:
                     fetchDirection_ = direction;
                     break;
                 default:
@@ -2956,7 +2995,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateBigDecimal(int column, java.math.BigDecimal x) throws SQLException {
+    public void updateBigDecimal(int column, BigDecimal x) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -2973,7 +3012,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateDate(int column, java.sql.Date x) throws SQLException {
+    public void updateDate(int column, Date x) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -2990,7 +3029,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateTime(int column, java.sql.Time x) throws SQLException {
+    public void updateTime(int column, Time x) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -3007,7 +3046,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateTimestamp(int column, java.sql.Timestamp x) throws SQLException {
+    public void updateTimestamp(int column, Timestamp x) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -3059,7 +3098,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateBinaryStream(int column,
-                                   java.io.InputStream x,
+                                   InputStream x,
                                    int length) throws SQLException {
         try
         {
@@ -3078,7 +3117,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateAsciiStream(int column,
-                                  java.io.InputStream x,
+                                  InputStream x,
                                   int length) throws SQLException {
         try
         {
@@ -3097,7 +3136,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateCharacterStream(int column,
-                                      java.io.Reader x,
+                                      Reader x,
                                       int length) throws SQLException {
         try
         {
@@ -3273,7 +3312,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateBigDecimal(String columnName, java.math.BigDecimal x) throws SQLException {
+    public void updateBigDecimal(String columnName, BigDecimal x)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -3287,7 +3327,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateDate(String columnName, java.sql.Date x) throws SQLException {
+    public void updateDate(String columnName, Date x) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -3301,7 +3341,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateTime(String columnName, java.sql.Time x) throws SQLException {
+    public void updateTime(String columnName, Time x) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -3315,7 +3355,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateTimestamp(String columnName, java.sql.Timestamp x) throws SQLException {
+    public void updateTimestamp(String columnName, Timestamp x)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -3358,7 +3399,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateBinaryStream(String columnName,
-                                   java.io.InputStream x,
+                                   InputStream x,
                                    int length) throws SQLException {
         try
         {
@@ -3374,7 +3415,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateAsciiStream(String columnName,
-                                  java.io.InputStream x,
+                                  InputStream x,
                                   int length) throws SQLException {
         try
         {
@@ -3390,7 +3431,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void updateCharacterStream(String columnName,
-                                      java.io.Reader x,
+                                      Reader x,
                                       int length) throws SQLException {
         try
         {
@@ -3509,7 +3550,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
     
-    public void updateRow() throws java.sql.SQLException {
+    public void updateRow() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -3632,7 +3673,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return true;
     }
 
-    public void deleteRow() throws java.sql.SQLException {
+    public void deleteRow() throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -3677,7 +3718,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             positionToCurrentRowAndDelete();
         }
 
-        if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
+        if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             cursor_.isUpdateDeleteHole_ = true;
         } else {
             if (preparedStatementForDelete_.updateCount_ > 0) {
@@ -3717,7 +3758,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     
         // this method does nothing if ResultSet is TYPE_SCROLL_INSENSITIVE
-        if (resultSetType_ == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
+        if (resultSetType_ == ResultSet.TYPE_SCROLL_SENSITIVE) {
             isValidCursorPosition_ = getRefreshRowset();
             try {
                 cancelRowUpdates();
@@ -3836,7 +3877,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * @exception SQLException if a database error occurs or the
      * result set is closed
      */
-    public java.sql.Statement getStatement() throws SQLException {
+    public Statement getStatement() throws SQLException {
         try {
             checkForClosedResultSet("getStatement");
         } catch (SqlException se) {
@@ -3855,19 +3896,19 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     //-------------------------- JDBC 3.0 ----------------------------------------
 
-    public java.net.URL getURL(int columnIndex) throws SQLException {
+    public URL getURL(int columnIndex) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
-    public java.net.URL getURL(String columnName) throws SQLException {
+    public URL getURL(String columnName) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
-    public void updateRef(int columnIndex, java.sql.Ref x) throws SQLException {
+    public void updateRef(int columnIndex, Ref x) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
-    public void updateRef(String columnName, java.sql.Ref x) throws SQLException {
+    public void updateRef(String columnName, Ref x) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
@@ -3885,7 +3926,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * the result set concurrency is <code>CONCUR_READ_ONLY</code>
      * or this method is called on a closed result set
      */
-    public void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
+    public void updateBlob(int columnIndex, Blob x) throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBlob",
@@ -3919,7 +3960,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * the result set concurrency is <code>CONCUR_READ_ONLY</code>
      * or this method is called on a closed result set
      */
-    public void updateBlob(String columnName, java.sql.Blob x) throws SQLException {
+    public void updateBlob(String columnName, Blob x) throws SQLException {
         try {
             updateBlob(findColumnX(columnName, "updateBlob"), x);
         } catch (SqlException se) {
@@ -3956,7 +3997,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                     resultSetMetaData_.types_[columnIndex -1],
-                                    new Blob(agent_, x, (int)length)));
+                                    new ClientBlob(agent_, x, (int)length)));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
@@ -3991,11 +4032,11 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
+    public void updateArray(int columnIndex, Array x) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
-    public void updateArray(String columnName, java.sql.Array x) throws SQLException {
+    public void updateArray(String columnName, Array x) throws SQLException {
         throw jdbc3MethodNotSupported();
     }
 
@@ -4046,7 +4087,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // if currentRowPosRelativeToAbsoluteRowPos is zero, already on the current row
         // reposition only if a commit has been sent
         // do not reposition forward-only cursors
-        if (resultSetType_ != java.sql.ResultSet.TYPE_FORWARD_ONLY &&
+        if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
             writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
@@ -4072,7 +4113,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // adjust the absolute position on the client
         absolutePosition_ += currentRowPosRelativeToAbsoluteRowPos;
 
-        if (resultSetType_ != java.sql.ResultSet.TYPE_FORWARD_ONLY &&
+        if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
             readPositioningFetch_();
@@ -4168,7 +4209,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // if rowToFetch is zero, already positioned on the current row
         // do not reposition forward-only cursors.
-        if (resultSetType_ != java.sql.ResultSet.TYPE_FORWARD_ONLY &&
+        if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
             writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
@@ -4193,7 +4234,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // adjust the absolute position on the client.
         absolutePosition_ += currentRowPosRelativeToAbsoluteRowPos;
 
-        if (resultSetType_ != java.sql.ResultSet.TYPE_FORWARD_ONLY &&
+        if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
             readPositioningFetch_();
@@ -4289,12 +4330,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     protected void moveToAfterLast() throws DisconnectException {
-        flowPositioningFetch(ResultSet.scrollOrientation_after__, 0);
+        flowPositioningFetch(ClientResultSet.scrollOrientation_after__, 0);
     }
 
     // Positions the cursor at before the first row.
     protected void moveToBeforeFirst() throws DisconnectException {
-        flowPositioningFetch(ResultSet.scrollOrientation_before__, 0);
+        flowPositioningFetch(ClientResultSet.scrollOrientation_before__, 0);
     }
 
     // analyze the error handling here, and whether or not can be pushed to common
@@ -4393,7 +4434,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void completeLocalCommit(java.util.Iterator listenerIterator) {
+    public void completeLocalCommit(Iterator listenerIterator) {
         cursorUnpositionedOnServer_ = true;
         lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
@@ -4407,7 +4448,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    public void completeLocalRollback(java.util.Iterator listenerIterator) {
+    public void completeLocalRollback(Iterator listenerIterator) {
         lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
         // all cursors need to be closed at rollback
@@ -4439,7 +4480,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     /**
      * Mark this ResultSet as closed. The ResultSet will not be
      * removed from the commit and rollback listeners list in
-     * <code>org.apache.derby.client.am.Connection</code>.
+     * <code>Connection</code>.
      */
     void markClosed() {
         markClosed(false);
@@ -4450,7 +4491,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      *
      * @param removeListener if true the ResultSet will be removed
      * from the commit and rollback listeners list in
-     * <code>org.apache.derby.client.am.Connection</code>.
+     * <code>Connection</code>.
      */
     void markClosed(boolean removeListener) {
         openOnClient_ = false;
@@ -4684,8 +4725,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         String insertString = buildInsertString();
 
         try {
-            preparedStatementForInsert_ = (PreparedStatement)statement_.connection_.
-                    prepareStatement(insertString);
+            preparedStatementForInsert_ = (ClientPreparedStatement)statement_.
+                connection_.prepareStatement(insertString);
         } catch ( SQLException sqle ) {
             throw new SqlException(sqle);
         }
@@ -4787,7 +4828,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private final void checkForUpdatableResultSet(String operation) 
         throws SqlException {
-        if (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY) {
+        if (resultSetConcurrency_ == ResultSet.CONCUR_READ_ONLY) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.UPDATABLE_RESULTSET_API_DISALLOWED),
                     operation);
@@ -4812,7 +4853,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
 
     private final void checkThatResultSetTypeIsScrollable() throws SqlException {
-        if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
+        if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CURSOR_MUST_BE_SCROLLABLE));
         }
@@ -4909,7 +4950,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnServer_) {
             SqlException sqlException = null;
             int sqlcode = Utils.getSqlcodeFromSqlca(queryTerminatingSqlca_);
-
             if (sqlcode < 0) {
                 sqlException = new SqlException(agent_.logWriter_, queryTerminatingSqlca_);
             } else if (sqlcode > 0 && sqlcode != 100) {
@@ -5461,7 +5501,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
     
     
-    private CloseFilterInputStream createCloseFilterInputStream(java.io.InputStream is) throws SqlException {
+    private CloseFilterInputStream createCloseFilterInputStream(InputStream is)
+            throws SqlException {
         
         if(is == null){
             return null;
@@ -5772,7 +5813,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                     resultSetMetaData_.types_[columnIndex -1],
-                                    new Blob(agent_, x)));
+                                    new ClientBlob(agent_, x)));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
@@ -5875,7 +5916,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                  resultSetMetaData_.types_[columnIndex -1], 
-                                 new Clob(agent_, reader)));
+                                 new ClientClob(agent_, reader)));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
@@ -6142,7 +6183,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 updateColumn(columnIndex,
                              agent_.crossConverters_.setObject(
                                  resultSetMetaData_.types_[columnIndex -1],
-                                 new Clob(agent_, x, (int)length)));
+                                 new ClientClob(agent_, x, (int)length)));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
@@ -6201,7 +6242,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * the result set concurrency is <code>CONCUR_READ_ONLY</code>
      * or this method is called on a closed result set
      */
-    public void updateClob(int columnIndex, java.sql.Clob x)
+    public void updateClob(int columnIndex, Clob x)
             throws SQLException {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
@@ -6236,7 +6277,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      * the result set concurrency is <code>CONCUR_READ_ONLY</code>
      * or this method is called on a closed result set
      */
-    public void updateClob(String columnLabel, java.sql.Clob x)
+    public void updateClob(String columnLabel, Clob x)
             throws SQLException {
         try {
             updateClob(findColumnX(columnLabel, "updateClob"), x);
@@ -6279,9 +6320,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             boolean[] tmpIsBlob = new boolean[columnCount];
             for (int i=0; i < columnCount; i++) {
                 int type = this.resultSetMetaData_.types_[i];
-                if (type == Types.BLOB || type == Types.CLOB) {
+                if (type == ClientTypes.BLOB || type == ClientTypes.CLOB) {
                     tmpIndexes[lobCount] = i +1; // Convert to 1-based index.
-                    tmpIsBlob[lobCount++] = (type == Types.BLOB);
+                    tmpIsBlob[lobCount++] = (type == ClientTypes.BLOB);
                 }
             }
             // Create a tracker for the LOB columns found.

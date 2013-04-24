@@ -24,8 +24,9 @@ package org.apache.derby.client.am;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 
-public class Savepoint implements java.sql.Savepoint {
+public class ClientSavepoint implements Savepoint {
     // ----------------- internals -----------------------------------------------
 
     int savepointId_ = 0;
@@ -35,13 +36,13 @@ public class Savepoint implements java.sql.Savepoint {
     //---------------------constructors/finalizer---------------------------------
 
     // create a named savepoint.
-    Savepoint(Agent agent, String savepointName) {
+    ClientSavepoint(Agent agent, String savepointName) {
         agent_ = agent;
         savepointName_ = savepointName;
     }
 
     // create an un-named savepoint.
-    Savepoint(Agent agent, int savepointId) {
+    ClientSavepoint(Agent agent, int savepointId) {
         agent_ = agent;
         savepointId_ = savepointId;
     }

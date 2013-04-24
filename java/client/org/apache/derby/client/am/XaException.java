@@ -21,8 +21,11 @@
 
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
+import javax.transaction.xa.XAException;
 
-public class XaException extends javax.transaction.xa.XAException implements Diagnosable {
+
+public class XaException extends XAException implements Diagnosable {
 
     //-----------------constructors-----------------------------------------------
 
@@ -33,7 +36,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
         }
     }
 
-    public XaException(LogWriter logWriter, java.lang.Throwable throwable) {
+    public XaException(LogWriter logWriter, Throwable throwable) {
         super();
         initCause(throwable);
         if (logWriter != null) {
@@ -49,7 +52,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
         }
     }
 
-    public XaException(LogWriter logWriter, java.lang.Throwable throwable, int errcode) {
+    public XaException(LogWriter logWriter, Throwable throwable, int errcode) {
         super();
         errorCode = errcode;
         initCause(throwable);
@@ -65,7 +68,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
         }
     }
 
-    public XaException(LogWriter logWriter, java.lang.Throwable throwable, String s) {
+    public XaException(LogWriter logWriter, Throwable throwable, String s) {
         super(s);
         initCause(throwable);
         if (logWriter != null) {
@@ -77,7 +80,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
         return null;
     }
 
-    public void printTrace(java.io.PrintWriter printWriter, String header) {
+    public void printTrace(PrintWriter printWriter, String header) {
         ExceptionFormatter.printTrace(this, printWriter, header);
     }
 

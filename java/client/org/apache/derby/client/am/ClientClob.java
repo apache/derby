@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.client.am.Clob
+   Derby - Class org.apache.derby.client.am.ClientClob
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -23,13 +23,23 @@ package org.apache.derby.client.am;
 
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.sql.Clob;
 import java.sql.SQLException;
 
 import org.apache.derby.client.net.EncodedInputStream;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class Clob extends Lob implements java.sql.Clob {
+/**
+ * This class implements the JDBC {@code java.sql.Clob} interface.
+ */
+public class ClientClob extends Lob implements Clob {
     //---------------------navigational members-----------------------------------
 
     //-----------------------------state------------------------------------------
@@ -37,9 +47,9 @@ public class Clob extends Lob implements java.sql.Clob {
 
     // Only used for input purposes.  For output, each getXXXStream call
     // must generate an independent stream.
-    protected java.io.InputStream asciiStream_ = null;
-    protected java.io.InputStream unicodeStream_ = null;
-    protected java.io.Reader characterStream_ = null;
+    protected InputStream asciiStream_ = null;
+    protected InputStream unicodeStream_ = null;
+    protected Reader characterStream_ = null;
 
     // used for input
     // Therefore, we always convert a String to UTF-8 before we flow it for input
@@ -48,7 +58,7 @@ public class Clob extends Lob implements java.sql.Clob {
     protected String encoding_ = "UNICODE";
 
     //---------------------constructors/finalizer---------------------------------
-    public Clob(Agent agent, String string) {
+    public ClientClob(Agent agent, String string) {
 
         this(agent,
              false);
@@ -59,7 +69,7 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     // CTOR for output, when a btc isn't available; the encoding is
-    public Clob(Agent agent,
+    public ClientClob(Agent agent,
                 byte[] unconvertedBytes,
                 String charsetName,
                 int dataOffset) throws SqlException {
@@ -84,7 +94,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     charsetName);
             setSqlLength(string_.length());
             dataType_ |= STRING;
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                 "byte[]", charsetName + " String", e);
@@ -94,8 +104,8 @@ public class Clob extends Lob implements java.sql.Clob {
 
     // CTOR for ascii/unicode stream input
     //"ISO-8859-1", "UTF-8", or "UnicodeBigUnmarked"
-    public Clob(Agent agent,
-                java.io.InputStream inputStream,
+    public ClientClob(Agent agent,
+                InputStream inputStream,
                 String encoding,
                 int length) throws SqlException {
 
@@ -113,8 +123,8 @@ public class Clob extends Lob implements java.sql.Clob {
         } else if (encoding.equals("UnicodeBigUnmarked")) { // "UnicodeBigUnmarked"
             try {
                 characterStream_ =
-                        new java.io.InputStreamReader(inputStream, "UnicodeBigUnmarked");
-            } catch (java.io.UnsupportedEncodingException e) {
+                    new InputStreamReader(inputStream, "UnicodeBigUnmarked");
+            } catch (UnsupportedEncodingException e) {
                 throw new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                     "UnicodeBigUnmarked", "InputStreamReader", e);
@@ -125,19 +135,19 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     /**
-     * Create a <code>Clob</code> of unknown length with the specified
+     * Create a <code>ClientClob</code> of unknown length with the specified
      * encoding.
      *
      * This constructor was added to support the JDBC 4 length less overloads.
-     * Note that a <code>Clob</code> created with this constructor is made for
-     * input to the database only. Do not pass it out to the user!
+     * Note that a <code>ClientClob</code> created with this constructor is
+     * made for input to the database only. Do not pass it out to the user!
      *
      * @param agent
      * @param inputStream the data to insert
      * @param encoding encoding to use for characters. Only "ISO-8859-1" is
      *      allowed.
      */
-    public Clob(Agent agent, java.io.InputStream inputStream, String encoding)
+    public ClientClob(Agent agent, InputStream inputStream, String encoding)
             throws SqlException {
 
         this(agent,
@@ -155,7 +165,7 @@ public class Clob extends Lob implements java.sql.Clob {
 
     // CTOR for character stream input
     // THE ENCODING IS ASSUMED TO BE "UTF-16BE"
-    public Clob(Agent agent, java.io.Reader reader, int length) {
+    public ClientClob(Agent agent, Reader reader, int length) {
 
         this(agent,
              false);
@@ -166,13 +176,13 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     /**
-     * Create a <code>Clob</code> object for a Clob value stored
+     * Create a <code>ClientClob</code> object for a Clob value stored
      * on the server and indentified by <code>locator</code>.
      * @param agent context for this <code>Clob</code>
      *              object (incl. connection).
      * @param locator reference id to <code>Clob</code> value on server.
      */
-    public Clob(Agent agent, int locator)
+    public ClientClob(Agent agent, int locator)
     {
         super(agent, false);
         locator_ = locator;
@@ -180,16 +190,16 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     /**
-     * Create a <code>Clob</code> of unknown length.
+     * Create a <code>ClientClob</code> of unknown length.
      *
      * This constructor was added to support the JDBC 4 length less overloads.
-     * Note that a <code>Clob</code> created with this constructor is made for
-     * input to the database only. Do not pass it out to the user!
+     * Note that a <code>ClientClob</code> created with this constructor is
+     * made for input to the database only. Do not pass it out to the user!
      *
      * @param agent
      * @param reader the data to insert
      */
-    public Clob(Agent agent, Reader reader) {
+    public ClientClob(Agent agent, Reader reader) {
 
         this(agent,
              isLayerBStreamingPossible( agent ) );
@@ -200,7 +210,7 @@ public class Clob extends Lob implements java.sql.Clob {
         dataType_ |= UNICODE_STREAM;
     }
 
-    private Clob(Agent agent,
+    private ClientClob(Agent agent,
                  boolean willBeLayerBStreamed) {
         super(agent,
               willBeLayerBStreamed);
@@ -238,7 +248,7 @@ public class Clob extends Lob implements java.sql.Clob {
   /**
    * Returns a copy of the specified substring
    * in the <code>CLOB</code> value
-   * designated by this <code>Clob</code> object.
+   * designated by this <code>ClientClob</code> object.
    * The substring begins at position
    * <code>pos</code> and has up to <code>length</code> consecutive
    * characters. The starting position must be between 1 and the length
@@ -249,8 +259,9 @@ public class Clob extends Lob implements java.sql.Clob {
    * @param pos the first character of the substring to be extracted.
    *            The first character is at position 1.
    * @param length the number of consecutive characters to be copied
-   * @return a <code>String</code> that is the specified substring in
-   *         the <code>CLOB</code> value designated by this <code>Clob</code> object
+   * @return a <code>String</code> that is the specified substring in the
+   *         <code>CLOB</code> value designated by this <code>ClientClob</code>
+   *         object
    * @exception SQLException if there is an error accessing the
    * <code>CLOB</code>
 
@@ -322,7 +333,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    public java.io.Reader getCharacterStream() throws SQLException {
+    public Reader getCharacterStream() throws SQLException {
 
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
@@ -335,7 +346,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     agent_.logWriter_.traceEntry(this, "getCharacterStream");
                 }
 
-                java.io.Reader retVal = getCharacterStreamX();
+                Reader retVal = getCharacterStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
                 }
@@ -348,7 +359,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    java.io.Reader getCharacterStreamX() throws SqlException {
+    Reader getCharacterStreamX() throws SqlException {
         checkForClosedConnection();
 
         //check is this Lob is locator enabled
@@ -365,10 +376,10 @@ public class Clob extends Lob implements java.sql.Clob {
             return characterStream_;
         }
 
-        return new java.io.StringReader(string_);
+        return new StringReader(string_);
     }
 
-    public java.io.InputStream getAsciiStream() throws SQLException {
+    public InputStream getAsciiStream() throws SQLException {
 
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
@@ -381,7 +392,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     agent_.logWriter_.traceEntry(this, "getAsciiStream");
                 }
 
-                java.io.InputStream retVal = getAsciiStreamX();
+                InputStream retVal = getAsciiStreamX();
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getAsciiStream", retVal);
                 }
@@ -394,7 +405,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    java.io.InputStream getAsciiStreamX() throws SqlException {
+    InputStream getAsciiStreamX() throws SqlException {
         checkForClosedConnection();
 
         if (isAsciiStream())  // this Lob is used for input
@@ -411,7 +422,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     (agent_.connection_,this);
         }
         else {
-            return new AsciiStream(string_, new java.io.StringReader(string_));
+            return new AsciiStream(string_, new StringReader(string_));
         }
     }
 
@@ -480,7 +491,7 @@ public class Clob extends Lob implements java.sql.Clob {
         return index;
     }
 
-    public long position(java.sql.Clob searchstr, long start) throws SQLException {
+    public long position(Clob searchstr, long start) throws SQLException {
 
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
@@ -517,7 +528,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    private long positionX(java.sql.Clob searchstr, long start) throws SqlException {
+    private long positionX(Clob searchstr, long start) throws SqlException {
         checkForClosedConnection();
 
         if (start <= 0) {
@@ -540,7 +551,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 //of the given Clob inside the LOB.
                 index = agent_.connection_.locatorProcedureCall()
                     .clobGetPositionFromLocator(locator_,
-                        ((Clob)searchstr).getLocator(),
+                        ((ClientClob)searchstr).getLocator(),
                         start);
             } else {
                 //Locator support is not available.
@@ -553,7 +564,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     index++;
                 }
             }
-        } catch (java.sql.SQLException e) {
+        } catch (SQLException e) {
             throw new SqlException(e);
         }
         return index;
@@ -678,7 +689,7 @@ public class Clob extends Lob implements java.sql.Clob {
         return length;
     }
 
-    public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+    public OutputStream setAsciiStream(long pos) throws SQLException {
 
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
@@ -690,7 +701,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream", (int) pos);
                 }
-                java.io.OutputStream outStream = null;
+                OutputStream outStream = null;
 
                 if(isLocator()) { // Check to see if the Lob is locator enabled
                     //The Lob is locator enabled. Return an instance of the
@@ -715,7 +726,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    public java.io.Writer setCharacterStream(long pos) throws SQLException {
+    public Writer setCharacterStream(long pos) throws SQLException {
 
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
@@ -727,7 +738,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", (int) pos);
                 }
-                java.io.Writer writer = null;
+                Writer writer = null;
                 //Check to see if this Clob is locator enabled.
                 if (isLocator()) {
                     //return an instance of the locator enabled implementation
@@ -924,7 +935,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 catch(SqlException sqle) {
                     throw sqle.getSQLException();
                 }
-                retVal = new java.io.StringReader(retVal_str);
+                retVal = new StringReader(retVal_str);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
                 }
@@ -951,7 +962,7 @@ public class Clob extends Lob implements java.sql.Clob {
         return ((dataType_ & UNICODE_STREAM) == UNICODE_STREAM);
     }
 
-    public java.io.InputStream getUnicodeStream() {
+    public InputStream getUnicodeStream() {
         return unicodeStream_;
     }
 
@@ -973,7 +984,7 @@ public class Clob extends Lob implements java.sql.Clob {
         try {
             utf8String_ = string_.getBytes("UTF-8");
             return utf8String_.length;
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                 "String", "UTF8 byte[]", e);
@@ -981,13 +992,13 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     // auxiliary method for position (Clob, long)
-    protected Clob createClobWrapper(java.sql.Clob clob) throws SqlException {
+    protected ClientClob createClobWrapper(Clob clob) throws SqlException {
         long length;
-        java.io.Reader rdr;
+        Reader rdr;
 
         try {
             length = clob.length();
-        } catch (java.sql.SQLException e) {
+        } catch (SQLException e) {
             throw new SqlException(e);
         }
 
@@ -999,19 +1010,19 @@ public class Clob extends Lob implements java.sql.Clob {
 
         try {
             rdr = clob.getCharacterStream();
-        } catch (java.sql.SQLException e) {
+        } catch (SQLException e) {
             throw SqlException.javaException(agent_.logWriter_, e);
         }
 
-        return new Clob(this.agent_, rdr, (int) length);
+        return new ClientClob(this.agent_, rdr, (int) length);
     }
 
     public void convertFromAsciiToCharacterStream() throws SqlException {
         try {
             characterStream_ =
-                    new java.io.InputStreamReader(asciiStream_, "ISO-8859-1");
+                    new InputStreamReader(asciiStream_, "ISO-8859-1");
             dataType_ = CHARACTER_STREAM;
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                 "ISO-8859-1", "CharacterStream", e);
@@ -1035,7 +1046,7 @@ public class Clob extends Lob implements java.sql.Clob {
         string_ = newString;
         asciiStream_ = new java.io.StringBufferInputStream(string_);
         unicodeStream_ = new java.io.StringBufferInputStream(string_);
-        characterStream_ = new java.io.StringReader(string_);
+        characterStream_ = new StringReader(string_);
         setSqlLength(string_.length());
     }
 
@@ -1063,6 +1074,7 @@ public class Clob extends Lob implements java.sql.Clob {
      * this locator based <code>Clob</code> object.
      *
      * A stored procedure call will be made to get it from the server.
+     * @throws org.apache.derby.client.am.SqlException
      * @return length of <code>Clob</code> in bytes
      */
     long getLocatorLength() throws SqlException

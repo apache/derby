@@ -21,14 +21,15 @@
 
 package org.apache.derby.client.am;
 
+import java.io.IOException;
 import java.io.Writer;
 import org.apache.derby.shared.common.reference.SQLState;
 
 class ClobWriter extends Writer {
-    private final Clob clob_;
+    private final ClientClob clob_;
     private long offset_;
 
-    ClobWriter(Clob clob, long offset) throws SqlException {
+    ClobWriter(ClientClob clob, long offset) throws SqlException {
         clob_ = clob;
         offset_ = offset;
 
@@ -73,7 +74,7 @@ class ClobWriter extends Writer {
     public void flush() {
     }
 
-    public void close() throws java.io.IOException {
+    public void close() throws IOException {
     }
     
     private void updateClob(StringBuffer sb) 

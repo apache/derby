@@ -20,14 +20,15 @@
 */
 package org.apache.derby.client.net;
 
+import java.sql.ResultSet;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
-import org.apache.derby.client.am.ResultSet;
+import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 
 
-public class NetResultSet extends ResultSet {
+public class NetResultSet extends ClientResultSet {
     // Alias for (NetConnection) super.statement.connection
     private final NetConnection netConnection_;
 
@@ -191,7 +192,7 @@ public class NetResultSet extends ResultSet {
 
     // ------------------------------- abstract box car methods --------------------------------------
     public void writeFetch_(Section section) throws SqlException {
-        if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY && fetchSize_ != 0 &&
+        if (resultSetType_ == ResultSet.TYPE_FORWARD_ONLY && fetchSize_ != 0 &&
                 rowsYetToBeReceivedForRowset_ > 0) {
             netAgent_.resultSetRequest_.writeFetch(this,
                     section,

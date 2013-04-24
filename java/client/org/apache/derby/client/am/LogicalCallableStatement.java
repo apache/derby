@@ -25,6 +25,9 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Ref;
 import java.sql.SQLException;
@@ -49,7 +52,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
  */
 public class LogicalCallableStatement
     extends LogicalPreparedStatement
-    implements java.sql.CallableStatement {
+    implements CallableStatement {
 
     /**
      * Creates a new logical callable statement.
@@ -59,7 +62,7 @@ public class LogicalCallableStatement
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalCallableStatement(java.sql.CallableStatement physicalCs,
+    public LogicalCallableStatement(CallableStatement physicalCs,
                                     StatementKey stmtKey,
                                     StatementCacheInteractor cacheInteractor) {
         super(physicalCs, stmtKey, cacheInteractor);
@@ -214,11 +217,11 @@ public class LogicalCallableStatement
         return getPhysCs().getArray(i);
     }
 
-    public java.sql.Blob getBlob(int i) throws SQLException {
+    public Blob getBlob(int i) throws SQLException {
         return getPhysCs().getBlob(i);
     }
 
-    public java.sql.Clob getClob(int i) throws SQLException {
+    public Clob getClob(int i) throws SQLException {
         return getPhysCs().getClob(i);
     }
 
@@ -306,11 +309,11 @@ public class LogicalCallableStatement
         return getPhysCs().getArray(parameterName);
     }
 
-    public java.sql.Blob getBlob(String parameterName) throws SQLException {
+    public Blob getBlob(String parameterName) throws SQLException {
         return getPhysCs().getBlob(parameterName);
     }
 
-    public java.sql.Clob getClob(String parameterName) throws SQLException {
+    public Clob getClob(String parameterName) throws SQLException {
         return getPhysCs().getClob(parameterName);
     }
 

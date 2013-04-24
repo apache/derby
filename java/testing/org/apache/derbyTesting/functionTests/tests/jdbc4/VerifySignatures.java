@@ -378,10 +378,21 @@ public class VerifySignatures extends BaseTestCase {
             Method impMethod =
                 derbyImplementation.getMethod(ifaceMethod.getName(),
                                               ifaceMethod.getParameterTypes());
-
-            assertEquals("Incorrect return type",
-                         ifaceMethod.getReturnType(),
-                         impMethod.getReturnType());
+            StringBuilder sb = new StringBuilder();
+            Class[] pts = ifaceMethod.getParameterTypes();
+            sb.append("(");
+            for (int i=0; i < pts.length; i++) {
+                sb.append(pts[i].getName());
+                if (i < pts.length -1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(")");
+            assertEquals(
+                    "Incorrect return type for " + ifaceMethod.getName() +
+                    sb.toString(),
+                    ifaceMethod.getReturnType(),
+                    impMethod.getReturnType());
 
             int modifiers = impMethod.getModifiers();
             assertTrue("Non-public method", Modifier.isPublic(modifiers));

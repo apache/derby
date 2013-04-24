@@ -21,20 +21,29 @@
 
 package org.apache.derby.client.am;
 
+import java.io.InputStream;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Map;
 
-public class CallableStatement extends PreparedStatement
-        implements java.sql.PreparedStatement,
-        java.sql.CallableStatement,
-        PreparedStatementCallbackInterface {
+public class ClientCallableStatement extends ClientPreparedStatement
+    implements PreparedStatement, CallableStatement,
+               PreparedStatementCallbackInterface {
     //---------------------navigational members-----------------------------------
 
     //---------------------navigational cheat-links-------------------------------
@@ -87,27 +96,43 @@ public class CallableStatement extends PreparedStatement
      *                    Occurred and the Close events.
      * @throws SqlException
      */
-    public CallableStatement(Agent agent,
-                             Connection connection,
+    public ClientCallableStatement(Agent agent,
+                             ClientConnection connection,
                              String sql,
                              int type, int concurrency, int holdability,
                              ClientPooledConnection cpc) throws SqlException {
-        super(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
-                null, null,cpc);
+        super(agent,
+              connection,
+              sql,
+              type,
+              concurrency,
+              holdability,
+              ClientStatement.NO_GENERATED_KEYS,
+              null,
+              null,
+              cpc);
         initCallableStatement();
     }
 
     public void resetCallableStatement(Agent agent,
-                                       Connection connection,
+                                       ClientConnection connection,
                                        String sql,
                                        int type, int concurrency, int holdability) throws SqlException {
-        super.resetPreparedStatement(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
-                null,null);
+        super.resetPreparedStatement(
+            agent,
+            connection,
+            sql,
+            type,
+            concurrency,
+            holdability,
+            ClientStatement.NO_GENERATED_KEYS,
+            null,
+            null);
         initCallableStatement();
     }
 
     public void resetCallableStatement(Agent agent,
-                                       Connection connection,
+                                       ClientConnection connection,
                                        String sql,
                                        Section section) throws SqlException {
         super.resetPreparedStatement(agent, connection, sql, section);
@@ -116,7 +141,7 @@ public class CallableStatement extends PreparedStatement
 
 
     public void resetCallableStatement(Agent agent,
-                                       Connection connection,
+                                       ClientConnection connection,
                                        String sql,
                                        Section section,
                                        ColumnMetaData parameterMetaData,
@@ -125,7 +150,7 @@ public class CallableStatement extends PreparedStatement
         initCallableStatement();
     }
 
-    protected void finalize() throws java.lang.Throwable {
+    protected void finalize() throws Throwable {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "finalize");
         }
@@ -406,7 +431,8 @@ public class CallableStatement extends PreparedStatement
     }
 
     /** @deprecated */
-    public java.math.BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException, ArithmeticException {
+    public BigDecimal getBigDecimal(int parameterIndex, int scale)
+            throws SQLException, ArithmeticException {
         try
         {
             synchronized (connection_) {
@@ -415,12 +441,12 @@ public class CallableStatement extends PreparedStatement
                 }
                 super.checkForClosedStatement();
                 checkForValidScale(scale);
-                java.math.BigDecimal result;
+                BigDecimal result;
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
                 if (result != null) {
-                    result = result.setScale(scale, java.math.BigDecimal.ROUND_DOWN);
+                    result = result.setScale(scale, BigDecimal.ROUND_DOWN);
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
@@ -434,7 +460,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.math.BigDecimal getBigDecimal(int parameterIndex) throws SQLException {
+    public BigDecimal getBigDecimal(int parameterIndex) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -442,7 +468,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                java.math.BigDecimal result;
+                BigDecimal result;
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
@@ -623,7 +649,7 @@ public class CallableStatement extends PreparedStatement
         return  wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
      }
 
-    public java.sql.Blob getBlob(int parameterIndex) throws SQLException {
+    public Blob getBlob(int parameterIndex) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -633,7 +659,9 @@ public class CallableStatement extends PreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
-                java.sql.Blob result = wasNullX() ? null : singletonRowData_.getBlob(parameterIndex);
+                Blob result = wasNullX() ? null :
+                    singletonRowData_.getBlob(parameterIndex);
+
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBlob", result);
                 }
@@ -646,14 +674,16 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Clob getClob(int parameterIndex) throws SQLException {
+    public Clob getClob(int parameterIndex) throws SQLException {
         try
         {
             synchronized (connection_) {
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
-                java.sql.Clob result = wasNullX() ? null : singletonRowData_.getClob(parameterIndex);
+                Clob result = wasNullX() ? null :
+                    singletonRowData_.getClob(parameterIndex);
+
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getClob", result);
                 }
@@ -666,7 +696,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Array getArray(int parameterIndex) throws SQLException {
+    public Array getArray(int parameterIndex) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -676,7 +706,9 @@ public class CallableStatement extends PreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
-                java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
+                Array result = wasNullX() ? null :
+                    singletonRowData_.getArray(parameterIndex);
+
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
@@ -693,7 +725,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Ref getRef(int parameterIndex) throws SQLException {
+    public Ref getRef(int parameterIndex) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -703,7 +735,9 @@ public class CallableStatement extends PreparedStatement
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
-                java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
+                Ref result = wasNullX() ? null :
+                    singletonRowData_.getRef(parameterIndex);
+
                 if (true) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
@@ -744,7 +778,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public Object getObject(int parameterIndex, java.util.Map map) throws SQLException {
+    public Object getObject(int parameterIndex, Map map) throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -793,14 +827,14 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public java.net.URL getURL(int parameterIndex) throws SQLException {
+    public URL getURL(int parameterIndex) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterIndex);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setURL(String parameterName, java.net.URL x) throws SQLException {
+    public void setURL(String parameterName, URL x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setURL", parameterName, x);
         }
@@ -863,7 +897,8 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public void setBigDecimal(String parameterName, java.math.BigDecimal x) throws SQLException {
+    public void setBigDecimal(String parameterName, BigDecimal x)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterName, x);
         }
@@ -884,35 +919,38 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public void setDate(String parameterName, java.sql.Date x) throws SQLException {
+    public void setDate(String parameterName, Date x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setTime(String parameterName, java.sql.Time x) throws SQLException {
+    public void setTime(String parameterName, Time x) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setTimestamp(String parameterName, java.sql.Timestamp x) throws SQLException {
+    public void setTimestamp(String parameterName, Timestamp x)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setAsciiStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
+    public void setAsciiStream(String parameterName, InputStream x, int length)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterName, x, length);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setBinaryStream(String parameterName, java.io.InputStream x, int length) throws SQLException {
+    public void setBinaryStream(String parameterName, InputStream x, int length)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterName, x, length);
         }
@@ -940,28 +978,34 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public void setCharacterStream(String parameterName, java.io.Reader reader, int length) throws SQLException {
+    public void setCharacterStream(String parameterName,
+                                   Reader reader,
+                                   int length) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterName, reader, length);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setDate(String parameterName, java.sql.Date x, java.util.Calendar calendar) throws SQLException {
+    public void setDate(String parameterName, Date x, Calendar calendar)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setDate", parameterName, x, calendar);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setTime(String parameterName, java.sql.Time x, java.util.Calendar calendar) throws SQLException {
+    public void setTime(String parameterName, Time x, Calendar calendar)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTime", parameterName, x, calendar);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public void setTimestamp(String parameterName, java.sql.Timestamp x, java.util.Calendar calendar) throws SQLException {
+    public void setTimestamp(String parameterName,
+                             Timestamp x,
+                             Calendar calendar) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTimestamp", parameterName, x, calendar);
         }
@@ -1038,21 +1082,21 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Date getDate(String parameterName) throws SQLException {
+    public Date getDate(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Time getTime(String parameterName) throws SQLException {
+    public Time getTime(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Timestamp getTimestamp(String parameterName) throws SQLException {
+    public Timestamp getTimestamp(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName);
         }
@@ -1066,70 +1110,73 @@ public class CallableStatement extends PreparedStatement
         throw jdbcMethodNotImplemented();
     }
 
-    public java.math.BigDecimal getBigDecimal(String parameterName) throws SQLException {
+    public BigDecimal getBigDecimal(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public Object getObject(String parameterName, java.util.Map map) throws SQLException {
+    public Object getObject(String parameterName, Map map) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getObject", parameterName, map);
             }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Ref getRef(String parameterName) throws SQLException {
+    public Ref getRef(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getRef", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Blob getBlob(String parameterName) throws SQLException {
+    public Blob getBlob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getBlob", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Clob getClob(String parameterName) throws SQLException {
+    public Clob getClob(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getClob", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Array getArray(String parameterName) throws SQLException {
+    public Array getArray(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getArray", parameterName);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Date getDate(String parameterName, java.util.Calendar calendar) throws SQLException {
+    public Date getDate(String parameterName, Calendar calendar)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getDate", parameterName, calendar);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Time getTime(String parameterName, java.util.Calendar calendar) throws SQLException {
+    public Time getTime(String parameterName, Calendar calendar)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTime", parameterName, calendar);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.sql.Timestamp getTimestamp(String parameterName, java.util.Calendar calendar) throws SQLException {
+    public Timestamp getTimestamp(String parameterName, Calendar calendar)
+            throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getTimestamp", parameterName, calendar);
         }
         throw jdbcMethodNotImplemented();
     }
 
-    public java.net.URL getURL(String parameterName) throws SQLException {
+    public URL getURL(String parameterName) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "getURL", parameterName);
         }
@@ -1181,7 +1228,8 @@ public class CallableStatement extends PreparedStatement
         
         for ( int i = 0; i < cursorParamCount; i++ )
         {
-            if ( parameterMetaData_.sqlxParmmode_[ i ] == java.sql.ParameterMetaData.parameterModeInOut )
+            if ( parameterMetaData_.sqlxParmmode_[ i ] ==
+                 ClientParameterMetaData.parameterModeInOut )
             {
                 int jdbcParamNumber = i + 1;
                 Object  returnArg;
@@ -1198,7 +1246,7 @@ public class CallableStatement extends PreparedStatement
                 //
                 // special case to coerce Integer to Short for SMALLINT
                 //
-                if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
+                if ( parameterMetaData_.types_[ i ] == ClientTypes.SMALLINT )
                 {
                     if (returnArg instanceof Integer)
                     {
@@ -1228,7 +1276,10 @@ public class CallableStatement extends PreparedStatement
     }
 
     private void checkForValidOutParameter(int parameterIndex) throws SqlException {
-        if (parameterMetaData_ == null || parameterMetaData_.sqlxParmmode_[parameterIndex - 1] < java.sql.ParameterMetaData.parameterModeInOut) {
+        if (parameterMetaData_ == null ||
+            parameterMetaData_.sqlxParmmode_[parameterIndex - 1] <
+                ClientParameterMetaData.parameterModeInOut) {
+
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.PARAM_NOT_OUT_OR_INOUT), 
                 parameterIndex);

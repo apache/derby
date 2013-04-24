@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetConnection;
@@ -154,11 +155,11 @@ public abstract class Lob implements UnitOfWorkListener {
         agent_.connection_.CommitAndRollbackListeners_.put(this,null);
     }
 
-    public void completeLocalCommit(java.util.Iterator listenerIterator) {
+    public void completeLocalCommit(Iterator listenerIterator) {
         listenerIterator.remove();
     }
 
-    public void completeLocalRollback(java.util.Iterator listenerIterator) {
+    public void completeLocalRollback(Iterator listenerIterator) {
         listenerIterator.remove();
     }
 

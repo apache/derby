@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
@@ -303,7 +304,7 @@ public class SqlException extends Exception implements Diagnosable {
         this(logWriter, (Throwable)null, reason, sqlState, errorCode);
     }
 
-    protected SqlException(LogWriter logWriter, java.lang.Throwable throwable, 
+    protected SqlException(LogWriter logWriter, Throwable throwable,
         String reason, String sqlState, int errorCode ) {
         message_ = reason;
         sqlstate_ = sqlState;
@@ -490,7 +491,7 @@ public class SqlException extends Exception implements Diagnosable {
         }
     }
 
-    public void printTrace(java.io.PrintWriter printWriter, String header) {
+    public void printTrace(PrintWriter printWriter, String header) {
         ExceptionFormatter.printTrace(this, printWriter, header);
     }
     

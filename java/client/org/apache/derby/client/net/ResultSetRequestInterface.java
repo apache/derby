@@ -35,12 +35,12 @@ public interface ResultSetRequestInterface {
                            int fetchSize) throws SqlException;
 
     public void writeScrollableFetch(
-            NetResultSet resultSet,
-            Section section,
-            int fetchSize,
-            int orientation,
-            long rowToFetch,
-            boolean resetQueryBlocks) throws SqlException;
+        NetResultSet resultSet,
+        Section section,
+        int fetchSize,
+        int orientation,
+        long rowToFetch,
+        boolean resetQueryBlocks) throws SqlException;
 
     public void writePositioningFetch(NetResultSet resultSet,
                                       Section section,

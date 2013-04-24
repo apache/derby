@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -34,13 +35,13 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * generating an <code>IOException</code>.
  * <p>
  * This <code>InputStream</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #read(byte[])
+ * buffering of data is done.  Hence, for efficiency #read(byte[])
  * should be used instead of #read().  Marks are not supported, but it
  * should be pretty simple to extend the implementation to support
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
-public class BlobLocatorInputStream extends java.io.InputStream 
+public class BlobLocatorInputStream extends InputStream
 {
 
     /**
@@ -54,7 +55,7 @@ public class BlobLocatorInputStream extends java.io.InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
-    public BlobLocatorInputStream(Connection connection, Blob blob) 
+    public BlobLocatorInputStream(ClientConnection connection, ClientBlob blob)
         throws SqlException
     {        
         if (SanityManager.DEBUG) {
@@ -87,7 +88,7 @@ public class BlobLocatorInputStream extends java.io.InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
-    public BlobLocatorInputStream(Connection connection, Blob blob,
+    public BlobLocatorInputStream(ClientConnection connection, ClientBlob blob,
                                   long position, long length) 
         throws SqlException
     {    
@@ -187,12 +188,12 @@ public class BlobLocatorInputStream extends java.io.InputStream
     /**
      * Connection used to read Blob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
     
     /**
      * The Blob to be accessed.
      */
-    private final Blob blob;
+    private final ClientBlob blob;
 
     /**
      * Current position in the underlying Blob.

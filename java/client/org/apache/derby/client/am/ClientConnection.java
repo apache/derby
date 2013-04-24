@@ -21,7 +21,17 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -35,15 +45,15 @@ import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public abstract class Connection
-    implements java.sql.Connection, ConnectionCallbackInterface
+public abstract class ClientConnection
+    implements Connection, ConnectionCallbackInterface
 {
     //---------------------navigational members-----------------------------------
 
 
     public Agent agent_;
 
-    public DatabaseMetaData databaseMetaData_;
+    public ClientDatabaseMetaData databaseMetaData_;
     // DERBY-210 -  WeakHashMap is used to store references to objects to avoid
     // memory leaks. When there are no other references to the keys in a 
     // WeakHashMap, they will get removed from the map and can thus get 
@@ -52,8 +62,8 @@ public abstract class Connection
         
     // In Connection.markStatementsClosed() method, this list is traversed to get a
     // list of open statements, which are marked closed and removed from the list.
-    final WeakHashMap<Statement, Void> openStatements_ =
-            new WeakHashMap<Statement, Void>();
+    final WeakHashMap<ClientStatement, Void> openStatements_ =
+            new WeakHashMap<ClientStatement, Void>();
 
     // Some statuses of DERBY objects may be invalid on server
     // after both commit and rollback. For example,
@@ -95,12 +105,12 @@ public abstract class Connection
 
     //prepared statements associated with isolation level change are stored 
     // in isolationLevelPreparedStmts
-    final private HashMap<String, PreparedStatement> 
+    final private HashMap<String, ClientPreparedStatement>
         isolationLevelPreparedStmts = 
-            new HashMap<String, PreparedStatement>();
+            new HashMap<String, ClientPreparedStatement>();
     
     // used to get transaction isolation level
-    private PreparedStatement getTransactionIsolationPrepStmt = null;
+    private ClientPreparedStatement getTransactionIsolationPrepStmt = null;
     
     // ------------------------dynamic properties---------------------------------
 
@@ -190,7 +200,7 @@ public abstract class Connection
     //---------------------constructors/finalizer---------------------------------
 
     // For jdbc 2 connections
-    protected Connection(
+    protected ClientConnection(
             LogWriter logWriter,
             String user,
             String password,
@@ -201,12 +211,13 @@ public abstract class Connection
         initConnection(logWriter, dataSource);
     }
 
-    protected Connection(
+    protected ClientConnection(
             LogWriter logWriter,
             String user,
             String password,
             boolean isXAConn,
-            ClientBaseDataSourceRoot dataSource) throws SqlException {
+            ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
 
         this.user_ = user;
         isXAConnection_ = isXAConn;
@@ -214,9 +225,10 @@ public abstract class Connection
     }
 
     // For jdbc 2 connections
-    private void initConnection(
+    protected void initConnection(
             LogWriter logWriter,
-            ClientBaseDataSourceRoot dataSource) throws SqlException {
+            ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
 
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
@@ -265,10 +277,11 @@ public abstract class Connection
     }
 
     // For jdbc 2 connections
-    protected Connection(
+    protected ClientConnection(
             LogWriter logWriter,
             boolean isXAConn,
-            ClientBaseDataSourceRoot dataSource) throws SqlException {
+            ClientBaseDataSourceRoot dataSource)
+            throws SqlException {
 
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
@@ -320,7 +333,7 @@ public abstract class Connection
     }
 
     // For jdbc 1 connections
-    protected Connection(LogWriter logWriter,
+    protected ClientConnection(LogWriter logWriter,
                          int driverManagerLoginTimeout,
                          String serverName,
                          int portNumber,
@@ -382,13 +395,17 @@ public abstract class Connection
 
     // ---------------------------jdbc 1------------------------------------------
 
-    synchronized public java.sql.Statement createStatement() throws SQLException {
+    synchronized public Statement createStatement() throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "createStatement");
             }
-            Statement s = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
+
+            ClientStatement s = createStatementX(
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY, holdability());
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "createStatement", s);
             }
@@ -400,17 +417,18 @@ public abstract class Connection
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql) throws SQLException {
+    synchronized public PreparedStatement prepareStatement(String sql)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql);
             }
-            PreparedStatement ps = prepareStatementX(sql,
-                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
+            ClientPreparedStatement ps = prepareStatementX(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
                     holdability(),
-                    java.sql.Statement.NO_GENERATED_KEYS,
+                    Statement.NO_GENERATED_KEYS,
                     null, null);
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareStatement", ps);
@@ -424,10 +442,16 @@ public abstract class Connection
     }
 
     // For internal use only.  Use by updatable result set code.
-    synchronized public PreparedStatement preparePositionedUpdateStatement(String sql, Section querySection) throws SqlException {
+    synchronized
+        public ClientPreparedStatement preparePositionedUpdateStatement (
+            String sql,
+            Section querySection) throws SqlException {
+
         checkForClosedConnection();
         // create a net material prepared statement.
-        PreparedStatement preparedStatement = newPositionedUpdatePreparedStatement_(sql, querySection);
+        ClientPreparedStatement preparedStatement =
+            newPositionedUpdatePreparedStatement_(sql, querySection);
+
         preparedStatement.flowPrepareDescribeInputOutput();
         // The positioned update statement is not added to the list of open statements,
         // because this would cause a java.util.ConcurrentModificationException when
@@ -441,13 +465,20 @@ public abstract class Connection
         return preparedStatement;
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql) throws SQLException {
+    synchronized public CallableStatement prepareCall(String sql)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareCall", sql);
             }
-            CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
+
+            ClientCallableStatement cs = prepareCallX(
+                sql,
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY,
+                holdability());
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareCall", cs);
             }
@@ -459,9 +490,16 @@ public abstract class Connection
         }
     }
 
-    synchronized PreparedStatement prepareDynamicCatalogQuery(String sql) throws SqlException {
-        PreparedStatement ps = newPreparedStatement_(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability(), java.sql.Statement.NO_GENERATED_KEYS, null,
-                null);
+    synchronized ClientPreparedStatement prepareDynamicCatalogQuery(String sql)
+            throws SqlException {
+        ClientPreparedStatement ps = newPreparedStatement_(
+            sql,
+            ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_READ_ONLY,
+            holdability(),
+            Statement.NO_GENERATED_KEYS,
+            null,
+            null);
         ps.isCatalogQuery_ = true;
         ps.prepare();
         openStatements_.put(ps, null);
@@ -508,8 +546,7 @@ public abstract class Connection
 
     // Driver-specific determination if local COMMIT/ROLLBACK is allowed;
     // primary usage is distinction between local and global trans. envs.;
-    protected abstract boolean allowLocalCommitRollback_()
-            throws SqlException;
+    protected abstract boolean allowLocalCommitRollback_() throws SqlException;
 
     synchronized public void setAutoCommit(boolean autoCommit) throws SQLException {
         try
@@ -794,7 +831,8 @@ public abstract class Connection
         SQLException accumulatedExceptions = null;
 
         //Close prepared statements associated with isolation level change
-        for (PreparedStatement ps : isolationLevelPreparedStmts.values() ) {
+        for (ClientPreparedStatement ps :
+                 isolationLevelPreparedStmts.values()) {
             try {
                 ps.close();
             } catch (SQLException se) {
@@ -892,24 +930,24 @@ public abstract class Connection
     }
 
     private void markStatementsClosed() {
-        Set<Statement> keySet = openStatements_.keySet();
-        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
-            Statement stmt = i.next();
+        Set<ClientStatement> keySet = openStatements_.keySet();
+        for (Iterator<ClientStatement> i = keySet.iterator(); i.hasNext();) {
+            ClientStatement stmt = i.next();
             stmt.markClosed();
             i.remove();
         }
     }
 
     private void writeCloseStatements() throws SqlException {
-        Set<Statement> keySet = openStatements_.keySet();
-        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
+        Set<ClientStatement> keySet = openStatements_.keySet();
+        for (Iterator<ClientStatement> i = keySet.iterator(); i.hasNext();) {
             i.next().writeClose(false); // false means don't permit auto-commits
         }
     }
 
     private void readCloseStatements() throws SqlException {
-        Set<Statement> keySet = openStatements_.keySet();
-        for (Iterator<Statement> i = keySet.iterator(); i.hasNext();) {
+        Set<ClientStatement> keySet = openStatements_.keySet();
+        for (Iterator<ClientStatement> i = keySet.iterator(); i.hasNext();) {
             i.next().readClose(false); // false means don't permit auto-commits
         }
     }
@@ -961,7 +999,7 @@ public abstract class Connection
         return;
 
         try {
-            // Per jdbc spec (see java.sql.Connection.close() javadoc).
+            // Per jdbc spec (see Connection.close() javadoc).
             checkForClosedConnection();
             setTransactionIsolationX(level);
         } catch (SqlException se) {
@@ -993,22 +1031,22 @@ public abstract class Connection
             throws SqlException {
         String levelString = null;
         switch (level) {
-        case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
+        case ClientConnection.TRANSACTION_REPEATABLE_READ:
             levelString = DERBY_TRANSACTION_REPEATABLE_READ;
             break;
-        case java.sql.Connection.TRANSACTION_READ_COMMITTED:
+        case ClientConnection.TRANSACTION_READ_COMMITTED:
             levelString = DERBY_TRANSACTION_READ_COMMITTED;
             break;
-        case java.sql.Connection.TRANSACTION_SERIALIZABLE:
+        case ClientConnection.TRANSACTION_SERIALIZABLE:
             levelString = DERBY_TRANSACTION_SERIALIZABLE;
             break;
-        case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
+        case ClientConnection.TRANSACTION_READ_UNCOMMITTED:
             levelString = DERBY_TRANSACTION_READ_UNCOMMITTED;
             break;
             // Per javadoc:
             //   Note that Connection.TRANSACTION_NONE cannot be used because it
             //   specifies that transactions are not supported.
-        case java.sql.Connection.TRANSACTION_NONE:
+        case Connection.TRANSACTION_NONE:
         default:
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
@@ -1016,14 +1054,17 @@ public abstract class Connection
         }
         //If we do not already have a prepared statement for the requested
         // isolation level change, then create one
-        PreparedStatement ps = (PreparedStatement)isolationLevelPreparedStmts.get(levelString);
+        ClientPreparedStatement ps =
+            (ClientPreparedStatement)isolationLevelPreparedStmts.
+            get(levelString);
+
         if (ps == null  || !ps.openOnClient_) {
             ps = prepareStatementX(
                     "SET CURRENT ISOLATION = " + levelString,
-                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
                     holdability(),
-                    java.sql.Statement.NO_GENERATED_KEYS,
+                    Statement.NO_GENERATED_KEYS,
                     null, null);
             isolationLevelPreparedStmts.put(levelString, ps);
         }
@@ -1070,7 +1111,7 @@ public abstract class Connection
             agent_.logWriter_.traceEntry(this, "getTransactionIsolation", isolation_);
         }
         try {
-            // Per jdbc spec (see java.sql.Connection.close() javadoc).
+            // Per jdbc spec (see Connection.close() javadoc).
             checkForClosedConnection();
             return getTransactionIsolationX();
         } catch (SqlException se) {
@@ -1082,7 +1123,7 @@ public abstract class Connection
         // Store the current auto-commit value and use it to restore 
         // at the end of this method.
         boolean currentAutoCommit = autoCommit_;
-        java.sql.ResultSet rs = null;
+        ResultSet rs = null;
         try
         {
             checkForClosedConnection();
@@ -1149,10 +1190,10 @@ public abstract class Connection
             	getTransactionIsolationPrepStmt =
                         prepareStatementX(
                                 "VALUES CURRENT ISOLATION",
-                                java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                                java.sql.ResultSet.CONCUR_READ_ONLY,
+                                ResultSet.TYPE_FORWARD_ONLY,
+                                ResultSet.CONCUR_READ_ONLY,
                                 holdability(),
-                                java.sql.Statement.NO_GENERATED_KEYS,
+                                Statement.NO_GENERATED_KEYS,
                                 null, null);
             }
             
@@ -1228,8 +1269,8 @@ public abstract class Connection
                agent_.logWriter_.traceEntry(this,
                   "getCurrentSchemaName() executes query");
             }
-            java.sql.Statement s = createStatement();
-            java.sql.ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
+            Statement s = createStatement();
+            ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
             rs.next();
             String schema = rs.getString(1);
             rs.close();
@@ -1253,18 +1294,18 @@ public abstract class Connection
      */
     private int translateIsolation(String isolationStr) {
         if(isolationStr.compareTo(DERBY_TRANSACTION_REPEATABLE_READ) == 0)
-            return java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+            return ClientConnection.TRANSACTION_REPEATABLE_READ;
         else if (isolationStr.compareTo(DERBY_TRANSACTION_SERIALIZABLE) == 0)
-            return java.sql.Connection.TRANSACTION_SERIALIZABLE;
+            return ClientConnection.TRANSACTION_SERIALIZABLE;
         else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_COMMITTED) == 0)
-            return java.sql.Connection.TRANSACTION_READ_COMMITTED;
+            return ClientConnection.TRANSACTION_READ_COMMITTED;
         else if (isolationStr.compareTo(DERBY_TRANSACTION_READ_UNCOMMITTED) == 0)
-            return java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
+            return ClientConnection.TRANSACTION_READ_UNCOMMITTED;
         else 
-            return java.sql.Connection.TRANSACTION_NONE;
+            return ClientConnection.TRANSACTION_NONE;
     }
 
-    public java.sql.SQLWarning getWarnings() throws SQLException {
+    public SQLWarning getWarnings() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getWarnings", warnings_);
         }
@@ -1301,7 +1342,7 @@ public abstract class Connection
     //======================================================================
     // Advanced features:
 
-    public java.sql.DatabaseMetaData getMetaData() throws SQLException {
+    public DatabaseMetaData getMetaData() throws SQLException {
         try
         {
             checkForClosedConnection();
@@ -1379,14 +1420,19 @@ public abstract class Connection
 
     //--------------------------JDBC 2.0-----------------------------
 
-    synchronized public java.sql.Statement createStatement(int resultSetType,
+    synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency) throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency);
             }
-            Statement s = createStatementX(resultSetType, resultSetConcurrency, holdability());
+
+            ClientStatement s = createStatementX(
+                resultSetType,
+                resultSetConcurrency,
+                holdability());
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "createStatement", s);
             }
@@ -1398,7 +1444,7 @@ public abstract class Connection
         }
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql,
+    synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency) throws SQLException {
         try
@@ -1406,11 +1452,11 @@ public abstract class Connection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency);
             }
-            PreparedStatement ps = prepareStatementX(sql,
+            ClientPreparedStatement ps = prepareStatementX(sql,
                     resultSetType,
                     resultSetConcurrency,
                     holdability(),
-                    java.sql.Statement.NO_GENERATED_KEYS,
+                    ClientStatement.NO_GENERATED_KEYS,
                     null, null);
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareStatement", ps);
@@ -1423,7 +1469,7 @@ public abstract class Connection
         }
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql,
+    synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency) throws SQLException {
         try
@@ -1431,7 +1477,13 @@ public abstract class Connection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency);
             }
-            CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, holdability());
+
+            ClientCallableStatement cs = prepareCallX(
+                sql,
+                resultSetType,
+                resultSetConcurrency,
+                holdability());
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareCall", cs);
             }
@@ -1443,20 +1495,25 @@ public abstract class Connection
         }
     }
 
-    synchronized public CallableStatement prepareMessageProc(String sql) throws SqlException {
+    synchronized public ClientCallableStatement prepareMessageProc(String sql)
+            throws SqlException {
         checkForClosedConnection();
 
-        CallableStatement cs = prepareCallX(sql, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY, holdability());
+        ClientCallableStatement cs = prepareCallX(
+            sql,
+            ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_READ_ONLY,
+            holdability());
         return cs;
     }
 
     // Per jdbc spec, when a result set type is unsupported, we downgrade and
     // issue a warning rather than to throw an exception.
     private int downgradeResultSetType(int resultSetType) {
-        if (resultSetType == java.sql.ResultSet.TYPE_SCROLL_SENSITIVE) {
+        if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE) {
             accumulateWarning(new SqlWarning(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SCROLL_SENSITIVE_NOT_SUPPORTED)));
-            return java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
+            return ResultSet.TYPE_SCROLL_INSENSITIVE;
         }
         return resultSetType;
     }
@@ -1550,7 +1607,7 @@ public abstract class Connection
     // generated name used internally for unnamed savepoints
     public static final String dncGeneratedSavepointNamePrefix__ = "DNC_GENENERATED_NAME_";
 
-    synchronized public java.sql.Savepoint setSavepoint() throws SQLException {
+    synchronized public Savepoint setSavepoint() throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1566,8 +1623,10 @@ public abstract class Connection
             if ((++dncGeneratedSavepointId_) < 0) {
                 dncGeneratedSavepointId_ = 1; // restart from 1 when overflow.
             }
-            Object s = setSavepointX(new Savepoint(agent_, dncGeneratedSavepointId_));
-            return (java.sql.Savepoint) s;
+            Object s = setSavepointX(
+                new ClientSavepoint(agent_, dncGeneratedSavepointId_));
+
+            return (ClientSavepoint) s;
         }
         catch ( SqlException se )
         {
@@ -1575,7 +1634,8 @@ public abstract class Connection
         }
     }
 
-    synchronized public java.sql.Savepoint setSavepoint(String name) throws SQLException {
+    synchronized public Savepoint setSavepoint(String name)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1592,8 +1652,8 @@ public abstract class Connection
                         new ClientMessageId (SQLState.NO_SAVEPOINT_WHEN_AUTO));
             }
             // create a named savepoint.
-            Object s = setSavepointX(new Savepoint(agent_, name));
-            return (java.sql.Savepoint) s;
+            Object s = setSavepointX(new ClientSavepoint(agent_, name));
+            return (ClientSavepoint) s;
         }
         catch ( SqlException se )
         {
@@ -1601,13 +1661,16 @@ public abstract class Connection
         }
     }
 
-    private Savepoint setSavepointX(Savepoint savepoint) throws SQLException {
+    private ClientSavepoint setSavepointX(ClientSavepoint savepoint)
+            throws SQLException {
         // Construct and flow a savepoint statement to server.
-        Statement stmt = null;
+        ClientStatement stmt = null;
         try {
-            stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
-                    holdability());
+            stmt = (ClientStatement) createStatementX(
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY,
+                holdability());
+
             String savepointName;
             try {
                 savepointName = savepoint.getSavepointName();
@@ -1634,7 +1697,7 @@ public abstract class Connection
         return savepoint;
     }
 
-    synchronized public void rollback(java.sql.Savepoint savepoint) throws SQLException {
+    synchronized public void rollback(Savepoint savepoint) throws SQLException {
         try
         {
             int saveXaState = xaState_;
@@ -1653,29 +1716,30 @@ public abstract class Connection
             } 
             // Only allow to rollback to a savepoint from the connection that create the savepoint.
             try {
-                if (this != ((Savepoint) savepoint).agent_.connection_) {
+                if (this != ((ClientSavepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_,
                             new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
-            } catch (java.lang.ClassCastException e) {
-                // savepoint is not an instance of am.Savepoint
+            } catch (ClassCastException e) {
+                 // savepoint is not an instance of am.Savepoint
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
 
             // Construct and flow a savepoint rollback statement to server.
-            Statement stmt = null;
+            ClientStatement stmt = null;
             try {
-                stmt = createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                stmt = createStatementX(ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
                         holdability());
                 String savepointName;
                 try {
-                    savepointName = ((Savepoint) savepoint).getSavepointName();
+                    savepointName =
+                        ((ClientSavepoint)savepoint).getSavepointName();
                 } catch (SQLException e) {
                     // generate the name for an un-named savepoint.
                     savepointName = dncGeneratedSavepointNamePrefix__ +
-                            ((Savepoint) savepoint).getSavepointId();
+                            ((ClientSavepoint) savepoint).getSavepointId();
                 }
                 stmt.executeX(
                         "ROLLBACK TO SAVEPOINT " +
@@ -1696,7 +1760,8 @@ public abstract class Connection
         }
     }
 
-    synchronized public void releaseSavepoint(java.sql.Savepoint savepoint) throws SQLException {
+    synchronized public void releaseSavepoint(Savepoint savepoint)
+            throws SQLException {
         try
         {
             int saveXaState = xaState_;
@@ -1715,7 +1780,7 @@ public abstract class Connection
             } 
             // Only allow to release a savepoint from the connection that create the savepoint.
             try {
-                if (this != ((Savepoint) savepoint).agent_.connection_) {
+                if (this != ((ClientSavepoint) savepoint).agent_.connection_) {
                     throw new SqlException(agent_.logWriter_, new ClientMessageId 
                             (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
                 }
@@ -1723,23 +1788,25 @@ public abstract class Connection
                 // savepoint is not an instance of am.Savepoint
                 throw new SqlException(
                     agent_.logWriter_,
-                    new ClientMessageId
-                    (SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
+                    new ClientMessageId(
+                        SQLState.SAVEPOINT_NOT_CREATED_BY_CONNECTION));
             }
 
             // Construct and flow a savepoint release statement to server.
-            Statement stmt = null;
+            ClientStatement stmt = null;
             try {
-                stmt = (Statement) createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                stmt = (ClientStatement) createStatementX(
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
                         holdability());
                 String savepointName;
                 try {
-                    savepointName = ((Savepoint) savepoint).getSavepointName();
+                    savepointName =
+                        ((ClientSavepoint) savepoint).getSavepointName();
                 } catch (SQLException e) {
                     // generate the name for an un-named savepoint.
                     savepointName = dncGeneratedSavepointNamePrefix__ +
-                            ((Savepoint) savepoint).getSavepointId();
+                            ((ClientSavepoint) savepoint).getSavepointId();
                 }
                 stmt.executeX(
                         "RELEASE SAVEPOINT " +
@@ -1760,7 +1827,7 @@ public abstract class Connection
         }
     }
 
-    synchronized public java.sql.Statement createStatement(int resultSetType,
+    synchronized public Statement createStatement(int resultSetType,
                                                            int resultSetConcurrency,
                                                            int resultSetHoldability) throws SQLException {
         try
@@ -1768,7 +1835,12 @@ public abstract class Connection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "createStatement", resultSetType, resultSetConcurrency, resultSetHoldability);
             }
-            Statement s = createStatementX(resultSetType, resultSetConcurrency, resultSetHoldability);
+
+            ClientStatement s = createStatementX(
+                resultSetType,
+                resultSetConcurrency,
+                resultSetHoldability);
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "createStatement", s);
             }
@@ -1780,7 +1852,7 @@ public abstract class Connection
         }
     }
 
-    private Statement createStatementX(int resultSetType,
+    private ClientStatement createStatementX(int resultSetType,
                                        int resultSetConcurrency,
                                        int resultSetHoldability) throws SqlException {
         checkForClosedConnection();
@@ -1802,7 +1874,12 @@ public abstract class Connection
                         new ClientMessageId(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE)));
             }
         }
-        Statement s = newStatement_(resultSetType, resultSetConcurrency, resultSetHoldability);
+
+        ClientStatement s = newStatement_(
+            resultSetType,
+            resultSetConcurrency,
+            resultSetHoldability);
+
         s.cursorAttributesToSendOnPrepare_ = s.cacheCursorAttributesToSendOnPrepare();
         openStatements_.put(s, null);
         return s;
@@ -1811,13 +1888,13 @@ public abstract class Connection
     // not sure if holding on to cursorAttributesToSendOnPrepare and restoring it is the
     // right thing to do here... because if property on the dataSource changes, we may have
     // to send different attributes, i.e. SENSITIVE DYNAMIC, instead of SENSITIVE STATIC.
-    protected void resetStatement(Statement s) throws SqlException {
+    protected void resetStatement(ClientStatement s) throws SqlException {
         String cursorAttributesToSendOnPrepare = s.cursorAttributesToSendOnPrepare_;
         resetStatement_(s, s.resultSetType_, s.resultSetConcurrency_, s.resultSetHoldability_);
         s.cursorAttributesToSendOnPrepare_ = cursorAttributesToSendOnPrepare;
     }
 
-    synchronized public java.sql.PreparedStatement prepareStatement(String sql,
+    synchronized public PreparedStatement prepareStatement(String sql,
                                                                     int resultSetType,
                                                                     int resultSetConcurrency,
                                                                     int resultSetHoldability) throws SQLException {
@@ -1826,11 +1903,11 @@ public abstract class Connection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
             }
-            PreparedStatement ps = prepareStatementX(sql,
+            ClientPreparedStatement ps = prepareStatementX(sql,
                     resultSetType,
                     resultSetConcurrency,
                     resultSetHoldability,
-                    java.sql.Statement.NO_GENERATED_KEYS,
+                    Statement.NO_GENERATED_KEYS,
                     null, null);
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareStatement", ps);
@@ -1844,7 +1921,7 @@ public abstract class Connection
     }
 
     // used by DBMD
-    PreparedStatement prepareStatementX(String sql,
+    ClientPreparedStatement prepareStatementX(String sql,
                                         int resultSetType,
                                         int resultSetConcurrency,
                                         int resultSetHoldability,
@@ -1853,8 +1930,16 @@ public abstract class Connection
                                         int[] columnIndexes) throws SqlException {
         checkForClosedConnection();
         resultSetType = downgradeResultSetType(resultSetType);
-        PreparedStatement ps = newPreparedStatement_(sql, resultSetType, resultSetConcurrency, resultSetHoldability, autoGeneratedKeys, columnNames,
-                columnIndexes);
+
+        ClientPreparedStatement ps = newPreparedStatement_(
+            sql,
+            resultSetType,
+            resultSetConcurrency,
+            resultSetHoldability,
+            autoGeneratedKeys,
+            columnNames,
+            columnIndexes);
+
         ps.cursorAttributesToSendOnPrepare_ = ps.cacheCursorAttributesToSendOnPrepare();
         ps.prepare();
         openStatements_.put(ps,null);
@@ -1864,7 +1949,8 @@ public abstract class Connection
     // not sure if holding on to cursorAttributesToSendOnPrepare and restoring it is the
     // right thing to do here... because if property on the dataSource changes, we may have
     // to send different attributes, i.e. SENSITIVE DYNAMIC, instead of SENSITIVE STATIC.
-    protected void resetPrepareStatement(PreparedStatement ps) throws SqlException {
+    protected void resetPrepareStatement(ClientPreparedStatement ps)
+            throws SqlException {
         String cursorAttributesToSendOnPrepare = ps.cursorAttributesToSendOnPrepare_;
         resetPreparedStatement_(ps, ps.sql_, ps.resultSetType_, ps.resultSetConcurrency_, ps.resultSetHoldability_, ps.autoGeneratedKeys_, ps.generatedKeysColumnNames_,
                 ps.generatedKeysColumnIndexes_);
@@ -1872,7 +1958,7 @@ public abstract class Connection
         ps.prepare();
     }
 
-    synchronized public java.sql.CallableStatement prepareCall(String sql,
+    synchronized public CallableStatement prepareCall(String sql,
                                                                int resultSetType,
                                                                int resultSetConcurrency,
                                                                int resultSetHoldability) throws SQLException {
@@ -1881,7 +1967,13 @@ public abstract class Connection
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareCall", sql, resultSetType, resultSetConcurrency, resultSetHoldability);
             }
-            CallableStatement cs = prepareCallX(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+
+            ClientCallableStatement cs = prepareCallX(
+                sql,
+                resultSetType,
+                resultSetConcurrency,
+                resultSetHoldability);
+
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "prepareCall", cs);
             }
@@ -1893,35 +1985,41 @@ public abstract class Connection
         }
     }
 
-    CallableStatement prepareCallX(String sql,
+    ClientCallableStatement prepareCallX(String sql,
                                            int resultSetType,
                                            int resultSetConcurrency,
                                            int resultSetHoldability) throws SqlException {
         checkForClosedConnection();
         resultSetType = downgradeResultSetType(resultSetType);
-        CallableStatement cs = newCallableStatement_(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+        ClientCallableStatement cs = newCallableStatement_(
+            sql,
+            resultSetType,
+            resultSetConcurrency,
+            resultSetHoldability);
         cs.cursorAttributesToSendOnPrepare_ = cs.cacheCursorAttributesToSendOnPrepare();
         cs.prepare();
         openStatements_.put(cs,null);
         return cs;
     }
 
-    protected void resetPrepareCall(CallableStatement cs) throws SqlException {
+    protected void resetPrepareCall(ClientCallableStatement cs)
+            throws SqlException {
         String cursorAttributesToSendOnPrepare = cs.cursorAttributesToSendOnPrepare_;
         resetCallableStatement_(cs, cs.sql_, cs.resultSetType_, cs.resultSetConcurrency_, cs.resultSetHoldability_);
         cs.cursorAttributesToSendOnPrepare_ = cursorAttributesToSendOnPrepare;
         cs.prepare();
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "prepareStatement", sql, autoGeneratedKeys);
             }
-            PreparedStatement ps = prepareStatementX(sql,
-                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
+            ClientPreparedStatement ps = prepareStatementX(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
                     holdability(),
                     autoGeneratedKeys,
                     null, null);
@@ -1936,7 +2034,8 @@ public abstract class Connection
         }
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, int columnIndexes[]) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, int columnIndexes[])
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1944,11 +2043,11 @@ public abstract class Connection
             }
             int genKeys = (columnIndexes == null ||
                     columnIndexes.length == 0
-                    ? Statement.NO_GENERATED_KEYS: 
-                Statement.RETURN_GENERATED_KEYS);
-            PreparedStatement ps = prepareStatementX(sql,
-                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    ? ClientStatement.NO_GENERATED_KEYS:
+                ClientStatement.RETURN_GENERATED_KEYS);
+            ClientPreparedStatement ps = prepareStatementX(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
                     holdability(),
                     genKeys,
                     null, columnIndexes);
@@ -1963,7 +2062,8 @@ public abstract class Connection
         }
     }
 
-    public java.sql.PreparedStatement prepareStatement(String sql, String columnNames[]) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, String columnNames[])
+            throws SQLException {
         try
         {
             if (agent_.loggingEnabled()) {
@@ -1971,11 +2071,11 @@ public abstract class Connection
             }
             int genKeys = (columnNames == null ||
                     columnNames.length == 0
-                    ? Statement.NO_GENERATED_KEYS: 
-                Statement.RETURN_GENERATED_KEYS);
-            PreparedStatement ps = prepareStatementX(sql,
-                    java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                    java.sql.ResultSet.CONCUR_READ_ONLY,
+                    ? ClientStatement.NO_GENERATED_KEYS:
+                ClientStatement.RETURN_GENERATED_KEYS);
+            ClientPreparedStatement ps = prepareStatementX(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
                     holdability(),
                     genKeys,
                     columnNames, null);
@@ -2005,28 +2105,31 @@ public abstract class Connection
     protected abstract Agent newAgent_(LogWriter logWriter, int loginTimeout, String serverName, int portNumber, int clientSSLMode) throws SqlException;
 
 
-    protected abstract DatabaseMetaData newDatabaseMetaData_();
+    protected abstract ClientDatabaseMetaData newDatabaseMetaData_();
 
-    protected abstract Statement newStatement_(int type,
+    protected abstract ClientStatement newStatement_(int type,
                                                int concurrency,
                                                int holdability) throws SqlException;
 
-    protected abstract void resetStatement_(Statement statement,
+    protected abstract void resetStatement_(ClientStatement statement,
                                             int type,
                                             int concurrency,
                                             int holdability) throws SqlException;
 
 
-    protected abstract PreparedStatement newPositionedUpdatePreparedStatement_(String sql, Section section) throws SqlException;
+    protected abstract ClientPreparedStatement
+        newPositionedUpdatePreparedStatement_
+            (String sql,
+             Section section) throws SqlException;
 
-    protected abstract PreparedStatement newPreparedStatement_(String sql,
+    protected abstract ClientPreparedStatement newPreparedStatement_(String sql,
                                                                int type,
                                                                int concurrency,
                                                                int holdability,
                                                                int autoGeneratedKeys,
                                                                String[] columnNames, int[] columnIndexes) throws SqlException;
 
-    protected abstract void resetPreparedStatement_(PreparedStatement ps,
+    protected abstract void resetPreparedStatement_(ClientPreparedStatement ps,
                                                     String sql,
                                                     int resultSetType,
                                                     int resultSetConcurrency,
@@ -2035,12 +2138,12 @@ public abstract class Connection
                                                     String[] columnNames,
                                                     int[] columnIndexes) throws SqlException;
 
-    protected abstract CallableStatement newCallableStatement_(String sql,
+    protected abstract ClientCallableStatement newCallableStatement_(String sql,
                                                                int type,
                                                                int concurrency,
                                                                int holdability) throws SqlException;
 
-    protected abstract void resetCallableStatement_(CallableStatement cs,
+    protected abstract void resetCallableStatement_(ClientCallableStatement cs,
                                                     String sql,
                                                     int resultSetType,
                                                     int resultSetConcurrency,
@@ -2083,7 +2186,7 @@ public abstract class Connection
 
     public abstract void readLocalCommit_() throws SqlException;
     
-    protected abstract void writeXATransactionStart(Statement statement) 
+    protected abstract void writeXATransactionStart(ClientStatement statement)
                                                 throws SqlException;
 
     public void completeLocalCommit() {
@@ -2138,7 +2241,8 @@ public abstract class Connection
     
     protected abstract void readXARollback_() throws SqlException;
 
-    public void writeTransactionStart(Statement statement) throws SqlException {
+    public void writeTransactionStart(ClientStatement statement)
+            throws SqlException {
         if (isXAConnection_) {
             writeXATransactionStart (statement);
         }
@@ -2209,13 +2313,13 @@ public abstract class Connection
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
                     pbIsolation == 
-                        java.sql.Connection.TRANSACTION_READ_UNCOMMITTED ||
+                        Connection.TRANSACTION_READ_UNCOMMITTED ||
                     pbIsolation ==
-                        java.sql.Connection.TRANSACTION_READ_COMMITTED ||
+                        Connection.TRANSACTION_READ_COMMITTED ||
                     pbIsolation ==
-                        java.sql.Connection.TRANSACTION_REPEATABLE_READ ||
+                        Connection.TRANSACTION_REPEATABLE_READ ||
                     pbIsolation ==
-                        java.sql.Connection.TRANSACTION_SERIALIZABLE,
+                        Connection.TRANSACTION_SERIALIZABLE,
                     "Invalid isolation level value: " + pbIsolation);
         }
         defaultIsolation = isolation_ = pbIsolation;
@@ -2298,7 +2402,7 @@ public abstract class Connection
         // Iterate through the physical statements and re-enable them for reuse.
 
         if (closeStatementsOnClose) {
-            for (Statement stmt : openStatements_.keySet()) {
+            for (ClientStatement stmt : openStatements_.keySet()) {
                 stmt.reset(closeStatementsOnClose);
             }
         }
@@ -2423,7 +2527,7 @@ public abstract class Connection
      * <code>Clob</code> interface can not be constructed.
      */
     
-    public java.sql.Clob createClob() throws SQLException {
+    public Clob createClob() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createClob");
         }
@@ -2437,6 +2541,9 @@ public abstract class Connection
         //Stores a locator value obtained by calling the
         //stored procedure CLOBCREATELOCATOR.
         int locator = INVALID_LOCATOR;
+
+        //Stores the Clob instance that is returned.
+        ClientClob clob = null;
 
         //Call the CLOBCREATELOCATOR stored procedure
         //that will return a locator value.
@@ -2453,17 +2560,14 @@ public abstract class Connection
         //The code here has been disabled because the Lob implementations
         //have still not been completely converted to use locators. Once
         //the Lob implementations are completed then this code can be enabled.
-
-        //Stores the Clob instance that is returned.
-        Clob clob;
-
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
-            clob = new Clob(this.agent_, locator);
+            clob = new ClientClob(this.agent_, locator);
         }
         else {
             //A valid locator value could not be obtained.
-            clob = new Clob(this.agent_, "");
+            clob = new ClientClob
+                    (this.agent_, "");
         }
 
         if (agent_.loggingEnabled()) {
@@ -2483,7 +2587,7 @@ public abstract class Connection
      *
      */
     
-    public java.sql.Blob createBlob() throws SQLException {
+    public Blob createBlob() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createBlob");
         }
@@ -2498,6 +2602,9 @@ public abstract class Connection
         //stored procedure BLOBCREATELOCATOR.
         int locator = INVALID_LOCATOR;
         
+        //Stores the Blob instance that is returned.
+        ClientBlob blob = null;
+
         //Call the BLOBCREATELOCATOR stored procedure
         //that will return a locator value.
         try {
@@ -2510,16 +2617,14 @@ public abstract class Connection
         //If the locator value is -1 it means that we do not
         //have locator support on the server.
         
-        //Stores the Blob instance that is returned.
-        Blob blob;
-
         if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
-            blob = new Blob(this.agent_, locator);
+            blob = new ClientBlob(this.agent_, locator);
         } 
         else {
             //A valid locator value could not be obtained.
-            blob = new Blob(new byte[0],this.agent_, 0);
+            blob = new ClientBlob
+                    (new byte[0],this.agent_, 0);
         }
         
         if (agent_.loggingEnabled()) {
@@ -2569,7 +2674,7 @@ public abstract class Connection
         if ( ( currentSchemaName_ != null) && (currentSchemaName_.equals( schemaName )) )
         { return; }
 
-        java.sql.PreparedStatement   ps = null;
+        PreparedStatement   ps = null;
 
         try {
             ps = prepareStatement( "set schema ?" );

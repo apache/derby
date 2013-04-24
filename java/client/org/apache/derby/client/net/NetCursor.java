@@ -21,12 +21,15 @@
 
 package org.apache.derby.client.net;
 
+import java.io.UnsupportedEncodingException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.derby.client.am.Agent;
-import org.apache.derby.client.am.Blob;
+import org.apache.derby.client.am.ClientBlob;
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Clob;
+import org.apache.derby.client.am.ClientClob;
+import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.Lob;
@@ -34,7 +37,8 @@ import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlCode;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.SqlWarning;
-import org.apache.derby.client.am.Types;
+import org.apache.derby.client.am.ClientTypes;
+import org.apache.derby.client.am.Utils;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -535,8 +539,8 @@ public class NetCursor extends Cursor {
         long length = 0L;
 
         if (isNull_[index] ||
-                (jdbcTypes_[index] != Types.BLOB &&
-                jdbcTypes_[index] != Types.CLOB)) {
+                (jdbcTypes_[index] != ClientTypes.BLOB &&
+                jdbcTypes_[index] != ClientTypes.CLOB)) {
             return false;
         }
 
@@ -878,7 +882,7 @@ public class NetCursor extends Cursor {
 
         try {
             s = new String(dataBuffer_, position_, length, encoding);
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             netAgent_.accumulateChainBreakingReadExceptionAndThrow(
                 new DisconnectException(
                     netAgent_, 
@@ -937,8 +941,11 @@ public class NetCursor extends Cursor {
     /**
      * @see org.apache.derby.client.am.Cursor#getBlobColumn_
      */
-    public Blob getBlobColumn_(int column, Agent agent, boolean toBePublished)
-            throws SqlException {
+    public ClientBlob getBlobColumn_(
+            int column,
+            Agent agent,
+            boolean toBePublished) throws SqlException {
+
         // Only inform the tracker if the Blob is published to the user.
         if (toBePublished) {
             if ( netResultSet_ != null ) { netResultSet_.markLOBAsPublished(column); }
@@ -946,14 +953,14 @@ public class NetCursor extends Cursor {
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
-            return new Blob(agent, locator);
+            return new ClientBlob(agent, locator);
         }
         
         // The Blob value has been sent instead of locator 
         int index = column - 1;
         int dataOffset;
         byte[] data;
-        Blob blob = null;
+        ClientBlob blob = null;
 
         // locate the EXTDTA bytes, if any
         data = findExtdtaData(column);
@@ -967,9 +974,9 @@ public class NetCursor extends Cursor {
                 dataOffset = 1;
             }
 
-            blob = new Blob(data, agent, dataOffset);
+            blob = new ClientBlob(data, agent, dataOffset);
         } else {
-            blob = new Blob(new byte[0], agent, 0);
+            blob = new ClientBlob(new byte[0], agent, 0);
         }
 
         return blob;
@@ -979,8 +986,11 @@ public class NetCursor extends Cursor {
     /**
      * @see org.apache.derby.client.am.Cursor#getClobColumn_
      */
-    public Clob getClobColumn_(int column, Agent agent, boolean toBePublished)
-            throws SqlException {
+    public ClientClob getClobColumn_(
+            int column,
+            Agent agent,
+            boolean toBePublished) throws SqlException {
+
         // Only inform the tracker if the Clob is published to the user.
         if (toBePublished) {
             if ( netResultSet_ != null ) { netResultSet_.markLOBAsPublished(column); }
@@ -988,14 +998,14 @@ public class NetCursor extends Cursor {
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
-            return new Clob(agent, locator);
+            return new ClientClob(agent, locator);
         }
         
         // The Clob value has been sent instead of locator 
         int index = column - 1;
         int dataOffset;
         byte[] data;
-        Clob clob = null;
+        ClientClob clob = null;
 
         // locate the EXTDTA bytes, if any
         data = findExtdtaData(column);
@@ -1008,10 +1018,10 @@ public class NetCursor extends Cursor {
             } else {
                 dataOffset = 1;
             }
-            clob = new Clob(agent, data, charsetName_[index], dataOffset);
+            clob = new ClientClob(agent, data, charsetName_[index], dataOffset);
         } else {
             // the locator is not valid, it is a zero-length LOB
-            clob = new Clob(agent, "");
+            clob = new ClientClob(agent, "");
         }
 
         return clob;
@@ -1034,7 +1044,7 @@ public class NetCursor extends Cursor {
         // reset the dataBuffer_ before getting more data if cursor is foward-only.
         // getMoreData() is only called in Cursor.next() when current position is
         // equal to lastValidBytePosition_.
-        if (netResultSet_.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
+        if (netResultSet_.resultSetType_ == ResultSet.TYPE_FORWARD_ONLY) {
             resetDataBuffer();
         }
         netResultSet_.flowFetch();

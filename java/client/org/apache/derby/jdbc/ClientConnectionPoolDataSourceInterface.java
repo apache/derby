@@ -21,11 +21,13 @@
 
 package org.apache.derby.jdbc;
 
+import javax.sql.ConnectionPoolDataSource;
+
 /**
  * Specifies Derby extensions to the {@code java.sqlx.ConnectionPoolDataSource}.
  */
 public interface ClientConnectionPoolDataSourceInterface
-    extends ClientDataSourceInterface, javax.sql.ConnectionPoolDataSource {
+    extends ClientDataSourceInterface, ConnectionPoolDataSource {
     /**
      * Returns the maximum number of JDBC prepared statements a connection is
      * allowed to cache.

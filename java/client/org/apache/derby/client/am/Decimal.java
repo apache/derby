@@ -20,7 +20,9 @@
 */
 package org.apache.derby.client.am;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 
@@ -145,10 +147,12 @@ public class Decimal {
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
      */
-    public static final java.math.BigDecimal getBigDecimal(byte[] buffer,
-                                                           int offset,
-                                                           int precision,
-                                                           int scale) throws java.io.UnsupportedEncodingException {
+    public static final BigDecimal getBigDecimal(
+            byte[] buffer,
+            int offset,
+            int precision,
+            int scale) throws UnsupportedEncodingException {
+
         // The byte-length of a packed decimal with precision <code>p</code> is always <code>p/2 + 1</code>
         int length = precision / 2 + 1;
 
@@ -193,7 +197,7 @@ public class Decimal {
             magnitude[10] = (byte) (value[2] >>> 8);
             magnitude[11] = (byte) (value[2]);
 
-            return new java.math.BigDecimal(new java.math.BigInteger(signum, magnitude), scale);
+            return new BigDecimal(new BigInteger(signum, magnitude), scale);
         } else if (precision <= 31) {
             // get the value of last 9 digits (5 bytes).
             int lo = packedNybblesToInt(buffer, offset, (length - 5) * 2, 9);
@@ -226,10 +230,10 @@ public class Decimal {
             magnitude[14] = (byte) (value[3] >>> 8);
             magnitude[15] = (byte) (value[3]);
 
-            return new java.math.BigDecimal(new java.math.BigInteger(signum, magnitude), scale);
+            return new BigDecimal(new BigInteger(signum, magnitude), scale);
         } else {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
     }
@@ -239,10 +243,12 @@ public class Decimal {
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
      */
-    public static final double getDouble(byte[] buffer,
-                                         int offset,
-                                         int precision,
-                                         int scale) throws java.io.UnsupportedEncodingException {
+    public static final double getDouble(
+            byte[] buffer,
+            int offset,
+            int precision,
+            int scale) throws UnsupportedEncodingException {
+
         // The byte-length of a packed decimal with precision <code>p</code> is always <code>p/2 + 1</code>
         int length = precision / 2 + 1;
 
@@ -291,7 +297,7 @@ public class Decimal {
                     hi * Math.pow(10, 27 - scale));
         } else {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
     }
@@ -302,13 +308,15 @@ public class Decimal {
      * @throws IllegalArgumentException if the specified representation is not recognized.
      * @throws ArithmeticException if value is too large for a long
      */
-    public static final long getLong(byte[] buffer,
-                                     int offset,
-                                     int precision,
-                                     int scale) throws java.io.UnsupportedEncodingException {
+    public static final long getLong(
+            byte[] buffer,
+            int offset,
+            int precision,
+            int scale) throws UnsupportedEncodingException {
+
         if (precision > 31) {
             // throw an exception here if nibbles is greater than 31
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 msgutil.getTextMessage(SQLState.DECIMAL_TOO_MANY_DIGITS));
         }
 
@@ -346,7 +354,7 @@ public class Decimal {
      */
     public static final int bigDecimalToPackedDecimalBytes(byte[] buffer,
                                                            int offset,
-                                                           java.math.BigDecimal b,
+                                                           BigDecimal b,
                                                            int declaredPrecision,
                                                            int declaredScale)
             throws SqlException {

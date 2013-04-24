@@ -22,6 +22,9 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -45,7 +48,7 @@ public class LogicalCallableStatement40
      * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
-    public LogicalCallableStatement40(java.sql.CallableStatement physicalCs,
+    public LogicalCallableStatement40(CallableStatement physicalCs,
                                       StatementKey stmtKey,
                                       StatementCacheInteractor cacheInteractor){
         super(physicalCs, stmtKey, cacheInteractor);
@@ -262,12 +265,12 @@ public class LogicalCallableStatement40
         return getPhysCs().getCharacterStream(arg0);
     }
 
-    public void setBlob(String arg0, java.sql.Blob arg1)
+    public void setBlob(String arg0, Blob arg1)
             throws SQLException {
          getPhysCs().setBlob(arg0, arg1);
     }
 
-    public void setClob(String arg0, java.sql.Clob arg1)
+    public void setClob(String arg0, Clob arg1)
             throws SQLException {
          getPhysCs().setClob(arg0, arg1);
     }
@@ -331,13 +334,15 @@ public class LogicalCallableStatement40
     public <T> T getObject( int parameterIndex, Class<T> type )
         throws SQLException
     {
-        return ((CallableStatement40)getPhysCs()).getObject( parameterIndex, type );
+        return ((ClientCallableStatement40)getPhysCs()).
+            getObject(parameterIndex, type);
     }
     
     public <T> T getObject(String parameterName, Class<T> type)
         throws SQLException
     {
-        return ((CallableStatement40)getPhysCs()).getObject( parameterName, type );
+        return ((ClientCallableStatement40)getPhysCs()).
+            getObject( parameterName, type );
     }
 
 }

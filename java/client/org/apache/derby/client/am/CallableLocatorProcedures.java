@@ -21,6 +21,8 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.ResultSet;
+import java.sql.Types;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -53,27 +55,27 @@ class CallableLocatorProcedures
     
     // One member variable for each stored procedure that can be called.
     // Used to be able to only prepare each procedure call once per connection.
-    private CallableStatement blobCreateLocatorCall;
-    private CallableStatement blobReleaseLocatorCall;
-    private CallableStatement blobGetPositionFromLocatorCall;
-    private CallableStatement blobGetPositionFromBytesCall;
-    private CallableStatement blobGetLengthCall;
-    private CallableStatement blobGetBytesCall;
-    private CallableStatement blobSetBytesCall;
-    private CallableStatement blobTruncateCall;
-    private CallableStatement clobCreateLocatorCall;
-    private CallableStatement clobReleaseLocatorCall;
-    private CallableStatement clobGetPositionFromStringCall;
-    private CallableStatement clobGetPositionFromLocatorCall;
-    private CallableStatement clobGetLengthCall;
-    private CallableStatement clobGetSubStringCall;
-    private CallableStatement clobSetStringCall;
-    private CallableStatement clobTruncateCall;
+    private ClientCallableStatement blobCreateLocatorCall;
+    private ClientCallableStatement blobReleaseLocatorCall;
+    private ClientCallableStatement blobGetPositionFromLocatorCall;
+    private ClientCallableStatement blobGetPositionFromBytesCall;
+    private ClientCallableStatement blobGetLengthCall;
+    private ClientCallableStatement blobGetBytesCall;
+    private ClientCallableStatement blobSetBytesCall;
+    private ClientCallableStatement blobTruncateCall;
+    private ClientCallableStatement clobCreateLocatorCall;
+    private ClientCallableStatement clobReleaseLocatorCall;
+    private ClientCallableStatement clobGetPositionFromStringCall;
+    private ClientCallableStatement clobGetPositionFromLocatorCall;
+    private ClientCallableStatement clobGetLengthCall;
+    private ClientCallableStatement clobGetSubStringCall;
+    private ClientCallableStatement clobSetStringCall;
+    private ClientCallableStatement clobTruncateCall;
 
     /**
      * The connection to be used when calling the stored procedures.
      */
-    private final Connection connection; 
+    private final ClientConnection connection;
 
     /**
      * Max size of byte[] and String parameters to procedures
@@ -89,7 +91,7 @@ class CallableLocatorProcedures
      *
      * @param conn the connection to be used to prepare calls.
      */
-    CallableLocatorProcedures(Connection conn) 
+    CallableLocatorProcedures(ClientConnection conn)
     {
         this.connection = conn;
     }
@@ -116,11 +118,11 @@ class CallableLocatorProcedures
                     !blobCreateLocatorCall.openOnClient_) {
                 blobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
-                        java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
                         connection.holdability());
                 blobCreateLocatorCall
-                        .registerOutParameterX(1, java.sql.Types.INTEGER);
+                        .registerOutParameterX(1, Types.INTEGER);
                 // Make sure this statement does not commit user transaction
                 blobCreateLocatorCall.isAutoCommittableStatement_ = false;
             }
@@ -167,9 +169,9 @@ class CallableLocatorProcedures
                 !blobReleaseLocatorCall.openOnClient_) {
             blobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBRELEASELOCATOR(?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             blobReleaseLocatorCall.isAutoCommittableStatement_ = false;
         }
@@ -203,11 +205,11 @@ class CallableLocatorProcedures
                 !blobGetPositionFromLocatorCall.openOnClient_) {
             blobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             blobGetPositionFromLocatorCall
-                .registerOutParameterX(1, java.sql.Types.BIGINT);
+                .registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             blobGetPositionFromLocatorCall.isAutoCommittableStatement_ = false;
         }
@@ -329,11 +331,11 @@ class CallableLocatorProcedures
                 !blobGetPositionFromBytesCall.openOnClient_) {
             blobGetPositionFromBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMBYTES(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             blobGetPositionFromBytesCall
-                .registerOutParameterX(1, java.sql.Types.BIGINT);
+                .registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             blobGetPositionFromBytesCall.isAutoCommittableStatement_ = false;
         }
@@ -372,10 +374,10 @@ class CallableLocatorProcedures
         if (blobGetLengthCall == null || !blobGetLengthCall.openOnClient_) {
             blobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETLENGTH(?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            blobGetLengthCall.registerOutParameterX(1, java.sql.Types.BIGINT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            blobGetLengthCall.registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             blobGetLengthCall.isAutoCommittableStatement_ = false;
         }
@@ -421,10 +423,10 @@ class CallableLocatorProcedures
         if (blobGetBytesCall == null || !blobGetBytesCall.openOnClient_) {
             blobGetBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETBYTES(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            blobGetBytesCall.registerOutParameterX(1, java.sql.Types.VARBINARY);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            blobGetBytesCall.registerOutParameterX(1, Types.VARBINARY);
             // Make sure this statement does not commit user transaction
             blobGetBytesCall.isAutoCommittableStatement_ = false;
         }
@@ -494,9 +496,9 @@ class CallableLocatorProcedures
         if (blobSetBytesCall == null || !blobSetBytesCall.openOnClient_) {
             blobSetBytesCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBSETBYTES(?, ?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             blobSetBytesCall.isAutoCommittableStatement_ = false;
         }
@@ -549,9 +551,9 @@ class CallableLocatorProcedures
         if (blobTruncateCall == null || !blobTruncateCall.openOnClient_) {
             blobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBTRUNCATE(?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             blobTruncateCall.isAutoCommittableStatement_ = false;
         }
@@ -588,11 +590,11 @@ class CallableLocatorProcedures
                     !clobCreateLocatorCall.openOnClient_) {
                 clobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
-                        java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                        java.sql.ResultSet.CONCUR_READ_ONLY,
-                        java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
                 clobCreateLocatorCall
-                        .registerOutParameterX(1, java.sql.Types.INTEGER);
+                        .registerOutParameterX(1, Types.INTEGER);
                 // Make sure this statement does not commit user transaction
                 clobCreateLocatorCall.isAutoCommittableStatement_ = false;
             }
@@ -639,9 +641,9 @@ class CallableLocatorProcedures
                 !clobReleaseLocatorCall.openOnClient_) {
             clobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBRELEASELOCATOR(?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             clobReleaseLocatorCall.isAutoCommittableStatement_ = false;
         }
@@ -757,11 +759,11 @@ class CallableLocatorProcedures
                 !clobGetPositionFromStringCall.openOnClient_) {
             clobGetPositionFromStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMSTRING(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             clobGetPositionFromStringCall
-                .registerOutParameterX(1, java.sql.Types.BIGINT);
+                .registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             clobGetPositionFromStringCall.isAutoCommittableStatement_ = false;
         }
@@ -806,11 +808,11 @@ class CallableLocatorProcedures
                 !clobGetPositionFromLocatorCall.openOnClient_) {
             clobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             clobGetPositionFromLocatorCall
-                .registerOutParameterX(1, java.sql.Types.BIGINT);
+                .registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             clobGetPositionFromLocatorCall.isAutoCommittableStatement_ = false;
         }
@@ -839,10 +841,10 @@ class CallableLocatorProcedures
         if (clobGetLengthCall == null || !clobGetLengthCall.openOnClient_) {
             clobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETLENGTH(?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            clobGetLengthCall.registerOutParameterX(1, java.sql.Types.BIGINT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            clobGetLengthCall.registerOutParameterX(1, Types.BIGINT);
             // Make sure this statement does not commit user transaction
             clobGetLengthCall.isAutoCommittableStatement_ = false;
         }
@@ -889,11 +891,11 @@ class CallableLocatorProcedures
                 !clobGetSubStringCall.openOnClient_) {
             clobGetSubStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETSUBSTRING(?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             clobGetSubStringCall
-                .registerOutParameterX(1, java.sql.Types.VARCHAR);
+                .registerOutParameterX(1, Types.VARCHAR);
             // Make sure this statement does not commit user transaction
             clobGetSubStringCall.isAutoCommittableStatement_ = false;
         }
@@ -937,16 +939,16 @@ class CallableLocatorProcedures
      * <code>CLOB</code> value designated by <code>sourceLocator</code>.
      * Writing starts at position <code>fromPosition</code> in the
      * <code>CLOB</code> value; <code>forLength</code> characters from the
-     * given string are written. If the end of the <code>Clob</code> value is
+     * given string are written. If the end of the <code>CLOB</code> value is
      * reached while writing the string, then the length of the
-     * <code>Clob</code> value will be increased to accomodate the extra
+     * <code>CLOB</code> value will be increased to accomodate the extra
      * characters.
      * <p> 
      * If <code>forLength</code> is larger than the maximum length of a
      * VARCHAR, the writing to the CLOB value will be split into repeated
      * procedure calls.
      *
-     * @param sourceLocator locator that identifies the Clob to operated on
+     * @param sourceLocator locator that identifies the CLOB to operated on
      * @param fromPosition the position in the <code>CLOB</code> value at which
      *        to start writing; the first position is 1
      * @param forLength the number of characters to be written to the
@@ -964,9 +966,9 @@ class CallableLocatorProcedures
         if (clobSetStringCall == null || !clobSetStringCall.openOnClient_) {
             clobSetStringCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBSETSTRING(?, ?, ?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             clobSetStringCall.isAutoCommittableStatement_ = false;
         }
@@ -1006,7 +1008,7 @@ class CallableLocatorProcedures
      * than the length+1 of the <code>CLOB</code> value then an
      * <code>SqlException</code> will be thrown.
      * 
-     * @param sourceLocator locator identifying the Clob to be truncated
+     * @param sourceLocator locator identifying the CLOB to be truncated
      * @param length the length, in characters, to which the <code>CLOB</code>
      *        value should be truncated
      */
@@ -1015,9 +1017,9 @@ class CallableLocatorProcedures
         if (clobTruncateCall == null || !clobTruncateCall.openOnClient_) {
             clobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBTRUNCATE(?, ?)",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                 ResultSet.TYPE_FORWARD_ONLY,
+                 ResultSet.CONCUR_READ_ONLY,
+                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
             // Make sure this statement does not commit user transaction
             clobTruncateCall.isAutoCommittableStatement_ = false;
         }

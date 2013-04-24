@@ -21,8 +21,31 @@
 
 package org.apache.derby.client.am;
 
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Security;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -57,8 +80,8 @@ public class EncryptionManager {
 
     //the prime value in BigInteger form. It has to be in BigInteger form because this
     //is the form used in JCE library.
-    private static final java.math.BigInteger modulus__
-            = new java.math.BigInteger(1, modulusBytes__);
+    private static final BigInteger modulus__
+            = new BigInteger(1, modulusBytes__);
 
     //  PROTOCOL's Diffie-Hellman agreed public value: base.
     private static final byte baseBytes__[] = {
@@ -73,20 +96,20 @@ public class EncryptionManager {
     };
 
     // The base value in BigInteger form.
-    private static final java.math.BigInteger base__ =
-            new java.math.BigInteger(1, baseBytes__);
+    private static final BigInteger base__ =
+            new BigInteger(1, baseBytes__);
 
     //PROTOCOL's Diffie-Hellman agreed exponential length
     private static final int exponential_length__ = 255;
 
-    private javax.crypto.spec.DHParameterSpec paramSpec_;
-    private java.security.KeyPairGenerator keyPairGenerator_;
-    private java.security.KeyPair keyPair_;
-    private javax.crypto.KeyAgreement keyAgreement_;
+    private DHParameterSpec paramSpec_;
+    private KeyPairGenerator keyPairGenerator_;
+    private KeyPair keyPair_;
+    private KeyAgreement keyAgreement_;
 
     private byte[] token_; // init vector
     private byte[] secKey_; // security key
-    private javax.crypto.SecretKeyFactory secretKeyFactory_ = null;
+    private SecretKeyFactory secretKeyFactory_ = null;
     private String providerName; // security provider name
     private Provider provider;
 
@@ -94,8 +117,8 @@ public class EncryptionManager {
     // NOTE: In a next incarnation, these constants are being moved
     // to a dedicated/specialized SecMec_USRSSBPWD class implementing
     // a SecurityMechanism interface.
-    private java.security.MessageDigest messageDigest = null;
-    private java.security.SecureRandom secureRandom = null;
+    private MessageDigest messageDigest = null;
+    private SecureRandom secureRandom = null;
     private final static int SECMEC_USRSSBPWD_SEED_LEN = 8;  // Seed length
     // PWSEQs's 8-byte value constant - See DRDA Vol 3
     private static final byte SECMEC_USRSSBPWD_PWDSEQS[] = {
@@ -114,17 +137,19 @@ public class EncryptionManager {
             // get a security provider that supports the diffie helman key agreement algorithm
             Provider[] list = Security.getProviders("KeyAgreement.DH");
             if (list == null) {
-                throw new java.security.NoSuchProviderException();
+                throw new NoSuchProviderException();
             }
             provider = list[0];
             providerName = provider.getName();
-            paramSpec_ = new javax.crypto.spec.DHParameterSpec(modulus__, base__, exponential_length__);
-            keyPairGenerator_ = java.security.KeyPairGenerator.getInstance("DH", providerName);
+            paramSpec_ =
+                new DHParameterSpec(modulus__, base__, exponential_length__);
+            keyPairGenerator_ =
+                KeyPairGenerator.getInstance("DH", providerName);
             keyPairGenerator_.initialize(paramSpec_);
             keyPair_ = keyPairGenerator_.generateKeyPair();
-            keyAgreement_ = javax.crypto.KeyAgreement.getInstance("DH", providerName);
+            keyAgreement_ = KeyAgreement.getInstance("DH", providerName);
             keyAgreement_.init(keyPair_.getPrivate());
-        } catch (java.security.GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
@@ -143,12 +168,12 @@ public class EncryptionManager {
             // Instantiate the encryption manager for the passed-in security
             // algorithm and this from the default provider
             // NOTE: We're only dealing with Message Digest algorithms for now.
-            messageDigest = java.security.MessageDigest.getInstance(algorithm);
+            messageDigest = MessageDigest.getInstance(algorithm);
             // We're also verifying that we can instantiate a randon number
             // generator (PRNG).
             secureRandom =
-                java.security.SecureRandom.getInstance(SHA_1_PRNG_ALGORITHM);
-        } catch (java.security.NoSuchAlgorithmException nsae) {
+                SecureRandom.getInstance(SHA_1_PRNG_ALGORITHM);
+        } catch (NoSuchAlgorithmException nsae) {
             // The following exception should not be raised for SHA-1 type of
             // message digest as we've already verified during boot-up that this
             // algorithm was available as part of the JRE (since BUILT-IN
@@ -171,7 +196,7 @@ public class EncryptionManager {
 
         //we need to get the plain form public key because PROTOCOL accepts plain form
         //public key only.
-        java.math.BigInteger aPub = ((javax.crypto.interfaces.DHPublicKey) keyPair_.getPublic()).getY();
+        BigInteger aPub = ((DHPublicKey) keyPair_.getPublic()).getY();
         byte[] aPubKey = aPub.toByteArray();
 
         //the following lines of code is to adjust the length of the key. PublicKey
@@ -280,14 +305,14 @@ public class EncryptionManager {
         try {
 
             //initiate a Diffie_Hellman KeyFactory object.
-            java.security.KeyFactory keyFac = java.security.KeyFactory.getInstance("DH", provider);
+            KeyFactory keyFac = KeyFactory.getInstance("DH", provider);
 
             //Use server's public key to initiate a DHPublicKeySpec and then use
             //this DHPublicKeySpec to initiate a publicKey object
-            java.math.BigInteger publicKey = new java.math.BigInteger(1, targetPublicKey);
-            javax.crypto.spec.DHPublicKeySpec dhKeySpec =
-                    new javax.crypto.spec.DHPublicKeySpec(publicKey, modulus__, base__);
-            java.security.PublicKey pubKey = keyFac.generatePublic(dhKeySpec);
+            BigInteger publicKey = new BigInteger(1, targetPublicKey);
+            DHPublicKeySpec dhKeySpec =
+                    new DHPublicKeySpec(publicKey, modulus__, base__);
+            PublicKey pubKey = keyFac.generatePublic(dhKeySpec);
 
             //Execute the first phase of DH keyagreement protocal.
             keyAgreement_.doPhase(pubKey, true);
@@ -345,7 +370,7 @@ public class EncryptionManager {
             keyParityCheck(key);
             return key;
         }
-        catch (java.security.GeneralSecurityException e) {
+        catch (GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e);
         }
@@ -365,7 +390,7 @@ public class EncryptionManager {
                               byte[] targetPublicKey) throws SqlException {
 
         byte[] cipherText = null;
-        java.security.Key key;
+        Key key = null;
 
         if (token_ == null) {
             token_ = calculateEncryptionToken(securityMechanism, initVector);
@@ -375,13 +400,14 @@ public class EncryptionManager {
             if (secKey_ == null) {
                 //use this encryption key to initiate a SecretKeySpec object
                 secKey_ = generatePrivateKey(targetPublicKey);
-                javax.crypto.spec.SecretKeySpec desKey = new javax.crypto.spec.SecretKeySpec(secKey_, "DES");
+                SecretKeySpec desKey = new SecretKeySpec(secKey_, "DES");
                 key = desKey;
             } else {
                 //use this encryption key to initiate a SecretKeySpec object
-                javax.crypto.spec.DESKeySpec desKey = new javax.crypto.spec.DESKeySpec(secKey_);
+                DESKeySpec desKey = new DESKeySpec(secKey_);
                 if (secretKeyFactory_ == null) {
-                    secretKeyFactory_ = javax.crypto.SecretKeyFactory.getInstance("DES", providerName);
+                    secretKeyFactory_ =
+                        SecretKeyFactory.getInstance("DES", providerName);
                 }
                 key = secretKeyFactory_.generateSecret(desKey);
             }
@@ -391,28 +417,29 @@ public class EncryptionManager {
             //CBC mode requires an initialization vector(IV) parameter. In CBC mode
             //we need to initialize the Cipher object with an IV, which can be supplied
             // using the javax.crypto.spec.IvParameterSpec class.
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("DES/CBC/PKCS5Padding", providerName);
+            Cipher cipher =
+                Cipher.getInstance("DES/CBC/PKCS5Padding", providerName);
 
             //generate a IVParameterSpec object and use it to initiate the
             //Cipher object.
-            javax.crypto.spec.IvParameterSpec ivParam = new javax.crypto.spec.IvParameterSpec(token_);
+            IvParameterSpec ivParam = new IvParameterSpec(token_);
 
             //initiate the Cipher using encryption mode, encryption key and the
             //IV parameter.
-            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, key, ivParam);
+            cipher.init(Cipher.ENCRYPT_MODE, key, ivParam);
 
             //Execute the final phase of encryption
             cipherText = cipher.doFinal(plainText);
-        } catch (javax.crypto.NoSuchPaddingException e) {
+        } catch (NoSuchPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
-        } catch (javax.crypto.BadPaddingException e) {
+        } catch (BadPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_BAD_PADDING)); 
-        } catch (javax.crypto.IllegalBlockSizeException e) {
+        } catch (IllegalBlockSizeException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
-        } catch (java.security.GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }
@@ -435,7 +462,7 @@ public class EncryptionManager {
                               byte[] targetPublicKey) throws SqlException {
 
         byte[] plainText = null;
-        java.security.Key key;
+        Key key = null;
 
         if (token_ == null) {
             token_ = calculateEncryptionToken(securityMechanism, initVector);
@@ -445,13 +472,14 @@ public class EncryptionManager {
             if (secKey_ == null) {
                 //use this encryption key to initiate a SecretKeySpec object
                 secKey_ = generatePrivateKey(targetPublicKey);
-                javax.crypto.spec.SecretKeySpec desKey = new javax.crypto.spec.SecretKeySpec(secKey_, "DES");
+                SecretKeySpec desKey = new SecretKeySpec(secKey_, "DES");
                 key = desKey;
             } else {
                 //use this encryption key to initiate a SecretKeySpec object
-                javax.crypto.spec.DESKeySpec desKey = new javax.crypto.spec.DESKeySpec(secKey_);
+                DESKeySpec desKey = new DESKeySpec(secKey_);
                 if (secretKeyFactory_ == null) {
-                    secretKeyFactory_ = javax.crypto.SecretKeyFactory.getInstance("DES", providerName);
+                    secretKeyFactory_ =
+                        SecretKeyFactory.getInstance("DES", providerName);
                 }
                 key = secretKeyFactory_.generateSecret(desKey);
             }
@@ -461,28 +489,29 @@ public class EncryptionManager {
             //CBC mode requires an initialization vector(IV) parameter. In CBC mode
             //we need to initialize the Cipher object with an IV, which can be supplied
             // using the javax.crypto.spec.IvParameterSpec class.
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("DES/CBC/PKCS5Padding", providerName);
+            Cipher cipher =
+                Cipher.getInstance("DES/CBC/PKCS5Padding", providerName);
 
             //generate a IVParameterSpec object and use it to initiate the
             //Cipher object.
-            javax.crypto.spec.IvParameterSpec ivParam = new javax.crypto.spec.IvParameterSpec(token_);
+            IvParameterSpec ivParam = new IvParameterSpec(token_);
 
             //initiate the Cipher using encryption mode, encryption key and the
             //IV parameter.
-            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, key, ivParam);
+            cipher.init(Cipher.DECRYPT_MODE, key, ivParam);
 
             //Execute the final phase of encryption
             plainText = cipher.doFinal(cipherText);
-        } catch (javax.crypto.NoSuchPaddingException e) {
+        } catch (NoSuchPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_NO_SUCH_PADDING)); 
-        } catch (javax.crypto.BadPaddingException e) {
+        } catch (BadPaddingException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_BAD_PADDING)); 
-        } catch (javax.crypto.IllegalBlockSizeException e) {
+        } catch (IllegalBlockSizeException e) {
             throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.CRYPTO_ILLEGAL_BLOCK_SIZE)); 
-        } catch (java.security.GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
         }

@@ -23,7 +23,8 @@ package org.apache.derby.client.net;
 
 // network traffic tracer.
 
-import org.apache.derby.client.am.Connection;
+import java.io.PrintWriter;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.jdbc.ClientDataSource;
 
@@ -125,7 +126,7 @@ public class NetLogWriter extends LogWriter {
     //-----------------------------constructors/finalizer-------------------------
 
     // One NetLogWriter object is created per data source, iff tracing is enabled.
-    public NetLogWriter(java.io.PrintWriter printWriter, int traceLevel) {
+    public NetLogWriter(PrintWriter printWriter, int traceLevel) {
         super(printWriter, traceLevel);
 
         // Initialize the codepoint name table if not previously initialized.
@@ -146,7 +147,7 @@ public class NetLogWriter extends LogWriter {
     //------------------------------entry points----------------------------------
 
     // Specialization of LogWriter.traceConnectsExit()
-    public void traceConnectsExit(Connection connection) {
+    public void traceConnectsExit(ClientConnection connection) {
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsExit(c);
@@ -164,7 +165,7 @@ public class NetLogWriter extends LogWriter {
         }
     }
 
-    public void traceConnectsResetExit(Connection connection) {
+    public void traceConnectsResetExit(ClientConnection connection) {
         NetConnection c = (NetConnection) connection;
         synchronized (printWriter_) {
             super.traceConnectsResetExit(c);

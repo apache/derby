@@ -21,9 +21,15 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
@@ -41,7 +47,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 /**
  * The client JDBC driver (type 4) for Derby.
  */
-public class ClientDriver implements java.sql.Driver {
+public class ClientDriver implements Driver {
     private transient int traceFileSuffixIndex_ = 0;
 
     private final static int DERBY_REMOTE_PROTOCOL = 1;
@@ -81,8 +87,8 @@ public class ClientDriver implements java.sql.Driver {
         
         try {
             registeredDriver__ = me;
-            java.sql.DriverManager.registerDriver(registeredDriver__);
-        } catch (java.sql.SQLException e) {
+            DriverManager.registerDriver(registeredDriver__);
+        } catch (SQLException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced
             exceptionsOnLoadDriver__ =
                     new SqlException(null, 
@@ -94,8 +100,8 @@ public class ClientDriver implements java.sql.Driver {
     public ClientDriver() {
     }
 
-    public java.sql.Connection connect(String url,
-                                       java.util.Properties properties) throws java.sql.SQLException {
+    public Connection connect(String url,
+                              Properties properties) throws SQLException {
         NetConnection conn;
         
         checkURLNotNull( url );
@@ -106,11 +112,11 @@ public class ClientDriver implements java.sql.Driver {
             }
 
             if (properties == null) {
-                properties = new java.util.Properties();
+                properties = new Properties();
             }
 
-            java.util.StringTokenizer urlTokenizer =
-                    new java.util.StringTokenizer(url, "/:= \t\n\r\f", true);
+            StringTokenizer urlTokenizer =
+                    new StringTokenizer(url, "/:= \t\n\r\f", true);
 
             int protocol = tokenizeProtocol(url, urlTokenizer);
             if (protocol == 0) {
@@ -121,7 +127,7 @@ public class ClientDriver implements java.sql.Driver {
             if (protocol == DERBY_REMOTE_PROTOCOL) {
                 try {
                     slashOrNull = urlTokenizer.nextToken(":/");
-                } catch (java.util.NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                     throw new SqlException(null, 
                         new ClientMessageId(SQLState.MALFORMED_URL),
@@ -137,14 +143,15 @@ public class ClientDriver implements java.sql.Driver {
             // database is the database name and attributes.  This will be
             // sent to network server as the databaseName
             String database = tokenizeDatabase(urlTokenizer, url); // "database"
-            java.util.Properties augmentedProperties = tokenizeURLProperties(url, properties);
+            Properties augmentedProperties =
+                tokenizeURLProperties(url, properties);
             database = appendDatabaseAttributes(database,augmentedProperties);
 
             int traceLevel;
             try {
                 traceLevel =
                     ClientBaseDataSourceRoot.getTraceLevel(augmentedProperties);
-            } catch (java.lang.NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                 throw new SqlException(null, 
                     new ClientMessageId(SQLState.TRACELEVEL_FORMAT_INVALID), e);
@@ -156,7 +163,7 @@ public class ClientDriver implements java.sql.Driver {
             // This log writer will be passed to the agent constructor.
             LogWriter dncLogWriter =
                 ClientBaseDataSourceRoot.computeDncLogWriterForNewConnection(
-                    java.sql.DriverManager.getLogWriter(),
+                    DriverManager.getLogWriter(),
                     ClientBaseDataSourceRoot.getTraceDirectory(
                         augmentedProperties),
                     ClientBaseDataSourceRoot.getTraceFile(
@@ -169,9 +176,8 @@ public class ClientDriver implements java.sql.Driver {
             
             
             conn = (NetConnection)getFactory().
-                    newNetConnection((NetLogWriter)
-                    dncLogWriter,
-                    java.sql.DriverManager.getLoginTimeout(),
+                    newNetConnection((NetLogWriter)dncLogWriter,
+                    DriverManager.getLoginTimeout(),
                     server,
                     port,
                     database,
@@ -213,14 +219,14 @@ public class ClientDriver implements java.sql.Driver {
         return longDatabase.toString();
     }
 
-    public boolean acceptsURL(String url) throws java.sql.SQLException {
+    public boolean acceptsURL(String url) throws SQLException {
 
         checkURLNotNull( url );
         
         try
         {
-            java.util.StringTokenizer urlTokenizer = 
-                    new java.util.StringTokenizer(url, "/:=; \t\n\r\f", true);
+            StringTokenizer urlTokenizer =
+                    new StringTokenizer(url, "/:=; \t\n\r\f", true);
             int protocol = tokenizeProtocol(url, urlTokenizer);
             return protocol != 0;
         }
@@ -229,7 +235,7 @@ public class ClientDriver implements java.sql.Driver {
             throw se.getSQLException();
         }
     }
-    private void    checkURLNotNull( String url ) throws java.sql.SQLException
+    private void    checkURLNotNull( String url ) throws SQLException
     {
         if ( url == null )
         {
@@ -241,25 +247,27 @@ public class ClientDriver implements java.sql.Driver {
         }
     }
 
-    public java.sql.DriverPropertyInfo[] getPropertyInfo(String url,
-                                                         java.util.Properties properties) throws java.sql.SQLException {
-        java.sql.DriverPropertyInfo driverPropertyInfo[] = new java.sql.DriverPropertyInfo[2];
+    public DriverPropertyInfo[] getPropertyInfo(
+            String url,
+            Properties properties) throws SQLException {
+
+        DriverPropertyInfo driverPropertyInfo[] = new DriverPropertyInfo[2];
 
         // If there are no properties set already,
         // then create a dummy properties just to make the calls go thru.
         if (properties == null) {
-            properties = new java.util.Properties();
+            properties = new Properties();
         }
 
         driverPropertyInfo[0] =
-            new java.sql.DriverPropertyInfo(
+            new DriverPropertyInfo(
                 Attribute.USERNAME_ATTR,
                 properties.getProperty(
                     Attribute.USERNAME_ATTR,
                     ClientBaseDataSourceRoot.propertyDefault_user));
 
         driverPropertyInfo[1] =
-                new java.sql.DriverPropertyInfo(Attribute.PASSWORD_ATTR,
+                new DriverPropertyInfo(Attribute.PASSWORD_ATTR,
                         properties.getProperty(Attribute.PASSWORD_ATTR));
 
         driverPropertyInfo[0].description =
@@ -293,7 +301,10 @@ public class ClientDriver implements java.sql.Driver {
     //  "jdbc:derby:"
     // and return 0 if the protcol is unrecognized
     // return DERBY_PROTOCOL for "jdbc:derby"
-    private static int tokenizeProtocol(String url, java.util.StringTokenizer urlTokenizer) throws SqlException {
+    private static int tokenizeProtocol(
+            String url,
+            StringTokenizer urlTokenizer) throws SqlException {
+
         // Is this condition necessary, StringTokenizer constructor may do this for us
         if (url == null) {
             return 0;
@@ -326,14 +337,14 @@ public class ClientDriver implements java.sql.Driver {
             }
 
             return protocol;
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return 0;
         }
     }
 
     // tokenize "/server" from URL jdbc:derby://server:port/
     // returns server name
-    private static String tokenizeServerName(java.util.StringTokenizer urlTokenizer,
+    private static String tokenizeServerName(StringTokenizer urlTokenizer,
                                              String url) throws SqlException {
         try {
             if (!urlTokenizer.nextToken("/").equals("/"))
@@ -343,7 +354,7 @@ public class ClientDriver implements java.sql.Driver {
                     new ClientMessageId(SQLState.MALFORMED_URL), url);
             }
             return urlTokenizer.nextToken("/:");
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                 throw new SqlException(null, 
                     new ClientMessageId(SQLState.MALFORMED_URL), url);
@@ -352,7 +363,7 @@ public class ClientDriver implements java.sql.Driver {
 
     // tokenize "[:portNumber]/" from URL jdbc:derby://server[:port]/
     // returns the portNumber or zero if portNumber is not specified.
-    private static int tokenizeOptionalPortNumber(java.util.StringTokenizer urlTokenizer,
+    private static int tokenizeOptionalPortNumber(StringTokenizer urlTokenizer,
                                                   String url) throws SqlException {
         try {
             String firstToken = urlTokenizer.nextToken(":/");
@@ -371,7 +382,7 @@ public class ClientDriver implements java.sql.Driver {
                 throw new SqlException(null, 
                     new ClientMessageId(SQLState.MALFORMED_URL), url);
             }
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, 
                 new ClientMessageId(SQLState.MALFORMED_URL), url, e);
@@ -379,21 +390,21 @@ public class ClientDriver implements java.sql.Driver {
     }
 
     //return database name
-    private static String tokenizeDatabase(java.util.StringTokenizer urlTokenizer,
+    private static String tokenizeDatabase(StringTokenizer urlTokenizer,
                                            String url) throws SqlException {
         try {
             // DERBY-618 - database name can contain spaces in the path
             String databaseName = urlTokenizer.nextToken("\t\n\r\f;");
             return databaseName;
-        } catch (java.util.NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, 
                 new ClientMessageId(SQLState.MALFORMED_URL), url, e);
         }
     }
 
-    private static java.util.Properties tokenizeURLProperties(String url,
-                                                              java.util.Properties properties)
+    private static Properties tokenizeURLProperties(String url,
+                                                    Properties properties)
             throws SqlException {
         String attributeString = null;
         int attributeIndex = -1;

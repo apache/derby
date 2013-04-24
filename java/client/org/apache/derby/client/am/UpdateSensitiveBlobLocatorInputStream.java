@@ -34,7 +34,7 @@ class UpdateSensitiveBlobLocatorInputStream
         extends UpdateSensitiveLOBLocatorInputStream {
     //Stores the Blob instance associated with
     //this InputStream.
-    private Blob blob = null;
+    private ClientBlob blob = null;
     
     /**
      * Creates an instance of the BlobLocatorInputStream
@@ -49,8 +49,10 @@ class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
-    UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob)
-    throws SqlException {
+    UpdateSensitiveBlobLocatorInputStream(
+            ClientConnection con,
+            ClientBlob blob) throws SqlException {
+
         super(con, blob, new BlobLocatorInputStream(con, blob));
         this.blob = blob;
     }
@@ -70,8 +72,12 @@ class UpdateSensitiveBlobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
-    UpdateSensitiveBlobLocatorInputStream(Connection con, Blob blob,
-            long position, long length) throws SqlException {
+    UpdateSensitiveBlobLocatorInputStream(
+            ClientConnection con,
+            ClientBlob blob,
+            long position,
+            long length) throws SqlException {
+
         super(con, blob, 
                 new BlobLocatorInputStream(con, blob, position, length), 
                 position, length);

@@ -21,12 +21,16 @@
 
 package org.apache.derby.client.am;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class BlobOutputStream extends java.io.OutputStream {
-    private Blob blob_;
+
+public class BlobOutputStream extends OutputStream {
+    private ClientBlob blob_;
     private long offset_;
 
-    public BlobOutputStream(Blob blob, long offset) {
+    public BlobOutputStream(ClientBlob blob, long offset) {
         blob_ = blob;
         offset_ = offset;
         
@@ -39,13 +43,13 @@ public class BlobOutputStream extends java.io.OutputStream {
         }
     }
 
-    public void write(int b) throws java.io.IOException 
+    public void write(int b) throws IOException
     {
         byte ba[] = {(byte )b};
         writeX(ba, 0, 1);
     }
 
-    public void write(byte b[], int off, int len) throws java.io.IOException {
+    public void write(byte b[], int off, int len) throws IOException {
         if (b == null) {
             throw new NullPointerException();
         } else if ((off < 0) || (off > b.length) || (len < 0) ||
@@ -68,7 +72,7 @@ public class BlobOutputStream extends java.io.OutputStream {
                 = b[off + i];
         }
         blob_.binaryStream_ 
-            = new java.io.ByteArrayInputStream(blob_.binaryString_);
+            = new ByteArrayInputStream(blob_.binaryString_);
         blob_.setSqlLength(blob_.binaryString_.length - blob_.dataOffset_);
     }
 }

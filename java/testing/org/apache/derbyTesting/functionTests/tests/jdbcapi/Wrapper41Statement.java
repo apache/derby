@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import org.apache.derby.client.am.ClientStatement;
 
 import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement;
@@ -39,7 +40,7 @@ public  class   Wrapper41Statement
     ///////////////////////////////////////////////////////////////////////
 
     private EngineStatement     _engineStatement;
-    private org.apache.derby.client.am.Statement       _netStatement;
+    private ClientStatement       _netStatement;
     private LogicalPreparedStatement  _logicalStatement;
     
     ///////////////////////////////////////////////////////////////////////
@@ -51,7 +52,7 @@ public  class   Wrapper41Statement
     public Wrapper41Statement( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EngineStatement ) { _engineStatement = (EngineStatement) wrapped; }
-        else if ( wrapped instanceof org.apache.derby.client.am.Statement ) { _netStatement = (org.apache.derby.client.am.Statement) wrapped; }
+        else if ( wrapped instanceof ClientStatement ) { _netStatement = (ClientStatement) wrapped; }
         else if ( wrapped instanceof LogicalPreparedStatement ) { _logicalStatement = (LogicalPreparedStatement) wrapped; }
         else { throw nothingWrapped(); }
     }

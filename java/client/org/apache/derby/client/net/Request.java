@@ -32,10 +32,15 @@ import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.util.Hashtable;
 
 
 public class Request {
@@ -208,7 +213,7 @@ public class Request {
     final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
-                                 java.io.InputStream in,
+                                 InputStream in,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
         
@@ -226,7 +231,7 @@ public class Request {
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
                                  long length,
-                                 java.io.InputStream in,
+                                 InputStream in,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
 
@@ -278,7 +283,7 @@ public class Request {
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
                                               long length,
-                                              java.io.InputStream in,
+                                              InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex) throws DisconnectException, SqlException {
         // We don't have the metadata available when we create this request
@@ -403,7 +408,7 @@ public class Request {
     final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
-                                              java.io.InputStream in,
+                                              InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex)
             throws DisconnectException {
@@ -490,7 +495,7 @@ public class Request {
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
                                  int length,
-                                 java.io.Reader r,
+                                 Reader r,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
                                                             SqlException{
@@ -508,7 +513,7 @@ public class Request {
     final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
-                                 java.io.Reader r,
+                                 Reader r,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
                                                             SqlException{
@@ -544,7 +549,7 @@ public class Request {
                     finalizePreviousChainedDss(true);
                 }
                 sendBytes(netAgent_.getOutputStream());
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 netAgent_.throwCommunicationsFailure(e);
             }
         }
@@ -581,7 +586,7 @@ public class Request {
                 finalizePreviousChainedDss(true);
             }
             sendBytes(netAgent_.getOutputStream());
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             netAgent_.throwCommunicationsFailure(e);
         }
         
@@ -600,7 +605,7 @@ public class Request {
             if ((Math.min(2 + leftToRead, 32767)) > buffer.remaining()) {
                 try {
                     sendBytes(netAgent_.getOutputStream());
-                } catch (java.io.IOException ioe) {
+                } catch (IOException ioe) {
                     netAgent_.throwCommunicationsFailure(ioe);
                 }
             }
@@ -616,7 +621,7 @@ public class Request {
         
         try {
             sendBytes(netAgent_.getOutputStream());
-        } catch (java.io.IOException ioe) {
+        } catch (IOException ioe) {
             netAgent_.throwCommunicationsFailure(ioe);
         }
         
@@ -944,7 +949,7 @@ public class Request {
                                   int count,
                                   int offset,
                                   boolean mddRequired,
-                                  java.util.Hashtable map) {
+                                  Hashtable map) {
         if (!mddRequired) {
             writeLidAndLengths(lidAndLengthOverrides, count, offset);
         }
@@ -1198,14 +1203,15 @@ public class Request {
 
     // write the request to the OutputStream and flush the OutputStream.
     // trace the send if PROTOCOL trace is on.
-    protected void flush(java.io.OutputStream socketOutputStream) throws java.io.IOException {
+    protected void flush(OutputStream socketOutputStream) throws IOException {
         if (doesRequestContainData()) {
             finalizeDssLength();
             sendBytes(socketOutputStream);
         }
     }
 
-    protected void sendBytes(java.io.OutputStream socketOutputStream) throws java.io.IOException {
+    protected void sendBytes(OutputStream socketOutputStream)
+            throws IOException {
         try {
             socketOutputStream.write(buffer.array(), 0, buffer.position());
             socketOutputStream.flush();
@@ -1317,7 +1323,7 @@ public class Request {
     }
 
     // insert a java.math.BigDecimal into the buffer.
-    final void writeBigDecimal(java.math.BigDecimal v,
+    final void writeBigDecimal(BigDecimal v,
                                int declaredPrecision,
                                int declaredScale) throws SqlException {
         ensureLength(16);
@@ -1333,7 +1339,7 @@ public class Request {
             ensureLength(10);
             DateTime.dateToDateBytes(buffer.array(), buffer.position(), date);
             buffer.position(buffer.position() + 10);
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_, 
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
                     "java.sql.Date", "DATE", e);

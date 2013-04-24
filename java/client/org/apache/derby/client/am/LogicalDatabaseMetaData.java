@@ -20,6 +20,9 @@
  */
 package org.apache.derby.client.am;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -31,8 +34,7 @@ import java.sql.SQLException;
  * lifetime of the metadata object equal to the logical connection instead
  * of the underlying physical connection.
  */
-public class LogicalDatabaseMetaData
-        implements java.sql.DatabaseMetaData {
+public class LogicalDatabaseMetaData implements DatabaseMetaData {
 
     /** The associated logical connection. */
     private final LogicalConnection logicalCon;
@@ -72,7 +74,7 @@ public class LogicalDatabaseMetaData
      * @throws SQLException if the logical connection has been closed, or
      *      obtaining the metadata object fails
      */
-    final java.sql.DatabaseMetaData getRealMetaDataObject()
+    final DatabaseMetaData getRealMetaDataObject()
             throws SQLException {
         return this.logicalCon.getRealMetaDataObject();
     }
@@ -557,14 +559,14 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().dataDefinitionIgnoredInTransactions();
     }
 
-    public java.sql.ResultSet getProcedures(
+    public ResultSet getProcedures(
             String catalog, String schemaPattern, String procedureNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getProcedures(
                 catalog, schemaPattern, procedureNamePattern);
     }
 
-    public java.sql.ResultSet getProcedureColumns(
+    public ResultSet getProcedureColumns(
             String catalog,
             String schemaPattern,
             String procedureNamePattern,
@@ -574,40 +576,40 @@ public class LogicalDatabaseMetaData
                 schemaPattern, procedureNamePattern, columnNamePattern);
     }
 
-    public java.sql.ResultSet getTables(String catalog, String schemaPattern,
+    public ResultSet getTables(String catalog, String schemaPattern,
             String tableNamePattern, String[] types)
             throws SQLException {
         return getRealMetaDataObject().getTables(
                 catalog, schemaPattern, tableNamePattern, types);
     }
 
-    public java.sql.ResultSet getSchemas() throws SQLException {
+    public ResultSet getSchemas() throws SQLException {
         return getRealMetaDataObject().getSchemas();
     }
 
-    public java.sql.ResultSet getCatalogs() throws SQLException {
+    public ResultSet getCatalogs() throws SQLException {
         return getRealMetaDataObject().getCatalogs();
     }
 
-    public java.sql.ResultSet getTableTypes() throws SQLException {
+    public ResultSet getTableTypes() throws SQLException {
         return getRealMetaDataObject().getTableTypes();
     }
 
-    public java.sql.ResultSet getColumns(String catalog, String schemaPattern,
+    public ResultSet getColumns(String catalog, String schemaPattern,
             String tableNamePattern, String columnNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getColumns(
                 catalog, schemaPattern, tableNamePattern, columnNamePattern);
     }
 
-    public java.sql.ResultSet getColumnPrivileges(String catalog, String schema,
+    public ResultSet getColumnPrivileges(String catalog, String schema,
             String table, String columnNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getColumnPrivileges(
                 catalog, schema, table, columnNamePattern);
     }
 
-    public java.sql.ResultSet getTablePrivileges(
+    public ResultSet getTablePrivileges(
             String catalog,
             String schemaPattern,
             String tableNamePattern) throws SQLException {
@@ -616,7 +618,7 @@ public class LogicalDatabaseMetaData
                 catalog, schemaPattern, tableNamePattern);
     }
 
-    public java.sql.ResultSet getBestRowIdentifier(
+    public ResultSet getBestRowIdentifier(
             String catalog,
             String schema,
             String table,
@@ -627,14 +629,14 @@ public class LogicalDatabaseMetaData
                 catalog, schema, table, scope, nullable);
     }
 
-    public java.sql.ResultSet getVersionColumns(
+    public ResultSet getVersionColumns(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getVersionColumns(
                 catalog, schema, table);
     }
 
-    public java.sql.ResultSet getPrimaryKeys(
+    public ResultSet getPrimaryKeys(
             String catalog,
             String schema,
             String table) throws SQLException {
@@ -642,19 +644,19 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().getPrimaryKeys(catalog, schema, table);
     }
 
-    public java.sql.ResultSet getImportedKeys(
+    public ResultSet getImportedKeys(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getImportedKeys(catalog, schema, table);
     }
 
-    public java.sql.ResultSet getExportedKeys(
+    public ResultSet getExportedKeys(
             String catalog, String schema, String table)
             throws SQLException {
         return getRealMetaDataObject().getExportedKeys(catalog, schema, table);
     }
 
-    public java.sql.ResultSet getCrossReference(String parentCatalog,
+    public ResultSet getCrossReference(String parentCatalog,
             String parentSchema, String parentTable, String foreignCatalog,
             String foreignSchema, String foreignTable)
             throws SQLException {
@@ -663,11 +665,11 @@ public class LogicalDatabaseMetaData
                 foreignSchema, foreignTable);
     }
 
-    public java.sql.ResultSet getTypeInfo() throws SQLException {
+    public ResultSet getTypeInfo() throws SQLException {
         return getRealMetaDataObject().getTypeInfo();
     }
 
-    public java.sql.ResultSet getIndexInfo(
+    public ResultSet getIndexInfo(
             String catalog,
             String schema,
             String table,
@@ -728,14 +730,14 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().supportsBatchUpdates();
     }
 
-    public java.sql.ResultSet getUDTs(String catalog, String schemaPattern,
+    public ResultSet getUDTs(String catalog, String schemaPattern,
             String typeNamePattern, int[] types)
             throws SQLException {
         return getRealMetaDataObject().getUDTs(
                 catalog, schemaPattern, typeNamePattern, types);
     }
 
-    public java.sql.Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         getRealMetaDataObject(); // Just check if the connection is still open.
         return this.logicalCon;
     }
@@ -756,21 +758,21 @@ public class LogicalDatabaseMetaData
         return getRealMetaDataObject().supportsGetGeneratedKeys();
     }
 
-    public java.sql.ResultSet getSuperTypes(
+    public ResultSet getSuperTypes(
             String catalog, String schemaPattern, String typeNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getSuperTypes(
                 catalog, schemaPattern, typeNamePattern);
     }
 
-    public java.sql.ResultSet getSuperTables(
+    public ResultSet getSuperTables(
             String catalog, String schemaPattern, String tableNamePattern)
             throws SQLException {
         return getRealMetaDataObject().getSuperTables(
                 catalog, schemaPattern, tableNamePattern);
     }
 
-    public java.sql.ResultSet getAttributes(
+    public ResultSet getAttributes(
             String catalog,
             String schemaPattern,
             String typeNamePattern,

@@ -35,7 +35,7 @@ class UpdateSensitiveClobLocatorInputStream
         extends UpdateSensitiveLOBLocatorInputStream {
     //Stores the Clob instance associated with
     //this InputStream.
-    private Clob clob = null;
+    private ClientClob clob = null;
     
     /**
      * Creates an instance of the ClobLocatorInputStream
@@ -50,8 +50,10 @@ class UpdateSensitiveClobLocatorInputStream
      * @throws SqlException If any exception occurs during stream
      *                      creation.
      */
-    UpdateSensitiveClobLocatorInputStream(Connection con, Clob clob)
-    throws SqlException {
+    UpdateSensitiveClobLocatorInputStream(
+            ClientConnection con,
+            ClientClob clob) throws SqlException {
+
         super(con, clob, new BufferedInputStream
                 (new ClobLocatorInputStream(con, clob)));
         this.clob = clob;

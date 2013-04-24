@@ -41,9 +41,7 @@ package org.apache.derby.client.net;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import javax.sql.XAConnection;
@@ -52,7 +50,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.ClientXid;
-import org.apache.derby.client.am.Connection;
+import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlCode;
@@ -264,7 +262,7 @@ public class NetXAResource implements XAResource {
             // to be thrown.
             throwXAException(rc, false);
         }else {
-            conn_.setXAState(Connection.XA_T0_NOT_ASSOCIATED);
+            conn_.setXAState(ClientConnection.XA_T0_NOT_ASSOCIATED);
         } 
     }
 
@@ -632,7 +630,7 @@ public class NetXAResource implements XAResource {
             // Setting this is currently required to avoid client from sending
             // commit for autocommit.
             if (rc == XAResource.XA_OK) {
-                conn_.setXAState(Connection.XA_T1_ASSOCIATED);
+                conn_.setXAState(ClientConnection.XA_T1_ASSOCIATED);
             }
 
         } catch (SqlException sqle) {
@@ -654,73 +652,73 @@ public class NetXAResource implements XAResource {
     private String getXAExceptionText(int rc) {
         String xaExceptionText;
         switch (rc) {
-        case javax.transaction.xa.XAException.XA_RBROLLBACK:
+        case XAException.XA_RBROLLBACK:
             xaExceptionText = "XA_RBROLLBACK";
             break;
-        case javax.transaction.xa.XAException.XA_RBCOMMFAIL:
+        case XAException.XA_RBCOMMFAIL:
             xaExceptionText = "XA_RBCOMMFAIL";
             break;
-        case javax.transaction.xa.XAException.XA_RBDEADLOCK:
+        case XAException.XA_RBDEADLOCK:
             xaExceptionText = "XA_RBDEADLOCK";
             break;
-        case javax.transaction.xa.XAException.XA_RBINTEGRITY:
+        case XAException.XA_RBINTEGRITY:
             xaExceptionText = "XA_RBINTEGRITY";
             break;
-        case javax.transaction.xa.XAException.XA_RBOTHER:
+        case XAException.XA_RBOTHER:
             xaExceptionText = "XA_RBOTHER";
             break;
-        case javax.transaction.xa.XAException.XA_RBPROTO:
+        case XAException.XA_RBPROTO:
             xaExceptionText = "XA_RBPROTO";
             break;
-        case javax.transaction.xa.XAException.XA_RBTIMEOUT:
+        case XAException.XA_RBTIMEOUT:
             xaExceptionText = "XA_RBTIMEOUT";
             break;
-        case javax.transaction.xa.XAException.XA_RBTRANSIENT:
+        case XAException.XA_RBTRANSIENT:
             xaExceptionText = "XA_RBTRANSIENT";
             break;
-        case javax.transaction.xa.XAException.XA_NOMIGRATE:
+        case XAException.XA_NOMIGRATE:
             xaExceptionText = "XA_NOMIGRATE";
             break;
-        case javax.transaction.xa.XAException.XA_HEURHAZ:
+        case XAException.XA_HEURHAZ:
             xaExceptionText = "XA_HEURHAZ";
             break;
-        case javax.transaction.xa.XAException.XA_HEURCOM:
+        case XAException.XA_HEURCOM:
             xaExceptionText = "XA_HEURCOM";
             break;
-        case javax.transaction.xa.XAException.XA_HEURRB:
+        case XAException.XA_HEURRB:
             xaExceptionText = "XA_HEURRB";
             break;
-        case javax.transaction.xa.XAException.XA_HEURMIX:
+        case XAException.XA_HEURMIX:
             xaExceptionText = "XA_HEURMIX";
             break;
-        case javax.transaction.xa.XAException.XA_RETRY:
+        case XAException.XA_RETRY:
             xaExceptionText = "XA_RETRY";
             break;
-        case javax.transaction.xa.XAException.XA_RDONLY:
+        case XAException.XA_RDONLY:
             xaExceptionText = "XA_RDONLY";
             break;
-        case javax.transaction.xa.XAException.XAER_ASYNC:
+        case XAException.XAER_ASYNC:
             xaExceptionText = "XAER_ASYNC";
             break;
-        case javax.transaction.xa.XAException.XAER_RMERR:
+        case XAException.XAER_RMERR:
             xaExceptionText = "XAER_RMERR";
             break;
-        case javax.transaction.xa.XAException.XAER_NOTA:
+        case XAException.XAER_NOTA:
             xaExceptionText = "XAER_NOTA";
             break;
-        case javax.transaction.xa.XAException.XAER_INVAL:
+        case XAException.XAER_INVAL:
             xaExceptionText = "XAER_INVAL";
             break;
-        case javax.transaction.xa.XAException.XAER_PROTO:
+        case XAException.XAER_PROTO:
             xaExceptionText = "XAER_PROTO";
             break;
-        case javax.transaction.xa.XAException.XAER_RMFAIL:
+        case XAException.XAER_RMFAIL:
             xaExceptionText = "XAER_RMFAIL";
             break;
-        case javax.transaction.xa.XAException.XAER_DUPID:
+        case XAException.XAER_DUPID:
             xaExceptionText = "XAER_DUPID";
             break;
-        case javax.transaction.xa.XAException.XAER_OUTSIDE:
+        case XAException.XAER_OUTSIDE:
             xaExceptionText = "XAER_OUTSIDE";
             break;
         case XAResource.XA_OK:
@@ -777,32 +775,32 @@ public class NetXAResource implements XAResource {
             // Reset to T0, not  associated for XA_RB*, RM*
            // XAER_RMFAIL and XAER_RMERR will be fatal to the connection
            // but that is not dealt with here
-           case javax.transaction.xa.XAException.XAER_RMFAIL:
-           case javax.transaction.xa.XAException.XAER_RMERR:
-           case javax.transaction.xa.XAException.XA_RBROLLBACK:
-           case javax.transaction.xa.XAException.XA_RBCOMMFAIL:
-           case javax.transaction.xa.XAException.XA_RBDEADLOCK:
-           case javax.transaction.xa.XAException.XA_RBINTEGRITY:
-           case javax.transaction.xa.XAException.XA_RBOTHER:
-           case javax.transaction.xa.XAException.XA_RBPROTO:
-           case javax.transaction.xa.XAException.XA_RBTIMEOUT:
-           case javax.transaction.xa.XAException.XA_RBTRANSIENT:
-               conn_.setXAState(Connection.XA_T0_NOT_ASSOCIATED);
+           case XAException.XAER_RMFAIL:
+           case XAException.XAER_RMERR:
+           case XAException.XA_RBROLLBACK:
+           case XAException.XA_RBCOMMFAIL:
+           case XAException.XA_RBDEADLOCK:
+           case XAException.XA_RBINTEGRITY:
+           case XAException.XA_RBOTHER:
+           case XAException.XA_RBPROTO:
+           case XAException.XA_RBTIMEOUT:
+           case XAException.XA_RBTRANSIENT:
+               conn_.setXAState(ClientConnection.XA_T0_NOT_ASSOCIATED);
            break;
             // No change for other XAExceptions
-            // javax.transaction.xa.XAException.XA_NOMIGRATE
-           //javax.transaction.xa.XAException.XA_HEURHAZ
-           // javax.transaction.xa.XAException.XA_HEURCOM
-           // javax.transaction.xa.XAException.XA_HEURRB
-           // javax.transaction.xa.XAException.XA_HEURMIX
-           // javax.transaction.xa.XAException.XA_RETRY
-           // javax.transaction.xa.XAException.XA_RDONLY
-           // javax.transaction.xa.XAException.XAER_ASYNC
-           // javax.transaction.xa.XAException.XAER_NOTA
-           // javax.transaction.xa.XAException.XAER_INVAL                
-           // javax.transaction.xa.XAException.XAER_PROTO
-           // javax.transaction.xa.XAException.XAER_DUPID
-           // javax.transaction.xa.XAException.XAER_OUTSIDE                
+            // XAException.XA_NOMIGRATE
+           //XAException.XA_HEURHAZ
+           // XAException.XA_HEURCOM
+           // XAException.XA_HEURRB
+           // XAException.XA_HEURMIX
+           // XAException.XA_RETRY
+           // XAException.XA_RDONLY
+           // XAException.XAER_ASYNC
+           // XAException.XAER_NOTA
+           // XAException.XAER_INVAL
+           // XAException.XAER_PROTO
+           // XAException.XAER_DUPID
+           // XAException.XAER_OUTSIDE
             default:
                 return;
         }    
@@ -820,8 +818,8 @@ public class NetXAResource implements XAResource {
         }
 
         if (xares instanceof NetXAResource) {
-            // Both are NetXAResource so check to see if this is the same RM
-            // remember, isSame is initialized to false
+            // Both are NetXAResource so check to see if this is the same RM.
+            // Remember, isSame is initialized to false
             NetXAResource derbyxares = (NetXAResource) xares;
             while (true) {
                 if (!conn_.databaseName_.equalsIgnoreCase(derbyxares.conn_.databaseName_)) {
@@ -921,7 +919,7 @@ public class NetXAResource implements XAResource {
                 (new SqlException(null, 
                         new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)),
                         exceptionsOnXA);
-        throwXAException(javax.transaction.xa.XAException.XAER_RMFAIL);
+        throwXAException(XAException.XAER_RMFAIL);
     }
 
     private String getXAFuncStr(int xaFunc) {

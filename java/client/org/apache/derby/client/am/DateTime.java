@@ -24,7 +24,11 @@ import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import org.apache.derby.client.net.Typdef;
 
 
@@ -62,7 +66,7 @@ public class DateTime {
      * @return  Date translated from  buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Date dateBytesToDate(byte[] buffer,
+    public static final Date dateBytesToDate(byte[] buffer,
                                                       int offset,
                                                       Calendar recyclableCal, 
                                                       String encoding) 
@@ -78,7 +82,7 @@ public class DateTime {
             monthIndx = 5;
             dayIndx = 8;
         } else {
-            throw new java.lang.IllegalArgumentException(
+            throw new IllegalArgumentException(
                 SqlException.getMessageUtil().getTextMessage(
                     SQLState.LANG_FORMAT_EXCEPTION));
         }
@@ -102,7 +106,7 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(year, month, day);
-        return new java.sql.Date(cal.getTimeInMillis());
+        return new Date(cal.getTimeInMillis());
     }
 
     
@@ -116,7 +120,7 @@ public class DateTime {
      * @return  Time translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Time timeBytesToTime(byte[] buffer,
+    public static final Time timeBytesToTime(byte[] buffer,
                                                       int offset,
                                                       Calendar recyclableCal,
                                                       String encoding) 
@@ -142,7 +146,7 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(1970, Calendar.JANUARY, 1, hour, minute, second);
-        return new java.sql.Time(cal.getTimeInMillis());
+        return new Time(cal.getTimeInMillis());
     }
 
     /**
@@ -156,7 +160,7 @@ public class DateTime {
      * @return TimeStamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Timestamp timestampBytesToTimestamp(byte[] buffer,
+    public static final Timestamp timestampBytesToTimestamp(byte[] buffer,
                                                                      int offset,
                                                                      Calendar recyclableCal, 
                                                                      String encoding,
@@ -173,7 +177,7 @@ public class DateTime {
          * the parsed nanoseconds value and use that to set nanos.
          */
         int nanos = parseTimestampString(timestamp, cal, supportsTimestampNanoseconds);
-        java.sql.Timestamp ts = new java.sql.Timestamp(cal.getTimeInMillis());
+        Timestamp ts = new Timestamp(cal.getTimeInMillis());
         ts.setNanos( nanos );
         return ts;
     }
@@ -431,7 +435,7 @@ public class DateTime {
      * @return Timestamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Timestamp dateBytesToTimestamp(byte[] buffer,
+    public static final Timestamp dateBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal,
                                                                 String encoding) 
@@ -465,7 +469,7 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(year, month, day, 0, 0, 0);
-        java.sql.Timestamp ts = new java.sql.Timestamp(cal.getTimeInMillis());
+        Timestamp ts = new Timestamp(cal.getTimeInMillis());
         ts.setNanos(0);
         return ts;
     }
@@ -483,7 +487,7 @@ public class DateTime {
      * @throws UnsupportedEncodingException
      * 
      */
-    public static final java.sql.Timestamp timeBytesToTimestamp(byte[] buffer,
+    public static final Timestamp timeBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal, 
                                                                 String encoding)
@@ -520,7 +524,7 @@ public class DateTime {
 
         // Derby's resolution for the TIME type is only seconds.
         cal.set(Calendar.MILLISECOND, 0);
-        return new java.sql.Timestamp(cal.getTimeInMillis());
+        return new Timestamp(cal.getTimeInMillis());
     }
     
     
@@ -534,7 +538,7 @@ public class DateTime {
      * @return Date translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Date timestampBytesToDate(byte[] buffer,
+    public static final Date timestampBytesToDate(byte[] buffer,
                                                            int offset,
                                                            Calendar recyclableCal, 
                                                            String encoding) 
@@ -562,7 +566,7 @@ public class DateTime {
 
         Calendar cal = getCleanCalendar(recyclableCal);
         cal.set(year, month, day);
-        return new java.sql.Date(cal.getTimeInMillis());
+        return new Date(cal.getTimeInMillis());
     }
 
    
@@ -576,7 +580,7 @@ public class DateTime {
      * @return  Time translated from buffer with specified Encoding
      * @throws UnsupportedEncodingException
      */
-    public static final java.sql.Time timestampBytesToTime(byte[] buffer,
+    public static final Time timestampBytesToTime(byte[] buffer,
                                                            int offset,
                                                            Calendar recyclableCal, 
                                                            String encoding) 
@@ -612,7 +616,7 @@ public class DateTime {
          * must be set to January 1, 1970. So override those values now.
          */
         cal.set(1970, Calendar.JANUARY, 1);
-        return new java.sql.Time(cal.getTimeInMillis());
+        return new Time(cal.getTimeInMillis());
     }
 
     /**
@@ -635,7 +639,7 @@ public class DateTime {
          * Make sure we clear that out before returning, per the
          * contract of this method.
          */
-        Calendar result = new java.util.GregorianCalendar();
+        Calendar result = new GregorianCalendar();
         result.clear();
         return result;
     }

@@ -21,7 +21,11 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -30,7 +34,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances
 // Once we move to JDK 1.4 pre-req, create a ResultSetMetaData class and make this class abstract
 
-public class ColumnMetaData implements java.sql.ResultSetMetaData {
+public class ColumnMetaData implements ResultSetMetaData {
 
     public int columns_;
 
@@ -85,8 +89,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
     // For performance only, not part of logical model.
     public transient int[][] protocolTypesCache_ = null;
-    public transient java.util.Hashtable protocolTypeToOverrideLidMapping_ = null;
-    public transient java.util.ArrayList mddOverrideArray_ = null;
+    public transient Hashtable protocolTypeToOverrideLidMapping_ = null;
+    public transient ArrayList mddOverrideArray_ = null;
 
     public transient int[] types_;
     public transient int[] clientParamtertype_;
@@ -197,10 +201,10 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             //return true if the SQLTYPE is CHAR, VARCHAR, LOGVARCHAR or CLOB
             int type = types_[column - 1];
             return
-                    type == Types.CHAR ||
-                    type == Types.VARCHAR ||
-                    type == Types.LONGVARCHAR ||
-                    type == Types.CLOB;
+                    type == ClientTypes.CHAR ||
+                    type == ClientTypes.VARCHAR ||
+                    type == ClientTypes.LONGVARCHAR ||
+                    type == ClientTypes.CLOB;
         }
         catch ( SqlException e )
         {
@@ -241,9 +245,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
             if (nullable_[column - 1]) {
-                return java.sql.ResultSetMetaData.columnNullable;
+                return ResultSetMetaData.columnNullable;
             } else {
-                return java.sql.ResultSetMetaData.columnNoNulls;
+                return ResultSetMetaData.columnNoNulls;
             }
         }
         catch ( SqlException e )
@@ -260,14 +264,14 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             //return true only if the SQLType is SMALLINT, INT, BIGINT, FLOAT, REAL, DOUBLE, NUMERIC OR DECIMAL
             int type = types_[column - 1];
             return
-                    type == Types.SMALLINT ||
-                    type == Types.INTEGER ||
-                    type == Types.BIGINT ||
-                    type == java.sql.Types.FLOAT ||
-                    type == Types.REAL ||
-                    type == Types.DOUBLE ||
-                    type == java.sql.Types.NUMERIC ||
-                    type == Types.DECIMAL;
+                    type == ClientTypes.SMALLINT ||
+                    type == ClientTypes.INTEGER ||
+                    type == ClientTypes.BIGINT ||
+                    type == Types.FLOAT ||
+                    type == ClientTypes.REAL ||
+                    type == ClientTypes.DOUBLE ||
+                    type == Types.NUMERIC ||
+                    type == ClientTypes.DECIMAL;
         }
         catch ( SqlException e )
         {
@@ -282,21 +286,21 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForValidColumnIndex(column);
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
-            case Types.BOOLEAN:
+            case ClientTypes.BOOLEAN:
                 return 5;
-            case Types.INTEGER:
+            case ClientTypes.INTEGER:
                 return 11;
-            case Types.SMALLINT:
+            case ClientTypes.SMALLINT:
                 return 6;
-            case Types.BIGINT:
+            case ClientTypes.BIGINT:
                 return 20;
-            case Types.REAL:
+            case ClientTypes.REAL:
                 return 15;
-            case Types.DOUBLE:
-            case java.sql.Types.FLOAT:
+            case ClientTypes.DOUBLE:
+            case Types.FLOAT:
                 return 24;
-            case Types.DECIMAL:
-            case java.sql.Types.NUMERIC:
+            case ClientTypes.DECIMAL:
+            case Types.NUMERIC:
         // There are 3 possible cases with respect to finding the correct max width for DECIMAL type.
         // 1. If scale = 0, only sign should be added to precision.
         // 2. scale = precision, 3 should be added to precision for sign, decimal and an additional char '0'.
@@ -304,23 +308,23 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         int scale = getScale(column);
         int precision = getPrecision(column);
         return (scale == 0) ? (precision + 1) : ((scale == precision) ? (precision + 3) : (precision + 2));
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.CLOB:
+            case ClientTypes.CHAR:
+            case ClientTypes.VARCHAR:
+            case ClientTypes.LONGVARCHAR:
+            case ClientTypes.CLOB:
                 return (int) sqlLength_[column - 1];
-            case Types.DATE:
+            case ClientTypes.DATE:
                 return 10;
-            case Types.TIME:
+            case ClientTypes.TIME:
                 return 8;
-            case Types.TIMESTAMP:
+            case ClientTypes.TIMESTAMP:
                 return 29;
-            case Types.JAVA_OBJECT:
+            case ClientTypes.JAVA_OBJECT:
                 return JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.BLOB:
+            case ClientTypes.BINARY:
+            case ClientTypes.VARBINARY:
+            case ClientTypes.LONGVARBINARY:
+            case ClientTypes.BLOB:
         // Derby-2425. For long length values, size overflows the int 
         // range. In such cases, the size is limited to the max. int value
         // This behavior is consistent with the same in Embedded mode.
@@ -417,39 +421,39 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             int jdbcType = types_[column - 1];
 
             switch (jdbcType) {
-            case Types.BOOLEAN:
+            case ClientTypes.BOOLEAN:
                 return 1;
-            case java.sql.Types.NUMERIC:
-            case Types.DECIMAL:
+            case Types.NUMERIC:
+            case ClientTypes.DECIMAL:
                 return sqlPrecision_[column - 1];
-            case Types.SMALLINT:
+            case ClientTypes.SMALLINT:
                 return 5;
-            case Types.INTEGER:
+            case ClientTypes.INTEGER:
                 return 10;
-            case Types.BIGINT:
+            case ClientTypes.BIGINT:
                 return 19;
-            case java.sql.Types.FLOAT:
+            case Types.FLOAT:
                 return 15;
-            case Types.REAL:
+            case ClientTypes.REAL:
                 return 7;  // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-            case Types.DOUBLE:
+            case ClientTypes.DOUBLE:
                 return 15; // This is the number of signed digits for IEEE float with mantissa 24, ie. 2^24
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.CLOB:
-            case Types.BLOB:
+            case ClientTypes.CHAR:
+            case ClientTypes.VARCHAR:
+            case ClientTypes.LONGVARCHAR:
+            case ClientTypes.BINARY:
+            case ClientTypes.VARBINARY:
+            case ClientTypes.LONGVARBINARY:
+            case ClientTypes.CLOB:
+            case ClientTypes.BLOB:
                 return (int) sqlLength_[column - 1];
-            case Types.DATE:
+            case ClientTypes.DATE:
                 return 10;
-            case Types.TIME:
+            case ClientTypes.TIME:
                 return 8;
-            case Types.TIMESTAMP:
+            case ClientTypes.TIMESTAMP:
                 return 29;
-            case Types.JAVA_OBJECT:
+            case ClientTypes.JAVA_OBJECT:
                 return JDBC30Translation.UNKNOWN_PRECISION;
             default:
                 throw new SqlException(logWriter_, 
@@ -561,21 +565,21 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return "CLOB";
             case DRDAConstants.DB2_SQLTYPE_VARCHAR:
             case DRDAConstants.DB2_SQLTYPE_NVARCHAR:
-                if (jdbcType == Types.VARBINARY) {
+                if (jdbcType == ClientTypes.VARBINARY) {
                     return "VARCHAR FOR BIT DATA";
                 } else {
                     return "VARCHAR";
                 }
             case DRDAConstants.DB2_SQLTYPE_CHAR:
             case DRDAConstants.DB2_SQLTYPE_NCHAR:
-                if (jdbcType == Types.BINARY) {
+                if (jdbcType == ClientTypes.BINARY) {
                     return "CHAR FOR BIT DATA";
                 } else {
                     return "CHAR";
                 }
             case DRDAConstants.DB2_SQLTYPE_LONG:
             case DRDAConstants.DB2_SQLTYPE_NLONG:
-                if (jdbcType == Types.LONGVARBINARY) {
+                if (jdbcType == ClientTypes.LONGVARBINARY) {
                     return "LONG VARCHAR FOR BIT DATA";
                 } else {
                     return "LONG VARCHAR";
@@ -585,10 +589,10 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return "SBCS";
             case DRDAConstants.DB2_SQLTYPE_FLOAT:
             case DRDAConstants.DB2_SQLTYPE_NFLOAT:
-                if (jdbcType == Types.DOUBLE) {
+                if (jdbcType == ClientTypes.DOUBLE) {
                     return "DOUBLE";
                 }
-                if (jdbcType == Types.REAL) {
+                if (jdbcType == ClientTypes.REAL) {
                     return "REAL";
                 }
             case DRDAConstants.DB2_SQLTYPE_DECIMAL:
@@ -626,7 +630,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
             if (sqlxUpdatable_ == null) {
-                return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_READ_ONLY); // If no extended describe, return resultSet's concurrecnty
+                // If no extended describe, return resultSet's concurrency
+                return resultSetConcurrency_ ==
+                       ResultSet.CONCUR_READ_ONLY;
             }
             return sqlxUpdatable_[column - 1] == 0; // PROTOCOL 0 means not updatable, 1 means updatable
         }
@@ -642,7 +648,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
             if (sqlxUpdatable_ == null) {
-                return (resultSetConcurrency_ == java.sql.ResultSet.CONCUR_UPDATABLE); // If no extended describe, return resultSet's concurrency
+                // If no extended describe, return resultSet's concurrency
+                return resultSetConcurrency_ ==
+                       ResultSet.CONCUR_UPDATABLE;
             }
             return sqlxUpdatable_[column - 1] == 1; // PROTOCOL 0 means not updatable, 1 means updatable
         }
@@ -678,52 +686,52 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
-            case java.sql.Types.BOOLEAN:
+            case Types.BOOLEAN:
                 return "java.lang.Boolean";
-            case java.sql.Types.BIT:
+            case Types.BIT:
                 return "java.lang.Boolean";
-            case java.sql.Types.TINYINT:
+            case Types.TINYINT:
                 return "java.lang.Integer";
-            case Types.SMALLINT:
+            case ClientTypes.SMALLINT:
                 return "java.lang.Integer";
-            case Types.INTEGER:
+            case ClientTypes.INTEGER:
                 return "java.lang.Integer";
-            case Types.BIGINT:
+            case ClientTypes.BIGINT:
                 return "java.lang.Long";
-            case java.sql.Types.FLOAT:
+            case Types.FLOAT:
                 return "java.lang.Double";
-            case Types.REAL:
+            case ClientTypes.REAL:
                 return "java.lang.Float";
-            case Types.DOUBLE:
+            case ClientTypes.DOUBLE:
                 return "java.lang.Double";
-            case java.sql.Types.NUMERIC:
-            case Types.DECIMAL:
+            case Types.NUMERIC:
+            case ClientTypes.DECIMAL:
                 return "java.math.BigDecimal";
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
+            case ClientTypes.CHAR:
+            case ClientTypes.VARCHAR:
+            case ClientTypes.LONGVARCHAR:
                 return "java.lang.String";
-            case Types.DATE:
+            case ClientTypes.DATE:
                 return "java.sql.Date";
-            case Types.TIME:
+            case ClientTypes.TIME:
                 return "java.sql.Time";
-            case Types.TIMESTAMP:
+            case ClientTypes.TIMESTAMP:
                 return "java.sql.Timestamp";
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
+            case ClientTypes.BINARY:
+            case ClientTypes.VARBINARY:
+            case ClientTypes.LONGVARBINARY:
                 return "byte[]";
-            case java.sql.Types.STRUCT:
+            case Types.STRUCT:
                 return "java.sql.Struct";
-            case java.sql.Types.ARRAY:
+            case Types.ARRAY:
                 return "java.sql.Array";
-            case Types.BLOB:
+            case ClientTypes.BLOB:
                 return "java.sql.Blob";
-            case Types.CLOB:
+            case ClientTypes.CLOB:
                 return "java.sql.Clob";
-            case java.sql.Types.REF:
+            case Types.REF:
                 return "java.sql.Ref";
-            case java.sql.Types.JAVA_OBJECT:
+            case Types.JAVA_OBJECT:
                 return sqlUDTclassName_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
@@ -750,7 +758,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     // Does OUT parm registration rely on extended describe?
     // If the output parameter has been registered, return true, else return false.
     public boolean isParameterModeGuessedAsOutput(int parameterIndex) {
-        return sqlxParmmode_[parameterIndex - 1] >= java.sql.ParameterMetaData.parameterModeInOut;
+        return
+            sqlxParmmode_[parameterIndex - 1] >=
+            ClientParameterMetaData.parameterModeInOut;
     }
 
     public void setLogWriter(LogWriter logWriter) {

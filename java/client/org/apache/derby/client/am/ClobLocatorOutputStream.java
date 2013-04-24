@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * An <code>OutputStream</code> that will use an locator to write
@@ -32,20 +33,20 @@ import java.io.IOException;
  * generating an <code>IOException</code>.
  * <p>
  * This <code>OutputStream</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #write(byte[])
+ * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).
  */
-public class ClobLocatorOutputStream extends java.io.OutputStream {
+public class ClobLocatorOutputStream extends OutputStream {
     
     /**
      * Connection used to read Clob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private final Clob clob;
+    private final ClientClob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -65,8 +66,11 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
      * @param pos the position in the <code>CLOB</code> value at which
      *        to start writing; the first position is 1
      */
-    public ClobLocatorOutputStream(Connection connection, Clob clob, long pos)
-    throws SqlException {
+    public ClobLocatorOutputStream(
+            ClientConnection connection,
+            ClientClob clob,
+            long pos) throws SqlException {
+
         if (pos-1 > clob.sqlLength()) {
             throw new IndexOutOfBoundsException();
         }

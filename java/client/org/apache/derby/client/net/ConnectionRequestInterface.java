@@ -39,8 +39,7 @@ public interface ConnectionRequestInterface {
     public void writeLocalRollback(NetConnection connection)
             throws SqlException;
 
-    public void writeLocalXAStart(NetConnection connection)
-            throws SqlException;
+    public void writeLocalXAStart(NetConnection connection) throws SqlException;
 
     public void writeLocalXACommit(NetConnection connection)
             throws SqlException;

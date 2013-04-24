@@ -36,6 +36,7 @@ import junit.framework.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
+import org.apache.derby.client.am.ClientStatement;
 
 /**
  * Tests for new methods added for Statement in JDBC4.
@@ -539,7 +540,7 @@ public class StatementTest
     {
         if ( onClient )
         {
-            org.apache.derby.client.am.Statement.fetchedRowBase = rowCountBase;
+            ClientStatement.fetchedRowBase = rowCountBase;
         }
         else
         {

@@ -21,8 +21,9 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.ResultSet;
 import org.apache.derby.client.am.ColumnMetaData;
-import org.apache.derby.client.am.ResultSet;
+import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
@@ -45,8 +46,11 @@ public class NetResultSetRequest extends NetStatementRequest
                 ((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_;
 
         boolean sendRtnextdta = false;
-        if (sendQryrowset && resultSet.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY &&
-                ((NetCursor) resultSet.cursor_).hasLobs_) {
+
+        if (sendQryrowset && resultSet.resultSetType_ ==
+                ResultSet.TYPE_FORWARD_ONLY &&
+            ((NetCursor) resultSet.cursor_).hasLobs_) {
+
             fetchSize = 1;
             resultSet.fetchSize_ = 1;
             sendRtnextdta = true;
@@ -91,10 +95,12 @@ public class NetResultSetRequest extends NetStatementRequest
         //     * qryrowset is optional.  it is ignored on opnqry.  if not sent on cntqry,
         //       then the fetch is going fetch next row as opposed to fetch next rowset.
         boolean sendQryrowset =
-                (resultSet.isRowsetCursor_ ||
-                (((NetStatement) resultSet.statement_.getMaterialStatement()).qryrowsetSentOnOpnqry_ &&
-                (resultSet.sensitivity_ == ResultSet.sensitivity_sensitive_static__ ||
-                ((NetCursor) resultSet.cursor_).blocking_)));
+            resultSet.isRowsetCursor_ ||
+            (((NetStatement)resultSet.statement_.getMaterialStatement()).
+                 qryrowsetSentOnOpnqry_ &&
+             (resultSet.sensitivity_ ==
+              ClientResultSet.sensitivity_sensitive_static__ ||
+              ((NetCursor)resultSet.cursor_).blocking_));
 
         buildScrollCNTQRY(protocolOrientation,
                 rowToFetch,
@@ -308,16 +314,16 @@ public class NetResultSetRequest extends NetStatementRequest
     // Called by NetResultSetRequest.writeScrollableFetch()
     private int computePROTOCOLOrientation(int orientation) throws SqlException {
         switch (orientation) {
-        case ResultSet.scrollOrientation_absolute__:
+        case ClientResultSet.scrollOrientation_absolute__:
             return CodePoint.QRYSCRABS;
 
-        case ResultSet.scrollOrientation_after__:
+        case ClientResultSet.scrollOrientation_after__:
             return CodePoint.QRYSCRAFT;
 
-        case ResultSet.scrollOrientation_before__:
+        case ClientResultSet.scrollOrientation_before__:
             return CodePoint.QRYSCRBEF;
 
-        case ResultSet.scrollOrientation_relative__:
+        case ClientResultSet.scrollOrientation_relative__:
             return CodePoint.QRYSCRREL;
 
         default:

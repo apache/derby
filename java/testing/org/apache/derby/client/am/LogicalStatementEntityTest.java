@@ -292,9 +292,9 @@ public class LogicalStatementEntityTest
                                         JDBCStatementCache cache)
             throws SQLException {
         StatementCacheInteractor cacheInteractor =
-                new StatementCacheInteractor(
-                    cache,
-                    ((org.apache.derby.client.am.Connection)getConnection()));
+            new StatementCacheInteractor(
+                cache,
+                ((org.apache.derby.client.am.ClientConnection)getConnection()));
         LogicalStatementEntity entity;
         if (isCallable) {
             entity = (LogicalStatementEntity)cacheInteractor.prepareCall(sql);

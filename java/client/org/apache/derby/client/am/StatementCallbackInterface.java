@@ -31,9 +31,14 @@ package org.apache.derby.client.am;
 
 public interface StatementCallbackInterface extends UnitOfWorkListener {
     // A query has been opened on the server.
-    public void completeOpenQuery(Sqlca sqlca, ResultSet resultSet) throws DisconnectException;
+    public void completeOpenQuery(Sqlca sqlca, ClientResultSet resultSet)
+            throws DisconnectException;
 
-    public void completeExecuteCallOpenQuery(Sqlca sqlca, ResultSet resultSet, ColumnMetaData resultSetMetaData, Section generatedSection);
+    public void completeExecuteCallOpenQuery(
+        Sqlca sqlca,
+        ClientResultSet resultSet,
+        ColumnMetaData resultSetMetaData,
+        Section generatedSection);
 
     // Chains a warning onto the statement.
     public void accumulateWarning(SqlWarning e);
@@ -49,7 +54,10 @@ public interface StatementCallbackInterface extends UnitOfWorkListener {
 
     public void completeExecute(Sqlca sqlca);
 
-    public void completeExecuteCall(Sqlca sqlca, Cursor params, ResultSet[] resultSets);
+    public void completeExecuteCall(
+        Sqlca sqlca,
+        Cursor params,
+        ClientResultSet[] resultSets);
 
     public void completeExecuteCall(Sqlca sqlca, Cursor params);
 

@@ -22,6 +22,7 @@
 package org.apache.derby.client.net;
 
 import java.util.HashMap;
+import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import org.apache.derby.client.ClientXid;
@@ -84,9 +85,9 @@ public class NetXAConnectionReply extends NetResultSetReply {
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
         if (xaFlags == XAResource.TMFAIL) {
-            return javax.transaction.xa.XAException.XA_RBROLLBACK;
+            return XAException.XA_RBROLLBACK;
         }
-        return javax.transaction.xa.XAResource.XA_OK;
+        return XAResource.XA_OK;
     }
 
     protected int readXaPrepare(NetConnection conn) throws DisconnectException {
@@ -123,7 +124,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
         callInfo.xaWasSuspended = false;
         conn.completeLocalRollback();
 
-        return javax.transaction.xa.XAResource.XA_OK;
+        return XAResource.XA_OK;
     }
 
     protected void readXaRecover(NetConnection conn) throws DisconnectException {
@@ -304,8 +305,8 @@ public class NetXAConnectionReply extends NetResultSetReply {
             peekCP = peekCodePoint();
         }
 
-        java.util.HashMap<Xid, NetIndoubtTransaction> indoubtTransactions =
-                new java.util.HashMap<Xid, NetIndoubtTransaction>();
+        HashMap<Xid, NetIndoubtTransaction> indoubtTransactions =
+                new HashMap<Xid, NetIndoubtTransaction>();
         while (peekCP == CodePoint.XID) {
             Xid xid = parseXID();
             indoubtTransactions.put(xid, new NetIndoubtTransaction(xid, null, null, null, sIpAddr, port));

@@ -21,28 +21,41 @@
 
 package org.apache.derby.client.am;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.Ref;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Calendar;
 import java.util.Locale;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // All currently supported derby types are mapped to one of the following jdbc types:
-// java.sql.Types.SMALLINT;
-// java.sql.Types.INTEGER;
-// java.sql.Types.BIGINT;
-// java.sql.Types.REAL;
-// java.sql.Types.DOUBLE;
-// java.sql.Types.DECIMAL;
-// java.sql.Types.DATE;
-// java.sql.Types.TIME;
-// java.sql.Types.TIMESTAMP;
-// java.sql.Types.CHAR;
-// java.sql.Types.VARCHAR;
-// java.sql.Types.LONGVARCHAR;
-// java.sql.Types.CLOB;
-// java.sql.Types.BLOB;
+// Types.SMALLINT;
+// Types.INTEGER;
+// Types.BIGINT;
+// Types.REAL;
+// Types.DOUBLE;
+// Types.DECIMAL;
+// Types.DATE;
+// Types.TIME;
+// Types.TIMESTAMP;
+// Types.CHAR;
+// Types.VARCHAR;
+// Types.LONGVARCHAR;
+// Types.CLOB;
+// Types.BLOB;
 //
 
 final class CrossConverters {
@@ -52,34 +65,34 @@ final class CrossConverters {
      */
     public static final int UNKNOWN_LENGTH = Integer.MIN_VALUE;
 
-    private final static java.math.BigDecimal bdMaxByteValue__ =
-            java.math.BigDecimal.valueOf(Byte.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinByteValue__ =
-            java.math.BigDecimal.valueOf(Byte.MIN_VALUE);
-    private final static java.math.BigDecimal bdMaxShortValue__ =
-            java.math.BigDecimal.valueOf(Short.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinShortValue__ =
-            java.math.BigDecimal.valueOf(Short.MIN_VALUE);
-    private final static java.math.BigDecimal bdMaxIntValue__ =
-            java.math.BigDecimal.valueOf(Integer.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinIntValue__ =
-            java.math.BigDecimal.valueOf(Integer.MIN_VALUE);
-    private final static java.math.BigDecimal bdMaxLongValue__ =
-            java.math.BigDecimal.valueOf(Long.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinLongValue__ =
-            java.math.BigDecimal.valueOf(Long.MIN_VALUE);
-    private final static java.math.BigDecimal bdMaxFloatValue__ =
-            new java.math.BigDecimal(Float.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinFloatValue__ =
-            new java.math.BigDecimal(-Float.MAX_VALUE);
-    private final static java.math.BigDecimal bdMaxDoubleValue__ =
-            new java.math.BigDecimal(Double.MAX_VALUE);
-    private final static java.math.BigDecimal bdMinDoubleValue__ =
-            new java.math.BigDecimal(-Double.MAX_VALUE);
+    private final static BigDecimal bdMaxByteValue__ =
+            BigDecimal.valueOf(Byte.MAX_VALUE);
+    private final static BigDecimal bdMinByteValue__ =
+            BigDecimal.valueOf(Byte.MIN_VALUE);
+    private final static BigDecimal bdMaxShortValue__ =
+            BigDecimal.valueOf(Short.MAX_VALUE);
+    private final static BigDecimal bdMinShortValue__ =
+            BigDecimal.valueOf(Short.MIN_VALUE);
+    private final static BigDecimal bdMaxIntValue__ =
+            BigDecimal.valueOf(Integer.MAX_VALUE);
+    private final static BigDecimal bdMinIntValue__ =
+            BigDecimal.valueOf(Integer.MIN_VALUE);
+    private final static BigDecimal bdMaxLongValue__ =
+            BigDecimal.valueOf(Long.MAX_VALUE);
+    private final static BigDecimal bdMinLongValue__ =
+            BigDecimal.valueOf(Long.MIN_VALUE);
+    private final static BigDecimal bdMaxFloatValue__ =
+            new BigDecimal(Float.MAX_VALUE);
+    private final static BigDecimal bdMinFloatValue__ =
+            new BigDecimal(-Float.MAX_VALUE);
+    private final static BigDecimal bdMaxDoubleValue__ =
+            new BigDecimal(Double.MAX_VALUE);
+    private final static BigDecimal bdMinDoubleValue__ =
+            new BigDecimal(-Double.MAX_VALUE);
 
     // Since BigDecimals are immutable, we can return pointers to these canned 0's and 1's.
-    private final static java.math.BigDecimal bdZero__ = java.math.BigDecimal.valueOf(0);
-    private final static java.math.BigDecimal bdOne__ = java.math.BigDecimal.valueOf(1);
+    private final static BigDecimal bdZero__ = BigDecimal.valueOf(0);
+    private final static BigDecimal bdOne__ = BigDecimal.valueOf(1);
 
     // ---------------------- state ----------------------------------------------
 
@@ -102,37 +115,37 @@ final class CrossConverters {
     final Object setObject(int targetType, boolean source) throws SqlException {
         short numVal = source ? (short) 1 : 0;
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             return Short.valueOf(numVal);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             return Integer.valueOf(numVal);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             return Long.valueOf(numVal);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             return Float.valueOf(numVal);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return Double.valueOf(numVal);
 
-        case Types.DECIMAL:
-            return java.math.BigDecimal.valueOf(numVal);
+        case ClientTypes.DECIMAL:
+            return BigDecimal.valueOf(numVal);
 
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "boolean", Types.getTypeString(targetType));
+                "boolean", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -146,37 +159,37 @@ final class CrossConverters {
     // In support of PS.setShort()
     final Object setObject(int targetType, short source) throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             return Short.valueOf(source);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             return Integer.valueOf(source);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             return Long.valueOf(source);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             return Float.valueOf(source);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return Double.valueOf(source);
 
-        case Types.DECIMAL:
-            return java.math.BigDecimal.valueOf(source);
+        case ClientTypes.DECIMAL:
+            return BigDecimal.valueOf(source);
 
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "byte", Types.getTypeString(targetType));
+                "byte", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -184,11 +197,11 @@ final class CrossConverters {
     // In support of PS.setInt()
     final Object setObject(int targetType, int source) throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -196,30 +209,30 @@ final class CrossConverters {
             }
             return Short.valueOf((short) source);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             return Integer.valueOf(source);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             return Long.valueOf(source);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             return Float.valueOf(source);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return Double.valueOf(source);
 
-        case Types.DECIMAL:
-            return java.math.BigDecimal.valueOf(source);
+        case ClientTypes.DECIMAL:
+            return BigDecimal.valueOf(source);
 
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                    "int", Types.getTypeString(targetType));
+                    "int", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -227,25 +240,25 @@ final class CrossConverters {
     // don't support the BIT/BOOLEAN as underlying DERBY targetTypes.
     final boolean setBooleanFromObject(Object source, int sourceType) throws SqlException {
         switch (sourceType) {
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             return getBooleanFromShort(((Short) source).shortValue());
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             return getBooleanFromInt(((Integer) source).intValue());
-        case Types.BIGINT:
-            return getBooleanFromLong(((java.math.BigInteger) source).longValue());
-        case Types.REAL:
+        case ClientTypes.BIGINT:
+            return getBooleanFromLong(((BigInteger) source).longValue());
+        case ClientTypes.REAL:
             return getBooleanFromFloat(((Float) source).floatValue());
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return getBooleanFromDouble(((Double) source).doubleValue());
-        case Types.DECIMAL:
-            return getBooleanFromLong(((java.math.BigDecimal) source).longValue());
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.DECIMAL:
+            return getBooleanFromLong(((BigDecimal) source).longValue());
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return getBooleanFromString((String) source);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
-                Types.getTypeString(sourceType), "boolean");
+                ClientTypes.getTypeString(sourceType), "boolean");
         }
     }
 
@@ -253,25 +266,25 @@ final class CrossConverters {
     // don't support the BIT/BOOLEAN as underlying DERBY targetTypes.
     final byte setByteFromObject(Object source, int sourceType) throws SqlException {
         switch (sourceType) {
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             return getByteFromShort(((Short) source).shortValue());
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             return getByteFromInt(((Integer) source).intValue());
-        case Types.BIGINT:
-            return getByteFromLong(((java.math.BigInteger) source).longValue());
-        case Types.REAL:
+        case ClientTypes.BIGINT:
+            return getByteFromLong(((BigInteger) source).longValue());
+        case ClientTypes.REAL:
             return getByteFromFloat(((Float) source).floatValue());
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return getByteFromDouble(((Double) source).doubleValue());
-        case Types.DECIMAL:
-            return getByteFromLong(((java.math.BigDecimal) source).longValue());
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.DECIMAL:
+            return getByteFromLong(((BigDecimal) source).longValue());
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return getByteFromString((String) source);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
-                Types.getTypeString(sourceType), "byte");
+                ClientTypes.getTypeString(sourceType), "byte");
         }
     }
 
@@ -279,11 +292,11 @@ final class CrossConverters {
     // In support of PS.setLong()
     final Object setObject(int targetType, long source) throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -291,7 +304,7 @@ final class CrossConverters {
             }
             return Short.valueOf((short) source);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -299,27 +312,27 @@ final class CrossConverters {
             }
             return Integer.valueOf((int) source);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             return Long.valueOf(source);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             return Float.valueOf(source);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             return Double.valueOf(source);
 
-        case Types.DECIMAL:
-            return java.math.BigDecimal.valueOf(source);
+        case ClientTypes.DECIMAL:
+            return BigDecimal.valueOf(source);
 
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "long", Types.getTypeString(targetType));
+                "long", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -327,11 +340,11 @@ final class CrossConverters {
     // In support of PS.setFloat()
     final Object setObject(int targetType, float source) throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -339,7 +352,7 @@ final class CrossConverters {
             }
             return Short.valueOf((short) source);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -347,7 +360,7 @@ final class CrossConverters {
             }
             return Integer.valueOf((int) source);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -355,7 +368,7 @@ final class CrossConverters {
             }
             return Long.valueOf((long) source);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     // change the check from (source > Float.MAX_VALUE || source < -Float.MIN_VALUE))
                     // to the following:
@@ -373,7 +386,7 @@ final class CrossConverters {
             }
             return Float.valueOf(source);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     //-------------------------------------------------------------------------------------
                     //    -infinity                             0                            +infinity
@@ -392,20 +405,21 @@ final class CrossConverters {
             // which may happen if we cast float to double.
             return Double.valueOf(String.valueOf(source));
 
-        case Types.DECIMAL:
+        case ClientTypes.DECIMAL:
             // Can't use the following commented out line because it changes precision of the result.
             //return new java.math.BigDecimal (source);
-            return new java.math.BigDecimal(String.valueOf(source));  // This matches derby semantics
+            // This matches derby semantics
+            return new BigDecimal(String.valueOf(source));
 
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "float", Types.getTypeString(targetType));
+                "float", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -413,11 +427,11 @@ final class CrossConverters {
     // In support of PS.setDouble()
     final Object setObject(int targetType, double source) throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(source != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -425,7 +439,7 @@ final class CrossConverters {
             }
             return Short.valueOf((short) source);
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -433,7 +447,7 @@ final class CrossConverters {
             }
             return Integer.valueOf((int) source);
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -441,7 +455,7 @@ final class CrossConverters {
             }
             return Long.valueOf((long) source);
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Float.MAX_VALUE || source < -Float.MAX_VALUE)) {
                 throw new OutsideRangeForDataTypeException(
@@ -449,7 +463,7 @@ final class CrossConverters {
             }
             return Float.valueOf((float) source);
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     // change the check from (source > Double.MAX_VALUE || source < -Double.MIN_VALUE))
                     // to the following:
@@ -467,32 +481,33 @@ final class CrossConverters {
             }
             return Double.valueOf(source);
 
-        case Types.DECIMAL:
+        case ClientTypes.DECIMAL:
             // Use BigDecimal.valueOf(source) instead of new BigDecimal(source),
             // as the latter may change the precision.
-            return java.math.BigDecimal.valueOf(source);
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+            return BigDecimal.valueOf(source);
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "double", Types.getTypeString(targetType));
+                "double", ClientTypes.getTypeString(targetType));
         }
     }
 
     // Convert from big decimal source to target type
     // In support of PS.setBigDecimal()
-    final Object setObject(int targetType, java.math.BigDecimal source) throws SqlException {
+    final Object setObject(int targetType, BigDecimal source)
+            throws SqlException {
         switch (targetType) {
-        case Types.BIT:
-        case Types.BOOLEAN:
+        case ClientTypes.BIT:
+        case ClientTypes.BOOLEAN:
             return Boolean.valueOf(
-                    java.math.BigDecimal.valueOf(0L).compareTo(source) != 0);
+                    BigDecimal.valueOf(0L).compareTo(source) != 0);
 
-        case Types.SMALLINT:
+        case ClientTypes.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxShortValue__) == 1 || source.compareTo(bdMinShortValue__) == -1)) {
                 throw new OutsideRangeForDataTypeException(
@@ -500,7 +515,7 @@ final class CrossConverters {
             }
             return Short.valueOf(source.shortValue());
 
-        case Types.INTEGER:
+        case ClientTypes.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxIntValue__) == 1 || source.compareTo(bdMinIntValue__) == -1)) {
                 throw new OutsideRangeForDataTypeException(
@@ -508,7 +523,7 @@ final class CrossConverters {
             }
             return Integer.valueOf(source.intValue());
 
-        case Types.BIGINT:
+        case ClientTypes.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxLongValue__) == 1 || source.compareTo(bdMinLongValue__) == -1)) {
                 throw new OutsideRangeForDataTypeException(
@@ -516,7 +531,7 @@ final class CrossConverters {
             }
             return Long.valueOf(source.longValue());
 
-        case Types.REAL:
+        case ClientTypes.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxFloatValue__) == 1 || source.compareTo(bdMinFloatValue__) == -1)) {
                 throw new OutsideRangeForDataTypeException(
@@ -524,7 +539,7 @@ final class CrossConverters {
             }
             return Float.valueOf(source.floatValue());
 
-        case Types.DOUBLE:
+        case ClientTypes.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxDoubleValue__) == 1 || source.compareTo(bdMinDoubleValue__) == -1)) {
                 throw new OutsideRangeForDataTypeException(
@@ -532,7 +547,50 @@ final class CrossConverters {
             }
             return Double.valueOf(source.doubleValue());
 
-        case Types.DECIMAL:
+        case ClientTypes.DECIMAL:
+            return source;
+
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
+            return String.valueOf(source);
+
+        default:
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.Math.BigDecimal", ClientTypes.getTypeString(targetType));
+        }
+    }
+
+    // Convert from date source to target type
+    // In support of PS.setDate()
+    final Object setObject(int targetType, Date source) throws SqlException {
+        switch (targetType) {
+
+        case Types.DATE:
+            return source;
+
+        case Types.TIMESTAMP:
+            return new Timestamp(source.getTime());
+
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+            return String.valueOf(source);
+
+        default:
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "java.sql.Date", ClientTypes.getTypeString(targetType));
+        }
+    }
+
+    // Convert from time source to target type
+    // In support of PS.setTime()
+    final Object setObject(int targetType, Time source) throws SqlException {
+        switch (targetType) {
+
+        case Types.TIME:
             return source;
 
         case Types.CHAR:
@@ -543,76 +601,34 @@ final class CrossConverters {
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.Math.BigDecimal", Types.getTypeString(targetType));
-        }
-    }
-
-    // Convert from date source to target type
-    // In support of PS.setDate()
-    final Object setObject(int targetType, java.sql.Date source) throws SqlException {
-        switch (targetType) {
-
-        case java.sql.Types.DATE:
-            return source;
-
-        case java.sql.Types.TIMESTAMP:
-            return new java.sql.Timestamp(source.getTime());
-
-        case java.sql.Types.CHAR:
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            return String.valueOf(source);
-
-        default:
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.sql.Date", Types.getTypeString(targetType));
-        }
-    }
-
-    // Convert from time source to target type
-    // In support of PS.setTime()
-    final Object setObject(int targetType, java.sql.Time source) throws SqlException {
-        switch (targetType) {
-
-        case java.sql.Types.TIME:
-            return source;
-
-        case java.sql.Types.CHAR:
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
-            return String.valueOf(source);
-
-        default:
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.sql.Time", Types.getTypeString(targetType));
+                "java.sql.Time", ClientTypes.getTypeString(targetType));
         }
     }
 
     // Convert from date source to target type
     // In support of PS.setTimestamp()
-    final Object setObject(int targetType, java.sql.Timestamp source) throws SqlException {
+    final Object setObject(int targetType, Timestamp source)
+            throws SqlException {
         switch (targetType) {
 
-        case java.sql.Types.TIMESTAMP:
+        case Types.TIMESTAMP:
             return source;
 
-        case java.sql.Types.TIME:
-            return new java.sql.Time(source.getTime());
+        case Types.TIME:
+            return new Time(source.getTime());
 
-        case java.sql.Types.DATE:
-            return new java.sql.Date(source.getTime());
+        case Types.DATE:
+            return new Date(source.getTime());
 
-        case java.sql.Types.CHAR:
-        case java.sql.Types.VARCHAR:
-        case java.sql.Types.LONGVARCHAR:
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
             return String.valueOf(source);
 
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.sql.Timestamp", Types.getTypeString(targetType));
+                "java.sql.Timestamp", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -623,8 +639,8 @@ final class CrossConverters {
     final Object setObject(int targetDriverType, String source) throws SqlException {
         try {
             switch (targetDriverType) {
-            case Types.BIT:
-            case Types.BOOLEAN:
+            case ClientTypes.BIT:
+            case ClientTypes.BOOLEAN:
             {
                 String cleanSource = source.trim().toUpperCase(Locale.ENGLISH);
                 if (cleanSource.equals("UNKNOWN")) {
@@ -636,61 +652,61 @@ final class CrossConverters {
                 } else {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.LANG_FORMAT_EXCEPTION),
-                        Types.getTypeString(targetDriverType));
+                        ClientTypes.getTypeString(targetDriverType));
                 }
             }
 
-            case Types.SMALLINT:
+            case ClientTypes.SMALLINT:
                 return Short.valueOf(source);
 
-            case Types.INTEGER:
+            case ClientTypes.INTEGER:
                 return Integer.valueOf(source);
 
-            case Types.BIGINT:
+            case ClientTypes.BIGINT:
                 return Long.valueOf(source);
 
-            case Types.REAL:
+            case ClientTypes.REAL:
                 return Float.valueOf(source);
 
-            case Types.DOUBLE:
+            case ClientTypes.DOUBLE:
                 return Double.valueOf(source);
 
-            case Types.DECIMAL:
-                return new java.math.BigDecimal(source);
+            case ClientTypes.DECIMAL:
+                return new BigDecimal(source);
 
-            case java.sql.Types.DATE:
+            case Types.DATE:
                 return date_valueOf(source, null);
 
-            case java.sql.Types.TIME:
+            case Types.TIME:
                 return time_valueOf(source, null);
 
-            case java.sql.Types.TIMESTAMP:
+            case Types.TIMESTAMP:
                 return timestamp_valueOf(source, null);
 
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case Types.LONGVARCHAR:
+            case ClientTypes.CHAR:
+            case ClientTypes.VARCHAR:
+            case ClientTypes.LONGVARCHAR:
                 return source;
 
-            case Types.CLOB:
-                return new Clob(agent_, source);
+            case ClientTypes.CLOB:
+                return new ClientClob(agent_, source);
 
                 // setString() against BINARY columns is problematic because w/out metadata, we'll send char encoding bytes.
                 // So we refuse setString() requests altogether.
-            case Types.BINARY:
-            case Types.VARBINARY:
-            case Types.LONGVARBINARY:
-            case Types.BLOB:
+            case ClientTypes.BINARY:
+            case ClientTypes.VARBINARY:
+            case ClientTypes.LONGVARBINARY:
+            case ClientTypes.BLOB:
             default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "String", Types.getTypeString(targetDriverType));
+                "String", ClientTypes.getTypeString(targetDriverType));
             }
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), 
-                    Types.getTypeString(targetDriverType),
+                    ClientTypes.getTypeString(targetDriverType),
                     e);                    
         }
     }
@@ -701,13 +717,13 @@ final class CrossConverters {
      */
     public static int getInputJdbcType(int jdbcType) {
         switch (jdbcType) {
-        case java.sql.Types.TINYINT:
-        case java.sql.Types.SMALLINT:
-            return java.sql.Types.INTEGER;
-        case java.sql.Types.NUMERIC:
-            return java.sql.Types.DECIMAL;
-        case java.sql.Types.FLOAT:
-            return java.sql.Types.DOUBLE;
+        case Types.TINYINT:
+        case Types.SMALLINT:
+            return Types.INTEGER;
+        case Types.NUMERIC:
+            return Types.DECIMAL;
+        case Types.FLOAT:
+            return Types.DOUBLE;
         default:
             return jdbcType;
         }
@@ -722,48 +738,50 @@ final class CrossConverters {
     // In support of PS.setBytes()
     final Object setObject(int targetType, byte[] source) throws SqlException {
         switch (targetType) {
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
+        case ClientTypes.BINARY:
+        case ClientTypes.VARBINARY:
+        case ClientTypes.LONGVARBINARY:
             return source;
-        case Types.BLOB:
-            return new Blob(source, agent_, 0);
+        case ClientTypes.BLOB:
+            return new ClientBlob(source, agent_, 0);
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "byte[]", Types.getTypeString(targetType));
+                "byte[]", ClientTypes.getTypeString(targetType));
         }
     }
 
     // Convert from Reader source to target type
     // In support of PS.setCharacterStream()
-    final Object setObject(int targetType, java.io.Reader source, int length) throws SqlException {
+    final Object setObject(int targetType, Reader source, int length)
+            throws SqlException {
         switch (targetType) {
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return setStringFromReader(source, length);
-        case Types.CLOB:
+        case ClientTypes.CLOB:
             if (length == CrossConverters.UNKNOWN_LENGTH) {
-                return new Clob(agent_, source);
+                return new ClientClob(agent_, source);
             }
-            return new Clob(agent_, source, length);
+            return new ClientClob(agent_, source, length);
             // setCharacterStream() against BINARY columns is problematic because w/out metadata, we'll send char encoding bytes.
             // There's no clean solution except to just not support setObject(String/Reader/Stream)
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
+        case ClientTypes.BINARY:
+        case ClientTypes.VARBINARY:
+        case ClientTypes.LONGVARBINARY:
+        case ClientTypes.BLOB:
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.io.Reader", Types.getTypeString(targetType));
+                "java.io.Reader", ClientTypes.getTypeString(targetType));
         }
     }
 
     // create a String by reading all of the bytes from reader
-    private final String setStringFromReader(java.io.Reader r, int length) throws SqlException {
-        java.io.StringWriter sw = new java.io.StringWriter();
+    private final String setStringFromReader(Reader r, int length)
+            throws SqlException {
+        StringWriter sw = new StringWriter();
         try {
             int read = r.read();
             int totalRead = 0;
@@ -778,7 +796,7 @@ final class CrossConverters {
                         new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
             return sw.toString();
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throw SqlException.javaException(agent_.logWriter_, e);
         }
     }
@@ -786,33 +804,42 @@ final class CrossConverters {
     // Convert from InputStream source to target type.
     // In support of PS.setAsciiStream, PS.setUnicodeStream
     // Note: PS.setCharacterStream() is handled by setObject(Reader)
-    final Object setObjectFromCharacterStream(int targetType, java.io.InputStream source, String encoding, int length) throws SqlException {
+    final Object setObjectFromCharacterStream(
+            int targetType,
+            InputStream source,
+            String encoding,
+            int length) throws SqlException {
+
         switch (targetType) {
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
+        case ClientTypes.CHAR:
+        case ClientTypes.VARCHAR:
+        case ClientTypes.LONGVARCHAR:
             return setStringFromStream(source, encoding, length);
-        case Types.CLOB:
+        case ClientTypes.CLOB:
             if (length == CrossConverters.UNKNOWN_LENGTH) {
-                return new Clob(agent_, source, encoding);
+                return new ClientClob(agent_, source, encoding);
             }
-            return new Clob(agent_, source, encoding, length);
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-        case Types.BLOB:
+            return new ClientClob(agent_, source, encoding, length);
+        case ClientTypes.BINARY:
+        case ClientTypes.VARBINARY:
+        case ClientTypes.LONGVARBINARY:
+        case ClientTypes.BLOB:
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.io.InputStream", Types.getTypeString(targetType));
+                "java.io.InputStream", ClientTypes.getTypeString(targetType));
         }
     }
 
 
     // create a String by reading all of the bytes from inputStream, applying encoding
-    private final String setStringFromStream(java.io.InputStream is, String encoding, int length) throws SqlException {
+    private final String setStringFromStream(
+            InputStream is,
+            String encoding,
+            int length) throws SqlException {
+
         try {
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             int totalRead = 0;
 
             try {
@@ -822,7 +849,7 @@ final class CrossConverters {
                     baos.write(read);
                     read = is.read();
                 }
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.JAVA_EXCEPTION),
                     e.getClass().getName(), e.getMessage(), e);
@@ -835,7 +862,7 @@ final class CrossConverters {
             }
 
             return new String(baos.toByteArray(), encoding);
-        } catch (java.io.UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
                     "java.io.InputStream", "String", e);
@@ -844,40 +871,45 @@ final class CrossConverters {
 
     // Convert from Blob source to target type
     // In support of PS.setBlob()
-    final Object setObject(int targetType, java.sql.Blob source) throws SqlException {
+    final Object setObject(int targetType, Blob source) throws SqlException {
         switch (targetType) {
-        case Types.BLOB:
+        case ClientTypes.BLOB:
             return source;
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.sql.Blob", Types.getTypeString(targetType));
+                "java.sql.Blob", ClientTypes.getTypeString(targetType));
         }
     }
 
     // Convert from InputStream source to target type
     // In support of PS.setBinaryStream()
-    final Object setObjectFromBinaryStream(int targetType, java.io.InputStream source, int length) throws SqlException {
+    final Object setObjectFromBinaryStream(
+            int targetType,
+            InputStream source,
+            int length) throws SqlException {
+
         switch (targetType) {
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
+        case ClientTypes.BINARY:
+        case ClientTypes.VARBINARY:
+        case ClientTypes.LONGVARBINARY:
             return setBytesFromStream(source, length);
-        case Types.BLOB:
+        case ClientTypes.BLOB:
             if (length == CrossConverters.UNKNOWN_LENGTH) {
-                return new Blob(agent_, source);
+                return new ClientBlob(agent_, source);
             }
-            return new Blob(agent_, source, length);
+            return new ClientBlob(agent_, source, length);
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.io.InputStream", Types.getTypeString(targetType));
+                "java.io.InputStream", ClientTypes.getTypeString(targetType));
         }
     }
 
     // create a byte[] by reading all of the bytes from inputStream
-    private final byte[] setBytesFromStream(java.io.InputStream is, int length) throws SqlException {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+    private final byte[] setBytesFromStream(InputStream is, int length)
+            throws SqlException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int totalRead = 0;
 
         try {
@@ -893,7 +925,7 @@ final class CrossConverters {
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId (SQLState.READER_UNDER_RUN));
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throw SqlException.javaException(agent_.logWriter_, e);
         }
         return baos.toByteArray();
@@ -901,14 +933,14 @@ final class CrossConverters {
 
     // Convert from Clob source to target type
     // In support of PS.setClob()
-    final Object setObject(int targetType, java.sql.Clob source) throws SqlException {
+    final Object setObject(int targetType, Clob source) throws SqlException {
         switch (targetType) {
-        case Types.CLOB:
+        case ClientTypes.CLOB:
             return source;
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                "java.sql.Clob", Types.getTypeString(targetType));
+                "java.sql.Clob", ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -927,42 +959,48 @@ final class CrossConverters {
             return setObject(targetType, ((Float) source).floatValue());
         } else if (source instanceof Double) {
             return setObject(targetType, ((Double) source).doubleValue());
-        } else if (source instanceof java.math.BigDecimal) {
-            return setObject(targetType, (java.math.BigDecimal) source);
-        } else if (source instanceof java.sql.Date) {
-            return setObject(targetType, (java.sql.Date) source);
-        } else if (source instanceof java.sql.Time) {
-            return setObject(targetType, (java.sql.Time) source);
-        } else if (source instanceof java.sql.Timestamp) {
-            return setObject(targetType, (java.sql.Timestamp) source);
+        } else if (source instanceof BigDecimal) {
+            return setObject(targetType, (BigDecimal) source);
+        } else if (source instanceof Date) {
+            return setObject(targetType, (Date) source);
+        } else if (source instanceof Time) {
+            return setObject(targetType, (Time) source);
+        } else if (source instanceof Timestamp) {
+            return setObject(targetType, (Timestamp) source);
         } else if (source instanceof String) {
             return setObject(targetType, (String) source);
         } else if (source instanceof byte[]) {
             return setObject(targetType, (byte[]) source);
-        } else if (source instanceof java.sql.Blob) {
-            return setObject(targetType, (java.sql.Blob) source);
-        } else if (source instanceof java.sql.Clob) {
-            return setObject(targetType, (java.sql.Clob) source);
-        } else if (source instanceof java.sql.Array) {
-            return setObject(targetType, (java.sql.Array) source);
-        } else if (source instanceof java.sql.Ref) {
-            return setObject(targetType, (java.sql.Ref) source);
+        } else if (source instanceof Blob) {
+            return setObject(targetType, (Blob) source);
+        } else if (source instanceof Clob) {
+            return setObject(targetType, (Clob) source);
+        } else if (source instanceof Array) {
+            return setObject(targetType, (Array) source);
+        } else if (source instanceof Ref) {
+            return setObject(targetType, (Ref) source);
         } else if (source instanceof Short) {
             return setObject(targetType, ((Short) source).shortValue());
         } else if (source instanceof Byte) {
             return setObject(targetType, ((Byte) source).byteValue());
-        } else if (source instanceof java.math.BigInteger) {
-            return setObject(targetType, new java.math.BigDecimal( (java.math.BigInteger) source ) );
+        } else if (source instanceof BigInteger) {
+            return setObject(targetType,
+                             new BigDecimal((BigInteger)source ));
         } else if (source instanceof java.util.Date) {
-            return setObject(targetType, new java.sql.Timestamp(  ((java.util.Date) source).getTime() ) );
-        } else if (source instanceof java.util.Calendar) {
-            return setObject(targetType, new java.sql.Timestamp(  ((java.util.Calendar) source).getTime().getTime() ) );
-        } else if (targetType == Types.JAVA_OBJECT) {
+            return setObject(targetType,
+                             new Timestamp(((java.util.Date)source).getTime()));
+        } else if (source instanceof Calendar) {
+            return setObject(targetType,
+                             new Timestamp(((Calendar)source).getTime().
+                                           getTime()));
+        } else if (targetType == ClientTypes.JAVA_OBJECT) {
             return source;
         } else {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
-                source.getClass().getName(), Types.getTypeString(targetType));
+            throw new SqlException(
+                agent_.logWriter_,
+                new ClientMessageId(SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                source.getClass().getName(),
+                ClientTypes.getTypeString(targetType));
         }
     }
 
@@ -1023,7 +1061,7 @@ final class CrossConverters {
 
     final byte getByteFromShort(short source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
+                (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1033,7 +1071,7 @@ final class CrossConverters {
 
     final byte getByteFromInt(int source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
+                (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1043,7 +1081,7 @@ final class CrossConverters {
 
     final byte getByteFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
+                (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1053,7 +1091,7 @@ final class CrossConverters {
 
     final byte getByteFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
+                (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1063,7 +1101,7 @@ final class CrossConverters {
 
     final byte getByteFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
+                (source > Byte.MAX_VALUE || source < Byte.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "TINYINT");
         }
@@ -1078,7 +1116,7 @@ final class CrossConverters {
     final byte getByteFromString(String source) throws SqlException {
         try {
             return parseByte(source);
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), "byte", e);
@@ -1089,7 +1127,7 @@ final class CrossConverters {
 
     final short getShortFromInt(int source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
+                (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "SMALLINT");
         }
@@ -1099,7 +1137,7 @@ final class CrossConverters {
 
     final short getShortFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
+                (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "SMALLINT");
         }
@@ -1109,7 +1147,7 @@ final class CrossConverters {
 
     final short getShortFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
+                (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "SMALLINT");
         }
@@ -1119,7 +1157,7 @@ final class CrossConverters {
 
     final short getShortFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
+                (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "SMALLINT");
         }
@@ -1134,7 +1172,7 @@ final class CrossConverters {
     final short getShortFromString(String source) throws SqlException {
         try {
             return parseShort(source);
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId 
                     (SQLState.LANG_FORMAT_EXCEPTION), 
@@ -1146,7 +1184,7 @@ final class CrossConverters {
 
     final int getIntFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
+                (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "INTEGER");
         }
@@ -1156,7 +1194,7 @@ final class CrossConverters {
 
     final int getIntFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
+                (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "INTEGER");
         }
@@ -1166,7 +1204,7 @@ final class CrossConverters {
 
     final int getIntFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
+                (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "INTEGER");
         }
@@ -1181,7 +1219,7 @@ final class CrossConverters {
     final int getIntFromString(String source) throws SqlException {
         try {
             return parseInt(source);
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "int", e);
@@ -1192,7 +1230,7 @@ final class CrossConverters {
 
     final long getLongFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Long.MAX_VALUE || source < java.lang.Long.MIN_VALUE)) {
+                (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "BIGINT");
         }
@@ -1202,7 +1240,7 @@ final class CrossConverters {
 
     final long getLongFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
-                (source > java.lang.Long.MAX_VALUE || source < java.lang.Long.MIN_VALUE)) {
+                (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
             throw new OutsideRangeForDataTypeException(
                 agent_.logWriter_, "BIGINT");
         }
@@ -1217,7 +1255,7 @@ final class CrossConverters {
     final long getLongFromString(String source) throws SqlException {
         try {
             return parseLong(source);
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "long", e);
@@ -1243,7 +1281,7 @@ final class CrossConverters {
     final float getFloatFromString(String source) throws SqlException {
         try {
             return Float.parseFloat(source.trim());
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "float", e);
@@ -1259,7 +1297,7 @@ final class CrossConverters {
     final double getDoubleFromString(String source) throws SqlException {
         try {
             return Double.parseDouble(source.trim());
-        } catch (java.lang.NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "double", e);
@@ -1268,16 +1306,18 @@ final class CrossConverters {
 
     //---------------------------- getBigDecimal*() methods ----------------------
 
-    final java.math.BigDecimal getBigDecimalFromBoolean(boolean source) throws SqlException {
+    final BigDecimal getBigDecimalFromBoolean(boolean source)
+            throws SqlException {
         return source ? bdOne__ : bdZero__;
     }
 
-    final java.math.BigDecimal getBigDecimalFromString(String source) throws SqlException {
+    final BigDecimal getBigDecimalFromString(String source)
+            throws SqlException {
         try {
             // Unfortunately, the big decimal constructor calls java.lang.Long.parseLong(),
             // which doesn't like spaces, so we have to call trim() to get rid of the spaces from CHAR columns.
-            return new java.math.BigDecimal(source.trim());
-        } catch (java.lang.NumberFormatException e) {
+            return new BigDecimal(source.trim());
+        } catch (NumberFormatException e) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId (SQLState.LANG_FORMAT_EXCEPTION),
                     "java.math.BigDecimal", e);
@@ -1312,18 +1352,18 @@ final class CrossConverters {
             throws SqlException {
         try {
             return date_valueOf(source, cal);
-        } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
+        } catch (IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
-    final java.sql.Date getDateFromTime(java.sql.Time source) throws SqlException {
-        return new java.sql.Date(source.getTime());
+    final Date getDateFromTime(Time source) throws SqlException {
+        return new Date(source.getTime());
     }
 
-    final java.sql.Date getDateFromTimestamp(java.sql.Timestamp source) throws SqlException {
-        return new java.sql.Date(source.getTime());
+    final Date getDateFromTimestamp(Timestamp source) throws SqlException {
+        return new Date(source.getTime());
     }
 
     //---------------------------- getTime*() methods ----------------------------
@@ -1332,14 +1372,14 @@ final class CrossConverters {
             throws SqlException {
         try {
             return time_valueOf(source, cal);
-        } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
+        } catch (IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
-    final java.sql.Time getTimeFromTimestamp(java.sql.Timestamp source) throws SqlException {
-        return new java.sql.Time(source.getTime());
+    final Time getTimeFromTimestamp(Timestamp source) throws SqlException {
+        return new Time(source.getTime());
     }
 
     //---------------------------- getTimestamp*() methods -----------------------
@@ -1348,34 +1388,34 @@ final class CrossConverters {
             throws SqlException {
         try {
             return timestamp_valueOf(source, cal);
-        } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
+        } catch (IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
     }
 
-    final java.sql.Timestamp getTimestampFromTime(java.sql.Time source) throws SqlException {
-        return new java.sql.Timestamp(source.getTime());
+    final Timestamp getTimestampFromTime(Time source) throws SqlException {
+        return new Timestamp(source.getTime());
     }
 
-    final java.sql.Timestamp getTimestampFromDate(java.sql.Date source) throws SqlException {
-        return new java.sql.Timestamp(source.getTime());
+    final Timestamp getTimestampFromDate(Date source) throws SqlException {
+        return new Timestamp(source.getTime());
     }
 
     /**
      * Convert a string to a date in the specified calendar. Accept the same
-     * format as {@code java.sql.Date.valueOf()}.
+     * format as {@code Date.valueOf()}.
      *
      * @param s the string to parse
      * @param cal the calendar (or null to use the default calendar)
-     * @return a {@code java.sql.Date} value that represents the date in the
+     * @return a {@code Date} value that represents the date in the
      * calendar {@code cal}
      * @throws IllegalArgumentException if the format of the string is invalid
      */
     final Date date_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Date format must be yyyy-mm-dd";
         if (s == null) {
-            throw new java.lang.IllegalArgumentException(formatError);
+            throw new IllegalArgumentException(formatError);
         }
         s = s.trim();
 
@@ -1459,7 +1499,7 @@ final class CrossConverters {
     final Time time_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Time format must be hh:mm:ss";
         if (s == null) {
-            throw new java.lang.IllegalArgumentException();
+            throw new IllegalArgumentException();
         }
         s = s.trim();
 
@@ -1514,7 +1554,7 @@ final class CrossConverters {
     final Timestamp timestamp_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff";
         if (s == null) {
-            throw new java.lang.IllegalArgumentException();
+            throw new IllegalArgumentException();
         }
 
         s = s.trim();

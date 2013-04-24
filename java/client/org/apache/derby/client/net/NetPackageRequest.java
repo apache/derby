@@ -178,7 +178,7 @@ public class NetPackageRequest extends NetConnectionRequest {
     private byte[] getBytes(String string, String encoding) throws SqlException {
         try {
             return string.getBytes(encoding);
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.JAVA_EXCEPTION), 
                 e.getClass().getName(), e.getMessage(), e);

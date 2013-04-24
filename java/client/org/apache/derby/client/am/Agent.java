@@ -21,6 +21,9 @@
 
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
+import java.sql.BatchUpdateException;
+import java.sql.Types;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -32,7 +35,7 @@ public abstract class Agent {
     private int batchedExceptionLabelIndex_;
     private boolean[] batchedExceptionGenerated_;
 
-    Connection connection_; // made friendly for lobs only, refactor !!
+    ClientConnection connection_; // made friendly for lobs only, refactor !!
     public SectionManager sectionManager_ = null; // temporarily public, make friendly at least !!
 
     public LogWriter logWriter_ = null;
@@ -75,24 +78,24 @@ public abstract class Agent {
         // (sort of) JAVA_OBJECT.
 
         switch (dataType) {
-        case java.sql.Types.ARRAY:
-        case java.sql.Types.DATALINK:
-        case java.sql.Types.DISTINCT:
+        case Types.ARRAY:
+        case Types.DATALINK:
+        case Types.DISTINCT:
         case JDBC40Translation.NCHAR:
         case JDBC40Translation.NCLOB:
         case JDBC40Translation.NVARCHAR:
         case JDBC40Translation.LONGNVARCHAR:
-        case java.sql.Types.NULL:
-        case java.sql.Types.OTHER:
-        case java.sql.Types.REF:
+        case Types.NULL:
+        case Types.OTHER:
+        case Types.REF:
         case JDBC40Translation.REF_CURSOR:
         case JDBC40Translation.ROWID:
         case JDBC40Translation.SQLXML:
-        case java.sql.Types.STRUCT:
+        case Types.STRUCT:
             throw new SqlException
                 (logWriter_,
                  new ClientMessageId(SQLState.DATA_TYPE_NOT_SUPPORTED),
-                 Types.getTypeString(dataType));
+                 ClientTypes.getTypeString(dataType));
         }
     }
 
@@ -104,7 +107,7 @@ public abstract class Agent {
         }
     }
 
-    protected Agent(Connection connection, LogWriter logWriter) {
+    protected Agent(ClientConnection connection, LogWriter logWriter) {
         connection_ = connection;
         logWriter_ = logWriter;
         crossConverters_ = new CrossConverters(this);
@@ -120,7 +123,13 @@ public abstract class Agent {
         deferredException_ = null;
     }
 
-    public void resetAgent(Connection connection, LogWriter logWriter, int loginTimeout, String server, int port) throws SqlException {
+    public void resetAgent(
+        ClientConnection connection,
+        LogWriter logWriter,
+        int loginTimeout,
+        String server,
+        int port) throws SqlException {
+
         resetAgent(logWriter);
         resetAgent_(logWriter, loginTimeout, server, port);
     }
@@ -142,11 +151,12 @@ public abstract class Agent {
         }
     }
 
-    public final java.io.PrintWriter getLogWriter() {
+    public final PrintWriter getLogWriter() {
         return (logWriter_ == null) ? null : logWriter_.printWriter_;
     }
 
-    abstract public LogWriter newLogWriter_(java.io.PrintWriter printWriter, int traceLevel);
+    abstract public LogWriter newLogWriter_(
+        PrintWriter printWriter, int traceLevel);
 
     //----------------------------------------------------------------------------
 
@@ -224,13 +234,14 @@ public abstract class Agent {
         return batchedExceptionGenerated_[batchedExceptionLabelIndex_];
     }
 
-    public final void flow(Statement statement) throws SqlException {
+    public final void flow(ClientStatement statement) throws SqlException {
         endWriteChain();
         flush_();
         beginReadChain(statement);
     }
 
-    public final void flowBatch(Statement statement, int batchSize) throws SqlException {
+    public final void flowBatch(ClientStatement statement, int batchSize)
+            throws SqlException {
         endBatchedWriteChain();
         flush_();
         beginBatchedReadChain(statement, batchSize);
@@ -267,11 +278,12 @@ public abstract class Agent {
     public void beginWriteChainOutsideUOW() throws SqlException {
     }
 
-    public void beginWriteChain(Statement statement) throws SqlException {
+    public void beginWriteChain(ClientStatement statement) throws SqlException {
         connection_.writeTransactionStart(statement);
     }
 
-    public final void beginBatchedWriteChain(Statement statement) throws SqlException {
+    public final void beginBatchedWriteChain(ClientStatement statement)
+            throws SqlException {
         beginWriteChain(statement);
     }
 
@@ -281,11 +293,16 @@ public abstract class Agent {
     protected final void endBatchedWriteChain() {
     }
 
-    protected void beginReadChain(Statement statement) throws SqlException {
+    protected void beginReadChain(ClientStatement statement)
+            throws SqlException {
         connection_.readTransactionStart();
     }
 
-    protected final void beginBatchedReadChain(Statement statement, int batchSize) throws SqlException {
+    protected final void beginBatchedReadChain(
+        ClientStatement statement,
+        int batchSize)
+            throws SqlException {
+
         enableBatchedExceptionTracking(batchSize);
         beginReadChain(statement);
     }
@@ -298,7 +315,7 @@ public abstract class Agent {
     }
 
     public final void endBatchedReadChain(long[] updateCounts, SqlException accumulatedExceptions)
-        throws java.sql.BatchUpdateException {
+        throws BatchUpdateException {
         disableBatchedExceptionTracking();
         for (int i = 0; i < batchedExceptionGenerated_.length; i++) {
             if (batchedExceptionGenerated_[i]) {

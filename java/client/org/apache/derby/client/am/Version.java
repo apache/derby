@@ -21,6 +21,9 @@
 
 package org.apache.derby.client.am;
 
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
@@ -73,7 +76,7 @@ public abstract class Version {
 
     // -------------------------- configuration print stream ---------------------
 
-    public static void writeDriverConfiguration(java.io.PrintWriter printWriter) {
+    public static void writeDriverConfiguration(PrintWriter printWriter) {
         String header = "[derby] ";
         synchronized (printWriter) {
             printWriter.println(header + "BEGIN TRACE_DRIVER_CONFIGURATION");
@@ -94,14 +97,14 @@ public abstract class Version {
             printWriter.println(header + "Default fetch size: " + Configuration.defaultFetchSize);
             printWriter.println(header + "Default isolation: " + Configuration.defaultIsolation);
 
-            java.lang.SecurityManager security = java.lang.System.getSecurityManager();
+            SecurityManager security = System.getSecurityManager();
             if (security == null) {
                 printWriter.println(header + "No security manager detected.");
             } else {
                 printWriter.println(header + "Security manager detected.");
             }
 
-            detectLocalHost(java.lang.System.getSecurityManager(), printWriter);
+            detectLocalHost(System.getSecurityManager(), printWriter);
 
             printSystemProperty(security, "JDBC 1 system property jdbc.drivers = ", "jdbc.drivers", printWriter);
 
@@ -135,10 +138,10 @@ public abstract class Version {
         }
     }
 
-    private static void printSystemProperty(java.lang.SecurityManager security,
+    private static void printSystemProperty(SecurityManager security,
                                             String prefix,
                                             String property,
-                                            java.io.PrintWriter printWriter) {
+                                            PrintWriter printWriter) {
         String header = "[derby] ";
         synchronized (printWriter) {
             try {
@@ -157,15 +160,18 @@ public abstract class Version {
     }
 
     // printWriter synchronized by caller
-    private static void detectLocalHost(java.lang.SecurityManager security, java.io.PrintWriter printWriter) {
+    private static void detectLocalHost(
+            SecurityManager security,
+            PrintWriter printWriter) {
+
         String header = "[derby] ";
         // getLocalHost() will hang the HotJava 1.0 browser with a high security manager.
         if (security == null) {
             try {
                 printWriter.print(header + "Detected local client host: ");
-                printWriter.println(java.net.InetAddress.getLocalHost().toString());
+                printWriter.println(InetAddress.getLocalHost().toString());
                 printWriter.flush();
-            } catch (java.net.UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 printWriter.println(header + 
                     msgutil.getTextMessage(MessageId.UNKNOWN_HOST_ID, e.getMessage()));
                 printWriter.flush();

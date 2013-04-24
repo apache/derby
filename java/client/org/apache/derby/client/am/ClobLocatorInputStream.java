@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -34,24 +35,24 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * generating an <code>IOException</code>.
  * <p>
  * This <code>InputStream</code> implementation is pretty basic.  No
- * buffering of data is done.  Hence, for efficieny #read(byte[])
+ * buffering of data is done.  Hence, for efficiency #read(byte[])
  * should be used instead of #read().  Marks are not supported, but it
  * should be pretty simple to extend the implementation to support
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
 
-public class ClobLocatorInputStream extends java.io.InputStream {
+public class ClobLocatorInputStream extends InputStream {
     
     /**
      * Connection used to read Clob from server.
      */
-    private final Connection connection;
+    private final ClientConnection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private final Clob clob;
+    private final ClientClob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -68,7 +69,7 @@ public class ClobLocatorInputStream extends java.io.InputStream {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
-    public ClobLocatorInputStream(Connection connection, Clob clob)
+    public ClobLocatorInputStream(ClientConnection connection, ClientClob clob)
     throws SqlException{
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
@@ -90,8 +91,10 @@ public class ClobLocatorInputStream extends java.io.InputStream {
      * @param pos the position inside the <code>Clob<code> from which
      *            the reading must begin.
      */
-    public ClobLocatorInputStream(Connection connection, Clob clob, long pos)
-    throws SqlException{
+    public ClobLocatorInputStream(
+            ClientConnection connection,
+            ClientClob clob,
+            long pos) throws SqlException{
         this(connection, clob);
         this.currentPos = pos;
     }
