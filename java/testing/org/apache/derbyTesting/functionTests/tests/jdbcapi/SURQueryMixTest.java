@@ -207,7 +207,7 @@ public class SURQueryMixTest extends SURBaseTest
                 double p = (double) k / (double) n; 
                 if (d<p) {
                     // Replace a random value from the sample with the new value
-                    int keyToReplace = Math.abs(r.nextInt())%k;                    
+                    int keyToReplace = r.nextInt(k);
                     sampledKeys.set(keyToReplace, key);
                 }
             }
