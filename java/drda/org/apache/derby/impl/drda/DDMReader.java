@@ -1052,7 +1052,7 @@ class DDMReader
         try {
             return readLOBChunk(true, desiredLength);
         } catch (DRDAProtocolException e) {
-            e.printStackTrace(agent.getServer().logWriter);
+            e.printStackTrace(agent.getServer().logWriter());
             throw new IOException(e.getMessage());
         }
     }
@@ -1405,7 +1405,7 @@ class DDMReader
         catch (java.io.UnsupportedEncodingException e) {
             agent.agentError("UnsupportedEncodingException in readString, encoding = " 
                     + encoding);
-            e.printStackTrace(agent.getServer().logWriter);
+            e.printStackTrace(agent.getServer().logWriter());
         }
         
         pos += length;

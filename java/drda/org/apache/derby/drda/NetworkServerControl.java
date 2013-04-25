@@ -598,7 +598,7 @@ public class NetworkServerControl{
           
     protected void setClientLocale(String locale)
     {
-        serverImpl.clientLocale = locale;
+        serverImpl.setClientLocale( locale );
     }
 
     /**

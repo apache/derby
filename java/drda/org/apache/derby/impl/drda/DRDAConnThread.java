@@ -181,6 +181,9 @@ class DRDAConnThread extends Thread {
     // as part of SECMEC_USRSSBPWD security mechanism
     private byte[] myTargetSeed;
 
+    // product id as bytes
+    private static  byte[]  prdIdBytes;
+
     // Some byte[] constants that are frequently written into messages. It is more efficient to 
     // use these constants than to convert from a String each time 
     // (This replaces the qryscraft_ and notQryscraft_ static exception objects.)
@@ -364,6 +367,13 @@ class DRDAConnThread extends Thread {
     protected OutputStream getOutputStream()
     {
         return sockos;
+    }
+
+    /** Get product id as bytes */
+    private static  byte[]  getProductIDBytes()
+    {
+        if ( prdIdBytes == null ) { prdIdBytes = NetworkServerControlImpl.prdIdBytes(); }
+        return prdIdBytes;
     }
 
     /**
@@ -1790,17 +1800,17 @@ class DRDAConnThread extends Thread {
         writer.createDssReply();
         writer.startDdm(CodePoint.EXCSATRD);
         writer.writeScalarString(CodePoint.EXTNAM,
-                                 NetworkServerControlImpl.att_extnam);
+                                 NetworkServerControlImpl.att_extnam());
         //only reply with manager levels if we got sent some
         if (knownManagers != null && knownManagers.size() > 0) {
             writeMGRLEVELS();
         }
         writer.writeScalarString(CodePoint.SRVCLSNM,
-                                 NetworkServerControlImpl.att_srvclsnm);
+                                 NetworkServerControlImpl.att_srvclsnm());
         writer.writeScalarString(CodePoint.SRVNAM,
                                  NetworkServerControlImpl.ATT_SRVNAM);
         writer.writeScalarString(CodePoint.SRVRLSLV,
-                                 NetworkServerControlImpl.att_srvrlslv);
+                                 NetworkServerControlImpl.att_srvrlslv());
         writer.endDdmAndDss();
     }
     /**
@@ -3669,7 +3679,7 @@ class DRDAConnThread extends Thread {
         writer.startDdm(CodePoint.ACCRDBRM);
         writer.writeScalar2Bytes(CodePoint.SVRCOD, svrcod);
         writer.writeScalarString(CodePoint.PRDID,
-                                 NetworkServerControlImpl.prdId);
+                                 NetworkServerControlImpl.prdId());
         //TYPDEFNAM -required - JCC doesn't support QTDSQLJVM so for now we
         // just use ASCII, though we should eventually be able to use QTDSQLJVM
         // at level 7
@@ -6304,7 +6314,7 @@ class DRDAConnThread extends Thread {
             return;
         }
             
-        if (SanityManager.DEBUG && server.debugOutput && sqlcode < 0) {
+        if (SanityManager.DEBUG && server.debugOutput() && sqlcode < 0) {
             trace("handle SQLException here");
             trace("reason is: "+e.getMessage());
             trace("SQLState is: "+e.getSQLState());
@@ -6325,7 +6335,7 @@ class DRDAConnThread extends Thread {
 
         // SQLERRPROC
         // Write the byte[] constant rather than the string, for efficiency
-        writer.writeBytes(NetworkServerControlImpl.prdIdBytes_);
+        writer.writeBytes( getProductIDBytes() );
 
         // SQLCAXGRP
         writeSQLCAXGRP(updateCount, rowCount, buildSqlerrmc(e), e.getNextException());
@@ -6378,7 +6388,7 @@ class DRDAConnThread extends Thread {
         writer.writeBytes(sqlState);
 
         // SQLERRPROC
-        writer.writeBytes(NetworkServerControlImpl.prdIdBytes_);
+        writer.writeBytes( getProductIDBytes() );
 
         // SQLCAXGRP (Uses null as sqlerrmc since there is no error)
         writeSQLCAXGRP(updateCount, rowCount, null, null);
@@ -8843,7 +8853,7 @@ class DRDAConnThread extends Thread {
      */
     protected  void trace(String value)
     {
-        if (SanityManager.DEBUG && server.debugOutput == true) {
+        if (SanityManager.DEBUG && server.debugOutput() == true) {
             server.consoleMessage(value, true);
         }
     }
@@ -8863,7 +8873,7 @@ class DRDAConnThread extends Thread {
     private void traceEXTDTARead(int drdaType, int index,
                                  EXTDTAReaderInputStream stream,
                                  boolean streamLOB, String encoding) {
-        if (SanityManager.DEBUG && server.debugOutput == true) {
+        if (SanityManager.DEBUG && server.debugOutput() == true) {
             StringBuilder sb = new StringBuilder("Reading/setting EXTDTA: ");
             // Data: t<type>/i<ob_index>/<streamLOB>/<encoding>/
             //       <statusByteExpected>/b<byteLength>

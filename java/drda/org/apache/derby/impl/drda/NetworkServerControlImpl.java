@@ -111,7 +111,7 @@ public final class NetworkServerControlImpl {
     public final static int COMMAND_TIMESLICE = 9;
     public final static int COMMAND_PROPERTIES = 10;
     public final static int COMMAND_UNKNOWN = -1;
-    public final static String [] DASHARGS =
+    private final static String [] DASHARGS =
     {"p", "d", "user", "password", "ld", "ea", "ep", "b", "h", "s",
          "noSecurityManager", "ssl"};
     public final static int DASHARG_PORT = 0;
@@ -171,13 +171,13 @@ public final class NetworkServerControlImpl {
     private final static int MAXREPLY = 32767;
 
     // Application Server Attributes.
-    protected static String att_srvclsnm;
+    private static String att_srvclsnm;
     protected final static String ATT_SRVNAM = "NetworkServerControl";
 
-    protected static String att_extnam;
-    protected static String att_srvrlslv; 
-    protected static String prdId;
-    protected static byte[] prdIdBytes_;
+    private static String att_extnam;
+    private static String att_srvrlslv; 
+    private static String prdId;
+    private static byte[] prdIdBytes_;
     
     private static String buildNumber;
     private static String versionString;
@@ -195,7 +195,7 @@ public final class NetworkServerControlImpl {
 
     // Application Server manager levels - this needs to be in sync
     // with CodePoint.MGR_CODEPOINTS
-    protected final static int [] MGR_LEVELS = { 7, // AGENT
+    private final static int [] MGR_LEVELS = { 7, // AGENT
                                                  4, // CCSID Manager
                                                  0, // CNMAPPC not implemented
                                                  0, // CMNSYNCPT not implemented
@@ -212,8 +212,8 @@ public final class NetworkServerControlImpl {
                                                 };
                                             
     
-    protected PrintWriter logWriter;                        // console
-    protected PrintWriter cloudscapeLogWriter;              // derby.log
+    private PrintWriter logWriter;                        // console
+    private PrintWriter cloudscapeLogWriter;              // derby.log
     private static Driver cloudscapeDriver;
 
     // error types
@@ -276,7 +276,7 @@ public final class NetworkServerControlImpl {
     private int maxPoolSize;            //maximum pool size for pooled connections
     private Object poolSync = new Object(); // object to use for syning reading
 
-    protected boolean debugOutput = false;
+    private boolean debugOutput = false;
     private boolean cleanupOnStart = false; // Should we clean up when starting the server?
     private boolean restartFlag = false;
 
@@ -300,7 +300,7 @@ public final class NetworkServerControlImpl {
     private ServerSocket serverSocket;
     private NetworkServerControlImpl serverInstance;
     private LocalizedResource langUtil;
-    public String clientLocale;
+    private String clientLocale;
     /** List of local addresses for checking admin commands. */
     ArrayList<InetAddress> localAddresses;
 
@@ -371,6 +371,9 @@ public final class NetworkServerControlImpl {
             SUPPORTS_EUSRIDPWD = false;
         }
     }
+
+    /** Get the log writer we're using */
+    public  PrintWriter logWriter() { return logWriter; }
 
     /**
      * Get the host where we listen for connections.
@@ -548,6 +551,24 @@ public final class NetworkServerControlImpl {
         throw new Exception(msg);
     }
 
+    /** Return the debug state */
+    public  boolean debugOutput()   { return debugOutput; }
+
+    /** Return the att_extnam server attribute */
+    public  static  String  att_extnam()    { return att_extnam; }
+    
+    /** Return the att_srvclsnm server attribute */
+    public  static  String  att_srvclsnm()    { return att_srvclsnm; }
+    
+    /** Return the att_srvrlslv server attribute */
+    public  static  String  att_srvrlslv()    { return att_srvrlslv; }
+    
+    /** Return the product id */
+    public  static  String  prdId()    { return prdId; }
+
+    /** Return the bytes of the product id */
+    public  static  byte[]  prdIdBytes() { return (byte[]) prdIdBytes_.clone(); }
+    
     /**
      * Write an exception to console output stream,
      * but only if debugOutput is true.
@@ -4091,7 +4112,7 @@ public final class NetworkServerControlImpl {
         return connNum;
     }
 
-    protected void setClientLocale(String locale)
+    public void setClientLocale(String locale)
     {
         clientLocale = locale;
     }
