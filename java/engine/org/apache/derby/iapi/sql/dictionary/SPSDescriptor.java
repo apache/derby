@@ -32,6 +32,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -46,6 +47,7 @@ import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 
 /**
  * A SPSDescriptor describes a Stored Prepared Statement.
@@ -218,7 +220,7 @@ public class SPSDescriptor extends TupleDescriptor
 		this.text = text;
 		this.usingText = usingText;
 		this.valid = valid;
-		this.compileTime = compileTime;
+		this.compileTime = DataTypeUtilities.clone( compileTime );
 		this.sd = dataDictionary.getSchemaDescriptor(suuid, null);
 		this.preparedStatement = preparedStatement;
 		this.compSchemaId = compSchemaUUID;
@@ -510,7 +512,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 */
 	public final synchronized Timestamp getCompileTime()
 	{
-		return compileTime;
+		return DataTypeUtilities.clone( compileTime );
 	}
 
 	/**
@@ -593,7 +595,7 @@ public class SPSDescriptor extends TupleDescriptor
             lookedUpParams = true;
         }
 
-		return params;
+		return (DataTypeDescriptor[]) ArrayUtil.copy( params );
 	}
 
 	/**
@@ -603,7 +605,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 */
 	public final synchronized void setParams(DataTypeDescriptor params[])
 	{
-		this.params = params;
+		this.params = (DataTypeDescriptor[]) ArrayUtil.copy( params );
 	}
 
 	/**
@@ -620,9 +622,11 @@ public class SPSDescriptor extends TupleDescriptor
 		throws StandardException
 	{
 		if (paramDefaults == null)
+        {
 			getParams();
+        }
 
-		return paramDefaults;
+		return ArrayUtil.copy( paramDefaults );
 	}
 
 	/**
@@ -632,7 +636,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 */
 	public final synchronized void setParameterDefaults(Object[] values)
 	{
-		this.paramDefaults = values;
+		this.paramDefaults = ArrayUtil.copy( values );
 	}
 	
 	/**

@@ -24,6 +24,8 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.sql.Timestamp;
 import java.util.Arrays;
 
+import org.apache.derby.iapi.types.DataTypeUtilities;
+
 /**
  * A Descriptor for a user stored in SYSUSERS.
  */
@@ -65,12 +67,12 @@ public final class  UserDescriptor extends TupleDescriptor
             System.arraycopy( password, 0, _password, 0, password.length );
         }
         
-        _lastModified = lastModified;
+        _lastModified = DataTypeUtilities.clone( lastModified );
 	}
 
 	public String getUserName(){ return _userName; }
 	public String getHashingScheme()    { return _hashingScheme; }
-    public  Timestamp   getLastModified()   { return _lastModified; }
+    public  Timestamp   getLastModified()   { return DataTypeUtilities.clone( _lastModified ); }
 
     /**
      * <p>

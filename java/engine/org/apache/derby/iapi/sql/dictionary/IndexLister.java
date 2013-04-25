@@ -23,6 +23,8 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
+
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
@@ -85,7 +87,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( indexRowGenerators == null ) { getAllIndexes(); }
-		return	indexRowGenerators;
+		return	(IndexRowGenerator[]) ArrayUtil.copy( indexRowGenerators );
 	}
 
     /**
@@ -99,7 +101,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( indexConglomerateNumbers == null ) { getAllIndexes(); }
-		return	indexConglomerateNumbers;
+		return	ArrayUtil.copy( indexConglomerateNumbers );
 	}
 
     /**
@@ -112,7 +114,7 @@ public class IndexLister
     public	String[]		getIndexNames()	throws StandardException
 	{
 		if ( indexNames == null ) { getAllIndexes(); }
-		return	indexNames;
+		return	ArrayUtil.copy( indexNames );
 	}
 
     /**
@@ -127,7 +129,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( distinctIndexRowGenerators == null ) { getAllIndexes(); }
-		return	distinctIndexRowGenerators;
+		return	(IndexRowGenerator[]) ArrayUtil.copy( distinctIndexRowGenerators );
 	}
 
     /**
@@ -142,7 +144,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( distinctIndexConglomerateNumbers == null ) { getAllIndexes(); }
-		return	distinctIndexConglomerateNumbers;
+		return	ArrayUtil.copy( distinctIndexConglomerateNumbers );
 	}
 
     /**
@@ -156,7 +158,7 @@ public class IndexLister
     public	String[]		getDistinctIndexNames()	throws StandardException
 	{
 		if ( indexNames == null ) { getAllIndexes(); }
-		return	indexNames;
+		return	ArrayUtil.copy( indexNames );
 	}
 
 	////////////////////////////////////////////////////////////////////////

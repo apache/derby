@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
@@ -200,7 +201,7 @@ public abstract class ConstraintDescriptor
 	 */
 	public int[]	getReferencedColumns()
 	{
-		return referencedColumns;
+		return ArrayUtil.copy( referencedColumns );
 	}
 
 	/**

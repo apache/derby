@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.io.FormatableHashtable;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 
 import java.util.Vector;
 
@@ -98,14 +99,10 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 		this.optimizeTime = optimizeTime;
 		this.generateTime = generateTime;
 		this.executeTime = executeTime;
-		this.beginCompilationTimestamp =beginCompilationTimestamp == null ?
-            null : (Timestamp) beginCompilationTimestamp.clone();
-		this.endCompilationTimestamp = endCompilationTimestamp == null ?
-            null : (Timestamp) endCompilationTimestamp.clone();
-		this.beginExecutionTimestamp = beginExecutionTimestamp == null ?
-            null : (Timestamp) beginExecutionTimestamp.clone();
-		this.endExecutionTimestamp = endExecutionTimestamp == null ?
-            null : (Timestamp) endExecutionTimestamp.clone();
+		this.beginCompilationTimestamp = DataTypeUtilities.clone( beginCompilationTimestamp );
+		this.endCompilationTimestamp = DataTypeUtilities.clone( endCompilationTimestamp );
+		this.beginExecutionTimestamp = DataTypeUtilities.clone( beginExecutionTimestamp );
+		this.endExecutionTimestamp = DataTypeUtilities.clone( endExecutionTimestamp );
 		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
 		this.topResultSetStatistics = topResultSetStatistics;
 	}
@@ -179,7 +176,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getBeginCompilationTimestamp()
 	{
-		return beginCompilationTimestamp == null ?  null : (Timestamp) beginCompilationTimestamp.clone();
+		return DataTypeUtilities.clone( beginCompilationTimestamp );
 	}
 
 	/**
@@ -189,7 +186,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getEndCompilationTimestamp()
 	{
-		return endCompilationTimestamp == null ? null : (Timestamp) endCompilationTimestamp.clone();
+		return DataTypeUtilities.clone( endCompilationTimestamp );
 	}
 
 	/**
@@ -199,7 +196,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getBeginExecutionTimestamp()
 	{
-		return beginExecutionTimestamp == null ? null : (Timestamp) beginExecutionTimestamp.clone();
+		return DataTypeUtilities.clone( beginExecutionTimestamp );
 	}
 
 	/**
@@ -209,7 +206,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 	 */
 	public Timestamp getEndExecutionTimestamp()
 	{
-		return endExecutionTimestamp == null ? null : (Timestamp) endExecutionTimestamp.clone();
+		return DataTypeUtilities.clone( endExecutionTimestamp );
 	}
 
 	/**

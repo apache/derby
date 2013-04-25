@@ -73,6 +73,26 @@ public abstract class ArrayUtil
         return (original == null) ? null : (int[]) original.clone();
     }
 
+    /** Copy a (possibly null) array of longs */
+    public  static  long[]   copy( long[] original )
+    {
+        return (original == null) ? null : (long[]) original.clone();
+    }
+
+    /** Copy a (possibly null) 2-dimensional array of ints */
+    public  static  int[][]   copy2( int[][] original )
+    {
+        if ( original == null ) { return null; }
+
+        int[][] result = new int[ original.length ][];
+        for ( int i = 0; i < original.length; i++ )
+        {
+            result[ i ] = copy( original[ i ] );
+        }
+        
+        return result;
+    }
+
     /**
      * Make the contents of an array available as a read-only list. If the
      * array is null, an empty list will be returned.

@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.catalog.Statistics;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import java.sql.Timestamp;
@@ -72,7 +73,7 @@ public class StatisticsDescriptor extends TupleDescriptor
 	/*----- getter functions for rowfactory ------*/
 	public UUID getTableUUID() { return statTableID;}
 	public UUID getReferenceID() { return statRefID; }
-	public Timestamp getUpdateTimestamp() { return statUpdateTime; }
+	public Timestamp getUpdateTimestamp() { return DataTypeUtilities.clone( statUpdateTime ); }
 	public String getStatType() { return statType; }
 	public boolean isValid() { return statValid; }
 	public Statistics getStatistic() { return statStat; }

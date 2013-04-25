@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -229,7 +230,7 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	 */
 	public void setColumnNames(String[] columnNames)
 	{
-		this.columnNames = columnNames;
+		this.columnNames = ArrayUtil.copy( columnNames );
 	}
 
 	/**
@@ -240,7 +241,7 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	 */
 	public String[] getColumnNames()
 	{
-		return columnNames;
+		return ArrayUtil.copy( columnNames );
 	}
 
 	//

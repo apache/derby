@@ -27,6 +27,7 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.sql.ResultSetMetaData;
 
@@ -35,6 +36,12 @@ import java.sql.ResultSetMetaData;
  */
 public abstract class DataTypeUtilities  {
 
+    /** Clone a Timestamp because they are mutable */
+    public  static  Timestamp   clone( Timestamp original )
+    {
+        return original == null ? null : (Timestamp) original.clone();
+    }
+    
 	/**
 		Get the precision of the datatype.
 		@param	dtd			data type descriptor

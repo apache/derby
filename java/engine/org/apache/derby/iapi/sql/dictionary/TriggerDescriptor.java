@@ -21,10 +21,12 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.catalog.UUID;
 import java.sql.Timestamp;
 
@@ -188,8 +190,8 @@ public class TriggerDescriptor extends TupleDescriptor
 		this.whenSPSId = whenSPSId;
 		this.isEnabled = isEnabled;
 		this.referencedCols = referencedCols;
-		this.referencedColsInTriggerAction = referencedColsInTriggerAction;
-		this.creationTimestamp = creationTimestamp;
+		setReferencedColsInTriggerAction( referencedColsInTriggerAction );
+		this.creationTimestamp = DataTypeUtilities.clone( creationTimestamp );
 		this.triggerDefinition = triggerDefinition;
 		this.referencingOld = referencingOld;
 		this.referencingNew = referencingNew;
@@ -274,7 +276,7 @@ public class TriggerDescriptor extends TupleDescriptor
 	 */
 	public Timestamp getCreationTimestamp()
 	{
-		return creationTimestamp;
+		return DataTypeUtilities.clone( creationTimestamp );
 	}
 
 	/**
@@ -460,7 +462,7 @@ public class TriggerDescriptor extends TupleDescriptor
 	 */
 	public int[] getReferencedCols()
 	{
-		return referencedCols;
+		return ArrayUtil.copy( referencedCols );
 	}
 
 	/**
@@ -470,8 +472,14 @@ public class TriggerDescriptor extends TupleDescriptor
 	 */
 	public int[] getReferencedColsInTriggerAction()
 	{
-		return referencedColsInTriggerAction;
+        return ArrayUtil.copy( referencedColsInTriggerAction );
 	}
+
+    /** Set the referenced column array for trigger actions */
+    public  void    setReferencedColsInTriggerAction( int[] referencedColsInTriggerAction )
+    {
+		this.referencedColsInTriggerAction = ArrayUtil.copy( referencedColsInTriggerAction );
+    }
 
 	/**
 	 * Is this trigger enabled

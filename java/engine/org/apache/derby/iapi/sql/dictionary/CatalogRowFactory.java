@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -239,8 +240,8 @@ public abstract	class CatalogRowFactory
 				indexNames[ictr] = generateIndexName(ictr);
 				indexUUID[ictr] = uf.recreateUUID(uuidStrings[ictr + 2 ]);
 			}
-			this.indexColumnPositions = indexColumnPositions;
-			this.indexUniqueness = indexUniqueness;
+			this.indexColumnPositions = ArrayUtil.copy2( indexColumnPositions );
+			this.indexUniqueness = ArrayUtil.copy( indexUniqueness );
  
 		}
 	}
