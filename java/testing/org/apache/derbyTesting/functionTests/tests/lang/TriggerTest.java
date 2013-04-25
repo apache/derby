@@ -562,7 +562,10 @@ public class TriggerTest extends BaseJDBCTestCase {
                     modifiedRowCount > 1 ? (order >= lastOrder) :
                         (order > lastOrder);
                 assertTrue("matching triggers need to be fired in order creation:"
-                        +info+". Triggers got fired in this order:"+TRIGGER_INFO.get().toString()+". Tiggers got created in this order:"+listOfCreatedTriggers.toString(), false);
+                        +info+". Triggers got fired in this order:"+
+                        TRIGGER_INFO.get().toString()+
+                        ". Tiggers got created in this order:"+
+                        listOfCreatedTriggers.toString(), orderOk);
                 lastOrder = order;
                 continue;
             }
