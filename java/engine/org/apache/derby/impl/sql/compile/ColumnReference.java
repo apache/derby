@@ -604,6 +604,7 @@ public class ColumnReference extends ValueNode
 										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 										this,
 										trueNode,
+										Boolean.FALSE,
 										getContextManager());
 		/* Set type info for the operator node */
 		equalsNode.bindComparisonOperator();

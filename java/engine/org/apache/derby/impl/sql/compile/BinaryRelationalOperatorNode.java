@@ -86,7 +86,18 @@ public class BinaryRelationalOperatorNode
 	 */
 	private InListOperatorNode inListProbeSource = null;
 
-	public void init(Object leftOperand, Object rightOperand)
+	//DERBY-6185 (Query against view  with "where name LIKE 
+	// 'Col1' ESCAPE '\' " failed)
+	//4th argument forQueryRewrite can be true only if this node has been 
+	//  added by an internal rewrite of the query. This allows binding to 
+	//  be more liberal when checking it against allowed syntax.
+	//  This parameter will be passed FALSE when a new instance of the node
+	//  is being created(which is the majority of the cases). But when an 
+	//  existing node is getting cloned, the value of this parameter should 
+	//  be passed as the originalNode.getForQueryRewrite(). Examples of this
+	//  can be found in Predicate.Java and PredicateList.java
+	public void init(Object leftOperand, Object rightOperand,
+        Object forQueryRewrite)
 	{
 		String methodName = "";
 		String operatorName = "";
@@ -135,7 +146,7 @@ public class BinaryRelationalOperatorNode
 				}
 			    break;
 		}
-		super.init(leftOperand, rightOperand, operatorName, methodName);
+		super.init(leftOperand, rightOperand, operatorName, methodName, forQueryRewrite);
 		btnVis = null;
 	}
 
@@ -144,10 +155,21 @@ public class BinaryRelationalOperatorNode
 	 * an InListOperatorNode.  This version is used during IN-list
 	 * preprocessing to create a "probe predicate" for the IN-list.
 	 * See InListOperatorNode.preprocess() for more.
+	 * DERBY-6185 (Query against view  with "where name LIKE 
+	 *  'Col1' ESCAPE '\' " failed)
+	 * 4th argument forQueryRewrite can be true only if this node has been
+	 *  added by an internal rewrite of the query. This allows binding to
+	 *  be more liberal when checking it against allowed syntax.
+	 *  This parameter will be passed FALSE when a new instance of the node
+	 *  is being created(which is the majority of the cases). But when an 
+	 *  existing node is getting cloned, the value of this parameter should
+	 *  be passed as the originalNode.getForQueryRewrite(). Examples of this
+	 *  can be found in Predicate.Java and PredicateList.java
 	 */
-	public void init(Object leftOperand, Object rightOperand, Object inListOp)
+	public void init(Object leftOperand, Object rightOperand,
+			 Object inListOp, Object forQueryRewrite)
 	{
-		init(leftOperand, rightOperand);
+		init(leftOperand, rightOperand, forQueryRewrite);
 		this.inListProbeSource = (InListOperatorNode)inListOp;
 	}
 
@@ -1047,6 +1069,7 @@ public class BinaryRelationalOperatorNode
 		negation = (BinaryOperatorNode)
 			getNodeFactory().getNode(getNegationNode(),
 									 leftOperand, rightOperand,
+									 Boolean.FALSE,
 									 getContextManager());
 		negation.setType(getTypeServices());
 		return negation;
@@ -1092,6 +1115,7 @@ public class BinaryRelationalOperatorNode
     BinaryOperatorNode getSwappedEquivalent() throws StandardException {
         BinaryOperatorNode newNode = (BinaryOperatorNode) getNodeFactory().getNode(getNodeTypeForSwap(),
                 rightOperand, leftOperand,
+                Boolean.FALSE,
                 getContextManager());
         newNode.setType(getTypeServices());
         return newNode;
@@ -1319,6 +1343,7 @@ public class BinaryRelationalOperatorNode
 		return (RelationalOperator)getNodeFactory().getNode(getNodeType(),
 														  otherCR,
 														  rightOperand,
+														  Boolean.FALSE,
 														  getContextManager());
 	}
 	

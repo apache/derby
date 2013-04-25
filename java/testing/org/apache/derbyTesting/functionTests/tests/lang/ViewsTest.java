@@ -52,6 +52,88 @@ public final class ViewsTest extends BaseJDBCTestCase {
         return new CleanDatabaseTestSetup(suite);
     }
 
+    //DERBY-6185(Query against view  with 
+    // "where name LIKE 'Col1' ESCAPE '\' " failed)
+    //Problem was that we clone binary comparison operator node during the
+    // optimize phase but we did not copy the entire state of the original
+    // node
+    public void test_DERBY6185() throws Exception
+    {
+        ResultSet rs = null;
+        
+        Statement st = createStatement();
+        PreparedStatement ps;
+
+        // create 2 tables and a view
+        st.executeUpdate(
+            "create table mytbl1 (name clob(10K))");
+        st.executeUpdate("insert into mytbl1 "+
+            "values ('Col1'),('Col2')");
+        st.executeUpdate(
+            "create table mytbl2 (name clob(10K))");
+        st.executeUpdate("insert into mytbl2 "+
+                "values ('Col1'),('Col2')");
+        st.executeUpdate(
+            "create view myview (name) as select t1.name from " +
+            "mytbl1 t1 union all select t2.name from mytbl2 t2");
+
+        //test base table's CLOB and LIKE clause with Statement
+        rs = st.executeQuery("select name from mytbl1 " +
+                "where name LIKE 'Col1'");
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"}
+        });
+
+        //test base table's CLOB and LIKE clause with PreparedStatement
+        ps = prepareStatement("select name from mytbl1 " +
+                "where name LIKE ?");
+        ps.setString(1, "Col1");
+        rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"}
+        });
+
+        //test view's CLOB and LIKE clause with Statement
+        rs = st.executeQuery("select name from myview " +
+            "where name LIKE 'Col1'");
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"},
+                {"Col1"}
+        });
+
+        //test view's CLOB and LIKE clause with PreparedStatement
+        ps = prepareStatement("select name from myview " +
+                "where name LIKE ?");
+        ps.setString(1, "Col1");
+        rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"},
+                {"Col1"}
+        });
+
+        //test UNION's CLOB and LIKE clause with Statement
+        rs = st.executeQuery("select name from " +
+             "(select name from mytbl1 t1 union all " +
+             "select t2.name from mytbl2 t2) " +
+             "as s where name like 'Col1'");
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"},
+                {"Col1"}
+        });
+
+        //test UNION's CLOB and LIKE clause with PreparedStatement
+        ps = prepareStatement("select name from " +
+             "(select name from mytbl1 t1 union all " +
+             "select t2.name from mytbl2 t2) " +
+             "as s where name like ?");
+        ps.setString(1, "Col1");
+        rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"Col1"},
+                {"Col1"}
+        });
+    }
+
     public void test_views() throws Exception
     {
         ResultSet rs = null;

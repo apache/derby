@@ -398,6 +398,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                                 C_NodeTypes.CHAR_CONSTANT_NODE,
                                 newPattern,
                                 getContextManager()),
+                                Boolean.FALSE,
                             getContextManager());
 
                     // Set forQueryRewrite to bypass comparability checks
@@ -677,7 +678,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
                     receiver.getClone(), 
                     likeLTopt,
-                    getContextManager());
+                    Boolean.FALSE,
+                   getContextManager());
 
             // Disable comparability checks
             lessThan.setForQueryRewrite(true);
@@ -736,6 +738,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                 C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
                 receiver.getClone(), 
                 likeGEopt,
+                Boolean.FALSE,
                 getContextManager());
 
 

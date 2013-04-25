@@ -123,6 +123,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 									C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
 									leftOperand, 
 								 	rightOperandList.elementAt(0),
+								 	Boolean.FALSE,
 									cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
@@ -139,6 +140,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
 								leftClone,
 								rightOperandList.elementAt(1),
+							 	Boolean.FALSE,
 								cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();
@@ -224,6 +226,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftClone1, 
 						rightOperandList.elementAt(1),
+					 	Boolean.FALSE,
 						cm);
 
 		/* Set type info for the operator node */
@@ -243,6 +246,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 					C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 					leftOperand, 
 					rightOperandList.elementAt(0),
+				 	Boolean.FALSE,
 					cm);
 
 		/* Set type info for the operator node */
@@ -302,6 +306,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 							leftOperand, 
 							rightOperandList.elementAt(0),
+						 	Boolean.FALSE,
 							cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
@@ -312,6 +317,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftOperand, 
 						rightOperandList.elementAt(1),
+					 	Boolean.FALSE,
 						cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();

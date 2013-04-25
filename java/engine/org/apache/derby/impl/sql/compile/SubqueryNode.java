@@ -1616,6 +1616,7 @@ public class SubqueryNode extends ValueNode
 							nodeType,
 							leftOperand,
 							rightOperand,
+							Boolean.FALSE,
 							getContextManager());
 
 		bcoNode.bindComparisonOperator();
@@ -2380,6 +2381,7 @@ public class SubqueryNode extends ValueNode
   									C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
   									leftOperand,
   									this,
+  									Boolean.FALSE,
   									getContextManager());
   				break;
 
@@ -2388,6 +2390,7 @@ public class SubqueryNode extends ValueNode
   								C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
   								leftOperand,
   								this,
+  								Boolean.FALSE,
   								getContextManager());
   				break;
 
@@ -2396,6 +2399,7 @@ public class SubqueryNode extends ValueNode
   								C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
   								leftOperand,
   								this,
+  								Boolean.FALSE,
   								getContextManager());
   				break;
 
@@ -2404,6 +2408,7 @@ public class SubqueryNode extends ValueNode
   							C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
   							leftOperand,
   							this,
+  							Boolean.FALSE,
   							getContextManager());
   				break;
 
@@ -2412,6 +2417,7 @@ public class SubqueryNode extends ValueNode
   							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
   							leftOperand,
   							this,
+  							Boolean.FALSE,
   							getContextManager());
   				break;
 
@@ -2420,6 +2426,7 @@ public class SubqueryNode extends ValueNode
   								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
   								leftOperand,
   								this,
+  								Boolean.FALSE,
   								getContextManager());
   				break;
   		}

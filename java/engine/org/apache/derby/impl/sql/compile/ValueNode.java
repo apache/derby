@@ -550,6 +550,7 @@ public abstract class ValueNode extends QueryTreeNode
 								C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 								this,
 								falseNode,
+								Boolean.FALSE,
 								getContextManager());
 		nullableResult = getTypeServices().isNullable();
 		equalsNode.setType(new DataTypeDescriptor(
