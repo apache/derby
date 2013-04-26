@@ -24,11 +24,12 @@ package org.apache.derby.impl.sql.catalog;
 import java.sql.Timestamp;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
-import java.sql.Types;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 
 public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor 
 {
@@ -68,10 +69,10 @@ public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor
         this.generate_time   = generate_time;
         this.compile_time    = compile_time;
         this.execute_time    = execute_time;
-        this.begin_comp_time = begin_comp_time;
-        this.end_comp_time   = end_comp_time;
-        this.begin_exe_time  = begin_exe_time;
-        this.end_exe_time    = end_exe_time;
+        this.begin_comp_time = DataTypeUtilities.clone( begin_comp_time );
+        this.end_comp_time   = DataTypeUtilities.clone( end_comp_time );
+        this.begin_exe_time  = DataTypeUtilities.clone( begin_exe_time );
+        this.end_exe_time    = DataTypeUtilities.clone( end_exe_time );
         
     }
     public void setStatementParameters(PreparedStatement ps)

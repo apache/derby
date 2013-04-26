@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.TypeId;
 import java.sql.Types;
 
@@ -74,7 +75,7 @@ public class XPLAINStatementDescriptor extends XPLAINTableDescriptor
         this.jvm_id      = jvm_id;
         this.os_id       = os_id;
         this.xplain_mode = xplain_mode;
-        this.xplain_time = xplain_time;
+        this.xplain_time = DataTypeUtilities.clone( xplain_time );
         this.thread_id   = thread_id;
         this.xa_id       = xa_id;
         this.session_id  = session_id;
