@@ -1484,6 +1484,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						if (referencedCols[j] > droppedColumnPosition)
 							referencedCols[j]--;
 					}
+                    trd.setReferencedCols( referencedCols );
 					dd.addDescriptor(trd, sd,
 									 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
 									 false, tc);

@@ -465,6 +465,12 @@ public class TriggerDescriptor extends TupleDescriptor
 		return ArrayUtil.copy( referencedCols );
 	}
 
+    /** Update the array of referenced columns */
+    public  void    setReferencedCols( int[] newCols )
+    {
+        referencedCols = ArrayUtil.copy( newCols );
+    }
+
 	/**
 	 * Get the referenced column array for the trigger action columns.
 	 *
