@@ -44,7 +44,7 @@ import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -101,9 +101,9 @@ class VTIResultSet extends NoPutResultSetImpl
 
 	/**
 		Specified isolation level of SELECT (scan). If not set or
-		not application, it will be set to ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL
+		not application, it will be set to TransactionControl.UNSPECIFIED_ISOLATION_LEVEL
 	*/
-	private int scanIsolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+	private int scanIsolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 
     //
     // class interface
@@ -704,7 +704,7 @@ class VTIResultSet extends NoPutResultSetImpl
 	}
 
 	public final int getStatementIsolationLevel() {
-		return ExecutionContext.CS_TO_JDBC_ISOLATION_LEVEL_MAP[getScanIsolationLevel()];
+		return TransactionControl.jdbcIsolationLevel( getScanIsolationLevel() );
 	}
 
 

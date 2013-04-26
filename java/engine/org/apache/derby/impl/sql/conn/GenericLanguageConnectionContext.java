@@ -73,6 +73,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.InterruptStatus;
 
@@ -230,7 +231,7 @@ public class GenericLanguageConnectionContext
     private SchemaDescriptor cachedInitialDefaultSchemaDescr = null;
 
     // RESOLVE - How do we want to set the default.
-    private int defaultIsolationLevel = ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
+    private int defaultIsolationLevel = TransactionControl.READ_COMMITTED_ISOLATION_LEVEL;
     protected int isolationLevel = defaultIsolationLevel;
 
     private boolean isolationLevelExplicitlySet = false;
@@ -254,7 +255,7 @@ public class GenericLanguageConnectionContext
     // isolation level to when preparing statements.
     // if unspecified, the statement won't be prepared with a specific 
     // scan isolationlevel
-    protected int prepareIsolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+    protected int prepareIsolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 
     // Whether or not to write executing statement info to db2j.log
     private boolean logStatementText;
@@ -2950,7 +2951,7 @@ public class GenericLanguageConnectionContext
      */
     public int getCurrentIsolationLevel()
     {
-        return (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL) ? defaultIsolationLevel : isolationLevel;
+        return (isolationLevel == TransactionControl.UNSPECIFIED_ISOLATION_LEVEL) ? defaultIsolationLevel : isolationLevel;
     }
 
     /**
@@ -2958,9 +2959,11 @@ public class GenericLanguageConnectionContext
      */
     public String getCurrentIsolationLevelStr()
     {
-        if( isolationLevel >= 0 && isolationLevel < ExecutionContext.CS_TO_SQL_ISOLATION_MAP.length)
-            return ExecutionContext.CS_TO_SQL_ISOLATION_MAP[ isolationLevel][0];
-        return ExecutionContext.CS_TO_SQL_ISOLATION_MAP[ ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL][0];
+        if( isolationLevel >= 0 && isolationLevel < TransactionControl.isolationMapCount() )
+        {
+            return TransactionControl.isolationTextNames( isolationLevel )[0];
+        }
+        return TransactionControl.isolationTextNames( TransactionControl.UNSPECIFIED_ISOLATION_LEVEL )[0];
     }
 
     /**
@@ -2979,7 +2982,7 @@ public class GenericLanguageConnectionContext
         if (!isolationLevelExplicitlySet)
             return prepareIsolationLevel;
         else
-            return ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+            return TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
     }
 
     /**

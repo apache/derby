@@ -84,6 +84,7 @@ import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
@@ -2213,19 +2214,19 @@ public class EmbedConnection implements EngineConnection
 		switch (level)
 		{
 		case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
-			iLevel = ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL;
+			iLevel = TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL;
 			break;
 
 		case java.sql.Connection.TRANSACTION_READ_COMMITTED:
-			iLevel = ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
+			iLevel = TransactionControl.READ_COMMITTED_ISOLATION_LEVEL;
 			break;
 
 		case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
-            iLevel = ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL;
+            iLevel = TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL;
             break;
 
 		case java.sql.Connection.TRANSACTION_SERIALIZABLE:
-			iLevel = ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL;
+			iLevel = TransactionControl.SERIALIZABLE_ISOLATION_LEVEL;
 			break;
 		default:
 			throw newSQLException(SQLState.UNIMPLEMENTED_ISOLATION_LEVEL, new Integer(level));
@@ -2255,7 +2256,7 @@ public class EmbedConnection implements EngineConnection
      */
     public final int getTransactionIsolation() throws SQLException {
         checkIfClosed();
-		return ExecutionContext.CS_TO_JDBC_ISOLATION_LEVEL_MAP[getLanguageConnection().getCurrentIsolationLevel()];
+		return TransactionControl.jdbcIsolationLevel( getLanguageConnection().getCurrentIsolationLevel() );
 	}
 
     /**
@@ -3136,7 +3137,7 @@ public class EmbedConnection implements EngineConnection
 	 * @param level Isolation level to change to.  level is the DB2 level
 	 *               specified in the package names which happen to correspond
 	 *               to our internal levels. If 
-	 *               level == ExecutionContext.UNSPECIFIED_ISOLATION,
+	 *               level == TransactionControl.UNSPECIFIED_ISOLATION,
 	 *               the statement won't be prepared with an isolation level.
 	 * 
 	 * 
@@ -3148,11 +3149,11 @@ public class EmbedConnection implements EngineConnection
 
 		switch (level)
 		{
-			case ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL:
-			case ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL:
-			case ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL:
-			case ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL:
-			case ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL:
+			case TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL:
+			case TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL:
+			case TransactionControl.READ_COMMITTED_ISOLATION_LEVEL:
+			case TransactionControl.SERIALIZABLE_ISOLATION_LEVEL:
+			case TransactionControl.UNSPECIFIED_ISOLATION_LEVEL:
 				break;
 			default:
 				throw Util.generateCsSQLException(

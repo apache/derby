@@ -40,6 +40,7 @@ import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
 
@@ -841,9 +842,9 @@ class DRDAStatement
         // for JCC. Other static packages will need to be supported for 
         // CCC. Maybe a static hash table would then be in order.
         if (pkgid.equals("SYSSTAT"))
-            return ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL;
+            return TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL;
         else
-            return ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+            return TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
     }
 
     /**

@@ -73,6 +73,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.context.ContextImpl;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.SQLWarning;
@@ -146,7 +147,7 @@ public class CompilerContextImpl extends ContextImpl
 		compilationSchema = null;
 		parameterList = null;
 		parameterDescriptors = null;
-		scanIsolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+		scanIsolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 		warnings = null;
 		savedObjects = null;
 		reliability = CompilerContext.SQL_LEGAL;

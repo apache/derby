@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.transaction.TransactionControl;
 
 /**
  * Abstract <code>ResultSet</code> class for <code>NoPutResultSet</code>s which
@@ -114,7 +115,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         this.tableLocked = tableLocked;
         suppliedLockMode = lockMode;
 
-        if (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL) {
+        if (isolationLevel == TransactionControl.UNSPECIFIED_ISOLATION_LEVEL) {
             unspecifiedIsolationLevel = true;
             isolationLevel = getLanguageConnectionContext().getCurrentIsolationLevel();
         } else {
@@ -176,7 +177,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
          */
         if (tableLocked ||
                 (languageLevel ==
-                     ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)) {
+                     TransactionControl.SERIALIZABLE_ISOLATION_LEVEL)) {
             return suppliedLockMode;
         } else {
             return TransactionController.MODE_RECORD;
@@ -192,9 +193,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     private int translateLanguageIsolationLevel(int languageLevel) {
 
         switch (languageLevel) {
-        case ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL:
+        case TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL:
             return TransactionController.ISOLATION_READ_UNCOMMITTED;
-        case ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL:
+        case TransactionControl.READ_COMMITTED_ISOLATION_LEVEL:
             /*
              * Now we see if we can get instantaneous locks
              * if we are getting share locks.
@@ -205,9 +206,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
                 return TransactionController.ISOLATION_READ_COMMITTED;
             }
             return TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK;
-        case ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL:
+        case TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL:
             return TransactionController.ISOLATION_REPEATABLE_READ;
-        case ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL:
+        case TransactionControl.SERIALIZABLE_ISOLATION_LEVEL:
             return TransactionController.ISOLATION_SERIALIZABLE;
         }
 

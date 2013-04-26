@@ -62,6 +62,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
@@ -1956,7 +1957,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	}
 	
 	public final int getStatementIsolationLevel() {
-		return ExecutionContext.CS_TO_JDBC_ISOLATION_LEVEL_MAP[getCompilerContext().getScanIsolationLevel()];
+		return TransactionControl.jdbcIsolationLevel( getCompilerContext().getScanIsolationLevel() );
 	}
 
 	public void setSharedState(String key, java.io.Serializable value) {

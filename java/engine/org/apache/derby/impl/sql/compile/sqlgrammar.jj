@@ -55,6 +55,7 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DateTimeDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
@@ -3319,7 +3320,7 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 	ResultSetNode	  queryExpression;
 	ArrayList updateColumns = new ArrayList();
 	int               forUpdateState = CursorNode.UNSPECIFIED;
-	int				  isolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
+	int				  isolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
 	OrderByList orderCols = null;
     ValueNode[] offsetClauses = new ValueNode[ OFFSET_CLAUSE_COUNT ];
@@ -3355,7 +3356,7 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 		}
 
 		/* Set the isolation levels for the scans if specified */
-		if (isolationLevel != ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL)
+		if (isolationLevel != TransactionControl.UNSPECIFIED_ISOLATION_LEVEL)
 		{
 			getCompilerContext().setScanIsolationLevel(isolationLevel);
 		}
@@ -12286,7 +12287,7 @@ isolationLevelDB2OrReset() :
 }
 {
         (
-                <RESET> { return ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL; }
+                <RESET> { return TransactionControl.UNSPECIFIED_ISOLATION_LEVEL; }
                 | isolationLevel = isolationLevelDB2() { return isolationLevel; }
         )
 }
@@ -12300,22 +12301,22 @@ isolationLevelDB2() :
 	(
                 isolationLevel = isolationLevelDB2Abbrev() { return isolationLevel; }
                 | ( ( <REPEATABLE> <READ> ) | <SERIALIZABLE> )
-                        { return ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL; }
+                        { return TransactionControl.SERIALIZABLE_ISOLATION_LEVEL; }
 		| <CURSOR> <STABILITY>
-                        { return ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_COMMITTED_ISOLATION_LEVEL; }
 
 		| <DIRTY> <READ>
-                        { return ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL; }
 
 		|
                         LOOKAHEAD( { getToken(1).kind == READ && getToken(2).kind == COMMITTED } )
                         <READ> <COMMITTED>
-                        { return ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_COMMITTED_ISOLATION_LEVEL; }
 
 		|
                         LOOKAHEAD( { getToken(1).kind == READ && getToken(2).kind == UNCOMMITTED } )
                         <READ> <UNCOMMITTED>
-                        { return ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL; }
 	)
 }
 
@@ -12326,15 +12327,15 @@ isolationLevelDB2Abbrev() :
 {
 	(
 		<RR>
-                        { return ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL; }
+                        { return TransactionControl.SERIALIZABLE_ISOLATION_LEVEL; }
 
-		| <RS> { return ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL; }
+		| <RS> { return TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL; }
 
 		| <CS>
-                        { return ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_COMMITTED_ISOLATION_LEVEL; }
 
 		| <UR>
-                        { return ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL; }
+                        { return TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL; }
 	)
 }
 
@@ -12363,12 +12364,12 @@ levelOfIsolation() :
 | 
     <REPEATABLE> <READ>
     {
-		return ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL;
+		return TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL;
     }
 |
 	<SERIALIZABLE>
 	{
-		return ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL;
+		return TransactionControl.SERIALIZABLE_ISOLATION_LEVEL;
 	}
 }
 
@@ -12379,12 +12380,12 @@ levelOfIsolationRead() :
 {
 	<UNCOMMITTED> 
 	{
-		return ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL;
+		return TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL;
 	}
 |
 	<COMMITTED> 
 	{
-		return ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
+		return TransactionControl.READ_COMMITTED_ISOLATION_LEVEL;
 	}
 }
 

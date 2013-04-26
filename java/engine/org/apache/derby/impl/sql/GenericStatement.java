@@ -44,6 +44,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 public class GenericStatement
@@ -310,7 +311,7 @@ public class GenericStatement
 			CompilerContext cc = lcc.pushCompilerContext(compilationSchema);
 			
 			if (prepareIsolationLevel != 
-				ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL)
+				TransactionControl.UNSPECIFIED_ISOLATION_LEVEL)
 			{
 				cc.setScanIsolationLevel(prepareIsolationLevel);
 			}

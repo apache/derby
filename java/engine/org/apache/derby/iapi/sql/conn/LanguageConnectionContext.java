@@ -843,7 +843,7 @@ public interface LanguageConnectionContext extends Context {
 	 * Get the prepare isolation level.
 	 * If the isolation level has been explicitly set with a SQL statement or
 	 * embedded call to setTransactionIsolation, this will return
-	 * ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL 
+	 * TransactionControl.UNSPECIFIED_ISOLATION_LEVEL 
 	 * SET ISOLATION always takes priority.
 	 * 
 	 */

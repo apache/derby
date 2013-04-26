@@ -40,6 +40,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.transaction.TransactionControl;
 
 /**
  * For INSERT/UPDATE/DELETE impls.  Used to tag them.
@@ -235,7 +236,7 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
      * Decode the update lock mode.
      * <p>
      * The value for update lock mode is in the second most significant byte for
-     * ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL isolation level. Otherwise
+     * TransactionControl.SERIALIZABLE_ISOLATION_LEVEL isolation level. Otherwise
      * (REPEATABLE READ, READ COMMITTED, and READ UNCOMMITTED) the lock mode is
      * located in the least significant byte.
      * <p>
@@ -260,12 +261,12 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
         }
 
         // Note that isolation level encoding from getCurrentIsolationLevel()
-        // returns ExecutionContext.*ISOLATION_LEVEL constants, not
+        // returns TransactionControl.*ISOLATION_LEVEL constants, not
         // TransactionController.ISOLATION* constants.
 
         int isolationLevel = lcc.getCurrentIsolationLevel();
 
-        if (isolationLevel == ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL) {
+        if (isolationLevel == TransactionControl.SERIALIZABLE_ISOLATION_LEVEL) {
             return lockMode >>> 16;
         }
 

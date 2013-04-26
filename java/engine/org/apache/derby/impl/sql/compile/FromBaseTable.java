@@ -73,6 +73,7 @@ import org.apache.derby.iapi.sql.LanguageProperties;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.ScanController;
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -4260,7 +4261,7 @@ public class FromBaseTable extends FromTable
             getLanguageConnectionContext().getCurrentIsolationLevel();
 
 
-		if ((isolationLevel != ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL) &&
+		if ((isolationLevel != TransactionControl.SERIALIZABLE_ISOLATION_LEVEL) &&
 			(tableDescriptor.getLockGranularity() != 
 					TableDescriptor.TABLE_LOCK_GRANULARITY))
 		{

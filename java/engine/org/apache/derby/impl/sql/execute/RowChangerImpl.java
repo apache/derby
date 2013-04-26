@@ -42,7 +42,7 @@ import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -301,7 +301,7 @@ class RowChangerImpl	implements	RowChanger
 		int isolationLevel;
 		if (lcc == null)
 		{
-			isolationLevel = ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
+			isolationLevel = TransactionControl.READ_COMMITTED_ISOLATION_LEVEL;
 		}
 		else
 		{
@@ -313,22 +313,22 @@ class RowChangerImpl	implements	RowChanger
 		{
 			// Even though we preserve the isolation level at READ UNCOMMITTED,
 			// Store will overwrite it to READ COMMITTED for update.
-			case ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL:
+			case TransactionControl.READ_UNCOMMITTED_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_READ_UNCOMMITTED;
 				break;
 
-			case ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL:
+			case TransactionControl.READ_COMMITTED_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_READ_COMMITTED;
 				break;
 
-			case ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL:
+			case TransactionControl.REPEATABLE_READ_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_REPEATABLE_READ;
 				break;
 
-			case ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL:
+			case TransactionControl.SERIALIZABLE_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_SERIALIZABLE;
 				break;

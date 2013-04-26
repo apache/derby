@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
@@ -36,7 +37,56 @@ import org.apache.derby.iapi.reference.SQLState;
  */
 public final class TransactionControl {
     
+	/* Constants for scan isolation levels. */
+	public static final int UNSPECIFIED_ISOLATION_LEVEL = 0;
+	public static final int READ_UNCOMMITTED_ISOLATION_LEVEL = 1;
+	public static final int READ_COMMITTED_ISOLATION_LEVEL = 2;
+	public static final int REPEATABLE_READ_ISOLATION_LEVEL = 3;
+	public static final int SERIALIZABLE_ISOLATION_LEVEL = 4;
+
+    /**
+     * Map from Derby transaction isolation constants to
+     * JDBC constants.
+     */
+	private static final int[] CS_TO_JDBC_ISOLATION_LEVEL_MAP = {
+		java.sql.Connection.TRANSACTION_NONE,				// UNSPECIFIED_ISOLATION_LEVEL
+		java.sql.Connection.TRANSACTION_READ_UNCOMMITTED,	// READ_UNCOMMITTED_ISOLATION_LEVEL
+		java.sql.Connection.TRANSACTION_READ_COMMITTED,		// READ_COMMITTED_ISOLATION_LEVEL
+		java.sql.Connection.TRANSACTION_REPEATABLE_READ,	// REPEATABLE_READ_ISOLATION_LEVEL		
+		java.sql.Connection.TRANSACTION_SERIALIZABLE		// SERIALIZABLE_ISOLATION_LEVEL
+	};
+
+    /**
+     * Map from Derby transaction isolation constants to
+     * text values used in SQL. Note that the text
+     * "REPEATABLE READ" or "RR" maps to SERIALIZABLE_ISOLATION_LEVEL
+     * as a hang over from DB2 compatibility and now to preserve
+     * backwards compatability.
+     */
+	private static final String[][] CS_TO_SQL_ISOLATION_MAP = {
+		{ "  "},					// UNSPECIFIED_ISOLATION_LEVEL
+		{ "UR", "DIRTY READ", "READ UNCOMMITTED"},
+		{ "CS", "CURSOR STABILITY", "READ COMMITTED"},
+		{ "RS"},		// read stability	
+		{ "RR", "REPEATABLE READ", "SERIALIZABLE"}
+	};
+
     private final ArrayList listeners;
+
+    /** Map a Derby isolation level to the corresponding JDBC level */
+    public  static  int jdbcIsolationLevel( int derbyIsolationLevel )
+    {
+        return CS_TO_JDBC_ISOLATION_LEVEL_MAP[ derbyIsolationLevel ];
+    }
+
+    /** Map Derby isolation level to SQL text values */
+    public  static  String[]    isolationTextNames( int derbyIsolationLevel )
+    {
+        return ArrayUtil.copy( CS_TO_SQL_ISOLATION_MAP[ derbyIsolationLevel ] );
+    }
+
+    /** Get number of isolation string mappings */
+    public  static  int     isolationMapCount() { return CS_TO_SQL_ISOLATION_MAP.length; }
     
     public TransactionControl()
     {
