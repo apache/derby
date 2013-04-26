@@ -43,7 +43,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * that does not fit in a VARCHAR (FOR BIT DATA), are split into
  * several calls each operating on a fragment of the LOB.
  *
- * @see Connection#locatorProcedureCall for an example of how to use
+ * @see ClientConnection#locatorProcedureCall for an example of how to use
  * this class.
  */
 class CallableLocatorProcedures 

@@ -131,7 +131,7 @@ public class ClientPreparedStatement extends ClientStatement
      * Resets the prepared statement for reuse in a statement pool.
      *
      * @throws SqlException if the reset fails
-     * @see Statement#resetForReuse
+     * @see ClientStatement#resetForReuse
      */
     void resetForReuse()
             throws SqlException {

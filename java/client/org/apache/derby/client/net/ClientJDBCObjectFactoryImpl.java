@@ -110,7 +110,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * Returns an instance of ClientCallableStatement.
      *
      * @param agent       The instance of NetAgent associated with this
-     *                    {@link org.apache.derby.client.am.CallableStatement}
+     *                    {@link org.apache.derby.client.am.ClientCallableStatement}
      *                    object.
      * @param connection  The connection object associated with this
      *                    PreparedStatement Object.
@@ -122,7 +122,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @param cpc         The PooledConnection object that will be used to 
      *                    notify the PooledConnection reference of the Error 
      *                    Occurred and the Close events.
-     * @return a {@link org.apache.derby.client.am.CallableStatement}
+     * @return a {@link org.apache.derby.client.am.ClientCallableStatement}
      *         object
      * @throws SqlException
      */
@@ -174,7 +174,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * statement is closed.
      *
      * @param agent The instance of NetAgent associated with this
-     *              {@link org.apache.derby.client.am.CallableStatement}
+     *              {@link org.apache.derby.client.am.ClientCallableStatement}
      *              object.
      * @param connection The connection object associated with this
      *                   PreparedStatement Object.
@@ -205,7 +205,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * prepared statement is closed.
      *
      * @param agent The instance of NetAgent associated with this
-     *              {@link org.apache.derby.client.am.CallableStatement}
+     *              {@link org.apache.derby.client.am.ClientCallableStatement}
      *              object.
      * @param connection  The connection object associated with this
      *                    PreparedStatement Object.
@@ -375,7 +375,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *                     NetConnection constructor was called. This is used to
      *                     pass StatementEvents back to the pooledConnection
      *                     object.
-     * @return a {@link Connection} object
+     * @return a {@link ClientConnection} object
      * @throws             SqlException
      */
     public ClientConnection newNetConnection(

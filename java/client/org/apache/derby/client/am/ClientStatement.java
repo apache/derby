@@ -3209,9 +3209,9 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
     }
     
     /**
-     * Convenience method for resultSetCommitting(ResultSet, boolean)
+     * Convenience method for resultSetCommitting(ClientResultSet, boolean)
      * 
-     * @see Statement#resultSetCommitting(ResultSet, boolean)
+     * @see ClientStatement#resultSetCommitting(ClientResultSet, boolean)
      * @param closingRS The ResultSet to be closed
      * @throws SqlException
      */

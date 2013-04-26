@@ -221,7 +221,7 @@ public interface ClientJDBCObjectFactory {
 
     /**
      * This method returns an instance of NetConnection (or
-     * NetConnection40) class which extends from Connection.  This
+     * NetConnection40) class which extends from ClientConnection.  This
      * implements the {@code java.sql.Connection} interface.
      */
     ClientConnection newNetConnection(
@@ -231,7 +231,7 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * This method returns an instance of NetConnection (or NetConnection40) class
-     * which extends from Connection
+     * which extends from ClientConnection
      * this implements the {@code java.sql.Connection} interface
      */
     ClientConnection newNetConnection(
@@ -242,7 +242,7 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * This method returns an instance of NetConnection (or NetConnection40)
-     * class which extends from org.apache.derby.client.am.Connection
+     * class which extends from ClientConnection
      * this implements the java.sql.Connection interface
      */
     ClientConnection newNetConnection(
@@ -253,7 +253,7 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * This method returns an instance of NetConnection (or
-     * NetConnection40) class which extends from Connection.  This
+     * NetConnection40) class which extends from ClientConnection.  This
      * implements the {@code java.sql.Connection} interface.
      */
     ClientConnection newNetConnection(
@@ -267,7 +267,7 @@ public interface ClientJDBCObjectFactory {
     /**
      * This method returns an instance of NetConnection
      * (or NetConnection40) class which extends from
-     * Connection this implements the
+     * ClientConnection this implements the
      * {@code java.sql.Connection interface}.
      */
     ClientConnection newNetConnection(
@@ -306,7 +306,7 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * This method returns an instance of NetResultSet(or
-     * NetResultSet40) which extends from ResultSet which implements
+     * NetResultSet40) which extends from ClientResultSet which implements
      * {@code java.sql.ResultSet}.
      */
     ClientResultSet newNetResultSet(
@@ -325,7 +325,7 @@ public interface ClientJDBCObjectFactory {
     
     /**
      * This method provides an instance of NetDatabaseMetaData (or
-     * NetDatabaseMetaData40) which extends from DatabaseMetaData
+     * NetDatabaseMetaData40) which extends from ClientDatabaseMetaData
      * which implements {@code java.sql.DatabaseMetaData}.
      */
     ClientDatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
