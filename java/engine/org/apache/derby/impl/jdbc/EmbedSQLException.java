@@ -22,6 +22,7 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.error.DerbySQLException;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -73,7 +74,7 @@ public class EmbedSQLException extends SQLException implements DerbySQLException
 	}
 
 	public Object[] getArguments() {
-		return arguments;
+		return ArrayUtil.copy( arguments );
 	}
 
 	/*

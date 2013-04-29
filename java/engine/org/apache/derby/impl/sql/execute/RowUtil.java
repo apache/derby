@@ -37,7 +37,19 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 public class RowUtil
 {
     /** Row count base added for testing JDBC 4.2 */
-    public  static  long    rowCountBase = 0L;
+    private  static  long    rowCountBase = 0L;
+
+    /**
+     * Debug method used to test the setLargeMaxRows() method added by JDBC 4.2.
+     * This method is a NOP on a production (insane) build of Derby.
+     */
+    public  static  void    setRowCountBase( long newBase )
+    {
+        if (SanityManager.DEBUG)    { rowCountBase = newBase; }
+    }
+
+    /** Retrieve the row count base */
+    public  static  long    getRowCountBase() { return rowCountBase; }
 
  	/**
 	  Get an empty ExecRow.

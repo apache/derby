@@ -36,8 +36,17 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 public class ClientStatement implements Statement, StatementCallbackInterface{
 
     /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */
-    public  static  long    fetchedRowBase = 0L;
+    private  static  long    fetchedRowBase = 0L;
     
+    /**
+     * Debug method used to test the setLargeMaxRows() method added by JDBC 4.2.
+     * This method is a NOP on a production (insane) build of Derby.
+     */
+    public  static  void    setFetchedRowBase( long newBase )
+    {
+        if (SanityManager.DEBUG)    { fetchedRowBase = newBase; }
+    }
+
     //---------------------navigational members-----------------------------------
 
     private MaterialStatement materialStatement_ = null;

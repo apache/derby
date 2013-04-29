@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.sql.execute.RowUtil;
@@ -368,6 +369,13 @@ public class StatementTest
     public  static  void    largeUpdate_jdbc4_2( Connection conn )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+        else { println( "Running largeUpdate_jdbc4_2() on debug code." ); }
+
         conn.prepareStatement
             (
              "create procedure setRowCountBase( newBase bigint )\n" +
@@ -394,6 +402,13 @@ public class StatementTest
     private static  void    largeUpdateTest( StatementWrapper sw, long rowCountBase )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+        else { println( "Running largeUpdateTest() on debug code." ); }
+
         // poke the rowCountBase into the engine. all returned row counts will be
         // increased by this amount
         setRowCountBase( sw.getWrappedStatement(), false, rowCountBase );
@@ -446,6 +461,12 @@ public class StatementTest
     private static  void    largeBatchTest( StatementWrapper sw, long rowCountBase )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+
         println( "Large batch test with rowCountBase = " + rowCountBase );
         
         // poke the rowCountBase into the engine. all returned row counts will be
@@ -473,6 +494,12 @@ public class StatementTest
     private static  void    largeMaxRowsTest( StatementWrapper sw, long maxRows )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+
         println( "Large max rows test with maxRows = " + maxRows );
 
         long    expectedRowCount = 3L;
@@ -497,6 +524,12 @@ public class StatementTest
     private static  void    largeBatchUpdateExceptionTest( StatementWrapper sw, long rowCountBase )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+
         println( "Large batch update exception test with rowCountBase = " + rowCountBase );
         
         sw.getWrappedStatement().clearBatch();
@@ -540,7 +573,7 @@ public class StatementTest
     {
         if ( onClient )
         {
-            ClientStatement.fetchedRowBase = rowCountBase;
+            ClientStatement.setFetchedRowBase( rowCountBase );
         }
         else
         {
@@ -699,8 +732,8 @@ public class StatementTest
     /** Set the base which is used for returned row counts and fetched row counters */
     public  static  void    setRowCountBase( long newBase )
     {
-        EmbedResultSet.fetchedRowBase = newBase;
-        RowUtil.rowCountBase = newBase;
+        EmbedResultSet.setFetchedRowBase( newBase );
+        RowUtil.setRowCountBase( newBase );
     }
 
 } // End class StatementTest

@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -65,7 +66,7 @@ public class EmbedResultSetMetaData
 	// constructor
 	//
 	public EmbedResultSetMetaData(ResultColumnDescriptor[] columnInfo) {
-		this.columnInfo = columnInfo;
+		this.columnInfo = (ResultColumnDescriptor[]) ArrayUtil.copy( columnInfo );
 	}
 
 	//

@@ -113,7 +113,7 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 		needToObjectifyStream = (this.constantAction.getTriggerInfo() != null);
 	}
 
-	public final long	modifiedRowCount() { return rowCount + RowUtil.rowCountBase; }
+	public final long	modifiedRowCount() { return rowCount + RowUtil.getRowCountBase(); }
 
 
 	/**

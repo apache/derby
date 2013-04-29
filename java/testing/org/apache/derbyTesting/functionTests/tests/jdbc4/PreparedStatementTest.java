@@ -32,6 +32,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import java.io.*;
 import java.sql.*;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 
@@ -1196,6 +1197,12 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public  static  void    largeUpdate_jdbc4_2( Connection conn )
         throws Exception
     {
+        //
+        // This test makes use of a debug entry point which is a NOP
+        // in an insane production build.
+        //
+        if (!SanityManager.DEBUG)    { return; }
+
         println( "Running large update test for JDBC 4.2" );
         
         conn.prepareStatement

@@ -96,7 +96,7 @@ public class EmbedResultSet extends ConnectionChild
     implements EngineResultSet, Comparable {
 
     /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */
-    public  static  long    fetchedRowBase = 0L;
+    private  static  long    fetchedRowBase = 0L;
     
 	// cursor movement
 	protected static final int FIRST = 1;
@@ -304,6 +304,15 @@ public class EmbedResultSet extends ConnectionChild
 
 		order = conn.getResultSetOrderId();
 	}
+
+    /**
+     * Debug method used to test the setLargeMaxRows() method added by JDBC 4.2.
+     * This method is a NOP on a production (insane) build of Derby.
+     */
+    public  static  void    setFetchedRowBase( long newBase )
+    {
+        if (SanityManager.DEBUG)    { fetchedRowBase = newBase; }
+    }
 
 	private void checkNotOnInsertRow() throws SQLException {
 		if (isOnInsertRow) {
