@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.ResultDescription;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
@@ -145,8 +146,10 @@ public final class GenericResultDescription
 	}
 
 	public ResultColumnDescriptor[] getColumnInfo() {
-		return columns;
+		return (ResultColumnDescriptor[]) ArrayUtil.copy( columns );
 	}
+
+    public  ResultColumnDescriptor  getColumnInfo( int idx ) { return columns[ idx ]; }
 
 	/**
 	 * position is 1-based.

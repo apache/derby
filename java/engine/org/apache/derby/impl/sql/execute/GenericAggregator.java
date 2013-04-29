@@ -312,7 +312,7 @@ class GenericAggregator
                     (
                      cf,
                      aggInfo.getAggregateName(),
-                     aggInfo.getResultDescription().getColumnInfo()[ 0 ].getType()
+                     aggInfo.getResultDescription().getColumnInfo( 0 ).getType()
                      );
 
 			} catch (Exception e)

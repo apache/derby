@@ -1552,54 +1552,20 @@ public class EmbedPreparedStatement
 
 
 	/**
-		Check the parameterINdex is in range and return the
-		array of type descriptors.
-
-		@exception SQLException parameter is out of range
-	*/
-	protected final DataTypeDescriptor[] getTypes(int parameterIndex)
-		throws SQLException {
-
-		DataTypeDescriptor[] types = preparedStatement.getParameterTypes();
-
-		if (types == null) {
-			throw newSQLException(SQLState.NO_INPUT_PARAMETERS);
-		}
-
-		/* Check that the parameterIndex is in range. */
-		if (parameterIndex < 1 ||
-				parameterIndex > types.length) {
-
-			/* This message matches the one used by the DBMS */
-			throw newSQLException(SQLState.LANG_INVALID_PARAM_POSITION, 
-            new Integer(parameterIndex), new Integer(types.length));
-		}
-		return types;
-	}
-
-	/**
 		Get the target JDBC type for a parameter. Will throw exceptions
-		if the parameter index is out of range
+		if the parameter index is out of range. The parameterIndex is 1-based.
 
 		@exception SQLException parameter is out of range
 	*/
 	protected int getParameterJDBCType(int parameterIndex)
-		throws SQLException {
+		throws SQLException
+    {
+        try {
+            DataTypeDescriptor dtd = preparedStatement.getParameterType( parameterIndex-1 );
 
-		DataTypeDescriptor[] types = getTypes(parameterIndex);
-
-		int type = types[parameterIndex -1] == null ? 
-			Types.OTHER :
-			types[parameterIndex - 1].getTypeId().getJDBCTypeId();
-
-		if (SanityManager.DEBUG) {
-			//int pmType = getEmbedParameterSetMetaData().getParameterType(parameterIndex);
-			//if (type != pmType) {
-				//SanityManager.THROWASSERT("MISMATCH PARAMETER META DATA param " + parameterIndex + " types " + type + " != " + pmType + "\n" + SQLText);
-			//}
-		}
-
-		return type;
+            return (dtd == null) ? Types.OTHER : dtd.getTypeId().getJDBCTypeId();
+            
+		} catch (StandardException t) { throw EmbedResultSet.noStateChangeException(t); }
 	}
 
     /**
@@ -1610,9 +1576,14 @@ public class EmbedPreparedStatement
      * @throws SQLException if parameter is out of range
      */
     protected final String getParameterSQLType(int parameterIndex)
-            throws SQLException {
-        DataTypeDescriptor[] pTypes = getTypes(parameterIndex);
-        return pTypes[parameterIndex-1].getTypeName();
+            throws SQLException
+    {
+        try {
+            DataTypeDescriptor dtd = preparedStatement.getParameterType( parameterIndex-1 );
+
+            return (dtd == null) ? null : dtd.getTypeName();
+            
+		} catch (StandardException t) { throw EmbedResultSet.noStateChangeException(t); }
     }
 
     /**

@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.cache.Cacheable;
 
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -48,6 +49,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
@@ -488,8 +490,32 @@ recompileOutOfDatePlan:
 	}
 
 	public DataTypeDescriptor[]	getParameterTypes()	{
-		return paramTypeDescriptors;
+		return (DataTypeDescriptor[]) ArrayUtil.copy( paramTypeDescriptors );
 	}
+
+    /** Return the type of the parameter (0-based indexing) */
+    public DataTypeDescriptor  getParameterType( int idx ) throws StandardException
+    {
+		if ( paramTypeDescriptors == null )
+        {
+			throw StandardException.newException( SQLState.NO_INPUT_PARAMETERS );
+		}
+
+		/* Check that the parameterIndex is in range. */
+		if ( (idx < 0) || (idx >= paramTypeDescriptors.length) )
+        {
+			/* This message matches the one used by the DBMS */
+			throw StandardException.newException
+                (
+                 SQLState.LANG_INVALID_PARAM_POSITION, 
+                 new Integer( idx+1 ),
+                 new Integer( paramTypeDescriptors.length )
+                 );
+		}
+
+        return paramTypeDescriptors[ idx ];
+    }
+    
 
 	public String getSource() {
 		return (sourceTxt != null) ?
@@ -571,7 +597,7 @@ recompileOutOfDatePlan:
 	 */
 	public Timestamp getBeginCompileTimestamp()
 	{
-		return beginCompileTimestamp;
+		return DataTypeUtilities.clone( beginCompileTimestamp );
 	}
 
 	/**
@@ -581,7 +607,7 @@ recompileOutOfDatePlan:
 	 */
 	public Timestamp getEndCompileTimestamp()
 	{
-		return endCompileTimestamp;
+		return DataTypeUtilities.clone( endCompileTimestamp );
 	}
 
 	void setCompileTimeWarnings(SQLWarning warnings) {

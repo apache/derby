@@ -54,6 +54,11 @@ public interface ResultDescription
 	*/
 	public ResultColumnDescriptor[] getColumnInfo();
 
+    /**
+     * Return the information about a single column (0-based indexing)
+     */
+    public  ResultColumnDescriptor  getColumnInfo( int idx );
+
 	/**
 	 * Returns a ResultColumnDescriptor for the column, given the ordiinal
 	 * position of the column.

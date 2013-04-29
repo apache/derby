@@ -191,6 +191,12 @@ public interface PreparedStatement
 	 */
 	DataTypeDescriptor[]	getParameterTypes();
 
+    /**
+     * Get the type of the parameter at the given (0-based) index.
+     * Raises an exception if the index is out of range.
+     */
+    DataTypeDescriptor  getParameterType( int idx ) throws StandardException;
+
 	/**
 	 *	Return the SQL string that this statement is for.
 	 *
