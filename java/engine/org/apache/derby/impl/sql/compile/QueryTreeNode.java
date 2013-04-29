@@ -610,7 +610,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	public DataTypeDescriptor[] getParameterTypes()
 		throws StandardException
 	{
-		return getCompilerContext().getParameterTypes();
+        return ((CompilerContextImpl) getCompilerContext()).getParameterTypes();
 	}
 
 	/**

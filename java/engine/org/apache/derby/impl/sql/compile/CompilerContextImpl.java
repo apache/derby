@@ -600,9 +600,9 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
-	 * @see CompilerContext#getParameterTypes
+     * Get an array of type descriptors for all the ? parameters.
 	 */
-	public DataTypeDescriptor[] getParameterTypes()
+    DataTypeDescriptor[] getParameterTypes()
 	{
 		return parameterDescriptors;
 	}

@@ -1048,7 +1048,7 @@ abstract class MethodCallNode extends JavaValueNode
 		in the compilercontext for future call statements*/
 		DataTypeDescriptor dts = DataTypeDescriptor.getSQLDataTypeDescriptor(typeName);
 		if (getCompilerContext().getReturnParameterFlag()) {
-			getCompilerContext().getParameterTypes()[0] = dts;
+            getParameterTypes()[0] = dts;
 		}
     }
 

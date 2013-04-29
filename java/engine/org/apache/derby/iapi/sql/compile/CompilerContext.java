@@ -38,8 +38,6 @@ import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.SortCostController;
 
@@ -472,15 +470,6 @@ public interface CompilerContext extends Context
 	 * @return	true if ? = call else false
 	 */
 	public boolean getReturnParameterFlag();
-
-	/**
-	 * Get the array of DataTypeDescriptor representing the types of
-	 * the ? parameters.
-	 *
-	 * @return	The parameter descriptors
-	 */
-
-	public DataTypeDescriptor[] getParameterTypes();
 
 	/**
 	 * Get the cursor info stored in the context.

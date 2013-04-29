@@ -36,7 +36,7 @@ package org.apache.derby.impl.sql.compile;
  * operation.
  */
 
-public interface CharStream {
+interface CharStream {
 
   /**
    * Returns the next character from the selected input.  The method

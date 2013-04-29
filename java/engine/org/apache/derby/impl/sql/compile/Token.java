@@ -25,7 +25,7 @@ package org.apache.derby.impl.sql.compile;
  * Describes the input token stream.
  */
 
-public class Token {
+class Token {
 
   /**
    * An integer that describes the kind of this token.  This numbering

@@ -448,7 +448,7 @@ public class SQLParser
 	 private void setUpAndLinkParameters()
 			throws StandardException
 	 {
-		CompilerContext cc = getCompilerContext();
+		CompilerContextImpl cc = (CompilerContextImpl) getCompilerContext();
 		cc.setParameterList(parameterList);
 		/* Link the untyped parameters to the array of parameter descriptors */
 		

@@ -74,6 +74,16 @@
       </fileset>
     </delete>
 
+    <!-- Reduce the visibility of these files from public to package. -->
+    <replaceregexp match="^public (class|interface)" replace="\1" flags="m">
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="SQLParser.java"/>
+        <include name="SQLParserConstants.java"/>
+        <include name="SQLParserTokenManager.java"/>
+        <include name="TokenMgrError.java"/>
+      </fileset>
+    </replaceregexp>
+
   </target>
 
   <target name="compile" depends="parser">
