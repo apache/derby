@@ -377,17 +377,18 @@ public class BasicDependencyManager implements DependencyManager {
 							// need a current dependent for bind
 							newCC.setCurrentDependent(dep);
 							cvn.bindStatement();
-							ProviderInfo[] providerInfos = cvn.getProviderInfo();
 							lcc.popCompilerContext(newCC);
 
 							boolean		interferent = false;
-							for (int i = 0; i < providerInfos.length; i++)
+
+                            Iterator it = cvn.getProviderInfo().iterator();
+                            while (it.hasNext())
 							{
-								Provider provider = null;
-									provider = (Provider) providerInfos[i].
+                                ProviderInfo info = (ProviderInfo) it.next();
+                                Provider provider = (Provider) info.
 													getDependableFinder().
 													getDependable(dd,
-													providerInfos[i].getObjectId());
+                                                    info.getObjectId());
 								if (provider instanceof TableDescriptor)
 								{
 									TableDescriptor tab = (TableDescriptor)provider;

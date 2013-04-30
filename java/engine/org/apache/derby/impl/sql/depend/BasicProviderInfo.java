@@ -55,9 +55,9 @@ public class BasicProviderInfo implements ProviderInfo
 	**
 	********************************************************/
 
-	public	UUID						uuid;
-	public	DependableFinder			dFinder;
-	public	String						providerName;
+    private UUID             uuid;
+    private DependableFinder dFinder;
+    private String           providerName;
 
 	// CONSTRUCTORS
 
@@ -74,7 +74,7 @@ public class BasicProviderInfo implements ProviderInfo
 	 *  @param dFinder		DependableFinder for Provider.
 	 *	@param providerName	Name of the Provider.
 	 */
-	public	BasicProviderInfo(
+    BasicProviderInfo(
 		               UUID				uuid,
 					   DependableFinder	dFinder,
 					   String			providerName)

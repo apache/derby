@@ -21,11 +21,12 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.Visitable;
+import java.util.List;
+
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.services.context.ContextManager;
-
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -38,11 +39,9 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
@@ -62,12 +61,12 @@ import org.apache.derby.catalog.UUID;
 
 public class CreateViewNode extends DDLStatementNode
 {
-	ResultColumnList	resultColumns;
-	ResultSetNode		queryExpression;
-	String				qeText;
-	int					checkOption;
-	ProviderInfo[]		providerInfos;
-	ColumnInfo[]		colInfos;
+    private ResultColumnList resultColumns;
+    private ResultSetNode    queryExpression;
+    private String           qeText;
+    private int              checkOption;
+    private ProviderInfo[]   providerInfos;
+    private ColumnInfo[]     colInfos;
 	private OrderByList orderByList;
     private ValueNode   offset;
     private ValueNode   fetchFirst;
@@ -167,7 +166,9 @@ public class CreateViewNode extends DDLStatementNode
 
 	// accessors
 
-	public	ProviderInfo[]	getProviderInfo() { return providerInfos; }
+    public final List getProviderInfo() {
+        return ArrayUtil.asReadOnlyList(colInfos);
+    }
 
 	// We inherit the generate() method from DDLStatementNode.
 
