@@ -430,8 +430,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	**/
 	private boolean isMultipleDeletePathsExist()
 	{
-		Hashtable parentResultSets = activation.getParentResultSets();
-		for (Enumeration e = parentResultSets.keys() ; e.hasMoreElements() ;) 
+		for (Enumeration e = activation.getParentResultSetKeys() ; e.hasMoreElements() ;) 
 		{
 			String rsId  = (String) e.nextElement();
 			Vector sVector = (Vector) activation.getParentResultSet(rsId);
@@ -453,8 +452,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	**/
 	private void setRowHoldersTypeToUniqueStream()
 	{
-		Hashtable parentResultSets = activation.getParentResultSets();
-		for (Enumeration e = parentResultSets.keys() ; e.hasMoreElements() ;) 
+		for (Enumeration e = activation.getParentResultSetKeys() ; e.hasMoreElements() ;) 
 		{
 			String rsId  = (String) e.nextElement();
 			Vector sVector = (Vector) activation.getParentResultSet(rsId);

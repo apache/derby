@@ -567,7 +567,7 @@ public interface Activation extends Dependent
 	//clear the parent resultset hash table;
 	public void clearParentResultSets();
 
-	public Hashtable getParentResultSets();
+	public Enumeration getParentResultSetKeys();
 
 	/**
 	 * beetle 3865: updateable cursor using index.  A way of communication
