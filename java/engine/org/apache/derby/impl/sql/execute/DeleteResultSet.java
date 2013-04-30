@@ -440,7 +440,6 @@ class DeleteResultSet extends DMLWriteResultSet
 			if (triggerActivator == null)
 			{
 				triggerActivator = new TriggerEventActivator(lcc, 
-															 tc, 
 															 constants.targetUUID,
 															 triggerInfo,
 															 TriggerExecutionContext.DELETE_EVENT,

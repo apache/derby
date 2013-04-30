@@ -22,16 +22,13 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.impl.sql.GenericColumnDescriptor;
 import org.apache.derby.impl.sql.GenericResultDescription;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -59,11 +56,6 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.io.FormatableHashtable;
-import org.apache.derby.iapi.services.io.FormatableIntHolder;
-import org.apache.derby.iapi.services.io.FormatableProperties;
-import org.apache.derby.catalog.TypeDescriptor;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -321,8 +313,6 @@ public class GenericExecutionFactory
 		ConnectionContext			cc,
 		String 						statementText,
 		int 						dmlType,
-		int[]						changedColIds,
-		String[]					changedColNames,
 		UUID						targetTableId,
 		String						targetTableName,
 		Vector						aiCounters
@@ -330,8 +320,6 @@ public class GenericExecutionFactory
 	{
 		return new InternalTriggerExecutionContext(lcc, cc,
 												   statementText, dmlType,
-												   changedColIds,
-												   changedColNames,
 												   targetTableId,
 												   targetTableName, 
 												   aiCounters);

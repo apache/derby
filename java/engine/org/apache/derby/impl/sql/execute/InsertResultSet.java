@@ -1132,7 +1132,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				if (triggerActivator == null)
 				{
 					triggerActivator = new TriggerEventActivator(lcc, 
-										tc, 
 										constants.targetUUID,
 										triggerInfo,
 										TriggerExecutionContext.INSERT_EVENT,
@@ -1283,7 +1282,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		if (triggerInfo != null)
 		{
 			triggerActivator = new TriggerEventActivator(lcc, 
-										tc, 
 										constants.targetUUID,
 										triggerInfo,
 										TriggerExecutionContext.INSERT_EVENT,

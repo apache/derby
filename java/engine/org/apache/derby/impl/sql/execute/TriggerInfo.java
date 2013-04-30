@@ -21,28 +21,18 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.catalog.UUID;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-import java.util.Iterator;
 
-import java.util.Vector;
 
 /**
  * This is a simple class used to store the run time information
@@ -70,8 +60,6 @@ public final class TriggerInfo implements Formatable
 	********************************************************/
 
 	TriggerDescriptor[] 	triggerArray; 
-	String[]				columnNames;
-	int[]				columnIds;
 
 	/**
 	 * Niladic constructor for Formattable
@@ -81,34 +69,14 @@ public final class TriggerInfo implements Formatable
 	/**
 	 * Constructor for TriggerInfo
 	 *
-	 * @param td the table upon which the trigger is declared
-	 * @param changedCols the columns that are changed in the dml that is
-	 *		causing the trigger to fire
 	 * @param triggers the list of trigger descriptors
 	 * 	
 	 */
 	public TriggerInfo
 	(
-		TableDescriptor			td,
-		int[]					changedCols,
 		GenericDescriptorList	triggers
 	)
 	{
-		this.columnIds = changedCols;
-
-		if (columnIds != null)
-		{
-			/*
-			** Find the names of all the columns that are
-			** being changd.
-			*/
-			columnNames = new String[columnIds.length];
-			for (int i = 0; i < columnIds.length; i++)
-			{
-				columnNames[i] = td.getColumnDescriptor(columnIds[i]).getColumnName();
-			}
-		}
-
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(triggers != null, "null trigger descriptor list");
@@ -118,30 +86,8 @@ public final class TriggerInfo implements Formatable
 		/*
 		** Copy the trigger descriptors into an array of the right type
 		*/
-        Iterator descIter = triggers.iterator();
-		
-		int size = triggers.size();
-		triggerArray = new TriggerDescriptor[size];
-
-		for (int i = 0; i < size; i++)
-		{
-            triggerArray[i] = (TriggerDescriptor) descIter.next();
-		}
-	}
-
-	/*
-	 * private constructor for TriggerInfo
-	 */
-	private TriggerInfo
-	(
-		TriggerDescriptor[]		triggers,
-		int[]					changedColsIds,
-		String[]				changedColsNames
-	) 
-	{
-		this.columnIds = changedColsIds;
-		this.columnNames = changedColsNames;
-		this.triggerArray = triggers;
+        triggerArray = (TriggerDescriptor[])
+                triggers.toArray(new TriggerDescriptor[triggers.size()]);
 	}
 
 	/**
@@ -162,34 +108,10 @@ public final class TriggerInfo implements Formatable
 		{
 			return false;
 		}
-
-		return hasTrigger(new Boolean(isBefore), new Boolean(isRow));
-	}
-
-	/**
-	 * Do we have a trigger or triggers that meet
-	 * the criteria
-	 *
-	 * @param isBefore	true for a before trigger, false
-	 *					for after trigger, null for either
-	 * @param isRow		true for a row trigger, false
-	 *					for statement trigger, null for either
-	 *
-	 * @return true if we have a trigger that meets the
-	 * 		criteria
-	 */
-	private boolean hasTrigger(Boolean isBefore, Boolean isRow)
-	{
-		if (triggerArray == null)
-		{
-			return false;
-		}
 		for (int i = 0; i < triggerArray.length; i++)
 		{
-			if (((isBefore == null) || 
-					(triggerArray[i].isBeforeTrigger() == isBefore.booleanValue())) &&
-			    ((isRow == null) || 
-					(triggerArray[i].isRowTrigger() == isRow.booleanValue())))
+            if ((triggerArray[i].isBeforeTrigger() == isBefore) &&
+                (triggerArray[i].isRowTrigger() == isRow))
 			{
 				return true;
 			}
@@ -216,8 +138,12 @@ public final class TriggerInfo implements Formatable
 	public void writeExternal(ObjectOutput out) throws IOException
 	{
 		ArrayUtil.writeArray(out, triggerArray);
-		ArrayUtil.writeIntArray(out, columnIds);
-		ArrayUtil.writeArray(out, columnNames);
+
+        // Used to write an array of changed column numbers and an array
+        // with the names of the columns, but they are not used anymore.
+        // Write dummy values to preserve the format.
+        ArrayUtil.writeIntArray(out, (int[]) null);
+        ArrayUtil.writeArray(out, (String[]) null);
 	}
 
 	/**
@@ -234,14 +160,9 @@ public final class TriggerInfo implements Formatable
 		triggerArray = new TriggerDescriptor[ArrayUtil.readArrayLength(in)];
 		ArrayUtil.readArrayItems(in, triggerArray);
 
-		columnIds = ArrayUtil.readIntArray(in);
-
-		int len = ArrayUtil.readArrayLength(in);
-		if (len > 0)
-		{
-			columnNames = new String[len];
-			ArrayUtil.readArrayItems(in, columnNames);
-		}
+        // Discard fields that are no longer used.
+        ArrayUtil.readIntArray(in);
+        ArrayUtil.readStringArray(in);
 	}
 	
 	/**
@@ -261,26 +182,6 @@ public final class TriggerInfo implements Formatable
 		if (SanityManager.DEBUG)
 		{
 			StringBuffer str = new StringBuffer();
-			str.append("\nColumn names modified:\t\t(");
-			for (int i = 0; i < columnNames.length; i++)
-			{
-				if (i > 0)
-					str.append(",");
-			
-				str.append(columnNames[i]);
-			}
-			str.append(")");
-
-			str.append("\nColumn ids modified:\t\t(");
-			for (int i = 0; i < columnIds.length; i++)
-			{
-				if (i > 0)
-					str.append(",");
-			
-				str.append(columnIds[i]);
-			}
-			str.append(")");
-
 			str.append("\nTriggers:");
 			for (int i = 0; i < triggerArray.length; i++)
 			{

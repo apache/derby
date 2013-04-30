@@ -649,7 +649,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			getAllRelevantTriggers(dataDictionary, targetTableDescriptor,
 							   changedColumnIds, includeTriggers);
 			createTriggerDependencies(relevantTriggers, dependent);
-			generateTriggerInfo(relevantTriggers, targetTableDescriptor, changedColumnIds);
+            generateTriggerInfo(relevantTriggers);
 
 			if (skipCheckConstraints)
 			{
@@ -1062,22 +1062,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * Generate the TriggerInfo structures used during code generation.
 	 *
 	 * @param triggerList				The trigger descriptor list
-	 * @param td				The TableDescriptor
-	 * @param changedCols		The columns that are being modified
-	 *
-	 * @exception StandardException		Thrown on failure
 	 */
-	private void generateTriggerInfo 
-	(
-		GenericDescriptorList		triggerList,
-		TableDescriptor				td,
-		int[]						changedCols
-    )
-		throws StandardException
+    private void generateTriggerInfo(GenericDescriptorList triggerList)
 	{	
-		if ((triggerList != null) && (triggerList.size() > 0))
+        if ((triggerList != null) && (!triggerList.isEmpty()))
 		{
-			triggerInfo = new TriggerInfo(td, changedCols, triggerList);
+            triggerInfo = new TriggerInfo(triggerList);
 		}
 	}
 

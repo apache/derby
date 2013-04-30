@@ -83,28 +83,6 @@ public interface TriggerExecutionContext
 	public String getEventStatementText();
 
 	/**
-	 * Find out if a column was changed, by column name.
-	 *
-	 * @param columnName the column to check
- 	 *
-	 * @return true if the column was modified by this statement.
-	 * Note that this will always return true for INSERT
-	 * and DELETE regardless of the column name passed in.
-	 */
-	public boolean wasColumnModified(String columnName);
-
-	/**
-	 * Find out if a column was changed, by column number
-	 *
-	 * @param columnNumber the column to check
- 	 *
-	 * @return true if the column was modified by this statement.
-	 * Note that this will always return true for INSERT
-	 * and DELETE regardless of the column name passed in.
-	 */
-	public boolean wasColumnModified(int columnNumber);
-
-	/**
 	 * Returns a result set of the old (before) images of the changed rows.
 	 * For a row trigger, this result set will have a single row.  For
 	 * a statement trigger, this result set has every row that has

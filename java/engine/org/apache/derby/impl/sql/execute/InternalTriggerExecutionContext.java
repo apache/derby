@@ -35,7 +35,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -63,8 +62,6 @@ class InternalTriggerExecutionContext
 	/*
 	** Immutable
 	*/
-	protected int[]					changedColIds;
-	protected String[]				changedColNames;
 	protected int					dmlType;
 	protected String				statementText;
 	protected ConnectionContext		cc;
@@ -126,9 +123,6 @@ class InternalTriggerExecutionContext
 	 * @param lcc	the lcc
 	 * @param statementText	the text of the statement that caused the
 	 *		trigger to fire.  may be null if we are replicating
-	 * @param changedColIds	the list of columns that changed.  Null
-	 *		for all columns or INSERT/DELETE.
-	 * @param changedColNames	the names that correspond to changedColIds
 	 * @param targetTableId	the UUID of the table upon which the trigger
 	 *		fired
 	 * @param targetTableName	the name of the table upon which the trigger
@@ -144,16 +138,12 @@ class InternalTriggerExecutionContext
 		ConnectionContext			cc,
 		String 						statementText,
 		int 						dmlType,
-		int[]						changedColIds,
-		String[]					changedColNames,
 		UUID						targetTableId,
 		String						targetTableName,
 		Vector						aiCounters
 	) throws StandardException
 	{
 		this.dmlType = dmlType;
-		this.changedColIds = changedColIds;
-		this.changedColNames = changedColNames;
 		this.statementText = statementText;
 		this.cc = cc;
 		this.lcc = lcc;
@@ -161,21 +151,6 @@ class InternalTriggerExecutionContext
 		this.targetTableName = targetTableName;
 		this.resultSetVector = new Vector();
 		this.aiCounters = aiCounters;
-
-		if (SanityManager.DEBUG)
-		{	
-			if ((changedColIds == null) != (changedColNames == null))
-			{
-				SanityManager.THROWASSERT("bad changed cols, "+
-					"(changedColsIds == null) = "+(changedColIds == null)+ 
-					"  (changedColsNames == null) = "+(changedColNames == null));
-			}
-			if (changedColIds != null)
-			{
-				SanityManager.ASSERT(changedColIds.length == changedColNames.length, 
-					"different number of changed col ids vs names");
-			}
-		}
 
 		lcc.pushTriggerExecutionContext(this);
 	}
@@ -393,58 +368,6 @@ class InternalTriggerExecutionContext
 	public String getEventStatementText()
 	{
 		return statementText;
-	}
-
-	/**
-	 * Find out of a column was changed, by column name
-	 *
-	 * @param columnName the column to check
- 	 *
-	 * @return true if the column was modified by this statement.
-	 * Note that this will always return true for INSERT
-	 * and DELETE regardless of the column name passed in.
-	 */
-	public boolean wasColumnModified(String columnName)
-	{
-		if (changedColNames == null)
-		{
-			return true;
-		}
-
-		for (int i = 0; i < changedColNames.length; i++)
-		{
-			if (changedColNames[i].equals(columnName))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Find out of a column was changed, by column number
-	 *
-	 * @param columnNumber the column to check
- 	 *
-	 * @return true if the column was modified by this statement.
-	 * Note that this will always return true for INSERT
-	 * and DELETE regardless of the column name passed in.
-	 */
-	public boolean wasColumnModified(int columnNumber)
-	{
-		if (changedColIds == null)
-		{
-			return true;
-		}
-
-		for (int i = 0; i < changedColNames.length; i++)
-		{
-			if (changedColIds[i] == columnNumber)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
