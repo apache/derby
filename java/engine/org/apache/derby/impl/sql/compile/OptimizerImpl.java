@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -31,14 +32,17 @@ import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -68,6 +72,7 @@ import java.util.HashMap;
 
 public class OptimizerImpl implements Optimizer 
 {
+	protected LanguageConnectionContext lcc;
 
 	DataDictionary			 dDictionary;
 	/* The number of tables in the query as a whole.  (Size of bit maps.) */
@@ -133,6 +138,7 @@ public class OptimizerImpl implements Optimizer
 	// optimizer trace
 	protected boolean optimizerTrace;
 	protected boolean optimizerTraceHtml;
+    private OptTrace    _tracer;
 
 	// max memory use per table
 	protected int maxMemoryPerTable;
@@ -353,6 +359,8 @@ public class OptimizerImpl implements Optimizer
 		desiredJoinOrderFound = false;
 	}
 
+    public  boolean tracingIsOn() { return optimizerTrace; }
+
     public int getMaxMemoryPerTable()
     {
         return maxMemoryPerTable;
@@ -369,10 +377,7 @@ public class OptimizerImpl implements Optimizer
 		/* Don't get any permutations if there is nothing to optimize */
 		if (numOptimizables < 1)
 		{
-			if (optimizerTrace)
-			{
-				trace(NO_TABLES, 0, 0, 0.0, null);
-			}
+			if (optimizerTrace) { tracer().traceVacuous(); }
 
 			endOfRoundCleanup();
 			return false;
@@ -402,10 +407,7 @@ public class OptimizerImpl implements Optimizer
 			currentTime = System.currentTimeMillis();
 			timeExceeded = (currentTime - timeOptimizationStarted) > timeLimit;
 
-			if (optimizerTrace && timeExceeded)
-			{
-				trace(TIME_EXCEEDED, 0, 0, 0.0, null);
-			}
+			if (optimizerTrace && timeExceeded) { tracer().traceTimeout( currentTime, bestCost ); }
 		}
 
 		if (bestCost.isUninitialized() && foundABestPlan &&
@@ -552,18 +554,6 @@ public class OptimizerImpl implements Optimizer
 		}
 		else
 		{
-			if (optimizerTrace)
- 			{
-				/*
-				** Not considered short-circuiting if all slots in join
-				** order are taken.
-				*/
-				if (joinPosition < (numOptimizables - 1))
-				{
-					trace(SHORT_CIRCUITING, 0, 0, 0.0, null);
-				}
-			}
-
 			// If we short-circuited the current join order then we need
 			// to make sure that, when we start pulling optimizables to find
 			// a new join order, we reload the best plans for those
@@ -572,7 +562,17 @@ public class OptimizerImpl implements Optimizer
 			// was part of a short-circuited (and thus rejected) join
 			// order.
 			if (joinPosition < (numOptimizables - 1))
-				reloadBestPlan = true;
+            {
+                if (optimizerTrace)
+                {
+                    tracer().traceShortCircuiting
+                        (
+                         timeExceeded, optimizableList.getOptimizable( proposedJoinOrder[joinPosition] ), joinPosition
+                         );
+                }
+
+                reloadBestPlan = true;
+            }
 		}
 
 		if (permuteState == JUMPING && !joinPosAdvanced && joinPosition >= 0)
@@ -793,19 +793,17 @@ public class OptimizerImpl implements Optimizer
 						!joinOrderMeetsDependencies(nextOptimizable))
 					{
 						if (optimizerTrace)
-						{
-							trace(SKIPPING_JOIN_ORDER, nextOptimizable, 0, 0.0, null);
-						}
+                        {
+                            tracer().traceSkippingJoinOrder
+                                ( nextOptimizable, joinPosition, ArrayUtil.copy( proposedJoinOrder ), (JBitSet) assignedTableMap.clone() );
+                        }
 
 						/*
 						** If this is a user specified join order then it is illegal.
 						*/
 						if ( ! optimizableList.optimizeJoinOrder())
 						{
-							if (optimizerTrace)
-							{
-								trace(ILLEGAL_USER_JOIN_ORDER, 0, 0, 0.0, null);
-							}
+							if (optimizerTrace) { tracer().traceIllegalUserJoinOrder(); }
 
 							throw StandardException.newException(
 								SQLState.LANG_ILLEGAL_FORCED_JOIN_ORDER);
@@ -830,18 +828,12 @@ public class OptimizerImpl implements Optimizer
 					// Verify that the user specified a legal join order
 					if ( ! optimizableList.legalJoinOrder(numTablesInQuery))
 					{
-						if (optimizerTrace)
-						{
-							trace(ILLEGAL_USER_JOIN_ORDER, 0, 0, 0.0, null);
-						}
+						if (optimizerTrace)  { tracer().traceIllegalUserJoinOrder(); }
 
 						throw StandardException.newException(SQLState.LANG_ILLEGAL_FORCED_JOIN_ORDER);
 					}
 
-					if (optimizerTrace)
-					{
-						trace(USER_JOIN_ORDER_OPTIMIZED, 0, 0, 0.0, null);
-					}
+					if (optimizerTrace) { tracer().traceUserJoinOrderOptimized(); }
 
 					desiredJoinOrderFound = true;
 				}
@@ -962,9 +954,10 @@ public class OptimizerImpl implements Optimizer
 				getBestAccessPath().setCostEstimate((CostEstimate) null);
 
 			if (optimizerTrace)
-			{
-				trace(CONSIDERING_JOIN_ORDER, 0, 0, 0.0, null);
-			}
+            {
+                tracer().traceJoinOrderConsideration
+                    ( joinPosition, ArrayUtil.copy( proposedJoinOrder ), (JBitSet) assignedTableMap.clone() );
+            }
 
 			Optimizable nextOpt =
 							optimizableList.getOptimizable(nextOptimizable);
@@ -1621,22 +1614,15 @@ public class OptimizerImpl implements Optimizer
 					ce.singleScanRowCount());
 			}
 
-			if (optimizerTrace)
+			if (optimizerTrace) { tracer().traceCostWithoutSortAvoidance( currentCost ); }
 			{
-				trace(TOTAL_COST_NON_SA_PLAN, 0, 0, 0.0, null);
-				if (curOpt.considerSortAvoidancePath())
-				{
-					trace(TOTAL_COST_SA_PLAN, 0, 0, 0.0, null);
-				}
+				if (curOpt.considerSortAvoidancePath()) { tracer().traceCostWithSortAvoidance( currentSortAvoidanceCost ); }
 			}
 				
 			/* Do we have a complete join order? */
 			if ( joinPosition == (numOptimizables - 1) )
 			{
-				if (optimizerTrace)
-				{
-					trace(COMPLETE_JOIN_ORDER, 0, 0, 0.0, null);
-				}
+				if (optimizerTrace) { tracer().traceCompleteJoinOrder(); }
 
 				/* Add cost of sorting to non-sort-avoidance cost */
 				if (requiredRowOrdering != null)
@@ -1718,11 +1704,7 @@ public class OptimizerImpl implements Optimizer
 										currentCost.singleScanRowCount()
 										);
 					
-					if (optimizerTrace)
-					{
-						trace(COST_OF_SORTING, 0, 0, 0.0, null);
-						trace(TOTAL_COST_WITH_SORTING, 0, 0, 0.0, null);
-					}
+					if (optimizerTrace) { tracer().traceSortCost( sortCost, currentCost ); }
 				}
 
 				/*
@@ -1790,10 +1772,7 @@ public class OptimizerImpl implements Optimizer
 							bestRowOrdering, optimizableList) == 
 								RequiredRowOrdering.NOTHING_REQUIRED)
 					{
-						if (optimizerTrace)
-						{
-							trace(CURRENT_PLAN_IS_SA_PLAN, 0, 0, 0.0, null);
-						}
+						if (optimizerTrace) { tracer().traceCurrentPlanAvoidsSort( bestCost, currentSortAvoidanceCost ); }
 
 						if ((currentSortAvoidanceCost.compare(bestCost) <= 0)
 							|| bestCost.isUninitialized())
@@ -1823,12 +1802,7 @@ public class OptimizerImpl implements Optimizer
 	{
 		foundABestPlan = true;
 
-		if (optimizerTrace)
-		{
-			trace(CHEAPEST_PLAN_SO_FAR, 0, 0, 0.0, null);
-			trace(PLAN_TYPE, planType, 0, 0.0, null);
-			trace(COST_OF_CHEAPEST_PLAN_SO_FAR, 0, 0, 0.0, null);
-		}
+		if (optimizerTrace) { tracer().traceCheapestPlanSoFar( planType, currentCost ); }
 
 		/* Remember the current cost as best */
 		bestCost.setCost(currentCost);
@@ -1871,11 +1845,8 @@ public class OptimizerImpl implements Optimizer
 
 		if (optimizerTrace)
 		{
-			if (requiredRowOrdering != null)
-			{
-				trace(SORT_NEEDED_FOR_ORDERING, planType, 0, 0.0, null);
-			}
-			trace(REMEMBERING_BEST_JOIN_ORDER, 0, 0, 0.0, null);
+			if (requiredRowOrdering != null)    { tracer().traceSortNeededForOrdering( planType, requiredRowOrdering ); }
+            tracer().traceRememberingBestJoinOrder( joinPosition, ArrayUtil.copy( bestJoinOrder ), (JBitSet) assignedTableMap.clone() );
 		}
 	}
 
@@ -2192,10 +2163,7 @@ public class OptimizerImpl implements Optimizer
 		// DERBY-1259.
 		if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(), maxMemoryPerTable))
 		{
-			if (optimizerTrace)
-			{
-				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, 0.0, null);
-			}
+			if (optimizerTrace) { tracer().traceSkippingBecauseTooMuchMemory( maxMemoryPerTable ); }
 			return;
 		}
 
@@ -2329,10 +2297,7 @@ public class OptimizerImpl implements Optimizer
         if( ! optimizable.memoryUsageOK( estimatedCost.rowCount() / outerCost.rowCount(),
                                          maxMemoryPerTable))
 		{
-			if (optimizerTrace)
-			{
-				trace(SKIPPING_DUE_TO_EXCESS_MEMORY, 0, 0, 0.0, null);
-			}
+			if (optimizerTrace) { tracer().traceSkippingBecauseTooMuchMemory( maxMemoryPerTable ); }
 			return;
 		}
 
@@ -2418,17 +2383,11 @@ public class OptimizerImpl implements Optimizer
 	 */
 	public void modifyAccessPaths() throws StandardException
 	{
-		if (optimizerTrace)
-		{
-			trace(MODIFYING_ACCESS_PATHS, 0, 0, 0.0, null);
-		}
+		if (optimizerTrace) { tracer().traceModifyingAccessPaths(); }
 
 		if ( ! foundABestPlan)
 		{
-			if (optimizerTrace)
-			{
-				trace(NO_BEST_PLAN, 0, 0, 0.0, null);
-			}
+			if (optimizerTrace) { tracer().traceNoBestPlan(); }
 
 			throw StandardException.newException(SQLState.LANG_NO_BEST_PLAN_FOUND);
 		}
@@ -2643,12 +2602,6 @@ public class OptimizerImpl implements Optimizer
 		return new CostEstimateImpl(theCost, theRowCount, theSingleScanRowCount);
 	}
 
-	// Optimzer trace
-	public void trace(int traceFlag, int intParam1, int intParam2,
-					  double doubleParam, Object objectParam1)
-	{
-	}
-	
 	/** @see Optimizer#useStatistics */
 	public boolean useStatistics() { return useStatistics && optimizableList.useStatistics(); }
 
@@ -2797,5 +2750,13 @@ public class OptimizerImpl implements Optimizer
 
 		return;
 	}
+
+    /** Get the trace machinery */
+    public  OptTrace    tracer()
+    {
+        if ( _tracer == null ) { _tracer = new DefaultOptTrace( lcc,  hashCode() ); }
+
+        return _tracer;
+    }
 
 }

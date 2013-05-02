@@ -37,6 +37,7 @@ import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -79,9 +80,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		 */
 		if (! innerTable.isMaterializable())
 		{
-
-			optimizer.trace(Optimizer.HJ_SKIP_NOT_MATERIALIZABLE, 0, 0, 0.0,
-							null);
+            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceSkipUnmaterializableHashJoin(); }
 			return false;
 		}
 
@@ -163,14 +162,17 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 
 		if (SanityManager.DEBUG)
 		{
-			if (hashKeyColumns == null)
-			{
-				optimizer.trace(Optimizer.HJ_SKIP_NO_JOIN_COLUMNS, 0, 0, 0.0, null);
-			}
-			else
-			{
-				optimizer.trace(Optimizer.HJ_HASH_KEY_COLUMNS, 0, 0, 0.0, hashKeyColumns);
-			}
+            if ( optimizer.tracingIsOn() )
+            {
+                if (hashKeyColumns == null)
+                {
+                    optimizer.tracer().traceSkipHashJoinNoHashKeys();
+                }
+                else
+                {
+                    optimizer.tracer().traceHashKeyColumns( ArrayUtil.copy( hashKeyColumns ) );
+                }
+            }
 		}
 
 		if (hashKeyColumns == null)

@@ -147,8 +147,8 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 							 CostEstimate costEstimate) {
 		costEstimate.multiply(outerCost.rowCount(), costEstimate);
 
-		optimizer.trace(Optimizer.COST_OF_N_SCANS, innerTable.getTableNumber(), 0, outerCost.rowCount(),
-						costEstimate);
+        if ( optimizer.tracingIsOn() )
+        { optimizer.tracer().traceCostOfNScans( innerTable.getTableNumber(), outerCost.rowCount(), costEstimate ); }
 	}
 
 	/** @see JoinStrategy#maxCapacity */
