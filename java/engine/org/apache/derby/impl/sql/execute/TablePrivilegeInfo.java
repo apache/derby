@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.error.StandardException;
@@ -59,10 +60,10 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 	private static final String[][] actionString =
 	{{"s", "S"}, {"d", "D"}, {"i", "I"}, {"u", "U"}, {"r", "R"}, {"t", "T"}};
 
-	private TableDescriptor td;
-	private boolean[] actionAllowed;
-	private FormatableBitSet[] columnBitSets;
-	private List descriptorList;
+    private final TableDescriptor td;
+    private final boolean[] actionAllowed;
+    private final FormatableBitSet[] columnBitSets;
+    private final List descriptorList;
 	
 	/**
 	 * @param actionAllowed actionAllowed[action] is true if action is in the privilege set.
@@ -72,8 +73,16 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 							   FormatableBitSet[] columnBitSets,
 							   List descriptorList)
 	{
-		this.actionAllowed = actionAllowed;
-		this.columnBitSets = columnBitSets;
+        // Copy the arrays so that modification outside doesn't change
+        // the internal state.
+        this.actionAllowed = ArrayUtil.copy(actionAllowed);
+        this.columnBitSets = new FormatableBitSet[columnBitSets.length];
+        for (int i = 0; i < columnBitSets.length; i++) {
+            if (columnBitSets[i] != null) {
+                this.columnBitSets[i] = new FormatableBitSet(columnBitSets[i]);
+            }
+        }
+
 		this.td = td;
 		this.descriptorList = descriptorList;
 	}

@@ -21,11 +21,9 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-
-import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -37,7 +35,6 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
-import org.apache.derby.iapi.services.io.FormatableIntHolder;
 import org.apache.derby.iapi.services.io.FormatableLongHolder;
 
 import java.io.ObjectOutput;
@@ -67,21 +64,21 @@ public class ColumnInfo implements Formatable
 	**
 	********************************************************/
 
-	public  int							action;
-	public	String						name;
-	public	DataTypeDescriptor			dataType;
-	public	DefaultInfo					defaultInfo;
-    public    ProviderInfo[]            providers;
-	public	DataValueDescriptor			defaultValue;
-	public	UUID						newDefaultUUID;
-	public	UUID						oldDefaultUUID;
+    int                         action;
+    String                      name;
+    DataTypeDescriptor          dataType;
+    DefaultInfo                 defaultInfo;
+    ProviderInfo[]              providers;
+    DataValueDescriptor         defaultValue;
+    UUID                        newDefaultUUID;
+    UUID                        oldDefaultUUID;
 	// autoinc columns.
-	public long 						autoincStart;
-	public long 						autoincInc;
+    long                        autoincStart;
+    long                        autoincInc;
 	//if this is an autoincrement column, then following variable will have CREATE or
 	//MODIFY_COLUMN_DEFAULT_RESTART or MODIFY_COLUMN_DEFAULT_INCREMENT. Otherwise,
 	//this variable will be set to -1.
-	public long 						autoinc_create_or_modify_Start_Increment = -1;
+    long                        autoinc_create_or_modify_Start_Increment = -1;
 
 	//This indicates column is for CREATE TABLE
 	public static final int CREATE					= 0;
@@ -135,7 +132,7 @@ public class ColumnInfo implements Formatable
 		this.dataType = dataType;
 		this.defaultValue = defaultValue;
 		this.defaultInfo = defaultInfo;
-        this.providers = providers;
+        this.providers = (ProviderInfo[]) ArrayUtil.copy(providers);
 		this.newDefaultUUID = newDefaultUUID;
 		this.oldDefaultUUID = oldDefaultUUID;
 		this.action = action;
@@ -227,6 +224,12 @@ public class ColumnInfo implements Formatable
 	 *	@return	the formatID of this class
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.COLUMN_INFO_V02_ID; }
+
+    // Accessors
+
+    public DataTypeDescriptor getDataType() {
+        return dataType;
+    }
 
 	/*
 	  Object methods.

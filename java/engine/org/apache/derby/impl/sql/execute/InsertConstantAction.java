@@ -86,7 +86,7 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	 * the row location of the column in SYSCOLUMNS.
 	 * if not, then it contains null.
 	 */
-	protected RowLocation[] autoincRowLocation;
+    RowLocation[] autoincRowLocation;
 	private long[] autoincIncrement;
 	
 	// CONSTRUCTORS
@@ -262,7 +262,7 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	/**
 	 * gets the row location 
 	 */
-	public RowLocation[] getAutoincRowLocation()
+    RowLocation[] getAutoincRowLocation()
 	{
 		return autoincRowLocation;
 	}

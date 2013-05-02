@@ -518,7 +518,7 @@ public class CreateTableNode extends DDLStatementNode
 
         for (int i = 0; i < colInfos.length; i++)
         {
-			DataTypeDescriptor dts = colInfos[i].dataType;
+            DataTypeDescriptor dts = colInfos[i].getDataType();
             if (dts.getTypeId().isLongConcatableTypeId())
             {
                 table_has_long_column = true;

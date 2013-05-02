@@ -30,9 +30,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.io.Formatable;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -93,7 +91,7 @@ public class ConstraintInfo implements ConsInfo
 	{
 		this.tableName = tableName;
 		this.tableSd = tableSd;
-		this.columnNames = columnNames;
+        this.columnNames = ArrayUtil.copy(columnNames);
 		this.raDeleteRule  = raDeleteRule;
 		this.raUpdateRule  = raUpdateRule;
 	}
@@ -238,8 +236,9 @@ public class ConstraintInfo implements ConsInfo
 	  *
 	  *	@return	array of referenced column names
 	  */
-	public String[] getReferencedColumnNames()
-	{ return columnNames; }
+    public String[] getReferencedColumnNames() {
+        return ArrayUtil.copy(columnNames);
+    }
 
 	/**
 	  *	Get the name of the table that these column live in.

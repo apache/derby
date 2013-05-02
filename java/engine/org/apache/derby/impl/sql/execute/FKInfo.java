@@ -75,18 +75,18 @@ public class FKInfo implements Formatable
 	/*
 	** See the constructor for the meaning of these fields
 	*/
-	public String				fkConstraintNames[];
-	public String				tableName;
-	public int					type;
-	public UUID					refUUID;
-	public long					refConglomNumber;
-	public UUID[]				fkUUIDs;
-	public long[]				fkConglomNumbers;
-	public boolean[]			fkIsSelfReferencing;
-	public int[]				colArray;
-	public int					stmtType;
-	public RowLocation			rowLocation;
-	public int[] 	            raRules;
+    String[]            fkConstraintNames;
+    String              tableName;
+    int                 type;
+    UUID                refUUID;
+    long                refConglomNumber;
+    private UUID[]      fkUUIDs;
+    long[]              fkConglomNumbers;
+    boolean[]           fkIsSelfReferencing;
+    int[]               colArray;
+    int                 stmtType;
+    RowLocation         rowLocation;
+    int[]               raRules;
 
 	/**
 	 * Niladic constructor for Formattable
@@ -132,18 +132,18 @@ public class FKInfo implements Formatable
 					int[]               raRules
 					)
 	{
-		this.fkConstraintNames = fkConstraintNames;
+        this.fkConstraintNames = ArrayUtil.copy(fkConstraintNames);
 		this.tableName = tableName;
 		this.stmtType = stmtType;
 		this.type = type;
 		this.refUUID = refUUID;
 		this.refConglomNumber = refConglomNumber;
-		this.fkUUIDs = fkUUIDs;
-		this.fkConglomNumbers = fkConglomNumbers;
-		this.fkIsSelfReferencing = fkIsSelfReferencing;
-		this.colArray = colArray;
+        this.fkUUIDs = (UUID[]) ArrayUtil.copy(fkUUIDs);
+        this.fkConglomNumbers = ArrayUtil.copy(fkConglomNumbers);
+        this.fkIsSelfReferencing = ArrayUtil.copy(fkIsSelfReferencing);
+        this.colArray = ArrayUtil.copy(colArray);
 		this.rowLocation = rowLocation;
-		this.raRules = raRules;
+        this.raRules = ArrayUtil.copy(raRules);
 
 		if (SanityManager.DEBUG)
 		{

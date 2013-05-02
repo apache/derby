@@ -32,13 +32,9 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
-import org.apache.derby.iapi.sql.depend.ProviderList;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 
 import java.util.ArrayList;
@@ -117,7 +113,7 @@ public class TablePrivilegesNode extends QueryTreeNode
 	/**
 	 * @return PrivilegeInfo for this node
 	 */
-	public PrivilegeInfo makePrivilegeInfo()
+    PrivilegeInfo makePrivilegeInfo()
 	{
 		return new TablePrivilegeInfo( td, actionAllowed, columnBitSets, 
 				descriptorList);
