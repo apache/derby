@@ -2255,7 +2255,7 @@ public class ClientPreparedStatement extends ClientStatement
 
 
         if (sqlMode_ == isQuery__) {
-            indexOfCurrentResultSet_ = -1; //reset ResultSetList
+            resetResultSetList();
             resultSetList_ = new ClientResultSet[batchSize];
         }
 
