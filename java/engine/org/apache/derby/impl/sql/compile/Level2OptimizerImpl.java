@@ -63,13 +63,10 @@ public class Level2OptimizerImpl extends OptimizerImpl
 			  joinStrategies, tableLockThreshold, requiredRowOrdering,
 			  numTablesInQuery);
 
-		// Remember whether or not optimizer trace is on;
-		optimizerTrace = lcc.getOptimizerTrace();
-		optimizerTraceHtml = lcc.getOptimizerTraceHtml();
 		this.lcc = lcc;
 
 		// Optimization started
-		if (optimizerTrace) { tracer().traceStart( timeOptimizationStarted ); }
+		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode() ); }
 	}
 
 	/** @see Optimizer#getLevel */

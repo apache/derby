@@ -21,10 +21,11 @@
 
 package org.apache.derby.impl.tools.optional;
 
-import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.db.OptimizerTrace;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 
 /**
@@ -75,7 +76,7 @@ public	class   OptimizerTracer  implements OptionalTool
 
     /**
      * <p>
-     * Dump the optimizer trace and turn off tracing. Takes optional parameters:
+     * Print the optimizer trace and turn off tracing. Takes optional parameters:
      * </p>
      *
      * <ul>
@@ -85,30 +86,34 @@ public	class   OptimizerTracer  implements OptionalTool
     public  void    unloadTool( String... configurationParameters )
         throws SQLException
     {
-        String  trace = OptimizerTrace.getOptimizerTraceOutput();
-        if ( trace == null ) { trace = ""; }
+        try {
+            OptTrace    tracer = OptimizerTrace.getOptimizerTracer();
+            boolean     needsClosing = false;
 
-        OptimizerTrace.nullifyTrace();
+            PrintWriter pw;
+            if (
+                (configurationParameters != null) &&
+                (configurationParameters.length > 0)
+                )
+            {
+                pw = new PrintWriter( configurationParameters[ 0 ] );
+                needsClosing = true;
+            }
+            else { pw = new PrintWriter( System.out ); }
         
-        if (
-            (configurationParameters != null) &&
-            (configurationParameters.length > 0)
-            )
-        {
-            try {
-                FileWriter    writer = new FileWriter( configurationParameters[ 0 ] );
+            if ( tracer != null )
+            {
+                tracer.printToWriter( pw );
+                pw.flush();
+            }
 
-                writer.write( trace );
-                writer.flush();
-                writer.close();
-            } catch (Exception e) { throw wrap( e ); }
+            if ( needsClosing ) { pw.close(); }
         }
-        else
+        catch (Exception e) { throw wrap( e ); }
+        finally
         {
-            System.out.println( trace );
+            OptimizerTrace.setOptimizerTracer( null );
         }
-
-        OptimizerTrace.setOptimizerTrace( false );
     }
 
     ////////////////////////////////////////////////////////////////////////

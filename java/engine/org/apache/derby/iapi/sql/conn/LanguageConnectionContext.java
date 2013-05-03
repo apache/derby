@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.conn;
 
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -911,57 +912,24 @@ public interface LanguageConnectionContext extends Context {
 	    throws StandardException;
 
 	/**
-	 * Control whether or not optimizer trace is on.
+	 * Install an optimizer tracer (to enable tracing) or uninstall the current optimizer tracer
+     * (to disable tracing).
 	 *
-	 * @param onOrOff    Whether to turn optimizer trace on (true) or off (false).
-	 *
-	 * @return Whether or not the call was successful.  (false will be returned when optimizer tracing is not supported.)
+	 * @param tracer    Null if tracing is being turned off, otherwise an optimizer tracer
 	 */
-	public boolean setOptimizerTrace(boolean onOrOff);
+	public void setOptimizerTracer( OptTrace tracer );
+
+	/**
+	 * Get the optimizer tracer (could be null if we aren't tracing the optimizer).
+	 */
+	public OptTrace getOptimizerTracer();
 
 	/** 
 	 * Get whether or not optimizer trace is on.
 	 *
 	 * @return Whether or not optimizer trace is on.
 	 */
-	public boolean getOptimizerTrace();
-
-	/**
-	 * Control whether or not optimizer trace is generated in html.
-	 *
-	 * @param onOrOff    Whether or not optimizer trace will be in html (true) or not (false).
-	 *
-	 * @return Whether or not the call was successful.  (false will be returned when optimizer tracing is not supported.)
-	 */
-	public boolean setOptimizerTraceHtml(boolean onOrOff);
-
-	/** 
-	 * Get whether or not optimizer trace html is on.
-	 *
-	 * @return Whether or not optimizer trace html is on.
-	 */
-	public boolean getOptimizerTraceHtml();
-
-	/**
-	 * Get the optimizer trace output for the last optimized query as a String.  If optimizer trace
-	 * html is on, then the String will contain the html tags.
-	 *
-	 * @return The optimizer trace output for the last optimized query as a String.
-	 *    Null will be returned if optimizer trace output is off or not supported 
-	 *    or no trace output was found or an exception occurred.
-	 */
-	public String getOptimizerTraceOutput();
-
-	/**
-	 * Set the optimizer trace output to the specified String.
-	 * (Done at the beginning of each statement.)
-	 */
-	public void setOptimizerTraceOutput(String startingText);
-
-	/**
-	 * Append the latest output to the optimizer trace output.
-	 */
-	public void appendOptimizerTraceOutput(String output);
+	public boolean optimizerTracingIsOn();
 
     /**
 	  *	Reports whether there is any outstanding work in the transaction.

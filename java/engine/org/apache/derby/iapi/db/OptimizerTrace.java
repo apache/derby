@@ -21,10 +21,15 @@
 
 package org.apache.derby.iapi.db;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+
+import org.apache.derby.impl.sql.compile.DefaultOptTrace;
 
 /**
   <P>
@@ -35,68 +40,47 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 public class OptimizerTrace
 {
 	/**
-	 * Control whether or not optimizer trace is on.
+	 * Turn default optimizer tracing on or off.
 	 *
-	 * @param onOrOff    Whether to turn optimizer trace on (true) or off (false).
-	 *
-	 * @return Whether or not the call was successful.  (false will be returned when optimizer tracing is not supported.)
+	 * @param onOrOff    Whether to turn optimizer tracing on (true) or off (false).
 	 */
-	public static boolean setOptimizerTrace(boolean onOrOff)
+	public static void setOptimizerTrace( boolean onOrOff )
 	{
-		boolean retCode = false;
+        OptTrace    optimizerTracer = onOrOff ? new DefaultOptTrace() : null;
 
-		try
-		{
-			// Get the current language connection context.  This is associated
-			// with the current database.
-			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-			retCode = lcc.setOptimizerTrace(onOrOff);
-		}
-		catch (Throwable t)
-		{
-			// eat all exceptions, simply return false
-		}
-
-		return retCode;
-	}
-
-    /**
-     * Null out the optimizer trace.
-     */
-    public  static  void    nullifyTrace()  throws SQLException
-    {
-        ConnectionUtil.getCurrentLCC().setOptimizerTraceOutput( null );
-    }
-
-	/**
-	 * Control whether or not optimizer trace is generated in html.
-	 *
-	 * @param onOrOff    Whether or not optimizer trace will be in html (true) or not (false).
-	 *
-	 * @return Whether or not the call was successful.  (false will be returned when optimizer tracing is not supported.)
-	 */
-	public static boolean setOptimizerTraceHtml(boolean onOrOff)
-	{
-		boolean retCode = false;
-
-		try
-		{
-			// Get the current language connection context.  This is associated
-			// with the current database.
-			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-			retCode = lcc.setOptimizerTraceHtml(onOrOff);
-		}
-		catch (Throwable t)
-		{
-			// eat all exceptions, simply return false
-		}
-
-		return retCode;
+        setOptimizerTracer( optimizerTracer );
 	}
 
 	/**
-	 * Get the optimizer trace output for the last optimized query as a String.  If optimizer trace
-	 * html is on, then the String will contain the html tags.
+	 * Install an optimizer tracer (to enable tracing) or uninstall the current optimizer tracer
+     * (to disable tracing).
+	 *
+	 * @param tracer    Null if tracing is being turned off, otherwise an optimizer tracer
+	 */
+	public static   void setOptimizerTracer( OptTrace tracer )
+	{
+		try
+		{
+            ConnectionUtil.getCurrentLCC().setOptimizerTracer( tracer );
+		}
+		catch (Throwable t) {}
+	}
+
+	/**
+	 * Get the current optimizer tracer, if any.
+	 */
+	public static   OptTrace getOptimizerTracer()
+	{
+		try
+		{
+            return ConnectionUtil.getCurrentLCC().getOptimizerTracer();
+		}
+		catch (Throwable t) { return null; }
+	}
+
+
+	/**
+	 * Get the optimizer trace output for the last optimized query as a String.
 	 *
 	 * @return The optimizer trace output for the last optimized query as a String.
 	 *    Null will be returned if optimizer trace output is off or not supported 
@@ -111,39 +95,23 @@ public class OptimizerTrace
 			// Get the current language connection context.  This is associated
 			// with the current database.
 			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-			retCode = lcc.getOptimizerTraceOutput();
+            OptTrace    tracer = lcc.getOptimizerTracer();
+
+            if ( tracer != null )
+            {
+                StringWriter    sw = new StringWriter();
+                PrintWriter     pw = new PrintWriter( sw );
+
+                tracer.printToWriter( pw );
+                pw.flush();
+                sw.flush();
+
+                retCode = sw.toString();
+            }
 		}
 		catch (Throwable t)
 		{
 			// eat all exceptions, simply return null
-		}
-
-		return retCode;
-	}
-
-	/**
-	 * Send the optimizer trace output for the last optimized query to a file with a .html extension.  
-	 * If optimizer trace html is on, then the output will contain the html tags.
-	 *
-	 * @param fileName    The name of the file to write to.  (.html extension will be added.)
-	 *
-	 * @return Whether or not the request was successful.
-	 *    false mayl be returned for a number of reasons, including if optimizer trace output is off or not supported 
-	 *    or no trace output was found or an exception occurred.
-	 */
-	public static boolean writeOptimizerTraceOutputHtml(String fileName)
-	{
-		boolean retCode = true;
-
-		try
-		{
-		String output = getOptimizerTraceOutput();
-		//RESOLVEOPTIMIZERTRACE - need to write out the html
-		}
-		catch (Throwable t)
-		{
-			// eat all exceptions, simply return false
-			retCode = false;
 		}
 
 		return retCode;

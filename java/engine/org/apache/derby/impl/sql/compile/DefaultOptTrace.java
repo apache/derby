@@ -21,8 +21,9 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.io.PrintWriter;
+
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
@@ -52,8 +53,7 @@ public  class   DefaultOptTrace implements  OptTrace
     //
     ////////////////////////////////////////////////////////////////////////
 
-    private LanguageConnectionContext   _lcc;
-    private int                                     _optimizerID;
+    private StringBuffer    _buffer;
     
     ////////////////////////////////////////////////////////////////////////
     //
@@ -62,10 +62,9 @@ public  class   DefaultOptTrace implements  OptTrace
     ////////////////////////////////////////////////////////////////////////
 
     /** Make a DefaultOptTrace */
-    public  DefaultOptTrace( LanguageConnectionContext lcc, int optimizerID )
+    public  DefaultOptTrace()
     {
-        _lcc = lcc;
-        _optimizerID = optimizerID;
+        _buffer = new StringBuffer();
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -74,13 +73,18 @@ public  class   DefaultOptTrace implements  OptTrace
     //
     ////////////////////////////////////////////////////////////////////////
 
-    public  void    traceStart( long timeOptimizationStarted )
+    public  void    traceStartStatement( String statementText )
+    {
+        appendTraceString( statementText );
+    }
+    
+    public  void    traceStart( long timeOptimizationStarted, int optimizerID )
     {
         appendTraceString
             (
              "Optimization started at time " + 
              timeOptimizationStarted +
-             " using optimizer " + _optimizerID
+             " using optimizer " + optimizerID
              );
     }
 
@@ -114,9 +118,9 @@ public  class   DefaultOptTrace implements  OptTrace
         appendTraceString( "No best plan found." );
     }
 
-    public  void    traceModifyingAccessPaths()
+    public  void    traceModifyingAccessPaths( int optimizerID )
     {
-        appendTraceString( "Modifying access paths using optimizer " + _optimizerID );
+        appendTraceString( "Modifying access paths using optimizer " + optimizerID );
     }
 
     public  void    traceShortCircuiting( boolean timeExceeded, Optimizable thisOpt, int joinPosition )
@@ -473,6 +477,11 @@ public  class   DefaultOptTrace implements  OptTrace
         appendTraceString( reportCostIncluding( "statistics for index being considered", cost, tableNumber ) );
     }
 
+    public  void    printToWriter( PrintWriter out )
+    {
+        out.println( _buffer.toString() );
+    }
+    
     ////////////////////////////////////////////////////////////////////////
     //
     //	REPORTING MINIONS
@@ -552,7 +561,7 @@ public  class   DefaultOptTrace implements  OptTrace
     /** Append a string to the optimizer trace */
     private void    appendTraceString( String traceString )
     {
-		_lcc.appendOptimizerTraceOutput(traceString + "\n");
+		_buffer.append( traceString + "\n" );
     }
 
 }

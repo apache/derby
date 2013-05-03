@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.sql.compile;
 
+import java.io.PrintWriter;
+
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -41,8 +43,11 @@ public  interface   OptTrace
     //
     ////////////////////////////////////////////////////////////////////////
 
+    /** Start the start of tracing a statement. */
+    public  void    traceStartStatement( String statementText );
+
     /** Start optimizer tracing. */
-    public  void    traceStart( long timeOptimizationStarted );
+    public  void    traceStart( long timeOptimizationStarted, int optimizerID );
 
     /** Say that the optimizer ran out of time. */
     public  void    traceTimeout( long currentTime, CostEstimate bestCost );
@@ -60,7 +65,7 @@ public  interface   OptTrace
     public  void    traceNoBestPlan();
 
     /** Say that we're modifying access paths. */
-    public  void    traceModifyingAccessPaths();
+    public  void    traceModifyingAccessPaths( int optimizerID );
 
     /** Say that we short-circuited a join order. */
     public  void    traceShortCircuiting( boolean timeExceeded, Optimizable thisOpt, int joinPosition );
@@ -209,4 +214,7 @@ public  interface   OptTrace
     /** Report the cost based on index statistics. */
     public  void    traceCostIncludingStatsForIndex( CostEstimate cost, int tableNumber );
     
+    /** Print the trace so far. */
+    public  void    printToWriter( PrintWriter out );
+
 }

@@ -41,6 +41,7 @@ import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.ASTVisitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -273,10 +274,7 @@ public class GenericLanguageConnectionContext
     private ArrayList triggerTables;
 
     // OptimizerTrace
-    private boolean optimizerTrace;
-    private boolean optimizerTraceHtml;
-    private String lastOptimizerTraceOutput;
-    private String optimizerTraceOutput;
+    private OptTrace    optimizerTracer;
 
     //// Support for AUTOINCREMENT
 
@@ -2994,82 +2992,24 @@ public class GenericLanguageConnectionContext
     }
 
     /**
-     * @see LanguageConnectionContext#setOptimizerTrace
+     * @see LanguageConnectionContext#setOptimizerTracer
      */
-    public boolean setOptimizerTrace(boolean onOrOff)
+    public void setOptimizerTracer( OptTrace tracer )
     {
-        if (of == null)
-        {
-            return false;
-        }
-        if (! of.supportsOptimizerTrace())
-        {
-            return false;
-        }
-        optimizerTrace = onOrOff;
-        return true;
+        optimizerTracer = tracer;
     }
 
     /**
-     * @see LanguageConnectionContext#getOptimizerTrace
+     * @see LanguageConnectionContext#getOptimizerTracer
      */
-    public boolean getOptimizerTrace()
-    {
-        return optimizerTrace;
-    }
-
+	public OptTrace getOptimizerTracer() { return optimizerTracer; }
+    
     /**
-     * @see LanguageConnectionContext#setOptimizerTraceHtml
+     * @see LanguageConnectionContext#optimizerTracingIsOn
      */
-    public boolean setOptimizerTraceHtml(boolean onOrOff)
+    public boolean optimizerTracingIsOn()
     {
-        if (of == null)
-        {
-            return false;
-        }
-        if (! of.supportsOptimizerTrace())
-        {
-            return false;
-        }
-        optimizerTraceHtml = onOrOff;
-        return true;
-    }
-
-    /**
-     * @see LanguageConnectionContext#getOptimizerTraceHtml
-     */
-    public boolean getOptimizerTraceHtml()
-    {
-        return optimizerTraceHtml;
-    }
-
-    /**
-     * @see LanguageConnectionContext#setOptimizerTraceOutput
-     */
-    public void setOptimizerTraceOutput(String startingText)
-    {
-        if (optimizerTrace)
-        {
-            lastOptimizerTraceOutput = optimizerTraceOutput;
-            optimizerTraceOutput = startingText;
-        }
-    }
-
-    /**
-     * @see LanguageConnectionContext#appendOptimizerTraceOutput
-     */
-    public void appendOptimizerTraceOutput(String output)
-    {
-        optimizerTraceOutput = 
-            (optimizerTraceOutput == null) ? output : optimizerTraceOutput + output;
-    }
-
-    /**
-     * @see LanguageConnectionContext#getOptimizerTraceOutput
-     */
-    public String getOptimizerTraceOutput()
-    {
-        return lastOptimizerTraceOutput;
+        return (optimizerTracer != null);
     }
 
     /**

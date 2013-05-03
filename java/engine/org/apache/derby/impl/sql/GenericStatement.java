@@ -188,9 +188,11 @@ public class GenericStatement
 				return preparedStmt;
 		}
 
-		// Clear the optimizer trace from the last statement
-		if (lcc.getOptimizerTrace())
-			lcc.setOptimizerTraceOutput(getSource() + "\n");
+		// Start a new optimizer trace for this statement
+		if (lcc.optimizerTracingIsOn())
+        {
+            lcc.getOptimizerTracer().traceStartStatement( getSource() );
+        }
 
 		beginTime = getCurrentTimeMillis(lcc);
 		/* beginTimestamp only meaningful if beginTime is meaningful.
