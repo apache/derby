@@ -27,10 +27,10 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class NetDatabaseMetaData40 extends NetDatabaseMetaData {
+class NetDatabaseMetaData40 extends NetDatabaseMetaData {
     
     
-    public NetDatabaseMetaData40(NetAgent netAgent, NetConnection netConnection) {
+    NetDatabaseMetaData40(NetAgent netAgent, NetConnection netConnection) {
         super(netAgent,netConnection);
     }
 

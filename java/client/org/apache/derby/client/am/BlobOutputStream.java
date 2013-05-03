@@ -26,11 +26,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
-public class BlobOutputStream extends OutputStream {
+class BlobOutputStream extends OutputStream {
     private ClientBlob blob_;
     private long offset_;
 
-    public BlobOutputStream(ClientBlob blob, long offset) {
+    BlobOutputStream(ClientBlob blob, long offset) {
         blob_ = blob;
         offset_ = offset;
         

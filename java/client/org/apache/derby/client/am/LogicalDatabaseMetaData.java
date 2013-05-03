@@ -34,7 +34,7 @@ import java.sql.SQLException;
  * lifetime of the metadata object equal to the logical connection instead
  * of the underlying physical connection.
  */
-public class LogicalDatabaseMetaData implements DatabaseMetaData {
+class LogicalDatabaseMetaData implements DatabaseMetaData {
 
     /** The associated logical connection. */
     private final LogicalConnection logicalCon;
@@ -52,8 +52,8 @@ public class LogicalDatabaseMetaData implements DatabaseMetaData {
      * @param logWriter destination for log/error messages
      * @throws SQLException if obtaining the JDBC driver versions fail
      */
-    public LogicalDatabaseMetaData(LogicalConnection logicalCon,
-                                   LogWriter logWriter)
+    LogicalDatabaseMetaData(LogicalConnection logicalCon,
+                            LogWriter logWriter)
             throws SQLException {
         this.logicalCon = logicalCon;
         this.logWriter = logWriter;

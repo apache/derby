@@ -40,9 +40,6 @@ public class ColumnMetaData implements ResultSetMetaData {
 
     public boolean[] nullable_;
 
-    // Although this is describe information, it is tagged transient for now becuase it is not currently used.
-    transient public int[] singleMixedByteOrDouble_; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
-
     // All of the following state data comes from the SQLDA reply.
 
     //Data from SQLDHGRP
@@ -89,18 +86,16 @@ public class ColumnMetaData implements ResultSetMetaData {
 
     // For performance only, not part of logical model.
     public transient int[][] protocolTypesCache_ = null;
-    public transient Hashtable protocolTypeToOverrideLidMapping_ = null;
-    public transient ArrayList mddOverrideArray_ = null;
 
     public transient int[] types_;
     public transient int[] clientParamtertype_;
 
-    public transient LogWriter logWriter_;
+    private transient LogWriter logWriter_;
 
     // only set on execute replies, this is not describe information.
     // only used for result set meta data.
 
-    public transient int resultSetConcurrency_;
+    transient int resultSetConcurrency_;
 
     transient private Hashtable<String, Integer> columnNameToIndexCache_;
 
@@ -111,7 +106,7 @@ public class ColumnMetaData implements ResultSetMetaData {
         nullDataForGC();
     }
 
-    void checkForClosedStatement() throws SqlException {
+    private void checkForClosedStatement() throws SqlException {
         // agent_.checkForDeferredExceptions();
         if (statementClosed_) {
             throw new SqlException(logWriter_, 
@@ -144,7 +139,6 @@ public class ColumnMetaData implements ResultSetMetaData {
         nullable_ = new boolean[upperBound];
         types_ = new int[upperBound];
         clientParamtertype_ = new int[upperBound];
-        singleMixedByteOrDouble_ = new int[upperBound]; // 1 means single, 2 means double, 3 means mixed-byte, 0 not applicable
 
         sqlPrecision_ = new int[upperBound];
         sqlScale_ = new int[upperBound];
@@ -755,14 +749,6 @@ public class ColumnMetaData implements ResultSetMetaData {
         }
     }
 
-    // Does OUT parm registration rely on extended describe?
-    // If the output parameter has been registered, return true, else return false.
-    public boolean isParameterModeGuessedAsOutput(int parameterIndex) {
-        return
-            sqlxParmmode_[parameterIndex - 1] >=
-            ClientParameterMetaData.parameterModeInOut;
-    }
-
     public void setLogWriter(LogWriter logWriter) {
         logWriter_ = logWriter;
     }
@@ -771,7 +757,6 @@ public class ColumnMetaData implements ResultSetMetaData {
         columns_ = 0;
         nullable_ = null;
         types_ = null;
-        singleMixedByteOrDouble_ = null;
         sqldRdbnam_ = null;
         sqldSchema_ = null;
         sqlPrecision_ = null;
@@ -798,7 +783,7 @@ public class ColumnMetaData implements ResultSetMetaData {
         types_ = null;
     }
 
-    public boolean hasLobColumns() {
+    boolean hasLobColumns() {
         for (int i = 0; i < columns_; i++) {
             switch (Utils.getNonNullableSqlType(sqlType_[i])) {
             case DRDAConstants.DB2_SQLTYPE_BLOB:
@@ -838,17 +823,13 @@ public class ColumnMetaData implements ResultSetMetaData {
     }
 
     // assign ordinal position as the column name if null.
-    void assignColumnName(int column) {
+    private void assignColumnName(int column) {
         if (columnNameToIndexCache_ == null) {
             columnNameToIndexCache_ = new Hashtable<String, Integer>();
         }
         String columnName = Integer.toString(column);
         columnNameToIndexCache_.put(columnName, column);
         sqlName_[column - 1] = columnName;
-    }
-
-    public boolean columnIsNotInUnicode(int index) {
-        return (sqlCcsid_[index] != 1208);
     }
 
     // JDBC 4.0 java.sql.Wrapper interface methods

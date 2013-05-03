@@ -41,7 +41,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
-public class BlobLocatorInputStream extends InputStream
+class BlobLocatorInputStream extends InputStream
 {
 
     /**
@@ -55,7 +55,7 @@ public class BlobLocatorInputStream extends InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
-    public BlobLocatorInputStream(ClientConnection connection, ClientBlob blob)
+    BlobLocatorInputStream(ClientConnection connection, ClientBlob blob)
         throws SqlException
     {        
         if (SanityManager.DEBUG) {
@@ -88,7 +88,7 @@ public class BlobLocatorInputStream extends InputStream
      * @throws SqlException if an error occurs when obtaining the
      *         length of the <code>Blob</code>.
      */
-    public BlobLocatorInputStream(ClientConnection connection, ClientBlob blob,
+    BlobLocatorInputStream(ClientConnection connection, ClientBlob blob,
                                   long position, long length) 
         throws SqlException
     {    

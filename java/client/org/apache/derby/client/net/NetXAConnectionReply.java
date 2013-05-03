@@ -21,7 +21,9 @@
 
 package org.apache.derby.client.net;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -30,7 +32,7 @@ import org.apache.derby.client.ClientXid;
 import org.apache.derby.client.am.ConnectionCallbackInterface;
 import org.apache.derby.client.am.DisconnectException;
 
-public class NetXAConnectionReply extends NetResultSetReply {
+class NetXAConnectionReply extends NetResultSetReply {
     NetXAConnectionReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -48,8 +50,6 @@ public class NetXAConnectionReply extends NetResultSetReply {
 
         NetXACallInfo callInfo =
                 netAgent_.netConnection_.xares_.callInfoArray_[netAgent_.netConnection_.currXACallInfoOffset_];
-        callInfo.xaInProgress_ = false;
-        callInfo.xaWasSuspended = false;
         connection.completeLocalCommit();
     }
 
@@ -60,7 +60,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
         connection.completeLocalRollback();
     }
 
-    protected void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
+    void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
         // If we are joining or resuming a global transaction, we let the
@@ -74,7 +74,7 @@ public class NetXAConnectionReply extends NetResultSetReply {
         endOfSameIdChainData();
     }
 
-    protected int readXaEndUnitOfWork(NetConnection conn) throws DisconnectException {
+    int readXaEndUnitOfWork(NetConnection conn) throws DisconnectException {
         // We have ended the XA unit of work, the next logical connection
         // should be reset using the normal procedure.
         conn.xares_.setKeepCurrentIsolationLevel(false);
@@ -90,50 +90,41 @@ public class NetXAConnectionReply extends NetResultSetReply {
         return XAResource.XA_OK;
     }
 
-    protected int readXaPrepare(NetConnection conn) throws DisconnectException {
+    int readXaPrepare(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         int synctype = parseSYNCCTLreply(conn);
         endOfSameIdChainData();
 
-        NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-        if (synctype == XAResource.XA_RDONLY) { // xaretval of read-only, make sure flag agrees
-            callInfo.setReadOnlyTransactionFlag(true);
-        } else { // xaretval NOT read-only, make sure flag agrees
-            callInfo.setReadOnlyTransactionFlag(false);
-        }
         return synctype;
     }
 
-    protected void readXaCommit(NetConnection conn) throws DisconnectException {
+    void readXaCommit(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
 
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-        callInfo.xaInProgress_ = false;
         conn.completeLocalCommit();
     }
 
-    protected int readXaRollback(NetConnection conn) throws DisconnectException {
+    int readXaRollback(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
 
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
-        callInfo.xaInProgress_ = false;
-        callInfo.xaWasSuspended = false;
         conn.completeLocalRollback();
 
         return XAResource.XA_OK;
     }
 
-    protected void readXaRecover(NetConnection conn) throws DisconnectException {
+    void readXaRecover(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
     }
 
-    protected void readXaForget(NetConnection conn) throws DisconnectException {
+    void readXaForget(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
         endOfSameIdChainData();
@@ -201,34 +192,33 @@ public class NetXAConnectionReply extends NetResultSetReply {
     }
 
     // Process XA return value
-    protected int parseXARETVAL() throws DisconnectException {
+    int parseXARETVAL() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.XARETVAL);
         return readInt();
     }
 
     // Process XA return value
-    protected byte parseSYNCTYPE() throws DisconnectException {
+    byte parseSYNCTYPE() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SYNCTYPE);
         return readByte();
     }
 
     // This method handles the parsing of all command replies and reply data
     // for the SYNNCTL command.
-    protected int parseSYNCCTLreply(ConnectionCallbackInterface connection) throws DisconnectException {
-        int retval = 0;
+    int parseSYNCCTLreply(ConnectionCallbackInterface connection)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
 
         if (peekCP != CodePoint.SYNCCRD) {
             parseSYNCCTLError(peekCP);
             return -1;
         }
-        retval = parseSYNCCRD(connection);
+        int retval = parseSYNCCRD(connection);
 
         peekCP = peekCodePoint();
         while (peekCP == CodePoint.SQLSTT) {
             String s = parseSQLSTT();
             //JCFTMP, need to null out the client list?
-            netAgent_.netConnection_.xares_.addSpecialRegisters(s);
             peekCP = peekCodePoint();
         }
         if (peekCP == CodePoint.PBSD) {
@@ -277,12 +267,12 @@ public class NetXAConnectionReply extends NetResultSetReply {
     }
 
 
-    protected int parseXIDCNT() throws DisconnectException {
+    int parseXIDCNT() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.XIDCNT);
         return readUnsignedShort();
     }
 
-    protected Xid parseXID() throws DisconnectException {
+    Xid parseXID() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.XID);
         int formatId = readInt();
         int gtridLen = readInt();
@@ -293,23 +283,21 @@ public class NetXAConnectionReply extends NetResultSetReply {
         return new ClientXid(formatId, gtrid, bqual);
     }
 
-    protected HashMap<Xid, NetIndoubtTransaction> parseIndoubtList()
+    List<Xid> parseIndoubtList()
             throws DisconnectException {
-        int port = 0;
-        String sIpAddr = null;
         peekCodePoint();
         parseLengthAndMatchCodePoint(CodePoint.PRPHRCLST);
         int peekCP = peekCodePoint();
         if (peekCP == CodePoint.XIDCNT) {
-            int numXid = parseXIDCNT();
+            parseXIDCNT(); // unused
             peekCP = peekCodePoint();
         }
 
-        HashMap<Xid, NetIndoubtTransaction> indoubtTransactions =
-                new HashMap<Xid, NetIndoubtTransaction>();
+        List<Xid> indoubtTransactions =
+                new ArrayList<Xid>();
         while (peekCP == CodePoint.XID) {
             Xid xid = parseXID();
-            indoubtTransactions.put(xid, new NetIndoubtTransaction(xid, null, null, null, sIpAddr, port));
+            indoubtTransactions.add(xid);
             peekCP = peekCodePoint();
         }
 

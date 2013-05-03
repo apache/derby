@@ -24,13 +24,11 @@ package org.apache.derby.client.net;
 import java.sql.SQLException;
 import java.sql.SQLType;
 import org.apache.derby.client.am.Cursor;
-import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils42;
-import org.apache.derby.shared.common.reference.SQLState;
 
 
-public class NetResultSet42 extends NetResultSet40
+class NetResultSet42 extends NetResultSet40
 {
     
     NetResultSet42(NetAgent netAgent,

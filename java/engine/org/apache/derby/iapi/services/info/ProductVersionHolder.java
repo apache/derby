@@ -343,7 +343,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	public int getDrdaMaintVersion() {return drdaMaintVersion; }
 
 	/**
-		Return the fix pack version from the maintence encoding.
+       Return the fix pack version from the maintenance encoding.
 	*/
 	public int getFixPackVersion() { return maintVersion / MAINT_ENCODING; }
 

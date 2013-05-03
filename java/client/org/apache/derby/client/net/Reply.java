@@ -31,13 +31,12 @@ import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.DisconnectException;
-import org.apache.derby.client.am.SqlState;
 import org.apache.derby.client.am.ClientMessageId;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
-public class Reply {
+class Reply {
     protected Agent agent_;
     protected NetAgent netAgent_; //cheat-link to (NetAgent) agent_
 
@@ -59,18 +58,17 @@ public class Reply {
     protected int longCountForDecryption_ = 0;
 
     protected int dssLength_;
-    protected boolean dssIsContinued_;
+    private boolean dssIsContinued_;
     private boolean dssIsChainedWithSameID_;
-    private boolean dssIsChainedWithDiffID_;
-    protected int dssCorrelationID_;
+    private int dssCorrelationID_;
 
     protected int peekedLength_ = 0;
-    protected int peekedCodePoint_ = END_OF_COLLECTION;    // saves the peeked codept
+    private int peekedCodePoint_ = END_OF_COLLECTION; // saves the peeked codept
     private int peekedNumOfExtendedLenBytes_ = 0;
     private int currentPos_ = 0;
 
-    public final static int END_OF_COLLECTION = -1;
-    public final static int END_OF_SAME_ID_CHAIN = -2;
+    final static int END_OF_COLLECTION = -1;
+    final static int END_OF_SAME_ID_CHAIN = -2;
 
     Reply(NetAgent netAgent, int bufferSize) {
         buffer_ = new byte[bufferSize];
@@ -88,7 +86,6 @@ public class Reply {
         dssLength_ = 0;
         dssIsContinued_ = false;
         dssIsChainedWithSameID_ = false;
-        dssIsChainedWithDiffID_ = false;
         dssCorrelationID_ = 1;
     }
 
@@ -100,7 +97,7 @@ public class Reply {
     // wherever they are in the current buffer to the beginning of
     // different buffer (note these buffers could be the same).
     // State information is updated as needed after the shift.
-    private final void shiftBuffer(byte[] destinationBuffer) {
+    private void shiftBuffer(byte[] destinationBuffer) {
         // calculate the size of the data in the current buffer.
         int sz = count_ - pos_;
 
@@ -123,7 +120,7 @@ public class Reply {
     // as much room as possible in the buffer before trying to
     // do the read.  The idea is to try to have space to get as much data as possible
     // if we need to do a read on the socket's stream.
-    protected final void ensureSpaceInBufferForFill(int desiredSpace) {
+    private void ensureSpaceInBufferForFill(int desiredSpace) {
         // calculate the total unused space in the buffer.
         // this includes any space at the end of the buffer and any free
         // space at the beginning resulting from bytes already read.
@@ -160,7 +157,7 @@ public class Reply {
     // from the underlying stream.  This method will keep trying to
     // read bytes until it has obtained at least the minimum number.
     // Now returns the total bytes read for decryption, use to return void.
-    protected int fill(int minimumBytesNeeded) throws DisconnectException {
+    private int fill(int minimumBytesNeeded) throws DisconnectException {
         // make sure that there is enough space in the buffer to hold
         // the minimum number of bytes needed.
         ensureSpaceInBufferForFill(minimumBytesNeeded);
@@ -208,7 +205,8 @@ public class Reply {
     // Make sure a certain amount of Layer A data is in the buffer.
     // The data will be in the buffer after this method is called.
     // Now returns the total bytes read for decryption, use to return void.
-    protected final int ensureALayerDataInBuffer(int desiredDataSize) throws DisconnectException {
+    private int ensureALayerDataInBuffer(int desiredDataSize)
+            throws DisconnectException {
         int totalBytesRead = 0;
         // calulate the the number of bytes in the buffer.
         int avail = count_ - pos_;
@@ -238,7 +236,8 @@ public class Reply {
     // big stuff returned from the server (qrydta's for example) by
     // copying out the data into some other storage.  any extended dss header
     // info will be removed in the copying process.
-    private final void compressBLayerData(int continueDssHeaderCount) throws DisconnectException {
+    private void compressBLayerData(int continueDssHeaderCount)
+            throws DisconnectException {
         int tempPos = 0;
 
         // jump to the last continuation header.
@@ -257,8 +256,8 @@ public class Reply {
         // read out the continuation header and increment the dss length by the
         // size of the conitnation bytes,  then shift the continuation data as needed.
         int shiftSize = 0;
-        int bytesToShift = 0;
-        int continueHeaderLength = 0;
+        int bytesToShift;
+        int continueHeaderLength;
         int newDssLength = 0;
         for (int i = 0; i < continueDssHeaderCount; i++) {
 
@@ -314,9 +313,9 @@ public class Reply {
         dssLength_ = dssLength_ + newDssLength;
     }
 
-    protected final void readDssHeader() throws DisconnectException {
-        int correlationID = 0;
-        int nextCorrelationID = 0;
+    private void readDssHeader() throws DisconnectException {
+        int correlationID;
+        int nextCorrelationID;
         ensureALayerDataInBuffer(6);
 
         // read out the dss length
@@ -358,11 +357,9 @@ public class Reply {
         if ((gdsFormatter & 0x40) == 0x40) {    // on indicates structure chained to next structure
             if ((gdsFormatter & 0x10) == 0x10) {
                 dssIsChainedWithSameID_ = true;
-                dssIsChainedWithDiffID_ = false;
                 nextCorrelationID = dssCorrelationID_;
             } else {
                 dssIsChainedWithSameID_ = false;
-                dssIsChainedWithDiffID_ = true;
                 nextCorrelationID = dssCorrelationID_ + 1;
             }
         } else {
@@ -377,7 +374,6 @@ public class Reply {
             }
 
             dssIsChainedWithSameID_ = false;
-            dssIsChainedWithDiffID_ = false;
             nextCorrelationID = 1;
         }
 
@@ -402,7 +398,8 @@ public class Reply {
     }
 
 
-    private final void decryptData(int gdsFormatter, int oldDssLength) throws DisconnectException {
+    private void decryptData(int gdsFormatter, int oldDssLength)
+            throws DisconnectException {
         boolean readHeader;
 
         if (dssLength_ == 32761) {
@@ -607,29 +604,6 @@ public class Reply {
         return i;
     }
 
-    final void readIntArray(int[] array) throws DisconnectException {
-        ensureBLayerDataInBuffer(array.length * 4);
-        adjustLengths(array.length * 4);
-
-        for (int i = 0; i < array.length; i++) {
-            array[i] = SignedBinary.getInt(buffer_, pos_);
-            pos_ += 4;
-        }
-    }
-
-
-    final long readLong() throws DisconnectException {
-        // should we be checking dss lengths and ddmScalarLengths here
-        ensureBLayerDataInBuffer(8);
-        adjustLengths(8);
-        long l = SignedBinary.getLong(buffer_, pos_);
-
-        pos_ += 8;
-
-        return l;
-    }
-
-
     final int[] readUnsignedShortList() throws DisconnectException {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
@@ -656,22 +630,6 @@ public class Reply {
         ensureBLayerDataInBuffer(1);
         adjustLengths(1);
         return (byte) (buffer_[pos_++] & 0xff);
-    }
-
-    final boolean readBoolean() throws DisconnectException {
-        ensureBLayerDataInBuffer(1);
-        adjustLengths(1);
-        return buffer_[pos_++] != 0;
-    }
-
-    final String readString(int length) throws DisconnectException {
-        ensureBLayerDataInBuffer(length);
-        adjustLengths(length);
-
-        String result = netAgent_.getCurrentCcsidManager()
-                            .convertToJavaString(buffer_, pos_, length);
-        pos_ += length;
-        return result;
     }
 
     final String readString(int length, String encoding) throws DisconnectException {
@@ -716,24 +674,6 @@ public class Reply {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
-
-        byte[] b = new byte[len];
-        System.arraycopy(buffer_, pos_, b, 0, len);
-        pos_ += len;
-        return b;
-    }
-
-    final byte[] readLDBytes() throws DisconnectException {
-        ensureBLayerDataInBuffer(2);
-        int len = ((buffer_[pos_++] & 0xff) << 8) + ((buffer_[pos_++] & 0xff) << 0);
-
-        if (len == 0) {
-            adjustLengths(2);
-            return null;
-        }
-
-        ensureBLayerDataInBuffer(len);
-        adjustLengths(len + 2);
 
         byte[] b = new byte[len];
         System.arraycopy(buffer_, pos_, b, 0, len);
@@ -808,7 +748,7 @@ public class Reply {
     // post:   dssIsContinued_ is set to true if the continuation bit is on, false otherwise
     //         dssLength_ is set to DssConstants.MAX_DSS_LEN - 2 (don't count the header for the next read)
     // helper method for getEXTDTAData
-    protected final void readDSSContinuationHeader() throws DisconnectException {
+    private void readDSSContinuationHeader() throws DisconnectException {
         ensureALayerDataInBuffer(2);
 
         dssLength_ =
@@ -1039,13 +979,6 @@ public class Reply {
         return peekedCodePoint_;
     }
 
-    // Read out the 2-byte length without moving the pos_ pointer.
-    protected final int peekLength() throws DisconnectException {
-        ensureBLayerDataInBuffer(2);
-        return (((buffer_[pos_] & 0xff) << 8) +
-                ((buffer_[pos_ + 1] & 0xff) << 0));
-    }
-
     // Read "length" number of bytes from the buffer into the byte array b starting from offset
     // "offset".  The current offset in the buffer does not change.
     protected final int peekFastBytes(byte[] b, int offset, int length) throws DisconnectException {
@@ -1081,7 +1014,7 @@ public class Reply {
         }
     }
 
-    protected final int readLengthAndCodePoint() throws DisconnectException {
+    private int readLengthAndCodePoint() throws DisconnectException {
         if (topDdmCollectionStack_ != EMPTY_STACK) {
             if (ddmCollectionLenStack_[topDdmCollectionStack_] == 0) {
                 return END_OF_COLLECTION;
@@ -1116,7 +1049,7 @@ public class Reply {
         return codePoint;
     }
 
-    private final void readExtendedLength() throws DisconnectException {
+    private void readExtendedLength() throws DisconnectException {
         int numberOfExtendedLenBytes = (ddmScalarLen_ - 0x8000); // fix scroll problem was - 4
         int adjustSize = 0;
         switch (numberOfExtendedLenBytes) {
@@ -1148,7 +1081,7 @@ public class Reply {
         */
     }
 
-    private final void adjustCollectionAndDssLengths(int length) {
+    private void adjustCollectionAndDssLengths(int length) {
         // adjust the lengths here.  this is a special case since the
         // extended length bytes do not include their own length.
         for (int i = 0; i <= topDdmCollectionStack_; i++) {
@@ -1201,7 +1134,7 @@ public class Reply {
         return columnCount;
     }
 
-    private final void peekExtendedLength() throws DisconnectException {
+    private void peekExtendedLength() throws DisconnectException {
         peekedNumOfExtendedLenBytes_ = (peekedLength_ - 0x8004);
         switch (peekedNumOfExtendedLenBytes_) {
         case 4:
@@ -1325,7 +1258,7 @@ public class Reply {
     }
 
     // remove and return the top offset value from mark stack.
-    final int popMark() {
+    private int popMark() {
         return currentPos_;
     }
 
@@ -1413,7 +1346,7 @@ public class Reply {
         return (nullInd == CodePoint.NULLDATA);
     }
 
-    private final int skipSQLDHROW(int offset) {
+    private int skipSQLDHROW(int offset) {
         int sqldhrowgrpNullInd = buffer_[pos_ + offset++] & 0xff;
         if (sqldhrowgrpNullInd == CodePoint.NULLDATA) {
             return offset;

@@ -21,7 +21,7 @@
 
 package org.apache.derby.client.net;
 
-import java.util.HashMap;
+import java.util.List;
 import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.ClientConnection;
@@ -114,28 +114,28 @@ public class NetConnectionReply extends Reply
     }
 
 
-    protected void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
+    void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
     }
 
-    protected int readXaEndUnitOfWork(NetConnection conn) throws DisconnectException {
+    int readXaEndUnitOfWork(NetConnection conn) throws DisconnectException {
         return 0;
     }
 
-    protected int readXaPrepare(NetConnection conn) throws DisconnectException {
+    int readXaPrepare(NetConnection conn) throws DisconnectException {
         return 0;
     }
 
-    protected void readXaCommit(NetConnection conn) throws DisconnectException {
+    void readXaCommit(NetConnection conn) throws DisconnectException {
     }
 
-    protected int readXaRollback(NetConnection conn) throws DisconnectException {
+    int readXaRollback(NetConnection conn) throws DisconnectException {
         return 0;
     }
 
-    protected void readXaRecover(NetConnection conn) throws DisconnectException {
+    void readXaRecover(NetConnection conn) throws DisconnectException {
     }
 
-    protected void readXaForget(NetConnection conn) throws DisconnectException {
+    void readXaForget(NetConnection conn) throws DisconnectException {
     }
 
 
@@ -270,7 +270,7 @@ public class NetConnectionReply extends Reply
     }
 
 
-    protected int parseTypdefsOrMgrlvlovrs() throws DisconnectException {
+    int parseTypdefsOrMgrlvlovrs() throws DisconnectException {
         boolean targetTypedefCloned = false;
         while (true) {
             int peekCP = peekCodePoint();
@@ -295,7 +295,8 @@ public class NetConnectionReply extends Reply
 
     //-----------------------------parse DDM Reply Messages-----------------------
 
-    protected void parseCommitError(ConnectionCallbackInterface connection) throws DisconnectException {
+    private void parseCommitError(ConnectionCallbackInterface connection)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -314,7 +315,7 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void parseRollbackError() throws DisconnectException {
+    private void parseRollbackError() throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.CMDCHKRM:
@@ -360,7 +361,8 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void parseSecurityCheckError(NetConnection netConnection) throws DisconnectException {
+    private void parseSecurityCheckError(NetConnection netConnection)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.CMDCHKRM:
@@ -476,7 +478,8 @@ public class NetConnectionReply extends Reply
         return parseAbnormalEndUow(r.getConnectionCallbackInterface(),r);
     }
 
-    void parseRdbAccessFailed(NetConnection netConnection) throws DisconnectException {
+    private void parseRdbAccessFailed(NetConnection netConnection)
+            throws DisconnectException {
         parseRDBAFLRM();
 
         // an SQLCARD is returned if an RDBALFRM is returned.
@@ -792,7 +795,7 @@ public class NetConnectionReply extends Reply
     //   RECCNT - optional (MINVAL 0, MINLVL 3)
     //
     // Called by all the Reply classesCMDCHKRM
-    protected void parseCMDCHKRM() throws DisconnectException {
+    void parseCMDCHKRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -1077,7 +1080,7 @@ public class NetConnectionReply extends Reply
     // CODPNT - optional (MINLVL 3)
     // RDBNAM - optional (MINLVL 3)
     //
-    protected void parseSYNTAXRM() throws DisconnectException {
+    private void parseSYNTAXRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean synerrcdReceived = false;
@@ -1335,7 +1338,7 @@ public class NetConnectionReply extends Reply
     // RECCNT - optional (MINLVL 3, MINVAL 0) (will not be returned - should be ignored)
     // RDBNAM - optional (MINLVL 3)
     //
-    protected void parseVALNSPRM() throws DisconnectException {
+    private void parseVALNSPRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -1420,7 +1423,7 @@ public class NetConnectionReply extends Reply
     // RECCNT - optional (MINVAL 0, MINLVL 3)
     // RDBNAM - optional (NINLVL 3)
     //
-    protected void parsePRCCNVRM() throws DisconnectException {
+    private void parsePRCCNVRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -1650,7 +1653,7 @@ public class NetConnectionReply extends Reply
     // CODPNT - required
     // RDBNAM - optional (MINLVL 3)
     //
-    protected void parseCMDNSPRM() throws DisconnectException {
+    void parseCMDNSPRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -1782,7 +1785,6 @@ public class NetConnectionReply extends Reply
         boolean srvclsnmReceived = false;
         String srvclsnm = null;
         boolean srvnamReceived = false;
-        String srvnam = null;
         boolean srvrlslvReceived = false;
         String srvrlslv = null;
 
@@ -1836,7 +1838,7 @@ public class NetConnectionReply extends Reply
                 // for logging errors.
                 foundInPass = true;
                 srvnamReceived = checkAndGetReceivedFlag(srvnamReceived);
-                srvnam = parseSRVNAM();
+                parseSRVNAM(); // not used yet
                 peekCP = peekCodePoint();
             }
 
@@ -1859,7 +1861,7 @@ public class NetConnectionReply extends Reply
         }
         popCollectionStack();
         // according the the DDM book, all these instance variables are optional
-        netConnection.setServerAttributeData(srvclsnm, srvnam, srvrlslv);
+        netConnection.setServerAttributeData(srvclsnm, srvrlslv);
     }
 
     // Must make a version that does not change state in the associated connection
@@ -2038,14 +2040,12 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    // Called by all the NET*Reply classes.
-    void parseTYPDEFNAM() throws DisconnectException {
+    private void parseTYPDEFNAM() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.TYPDEFNAM);
         netAgent_.targetTypdef_.setTypdefnam(readString());
     }
 
-    // Called by all the NET*Reply classes.
-    void parseTYPDEFOVR() throws DisconnectException {
+    private void parseTYPDEFOVR() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.TYPDEFOVR);
         pushLengthOnCollectionStack();
         int peekCP = peekCodePoint();
@@ -2090,18 +2090,18 @@ public class NetConnectionReply extends Reply
     }
 
     // Process XA return value
-    protected int parseXARETVAL() throws DisconnectException {
+    int parseXARETVAL() throws DisconnectException {
         return 0;
     }
 
     // Process XA return value
-    protected byte parseSYNCTYPE() throws DisconnectException {
+    byte parseSYNCTYPE() throws DisconnectException {
         return 0;
     }
 
     // This method handles the parsing of all command replies and reply data
     // for the SYNCCTL command.
-    protected int parseSYNCCTLreply(ConnectionCallbackInterface connection) 
+    int parseSYNCCTLreply(ConnectionCallbackInterface connection)
         throws DisconnectException {
         if (peekCodePoint() == CodePoint.PBSD) {
             parsePBSD();
@@ -2283,14 +2283,14 @@ public class NetConnectionReply extends Reply
     // creates or activates to run the DDM server.
     // No semantic meaning is assigned to external names in DDM.
     // External names are transmitted to aid in problem determination.
-    protected String parseEXTNAM() throws DisconnectException {
+    private String parseEXTNAM() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.EXTNAM);
         return readString();
     }
 
     // Server Class name specifies the name of a class of DDM servers.
     // Server class names are assigned for each product involved in PROTOCOL.
-    protected String parseSRVCLSNM() throws DisconnectException {
+    private String parseSRVCLSNM() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SRVCLSNM);
         return readString();
     }
@@ -2299,7 +2299,7 @@ public class NetConnectionReply extends Reply
     // No semantic meaning is assigned to server names in DDM,
     // but it is recommended that the server names are transmitted
     // for problem determination.
-    protected String parseSRVNAM() throws DisconnectException {
+    private String parseSRVNAM() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SRVNAM);
         return readString();
     }
@@ -2310,26 +2310,26 @@ public class NetConnectionReply extends Reply
     // SRVRLSLV should not be used in place of product-defined
     // extensions to carry information not related to the products
     // release level.
-    protected String parseSRVRLSLV() throws DisconnectException {
+    private String parseSRVRLSLV() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SRVRLSLV);
         return readString();
     }
 
     // Manager-Level Number Attribute Binary Integer Number specifies
     // the level of a defined DDM manager.
-    protected int parseMGRLVLN() throws DisconnectException {
+    private int parseMGRLVLN() throws DisconnectException {
         return readUnsignedShort();
     }
 
     // Security Mechanims.
-    protected int[] parseSECMEC() throws DisconnectException {
+    private int[] parseSECMEC() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SECMEC);
         return readUnsignedShortList();
     }
 
     // The Security Token Byte String is information provided and used
     // by the various security mechanisms.
-    protected byte[] parseSECTKN(boolean skip) throws DisconnectException {
+    private byte[] parseSECTKN(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SECTKN);
         if (skip) {
             skipBytes();
@@ -2341,7 +2341,7 @@ public class NetConnectionReply extends Reply
 
     // The Security Check Code String codifies the security information
     // and condition for the SECCHKRM.
-    protected int parseSECCHKCD() throws DisconnectException {
+    private int parseSECCHKCD() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SECCHKCD);
         int secchkcd = readUnsignedByte();
         if ((secchkcd < CodePoint.SECCHKCD_00) || (secchkcd > CodePoint.SECCHKCD_15)) {
@@ -2352,7 +2352,7 @@ public class NetConnectionReply extends Reply
 
     // Product specific Identifier specifies the product release level
     // of a DDM server.
-    protected String parsePRDID(boolean skip) throws DisconnectException {
+    private String parsePRDID(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.PRDID);
         if (skip) {
             skipBytes();
@@ -2363,7 +2363,7 @@ public class NetConnectionReply extends Reply
     }
 
     // The User Id specifies an end-user name.
-    protected String parseUSRID(boolean skip) throws DisconnectException {
+    private String parseUSRID(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.USRID);
         if (skip) {
             skipBytes();
@@ -2375,13 +2375,13 @@ public class NetConnectionReply extends Reply
     // Code Point Data Representation specifies the data representation
     // of a dictionary codepoint.  Code points are hexadecimal aliases for DDM
     // named terms.
-    protected int parseCODPNTDR() throws DisconnectException {
+    private int parseCODPNTDR() throws DisconnectException {
         return readUnsignedShort();
     }
 
     // Correlation Token specifies a token that is conveyed between source
     // and target servers for correlating the processing between servers.
-    protected byte[] parseCRRTKN(boolean skip) throws DisconnectException {
+    private byte[] parseCRRTKN(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.CRRTKN);
         if (skip) {
             skipBytes();
@@ -2392,7 +2392,7 @@ public class NetConnectionReply extends Reply
 
     // Unit of Work Disposition Scalar Object specifies the disposition of the
     // last unit of work.
-    protected int parseUOWDSP() throws DisconnectException {
+    private int parseUOWDSP() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.UOWDSP);
         int uowdsp = readUnsignedByte();
         if ((uowdsp != CodePoint.UOWDSP_COMMIT) && (uowdsp != CodePoint.UOWDSP_ROLLBACK)) {
@@ -2404,7 +2404,7 @@ public class NetConnectionReply extends Reply
 
     // Relational Database Name specifies the name of a relational
     // database of the server.  A server can have more than one RDB.
-    protected String parseRDBNAM(boolean skip) throws DisconnectException {
+    String parseRDBNAM(boolean skip) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.RDBNAM);
         if (skip) {
             skipBytes();
@@ -2415,16 +2415,16 @@ public class NetConnectionReply extends Reply
 
 
 
-    protected int parseXIDCNT() throws DisconnectException {
+    int parseXIDCNT() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.XIDCNT);
         return readUnsignedShort();
     }
 
-    protected Xid parseXID() throws DisconnectException {
+    Xid parseXID() throws DisconnectException {
         return null;
     }
 
-    protected HashMap<Xid, NetIndoubtTransaction> parseIndoubtList()
+    List<Xid> parseIndoubtList()
             throws DisconnectException {
         return null;
     }
@@ -2432,7 +2432,7 @@ public class NetConnectionReply extends Reply
 
     // Syntax Error Code String specifies the condition that caused termination
     // of data stream parsing.
-    protected int parseSYNERRCD() throws DisconnectException {
+    private int parseSYNERRCD() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SYNERRCD);
         int synerrcd = readUnsignedByte();
         if ((synerrcd < 0x01) || (synerrcd > 0x1D)) {
@@ -2442,14 +2442,14 @@ public class NetConnectionReply extends Reply
     }
 
     // The Code Point Data specifies a scalar value that is an architected code point.
-    protected int parseCODPNT() throws DisconnectException {
+    private int parseCODPNT() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.CODPNT);
         return parseCODPNTDR();
     }
 
     // Conversational Protocol Error Code specifies the condition
     // for which the PRCCNVRm was returned.
-    protected int parsePRCCNVCD() throws DisconnectException {
+    private int parsePRCCNVCD() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.PRCCNVCD);
         int prccnvcd = readUnsignedByte();
         if ((prccnvcd != 0x01) && (prccnvcd != 0x02) && (prccnvcd != 0x03) &&
@@ -2463,28 +2463,28 @@ public class NetConnectionReply extends Reply
 
     // CCSID for Single-Byte Characters specifies a coded character
     // set identifier for single-byte characters.
-    protected int parseCCSIDSBC() throws DisconnectException {
+    private int parseCCSIDSBC() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.CCSIDSBC);
         return readUnsignedShort();
     }
 
     // CCSID for Mixed-Byte Characters specifies a coded character
     // set identifier for mixed-byte characters.
-    protected int parseCCSIDMBC() throws DisconnectException {
+    private int parseCCSIDMBC() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.CCSIDMBC);
         return readUnsignedShort();
     }
 
     // CCSID for Double-Byte Characters specifies a coded character
     // set identifier for double-byte characters.
-    protected int parseCCSIDDBC() throws DisconnectException {
+    private int parseCCSIDDBC() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.CCSIDDBC);
         return readUnsignedShort();
     }
 
     // Severity Code is an indicator of the severity of a condition
     // detected during the execution of a command.
-    protected int parseSVRCOD(int minSvrcod, int maxSvrcod) throws DisconnectException {
+    int parseSVRCOD(int minSvrcod, int maxSvrcod) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SVRCOD);
 
         int svrcod = readUnsignedShort();
@@ -2505,7 +2505,8 @@ public class NetConnectionReply extends Reply
         return svrcod;
     }
 
-    protected int parseFastSVRCOD(int minSvrcod, int maxSvrcod) throws DisconnectException {
+    int parseFastSVRCOD(int minSvrcod, int maxSvrcod)
+            throws DisconnectException {
         matchCodePoint(CodePoint.SVRCOD);
 
         int svrcod = readFastUnsignedShort();
@@ -2526,7 +2527,7 @@ public class NetConnectionReply extends Reply
         return svrcod;
     }
 
-    protected NetSqlca parseSQLCARD(Sqlca[] rowsetSqlca) throws DisconnectException {
+    NetSqlca parseSQLCARD(Sqlca[] rowsetSqlca) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLCARD);
         int ddmLength = getDdmLength();
         ensureBLayerDataInBuffer(ddmLength);
@@ -2724,14 +2725,15 @@ public class NetConnectionReply extends Reply
     // this is duplicated in parseColumnMetaData, but different
     // DAGroup under NETColumnMetaData requires a lot more stuffs including
     // precsion, scale and other stuffs
-    protected String parseFastVCS() throws DisconnectException {
+    String parseFastVCS() throws DisconnectException {
         // doublecheck what readString() does if the length is 0
         return readFastString(readFastUnsignedShort(),
                 netAgent_.targetTypdef_.getCcsidSbcEncoding());
     }
     //----------------------non-parsing computational helper methods--------------
 
-    protected boolean checkAndGetReceivedFlag(boolean receivedFlag) throws DisconnectException {
+    boolean checkAndGetReceivedFlag(boolean receivedFlag)
+            throws DisconnectException {
         if (receivedFlag) {
             // this method will throw a disconnect exception if
             // the received flag is already true;
@@ -2740,20 +2742,20 @@ public class NetConnectionReply extends Reply
         return true;
     }
 
-    protected void checkRequiredObjects(boolean receivedFlag) throws DisconnectException {
+    void checkRequiredObjects(boolean receivedFlag) throws DisconnectException {
         if (!receivedFlag) {
             doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
         }
     }
 
-    protected void checkRequiredObjects(boolean receivedFlag,
+    void checkRequiredObjects(boolean receivedFlag,
                                         boolean receivedFlag2) throws DisconnectException {
         if (!receivedFlag || !receivedFlag2) {
             doSyntaxrmSemantics(CodePoint.SYNERRCD_REQ_OBJ_NOT_FOUND);
         }
     }
 
-    protected void checkRequiredObjects(boolean receivedFlag,
+    void checkRequiredObjects(boolean receivedFlag,
                                         boolean receivedFlag2,
                                         boolean receivedFlag3) throws DisconnectException {
         if (!receivedFlag || !receivedFlag2 || !receivedFlag3) {
@@ -2761,7 +2763,7 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    protected void checkRequiredObjects(boolean receivedFlag,
+    private void checkRequiredObjects(boolean receivedFlag,
                                         boolean receivedFlag2,
                                         boolean receivedFlag3,
                                         boolean receivedFlag4) throws DisconnectException {
@@ -2774,14 +2776,14 @@ public class NetConnectionReply extends Reply
     // but means that these methods are private to this class and to subclasses,
     // and should not be used as package-wide friendly methods.
 
-    protected void doObjnsprmSemantics(int codePoint) throws DisconnectException {
+    private void doObjnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
             new ClientMessageId(SQLState.DRDA_DDM_OBJECT_NOT_SUPPORTED),
             Integer.toHexString(codePoint)));
     }
 
-    // Also called by NetStatementReply.
-    protected void doPrmnsprmSemantics(int codePoint) throws DisconnectException {
+    // Also called by NetStatementReply and others
+    void doPrmnsprmSemantics(int codePoint) throws DisconnectException {
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
             new ClientMessageId(SQLState.DRDA_DDM_PARAM_NOT_SUPPORTED),
             Integer.toHexString(codePoint)));
@@ -2936,7 +2938,8 @@ public class NetConnectionReply extends Reply
     //      The command or statement cannot be processed.  The current
     //          transaction is rolled back and the application is disconnected
     //          from the remote database.
-    protected void doPrccnvrmSemantics(int conversationProtocolErrorCode) throws DisconnectException {
+    private void doPrccnvrmSemantics(int conversationProtocolErrorCode)
+            throws DisconnectException {
         // we may need to map the conversation protocol error code, prccnvcd, to some kind
         // of reason code.  For now just return the prccnvcd as the reason code
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
@@ -2948,7 +2951,7 @@ public class NetConnectionReply extends Reply
     // SQL Diagnostics Condition Token Array - Identity 0xF7
     // SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
     // SQLTOKROW; ROW LID 0xE7; ELEMENT TAKEN 0(all); REP FACTOR 0(all)
-    void parseSQLDCTOKS() throws DisconnectException {
+    private void parseSQLDCTOKS() throws DisconnectException {
         if (readFastUnsignedByte() == CodePoint.NULLDATA) {
             return;
         }
@@ -3246,7 +3249,7 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void resetRowsetSqlca(Sqlca[] rowsetSqlca, int row) {
+    private void resetRowsetSqlca(Sqlca[] rowsetSqlca, int row) {
         // rowsetSqlca can be null.
         int count = ((rowsetSqlca == null) ? 0 : rowsetSqlca.length);
         for (int i = row; i < count; i++) {
@@ -3263,7 +3266,7 @@ public class NetConnectionReply extends Reply
      *
      * @throws org.apache.derby.client.am.DisconnectException
      */
-    protected void parseInitialPBSD(ClientConnection connection)
+    private void parseInitialPBSD(ClientConnection connection)
             throws DisconnectException {
         if (peekCodePoint() != CodePoint.PBSD) {
             return;
@@ -3296,7 +3299,7 @@ public class NetConnectionReply extends Reply
      * current schema as an UTF-8 String.
      * @throws org.apache.derby.client.am.DisconnectException
      */
-    protected void parsePBSD() throws DisconnectException {
+    void parsePBSD() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.PBSD);
         int peekCP = peekCodePoint();
         while (peekCP != END_OF_SAME_ID_CHAIN) {

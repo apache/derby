@@ -31,7 +31,7 @@ import org.apache.derby.client.am.SqlException;
 // Implementations of this interface should not dereference common layer Statement state, as it is passed in,
 // but may dereference material layer Statement state if necessary for performance.
 
-public interface StatementRequestInterface {
+interface StatementRequestInterface {
     public void writeExecuteImmediate(NetStatement materialStatement,
                                       String sql,
                                       Section section) throws SqlException;

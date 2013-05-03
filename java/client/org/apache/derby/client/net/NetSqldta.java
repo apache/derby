@@ -24,13 +24,10 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.SqlException;
 
 
-public class NetSqldta extends NetCursor {
-    private NetConnection netConnection_;
+class NetSqldta extends NetCursor {
 
-
-    public NetSqldta(NetAgent netAgent) {
+    NetSqldta(NetAgent netAgent) {
         super(netAgent);
-        netConnection_ = netAgent.netConnection_;
     }
 
     public boolean next() throws SqlException {

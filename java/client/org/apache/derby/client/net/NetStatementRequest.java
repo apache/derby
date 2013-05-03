@@ -52,7 +52,9 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters
 
-public class NetStatementRequest extends NetPackageRequest implements StatementRequestInterface {
+class NetStatementRequest extends NetPackageRequest
+    implements StatementRequestInterface {
+
     // Integers: build EXTDTA for column i
     private ArrayList<Integer> extdtaPositions_ = null;
 
@@ -350,7 +352,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     //   the sqlam and/or prdid must support command and parameters passed to this method,
     //   method will not validate against the connection's level of support
     //
-    void buildOPNQRY(Section section,
+    private void buildOPNQRY(Section section,
                      boolean sendQueryRowSet,
                      int fetchSize) throws SqlException {
         createCommand();
@@ -378,7 +380,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // execute a non-cursor SQL statement sent as command data.
     //
     // precondtions:
-    void buildEXCSQLIMM(Section section,
+    private void buildEXCSQLIMM(Section section,
                         boolean sendQryinsid,
                         long qryinsid) throws SqlException {
         createCommand();
@@ -399,7 +401,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // preconditions:
     //   the sqlam and/or prdid must support command and parameters passed to this method,
     //   method will not validate against the connection's level of support
-    void buildPRPSQLSTT(Section section,
+    private void buildPRPSQLSTT(Section section,
                         String sql,
                         boolean sendRtnsqlda,
                         boolean sendTypsqlda,
@@ -424,7 +426,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // preconditions:
     //   the sqlam and/or prdid must support command and parameters passed to this method,
     //   method will not validate against the connection's level of support
-    void buildEXCSQLSET(Section section)
+    private void buildEXCSQLSET(Section section)
             throws SqlException {
         createCommand();
         markLengthBytes(CodePoint.EXCSQLSET);
@@ -459,7 +461,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // PRCNAM
     // OUTOVROPT
     // RDBNAM
-    void buildEXCSQLSTT(Section section,
+    private void buildEXCSQLSTT(Section section,
                         boolean sendOutexp,
                         boolean outexp,
                         boolean sendPrcnam,
@@ -508,7 +510,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // preconditions:
     //   the sqlam and/or prdid must support command and parameters passed to this method,
     //   method will not validate against the connection's level of support
-    void buildDSCSQLSTT(Section section,
+    private void buildDSCSQLSTT(Section section,
                         boolean sendTypsqlda,
                         int typsqlda) throws SqlException {
         createCommand();
@@ -527,7 +529,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // that an RDB is executing.
     //
     // preconditions:
-    boolean buildSQLDTAcommandData(int numInputColumns,
+    private boolean buildSQLDTAcommandData(int numInputColumns,
                                    ColumnMetaData parameterMetaData,
                                    Object[] inputRow) throws SqlException {
         createEncryptedCommandData();
@@ -584,7 +586,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // Build the FDOCA SQLDTA Late Row Descriptor.
     //
     // preconditions:
-    protected void buildSQLDTA(int numColumns,
+    private void buildSQLDTA(int numColumns,
                                int[][] lidAndLengthOverrides,
                                boolean overrideExists,
                                Hashtable overrideMap,
@@ -605,7 +607,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
 
     // Build the FDOCA SQLDTAGRP Late Group Descriptor.
     // preconditions:
-    protected void buildSQLDTAGRP(int numVars,
+    private void buildSQLDTAGRP(int numVars,
                                   int[][] lidAndLengthOverrides,
                                   boolean mddRequired,
                                   Hashtable overrideMap) throws SqlException {
@@ -673,12 +675,14 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         return lidAndLengths;
     }
 
-    protected void buildSQLDTARD(int numColumns, int[][] lidAndLengthOverrides) throws SqlException {
+    private void buildSQLDTARD(int numColumns, int[][] lidAndLengthOverrides)
+            throws SqlException {
         buildSQLCADTA(numColumns, lidAndLengthOverrides);
         writeBytes(FdocaConstants.SQLDTARD_RLO_TOSEND);
     }
 
-    protected void buildSQLCADTA(int numColumns, int[][] lidAndLengthOverrides) throws SqlException {
+    private void buildSQLCADTA(int numColumns, int[][] lidAndLengthOverrides)
+            throws SqlException {
         buildSQLDTAGRP(numColumns, lidAndLengthOverrides, false, null);  // false means no mdd override
         writeBytes(FdocaConstants.SQLCADTA_RLO_TOSEND);
     }

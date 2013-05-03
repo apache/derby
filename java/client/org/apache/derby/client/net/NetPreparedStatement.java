@@ -29,7 +29,7 @@ import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.MaterialPreparedStatement;
 
 
-public class NetPreparedStatement extends NetStatement
+class NetPreparedStatement extends NetStatement
         implements MaterialPreparedStatement {
 
     // Alias for (NetPreparedStatement) super.statement.

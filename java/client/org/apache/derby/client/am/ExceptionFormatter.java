@@ -27,13 +27,13 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import javax.transaction.xa.XAException;
 
-public class ExceptionFormatter {
+class ExceptionFormatter {
     // returnTokensOnly is true only when exception tracing is enabled so
     // that we don't try to go to the server for a message while we're in
     // the middle of parsing an Sqlca reply.
     // Without this, if e.getMessage() fails, we would have infinite recursion
     // when TRACE_DIAGNOSTICS is on  because tracing occurs within the exception constructor.
-    static public void printTrace(SqlException e,
+    static void printTrace(SqlException e,
                                   PrintWriter printWriter,
                                   String messageHeader,
                                   boolean returnTokensOnly) {
@@ -102,7 +102,7 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(SQLException e,
+    static void printTrace(SQLException e,
                                   PrintWriter printWriter,
                                   String messageHeader,
                                   boolean returnTokensOnly) {
@@ -157,7 +157,7 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(Sqlca sqlca,
+    static void printTrace(Sqlca sqlca,
                                   PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Sqlca@" + Integer.toHexString(sqlca.hashCode()) + "]";
@@ -172,7 +172,7 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(Throwable e,
+    static void printTrace(Throwable e,
                                   PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Throwable@" + Integer.toHexString(e.hashCode()) + "]";
@@ -184,7 +184,7 @@ public class ExceptionFormatter {
         }
     }
 
-    static public void printTrace(XAException e,
+    static void printTrace(XAException e,
                                   PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "XAException@" + Integer.toHexString(e.hashCode()) + "]";

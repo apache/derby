@@ -59,8 +59,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         // Note: conApp will be set after this call
         logicalCon_ = super.getConnection();
 
-        netXares_ = new NetXAResource(this,
-                rmId_, userId, password, netXAPhysicalConnection_);
+        netXares_ = new NetXAResource(this, netXAPhysicalConnection_);
         xares_ = netXares_;
     }
 

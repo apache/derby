@@ -48,7 +48,7 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
         
         ccsidManager = new Utf8CcsidManager();
 
-        // Set up a dummy Agent since many of the methods require one for
+        // Set up a dummy Agent since testInvalidCharacters require one for
         // generating exceptions.
         PrintWriter pw = new PrintWriter(new TestNullOutputStream());
         agent = new NetAgent(null, new LogWriter(pw, 0));

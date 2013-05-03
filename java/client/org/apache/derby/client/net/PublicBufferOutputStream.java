@@ -25,9 +25,9 @@ import java.io.ByteArrayOutputStream;
 /**
  * A ByteArrayOutputStream which gives a direct reference of the buffer array
  */
-public class PublicBufferOutputStream extends ByteArrayOutputStream {
+class PublicBufferOutputStream extends ByteArrayOutputStream {
 
-    public PublicBufferOutputStream() {
+    PublicBufferOutputStream() {
         super();
     }
 

@@ -66,11 +66,11 @@ public class DateTime {
      * @return  Date translated from  buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Date dateBytesToDate(byte[] buffer,
-                                                      int offset,
-                                                      Calendar recyclableCal, 
-                                                      String encoding) 
-    throws UnsupportedEncodingException {
+    static final Date dateBytesToDate(byte[] buffer,
+            int offset,
+            Calendar recyclableCal,
+            String encoding) throws UnsupportedEncodingException {
+
         int year, month, day;
 
         String date = new String(buffer, offset, 
@@ -160,7 +160,7 @@ public class DateTime {
      * @return TimeStamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Timestamp timestampBytesToTimestamp(byte[] buffer,
+    static final Timestamp timestampBytesToTimestamp(byte[] buffer,
                                                                      int offset,
                                                                      Calendar recyclableCal, 
                                                                      String encoding,
@@ -435,7 +435,7 @@ public class DateTime {
      * @return Timestamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Timestamp dateBytesToTimestamp(byte[] buffer,
+    static final Timestamp dateBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal,
                                                                 String encoding) 
@@ -487,7 +487,7 @@ public class DateTime {
      * @throws UnsupportedEncodingException
      * 
      */
-    public static final Timestamp timeBytesToTimestamp(byte[] buffer,
+    static final Timestamp timeBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal, 
                                                                 String encoding)
@@ -538,7 +538,7 @@ public class DateTime {
      * @return Date translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Date timestampBytesToDate(byte[] buffer,
+    static final Date timestampBytesToDate(byte[] buffer,
                                                            int offset,
                                                            Calendar recyclableCal, 
                                                            String encoding) 
@@ -580,7 +580,7 @@ public class DateTime {
      * @return  Time translated from buffer with specified Encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Time timestampBytesToTime(byte[] buffer,
+    static final Time timestampBytesToTime(byte[] buffer,
                                                            int offset,
                                                            Calendar recyclableCal, 
                                                            String encoding) 

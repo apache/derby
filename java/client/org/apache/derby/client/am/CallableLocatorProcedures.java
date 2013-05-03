@@ -51,7 +51,7 @@ class CallableLocatorProcedures
     //caches the information from a Stored Procedure
     //call as to whether locator support is available in
     //the server or not.
-    boolean isLocatorSupportAvailable = true;
+    private boolean isLocatorSupportAvailable = true;
     
     // One member variable for each stored procedure that can be called.
     // Used to be able to only prepare each procedure call once per connection.

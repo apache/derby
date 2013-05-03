@@ -37,7 +37,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * this.  A more efficient skip implementation should also be
  * straight-forward.
  */
-public class ClobLocatorReader extends Reader {
+class ClobLocatorReader extends Reader {
     /**
      * Connection used to read Clob from server.
      */
@@ -76,7 +76,7 @@ public class ClobLocatorReader extends Reader {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
-    public ClobLocatorReader(ClientConnection connection, ClientClob clob)
+    ClobLocatorReader(ClientConnection connection, ClientClob clob)
     throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
@@ -106,7 +106,7 @@ public class ClobLocatorReader extends Reader {
      *            retrieved.
      * @param len The length in characters of the partial value to be retrieved.
      */
-    public ClobLocatorReader(ClientConnection connection, ClientClob clob,
+    ClobLocatorReader(ClientConnection connection, ClientClob clob,
             long pos, long len) throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());

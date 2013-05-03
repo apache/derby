@@ -24,7 +24,7 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ResultSetCallbackInterface;
 
-public interface ResultSetReplyInterface {
+interface ResultSetReplyInterface {
     public void readFetch(ResultSetCallbackInterface resultSet)
             throws DisconnectException;
 

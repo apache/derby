@@ -32,7 +32,7 @@ import java.io.Reader;
  * this stream verifies that the underlying Clob has not
  * changed and if it has it recreates the specific streams.
  */
-public class UpdateSensitiveClobLocatorReader extends Reader {
+class UpdateSensitiveClobLocatorReader extends Reader {
     //The ClobLocatorReader instance
     //wrapped inside a BufferedReader
     private BufferedReader r = null;
@@ -216,7 +216,7 @@ public class UpdateSensitiveClobLocatorReader extends Reader {
      * with the current position and the length
      * values if specified.
      */
-    protected Reader reCreateStream() throws SqlException {
+    private Reader reCreateStream() throws SqlException {
         Reader r_ = null;
         //Verify if a subset of the underlying
         //Clob data was requested.

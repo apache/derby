@@ -25,12 +25,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class AsciiStream extends InputStream {
+class AsciiStream extends InputStream {
     private Reader reader_;
     private String materializedString_;
     private int charsRead_ = 0;
     
-    public AsciiStream(String materializedString){
+    AsciiStream(String materializedString){
         this(materializedString,new StringReader(materializedString));
     }
     

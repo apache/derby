@@ -26,11 +26,11 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
-public class ClientSavepoint implements Savepoint {
+class ClientSavepoint implements Savepoint {
     // ----------------- internals -----------------------------------------------
 
-    int savepointId_ = 0;
-    String savepointName_ = null;
+    private int savepointId_ = 0;
+    private String savepointName_ = null;
     Agent agent_;
 
     //---------------------constructors/finalizer---------------------------------

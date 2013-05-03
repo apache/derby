@@ -43,18 +43,13 @@ import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public class NetCursor extends Cursor {
+class NetCursor extends Cursor {
 
     NetResultSet netResultSet_;
-    NetAgent netAgent_;
+    private NetAgent netAgent_;
 
     Typdef qrydscTypdef_;
 
-    int targetSqlamForTypdef_;
-
-
-    // override column meta data
-    int numMddOverrides_;
     int maximumRowSize_;
     boolean blocking_;  // if true, multiple rows may be "blocked" in a single reply
 
@@ -85,7 +80,6 @@ public class NetCursor extends Cursor {
     NetCursor(NetAgent netAgent) {
         super(netAgent);
         netAgent_ = netAgent;
-        numMddOverrides_ = 0;
         maximumRowSize_ = 0;
         extdtaPositions_ = new HashMap<Integer, Integer>();
         extdtaData_ = new ArrayList<byte[]>();
@@ -535,7 +529,7 @@ public class NetCursor extends Cursor {
     }
 
     // prereq: the base data for the cursor has been processed for offsets and lengths
-    boolean isNonTrivialDataLob(int index) {
+    private boolean isNonTrivialDataLob(int index) {
         long length = 0L;
 
         if (isNull_[index] ||
@@ -581,7 +575,7 @@ public class NetCursor extends Cursor {
     //
     // FORMAT FOR ALL SQLAM LEVELS
     //   SQLCAGRP; GROUP LID 0x54; ELEMENT TAKEN 0(all); REP FACTOR 1
-    NetSqlca[] parseSQLCARD(Typdef typdef)
+    private NetSqlca[] parseSQLCARD(Typdef typdef)
             throws DisconnectException, SqlException {
 
         return parseSQLCAGRP(typdef);
@@ -839,7 +833,7 @@ public class NetCursor extends Cursor {
     
     // SQL Diagnostics Condition Token Array - Identity 0xF7
     // NULLDATA will be received for now
-    void parseSQLDCTOKS() throws DisconnectException, SqlException {
+    private void parseSQLDCTOKS() throws DisconnectException, SqlException {
         if (readFdocaOneByte() == CodePoint.NULLDATA) {
             return;
         }
@@ -900,7 +894,7 @@ public class NetCursor extends Cursor {
         isNull_ = new boolean[columns_];
     }
 
-    protected byte[] findExtdtaData(int column) {
+    private byte[] findExtdtaData(int column) {
         byte[] data = null;
 
         // locate the EXTDTA bytes, if any
@@ -1028,8 +1022,10 @@ public class NetCursor extends Cursor {
     }
 
     // this is really an event-callback from NetStatementReply.parseSQLDTARDarray()
-    void initializeColumnInfoArrays(Typdef typdef,
-                                    int columnCount, int targetSqlamForTypdef) throws DisconnectException {
+    void initializeColumnInfoArrays(
+            Typdef typdef,
+            int columnCount) throws DisconnectException {
+
         qrydscTypdef_ = typdef;
 
         // Allocate  arrays to hold the descriptor information.
@@ -1037,7 +1033,6 @@ public class NetCursor extends Cursor {
         fdocaLength_ = new int[columnCount];
         isGraphic_ = new boolean[columnCount];
         typeToUseForComputingDataLength_ = new int[columnCount];
-        targetSqlamForTypdef_ = targetSqlamForTypdef;
     }
 
     protected void getMoreData_() throws SqlException {

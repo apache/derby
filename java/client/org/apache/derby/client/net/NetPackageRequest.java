@@ -27,8 +27,8 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
-public class NetPackageRequest extends NetConnectionRequest {
-    static final String COLLECTIONNAME = "NULLID";
+class NetPackageRequest extends NetConnectionRequest {
+    private static final String COLLECTIONNAME = "NULLID";
 
     NetPackageRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
@@ -43,7 +43,7 @@ public class NetPackageRequest extends NetConnectionRequest {
     // variable which follows.
     static final String collectionName = "NULLID";
 
-    void buildCommonPKGNAMinfo(Section section) throws SqlException {
+    private void buildCommonPKGNAMinfo(Section section) throws SqlException {
         String collectionToFlow = COLLECTIONNAME;
         // the scalar data length field may or may not be required.  it depends
         // on the level of support and length of the data.
@@ -262,7 +262,7 @@ public class NetPackageRequest extends NetConnectionRequest {
     }
 
 
-    public void encryptDataStream(int lengthLocation) throws SqlException {
+    void encryptDataStream(int lengthLocation) throws SqlException {
         byte[] clearedBytes = new byte[buffer.position() - lengthLocation];
         buffer.position(lengthLocation);
         buffer.get(clearedBytes);

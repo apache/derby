@@ -28,7 +28,9 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class NetConnectionRequest extends Request implements ConnectionRequestInterface {
+class NetConnectionRequest extends Request
+    implements ConnectionRequestInterface {
+
     NetConnectionRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -60,12 +62,6 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                 targetRsyncmgr,
                 targetUnicodemgr);
 
-    }
-
-    void writeDummyExchangeServerAttributes() throws SqlException {
-        // send the exchange server attributes command to the server,
-        // without any parameters
-        buildDummyEXCSAT();
     }
 
     void writeAccessSecurity(int securityMechanism,
@@ -191,7 +187,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     // The Relational Database Name (RDBNAM) is an optional parameter
     // which will not be sent by this command to reduce size, building,
     // and parsing.
-    void buildRDBRLLBCK() throws SqlException {
+    private void buildRDBRLLBCK() throws SqlException {
         createCommand();
         writeLengthCodePoint(0x04, CodePoint.RDBRLLBCK);
     }
@@ -203,7 +199,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     // - this driver's product release level
     // - this driver's external name
     // - this driver's server name
-    void buildEXCSAT(String externalName,
+    private void buildEXCSAT(String externalName,
                      int targetAgent,
                      int targetSqlam,
                      int targetRdb,
@@ -264,7 +260,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         updateLengthBytes();
     }
 
-    void buildDummyEXCSAT() throws SqlException {
+    private void buildDummyEXCSAT() throws SqlException {
         createCommand();
 
         // begin excsat collection by placing the 4 byte llcp in the buffer.
@@ -278,7 +274,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         updateLengthBytes();
     }
 
-    void buildACCSEC(int secmec,
+    private void buildACCSEC(int secmec,
                      String rdbnam,
                      byte[] sectkn) throws SqlException {
         createCommand();
@@ -307,7 +303,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         updateLengthBytes();
     }
 
-    void buildSECCHK(int secmec,
+    private void buildSECCHK(int secmec,
                      String rdbnam,
                      String user,
                      String password,
@@ -345,7 +341,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     // manager.  The access RDB command then binds the created instance to the target
     // agent and to the RDB. The RDB remains available (accessed) until
     // the communications conversation is terminate.
-    void buildACCRDB(String rdbnam,
+    private void buildACCRDB(String rdbnam,
                      boolean readOnly,
                      byte[] crrtkn,
                      byte[] prddta,
@@ -555,7 +551,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         writeScalarString(CodePoint.TYPDEFNAM, typdefnam);
     }
 
-    void buildTYPDEFOVR(boolean sendCcsidSbc,
+    private void buildTYPDEFOVR(boolean sendCcsidSbc,
                         int ccsidSbc,
                         boolean sendCcsidDbc,
                         int ccsidDbc,

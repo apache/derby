@@ -29,7 +29,7 @@ import org.apache.derby.client.am.SqlException;
 // Implementations of this interface should not dereference common layer Connection state, as it is passed in,
 // but may dereference material layer Connection state if necessary for performance.
 
-public interface ConnectionRequestInterface {
+interface ConnectionRequestInterface {
     public void writeCommitSubstitute(NetConnection connection)
             throws SqlException;
 

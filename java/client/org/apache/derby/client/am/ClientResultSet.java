@@ -73,7 +73,7 @@ public abstract class ClientResultSet implements ResultSet,
     //   That is, the state data is set by the constructor and never changes.
 
     // Alias for statement_.connection
-    public final ClientConnection connection_;
+    private final ClientConnection connection_;
 
     //----------------------------- constants ------------------------------------
 
@@ -81,14 +81,14 @@ public abstract class ClientResultSet implements ResultSet,
     public final static int scrollOrientation_absolute__ = 2;
     public final static int scrollOrientation_after__ = 3;
     public final static int scrollOrientation_before__ = 4;
-    public final static int scrollOrientation_prior__ = 5;
-    public final static int scrollOrientation_first__ = 6;
-    public final static int scrollOrientation_last__ = 7;
-    public final static int scrollOrientation_current__ = 8;
-    public final static int scrollOrientation_next__ = 0;
+    private final static int scrollOrientation_prior__ = 5;
+    private final static int scrollOrientation_first__ = 6;
+    private final static int scrollOrientation_last__ = 7;
+    private final static int scrollOrientation_current__ = 8;
+    private final static int scrollOrientation_next__ = 0;
 
-    public final static int updatability_unknown__ = 0;
-    public final static int updatability_readOnly__ = 1;
+    // public final static int updatability_unknown__ = 0;
+    // public final static int updatability_readOnly__ = 1;
     public final static int updatability_delete__ = 2;
     public final static int updatability_update__ = 4;
 
@@ -101,18 +101,11 @@ public abstract class ClientResultSet implements ResultSet,
     static final private int WAS_NOT_NULL = 2;
     static final private int WAS_NULL_UNSET = 0;
 
-    static final public int NEXT_ROWSET = 1;
-    static final public int PREVIOUS_ROWSET = 2;
-    static final public int ABSOLUTE_ROWSET = 3;
-    static final public int FIRST_ROWSET = 4;
-    static final public int LAST_ROWSET = 5;
-    static final public int RELATIVE_ROWSET = 6;
-    static final public int REFRESH_ROWSET = 7;
     //  determines if a cursor is a:
     //    Return to Client - not to be read by the stored procedure only by client
     //    Return to Caller
-    public static final byte DDM_RETURN_CALLER = 0x01;
-    public static final byte DDM_RETURN_CLIENT = 0x02;
+    private static final byte DDM_RETURN_CALLER = 0x01;
+    private static final byte DDM_RETURN_CLIENT = 0x02;
 
     //-----------------------------state------------------------------------------
 
@@ -125,7 +118,7 @@ public abstract class ClientResultSet implements ResultSet,
     //  determines if a cursor is a:
     //    Return to Client - not to be read by the stored procedure only by client
     //    Return to Caller - only calling JSP can read it, not the client
-    protected byte rsReturnability_ = DDM_RETURN_CLIENT;
+    private byte rsReturnability_ = DDM_RETURN_CLIENT;
 
     // This means the client-side jdbc result set object is open.
     boolean openOnClient_ = true;
@@ -145,7 +138,7 @@ public abstract class ClientResultSet implements ResultSet,
     // Before the first call to next() or any cursor positioning method, the cursor position is invalid
     // and getter methods cannot be called.
     // Also, if a cursor is exhausted (+100), the cursor position is invalid.
-    public boolean isValidCursorPosition_ = false;
+    private boolean isValidCursorPosition_ = false;
 
     public boolean cursorHold_;
 
@@ -155,16 +148,15 @@ public abstract class ClientResultSet implements ResultSet,
     public long queryInstanceIdentifier_ = 0;
 
     public int resultSetType_;
-    public int resultSetConcurrency_;
-    public int resultSetHoldability_;
+    int resultSetConcurrency_;
+    int resultSetHoldability_;
     public boolean scrollable_ = false;
     public int sensitivity_;
     public boolean isRowsetCursor_ = false;
-    public boolean isBeforeFirst_ = true;
-    public boolean isAfterLast_ = false;
-    public boolean isFirst_ = false;
-    public boolean isLast_ = false;
-    public boolean rowsetContainsLastRow_ = false;
+    private boolean isBeforeFirst_ = true;
+    private boolean isAfterLast_ = false;
+    private boolean isFirst_ = false;
+    private boolean isLast_ = false;
     public Sqlca[] rowsetSqlca_;
 
     // Gets its initial value from the statement when the result set is created.
@@ -175,19 +167,20 @@ public abstract class ClientResultSet implements ResultSet,
     // type, scrollability and presence of lobs.
     public int fetchSize_;
 
-    public int fetchDirection_;
+    private int fetchDirection_;
 
-    public long rowCount_ = -1;
+    private long rowCount_ = -1;
 
-    protected long absolutePosition_ = 0;       // absolute position of the current row
-    protected long firstRowInRowset_ = 0;       // absolute position of the first row in the current rowset
-    protected long lastRowInRowset_ = 0;        // absolute position of the last row in the current rowset
-    protected long currentRowInRowset_ = -1;     // relative position to the first row in the current rowsetwel
-
-    protected long absoluteRowNumberForTheIntendedRow_;
+    private long absolutePosition_ = 0; // absolute position of the current row
+    private long firstRowInRowset_ = 0; // absolute position of the first row
+                                        // in the current rowset
+    private long lastRowInRowset_ = 0;  // absolute position of the last row in
+                                        // the current rowset
+    private long currentRowInRowset_ = -1; // relative position to the first
+                                           // row in the current rowsetwel
 
     private boolean isOnInsertRow_ = false;  // reserved for later
-    protected boolean isOnCurrentRow_ = true;
+    private boolean isOnCurrentRow_ = true;
     public int rowsReceivedInCurrentRowset_ = 0;  // keep track of the number of rows received in the
     // current rowset so far
 
@@ -213,13 +206,10 @@ public abstract class ClientResultSet implements ResultSet,
     private ClientPreparedStatement preparedStatementForDelete_;
     private ClientPreparedStatement preparedStatementForInsert_;
 
-    // Nesting level of the result set in a stored procedure
-    public int nestingLevel_ = -1;
-
     // Whenever a commit occurs, it unpositions the cursor on the server.  We need to
     // reposition the cursor before updating/deleting again.  This flag will be set to true
     // whenever a commit happens, and reset to false again after we repositoin the cursor.
-    public boolean cursorUnpositionedOnServer_ = false;
+    private boolean cursorUnpositionedOnServer_ = false;
     
     // Keep maxRows in the ResultSet, so that changes to maxRow in the statement
     // do not affect the resultSet after it has been created
@@ -1941,7 +1931,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     // An untraced version of clearWarnings()
-    public final void clearWarningsX() {
+    private void clearWarningsX() {
         warnings_ = null;
     }
 
@@ -2422,7 +2412,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    public boolean absoluteX(int row) throws SqlException {
+    private boolean absoluteX(int row) throws SqlException {
         checkForClosedResultSet("absolute");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
@@ -4040,7 +4030,8 @@ public abstract class ClientResultSet implements ResultSet,
         throw jdbc3MethodNotSupported();
     }
 
-    public boolean repositionScrollableResultSetBeforeJDBC1PositionedUpdateDelete() throws SqlException {
+    boolean repositionScrollableResultSetBeforeJDBC1PositionedUpdateDelete()
+            throws SqlException {
         boolean repositionedCursor = false;
 
         // calculate the absolutePosition of the current row directly.
@@ -4059,7 +4050,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
     //--------------------categorize the methods below -----------------
 
-    public void flowPositioningFetch(int scrollOrientation,
+    private void flowPositioningFetch(int scrollOrientation,
                                      int rowToFetch) throws DisconnectException {
         // need the try-catch block here because agent_.beginWriteChain throws
         // an SqlException
@@ -4078,7 +4069,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    protected void positionToCurrentRowAndUpdate() throws SqlException {
+    private void positionToCurrentRowAndUpdate() throws SqlException {
         agent_.beginWriteChain(statement_);
 
         // calculate the position of the current row relative to the absolute position on server
@@ -4130,7 +4121,7 @@ public abstract class ClientResultSet implements ResultSet,
         agent_.endReadChain();
     }
 
-    protected void insert() throws SqlException {
+    private void insert() throws SqlException {
         agent_.beginWriteChain(statement_);
 
         // re-prepare the insert statement if repreparing is needed after a commit.
@@ -4159,7 +4150,7 @@ public abstract class ClientResultSet implements ResultSet,
      }    
 
     
-    protected void update() throws SqlException {
+    private void update() throws SqlException {
         agent_.beginWriteChain(statement_);
 
         // re-prepare the update statement if repreparing is needed after a commit.
@@ -4201,7 +4192,7 @@ public abstract class ClientResultSet implements ResultSet,
         agent_.endReadChain();
     }
 
-    protected void positionToCurrentRowAndDelete() throws SqlException {
+    private void positionToCurrentRowAndDelete() throws SqlException {
         agent_.beginWriteChain(statement_);
 
         // calculate the position of the current row relative to the absolute position on server
@@ -4251,7 +4242,7 @@ public abstract class ClientResultSet implements ResultSet,
         agent_.endReadChain();
     }
 
-    protected void delete() throws SqlException {
+    private void delete() throws SqlException {
         try
         {
             agent_.beginWriteChain(statement_);
@@ -4292,7 +4283,7 @@ public abstract class ClientResultSet implements ResultSet,
 
     // Resets all rowset related flags.
     // Called by getRowSet() from material layer.
-    public void setRowsetAfterLastEvent() throws SqlException {
+    private void setRowsetAfterLastEvent() throws SqlException {
         firstRowInRowset_ = 0;
         lastRowInRowset_ = 0;
         absolutePosition_ = (maxRows_ == 0) ? rowCount_ + 1 : maxRows_ + 1;
@@ -4300,7 +4291,7 @@ public abstract class ClientResultSet implements ResultSet,
         rowsReceivedInCurrentRowset_ = 0;
     }
 
-    public void setRowsetBeforeFirstEvent() throws SqlException {
+    private void setRowsetBeforeFirstEvent() throws SqlException {
         firstRowInRowset_ = 0;
         lastRowInRowset_ = 0;
         absolutePosition_ = 0;
@@ -4308,7 +4299,7 @@ public abstract class ClientResultSet implements ResultSet,
         rowsReceivedInCurrentRowset_ = 0;
     }
 
-    public void setRowsetNoRowsEvent() {
+    private void setRowsetNoRowsEvent() {
         rowCount_ = 0;
         firstRowInRowset_ = 0;
         lastRowInRowset_ = 0;
@@ -4329,28 +4320,17 @@ public abstract class ClientResultSet implements ResultSet,
         isValidCursorPosition_ = isValidCursorPosition;
     }
 
-    protected void moveToAfterLast() throws DisconnectException {
+    private void moveToAfterLast() throws DisconnectException {
         flowPositioningFetch(ClientResultSet.scrollOrientation_after__, 0);
     }
 
     // Positions the cursor at before the first row.
-    protected void moveToBeforeFirst() throws DisconnectException {
+    private void moveToBeforeFirst() throws DisconnectException {
         flowPositioningFetch(ClientResultSet.scrollOrientation_before__, 0);
     }
 
-    // analyze the error handling here, and whether or not can be pushed to common
-    // can we make this the common layer fetch method
-    // Called by the read/skip Fdoca bytes methods in the net
-    // whenever data reads exhaust the internal buffer used by this reply
-    public void flowFetch() throws DisconnectException, SqlException {
-        agent_.beginWriteChain(statement_);
-        writeFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_);
-        agent_.flow(statement_);
-        readFetch_();
-        agent_.endReadChain();
-    }
-
-    public void writeInsertRow(boolean chainedWritesFollowingSetLob) throws SQLException {
+    private void writeInsertRow(boolean chainedWritesFollowingSetLob)
+            throws SQLException {
         try
         {
             preparedStatementForInsert_.materialPreparedStatement_.writeExecute_(
@@ -4368,7 +4348,8 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
     
-    public void writeUpdateRow(boolean chainedWritesFollowingSetLob) throws SQLException {
+    private void writeUpdateRow(boolean chainedWritesFollowingSetLob)
+            throws SQLException {
         try
         {
             preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.section_,
@@ -4384,7 +4365,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    public void writeDeleteRow() throws SQLException {
+    private void writeDeleteRow() throws SQLException {
         try
         {
             if (isRowsetCursor_) {
@@ -4409,23 +4390,23 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    public void readInsertRow() throws DisconnectException, SqlException {
+    private void readInsertRow() throws DisconnectException, SqlException {
         preparedStatementForInsert_.materialPreparedStatement_.readExecute_();
     }
 
-    public void readUpdateRow() throws DisconnectException, SqlException {
+    private void readUpdateRow() throws DisconnectException, SqlException {
         preparedStatementForUpdate_.materialPreparedStatement_.readExecute_();
         accumulateWarning(preparedStatementForUpdate_.getSqlWarnings());
     }
 
-    public void readDeleteRow() throws DisconnectException, SqlException {
+    private void readDeleteRow() throws DisconnectException, SqlException {
         preparedStatementForDelete_.materialPreparedStatement_.readExecute_();
         accumulateWarning(preparedStatementForDelete_.getSqlWarnings());
     }
 
     //------------------material layer event callback methods-----------------------
 
-    boolean listenToUnitOfWork_ = false;
+    private boolean listenToUnitOfWork_ = false;
 
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
@@ -4557,16 +4538,12 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     //-------------------------------helper methods-------------------------------
-    protected boolean rowCountIsUnknown() {
+    boolean rowCountIsUnknown() {
         if (sensitivity_ == sensitivity_sensitive_dynamic__) {
             return false;
         } else {
             return rowCount_ == -1;
         }
-    }
-
-    protected boolean rowCountIsKnown() {
-        return rowCount_ != -1;
     }
 
     private void updateColumn(int column, Object value) {
@@ -4807,7 +4784,7 @@ public abstract class ClientResultSet implements ResultSet,
                 new ClientMessageId(SQLState.CURSOR_INVALID_OPERATION_AT_CURRENT_POSITION));
     }
 
-    final void checkForValidColumnIndex(int column) throws SqlException {
+    private void checkForValidColumnIndex(int column) throws SqlException {
         if (column < 1 || column > resultSetMetaData_.columns_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_COLUMN_POSITION),
@@ -4932,7 +4909,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    protected void updateColumnInfoFromCache() {
+    private void updateColumnInfoFromCache() {
         // currentRowInRowset_ should never be bigger than the max value of an int,
         // because we have a driver imposed limit of fetch size 1000.
         cursor_.columnDataPosition_ =
@@ -4966,7 +4943,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
     }
 
-    public void parseScrollableRowset() throws SqlException {
+    void parseScrollableRowset() throws SqlException {
         // modified check from qrydtaReturned to cursor.dataBufferHasUnprocesseData()
         if (cursor_.dataBufferHasUnprocessedData() && scrollable_) {
             parseRowset_();
@@ -5561,7 +5538,7 @@ public abstract class ClientResultSet implements ResultSet,
      * @param columnIndex 1-based column index
      * @throws SQLException if the column has already been accessed
      */
-    void useStreamOrLOB(int columnIndex) throws SqlException {
+    private void useStreamOrLOB(int columnIndex) throws SqlException {
         checkLOBMultiCall(columnIndex);
         columnUsedFlags_[columnIndex - 1] = true;
     }

@@ -95,22 +95,6 @@ public final class Utils {
         return stringBuffer.toString();
     }
 
-    static String getStringFromStrings(String[] strings) {
-        if (strings == null) {
-            return "{}";
-        }
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("{ ");
-        for (int i = 0; i < strings.length; i++) {
-            stringBuffer.append(strings[i]);
-            if (i != strings.length - 1) {
-                stringBuffer.append(", ");
-            }
-        }
-        stringBuffer.append(" }");
-        return stringBuffer.toString();
-    }
-
     static public int computeBigDecimalPrecision(BigDecimal decimal) {
         byte[] bBytes = decimal.unscaledValue().abs().toByteArray();
 
@@ -212,66 +196,11 @@ public final class Utils {
         {(byte) 0x7e, (byte) 0x37, (byte) 0xbe, (byte) 0x20, (byte) 0x22, (byte) 0xc0, (byte) 0x91, (byte) 0x4b, (byte) 0x26, (byte) 0x80, (byte) 0x00, (byte) 0x00, (byte) 0x00}  // 10^31
     };
 
-    // If the input string is short, pad it with blanks.
-    // If the input string is long, truncate it.
-    static public String padOrTruncate(String s, int fixedLength) {
-        if (s.length() >= fixedLength) // we need to truncate
-        {
-            return s.substring(0, fixedLength);
-        } else { // we need to pad
-            StringBuffer buffer = new StringBuffer(s);
-            for (int i = 0; i < fixedLength - s.length(); i++) {
-                buffer.append(" ");
-            }
-            return buffer.toString();
-        }
-    }
-
-    static public void checkForNegativePositiveSqlcard(
-            Sqlca sqlca,
-            ClientStatement statement) throws SqlException {
-
-        if (sqlca != null) {
-            int sqlcode = sqlca.getSqlCode();
-            if (sqlcode < 0) {
-                throw new SqlException(statement.agent_.logWriter_, sqlca);
-            } else {
-                if (sqlcode > 0) {
-                    statement.accumulateWarning(new SqlWarning(statement.agent_.logWriter_, sqlca));
-                }
-            }
-        }
-    }
-
-    static public void checkForNegativePositiveSqlcard(
-            Sqlca sqlca,
-            ClientResultSet resultSet) throws SqlException {
-
-        if (sqlca != null) {
-            int sqlcode = sqlca.getSqlCode();
-            if (sqlcode < 0) {
-                throw new SqlException(resultSet.agent_.logWriter_, sqlca);
-            } else {
-                if (sqlcode > 0) {
-                    resultSet.accumulateWarning(new SqlWarning(resultSet.agent_.logWriter_, sqlca));
-                }
-            }
-        }
-    }
-
     static public int getSqlcodeFromSqlca(Sqlca sqlca) {
         if (sqlca == null) {
             return 0;
         }
         return sqlca.getSqlCode();
-    }
-
-    static public long getUpdateCountFromSqlcard(Sqlca sqlca) {
-        if (sqlca == null) {
-            return 0;
-        } else {
-            return sqlca.getUpdateCount();
-        }
     }
 
     /** Squash an array of longs into an array of ints */
@@ -305,68 +234,11 @@ public final class Utils {
         }
     }
 
-    // latestException is assumed to be non-null, accumulatedExceptions can be null
-    public static SqlWarning accumulateSQLWarning(SqlWarning latestException,
-                                                  SqlWarning accumulatedExceptions) {
-        latestException.setNextException(accumulatedExceptions);
-        return latestException;
-    }
-
-    // just a thought...
-    static String getSQLTypeName(int sqlType) {
-        switch (sqlType) {
-        case Types.BIGINT:
-            return "BIGINT";
-        case Types.BINARY:
-            return "BINARY";
-        case Types.BIT:
-            return "BIT";
-        case Types.CHAR:
-            return "CHAR";
-        case Types.DATE:
-            return "DATE";
-        case Types.DECIMAL:
-            return "DECIMAL";
-        case Types.DOUBLE:
-            return "DOUBLE";
-        case Types.REAL:
-            return "REAL";
-        case Types.INTEGER:
-            return "INTEGER";
-        case Types.LONGVARBINARY:
-            return "LONGVARBINARY";
-        case Types.LONGVARCHAR:
-            return "LONGVARCHAR";
-        case Types.NULL:
-            return "NULL";
-        case Types.NUMERIC:
-            return "NUMERIC";
-        case Types.OTHER:
-            return "OTHER";
-        case Types.FLOAT:
-            return "FLOAT";
-        case Types.SMALLINT:
-            return "SMALLINT";
-        case Types.TIME:
-            return "TIME";
-        case Types.TIMESTAMP:
-            return "TIMESTAMP";
-        case Types.TINYINT:
-            return "TINYINT";
-        case Types.VARBINARY:
-            return "VARBINARY";
-        case Types.VARCHAR:
-            return "VARCHAR";
-        default:
-            return null;
-        }
-    }
-
     public static boolean isSqlTypeNullable(int sqlType) {
         return (sqlType | 0x01) == sqlType;
     }
 
-    public static int getNonNullableSqlType(int sqlType) {
+    static int getNonNullableSqlType(int sqlType) {
         return sqlType & ~1;
     }
 }

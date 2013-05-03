@@ -24,7 +24,7 @@ package org.apache.derby.client.am;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class DisconnectException extends SqlException {
-    public DisconnectException(Agent agent, ClientMessageId msgid,
+    private DisconnectException(Agent agent, ClientMessageId msgid,
         Object[] args, SqlCode sqlcode, Throwable t)  {
         super(agent != null ? agent.logWriter_ : null, msgid,
             args, sqlcode, t);
@@ -35,17 +35,12 @@ public class DisconnectException extends SqlException {
         }
     }
     
-    public DisconnectException(Agent agent, ClientMessageId msgid,
+    private DisconnectException(Agent agent, ClientMessageId msgid,
         Object[] args, SqlCode sqlcode) {
         this(agent, msgid, args, sqlcode, (Throwable)null);
     }
 
-    public DisconnectException(Agent agent, ClientMessageId msgid, SqlCode sqlcode) {
-        this(agent, msgid, (Object[]) null, sqlcode);
-    }
-
-        
-    public DisconnectException(Agent agent, ClientMessageId msgid,
+    private DisconnectException(Agent agent, ClientMessageId msgid,
         Object[] args) {
         this(agent, msgid, args, SqlCode.disconnectError);
     }

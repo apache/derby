@@ -42,7 +42,7 @@ import java.security.cert.CertificateException;
  * This is a naive trust manager we use when we don't want server
  * authentication. Any certificate will be accepted. 
  **/
-public class NaiveTrustManager
+class NaiveTrustManager
     implements X509TrustManager
 {
 
@@ -60,7 +60,7 @@ public class NaiveTrustManager
      * Utility routine which is not part of the X509TrustManager
      * interface.
      **/
-    public static SocketFactory getSocketFactory()
+    static SocketFactory getSocketFactory()
         throws NoSuchAlgorithmException,
                KeyManagementException,
                NoSuchProviderException,

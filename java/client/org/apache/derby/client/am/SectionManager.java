@@ -29,16 +29,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 
 public class SectionManager {
-    String collection_;
-    Agent agent_;
-
-    // Cursor holdability attributes used as package cluster indices.
-    // Not defined in PackageBindOptions because this attribute is part of the
-    // declare cursor [with hold] sql string based on section binds.
-    // By convention, we bind all sections in the same package with
-    // the same holdability.
-    final static int HOLD = 0;
-    final static int NO_HOLD = 1;
+    private Agent agent_;
 
     // The following stack of available sections is
     // for pooling and recycling previously used sections.
@@ -48,21 +39,21 @@ public class SectionManager {
     private final Stack<Section> freeSectionsNonHold_;
     private final Stack<Section> freeSectionsHold_;
 
-    int nextAvailableSectionNumber_ = 1;
+    private int nextAvailableSectionNumber_ = 1;
 
     // store package consistency token information and initialized in
     // setPKGNAMCBytes
     // holdPKGNAMCBytes stores PKGNAMCBytes when holdability is hold
     // noHoldPKGNAMCBytes stores PKGNAMCBytes when holdability is no hold
-    public byte[] holdPKGNAMCBytes = null;
-    public byte[] noHoldPKGNAMCBytes = null;
+    byte[] holdPKGNAMCBytes = null;
+    byte[] noHoldPKGNAMCBytes = null;
 
 
-    final static String packageNameWithHold__ = "SYSLH000";
-    final static String packageNameWithNoHold__ = "SYSLN000";
+    private final static String packageNameWithHold__ = "SYSLH000";
+    private final static String packageNameWithNoHold__ = "SYSLN000";
 
-    final static String cursorNamePrefixWithHold__ = "SQL_CURLH000C";
-    final static String cursorNamePrefixWithNoHold__ = "SQL_CURLN000C";
+    private final static String cursorNamePrefixWithHold__ = "SQL_CURLH000C";
+    private final static String cursorNamePrefixWithNoHold__ = "SQL_CURLN000C";
 
     // Jdbc 1 positioned updates are implemented via
     // sql scan for "...where current of <users-cursor-name>",
@@ -85,14 +76,10 @@ public class SectionManager {
         positionedUpdateCursorNameToResultSet_ =
             new Hashtable<String, WeakReference<ClientResultSet>>();
 
-    String databaseName;
+    private final int maxNumSections_ = 32768;
 
-    int maxNumSections_ = 32768;
-
-    public SectionManager(String collection, Agent agent, String databaseName) {
-        collection_ = collection;
+    public SectionManager(Agent agent) {
         agent_ = agent;
-        this.databaseName = databaseName;
         freeSectionsNonHold_ = new Stack<Section>();
         freeSectionsHold_ = new Stack<Section>();
     }
@@ -106,7 +93,7 @@ public class SectionManager {
      *                             is stored in holdPKGNAMCBytes and in noHoldPKGNAMCBytes when holdability is set to
      *                             CLOSE_CURSORS_AT_COMMIT
      */
-    public void setPKGNAMCBytes(byte[] b, int resultSetHoldability) {
+    void setPKGNAMCBytes(byte[] b, int resultSetHoldability) {
         if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             agent_.sectionManager_.holdPKGNAMCBytes = b;
         } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {
@@ -118,8 +105,7 @@ public class SectionManager {
     //------------------------entry points----------------------------------------
 
     // Get a section for either a jdbc update or query statement.
-    public Section getDynamicSection(int resultSetHoldability) throws SqlException {
-        int cursorHoldIndex;
+    Section getDynamicSection(int resultSetHoldability) throws SqlException {
         if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             return getSection(freeSectionsHold_, packageNameWithHold__, cursorNamePrefixWithHold__, resultSetHoldability);
         } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {
@@ -131,7 +117,7 @@ public class SectionManager {
         }
     }
 
-    protected Section getSection(
+    private Section getSection(
             Stack freeSections,
             String packageName,
             String cursorNamePrefix,
@@ -153,7 +139,7 @@ public class SectionManager {
         }
     }
 
-    public void freeSection(Section section, int resultSetHoldability) {
+    void freeSection(Section section, int resultSetHoldability) {
         if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             this.freeSectionsHold_.push(section);
         } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {

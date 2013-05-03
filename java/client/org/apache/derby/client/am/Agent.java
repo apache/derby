@@ -29,14 +29,15 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Agent {
-    public SqlException accumulatedReadExceptions_ = null;
+    SqlException accumulatedReadExceptions_ = null;
 
     private boolean enableBatchedExceptionTracking_;
     private int batchedExceptionLabelIndex_;
     private boolean[] batchedExceptionGenerated_;
 
     ClientConnection connection_; // made friendly for lobs only, refactor !!
-    public SectionManager sectionManager_ = null; // temporarily public, make friendly at least !!
+
+    SectionManager sectionManager_ = null;
 
     public LogWriter logWriter_ = null;
 
@@ -46,7 +47,7 @@ public abstract class Agent {
     // cannot be thrown on the getMessage() invocation because the signature of getMessage() does not
     // allow for throwing an exception.
     // Therefore, we must save the exception and throw it at our very first opportunity.
-    SqlException deferredException_;
+    private SqlException deferredException_;
 
     void checkForDeferredExceptions() throws SqlException {
         if (deferredException_ != null) {
@@ -64,7 +65,7 @@ public abstract class Agent {
      * @param dataType the data type to check
      * @exception SqlException if the type is not supported
      */
-    public void checkForSupportedDataType(int dataType) throws SqlException {
+    void checkForSupportedDataType(int dataType) throws SqlException {
 
         // JDBC 4.0 javadoc for setObject() says:
         //
@@ -99,7 +100,7 @@ public abstract class Agent {
         }
     }
 
-    public void accumulateDeferredException(SqlException e) {
+    void accumulateDeferredException(SqlException e) {
         if (deferredException_ == null) {
             deferredException_ = e;
         } else {
@@ -113,7 +114,7 @@ public abstract class Agent {
         crossConverters_ = new CrossConverters(this);
     }
 
-    protected void resetAgent(LogWriter logWriter) {
+    private void resetAgent(LogWriter logWriter) {
         // sectionManager_ is set elsewhere
         accumulatedReadExceptions_ = null;
         enableBatchedExceptionTracking_ = false;
@@ -123,7 +124,7 @@ public abstract class Agent {
         deferredException_ = null;
     }
 
-    public void resetAgent(
+    void resetAgent(
         ClientConnection connection,
         LogWriter logWriter,
         int loginTimeout,
@@ -174,7 +175,7 @@ public abstract class Agent {
     }
 
     // Called only for disconnect event
-    public final void accumulateDisconnectException(DisconnectException e) {
+    private void accumulateDisconnectException(DisconnectException e) {
         if (enableBatchedExceptionTracking_) {
             batchedExceptionGenerated_[batchedExceptionLabelIndex_] = true;
             labelAsBatchedException(e, batchedExceptionLabelIndex_);
@@ -229,18 +230,13 @@ public abstract class Agent {
         }
     }
 
-    // precondition: all batch execute reads have occurred
-    final boolean batchUpdateExceptionGenerated() {
-        return batchedExceptionGenerated_[batchedExceptionLabelIndex_];
-    }
-
     public final void flow(ClientStatement statement) throws SqlException {
         endWriteChain();
         flush_();
         beginReadChain(statement);
     }
 
-    public final void flowBatch(ClientStatement statement, int batchSize)
+    final void flowBatch(ClientStatement statement, int batchSize)
             throws SqlException {
         endBatchedWriteChain();
         flush_();
@@ -266,7 +262,7 @@ public abstract class Agent {
         }
     }
 
-    public final void disconnectEvent() {
+    final void disconnectEvent() {
         // closes client-side resources associated with database connection
         try {
             close();
@@ -282,7 +278,7 @@ public abstract class Agent {
         connection_.writeTransactionStart(statement);
     }
 
-    public final void beginBatchedWriteChain(ClientStatement statement)
+    final void beginBatchedWriteChain(ClientStatement statement)
             throws SqlException {
         beginWriteChain(statement);
     }
@@ -290,7 +286,7 @@ public abstract class Agent {
     protected void endWriteChain() {
     }
 
-    protected final void endBatchedWriteChain() {
+    private final void endBatchedWriteChain() {
     }
 
     protected void beginReadChain(ClientStatement statement)
@@ -298,7 +294,7 @@ public abstract class Agent {
         connection_.readTransactionStart();
     }
 
-    protected final void beginBatchedReadChain(
+    private void beginBatchedReadChain(
         ClientStatement statement,
         int batchSize)
             throws SqlException {
@@ -314,8 +310,10 @@ public abstract class Agent {
         checkForExceptions();
     }
 
-    public final void endBatchedReadChain(long[] updateCounts, SqlException accumulatedExceptions)
-        throws BatchUpdateException {
+    final void endBatchedReadChain(long[] updateCounts,
+                                   SqlException accumulatedExceptions)
+            throws BatchUpdateException {
+
         disableBatchedExceptionTracking();
         for (int i = 0; i < batchedExceptionGenerated_.length; i++) {
             if (batchedExceptionGenerated_[i]) {

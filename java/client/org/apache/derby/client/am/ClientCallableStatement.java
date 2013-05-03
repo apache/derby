@@ -131,25 +131,6 @@ public class ClientCallableStatement extends ClientPreparedStatement
         initCallableStatement();
     }
 
-    public void resetCallableStatement(Agent agent,
-                                       ClientConnection connection,
-                                       String sql,
-                                       Section section) throws SqlException {
-        super.resetPreparedStatement(agent, connection, sql, section);
-        initCallableStatement();
-    }
-
-
-    public void resetCallableStatement(Agent agent,
-                                       ClientConnection connection,
-                                       String sql,
-                                       Section section,
-                                       ColumnMetaData parameterMetaData,
-                                       ColumnMetaData resultSetMetaData) throws SqlException {
-        super.resetPreparedStatement(agent, connection, sql, section, parameterMetaData, resultSetMetaData);
-        initCallableStatement();
-    }
-
     protected void finalize() throws Throwable {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "finalize");
@@ -1294,7 +1275,7 @@ public class ClientCallableStatement extends ClientPreparedStatement
         }
     }
     
-    protected SQLException jdbcMethodNotImplemented() throws SQLException
+    SQLException jdbcMethodNotImplemented() throws SQLException
     {
         try
         {

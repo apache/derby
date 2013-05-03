@@ -133,16 +133,16 @@ public class Typdef implements Cloneable {
     //-----------------------------state------------------------------------------
 
     // double byte character set
-    static final short CCSIDDBC = 1;
+    private static final short CCSIDDBC = 1;
 
     // multi-byte character set
-    static final short CCSIDMBC = 2;
+    private static final short CCSIDMBC = 2;
 
     // single byte character set
-    static final short CCSIDSBC = 3;
+    private static final short CCSIDSBC = 3;
 
     // No CCSID
-    static final short NOCCSID = 0;
+    private static final short NOCCSID = 0;
 
     // fixed length
     static final short FIXEDLENGTH = 0;
@@ -273,33 +273,33 @@ public class Typdef implements Cloneable {
         /* 0x01 Empties */
         null,
         /* 0x02 4-byte int */
-        new FdocaSimpleDataArray(0x02, FdocaConstants.FDOCA_TYPE_INTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x02,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x03 null 4-byte int */
-        new FdocaSimpleDataArray(0x03, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x03,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x04 2-byte int */
-        new FdocaSimpleDataArray(0x04, FdocaConstants.FDOCA_TYPE_INTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 2, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x04,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x05 null 2-byte int */
-        new FdocaSimpleDataArray(0x05, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 2, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x05,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x06 1-byte int */
-        new FdocaSimpleDataArray(0x06, FdocaConstants.FDOCA_TYPE_INTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 1, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x06,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x07 null 1-byte int */
-        new FdocaSimpleDataArray(0x07, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 1, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x07,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x08 16-byte bin float */
-        new FdocaSimpleDataArray(0x08, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x08,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x09 null 16-byte bin float */
-        new FdocaSimpleDataArray(0x09, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 16, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x09,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x0A 8-byte bin float */
-        new FdocaSimpleDataArray(0x0A, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0A,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x0B null 8-byte bin float */
-        new FdocaSimpleDataArray(0x0B, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0B,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x0C 4-byte bin float */
-        new FdocaSimpleDataArray(0x0C, FdocaConstants.FDOCA_TYPE_FLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0C,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x0D null 4-byte bin float */
-        new FdocaSimpleDataArray(0x0D, FdocaConstants.FDOCA_TYPE_NFLOAT_IEEE, FloatingPoint.IEEE_754_FLOATING_POINT, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x0D,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x0E Fixed Decimal */
-        new FdocaSimpleDataArray(0x0E, FdocaConstants.FDOCA_TYPE_DECIMAL, Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
+        new FdocaSimpleDataArray(0x0E,  NOCCSID, 0, DECIMALLENGTH),
         /* 0x0F null Fixed Decimal */
-        new FdocaSimpleDataArray(0x0F, FdocaConstants.FDOCA_TYPE_NDECIMAL, Decimal.PACKED_DECIMAL, NOCCSID, 0, 0, 31, DECIMALLENGTH),
+        new FdocaSimpleDataArray(0x0F,  NOCCSID, 0, DECIMALLENGTH),
         /* 0x10 empties */
         null,
         /* 0x11 empties */
@@ -313,125 +313,125 @@ public class Typdef implements Cloneable {
         /* 0x15 Empties */
         null,
         /* 0x16 Big int */
-        new FdocaSimpleDataArray(0x16, FdocaConstants.FDOCA_TYPE_INTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x16,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x17 null Big int */
-        new FdocaSimpleDataArray(0x17, FdocaConstants.FDOCA_TYPE_NINTEGER_BE, SignedBinary.BIG_ENDIAN, NOCCSID, 0, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x17,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x18 Large Obj Bytes Loc */
-        new FdocaSimpleDataArray(0x18, FdocaConstants.FDOCA_TYPE_FIXEDBYTES, 0x00, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x18,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x19 null Large Obj Bytes Loc */
-        new FdocaSimpleDataArray(0x19, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, 0x00, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x19,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x1A Empties */
         null,
         /* 0x1B null Large Obj Char Loc */
-        new FdocaSimpleDataArray(0x1B, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, 0x00, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x1B,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x1C Large Obj Char DBCS Loc */
-        new FdocaSimpleDataArray(0x1C, FdocaConstants.FDOCA_TYPE_FIXEDBYTES, 0x00, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x1C,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x1D null Large Obj Char DBCS Loc */
-        new FdocaSimpleDataArray(0x1D, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, 0x00, NOCCSID, 0, 0, 4, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x1D,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x1E Row Identifier */
-        new FdocaSimpleDataArray(0x1E, FdocaConstants.FDOCA_TYPE_VARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 40, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x1E,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x1F null Row Identifier */
-        new FdocaSimpleDataArray(0x1F, FdocaConstants.FDOCA_TYPE_NVARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 40, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x1F,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x20 Date */
-        new FdocaSimpleDataArray(0x20, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 10, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x20,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x21 null Date */
-        new FdocaSimpleDataArray(0x21, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 10, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x21,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x22 Time */
-        new FdocaSimpleDataArray(0x22, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x22,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x23 null Time */
-        new FdocaSimpleDataArray(0x23, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 8, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x23,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x24 Timestamp */
-        new FdocaSimpleDataArray(0x24, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 26, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x24,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x25 null Timestamp */
-        new FdocaSimpleDataArray(0x25, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 26, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x25,  CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x26 Fixed bytes */
-        new FdocaSimpleDataArray(0x26, FdocaConstants.FDOCA_TYPE_FIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x26, NOCCSID, 0, FIXEDLENGTH),
         /* 0x27 null Fixed bytes */
-        new FdocaSimpleDataArray(0x27, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x27, NOCCSID, 0, FIXEDLENGTH),
         /* 0x28 Variable bytes */
-        new FdocaSimpleDataArray(0x28, FdocaConstants.FDOCA_TYPE_VARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x28,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x29 null Variable bytes */
-        new FdocaSimpleDataArray(0x29, FdocaConstants.FDOCA_TYPE_NVARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x29,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x2A Long var bytes */
-        new FdocaSimpleDataArray(0x2A, FdocaConstants.FDOCA_TYPE_VARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x2A,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x2B null Long var bytes */
-        new FdocaSimpleDataArray(0x2B, FdocaConstants.FDOCA_TYPE_NVARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x2B,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x2C Nullterm bytes */
-        new FdocaSimpleDataArray(0x2C, FdocaConstants.FDOCA_TYPE_NTBYTES, Cursor.NULL_TERMINATED_BYTES, NOCCSID, 0, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x2C,  NOCCSID, 0, FIXEDLENGTH),
         /* 0x2D null Nullterm bytes */
-        new FdocaSimpleDataArray(0x2D, FdocaConstants.FDOCA_TYPE_NNTBYTES, Cursor.NULL_TERMINATED_STRING, NOCCSID, 0, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x2D,   NOCCSID, 0, FIXEDLENGTH),
         /* 0x2E Nullterm SBCS */
-        new FdocaSimpleDataArray(0x2E, FdocaConstants.FDOCA_TYPE_NTCHAR, Cursor.NULL_TERMINATED_STRING, CCSIDSBC, 1, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x2E,   CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x2F null Nullterm SBCS */
-        new FdocaSimpleDataArray(0x2F, FdocaConstants.FDOCA_TYPE_NNTCHAR, Cursor.NULL_TERMINATED_STRING, CCSIDSBC, 1, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x2F,   CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x30 Fix char SBCS */
-        new FdocaSimpleDataArray(0x30, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x30, CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x31 null Fix char SBCS */
-        new FdocaSimpleDataArray(0x31, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, Cursor.STRING, CCSIDSBC, 1, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x31, CCSIDSBC, 1, FIXEDLENGTH),
         /* 0x32 Var char SBCS */
-        new FdocaSimpleDataArray(0x32, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x32,  CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x33 null Var char SBCS */
-        new FdocaSimpleDataArray(0x33, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x33,  CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x34 Long var SBCS */
-        new FdocaSimpleDataArray(0x34, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x34,  CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x35 null Long var SBCS */
-        new FdocaSimpleDataArray(0x35, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x35,  CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x36 Fix char DBCS */
-        new FdocaSimpleDataArray(0x36, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, 0x00, CCSIDDBC, 2, 0, 16383, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x36,  CCSIDDBC, 2, FIXEDLENGTH),
         /* 0x37 null Fix char DBCS */
-        new FdocaSimpleDataArray(0x37, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, 0x00, CCSIDDBC, 2, 0, 16383, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x37,  CCSIDDBC, 2, FIXEDLENGTH),
         /* 0x38 Var char DBCS */
-        new FdocaSimpleDataArray(0x38, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDDBC, 2, 1, 16383, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x38,  CCSIDDBC, 2, TWOBYTELENGTH),
         /* 0x39 null Var char DBCS */
-        new FdocaSimpleDataArray(0x39, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDDBC, 2, 1, 16383, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x39,  CCSIDDBC, 2, TWOBYTELENGTH),
         /* 0x3A Long var DBCS */
-        new FdocaSimpleDataArray(0x3A, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDDBC, 2, 1, 16383, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x3A,  CCSIDDBC, 2, TWOBYTELENGTH),
         /* 0x3B null Long var DBCS */
-        new FdocaSimpleDataArray(0x3B, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDDBC, 2, 1, 16383, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x3B,  CCSIDDBC, 2, TWOBYTELENGTH),
         /* 0x3C Fix char MBCS */
-        new FdocaSimpleDataArray(0x3C, FdocaConstants.FDOCA_TYPE_FIXEDCHAR, 0x00, CCSIDMBC, 1, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x3C,  CCSIDMBC, 1, FIXEDLENGTH),
         /* 0x3D null Fix char MBCS */
-        new FdocaSimpleDataArray(0x3D, FdocaConstants.FDOCA_TYPE_NFIXEDCHAR, 0x00, CCSIDMBC, 1, 0, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x3D,  CCSIDMBC, 1, FIXEDLENGTH),
         /* 0x3E Var char MBCS */
-        new FdocaSimpleDataArray(0x3E, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x3E,  CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x3F null Var char MBCS */
-        new FdocaSimpleDataArray(0x3F, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x3F,  CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x40 Long var MBCS */
-        new FdocaSimpleDataArray(0x40, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x40,  CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x41 null Long var MBCS */
-        new FdocaSimpleDataArray(0x41, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x41,  CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x42 Nullterm MBCS */
-        new FdocaSimpleDataArray(0x42, FdocaConstants.FDOCA_TYPE_NTCHAR, Cursor.NULL_TERMINATED_STRING, CCSIDMBC, 1, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x42,  CCSIDMBC, 1, FIXEDLENGTH),
         /* 0x43 null Nullterm MBCS */
-        new FdocaSimpleDataArray(0x43, FdocaConstants.FDOCA_TYPE_NNTCHAR, Cursor.NULL_TERMINATED_STRING, CCSIDMBC, 1, 1, 32767, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0x43,  CCSIDMBC, 1, FIXEDLENGTH),
         /* 0x44 L String bytes */
-        new FdocaSimpleDataArray(0x44, FdocaConstants.FDOCA_TYPE_PSCLBYTE, Cursor.VARIABLE_SHORT_STRING, NOCCSID, 0, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x44,  NOCCSID, 0, ONEBYTELENGTH),
         /* 0x45 null L String bytes */
-        new FdocaSimpleDataArray(0x45, FdocaConstants.FDOCA_TYPE_NPSCLBYTE, Cursor.VARIABLE_SHORT_STRING, NOCCSID, 0, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x45,  NOCCSID, 0, ONEBYTELENGTH),
         /* 0x46 L String SBCS */
-        new FdocaSimpleDataArray(0x46, FdocaConstants.FDOCA_TYPE_PSCLCHAR, Cursor.VARIABLE_SHORT_STRING, CCSIDSBC, 1, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x46,  CCSIDSBC, 1, ONEBYTELENGTH),
         /* 0x47 null L String SBCS */
-        new FdocaSimpleDataArray(0x47, FdocaConstants.FDOCA_TYPE_NPSCLCHAR, Cursor.VARIABLE_SHORT_STRING, CCSIDSBC, 1, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x47,  CCSIDSBC, 1, ONEBYTELENGTH),
         /* 0x48 L String MBCS */
-        new FdocaSimpleDataArray(0x48, FdocaConstants.FDOCA_TYPE_PSCLCHAR, Cursor.VARIABLE_SHORT_STRING, CCSIDMBC, 1, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x48,  CCSIDMBC, 1, ONEBYTELENGTH),
         /* 0x49 null L String MBCS */
-        new FdocaSimpleDataArray(0x49, FdocaConstants.FDOCA_TYPE_NPSCLCHAR, Cursor.VARIABLE_SHORT_STRING, CCSIDMBC, 1, 1, 255, ONEBYTELENGTH),
+        new FdocaSimpleDataArray(0x49,  CCSIDMBC, 1, ONEBYTELENGTH),
         /* 0x4A Empties */
         null,
         /* 0x4B Empties */
         null,
         /* 0x4C  SBCS */
-        new FdocaSimpleDataArray(0x4C, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x4C,   CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x4D null  SBCS */
-        new FdocaSimpleDataArray(0x4D, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDSBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x4D,   CCSIDSBC, 1, TWOBYTELENGTH),
         /* 0x4E  MBCS */
-        new FdocaSimpleDataArray(0x4E, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x4E,   CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x4F null  MBCS */
-        new FdocaSimpleDataArray(0x4F, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x4F,   CCSIDMBC, 1, TWOBYTELENGTH),
         /* 0x50 UDT */
-        new FdocaSimpleDataArray(0x50, FdocaConstants.FDOCA_TYPE_VARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x50,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x51 null UDT */
-        new FdocaSimpleDataArray(0x51, FdocaConstants.FDOCA_TYPE_NVARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        new FdocaSimpleDataArray(0x51,  NOCCSID, 0, TWOBYTELENGTH),
         /* 0x52 Empties */
         null,
         /* 0x53 Empties */
@@ -649,9 +649,9 @@ public class Typdef implements Cloneable {
         /* 0xBD Empties */
         null,
         /* 0xBE Boolean */
-        new FdocaSimpleDataArray(0xBE, FdocaConstants.FDOCA_TYPE_FIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 1, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0xBE,  NOCCSID, 0, FIXEDLENGTH),
         /* 0xBF null Boolean */
-        new FdocaSimpleDataArray(0xBF, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 1, FIXEDLENGTH),
+        new FdocaSimpleDataArray(0xBF,  NOCCSID, 0, FIXEDLENGTH),
         /* 0xC0 Empties */
         null,
         /* 0xC1 Empties */
@@ -669,21 +669,21 @@ public class Typdef implements Cloneable {
         /* 0xC7 Empties */
         null,
         /* 0xC8 Large object bytes */
-        new FdocaSimpleDataArray(0xC8, FdocaConstants.FDOCA_TYPE_LOBBYTES, 0x00, NOCCSID, 0, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xC8,  NOCCSID, 0, LOBLENGTH),
         /* 0xC9 null Large object bytes */
-        new FdocaSimpleDataArray(0xC9, FdocaConstants.FDOCA_TYPE_NLOBBYTES, 0x00, NOCCSID, 0, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xC9,  NOCCSID, 0, LOBLENGTH),
         /* 0xCA Large object char SBCS */
-        new FdocaSimpleDataArray(0xCA, FdocaConstants.FDOCA_TYPE_LOBCHAR, Cursor.SBCS_CLOB, CCSIDSBC, 1, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCA,  CCSIDSBC, 1, LOBLENGTH),
         /* 0xCB null Large object char SBCS */
-        new FdocaSimpleDataArray(0xCB, FdocaConstants.FDOCA_TYPE_NLOBCHAR, Cursor.SBCS_CLOB, CCSIDSBC, 1, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCB,  CCSIDSBC, 1, LOBLENGTH),
         /* 0xCC Large object char DBCS */
-        new FdocaSimpleDataArray(0xCC, FdocaConstants.FDOCA_TYPE_LOBCHAR, Cursor.DBCS_CLOB, CCSIDDBC, 2, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCC,  CCSIDDBC, 2, LOBLENGTH),
         /* 0xCD null Large object char DBCS */
-        new FdocaSimpleDataArray(0xCD, FdocaConstants.FDOCA_TYPE_NLOBCHAR, Cursor.DBCS_CLOB, CCSIDDBC, 2, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCD,  CCSIDDBC, 2, LOBLENGTH),
         /* 0xCE Large object char MBCS */
-        new FdocaSimpleDataArray(0xCE, FdocaConstants.FDOCA_TYPE_LOBCHAR, Cursor.MBCS_CLOB, CCSIDMBC, 1, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCE,  CCSIDMBC, 1, LOBLENGTH),
         /* 0xCF null Large object char MBCS */
-        new FdocaSimpleDataArray(0xCF, FdocaConstants.FDOCA_TYPE_NLOBCHAR, Cursor.MBCS_CLOB, CCSIDMBC, 1, 1, 8, LOBLENGTH),
+        new FdocaSimpleDataArray(0xCF,  CCSIDMBC, 1, LOBLENGTH),
     };
 
     private static final int[] protocolToJdbcTypes_ = {
@@ -916,7 +916,6 @@ public class Typdef implements Cloneable {
     private String ccsidMbcEncoding_;
 
 
-    protected int environment_;
     private boolean mddOverride_ = false;
     private FdocaSimpleDataArray overrideTable_[] = new FdocaSimpleDataArray[OVERRIDE_TABLE_SIZE];
 
@@ -927,11 +926,12 @@ public class Typdef implements Cloneable {
         this.initialize(netAgent, 0, false, 0, false, 0, false, null);
     }
 
-    Typdef(NetAgent netAgent, int ccsidSbc, String typdefnam) throws DisconnectException {
-        this.initialize(netAgent, ccsidSbc, true, 0, false, 0, false, typdefnam);
-    }
+    Typdef(NetAgent netAgent,
+           int ccsidSbc,
+           String typdefnam,
+           int ccsidDbc,
+           int ccsidMbc) throws DisconnectException {
 
-    public Typdef(NetAgent netAgent, int ccsidSbc, String typdefnam, int ccsidDbc, int ccsidMbc) throws DisconnectException {
         this.initialize(netAgent, ccsidSbc, true, ccsidMbc, true, ccsidDbc, true, typdefnam);
     }
 
@@ -980,12 +980,6 @@ public class Typdef implements Cloneable {
         ccsidSbcEncoding_ = null;
     }
 
-    void clearCcsidSbc() {
-        ccsidSbc_ = 0;
-        ccsidSbcSet_ = false;
-        ccsidSbcEncoding_ = null;
-    }
-
     boolean isCcsidSbcSet() {
         return ccsidSbcSet_;
     }
@@ -1008,18 +1002,12 @@ public class Typdef implements Cloneable {
         ccsidDbcEncoding_ = null;
     }
 
-    void clearCcsidDbc() {
-        ccsidDbc_ = 0;
-        ccsidDbcSet_ = false;
-        ccsidDbcEncoding_ = null;
-    }
-
     boolean isCcsidDbcSet() {
         return ccsidDbcSet_;
     }
 
     // analyze exception handling some more here
-    String getCcsidDbcEncoding() throws DisconnectException {
+    private String getCcsidDbcEncoding() throws DisconnectException {
         if (ccsidDbcEncoding_ == null) {
             ccsidDbcEncoding_ = UTF8ENCODING;
         }
@@ -1033,12 +1021,6 @@ public class Typdef implements Cloneable {
     void setCcsidMbc(int ccsid) {
         ccsidMbc_ = ccsid;
         ccsidMbcSet_ = true;
-        ccsidMbcEncoding_ = null;
-    }
-
-    void clearCcsidMbc() {
-        ccsidMbc_ = 0;
-        ccsidMbcSet_ = false;
         ccsidMbcEncoding_ = null;
     }
 
@@ -1200,21 +1182,13 @@ public class Typdef implements Cloneable {
         if (overrideTable_[fdocaTripletLid] == null) {
             overrideTable_[fdocaTripletLid] = new FdocaSimpleDataArray
                     (protocolType,
-                            fdocaFieldType,
-                            fdocaTypeToRepresentationMap_[fdocaFieldType & 0x7f],
                             ccsid,
                             characterSize,
-                            mode,
-                            length,
                             mapFdocaTypeToTypeToUseForComputingDataLength(fdocaFieldType));
         } else {
             overrideTable_[fdocaTripletLid].update(protocolType,
-                    fdocaFieldType,
-                    fdocaTypeToRepresentationMap_[fdocaFieldType & 0x7f],
                     ccsid,
                     characterSize,
-                    mode,
-                    length,
                     mapFdocaTypeToTypeToUseForComputingDataLength(fdocaFieldType));
         }
     }

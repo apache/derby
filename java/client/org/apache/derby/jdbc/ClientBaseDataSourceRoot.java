@@ -311,7 +311,7 @@ public abstract class ClientBaseDataSourceRoot implements
     // @see #getUpgradedSecurityMechanism
     // Therefore, need to keep track if the securityMechanism has been
     // explicitly set
-    protected short securityMechanism = SECMEC_HAS_NOT_EXPLICITLY_SET;
+    private short securityMechanism = SECMEC_HAS_NOT_EXPLICITLY_SET;
 
 
 
@@ -364,7 +364,7 @@ public abstract class ClientBaseDataSourceRoot implements
      * @param password password argument
      * @return upgraded security mechanism if possible
      */
-    public static short getUpgradedSecurityMechanism(String password) {
+    private static short getUpgradedSecurityMechanism(String password) {
         // if password is null, in that case the only acceptable security
         // mechanism is USRIDONL, which is the default security mechanism.
         if ( password == null ) {
@@ -415,7 +415,7 @@ public abstract class ClientBaseDataSourceRoot implements
     //
     private String traceFile;
 
-    public static String getTraceFile(Properties properties) {
+    static String getTraceFile(Properties properties) {
         return properties.getProperty(Attribute.CLIENT_TRACE_FILE);
     }
 
@@ -433,7 +433,7 @@ public abstract class ClientBaseDataSourceRoot implements
      * @param properties jdbc url properties
      * @return value of traceDirectory property
      */
-    public static String getTraceDirectory(Properties properties) {
+    static String getTraceDirectory(Properties properties) {
         String traceDirectoryString;
 
         traceDirectoryString  =
@@ -486,7 +486,7 @@ public abstract class ClientBaseDataSourceRoot implements
     //
     private boolean traceFileAppend = propertyDefault_traceFileAppend;
 
-    public static boolean getTraceFileAppend(Properties properties) {
+    static boolean getTraceFileAppend(Properties properties) {
         String traceFileAppendString =
             properties.getProperty(Attribute.CLIENT_TRACE_APPEND);
         return parseBoolean(
@@ -524,7 +524,7 @@ public abstract class ClientBaseDataSourceRoot implements
     // If neither traceFile nor jdbc logWriter are set, then null is returned.
     // logWriterInUseSuffix used only for trace directories to indicate whether
     // log writer is use is from xads, cpds, sds, ds, driver, config, reset.
-    LogWriter computeDncLogWriterForNewConnection(
+    private LogWriter computeDncLogWriterForNewConnection(
         String logWriterInUseSuffix) throws SqlException {
 
         return computeDncLogWriterForNewConnection(
@@ -563,7 +563,7 @@ public abstract class ClientBaseDataSourceRoot implements
     }
 
     // Compute a DNC log writer before a connection is created.
-    static LogWriter computeDncLogWriter(
+    private static LogWriter computeDncLogWriter(
         PrintWriter logWriter,
         String traceDirectory,
         String traceFile,
@@ -606,7 +606,7 @@ public abstract class ClientBaseDataSourceRoot implements
     // overrides the traceFile, and traceDirectory settings.  If neither
     // traceFile, nor logWriter, nor traceDirectory are set, then null is
     // returned.
-    static PrintWriter computePrintWriter(
+    private static PrintWriter computePrintWriter(
         PrintWriter logWriter,
         String traceDirectory,
         String traceFile,
@@ -957,7 +957,7 @@ public abstract class ClientBaseDataSourceRoot implements
         return shutdownstr;
     }
 
-    protected String connectionAttributes = null;
+    private String connectionAttributes = null;
 
     /**
      * Set this property to pass in more Derby specific connection URL
@@ -990,7 +990,7 @@ public abstract class ClientBaseDataSourceRoot implements
 
 
 
-    protected int traceLevel = propertyDefault_traceLevel;
+    private int traceLevel = propertyDefault_traceLevel;
 
     /**
      * Check if derby.client.traceLevel is provided as a JVM property.
@@ -1073,7 +1073,7 @@ public abstract class ClientBaseDataSourceRoot implements
      * to the client. These need to be updated when set connection attributes
      * is called.
      */
-    void updateDataSourceValues(Properties prop)
+    private void updateDataSourceValues(Properties prop)
         throws SqlException
     {
         if (prop == null) {
@@ -1115,7 +1115,7 @@ public abstract class ClientBaseDataSourceRoot implements
      * @param sqle exception to handle
      * @throws SQLException handled exception (if any)
      */
-    protected final void handleConnectionException(LogWriter logWriter,
+    private void handleConnectionException(LogWriter logWriter,
                                                    SqlException sqle)
             throws SQLException {
         // See DERBY-4070

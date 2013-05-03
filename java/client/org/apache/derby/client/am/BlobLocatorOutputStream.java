@@ -37,7 +37,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).  
  */
-public class BlobLocatorOutputStream extends OutputStream {
+class BlobLocatorOutputStream extends OutputStream {
     
     /**
      * Create an <code>OutputStream</code> for writing to the
@@ -50,7 +50,7 @@ public class BlobLocatorOutputStream extends OutputStream {
      * @param pos the position in the <code>BLOB</code> value at which
      *        to start writing; the first position is 1
      */
-    public BlobLocatorOutputStream(
+    BlobLocatorOutputStream(
         ClientConnection connection,
         ClientBlob blob,
         long pos) throws SqlException {

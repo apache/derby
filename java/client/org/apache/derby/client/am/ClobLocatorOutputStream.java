@@ -36,12 +36,7 @@ import java.io.OutputStream;
  * buffering of data is done.  Hence, for efficiency #write(byte[])
  * should be used instead of #write(int).
  */
-public class ClobLocatorOutputStream extends OutputStream {
-    
-    /**
-     * Connection used to read Clob from server.
-     */
-    private final ClientConnection connection;
+class ClobLocatorOutputStream extends OutputStream {
     
     /**
      * The Clob to be accessed.
@@ -59,15 +54,12 @@ public class ClobLocatorOutputStream extends OutputStream {
      * Create an <code>OutputStream</code> for writing to the
      * <code>Clob</code> value represented by the given locator based
      * <code>Clob</code> object.
-     * @param connection connection to be used to write to the
-     *        <code>Clob</code> value on the server
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      * @param pos the position in the <code>CLOB</code> value at which
      *        to start writing; the first position is 1
      */
-    public ClobLocatorOutputStream(
-            ClientConnection connection,
+    ClobLocatorOutputStream(
             ClientClob clob,
             long pos) throws SqlException {
 
@@ -75,7 +67,6 @@ public class ClobLocatorOutputStream extends OutputStream {
             throw new IndexOutOfBoundsException();
         }
         
-        this.connection = connection;
         this.clob = clob;
         this.currentPos = pos;
     }

@@ -429,6 +429,8 @@ public class ClientDriver implements Driver {
      */
     
     public static ClientJDBCObjectFactory getFactory() {
+        // System.err.println("factoryObject="+factoryObject);
+
         if(factoryObject!=null)
             return factoryObject;
         if (Configuration.supportsJDBC42()) {

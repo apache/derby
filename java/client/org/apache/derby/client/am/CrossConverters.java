@@ -96,7 +96,7 @@ final class CrossConverters {
 
     // ---------------------- state ----------------------------------------------
 
-    Agent agent_;
+    private final Agent agent_;
 
     // ----------------------constructors/finalizer-------------------------------
 
@@ -779,7 +779,7 @@ final class CrossConverters {
     }
 
     // create a String by reading all of the bytes from reader
-    private final String setStringFromReader(Reader r, int length)
+    private String setStringFromReader(Reader r, int length)
             throws SqlException {
         StringWriter sw = new StringWriter();
         try {
@@ -833,7 +833,7 @@ final class CrossConverters {
 
 
     // create a String by reading all of the bytes from inputStream, applying encoding
-    private final String setStringFromStream(
+    private String setStringFromStream(
             InputStream is,
             String encoding,
             int length) throws SqlException {
@@ -907,7 +907,7 @@ final class CrossConverters {
     }
 
     // create a byte[] by reading all of the bytes from inputStream
-    private final byte[] setBytesFromStream(InputStream is, int length)
+    private byte[] setBytesFromStream(InputStream is, int length)
             throws SqlException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int totalRead = 0;
@@ -1010,10 +1010,6 @@ final class CrossConverters {
     // ---------------------------------------------------------------------------
 
     //---------------------------- getBoolean*() methods -------------------------
-
-    final boolean getBooleanFromByte(byte source) throws SqlException {
-        return source != 0;
-    }
 
     final boolean getBooleanFromShort(short source) throws SqlException {
         return source != 0;
@@ -1306,11 +1302,6 @@ final class CrossConverters {
 
     //---------------------------- getBigDecimal*() methods ----------------------
 
-    final BigDecimal getBigDecimalFromBoolean(boolean source)
-            throws SqlException {
-        return source ? bdOne__ : bdZero__;
-    }
-
     final BigDecimal getBigDecimalFromString(String source)
             throws SqlException {
         try {
@@ -1325,10 +1316,6 @@ final class CrossConverters {
     }
 
     //---------------------------- getString*() methods --------------------------
-
-    final String getStringFromBoolean(boolean source) throws SqlException {
-        return source ? "1" : "0";
-    }
 
     final String getStringFromBytes(byte[] bytes) throws SqlException {
         StringBuffer stringBuffer = new StringBuffer(bytes.length * 2);
@@ -1358,14 +1345,6 @@ final class CrossConverters {
         }
     }
 
-    final Date getDateFromTime(Time source) throws SqlException {
-        return new Date(source.getTime());
-    }
-
-    final Date getDateFromTimestamp(Timestamp source) throws SqlException {
-        return new Date(source.getTime());
-    }
-
     //---------------------------- getTime*() methods ----------------------------
 
     final Time getTimeFromString(String source, Calendar cal)
@@ -1376,10 +1355,6 @@ final class CrossConverters {
             throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
         }
-    }
-
-    final Time getTimeFromTimestamp(Timestamp source) throws SqlException {
-        return new Time(source.getTime());
     }
 
     //---------------------------- getTimestamp*() methods -----------------------
@@ -1394,14 +1369,6 @@ final class CrossConverters {
         }
     }
 
-    final Timestamp getTimestampFromTime(Time source) throws SqlException {
-        return new Timestamp(source.getTime());
-    }
-
-    final Timestamp getTimestampFromDate(Date source) throws SqlException {
-        return new Timestamp(source.getTime());
-    }
-
     /**
      * Convert a string to a date in the specified calendar. Accept the same
      * format as {@code Date.valueOf()}.
@@ -1412,7 +1379,7 @@ final class CrossConverters {
      * calendar {@code cal}
      * @throws IllegalArgumentException if the format of the string is invalid
      */
-    final Date date_valueOf(String s, Calendar cal) {
+    private static Date date_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Date format must be yyyy-mm-dd";
         if (s == null) {
             throw new IllegalArgumentException(formatError);
@@ -1496,8 +1463,7 @@ final class CrossConverters {
      * calendar {@code cal}
      * @throws IllegalArgumentException if the format of the string is invalid
      */
-    final Time time_valueOf(String s, Calendar cal) {
-        String formatError = "JDBC Time format must be hh:mm:ss";
+    private static Time time_valueOf(String s, Calendar cal) {
         if (s == null) {
             throw new IllegalArgumentException();
         }
@@ -1525,7 +1491,7 @@ final class CrossConverters {
      * @throws IllegalArgumentException if the time string is not on the
      * format HH:MM:SS
      */
-    private void initTimePortion(Calendar cal, String time) {
+    private static void initTimePortion(Calendar cal, String time) {
         // Expect string on format HH:MM:SS
         if (time.length() != 8 ||
                 time.charAt(2) != ':' || time.charAt(5) != ':') {
@@ -1551,8 +1517,7 @@ final class CrossConverters {
      * in the calendar {@code cal}
      * @throws IllegalArgumentException if the format of the string is invalid
      */
-    final Timestamp timestamp_valueOf(String s, Calendar cal) {
-        String formatError = "JDBC Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff";
+    private static Timestamp timestamp_valueOf(String s, Calendar cal) {
         if (s == null) {
             throw new IllegalArgumentException();
         }
@@ -1608,7 +1573,7 @@ final class CrossConverters {
         return ts;
     }
 
-    private final byte parseByte(String s) throws NumberFormatException {
+    private static byte parseByte(String s) throws NumberFormatException {
         int i = parseInt(s);
         if (i < Byte.MIN_VALUE || i > Byte.MAX_VALUE) {
             throw new NumberFormatException();
@@ -1616,7 +1581,7 @@ final class CrossConverters {
         return (byte) i;
     }
 
-    private final short parseShort(String s) throws NumberFormatException {
+    private static short parseShort(String s) throws NumberFormatException {
         int i = parseInt(s);
         if (i < Short.MIN_VALUE || i > Short.MAX_VALUE) {
             throw new NumberFormatException();
@@ -1625,7 +1590,7 @@ final class CrossConverters {
     }
 
     // Custom version of java.lang.parseInt() that allows for space padding of char fields.
-    private final int parseInt(String s) throws NumberFormatException {
+    private static int parseInt(String s) throws NumberFormatException {
         if (s == null) {
             throw new NumberFormatException("null");
         }
@@ -1691,7 +1656,7 @@ final class CrossConverters {
         }
     }
 
-    private final long parseLong(String s) throws NumberFormatException {
+    private static long parseLong(String s) throws NumberFormatException {
         if (s == null) {
             throw new NumberFormatException("null");
         }
@@ -1754,7 +1719,8 @@ final class CrossConverters {
         }
     }
 
-    private final void skipPadding(String s, int i, int length) throws NumberFormatException {
+    private static void skipPadding(String s, int i, int length)
+            throws NumberFormatException {
         while (i < length) {
             if (s.charAt(i++) != ' ') {
                 throw new NumberFormatException(s);

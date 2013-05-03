@@ -25,9 +25,9 @@ import org.apache.derby.client.am.ClientDatabaseMetaData;
 import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
 
-public class NetDatabaseMetaData extends ClientDatabaseMetaData {
+class NetDatabaseMetaData extends ClientDatabaseMetaData {
 
-    public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
+    NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
         super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
                 netConnection.targetSrvclsnm_,

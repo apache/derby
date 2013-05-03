@@ -30,8 +30,10 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
-public class NetResultSetReply extends NetStatementReply implements ResultSetReplyInterface {
-    public NetResultSetReply(NetAgent netAgent, int bufferSize) {
+class NetResultSetReply extends NetStatementReply
+    implements ResultSetReplyInterface {
+
+    NetResultSetReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
 
@@ -202,7 +204,9 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         }
     }
 
-    void parseCloseError(ResultSetCallbackInterface resultSetI) throws DisconnectException {
+    private void parseCloseError(ResultSetCallbackInterface resultSetI)
+            throws DisconnectException {
+
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -228,7 +232,9 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         }
     }
 
-    void parseFetchError(ResultSetCallbackInterface resultSetI) throws DisconnectException {
+    private void parseFetchError(ResultSetCallbackInterface resultSetI)
+            throws DisconnectException {
+
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:

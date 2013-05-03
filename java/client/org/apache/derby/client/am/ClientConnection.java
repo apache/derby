@@ -83,8 +83,8 @@ public abstract class ClientConnection
 
     // See ClientDataSource pre-connect settings
     protected final String user_;
-    public boolean retrieveMessageText_;
-    protected boolean jdbcReadOnly_;
+    boolean retrieveMessageText_;
+    private boolean jdbcReadOnly_;
     /**
      * Holdabilty for created statements.
      * Only access through the holdability method
@@ -183,11 +183,11 @@ public abstract class ClientConnection
     // XA Host Type
     public int xaHostVersion_ = 0;
 
-    public int loginTimeout_;
+    private int loginTimeout_;
     public ClientBaseDataSourceRoot dataSource_;
     public String serverNameIP_;
     public int portNumber_;
-    public int clientSSLMode_ = ClientBaseDataSourceRoot.SSL_OFF;
+    private int clientSSLMode_ = ClientBaseDataSourceRoot.SSL_OFF;
 
     Hashtable<String, String> clientCursorNameCache_ =
             new Hashtable<String, String>();
@@ -225,7 +225,7 @@ public abstract class ClientConnection
     }
 
     // For jdbc 2 connections
-    protected void initConnection(
+    private void initConnection(
             LogWriter logWriter,
             ClientBaseDataSourceRoot dataSource)
             throws SqlException {
@@ -442,8 +442,7 @@ public abstract class ClientConnection
     }
 
     // For internal use only.  Use by updatable result set code.
-    synchronized
-        public ClientPreparedStatement preparePositionedUpdateStatement (
+    synchronized ClientPreparedStatement preparePositionedUpdateStatement (
             String sql,
             Section querySection) throws SqlException {
 
@@ -525,7 +524,7 @@ public abstract class ClientConnection
 
     }
 
-    synchronized public String nativeSQLX(String sql) throws SqlException {
+    synchronized String nativeSQLX(String sql) throws SqlException {
         checkForClosedConnection();
         if (sql == null) {
             throw new SqlException(agent_.logWriter_,
@@ -623,7 +622,8 @@ public abstract class ClientConnection
                 new ClientMessageId(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK));
         }
     }
-    public void flowCommit() throws SqlException {
+
+    private void flowCommit() throws SqlException {
         // Per JDBC specification (see javadoc for Connection.commit()):
         //   "This method should be used only when auto-commit mode has been disabled."
         // However, some applications do this anyway, it is harmless, so
@@ -677,7 +677,7 @@ public abstract class ClientConnection
         }
     }
 
-    public void writeCommit() throws SqlException {
+    void writeCommit() throws SqlException {
         if (isXAConnection_) {
             writeXACommit_ ();
         } else {
@@ -692,7 +692,7 @@ public abstract class ClientConnection
         }
     }
 
-    public void readCommit() throws SqlException {
+    void readCommit() throws SqlException {
         if (isXAConnection_) {
             readXACommit_ ();
         } else {
@@ -750,7 +750,7 @@ public abstract class ClientConnection
         }
     }
 
-    public void writeRollback() throws SqlException {
+    private void writeRollback() throws SqlException {
         if (isXAConnection_) {
             writeXARollback_ ();
         } else {
@@ -758,7 +758,7 @@ public abstract class ClientConnection
         }
     }
 
-    public void readRollback() throws SqlException {
+    private void readRollback() throws SqlException {
         if (isXAConnection_) {
             readLocalXARollback_();
         } else {
@@ -912,7 +912,7 @@ public abstract class ClientConnection
 
     protected abstract void markClosed_();
 
-    public void markClosed(boolean statementPooling) // called by LogicalConnection.close()
+    private void markClosed(boolean statementPooling)
     {
         open_ = false;
         inUnitOfWork_ = false;
@@ -1333,7 +1333,7 @@ public abstract class ClientConnection
     }
 
     // An untraced version of clearWarnings()
-    public void clearWarningsX() throws SqlException {
+    private void clearWarningsX() throws SqlException {
         warnings_ = null;
         accumulated440ForMessageProcFailure_ = false;
         accumulated444ForMessageProcFailure_ = false;
@@ -1495,7 +1495,7 @@ public abstract class ClientConnection
         }
     }
 
-    synchronized public ClientCallableStatement prepareMessageProc(String sql)
+    synchronized ClientCallableStatement prepareMessageProc(String sql)
             throws SqlException {
         checkForClosedConnection();
 
@@ -1603,9 +1603,10 @@ public abstract class ClientConnection
         }
     }
 
-    public int dncGeneratedSavepointId_;
+    private int dncGeneratedSavepointId_;
     // generated name used internally for unnamed savepoints
-    public static final String dncGeneratedSavepointNamePrefix__ = "DNC_GENENERATED_NAME_";
+    private static final String
+            dncGeneratedSavepointNamePrefix__ = "DNC_GENENERATED_NAME_";
 
     synchronized public Savepoint setSavepoint() throws SQLException {
         try
@@ -2097,9 +2098,7 @@ public abstract class ClientConnection
 
     protected abstract boolean doCloseStatementsOnClose_();
 
-    public abstract SectionManager newSectionManager(String collection,
-                                                     Agent agent,
-                                                     String databaseName);
+    public abstract SectionManager newSectionManager(Agent agent);
     //--------------------Abstract material factory methods-----------------
 
     protected abstract Agent newAgent_(LogWriter logWriter, int loginTimeout, String serverName, int portNumber, int clientSSLMode) throws SqlException;
@@ -2158,9 +2157,8 @@ public abstract class ClientConnection
         databaseMetaData_ = newDatabaseMetaData_();
 
         agent_.sectionManager_ =
-                newSectionManager("NULLID",
-                        agent_,
-                        databaseName_);
+                newSectionManager(
+                        agent_);
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceConnectExit(this);
         }
@@ -2220,7 +2218,7 @@ public abstract class ClientConnection
      * @param uwl The UnitOfWorkLitener to be rolled back
      *
      */
-    public void completeSpecificRollback(UnitOfWorkListener uwl) {
+    private void completeSpecificRollback(UnitOfWorkListener uwl) {
         Set<UnitOfWorkListener> keySet = CommitAndRollbackListeners_.keySet();
         for (Iterator<UnitOfWorkListener> i = keySet.iterator(); i.hasNext();) {
             UnitOfWorkListener listener = i.next();
@@ -2340,8 +2338,6 @@ public abstract class ClientConnection
     public void completeInitialPiggyBackSchema(String pbSchema) {
         currentSchemaName_ = pbSchema;
     }
-
-    public abstract void addSpecialRegisters(String s);
 
     // can this only be called by the PooledConnection
     // can this be called on a closed connection
@@ -2477,7 +2473,7 @@ public abstract class ClientConnection
         xaState_ = state;
     }
 
-    public void accumulateWarning(SqlWarning e) {
+    private void accumulateWarning(SqlWarning e) {
         if (warnings_ == null) {
             warnings_ = e;
         } else {
@@ -2485,14 +2481,14 @@ public abstract class ClientConnection
         }
     }
 
-    public void accumulate440WarningForMessageProcFailure(SqlWarning e) {
+    void accumulate440WarningForMessageProcFailure(SqlWarning e) {
         if (!accumulated440ForMessageProcFailure_) {
             accumulateWarning(e);
             accumulated440ForMessageProcFailure_ = true;
         }
     }
 
-    public void accumulate444WarningForMessageProcFailure(SqlWarning e) {
+    void accumulate444WarningForMessageProcFailure(SqlWarning e) {
         if (!accumulated444ForMessageProcFailure_) {
             accumulateWarning(e);
             accumulated444ForMessageProcFailure_ = true;

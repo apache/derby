@@ -35,10 +35,6 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class Configuration {
 
-    public static final String jreLevel;// = "1.3.0"; // default level if unable to read
-    public static final int jreLevelMajor;// = 1;
-    public static final int jreLevelMinor;// = 3;
-
     private Configuration() {
     }
 
@@ -46,13 +42,14 @@ public class Configuration {
 
     private static ProductVersionHolder dncProductVersionHolder__;
 
-    public static ProductVersionHolder getProductVersionHolder() {
+    static ProductVersionHolder getProductVersionHolder() {
         return dncProductVersionHolder__;
     }
 
 
     // for DatabaseMetaData.getDriverName()
-    public final static String dncDriverName = "Apache Derby Network Client JDBC Driver";
+    final static String
+        dncDriverName = "Apache Derby Network Client JDBC Driver";
 
 
     // Hard-wired for JDBC
@@ -64,10 +61,6 @@ public class Configuration {
     public static byte[] getDncPackageConsistencyToken() {
         return dncPackageConsistencyToken.clone();
     }
-
-    // We will not set package VERSION in the initial release.
-    // If we have to change the package version in the future then we can.
-    public static final String dncPackageVersion = null;
 
     // for ClientDriver.jdbcCompliant()
     public final static boolean jdbcCompliant = true;
@@ -90,8 +83,6 @@ public class Configuration {
 
     // -------------------------- compiled in properties -------------------------
 
-    public final static boolean enableNetConnectionPooling = true;
-
     final static boolean rangeCheckCrossConverters = true;
 
     // Define different levels of bug checking, for now turn all bits on.
@@ -100,30 +91,21 @@ public class Configuration {
     // --------------------------- connection defaults ---------------------------
 
     // This is the DERBY default and maps to DERBY's "Cursor Stability".
-    public final static int defaultIsolation =
-            Connection.TRANSACTION_READ_COMMITTED;
+    final static int defaultIsolation = Connection.TRANSACTION_READ_COMMITTED;
 
     // ---------------------------- statement defaults----------------------------
 
     public static final int defaultFetchSize = 64;
 
     // Prepare attribute constants
-    public static final String cursorAttribute_SensitiveStatic = "SENSITIVE STATIC SCROLL ";
-    public static final String cursorAttribute_SensitiveStaticRowset = cursorAttribute_SensitiveStatic;
-    public static final String cursorAttribute_SensitiveDynamic = "SENSITIVE DYNAMIC SCROLL ";
-    public static final String cursorAttribute_SensitiveDynamicRowset = "SENSITIVE DYNAMIC SCROLL WITH ROWSET POSITIONING ";
-    public static final String cursorAttribute_Insensitive = "INSENSITIVE SCROLL ";
-    public static final String cursorAttribute_InsensitiveRowset = cursorAttribute_Insensitive;
-
-    // uncomment the following when we want to use multi-row fetch to support sensitive static and
-    // insensitve cursors whenever the server has support for it.
-    //public static final String cursorAttribute_SensitiveStaticRowset = "SENSITIVE STATIC SCROLL WITH ROWSET POSITIONING ";
-    //public static final String cursorAttribute_InsensitiveRowset = "INSENSITIVE SCROLL WITH ROWSET POSITIONING ";
-
-    public static final String cursorAttribute_ForUpdate = "FOR UPDATE ";
-    public static final String cursorAttribute_ForReadOnly = "FOR READ ONLY ";
-
-    public static final String cursorAttribute_WithHold = "WITH HOLD ";
+    static final String
+            cursorAttribute_SensitiveStatic = "SENSITIVE STATIC SCROLL ";
+    static final String
+            cursorAttribute_Insensitive = "INSENSITIVE SCROLL ";
+    static final String
+            cursorAttribute_ForUpdate = "FOR UPDATE ";
+    static final String
+            cursorAttribute_WithHold = "WITH HOLD ";
 
     // -----------------------Load resource bundles for the driver asap-----------
 
@@ -138,37 +120,6 @@ public class Configuration {
         } catch (SqlException e) {
             exceptionsOnLoadResources = e;
         }
-        String _jreLevel;
-        try {
-            _jreLevel = System.getProperty("java.version");
-        } catch (SecurityException e) {
-            _jreLevel = "1.3.0";
-        } // ignore it, assume 1.3.0
-        jreLevel = _jreLevel;
-        StringTokenizer st = new StringTokenizer(jreLevel, ".");
-        int jreState = 0;
-        int _jreLevelMajor = 1;
-        int _jreLevelMinor = 3;
-        while (st.hasMoreTokens()) {
-            int i;
-            try {
-                i = Integer.parseInt(st.nextToken()); // get int value
-            } catch (NumberFormatException e) {
-                i = 0;
-            }
-            switch (jreState++) {
-            case 0:
-                _jreLevelMajor = i; // state 0, this is the major version
-                break;
-            case 1:
-                _jreLevelMinor = i; // state 1, this is the minor version
-                break;
-            default:
-                break; // state >1, ignore
-            }
-        }
-        jreLevelMajor = _jreLevelMajor;
-        jreLevelMinor = _jreLevelMinor;
     }
 
     public static SqlException getExceptionOnLoadResources() {

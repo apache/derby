@@ -33,7 +33,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 // and we won't have to wrap column meta data instances directly.
 
 public class ClientParameterMetaData implements ParameterMetaData {
-    ColumnMetaData columnMetaData_;
+    private ColumnMetaData columnMetaData_;
 
     public ClientParameterMetaData(ColumnMetaData columnMetaData) {
         columnMetaData_ = columnMetaData;

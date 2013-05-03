@@ -31,7 +31,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  *
  * @see LogicalDatabaseMetaData
  */
-public class LogicalDatabaseMetaData40
+class LogicalDatabaseMetaData40
     extends LogicalDatabaseMetaData {
 
     /**

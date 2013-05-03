@@ -41,24 +41,15 @@ class FdocaConstants {
     static final int FDOCA_TYPE_NPSCLCHAR = 0x99;
     static final int FDOCA_TYPE_INTEGER_BE = 0x23;
     static final int FDOCA_TYPE_NINTEGER_BE = 0xA3;
-    static final int FDOCA_TYPE_INTEGER_LE = 0x24;
-    static final int FDOCA_TYPE_NINTEGER_LE = 0xA4;
     static final int FDOCA_TYPE_DECIMAL = 0x30;
     static final int FDOCA_TYPE_NDECIMAL = 0xB0;
     static final int FDOCA_TYPE_NUMERIC_CHAR = 0x32;
-    static final int FDOCA_TYPE_NNUMERIC_CHAR = 0xB2;
-    static final int FDOCA_TYPE_FLOAT_X86 = 0x47;
-    static final int FDOCA_TYPE_NFLOAT_X86 = 0xC7;
     static final int FDOCA_TYPE_FLOAT_IEEE = 0x48;
     static final int FDOCA_TYPE_NFLOAT_IEEE = 0xC8;
     static final int FDOCA_TYPE_LOBBYTES = 0x50;
     static final int FDOCA_TYPE_NLOBBYTES = 0xD0;
     static final int FDOCA_TYPE_LOBCHAR = 0x51;
     static final int FDOCA_TYPE_NLOBCHAR = 0xD1;
-
-    // --- Override LIDs 0x50 - 0xAF
-    static final int FIRST_OVERRIDE_LID = 0x50;
-    static final int LAST_OVERRIDE_LID = 0xAF;
 
     static final int CPT_TRIPLET_TYPE = 0x7F;      // CPT triplet type
     static final int MDD_TRIPLET_TYPE = 0x78;      // MDD triplet type
@@ -80,27 +71,6 @@ class FdocaConstants {
     static final int SQLDTARD_RLO_SIZE = 6;        // size of SQLDTARD minus MDD
     static final int SQLCADTA_RLO_SIZE = 9;        // size of SQLCDTA minus MDD
     static final int SDA_TRIPLET_SIZE = 12;        // Size of SDA triplet
-    static final int SQLDTAGRP_SIZE = 3;           // Size of SQLDTAGRP descriptor
-    static final int CPT_SIZE = 3;                 // Size of CPT descriptor
-    static final int SQLDTAGRP_COL_DSC_SIZE = 3;   // Env. LID & len. bytes
-    static final int MDD_REST_SIZE = 5;            // Size of the MDD group minus length and type
-
-    static final int MDD_SDA_TRIPLET_SIZE = 19;
-    static final int MDD_SDA_PROTOCOLTYPE_OFFSET = 6;
-    static final int MDD_SDA_FDOCALID_OFFSET = 9;
-    static final int MDD_SDA_FDOCATYPE_OFFSET = 10;
-    static final int MDD_SDA_CCSID_OFFSET = 11;
-    static final int MDD_SDA_LENGTH_OFFSET = 17;
-
-    static final byte[] defaultMddSdaBytes = {
-        (byte) 0x07, (byte) 0x78, (byte) 0x00, (byte) 0x05,
-        (byte) 0x01, (byte) 0x01, (byte) 0x00, // protocol type
-        (byte) 0x0C, (byte) 0x70, (byte) 0x00, // fdoca triplet lid
-        (byte) 0x00, // fdoca field type
-        (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, // ccsid
-        (byte) 0x01, (byte) 0x01,
-        (byte) 0x7F, (byte) 0xFF                           // length
-    };
 
     static final byte[] MDD_SQLDTAGRP_TOSEND = {
         (byte) 0x07, (byte) 0x78, (byte) 0x00, (byte) 0x05,

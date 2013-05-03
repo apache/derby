@@ -30,13 +30,8 @@ import org.apache.derby.shared.common.reference.MessageId;
 
 
 public abstract class Version {
-    static final MessageUtil msgutil = SqlException.getMessageUtil();
+    private static final MessageUtil msgutil = SqlException.getMessageUtil();
     
-    // Same as java.sql.DatabaseMetaData.getDriverName()
-    public static String getDriverName() {
-        return Configuration.dncDriverName;
-    }
-
     // for DatabaseMetaData.getDriverVersion()
     public static String getDriverVersion() {
         return Configuration.getProductVersionHolder().getVersionBuildString(true);
@@ -52,20 +47,8 @@ public abstract class Version {
         return Configuration.getProductVersionHolder().getMinorVersion();
     }
 
-    public static int getBuildNumber() {
-        return Configuration.getProductVersionHolder().getBuildNumberAsInt();
-    }
-
     public static int getProtocolMaintVersion() {
         return Configuration.getProductVersionHolder().getDrdaMaintVersion();
-    }
-
-    public static boolean isAlpha() {
-        return Configuration.getProductVersionHolder().isAlpha();
-    }
-
-    public static boolean isBeta() {
-        return Configuration.getProductVersionHolder().isBeta();
     }
 
     // Not an external, just a helper method
@@ -76,7 +59,7 @@ public abstract class Version {
 
     // -------------------------- configuration print stream ---------------------
 
-    public static void writeDriverConfiguration(PrintWriter printWriter) {
+    static void writeDriverConfiguration(PrintWriter printWriter) {
         String header = "[derby] ";
         synchronized (printWriter) {
             printWriter.println(header + "BEGIN TRACE_DRIVER_CONFIGURATION");

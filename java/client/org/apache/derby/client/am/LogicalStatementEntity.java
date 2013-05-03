@@ -154,7 +154,7 @@ abstract class LogicalStatementEntity
      * @return A statement.
      * @throws SQLException if the logical statement has been closed
      */
-    synchronized Statement getPhysStmt()
+    private synchronized Statement getPhysStmt()
             throws SQLException
     {
         if ( hasCallableStmt ) { return getPhysCs(); }

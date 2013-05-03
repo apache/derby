@@ -26,7 +26,7 @@ import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
 
-public class NetXAConnectionRequest extends NetResultSetRequest {
+class NetXAConnectionRequest extends NetResultSetRequest {
     NetXAConnectionRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }

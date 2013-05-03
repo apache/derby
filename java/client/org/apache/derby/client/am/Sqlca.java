@@ -32,12 +32,12 @@ import org.apache.derby.shared.common.reference.SQLState;
 public abstract class Sqlca {
 
     // Indexes into sqlErrd_
-    public  static  final   int HIGH_ORDER_ROW_COUNT = 0;
-    public  static  final   int LOW_ORDER_ROW_COUNT = 1;
-    public  static  final   int LOW_ORDER_UPDATE_COUNT = 2;
-    public  static  final   int HIGH_ORDER_UPDATE_COUNT = 3;
+    private  static  final   int HIGH_ORDER_ROW_COUNT = 0;
+    private  static  final   int LOW_ORDER_ROW_COUNT = 1;
+    private  static  final   int LOW_ORDER_UPDATE_COUNT = 2;
+    private  static  final   int HIGH_ORDER_UPDATE_COUNT = 3;
     public  static  final   int SQL_ERR_LENGTH = 6;
-    transient protected ClientConnection connection_;
+    transient private ClientConnection connection_;
     SqlException exceptionThrownOnStoredProcInvocation_;
     boolean messageTextRetrievedContainsTokensOnly_ = true;
 
@@ -232,11 +232,6 @@ public abstract class Sqlca {
         return Utils.getStringFromInts(getSqlErrd());
     }
 
-    // what is this for??
-    public int getReturnValue() {
-        return getSqlErrd()[0];
-    }
-
     private final static String elevenBlanks = "           ";
 
     synchronized public String getSqlWarn() {
@@ -416,15 +411,6 @@ public abstract class Sqlca {
             }
             current = next;
         }
-    }
-
-    public boolean includesSqlCode(int[] codes) {
-        for (int i = 0; i < codes.length; i++) {
-            if (codes[i] == getSqlCode()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

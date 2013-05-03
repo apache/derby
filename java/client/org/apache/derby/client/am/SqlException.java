@@ -73,17 +73,17 @@ import org.apache.derby.shared.common.reference.SQLState;
 // the constructor <code>new SqlException(java.sql.SQLException wrapMe)</code)
 //
 public class SqlException extends Exception implements Diagnosable {
-    protected static final int DEFAULT_ERRCODE = 99999;
-    protected transient Sqlca sqlca_ = null; // for engine generated errors only
+    private static final int DEFAULT_ERRCODE = 99999;
+    private transient Sqlca sqlca_ = null; // for engine generated errors only
     /** Tells which of the messages in the SQLCA this exception refers to
      * (counting from 0). For engine generated errors only. */
     private transient int messageNumber_;
-    protected String message_ = null;
-    protected String cachedMessage_ = null;
+    private String message_ = null;
+    private String cachedMessage_ = null;
     private String batchPositionLabel_; // for batched exceptions only
-    protected String sqlstate_ = null;
-    protected int errorcode_ = DEFAULT_ERRCODE;
-    protected String causeString_ = null;
+    private String sqlstate_ = null;
+    private int errorcode_ = DEFAULT_ERRCODE;
+    private String causeString_ = null;
     protected SqlException nextException_;
     
     public static final String CLIENT_MESSAGE_RESOURCE_NAME =
@@ -94,7 +94,7 @@ public class SqlException extends Exception implements Diagnosable {
      * It will be over written by the SQLException factory of the
      * supported JDBC version.
      */
-    static SQLExceptionFactory
+    private static SQLExceptionFactory
             exceptionFactory = new SQLExceptionFactory ();
     
     /** 
@@ -163,7 +163,7 @@ public class SqlException extends Exception implements Diagnosable {
      *      a non-SQL exception can not be chained.  Instead, the exception class
      *      and message text is appended to the message for this exception.
      */
-    public SqlException(LogWriter logwriter, 
+    SqlException(LogWriter logwriter,
         ClientMessageId msgid, Object[] args, Throwable cause)
     {
         this(
@@ -178,7 +178,7 @@ public class SqlException extends Exception implements Diagnosable {
 
     // Use the following SQLExceptions when you want to override the error
     // code that is derived from the severity of the message id.
-    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
+    SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
         SqlCode sqlcode, Throwable t) {
         this(logWriter, msgid, args, t);
         this.errorcode_ = sqlcode.getCode();
@@ -189,10 +189,6 @@ public class SqlException extends Exception implements Diagnosable {
         this(logWriter, msgid, args, sqlcode, (Throwable)null);
     }
         
-    public SqlException(LogWriter logWriter, ClientMessageId msgid, SqlCode sqlcode) {
-        this(logWriter, msgid, (Object[])null, sqlcode);
-    }
-    
     public SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
         SqlCode sqlcode) {
         this(logWriter, msgid, new Object[] {arg1}, sqlcode);
@@ -212,7 +208,9 @@ public class SqlException extends Exception implements Diagnosable {
         this (logwriter, msgid, (Object[])null, cause);
     }
     
-    public SqlException(LogWriter logwriter, ClientMessageId msgid, Object[] args)
+    private SqlException(LogWriter logwriter,
+                         ClientMessageId msgid,
+                         Object[] args)
     {
         this(logwriter, msgid, args, (Throwable)null);
     }

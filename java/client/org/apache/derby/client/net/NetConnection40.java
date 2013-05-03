@@ -54,34 +54,43 @@ public class  NetConnection40 extends NetConnection {
      *-------------------------------------------------------
     */
 
-    public NetConnection40(NetLogWriter netLogWriter,
+    NetConnection40(NetLogWriter netLogWriter,
                          String databaseName,
                          Properties properties) throws SqlException {
-    super(netLogWriter,databaseName,properties);
+        super(netLogWriter,databaseName,properties);
     }
-    public NetConnection40(NetLogWriter netLogWriter,
+
+    NetConnection40(NetLogWriter netLogWriter,
                          ClientBaseDataSourceRoot dataSource,
                          String user,
                          String password) throws SqlException {
-    super(netLogWriter,dataSource,user,password);
+        super(netLogWriter,dataSource,user,password);
     }
-     public NetConnection40(NetLogWriter netLogWriter,
+
+    NetConnection40(NetLogWriter netLogWriter,
                          int driverManagerLoginTimeout,
                          String serverName,
                          int portNumber,
                          String databaseName,
                          Properties properties) throws SqlException{
-    super(netLogWriter,driverManagerLoginTimeout,serverName,portNumber,databaseName,properties);
-     }
-     public NetConnection40(NetLogWriter netLogWriter,
+        super(netLogWriter,
+                driverManagerLoginTimeout,
+                serverName,
+                portNumber,
+                databaseName,
+                properties);
+    }
+
+    NetConnection40(NetLogWriter netLogWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException{
-    super(netLogWriter,user,password,dataSource,rmId,isXAConn);
+        super(netLogWriter,user,password,dataSource,rmId,isXAConn);
     }
-    public NetConnection40(NetLogWriter netLogWriter,
+
+    NetConnection40(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
                          ClientBaseDataSourceRoot dataSource,

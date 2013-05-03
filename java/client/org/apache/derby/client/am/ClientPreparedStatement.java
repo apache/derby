@@ -63,16 +63,16 @@ public class ClientPreparedStatement extends ClientStatement
 
     //-----------------------------state------------------------------------------
 
-    public String sql_;
+    String sql_;
 
     // This variable is only used by Batch.
     // True if a call sql statement has an OUT or INOUT parameter registered.
-    public boolean outputRegistered_ = false;
+    boolean outputRegistered_ = false;
 
     // Parameter inputs are cached as objects so they may be sent on execute()
-    public Object[] parameters_;
+    Object[] parameters_;
 
-    boolean[] parameterSet_;
+    private boolean[] parameterSet_;
     boolean[] parameterRegistered_;
     
     void setInput(int parameterIndex, Object input) {
@@ -80,7 +80,7 @@ public class ClientPreparedStatement extends ClientStatement
         parameterSet_[parameterIndex - 1] = true;
     }
 
-    public ColumnMetaData parameterMetaData_; // type information for input sqlda
+    ColumnMetaData parameterMetaData_; // type information for input sqlda
     
     private ArrayList<int[]> parameterTypeList;
 
@@ -92,11 +92,11 @@ public class ClientPreparedStatement extends ClientStatement
     // gets repositioned.
     // So instead of caching the scrollableRS_, we will cache the cursorName.  And re-retrieve the scrollable
     // result set from the map using this cursorName every time the PreparedStatement excutes.
-    String positionedUpdateCursorName_ = null;
+    private String positionedUpdateCursorName_ = null;
     
     // the ClientPooledConnection object used to notify of the events that occur
     // on this prepared statement object
-    protected final ClientPooledConnection pooledConnection_;
+    private final ClientPooledConnection pooledConnection_;
 
 
     private void initPreparedStatement() {
@@ -183,7 +183,7 @@ public class ClientPreparedStatement extends ClientStatement
         pooledConnection_ = cpc;
     }
     
-    public void resetPreparedStatement(Agent agent,
+    private void resetPreparedStatement(Agent agent,
                                        ClientConnection connection,
                                        String sql,
                                        Section section) throws SqlException {
@@ -301,29 +301,6 @@ public class ClientPreparedStatement extends ClientStatement
             // We don't need to analyze the sql text to determine if it is a query or not.
             // This is up to the server to decide, we just pass thru the sql on flowPrepare().
             section_ = agent_.sectionManager_.getDynamicSection(resultSetHoldability_);
-        }
-    }
-
-    public void resetPreparedStatement(Agent agent,
-                                       ClientConnection connection,
-                                       String sql,
-                                       Section section,
-                                       ColumnMetaData parameterMetaData,
-                                       ColumnMetaData resultSetMetaData) throws SqlException {
-        resetPreparedStatement(agent, connection, sql, section);
-        initPreparedStatement(parameterMetaData, resultSetMetaData);
-    }
-
-    private void initPreparedStatement(ColumnMetaData parameterMetaData,
-                                       ColumnMetaData resultSetMetaData) {
-        isPreparedStatement_ = true;
-        parameterMetaData_ = parameterMetaData;
-        resultSetMetaData_ = resultSetMetaData;
-        if (parameterMetaData_ != null) {
-            parameters_ = new Object[parameterMetaData_.columns_];
-            //parameterSetOrRegistered_ = new boolean[parameterMetaData_.columns_];
-            parameterSet_ = new boolean[parameterMetaData_.columns_];
-            parameterRegistered_ = new boolean[parameterMetaData_.columns_];
         }
     }
 
@@ -959,8 +936,8 @@ public class ClientPreparedStatement extends ClientStatement
         }
     }
 
-    // also used by BLOB
-    public void setBytesX(int parameterIndex, byte[] x) throws SqlException {
+    // also used by CallableLocatorProcedures
+    void setBytesX(int parameterIndex, byte[] x) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
             Types.LONGVARBINARY;
 
@@ -1317,8 +1294,7 @@ public class ClientPreparedStatement extends ClientStatement
         }
     }
 
-    // also used by Blob
-    public void setBlobX(int parameterIndex, Blob x) throws SqlException {
+    private void setBlobX(int parameterIndex, Blob x) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = Types.BLOB;
         if (x == null) {
             setNullX(parameterIndex, Types.BLOB);
@@ -1344,8 +1320,7 @@ public class ClientPreparedStatement extends ClientStatement
         }
     }
 
-    // also used by Clob
-    void setClobX(int parameterIndex, Clob x) throws SqlException {
+    private void setClobX(int parameterIndex, Clob x) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = Types.CLOB;
         if (x == null) {
             this.setNullX(parameterIndex, ClientTypes.CLOB);
@@ -1796,7 +1771,10 @@ public class ClientPreparedStatement extends ClientStatement
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setURL", parameterIndex, x);
         }
-        jdbc3FeatureNotSupported(false);
+
+        throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED)).
+                getSQLException();
     }
 
     public ParameterMetaData getParameterMetaData() throws SQLException {
@@ -1837,7 +1815,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     // ------------------------ box car and callback methods --------------------------------
 
-    public void writeExecute(Section section,
+    private void writeExecute(Section section,
                              ColumnMetaData parameterMetaData,
                              Object[] inputs,
                              int numInputColumns,
@@ -1857,7 +1835,7 @@ public class ClientPreparedStatement extends ClientStatement
     }
 
 
-    public void readExecute() throws SqlException {
+    private void readExecute() throws SqlException {
         materialPreparedStatement_.readExecute_();
     }
 
@@ -1875,11 +1853,11 @@ public class ClientPreparedStatement extends ClientStatement
                 inputs);
     }
 
-    public void writeDescribeInput(Section section) throws SqlException {
+    private void writeDescribeInput(Section section) throws SqlException {
         materialPreparedStatement_.writeDescribeInput_(section);
     }
 
-    public void readDescribeInput() throws SqlException {
+    private void readDescribeInput() throws SqlException {
         materialPreparedStatement_.readDescribeInput_();
     }
 
@@ -1910,14 +1888,6 @@ public class ClientPreparedStatement extends ClientStatement
         }
     }
 
-    public void writeDescribeOutput(Section section) throws SqlException {
-        materialPreparedStatement_.writeDescribeOutput_(section);
-    }
-
-    public void readDescribeOutput() throws SqlException {
-        materialPreparedStatement_.readDescribeOutput_();
-    }
-
     public void completeDescribeOutput(ColumnMetaData resultSetMetaData, Sqlca sqlca) {
         int sqlcode = super.completeSqlca(sqlca);
         if (sqlcode < 0) {
@@ -1929,19 +1899,19 @@ public class ClientPreparedStatement extends ClientStatement
         }
     }
 
-    void writePrepareDescribeInputOutput() throws SqlException {
+    private void writePrepareDescribeInputOutput() throws SqlException {
         // Notice that sql_ is passed in since in general ad hoc sql must be passed in for unprepared statements
         writePrepareDescribeOutput(sql_, section_);
         writeDescribeInput(section_);
     }
 
-    void readPrepareDescribeInputOutput() throws SqlException {
+    private void readPrepareDescribeInputOutput() throws SqlException {
         readPrepareDescribeOutput();
         readDescribeInput();
         completePrepareDescribe();
     }
 
-    void writePrepareDescribeInput() throws SqlException {
+    private void writePrepareDescribeInput() throws SqlException {
         // performance will be better if we flow prepare with output enable vs. prepare then describe input for callable
         // Notice that sql_ is passed in since in general ad hoc sql must be passed in for unprepared statements
         writePrepare(sql_, section_);
@@ -1954,7 +1924,7 @@ public class ClientPreparedStatement extends ClientStatement
         completePrepareDescribe();
     }
 
-    void completePrepareDescribe() {
+    private void completePrepareDescribe() {
         if (parameterMetaData_ == null) {
             return;
         }
@@ -1987,13 +1957,6 @@ public class ClientPreparedStatement extends ClientStatement
             return newArray;
         }
         return array;
-    }
-
-    void writePrepareDescribeInputOutput(String sql,
-                                         Section section) throws SqlException {
-        // Notice that sql_ is passed in since in general ad hoc sql must be passed in for unprepared statements
-        writePrepareDescribeOutput(sql, section);
-        writeDescribeInput(section);
     }
 
     void flowPrepareDescribeInputOutput() throws SqlException {
@@ -2235,7 +2198,7 @@ public class ClientPreparedStatement extends ClientStatement
             }
     }
 
-    public long[] executeBatchX(boolean supportsQueryBatchRequest) 
+    private long[] executeBatchX(boolean supportsQueryBatchRequest)
         throws SqlException, SQLException {
         synchronized (connection_) {
             checkForClosedStatement(); // Per jdbc spec (see Statement.close() javadoc)
@@ -2416,7 +2379,7 @@ public class ClientPreparedStatement extends ClientStatement
 
     //------------------material layer event callbacks follow-----------------------
 
-    boolean listenToUnitOfWork_ = false;
+    private boolean listenToUnitOfWork_ = false;
 
     public void listenToUnitOfWork() {
         if (!listenToUnitOfWork_) {
@@ -2485,45 +2448,6 @@ public class ClientPreparedStatement extends ClientStatement
         if (scale < 0 || scale > 31) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.BAD_SCALE_VALUE), scale);
-        }
-    }
-
-    void checkScaleForINOUTDecimal(int parameterIndex, int registerOutScale) throws SqlException {
-        BigDecimal decimalInput = (BigDecimal) parameters_[parameterIndex - 1];
-        if (decimalInput == null) {
-            return;
-        }
-        // if the register out scale is greater than input scale, input scale is stored in sqlScale_
-        if (registerOutScale > parameterMetaData_.sqlScale_[parameterIndex - 1]) {
-            int inputLength = decimalInput.toString().length();
-            int scaleDifference = registerOutScale - decimalInput.scale();
-            if (decimalInput.signum() == -1) {
-                inputLength--;
-            }
-            // if the new Decimal (with bigger scale) cannot fit into the DA
-            if ((32 - scaleDifference) < inputLength) {
-                // TODO - FINISH THIS
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
-            }
-            // if the new Decimal (with bigger scale) can fit
-            else {
-                parameters_[parameterIndex - 1] = decimalInput.setScale(registerOutScale);
-                parameterMetaData_.sqlScale_[parameterIndex - 1] = registerOutScale;
-            }
-        }
-        // if the register out sacle is smaller than input scale
-        else if (registerOutScale < parameterMetaData_.sqlScale_[parameterIndex - 1]) {
-            // remove 0's at the end of input
-            try {
-                // if the new Decimal (with smaller scale) can fit
-                parameters_[parameterIndex - 1] = decimalInput.setScale(registerOutScale);
-                parameterMetaData_.sqlScale_[parameterIndex - 1] = registerOutScale;
-            } catch (ArithmeticException e) {
-                // if the new Decimal (with smaller scale) cannot fit into the DA
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.REGOUTPARAM_SCALE_DOESNT_MATCH_SETTER));
-            }
         }
     }
 

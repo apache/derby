@@ -35,11 +35,11 @@ public class NetLogWriter extends LogWriter {
 
     // The recevie constant is used to indicate that the bytes were read to a Stream.
     // It indicates to this class that a receive header should be used.
-    public static final int TYPE_TRACE_RECEIVE = 2;
+    static final int TYPE_TRACE_RECEIVE = 2;
 
     // The send constant is used to indicate that the bytes were written to
     // a Stream.  It indicates to this class that a send header should be used.
-    public static final int TYPE_TRACE_SEND = 1;
+    static final int TYPE_TRACE_SEND = 1;
 
     //------------------------------ internal constants --------------------------
 
@@ -190,7 +190,7 @@ public class NetLogWriter extends LogWriter {
     // The type is needed to indicate if the data is part of the send or receive buffer.
     // The class name, method name, and trcPt number are also written to the trace.
     // Not much checking is performed on the parameters.  This is done to help performance.
-    synchronized public void traceProtocolFlow(byte[] buff,
+    synchronized void traceProtocolFlow(byte[] buff,
                                                int offset,
                                                int len,
                                                int type,

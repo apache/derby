@@ -21,15 +21,12 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.ClientCallableStatement;
-import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.MaterialPreparedStatement;
-import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.ClientPooledConnection;
 
-public class NetCallableStatement extends NetPreparedStatement
+class NetCallableStatement extends NetPreparedStatement
         implements MaterialPreparedStatement {
 
     ClientCallableStatement callableStatement_;
@@ -43,7 +40,7 @@ public class NetCallableStatement extends NetPreparedStatement
     }
 
     // Relay constructor for all NetCallableStatement, constructors
-    NetCallableStatement(ClientCallableStatement statement,
+    private NetCallableStatement(ClientCallableStatement statement,
                          NetAgent netAgent,
                          NetConnection netConnection) throws SqlException {
         super(statement, netAgent, netConnection);
@@ -51,7 +48,7 @@ public class NetCallableStatement extends NetPreparedStatement
         initNetCallableStatement(statement);
     }
 
-    void resetNetCallableStatement(ClientCallableStatement statement,
+    private void resetNetCallableStatement(ClientCallableStatement statement,
                                    NetAgent netAgent,
                                    NetConnection netConnection) throws SqlException {
         super.resetNetPreparedStatement(statement, netAgent, netConnection);

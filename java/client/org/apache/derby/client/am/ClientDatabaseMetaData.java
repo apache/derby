@@ -56,7 +56,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     //---------------------navigational members-----------------------------------
 
-    protected Agent agent_;
+    private Agent agent_;
     protected ClientConnection connection_;
 
     //-----------------------------state------------------------------------------
@@ -65,14 +65,12 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private Object[] metaDataInfoCache_ = new Object[numberOfMetaDataInfoMethods__];
     private boolean metaDataInfoIsCached_ = false;
 
-    public ProductLevel productLevel_;
+    ProductLevel productLevel_;
 
     /** The JDBC major version supported by the server. */
     private final int serverJdbcMajorVersion;
     /** The JDBC minor version supported by the server. */
     private final int serverJdbcMinorVersion;
-
-    public boolean useServerXAState_ = true;
 
     /** True if the server supports QRYCLSIMP. */
     private boolean supportsQryclsimp_;
@@ -2341,7 +2339,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     // values. So, LEAVE INSTANCE VARIABLES UNINITIALIZED!
     //
     // END OF WARNING
-    protected void computeFeatureSet_() {
+    private void computeFeatureSet_() {
 
         // Support for QRYCLSIMP was added in 10.2.0
         if (productLevel_.greaterThanOrEqualTo(10, 2, 0)) {
@@ -2981,7 +2979,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * @exception SqlException if the server does not support the
      * specified JDBC version
      */
-    protected void checkServerJdbcVersionX(String method, int major, int minor)
+    private void checkServerJdbcVersionX(String method, int major, int minor)
         throws SqlException
     {
         if (serverJdbcMajorVersion < major ||

@@ -28,7 +28,8 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 
 
-public class NetResultSet extends ClientResultSet {
+
+class NetResultSet extends ClientResultSet {
     // Alias for (NetConnection) super.statement.connection
     private final NetConnection netConnection_;
 
@@ -48,7 +49,7 @@ public class NetResultSet extends ClientResultSet {
     //-----------------------------state------------------------------------------
 
     // This is used to avoid sending multiple outovr over subsequent next()'s
-    public boolean firstOutovrBuilt_ = false;
+    boolean firstOutovrBuilt_ = false;
 
     //---------------------constructors/finalizer---------------------------------
 
@@ -122,7 +123,6 @@ public class NetResultSet extends ClientResultSet {
         }
 
         queryInstanceIdentifier_ = qryinsid;
-        nestingLevel_ = (int) ((queryInstanceIdentifier_ >>> 48) & 0xFFFF);
     }
 
 
@@ -185,9 +185,6 @@ public class NetResultSet extends ClientResultSet {
         } catch (SqlException e) {
             throw new DisconnectException(agent_, e);
         }
-    }
-
-    void queryDataWasReturnedOnOpen() throws DisconnectException {
     }
 
     // ------------------------------- abstract box car methods --------------------------------------
@@ -262,4 +259,19 @@ public class NetResultSet extends ClientResultSet {
             netCursor_.scanDataBufferForEndOfData();
         }
     }
+
+    // Analyze the error handling here, and whether or not can be pushed to
+    // common can we make this the common layer fetch method.  Called by the
+    // read/skip Fdoca bytes methods in the net whenever data reads exhaust the
+    // internal buffer used by this reply.
+    void flowFetch() throws DisconnectException, SqlException {
+        agent_.beginWriteChain(statement_);
+        writeFetch_((generatedSection_ == null) ?
+                statement_.section_ :
+                generatedSection_);
+        agent_.flow(statement_);
+        readFetch_();
+        agent_.endReadChain();
+    }
+
 }

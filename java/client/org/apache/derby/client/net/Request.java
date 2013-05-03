@@ -43,7 +43,7 @@ import java.nio.CharBuffer;
 import java.util.Hashtable;
 
 
-public class Request {
+class Request {
 
     // byte array buffer used for constructing requests.
     // currently requests are built starting at the beginning of the buffer.
@@ -87,7 +87,7 @@ public class Request {
         clearBuffer();
     }
 
-    protected final void clearBuffer() {
+    private final void clearBuffer() {
         buffer.clear();
         top_ = 0;
         for (int i = 0; i < markStack_.length; i++) {
@@ -109,7 +109,7 @@ public class Request {
     // if the buffer does not contain sufficient room for the data, the buffer
     // will be expanded by the larger of (2 * current size) or (current size + length).
     // the data from the previous buffer is copied into the larger buffer.
-    protected final void ensureLength(int length) {
+    private final void ensureLength(int length) {
         if (length > buffer.remaining()) {
             int newLength =
                 Math.max(buffer.capacity() * 2, buffer.position() + length);
@@ -125,14 +125,6 @@ public class Request {
     // be updated appropriately.
     protected final void createCommand() {
         buildDss(false, false, false, DssConstants.GDSFMT_RQSDSS, ++correlationID_, false);
-    }
-
-    // creates an request dss in the buffer to contain a ddm command
-    // object.  calling this method means any previous dss objects in
-    // the buffer are complete and their length and chaining bytes can
-    // be updated appropriately.
-    protected void createXACommand() {
-        buildDss(false, false, false, DssConstants.GDSFMT_RQSDSS_NOREPLY, ++correlationID_, false);
     }
 
     // creates an object dss in the buffer to contain a ddm command
@@ -530,7 +522,7 @@ public class Request {
     // 1.  Flushes an existing DSS segment, if necessary
     // 2.  Determines if extended length bytes are needed
     // 3.  Creates a new DSS/DDM header and a null byte indicator, if applicable
-    protected final int prepScalarStream(boolean chained,
+    private final int prepScalarStream(boolean chained,
                                          boolean chainedWithSameCorrelator,
                                          boolean writeNullByte,
                                          long leftToRead)
@@ -577,7 +569,7 @@ public class Request {
     }
 
     
-    protected final void flushExistingDSS() throws DisconnectException {
+    private final void flushExistingDSS() throws DisconnectException {
         
         try {
             if (simpleDssFinalize) {
@@ -595,7 +587,7 @@ public class Request {
 
     // Writes out a scalar stream DSS segment, along with DSS continuation headers,
     // if necessary.
-    protected final int flushScalarStreamSegment(long leftToRead,
+    private final int flushScalarStreamSegment(long leftToRead,
                                                  int bytesToRead) throws DisconnectException {
         int newBytesToRead = bytesToRead;
 
@@ -617,7 +609,7 @@ public class Request {
         return newBytesToRead;
     }
     
-    protected final int flushScalarStreamSegment() throws DisconnectException {
+    private final int flushScalarStreamSegment() throws DisconnectException {
         
         try {
             sendBytes(netAgent_.getOutputStream());
@@ -648,7 +640,7 @@ public class Request {
      *      {@code writeStatus} is {@code false}
      * @throws DisconnectException if flushing the buffer fails
      */
-    protected final void padScalarStreamForError(long leftToRead,
+    private final void padScalarStreamForError(long leftToRead,
                                                  int bytesToRead,
                                                  boolean writeStatus,
                                                  byte status)
@@ -682,7 +674,9 @@ public class Request {
     // used to finialize a dss which is already in the buffer
     // before another dss is built.  this includes updating length
     // bytes and chaining bits.
-    protected final void finalizePreviousChainedDss(boolean dssHasSameCorrelator) {
+    private final void finalizePreviousChainedDss(
+        boolean dssHasSameCorrelator) {
+
         finalizeDssLength();
         int pos = dssLengthLocation_ + 3;
         byte value = buffer.get(pos);
@@ -696,7 +690,7 @@ public class Request {
 
     // method to determine if any data is in the request.
     // this indicates there is a dss object already in the buffer.
-    protected final boolean doesRequestContainData() {
+    private final boolean doesRequestContainData() {
         return buffer.position() != 0;
     }
 
@@ -714,7 +708,7 @@ public class Request {
      * Note: In the future, we may try to optimize this approach
      * in an attempt to avoid these shifts.
      */
-    protected final void finalizeDssLength() {
+    private final void finalizeDssLength() {
         // calculate the total size of the dss and the number of bytes which would
         // require continuation dss headers.  The total length already includes the
         // the 6 byte dss header located at the beginning of the dss.  It does not
@@ -910,7 +904,7 @@ public class Request {
     }
 
     // insert the padByte into the buffer by length number of times.
-    final void padBytes(byte padByte, int length) {
+    private final void padBytes(byte padByte, int length) {
         ensureLength(length);
         for (int i = 0; i < length; i++) {
             buffer.put(padByte);
@@ -933,7 +927,9 @@ public class Request {
         buffer.put((byte) tripletId);
     }
 
-    final void writeLidAndLengths(int[][] lidAndLengthOverrides, int count, int offset) {
+    private void writeLidAndLengths(int[][] lidAndLengthOverrides,
+                                    int count,
+                                    int offset) {
         ensureLength(count * 3);
         for (int i = 0; i < count; i++, offset++) {
             buffer.put((byte) lidAndLengthOverrides[offset][0]);
@@ -1053,26 +1049,6 @@ public class Request {
         buffer.putShort((short) codePoint);
     }
 
-    // insert a 4 byte length/codepoint pair into the buffer followed
-    // by length number of bytes copied from array buf starting at offset 0.
-    // the length of this scalar must not exceed the max for the two byte length
-    // field.  This method does not support extended length.  The length
-    // value inserted in the buffer includes the number of bytes to copy plus
-    // the size of the llcp (or length + 4). It is up to the caller to make sure
-    // the array, buf, contains at least length number of bytes.
-    final void writeScalarBytes(int codePoint, byte[] buf, int length) {
-        writeScalarBytes(codePoint, buf, 0, length);
-    }
-
-    // insert a 4 byte length/codepoint pair into the buffer.
-    // total of 4 bytes inserted in buffer.
-    // Note: datalength will be incremented by the size of the llcp, 4,
-    // before being inserted.
-    final void writeScalarHeader(int codePoint, int dataLength) {
-        writeLengthCodePoint(dataLength + 4, codePoint);
-        ensureLength(dataLength);
-    }
-
     /**
      * Write string with no minimum or maximum limit.
      * @param codePoint codepoint to write  
@@ -1179,19 +1155,6 @@ public class Request {
         buffer.put(buff, start, length);
     }
 
-    // insert a 4 byte length/codepoint pair plus ddm binary data into the
-    // buffer.  The binary data is padded if needed with the padByte
-    // if the data is less than paddedLength.
-    // Note: this method is not to be used for truncation and buff.length
-    // must be <= paddedLength.
-    // The llcp length bytes will contain the length of the data plus
-    // the length of the llcp or 4.
-    // This method does not handle scenarios which require extended length bytes.
-    final void writeScalarPaddedBytes(int codePoint, byte[] buff, int paddedLength, byte padByte) {
-        writeLengthCodePoint(paddedLength + 4, codePoint);
-        writeScalarPaddedBytes(buff, paddedLength, padByte);
-    }
-
     // this method inserts binary data into the buffer and pads the
     // data with the padByte if the data length is less than the paddedLength.
     // Not: this method is not to be used for truncation and buff.length
@@ -1210,7 +1173,7 @@ public class Request {
         }
     }
 
-    protected void sendBytes(OutputStream socketOutputStream)
+    private void sendBytes(OutputStream socketOutputStream)
             throws IOException {
         try {
             socketOutputStream.write(buffer.array(), 0, buffer.position());
@@ -1235,7 +1198,7 @@ public class Request {
         }
     }
 
-    final void maskOutPassword() {
+    private final void maskOutPassword() {
         int savedPos = buffer.position();
         try {
             String maskChar = "*";
@@ -1259,7 +1222,7 @@ public class Request {
     }
 
     // insert a java byte into the buffer.
-    final void writeByte(byte v) {
+    private void writeByte(byte v) {
         ensureLength(1);
         buffer.put(v);
     }
@@ -1462,13 +1425,6 @@ public class Request {
         }
 
         writeLDBytesXSubset( length, length, buffer );
-    }
-
-    // does it follows
-    // ccsid manager or typdef rules.  should this method write ddm character
-    // data or fodca data right now it is coded for ddm char data only
-    final void writeDDMString(String s) throws SqlException {
-        encodeString(s);
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,

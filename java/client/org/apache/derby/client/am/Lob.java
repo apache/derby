@@ -35,13 +35,13 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Lob implements UnitOfWorkListener {
     // The following flags specify the data type(s) a LOB instance currently contains
-    public static final int STRING = 2;
-    public static final int ASCII_STREAM = 4;
-    public static final int UNICODE_STREAM = 8;
-    public static final int CHARACTER_STREAM = 16;
-    public static final int BINARY_STREAM = 32;
-    public static final int BINARY_STRING = 64;
-    public static final int LOCATOR = 128;
+    static final int STRING = 2;
+    static final int ASCII_STREAM = 4;
+    static final int UNICODE_STREAM = 8;
+    static final int CHARACTER_STREAM = 16;
+    static final int BINARY_STREAM = 32;
+    static final int BINARY_STRING = 64;
+    static final int LOCATOR = 128;
 
     public static final int INVALID_LOCATOR = -1;
     //---------------------navigational members-----------------------------------

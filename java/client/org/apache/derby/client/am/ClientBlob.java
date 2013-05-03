@@ -57,7 +57,7 @@ public class ClientBlob extends Lob implements Blob {
     }
 
     // CTOR for input:
-    public ClientBlob(Agent agent,
+    ClientBlob(Agent agent,
                 InputStream binaryStream,
                 int length) {
         
@@ -89,7 +89,7 @@ public class ClientBlob extends Lob implements Blob {
      * @param agent
      * @param binaryStream the stream to get data from
      */
-    public ClientBlob(Agent agent, InputStream binaryStream) {
+    ClientBlob(Agent agent, InputStream binaryStream) {
         
         super(agent,
               isLayerBStreamingPossible(agent));
@@ -427,7 +427,8 @@ public class ClientBlob extends Lob implements Blob {
         }
     }
 
-    public int setBytesX(long pos, byte[] bytes, int offset, int len) throws SqlException {
+    int setBytesX(long pos, byte[] bytes, int offset, int len)
+            throws SqlException {
         /*
             Check if position is less than 0 and if true
             raise an exception
@@ -707,7 +708,7 @@ public class ClientBlob extends Lob implements Blob {
         return binaryString_;
     }
 
-    protected long binaryStringPosition(byte[] pattern, long start) {
+    private long binaryStringPosition(byte[] pattern, long start) {
         // perform a local byte string search, starting at start
         // check that the range of comparison is valid
         int index = (int) start + dataOffset_ - 1; // api start begins at 1
@@ -722,7 +723,7 @@ public class ClientBlob extends Lob implements Blob {
     }
 
     // precondition: binaryString_ is long enough for the comparison
-    protected boolean isSubString(byte[] pattern, int index) {
+    private boolean isSubString(byte[] pattern, int index) {
         for (int i = 0; i < pattern.length; i++, index++) {
             if (pattern[i] != binaryString_[index]) {
                 return false;

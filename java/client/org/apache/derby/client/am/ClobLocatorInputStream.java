@@ -42,7 +42,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * straight-forward.
  */
 
-public class ClobLocatorInputStream extends InputStream {
+class ClobLocatorInputStream extends InputStream {
     
     /**
      * Connection used to read Clob from server.
@@ -69,8 +69,8 @@ public class ClobLocatorInputStream extends InputStream {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
-    public ClobLocatorInputStream(ClientConnection connection, ClientClob clob)
-    throws SqlException{
+    ClobLocatorInputStream(ClientConnection connection, ClientClob clob)
+            throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
         }
@@ -91,7 +91,7 @@ public class ClobLocatorInputStream extends InputStream {
      * @param pos the position inside the <code>Clob<code> from which
      *            the reading must begin.
      */
-    public ClobLocatorInputStream(
+    ClobLocatorInputStream(
             ClientConnection connection,
             ClientClob clob,
             long pos) throws SqlException{

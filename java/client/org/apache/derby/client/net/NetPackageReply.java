@@ -25,7 +25,7 @@ import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class NetPackageReply extends NetConnectionReply {
+class NetPackageReply extends NetConnectionReply {
     NetPackageReply(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
@@ -153,7 +153,7 @@ public class NetPackageReply extends NetConnectionReply {
     // RDBNAM - optional
     //
     // Also called by NetResultSetReply and NetStatementReply
-    void parseSQLERRRM() throws DisconnectException {
+    private void parseSQLERRRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;

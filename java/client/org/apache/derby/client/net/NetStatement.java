@@ -29,7 +29,7 @@ import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.jdbc.ClientDriver;
 
-public class NetStatement implements MaterialStatement {
+class NetStatement implements MaterialStatement {
 
     ClientStatement statement_;
 
@@ -42,7 +42,7 @@ public class NetStatement implements MaterialStatement {
 
 
     // If qryrowset is sent on opnqry then it also needs to be sent on every subsequent cntqry.
-    public boolean qryrowsetSentOnOpnqry_ = false;
+    boolean qryrowsetSentOnOpnqry_ = false;
 
     //---------------------constructors/finalizer---------------------------------
 
@@ -86,18 +86,6 @@ public class NetStatement implements MaterialStatement {
         netConnection_ = netConnection;
         statement_ = statement;
         statement_.setMaterialStatement(this);
-    }
-
-    // Called by abstract Connection.createStatement().newStatement() for jdbc 1 statements
-    NetStatement(NetAgent netAgent, NetConnection netConnection) throws SqlException {
-        this(ClientDriver.getFactory().newStatement(netAgent, netConnection),
-                netAgent,
-                netConnection);
-    }
-
-    void netReset(NetAgent netAgent, NetConnection netConnection) throws SqlException {
-        statement_.resetStatement(netAgent, netConnection);
-        resetNetStatement(statement_, netAgent, netConnection);
     }
 
     public void reset_() {

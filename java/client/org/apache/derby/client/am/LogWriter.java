@@ -228,7 +228,9 @@ public class LogWriter {
         }
     }
 
-    public void traceDeprecatedExit(Object instance, String methodName, Object returnValue) {
+    void traceDeprecatedExit(Object instance,
+                             String methodName,
+                             Object returnValue) {
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
@@ -240,7 +242,7 @@ public class LogWriter {
         }
     }
 
-    public void traceExit(
+    void traceExit(
             Object instance,
             String methodName,
             ClientResultSet resultSet) {
@@ -249,23 +251,7 @@ public class LogWriter {
         traceExit(instance, methodName, returnValue);
     }
 
-    public void traceExit(
-            Object instance,
-            String methodName,
-            ClientCallableStatement returnValue) {
-
-        traceExit(instance, methodName, "CallableStatement@" + Integer.toHexString(returnValue.hashCode()));
-    }
-
-    public void traceExit(
-            Object instance,
-            String methodName,
-            ClientPreparedStatement returnValue) {
-
-        traceExit(instance, methodName, "PreparedStatement@" + Integer.toHexString(returnValue.hashCode()));
-    }
-
-    public void traceExit(
+    void traceExit(
             Object instance,
             String methodName,
             ClientStatement returnValue) {

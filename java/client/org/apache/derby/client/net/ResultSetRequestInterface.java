@@ -29,7 +29,7 @@ import org.apache.derby.client.am.SqlException;
 // Implementations of this interface should not dereference common layer ResultSet state, as it is passed in,
 // but may dereference material layer ResultSet state if necessary for performance.
 
-public interface ResultSetRequestInterface {
+interface ResultSetRequestInterface {
     public void writeFetch(NetResultSet resultSet,
                            Section section,
                            int fetchSize) throws SqlException;

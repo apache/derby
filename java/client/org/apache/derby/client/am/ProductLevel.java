@@ -21,13 +21,13 @@
 package org.apache.derby.client.am;
 
 public class ProductLevel {
-    public String databaseProductName_;
-    public int versionLevel_;
-    public int releaseLevel_;
-    public int modificationLevel_;
+    String databaseProductName_;
+    int versionLevel_;
+    int releaseLevel_;
+    private int modificationLevel_;
 
     // The following value is sent in the srvrlslv level
-    public String databaseProductVersion_;
+    String databaseProductVersion_;
 
     // The productID is set by the constructors.
     // dabaseProductVersion added by derby to include  srvrlslv
@@ -64,7 +64,9 @@ public class ProductLevel {
         }
     }
 
-    public boolean greaterThanOrEqualTo(int versionLevel, int releaseLevel, int modificationLevel) {
+    boolean greaterThanOrEqualTo(int versionLevel,
+                                 int releaseLevel,
+                                 int modificationLevel) {
         if (versionLevel_ > versionLevel) {
             return true;
         } else if (versionLevel_ == versionLevel) {
@@ -79,7 +81,9 @@ public class ProductLevel {
         return false;
     }
 
-    public boolean lessThan(int versionLevel, int releaseLevel, int modificationLevel) {
+    boolean lessThan(int versionLevel,
+                     int releaseLevel,
+                     int modificationLevel) {
         if (versionLevel_ < versionLevel) {
             return true;
         } else if (versionLevel_ == versionLevel) {

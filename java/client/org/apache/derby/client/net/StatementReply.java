@@ -26,7 +26,7 @@ import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.StatementCallbackInterface;
 
-public class StatementReply extends ConnectionReply {
+class StatementReply extends ConnectionReply {
     private StatementReplyInterface materialStatementReply_;
 
     StatementReply(Agent agent,
@@ -36,48 +36,58 @@ public class StatementReply extends ConnectionReply {
         materialStatementReply_ = materialStatementReply;
     }
 
-    public void readPrepareDescribeOutput(StatementCallbackInterface statement) throws SqlException {
+    void readPrepareDescribeOutput(StatementCallbackInterface statement)
+            throws SqlException {
         materialStatementReply_.readPrepareDescribeOutput(statement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readExecuteImmediate(StatementCallbackInterface statement) throws SqlException {
+    void readExecuteImmediate(StatementCallbackInterface statement)
+            throws SqlException {
         materialStatementReply_.readExecuteImmediate(statement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readOpenQuery(StatementCallbackInterface statement) throws SqlException {
+    void readOpenQuery(StatementCallbackInterface statement)
+            throws SqlException {
         materialStatementReply_.readOpenQuery(statement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readExecute(PreparedStatementCallbackInterface preparedStatement) throws SqlException {
+    void readExecute(PreparedStatementCallbackInterface preparedStatement)
+            throws SqlException {
         materialStatementReply_.readExecute(preparedStatement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readPrepare(StatementCallbackInterface statement) throws SqlException {
+    void readPrepare(StatementCallbackInterface statement) throws SqlException {
         materialStatementReply_.readPrepare(statement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readDescribeInput(PreparedStatementCallbackInterface preparedStatement) throws SqlException {
+    void readDescribeInput(PreparedStatementCallbackInterface preparedStatement)
+            throws SqlException {
         materialStatementReply_.readDescribeInput(preparedStatement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readDescribeOutput(PreparedStatementCallbackInterface preparedStatement) throws SqlException {
+
+    void readDescribeOutput(
+            PreparedStatementCallbackInterface preparedStatement)
+            throws SqlException {
         materialStatementReply_.readDescribeOutput(preparedStatement);
         agent_.checkForChainBreakingException_();
     }
 
-    public void readExecuteCall(StatementCallbackInterface statement) throws SqlException {
+    void readExecuteCall(StatementCallbackInterface statement)
+            throws SqlException {
         materialStatementReply_.readExecuteCall(statement);
         agent_.checkForChainBreakingException_();
     }
 
 
-    public void readSetSpecialRegister(StatementCallbackInterface statement) throws SqlException {
+    void readSetSpecialRegister(StatementCallbackInterface statement)
+            throws SqlException {
         materialStatementReply_.readSetSpecialRegister(statement);
         agent_.checkForChainBreakingException_();
     }

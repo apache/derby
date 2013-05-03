@@ -26,20 +26,8 @@ import org.apache.derby.client.am.Version;
 public class NetConfiguration {
     // ---------------------------------------------------------------------------
 
-    static final int INITIAL_CAPACITY = 10; // initial size of the Vector for the input parameters
-
     // Value to use when padding non-character data in ddm objects.
-    public static final byte NON_CHAR_DDM_DATA_PAD_BYTE = 0x00;
-
-    static final int CURSOR_NOT_OPEN = 0;
-    static final int CURSOR_OPEN = 1;
-    static final int CURSOR_CLOSE_ONLY = 2;
-
-    // Number of bytes in the DDM header.
-    static final int DDMHDR_LENGTH = 4;
-
-    // Number of bytes in the DSS header.
-    static final int DSSHDR_LENGTH = 6;
+    static final byte NON_CHAR_DDM_DATA_PAD_BYTE = 0x00;
 
     // Maximum size of External Name.
     static final int EXTNAM_MAXSIZE = 255;
@@ -78,13 +66,10 @@ public class NetConfiguration {
     static final int PASSWORD_MAXSIZE = 255;
 
     // Fixed PRDDTA application id fixed length.
-    public static final int PRDDTA_APPL_ID_FIXED_LEN = 20;
+    static final int PRDDTA_APPL_ID_FIXED_LEN = 20;
 
     // PRDDTA Accounting Suffix Length byte offset.
     static final int PRDDTA_ACCT_SUFFIX_LEN_BYTE = 55;
-
-    // PRDDTA Max Accounting Suffix Length.
-    static final int PRDDTA_MAX_ACCT_SUFFIX_LEN = 199;
 
     // PRDDTA Length byte offset.
     static final int PRDDTA_LEN_BYTE = 0;
@@ -93,19 +78,19 @@ public class NetConfiguration {
     static final int PRDDTA_MAXSIZE = 255;
 
     // PRDDTA platform id.
-    public static final String PRDDTA_PLATFORM_ID = "JVM               ";
+    static final String PRDDTA_PLATFORM_ID = "JVM               ";
 
     // Fixed PRDDTA user id fixed length.
-    public static final int PRDDTA_USER_ID_FIXED_LEN = 8;
+    static final int PRDDTA_USER_ID_FIXED_LEN = 8;
 
     // Identifier Length for fixed length rdb name
-    public static final int PKG_IDENTIFIER_FIXED_LEN = 18;
+    static final int PKG_IDENTIFIER_FIXED_LEN = 18;
 
     // Maximum RDB Identifier Length
     static final int PKG_IDENTIFIER_MAX_LEN = 255;
 
     // Fixed pkgcnstkn length
-    public static final int PKGCNSTKN_FIXED_LEN = 8;
+    static final int PKGCNSTKN_FIXED_LEN = 8;
 
     // Maximum length of a security token.
     // Anything greater than 32763 bytes of SECTKN would require extended length DDMs.
@@ -122,27 +107,11 @@ public class NetConfiguration {
     // Manager is NA or not usued.
     static final int MGRLVL_NA = 0;
 
-    // Manager Level 3 constant.
-    static final int MGRLVL_3 = 0x03;
-
-    // Manager Level 4 constant.
-    static final int MGRLVL_4 = 0x04;
-
     // Manager Level 5 constant.
     static final int MGRLVL_5 = 0x05;
 
-    // Manager level 6 constant.
-    static final int MGRLVL_6 = 0x06;
-
     // Manager Level 7 constant.
     static final public int MGRLVL_7 = 0x07;
-
-    // Indicates the DCE security mechanism.
-    static final int SECMEC_DCESEC = 0x01;
-
-    // Indicates encrypted userid, password,
-    // new password security mechanism.
-    static final int SECMEC_EUSRIDNWPWD = 0x0A;
 
     // Indicates userid/encrypted password security mechanism.
     public static final int SECMEC_EUSRIDPWD = 0x09;
@@ -179,16 +148,13 @@ public class NetConfiguration {
 
 
     // IEEE ASCII constant.
-    public static final String SYSTEM_ASC = "QTDSQLASC";
-
-    // JVM constant.
-    static final String SYSTEM_JVM = "QTDSQLJVM";
+    static final String SYSTEM_ASC = "QTDSQLASC";
 
     // Maximum size of User Name.
     static final int USRID_MAXSIZE = 255;
 
     // Product id of the ClientDNC.
-    public static final String PRDID;
+    static final String PRDID;
 
     // The server release level of this product.
     // It will be prefixed with PRDID

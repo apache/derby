@@ -35,12 +35,12 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 
-public class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
+class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
     private int port_;
     private int clientSSLMode_;
 
-    public OpenSocketAction(String server, int port, int clientSSLMode) {
+    OpenSocketAction(String server, int port, int clientSSLMode) {
         server_ = server;
         port_ = port;
         clientSSLMode_ = clientSSLMode;

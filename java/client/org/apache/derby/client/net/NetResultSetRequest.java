@@ -30,9 +30,10 @@ import org.apache.derby.client.am.ClientMessageId;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
-public class NetResultSetRequest extends NetStatementRequest
+class NetResultSetRequest extends NetStatementRequest
         implements ResultSetRequestInterface {
-    public NetResultSetRequest(NetAgent netAgent, int bufferSize) {
+
+    NetResultSetRequest(NetAgent netAgent, int bufferSize) {
         super(netAgent, bufferSize);
     }
 

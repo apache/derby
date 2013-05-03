@@ -90,31 +90,23 @@ public class NetXAConnection {
         netCon.xares_ = xares;
     }
 
-    public void writeLocalXAStart_() throws SqlException {
-        netCon.netAgent_.netConnectionRequest_.writeLocalXAStart(netCon);
-    }
-
-    public void readLocalXAStart_() throws SqlException {
-        netCon.netAgent_.netConnectionReply_.readLocalXAStart(netCon);
-    }
-
-    public void writeLocalXACommit_() throws SqlException {
+    private void writeLocalXACommit_() throws SqlException {
         netCon.netAgent_.netConnectionRequest_.writeLocalXACommit(netCon);
     }
 
-    public void readLocalXACommit_() throws SqlException {
+    private void readLocalXACommit_() throws SqlException {
         netCon.netAgent_.netConnectionReply_.readLocalXACommit(netCon);
     }
 
-    public void writeLocalXARollback_() throws SqlException {
+    private void writeLocalXARollback_() throws SqlException {
         netCon.netAgent_.netConnectionRequest_.writeLocalXARollback(netCon);
     }
 
-    public void readLocalXARollback_() throws SqlException {
+    private void readLocalXARollback_() throws SqlException {
         netCon.netAgent_.netConnectionReply_.readLocalXARollback(netCon);
     }
 
-    public void writeTransactionStart(ClientStatement statement)
+    void writeTransactionStart(ClientStatement statement)
             throws SqlException {
         //KATHEY  remove below after checking that we don't need it.
         if (!netCon.isXAConnection()) {
@@ -140,24 +132,7 @@ public class NetXAConnection {
         return;
     }
 
-    public byte[] getUOWID(Xid xid) {
-        NetIndoubtTransaction indoubtTxn = netCon.getIndoubtTransaction(xid);
-        if (indoubtTxn == null) {
-            return null;
-        }
-        byte[] uowid = indoubtTxn.getUOWID();
-        return uowid;
-    }
-
-    public int getPort(Xid xid) {
-        NetIndoubtTransaction indoubtTxn = netCon.getIndoubtTransaction(xid);
-        if (indoubtTxn == null) {
-            return -1;
-        }
-        return indoubtTxn.getPort();
-    }
-
-    public void writeCommit() throws SqlException {
+    void writeCommit() throws SqlException {
         // this logic must be in sync with willAutoCommitGenerateFlow() logic
         int xaState = netCon.getXAState();
         if (xaState == netCon.XA_T0_NOT_ASSOCIATED){
@@ -168,7 +143,7 @@ public class NetXAConnection {
         }
     }
 
-    public void readCommit() throws SqlException {
+    void readCommit() throws SqlException {
         int xaState = netCon.getXAState();
         NetXACallInfo callInfo = netCon.xares_.callInfoArray_
                 [netCon.currXACallInfoOffset_];
@@ -186,14 +161,14 @@ public class NetXAConnection {
         }        
     }
 
-    public void writeRollback() throws SqlException {
+    void writeRollback() throws SqlException {
       netCon.xares_.callInfoArray_[
                 netCon.xares_.conn_.currXACallInfoOffset_
                 ].xid_ = netCon.xares_.nullXid;
        writeLocalXARollback_(); 
     }
 
-    public void readRollback() throws SqlException {
+    void readRollback() throws SqlException {
         NetXACallInfo callInfo = netCon.xares_.callInfoArray_
                 [netCon.currXACallInfoOffset_];
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
@@ -257,7 +232,7 @@ public class NetXAConnection {
      * @return NetConnection
      *
      */
-    protected NetConnection createNetConnection (
+    private NetConnection createNetConnection (
             NetLogWriter netLogWriter,
             String user,
             String password,

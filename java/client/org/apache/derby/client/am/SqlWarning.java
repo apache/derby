@@ -34,37 +34,20 @@ public class SqlWarning extends SqlException implements Diagnosable {
 
     protected SqlWarning nextWarning_;
     
-    public SqlWarning(LogWriter logwriter, 
-        ClientMessageId msgid, Object[] args, Throwable cause)
-    {
-        super(logwriter, msgid, args, cause);
-    }
-    
-    public SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object[] args)
-    {
-        this(logwriter, msgid, args, null);
-    }
-    
-    public SqlWarning (LogWriter logwriter, ClientMessageId msgid)
+    SqlWarning (LogWriter logwriter, ClientMessageId msgid)
     {
         super(logwriter, msgid);
     }
     
-    public SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object arg1)
+    SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object arg1)
     {
         super(logwriter, msgid, arg1);
     }
     
-    public SqlWarning(LogWriter logwriter,
+    SqlWarning(LogWriter logwriter,
         ClientMessageId msgid, Object arg1, Object arg2)
     {
         super(logwriter, msgid, arg1, arg2);
-    }
-    
-    public SqlWarning(LogWriter logwriter,
-        ClientMessageId msgid, Object arg1, Object arg2, Object arg3)
-    {
-        super(logwriter, msgid, arg1, arg2, arg3);
     }
     
     public SqlWarning(LogWriter logWriter, Sqlca sqlca)
@@ -72,7 +55,7 @@ public class SqlWarning extends SqlException implements Diagnosable {
         super(logWriter, sqlca);
     }
     
-    public void setNextWarning(SqlWarning warning)
+    void setNextWarning(SqlWarning warning)
     {
         // Add this warning to the end of the chain
         SqlWarning theEnd = this;
@@ -80,11 +63,6 @@ public class SqlWarning extends SqlException implements Diagnosable {
             theEnd = theEnd.nextWarning_;
         }
         theEnd.nextWarning_ = warning;
-    }
-    
-    public SqlWarning getNextWarning()
-    {
-        return nextWarning_;
     }
     
     /**

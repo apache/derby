@@ -25,7 +25,7 @@ import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.PreparedStatementCallbackInterface;
 import org.apache.derby.client.am.StatementCallbackInterface;
 
-public interface StatementReplyInterface {
+interface StatementReplyInterface {
     public void readPrepareDescribeOutput(StatementCallbackInterface statement) throws DisconnectException;
 
     public void readExecuteImmediate(StatementCallbackInterface statement) throws DisconnectException;

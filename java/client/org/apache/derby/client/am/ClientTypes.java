@@ -30,30 +30,30 @@ import org.apache.derby.iapi.reference.JDBC40Translation;
 public class ClientTypes {
     // -------------------------------- Driver types -------------------------------------------------
 
-    public final static int BIT        =  Types.BIT;          // -7;
+    final static int BIT        =  Types.BIT;          // -7;
 
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
-    //public final static int TINYINT   = Types.TINYINT;       // -6;
+    //final static int TINYINT   = Types.TINYINT;       // -6;
 
-    public final static int BOOLEAN = Types.BOOLEAN;       // 16;
+    final static int BOOLEAN = Types.BOOLEAN;       // 16;
 
-    public final static int SMALLINT = Types.SMALLINT;      // 5;
+    final static int SMALLINT = Types.SMALLINT;      // 5;
 
-    public final static int INTEGER = Types.INTEGER;       // 4;
+    final static int INTEGER = Types.INTEGER;       // 4;
 
-    public final static int BIGINT = Types.BIGINT;        // -5;
+    final static int BIGINT = Types.BIGINT;        // -5;
 
     // We type using DOUBLE
-    //public final static int FLOAT     = Types.FLOAT;         // 6;
+    //final static int FLOAT     = Types.FLOAT;         // 6;
 
-    public final static int REAL = Types.REAL;          // 7;
+    final static int REAL = Types.REAL;          // 7;
 
-    public final static int DOUBLE = Types.DOUBLE;        // 8;
+    final static int DOUBLE = Types.DOUBLE;        // 8;
 
     // We type using DECIMAL
-    //public final static int NUMERIC   = Types.NUMERIC;       // 2;
+    //final static int NUMERIC   = Types.NUMERIC;       // 2;
 
-    public final static int DECIMAL = Types.DECIMAL;       // 3;
+    final static int DECIMAL = Types.DECIMAL;       // 3;
 
     public final static int CHAR = Types.CHAR;          // 1;
 
@@ -61,11 +61,11 @@ public class ClientTypes {
 
     public final static int LONGVARCHAR = Types.LONGVARCHAR;   // -1;
 
-    public final static int DATE = Types.DATE;          // 91;
+    final static int DATE = Types.DATE;          // 91;
 
-    public final static int TIME = Types.TIME;          // 92;
+    final static int TIME = Types.TIME;          // 92;
 
-    public final static int TIMESTAMP = Types.TIMESTAMP;     // 93;
+    final static int TIMESTAMP = Types.TIMESTAMP;     // 93;
 
     public final static int BINARY = Types.BINARY;        // -2;
 
@@ -81,9 +81,9 @@ public class ClientTypes {
 
     // hide the default constructor
     private ClientTypes() {
-   }
+    }
     
-    static public String getTypeString(int type)
+    static String getTypeString(int type)
     {
         switch (type )
         {

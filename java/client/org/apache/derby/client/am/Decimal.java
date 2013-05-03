@@ -147,7 +147,7 @@ public class Decimal {
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
      */
-    public static final BigDecimal getBigDecimal(
+    static BigDecimal getBigDecimal(
             byte[] buffer,
             int offset,
             int precision,
@@ -243,7 +243,7 @@ public class Decimal {
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
      */
-    public static final double getDouble(
+    static double getDouble(
             byte[] buffer,
             int offset,
             int precision,
@@ -308,7 +308,7 @@ public class Decimal {
      * @throws IllegalArgumentException if the specified representation is not recognized.
      * @throws ArithmeticException if value is too large for a long
      */
-    public static final long getLong(
+    static long getLong(
             byte[] buffer,
             int offset,
             int precision,

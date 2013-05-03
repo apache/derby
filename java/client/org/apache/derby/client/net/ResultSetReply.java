@@ -26,10 +26,10 @@ import org.apache.derby.client.am.ResultSetCallbackInterface;
 import org.apache.derby.client.am.SqlException;
 
 
-public class ResultSetReply extends StatementReply {
+class ResultSetReply extends StatementReply {
     private ResultSetReplyInterface materialResultSetReply_;
 
-    public ResultSetReply(Agent agent,
+    ResultSetReply(Agent agent,
                           ResultSetReplyInterface materialResultSetReply,
                           StatementReplyInterface materialStatementReply,
                           ConnectionReplyInterface materialConnectionReply) {
@@ -37,14 +37,15 @@ public class ResultSetReply extends StatementReply {
         materialResultSetReply_ = materialResultSetReply;
     }
 
-    public void readFetch(ResultSetCallbackInterface resultSet) throws SqlException {
+    void readFetch(ResultSetCallbackInterface resultSet) throws SqlException {
         materialResultSetReply_.readFetch(resultSet);
         agent_.checkForChainBreakingException_();
     }
 
 
     // think about splitting out the position cursor stuff from the fetch stuff
-    public void readScrollableFetch(ResultSetCallbackInterface resultSet) throws SqlException {
+    void readScrollableFetch(ResultSetCallbackInterface resultSet)
+            throws SqlException {
         materialResultSetReply_.readScrollableFetch(resultSet);
         agent_.checkForChainBreakingException_();
     }
@@ -54,7 +55,8 @@ public class ResultSetReply extends StatementReply {
         agent_.checkForChainBreakingException_();
     }
 
-    public void readCursorClose(ResultSetCallbackInterface resultSet) throws SqlException {
+    void readCursorClose(ResultSetCallbackInterface resultSet)
+            throws SqlException {
         materialResultSetReply_.readCursorClose(resultSet);
         agent_.checkForChainBreakingException_();
     }

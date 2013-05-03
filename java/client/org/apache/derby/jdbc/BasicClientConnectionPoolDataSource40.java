@@ -30,7 +30,7 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
- * This datasource is suitable for client/server use of Derby,
+ * This data source is suitable for client/server use of Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
  * BasicClientConnectionPoolDataSource40 is similar to
@@ -39,7 +39,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  *
  * @see ClientConnectionPoolDataSource40
  */
-public class BasicClientConnectionPoolDataSource40
+class BasicClientConnectionPoolDataSource40
         extends BasicClientDataSource40
         implements ConnectionPoolDataSource,
                    ClientConnectionPoolDataSourceInterface {

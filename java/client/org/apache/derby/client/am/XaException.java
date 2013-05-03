@@ -29,45 +29,6 @@ public class XaException extends XAException implements Diagnosable {
 
     //-----------------constructors-----------------------------------------------
 
-    public XaException(LogWriter logWriter) {
-        super();
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public XaException(LogWriter logWriter, Throwable throwable) {
-        super();
-        initCause(throwable);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public XaException(LogWriter logWriter, int errcode) {
-        super();
-        errorCode = errcode;
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public XaException(LogWriter logWriter, Throwable throwable, int errcode) {
-        super();
-        errorCode = errcode;
-        initCause(throwable);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
-    public XaException(LogWriter logWriter, String s) {
-        super(s);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
-
     public XaException(LogWriter logWriter, Throwable throwable, String s) {
         super(s);
         initCause(throwable);
@@ -82,15 +43,6 @@ public class XaException extends XAException implements Diagnosable {
 
     public void printTrace(PrintWriter printWriter, String header) {
         ExceptionFormatter.printTrace(this, printWriter, header);
-    }
-
-    // Return a single XaException without the "next" pointing to another SQLException.
-    // Because the "next" is a private field in java.sql.SQLException,
-    // we have to create a new XaException in order to break the chain with "next" as null.
-    XaException copyAsUnchainedXAException(LogWriter logWriter) {
-        XaException xae = new XaException(logWriter, getCause(), getMessage());
-        xae.errorCode = this.errorCode;
-        return xae;
     }
 }
 

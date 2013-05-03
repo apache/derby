@@ -29,8 +29,8 @@ import org.apache.derby.client.am.SqlException;
 // Performs character conversions as required to send and receive PROTOCOL control data.
 // User data uses the JVM's built in converters, i18n.jar,
 
-public abstract class CcsidManager {
-    public byte space_; // ' ' character
+abstract class CcsidManager {
+    byte space_; // ' ' character
     byte dot_;   // '.' character
 
     // Byte array used to convert numbers into
@@ -43,7 +43,7 @@ public abstract class CcsidManager {
     byte[] numToSnaRequiredCrrtknChar_;
 
     /* DRDA CCSID levels for UTF8 and EBCDIC */
-    public static final int UTF8_CCSID = 1208;
+    static final int UTF8_CCSID = 1208;
     
     CcsidManager(byte space,
                  byte dot,

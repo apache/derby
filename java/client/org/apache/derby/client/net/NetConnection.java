@@ -59,7 +59,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 public class NetConnection extends ClientConnection {
     
     // Use this to get internationalized strings...
-    protected static final MessageUtil msgutil = SqlException.getMessageUtil();
+    private static final MessageUtil msgutil = SqlException.getMessageUtil();
 
     protected NetAgent netAgent_;
     //contains a reference to the PooledConnection from which this created 
@@ -69,9 +69,6 @@ public class NetConnection extends ClientConnection {
     //appropriate events.
     private final ClientPooledConnection pooledConnection_;
     private final boolean closeStatementsOnClose;
-
-    // For XA Transaction
-    protected int pendingEndXACallinfoOffset_ = -1;
 
     //-----------------------------state------------------------------------------
 
@@ -92,14 +89,14 @@ public class NetConnection extends ClientConnection {
     protected int targetAgent_ = NetConfiguration.MGRLVL_7;  //01292003jev monitoring
     protected int targetCmntcpip_ = NetConfiguration.MGRLVL_5;
     protected int targetRdb_ = NetConfiguration.MGRLVL_7;
-    public int targetSecmgr_ = NetConfiguration.MGRLVL_7;
+    int targetSecmgr_ = NetConfiguration.MGRLVL_7;
     protected int targetCmnappc_ = NetConfiguration.MGRLVL_NA;  //NA since currently not used by net
     protected int targetXamgr_ = NetConfiguration.MGRLVL_7;
     protected int targetSyncptmgr_ = NetConfiguration.MGRLVL_NA;
     protected int targetRsyncmgr_ = NetConfiguration.MGRLVL_NA;
     protected int targetUnicodemgr_ = CcsidManager.UTF8_CCSID;
 
-    String extnam_;
+    private String extnam_;
 
     // Server Class Name of the target server returned in excsatrd.
     // Again this is something which the driver is not currently using
@@ -108,28 +105,22 @@ public class NetConnection extends ClientConnection {
     // the database meta data object will make use of this
     // for example, the product id (prdid) would give this driver an idea of
     // what type of sevrer it is connected to.
-    public String targetSrvclsnm_;
-
-    // Server Name of the target server returned in excsatrd.
-    // Again this is something which we don't currently use but
-    // keep it in case we want to log it in some problem determination
-    // trace/dump later.
-    protected String targetSrvnam_;
+    String targetSrvclsnm_;
 
     // Server Product Release Level of the target server returned in excsatrd.
     // specifies the procuct release level of a ddm server.
     // Again this is something which we don't currently use but
     // keep it in case we want to log it in some problem determination
     // trace/dump later.
-    public String targetSrvrlslv_;
+    String targetSrvrlslv_;
 
     // Keys used for encryption.
-    transient byte[] publicKey_;
+    private transient byte[] publicKey_;
     private transient byte[] targetPublicKey_;
 
     // Seeds used for strong password substitute generation (USRSSBPWD)
-    transient byte[] sourceSeed_;   // Client seed
-    transient byte[] targetSeed_;   // Server seed
+    private transient byte[] sourceSeed_;   // Client seed
+    private transient byte[] targetSeed_;   // Server seed
 
     // Product-Specific Data (prddta) sent to the server in the accrdb command.
     // The prddta has a specified format.  It is saved in case it is needed again
@@ -143,16 +134,16 @@ public class NetConnection extends ClientConnection {
 
     // Correlation Token of the source sent to the server in the accrdb.
     // It is saved like the prddta in case it is needed for a connect reflow.
-    public byte[] crrtkn_;
+    byte[] crrtkn_;
 
     // The Secmec used by the target.
     // It contains the negotiated security mechanism for the connection.
     // Initially the value of this is 0.  It is set only when the server and
     // the target successfully negotiate a security mechanism.
-    int targetSecmec_;
+    private int targetSecmec_;
 
     // the security mechanism requested by the application
-    protected int securityMechanism_;
+    private int securityMechanism_;
 
     // stored the password for deferred reset only.
     private transient char[] deferredResetPassword_ = null;
@@ -180,16 +171,15 @@ public class NetConnection extends ClientConnection {
     protected byte[] cnntkn_ = null;
 
     protected NetXAResource xares_ = null;
-    private HashMap<Xid, NetIndoubtTransaction> indoubtTransactions_ = null;
+    private List<Xid> indoubtTransactions_ = null;
     protected int currXACallInfoOffset_ = 0;
-    private short seqNo_ = 1;
 
     // Flag to indicate a read only transaction
     protected boolean readOnlyTransaction_ = true;
 
     //---------------------constructors/finalizer---------------------------------
 
-    public NetConnection(NetLogWriter netLogWriter,
+    NetConnection(NetLogWriter netLogWriter,
                          String databaseName,
                          Properties properties) throws SqlException {
         super(netLogWriter, 0, "", -1, databaseName, properties);
@@ -197,7 +187,7 @@ public class NetConnection extends ClientConnection {
         this.closeStatementsOnClose = true;
     }
 
-    public NetConnection(
+    NetConnection(
             NetLogWriter netLogWriter,
             ClientBaseDataSourceRoot dataSource,
             String user,
@@ -210,7 +200,7 @@ public class NetConnection extends ClientConnection {
     }
 
     // For jdbc 1 connections
-    public NetConnection(NetLogWriter netLogWriter,
+    NetConnection(NetLogWriter netLogWriter,
                          int driverManagerLoginTimeout,
                          String serverName,
                          int portNumber,
@@ -235,7 +225,7 @@ public class NetConnection extends ClientConnection {
     }
 
     // For JDBC 2 Connections
-    public NetConnection(NetLogWriter netLogWriter,
+    NetConnection(NetLogWriter netLogWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
@@ -248,7 +238,7 @@ public class NetConnection extends ClientConnection {
         initialize(password, dataSource, isXAConn);
     }
 
-    public NetConnection(NetLogWriter netLogWriter,
+    NetConnection(NetLogWriter netLogWriter,
                          String ipaddr,
                          int portNumber,
                          ClientBaseDataSourceRoot dataSource,
@@ -287,7 +277,7 @@ public class NetConnection extends ClientConnection {
      * @throws             SqlException
      */
     
-    public NetConnection(NetLogWriter netLogWriter,
+    NetConnection(NetLogWriter netLogWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
@@ -333,7 +323,7 @@ public class NetConnection extends ClientConnection {
 
     // preferably without password in the method signature.
     // We can probally get rid of flowReconnect method.
-    public void resetNetConnection(LogWriter logWriter)
+    private void resetNetConnection(LogWriter logWriter)
             throws SqlException {
         super.resetConnection(logWriter);
         //----------------------------------------------------
@@ -341,7 +331,6 @@ public class NetConnection extends ClientConnection {
         // change and can be used to check secmec support.
 
         targetSrvclsnm_ = null;
-        targetSrvnam_ = null;
         targetSrvrlslv_ = null;
         publicKey_ = null;
         targetPublicKey_ = null;
@@ -371,26 +360,12 @@ public class NetConnection extends ClientConnection {
         resetNetConnection(logWriter);
     }
 
-    List getSpecialRegisters() {
-        if (xares_ != null) {
-            return xares_.getSpecialRegisters();
-        } else {
-            return null;
-        }
-    }
-
-    public void addSpecialRegisters(String s) {
-        if (xares_ != null) {
-            xares_.addSpecialRegisters(s);
-        }
-    }
-
-    protected void completeReset(boolean isDeferredReset)
+    private void completeReset(boolean isDeferredReset)
             throws SqlException {
         super.completeReset(isDeferredReset, closeStatementsOnClose, xares_);
     }
 
-    public final void flowConnect(String password,
+    private void flowConnect(String password,
                             int securityMechanism) throws SqlException {
         netAgent_ = (NetAgent) super.agent_;
         constructExtnam();
@@ -474,7 +449,7 @@ public class NetConnection extends ClientConnection {
         }
     }
     
-    protected final void flowSimpleConnect() throws SqlException {
+    private void flowSimpleConnect() throws SqlException {
         netAgent_ = (NetAgent) super.agent_;
         constructExtnam();
         // these calls need to be after newing up the agent
@@ -537,7 +512,8 @@ public class NetConnection extends ClientConnection {
         }
     }
 
-    protected boolean flowReconnect(String password, int securityMechanism) throws SqlException {
+    private boolean flowReconnect(String password, int securityMechanism)
+            throws SqlException {
         constructExtnam();
         // these calls need to be after newing up the agent
         // because they require the ccsid manager
@@ -597,12 +573,8 @@ public class NetConnection extends ClientConnection {
         }
     }
 
-    protected byte[] getCnnToken() {
+    private byte[] getCnnToken() {
         return cnntkn_;
-    }
-
-    protected short getSequenceNumber() {
-        return ++seqNo_;
     }
 
     //--------------------------------flow methods--------------------------------
@@ -935,10 +907,9 @@ public class NetConnection extends ClientConnection {
     //-------------------parse callback methods--------------------------------
 
     void setServerAttributeData(String srvclsnm,
-                                String srvnam,
                                 String srvrlslv) {
         targetSrvclsnm_ = srvclsnm;      // since then can be optionally returned from the
-        targetSrvnam_ = srvnam;          // server
+                                         // server
         targetSrvrlslv_ = srvrlslv;
     }
 
@@ -1626,7 +1597,7 @@ public class NetConnection extends ClientConnection {
     }
 
     public void setIndoubtTransactions(
-            HashMap<Xid, NetIndoubtTransaction> indoubtTransactions) {
+            List<Xid> indoubtTransactions) {
 
         if (isXAConnection_) {
             if (indoubtTransactions_ != null) {
@@ -1636,13 +1607,9 @@ public class NetConnection extends ClientConnection {
         }
     }
 
-    public NetIndoubtTransaction getIndoubtTransaction(Xid xid) {
-        return indoubtTransactions_.get(xid);
-    }
-
-    public Xid[] getIndoubtTransactionIds() {
+    Xid[] getIndoubtTransactionIds() {
         Xid[] result = new Xid[0];
-        return indoubtTransactions_.keySet().toArray(result);
+        return indoubtTransactions_.toArray(result);
     }
 
     protected void setReadOnlyTransactionFlag(boolean flag) {
@@ -1650,10 +1617,8 @@ public class NetConnection extends ClientConnection {
     }
 
     public SectionManager newSectionManager
-            (String collection,
-             Agent agent,
-             String databaseName) {
-        return new SectionManager(collection, agent, databaseName);
+            (Agent agent) {
+        return new SectionManager(agent);
     }
 
     public boolean willAutoCommitGenerateFlow() {
@@ -1693,15 +1658,6 @@ public class NetConnection extends ClientConnection {
         return targetSrvclsnm_;
     }
 
-    public void doResetNow() throws SqlException {
-        if (!resetConnectionAtFirstSql_) {
-            return; // reset not needed
-        }
-        agent_.beginWriteChainOutsideUOW();
-        agent_.flowOutsideUOW();
-        agent_.endReadChain();
-    }
-    
     /**
      * @return Returns the connectionNull.
      */
@@ -1721,7 +1677,7 @@ public class NetConnection extends ClientConnection {
      *
      * @return true if QRYCLSIMP is fully supported
      */
-    public final boolean serverSupportsQryclsimp() {
+    final boolean serverSupportsQryclsimp() {
         NetDatabaseMetaData metadata =
             (NetDatabaseMetaData) databaseMetaData_;
         return metadata.serverSupportsQryclsimp();
@@ -1797,18 +1753,6 @@ public class NetConnection extends ClientConnection {
         return metadata.serverSupportsTimestampNanoseconds();
     }
     
-    /**
-     * Check whether the server supports boolean values
-     * @return true if boolean values are supported
-     */
-    protected final boolean serverSupportsBooleanValues() {
-
-        NetDatabaseMetaData metadata =
-            (NetDatabaseMetaData) databaseMetaData_;
-
-        return metadata.serverSupportsBooleanValues();
-    }
-
     /**
      * Returns if a transaction is in process
      * @return open

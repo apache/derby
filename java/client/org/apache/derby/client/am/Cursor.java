@@ -312,11 +312,11 @@ public abstract class Cursor {
     
     //---------------------------cursor positioning-------------------------------
 
-    public final void markNextRowPosition() {
+    protected final void markNextRowPosition() {
         nextRowPosition_ = position_;
     }
 
-    public final void makeNextRowPositionCurrent() {
+    protected final void makeNextRowPositionCurrent() {
         currentRowPosition_ = nextRowPosition_;
     }
 
@@ -333,7 +333,7 @@ public abstract class Cursor {
     // Direct conversions only, cross conversions are handled by another set of getters.
 
     // Build a Java boolean from a 1-byte signed binary representation.
-    private final boolean get_BOOLEAN(int column) {
+    private boolean get_BOOLEAN(int column) {
         if ( SignedBinary.getByte
              ( dataBuffer_, columnDataPosition_[column - 1] ) == 0 )
         { return false; }

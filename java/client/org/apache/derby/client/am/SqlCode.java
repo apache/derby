@@ -31,7 +31,7 @@ package org.apache.derby.client.am;
 public class SqlCode {
     private int code_;
 
-    public SqlCode(int code) {
+    SqlCode(int code) {
         code_ = code;
     }
 
@@ -44,16 +44,10 @@ public class SqlCode {
         return code_;
     }
 
-    public final static SqlCode invalidCommitOrRollbackUnderXA = new SqlCode(-4200);
-
-    public final static SqlCode invalidSetAutoCommitUnderXA = new SqlCode(-4201);
-
     public final static SqlCode queuedXAError = new SqlCode(-4203);
 
-    public final static SqlCode disconnectError = new SqlCode(40000);
+    final static SqlCode disconnectError = new SqlCode(40000);
 
-    public final static SqlCode undefinedError = new SqlCode(-99999);
-    
     /** SQL code for SQL state 02000 (end of data). DRDA does not
      * specify the SQL code for this SQL state, but Derby uses 100. */
     public final static SqlCode END_OF_DATA = new SqlCode(100);

@@ -40,23 +40,20 @@ import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.shared.common.i18n.MessageUtil;
 
 public class NetAgent extends Agent {
     //---------------------navigational members-----------------------------------
 
     // All these request objects point to the same physical request object.
-    public ConnectionRequestInterface connectionRequest_;
-    public NetConnectionRequest packageRequest_;
-    public StatementRequestInterface statementRequest_;
-    public ResultSetRequestInterface resultSetRequest_;
+    ConnectionRequestInterface connectionRequest_;
+    StatementRequestInterface statementRequest_;
+    ResultSetRequestInterface resultSetRequest_;
 
     // All these reply objects point to the same physical reply object.
-    public ConnectionReply connectionReply_;
-    public ConnectionReply packageReply_;
-    public StatementReply statementReply_;
-    public ResultSetReply resultSetReply_;
+    ConnectionReply connectionReply_;
+    private ConnectionReply packageReply_;
+    StatementReply statementReply_;
+    ResultSetReply resultSetReply_;
 
     //---------------------navigational cheat-links-------------------------------
     // Cheat-links are for convenience only, and are not part of the conceptual model.
@@ -69,29 +66,29 @@ public class NetAgent extends Agent {
 
     // Alias for (Request) super.*Request, all in one
     // In the case of the NET implementation, these all point to the same physical request object.
-    protected Request request_;
-    public NetConnectionRequest netConnectionRequest_;
-    public NetPackageRequest netPackageRequest_;
-    public NetStatementRequest netStatementRequest_;
-    public NetResultSetRequest netResultSetRequest_;
+    private Request request_;
+    NetConnectionRequest netConnectionRequest_;
+    private NetPackageRequest netPackageRequest_;
+    private NetStatementRequest netStatementRequest_;
+    private NetResultSetRequest netResultSetRequest_;
 
     // Alias for (Reply) super.*Reply, all in one.
     // In the case of the NET implementation, these all point to the same physical reply object.
-    protected Reply reply_;
-    public NetConnectionReply netConnectionReply_;
-    public NetPackageReply netPackageReply_;
-    public NetStatementReply netStatementReply_;
-    public NetResultSetReply netResultSetReply_;
+    private Reply reply_;
+    NetConnectionReply netConnectionReply_;
+    private NetPackageReply netPackageReply_;
+    private NetStatementReply netStatementReply_;
+    private NetResultSetReply netResultSetReply_;
 
     //-----------------------------state------------------------------------------
 
     Socket socket_;
-    InputStream rawSocketInputStream_;
-    OutputStream rawSocketOutputStream_;
+    private InputStream rawSocketInputStream_;
+    private OutputStream rawSocketOutputStream_;
 
     String server_;
     int port_;
-    int clientSSLMode_;
+    private int clientSSLMode_;
 
     private EbcdicCcsidManager ebcdicCcsidManager_;
     private Utf8CcsidManager utf8CcsidManager_;
@@ -99,19 +96,21 @@ public class NetAgent extends Agent {
     
     // TODO: Remove target? Keep just one CcsidManager?
     //public CcsidManager targetCcsidManager_;
-    public Typdef typdef_;
-    public Typdef targetTypdef_;
-    public Typdef originalTargetTypdef_; // added to support typdef overrides
+    Typdef typdef_;
+    Typdef targetTypdef_;
+    Typdef originalTargetTypdef_; // added to support typdef overrides
 
-    protected int svrcod_;
+    private int svrcod_;
 
-    public int orignalTargetSqlam_ = NetConfiguration.MGRLVL_7;
-    public int targetSqlam_ = orignalTargetSqlam_;
+    int orignalTargetSqlam_ = NetConfiguration.MGRLVL_7;
+    int targetSqlam_ = orignalTargetSqlam_;
 
-    public SqlException exceptionOpeningSocket_ = null;
-    public SqlException exceptionConvertingRdbnam = null;
+    SqlException exceptionOpeningSocket_ = null;
+    SqlException exceptionConvertingRdbnam = null;
     
     //---------------------constructors/finalizer---------------------------------
+
+    // Only used for testing
     public NetAgent(NetConnection netConnection,
                     LogWriter logWriter) throws SqlException {
         super(netConnection, logWriter);
@@ -209,7 +208,6 @@ public class NetAgent extends Agent {
 
             resultSetRequest_ = (ResultSetRequestInterface) netResultSetRequest_;
             statementRequest_ = (StatementRequestInterface) netStatementRequest_;
-            packageRequest_ = (NetConnectionRequest) netPackageRequest_;
             connectionRequest_ = (ConnectionRequestInterface) netConnectionRequest_;
         } else {
             netResultSetReply_ = new NetResultSetReply(this, netConnection_.commBufferSize_);
@@ -233,7 +231,6 @@ public class NetAgent extends Agent {
 
             resultSetRequest_ = (ResultSetRequestInterface) netResultSetRequest_;
             statementRequest_ = (StatementRequestInterface) netStatementRequest_;
-            packageRequest_ = (NetConnectionRequest) netPackageRequest_;
             connectionRequest_ = (ConnectionRequestInterface) netConnectionRequest_;
         }
     }
@@ -275,7 +272,7 @@ public class NetAgent extends Agent {
         svrcod_ = CodePoint.SVRCOD_INFO;
     }
 
-    int getSvrcod() {
+    private int getSvrcod() {
         return svrcod_;
     }
 
@@ -398,7 +395,7 @@ public class NetAgent extends Agent {
         return timeout;
     }
 
-    protected void sendRequest() throws DisconnectException {
+    private void sendRequest() throws DisconnectException {
         try {
             request_.flush(rawSocketOutputStream_);
         } catch (IOException e) {
@@ -426,7 +423,7 @@ public class NetAgent extends Agent {
         rawSocketOutputStream_ = outputStream;
     }
 
-    public void throwCommunicationsFailure(Throwable cause) 
+    void throwCommunicationsFailure(Throwable cause)
         throws DisconnectException {
         //DisconnectException
         //accumulateReadExceptionAndDisconnect
@@ -521,7 +518,7 @@ public class NetAgent extends Agent {
     /**
      * Switches the current CCSID manager to UTF-8
      */
-    public void switchToUtf8CcsidMgr() {
+    void switchToUtf8CcsidMgr() {
         currentCcsidManager_ = utf8CcsidManager_;
     }
     
@@ -530,19 +527,6 @@ public class NetAgent extends Agent {
      */
     public void switchToEbcdicMgr() {
         currentCcsidManager_ = ebcdicCcsidManager_;
-    }
-
-    public String convertToStringTcpIpAddress(int tcpIpAddress) {
-        StringBuffer ipAddrBytes = new StringBuffer();
-        ipAddrBytes.append((tcpIpAddress >> 24) & 0xff);
-        ipAddrBytes.append(".");
-        ipAddrBytes.append((tcpIpAddress >> 16) & 0xff);
-        ipAddrBytes.append(".");
-        ipAddrBytes.append((tcpIpAddress >> 8) & 0xff);
-        ipAddrBytes.append(".");
-        ipAddrBytes.append((tcpIpAddress) & 0xff);
-
-        return ipAddrBytes.toString();
     }
 
     protected int getPort() {

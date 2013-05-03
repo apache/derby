@@ -47,15 +47,13 @@ public class ClientClob extends Lob implements Clob {
 
     // Only used for input purposes.  For output, each getXXXStream call
     // must generate an independent stream.
-    protected InputStream asciiStream_ = null;
-    protected InputStream unicodeStream_ = null;
-    protected Reader characterStream_ = null;
+    private InputStream asciiStream_ = null;
+    private InputStream unicodeStream_ = null;
+    private Reader characterStream_ = null;
 
     // used for input
     // Therefore, we always convert a String to UTF-8 before we flow it for input
-    protected byte[] utf8String_;
-
-    protected String encoding_ = "UNICODE";
+    private byte[] utf8String_;
 
     //---------------------constructors/finalizer---------------------------------
     public ClientClob(Agent agent, String string) {
@@ -147,7 +145,7 @@ public class ClientClob extends Lob implements Clob {
      * @param encoding encoding to use for characters. Only "ISO-8859-1" is
      *      allowed.
      */
-    public ClientClob(Agent agent, InputStream inputStream, String encoding)
+    ClientClob(Agent agent, InputStream inputStream, String encoding)
             throws SqlException {
 
         this(agent,
@@ -165,7 +163,7 @@ public class ClientClob extends Lob implements Clob {
 
     // CTOR for character stream input
     // THE ENCODING IS ASSUMED TO BE "UTF-16BE"
-    public ClientClob(Agent agent, Reader reader, int length) {
+    ClientClob(Agent agent, Reader reader, int length) {
 
         this(agent,
              false);
@@ -199,7 +197,7 @@ public class ClientClob extends Lob implements Clob {
      * @param agent
      * @param reader the data to insert
      */
-    public ClientClob(Agent agent, Reader reader) {
+    ClientClob(Agent agent, Reader reader) {
 
         this(agent,
              isLayerBStreamingPossible( agent ) );
@@ -622,7 +620,8 @@ public class ClientClob extends Lob implements Clob {
         }
     }
 
-    public int setStringX(long pos, String str, int offset, int len) throws SqlException {
+    int setStringX(long pos, String str, int offset, int len)
+            throws SqlException {
         if ((int) pos <= 0 ) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_BAD_POSITION), pos);
@@ -707,7 +706,7 @@ public class ClientClob extends Lob implements Clob {
                     //The Lob is locator enabled. Return an instance of the
                     //Locator enabled Clob specific OutputStream implementation.
                     outStream = new ClobLocatorOutputStream
-                            (agent_.connection_, this, pos);
+                            (this, pos);
                 }
                 else {
                     //The Lob is not locator enabled.
@@ -990,45 +989,6 @@ public class ClientClob extends Lob implements Clob {
                 "String", "UTF8 byte[]", e);
         }
     }
-
-    // auxiliary method for position (Clob, long)
-    protected ClientClob createClobWrapper(Clob clob) throws SqlException {
-        long length;
-        Reader rdr;
-
-        try {
-            length = clob.length();
-        } catch (SQLException e) {
-            throw new SqlException(e);
-        }
-
-        if (length > Integer.MAX_VALUE) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId(SQLState.BLOB_TOO_LARGE_FOR_CLIENT),
-                length, Integer.MAX_VALUE);
-        }
-
-        try {
-            rdr = clob.getCharacterStream();
-        } catch (SQLException e) {
-            throw SqlException.javaException(agent_.logWriter_, e);
-        }
-
-        return new ClientClob(this.agent_, rdr, (int) length);
-    }
-
-    public void convertFromAsciiToCharacterStream() throws SqlException {
-        try {
-            characterStream_ =
-                    new InputStreamReader(asciiStream_, "ISO-8859-1");
-            dataType_ = CHARACTER_STREAM;
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                "ISO-8859-1", "CharacterStream", e);
-        }
-    }
-
 
     /**
      * Reinitialize the value of this CLOB.
