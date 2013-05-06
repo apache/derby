@@ -25,8 +25,14 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.db.OptimizerTrace;
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
+
+import org.apache.derby.impl.sql.compile.DefaultOptTrace;
 
 /**
  * <p>
@@ -65,13 +71,50 @@ public	class   OptimizerTracer  implements OptionalTool
 
     /**
      * <p>
-     * Turns on optimizer tracing.
+     * Turns on optimizer tracing. May take optional parameters:
      * </p>
+     *
+     * <ul>
+     * <li>custom, $class - If the first arg is the "custom" literal, then the next arg must be
+     * the name of a class which implements org.apache.derby.iapi.sql.compile.OptTrace
+     * and which has a 0-arg constructor. The 0-arg constructor is called and the resulting
+     * OptTrace object is plugged in to trace the optimizer.</li>
+     * </ul>
      */
     public  void    loadTool( String... configurationParameters )
         throws SQLException
     {
-        OptimizerTrace.setOptimizerTrace( true );
+        OptTrace    tracer;
+
+        if ( (configurationParameters == null) || (configurationParameters.length == 0) )
+        {
+            tracer = new DefaultOptTrace();
+        }
+        else if ( "custom".equals( configurationParameters[ 0 ] ) )
+        {
+            if ( configurationParameters.length != 2 )
+            { throw wrap( LocalizedResource.getMessage( "OT_BadLoadUnloadArgs" ) ); }
+
+            String  customOptTraceName = configurationParameters[ 1 ];
+
+            try {
+                CompilerContext cc = (CompilerContext) ContextService.getContext( CompilerContext.CONTEXT_ID );
+                ClassFactory    classFactory = cc.getClassFactory();
+
+                tracer = (OptTrace) classFactory.loadApplicationClass( customOptTraceName ).newInstance();
+            }
+            catch (InstantiationException cnfe) { throw cantInstantiate( customOptTraceName ); }
+            catch (ClassNotFoundException cnfe) { throw cantInstantiate( customOptTraceName ); }
+            catch (IllegalAccessException cnfe) { throw cantInstantiate( customOptTraceName ); }
+            catch (Throwable t) { throw wrap( t ); }
+        }
+        else { throw wrap( LocalizedResource.getMessage( "OT_BadLoadUnloadArgs" ) ); }
+                     
+        OptimizerTrace.setOptimizerTracer( tracer );
+    }
+    private SQLException    cantInstantiate( String className )
+    {
+        return wrap( LocalizedResource.getMessage( "OT_CantInstantiateClass", className ) );
     }
 
     /**
@@ -126,6 +169,13 @@ public	class   OptimizerTracer  implements OptionalTool
     private SQLException    wrap( Throwable t )
     {
         return new SQLException( t.getMessage(), t );
+    }
+    
+    private SQLException    wrap( String errorMessage )
+    {
+        String  sqlState = org.apache.derby.shared.common.reference.SQLState.JAVA_EXCEPTION.substring( 0, 5 );
+
+        return new SQLException( errorMessage, sqlState );
     }
 }
 

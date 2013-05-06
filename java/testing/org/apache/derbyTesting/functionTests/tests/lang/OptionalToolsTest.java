@@ -514,4 +514,102 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Test loading a customized optimizer tracer. See DERBY-6211.
+     * </p>
+     */
+    public void test_04_customOptimizerTrace() throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        goodStatement
+            (
+             dboConnection,
+             "create function fullTrace() returns varchar( 32672 )\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.DummyOptTrace.fullTrace'\n"
+             );
+
+        // install a custom tracer for the optimizer
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool\n" +
+             "(\n" +
+             "    'optimizerTracing', true, 'custom',\n" +
+             "    'org.apache.derbyTesting.functionTests.tests.lang.DummyOptTrace'\n" +
+             ")\n"
+             );
+        // run a couple queries
+        goodStatement
+            (
+             dboConnection,
+             "select tablename from sys.systables where 1=2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "select columnname from sys.syscolumns where 1=2"
+             );
+        // unload the tracer
+        goodStatement
+            (
+             dboConnection,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', false )"
+             );
+
+        // verify that it actually did something
+        assertResults
+            (
+             dboConnection,
+             "values fullTrace()",
+             new String[][]
+             {
+                 { "<text>select tablename from sys.systables where 1=2</text><text>select columnname from sys.syscolumns where 1=2</text><text>call syscs_util.syscs_register_tool( 'optimizerTracing', false )</text>" },
+             },
+             false
+             );
+
+        // drop the function
+        goodStatement
+            (
+             dboConnection,
+             "drop function fullTrace"
+             );
+
+        // no classname given
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'custom' )"
+             );
+        // class can't be found
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'custom', 'foo.bar.Wibble' )"
+             );
+        // error because class doesn't implement OptTrace
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'custom', 'java.lang.String' )"
+             );
+        // error because class doesn't have a 0-arg constructor
+        expectExecutionError
+            (
+             dboConnection,
+             UNEXPECTED_USER_EXCEPTION,
+             "call syscs_util.syscs_register_tool\n" +
+             "(\n" +
+             "    'optimizerTracing', true, 'custom',\n" +
+             "    'org.apache.derbyTesting.functionTests.tests.lang.DummyOptTrace$BadSubclass'\n" +
+             ")\n"
+             );
+    }
+
 }
