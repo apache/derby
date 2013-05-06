@@ -89,6 +89,13 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             "var_type SMALLINT NOT NULL " +
             ")";
 
+    private final static String DERBY_6045_DATA_TABLE2 = "MT_GAF_TOP_LEVEL_TERM_COUNTS";
+    private final static String CREATE_DERBY_6045_DATA_TABLE2 =
+            "CREATE TABLE " + DERBY_6045_DATA_TABLE2 +
+            "(mt BIGINT NOT NULL, term BIGINT NOT NULL, "+
+            "term_index INTEGER NOT NULL, " +
+            "usage_count BIGINT NOT NULL )";
+
     private final static String CREATE_DATA_TABLE =
         "CREATE TABLE " + DATA_TABLE + " (" +
         "ID BIGINT NOT NULL ," +
@@ -233,6 +240,89 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         "insert into d3603_c (c_id, d_id, t_o, t_i) values (2, 2, 1, 1)",
         "insert into d3603_c (c_id, d_id, t_o, t_i) values (21, 1, 1, 1)",
     };
+
+    // DERBY-6045 (in list multi-probe by primary key not chosen on tables 
+    //  with >256 rows)
+    // Following test shows that we use index scan for DELETE statement
+    //  on a table with appropriate indexes. This happens with or without
+    //  update statistics and with or without parameterized statement.
+    public void testDerby6045DeleteTest()
+        throws SQLException
+    {
+            Statement s = createStatement();
+            s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+            dropTable(DERBY_6045_DATA_TABLE2);
+            // Create the test table, primary key and insert data
+            s.executeUpdate(CREATE_DERBY_6045_DATA_TABLE2);
+            s.executeUpdate("ALTER TABLE " + DERBY_6045_DATA_TABLE2 +
+                    " ADD CONSTRAINT kb_mt_gaf_top_level_term_counts_pk" + 
+                    " PRIMARY KEY (mt, term, term_index)");
+            s.executeUpdate("CREATE INDEX " +
+                    "kb_mt_gaf_top_level_term_counts_mt_index "+
+            		"ON " + DERBY_6045_DATA_TABLE2+"(mt)");
+            s.executeUpdate("CREATE INDEX " +
+            		"kb_mt_gaf_top_level_term_counts_term_index "+
+            		"ON " + DERBY_6045_DATA_TABLE2+"(term)");
+            //insert requested number of rows in the table
+            PreparedStatement ps = s.getConnection().prepareStatement(
+                "insert into " + DERBY_6045_DATA_TABLE2 +
+                " VALUES (?, ?, ?, ?)");
+            int numberOfRows = 10000;
+            for (int i=1; i<=numberOfRows; i++) {
+                ps.setInt(1, i);
+                ps.setInt(2, i);
+                ps.setInt(3, i);
+                ps.setInt(4, i);
+                ps.executeUpdate();
+            }
+            //do not run update statisitcs and do not use PreparedStatement
+            deleteRows(false, false);
+            //do not run update statisitcs but do use PreparedStatement
+            deleteRows(false, true);
+            //run update statisitcs but do not use PreparedStatement
+            deleteRows(true, false);
+            //run update statisitcs and use PreparedStatement
+            deleteRows(true, true);
+
+            dropTable(DERBY_6045_DATA_TABLE2);
+            ps.close();
+            s.close();
+    }
+
+    void deleteRows(boolean runUpdateStatistics,
+            boolean useParameterMarkers) 
+        throws SQLException
+    {
+        Statement s;
+        PreparedStatement ps;
+        RuntimeStatisticsParser rtsp;
+
+        s = createStatement();
+        if (runUpdateStatistics) {
+              s.execute("call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP', 'MT_GAF_TOP_LEVEL_TERM_COUNTS', null)");
+        }
+
+        if (useParameterMarkers) {
+            ps = prepareStatement("DELETE FROM MT_GAF_TOP_LEVEL_TERM_COUNTS WHERE (term = ?) ");
+            ps.setInt(1,1);
+            ps.execute();
+        } else {
+        	s.execute("DELETE FROM MT_GAF_TOP_LEVEL_TERM_COUNTS WHERE (term = 2) ");
+        }
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+
+        if (useParameterMarkers) {
+            ps = prepareStatement("DELETE FROM mt_gaf_top_level_term_counts WHERE (term = ?) OR (mt = ?)");
+      	    ps.setInt(1,3);
+            ps.setInt(2,4);
+            ps.execute();
+        } else {
+        	s.execute("DELETE FROM mt_gaf_top_level_term_counts WHERE (term = 5) OR (mt = 6)");
+        }
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedIndexScan());
+    }
 
     /**
      * Executes three different types of queries ("strategies") repeatedly
