@@ -21,12 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.List;
 
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -163,12 +161,6 @@ public class CreateViewNode extends DDLStatementNode
 			queryExpression.treePrint(depth + 1);
 		}
 	}
-
-	// accessors
-
-    public final List getProviderInfo() {
-        return ArrayUtil.asReadOnlyList(colInfos);
-    }
 
 	// We inherit the generate() method from DDLStatementNode.
 

@@ -35,8 +35,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.depend.Dependency;
@@ -47,11 +45,9 @@ import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.impl.sql.compile.CreateViewNode;
 
 /**
  * The dependency manager tracks needs that dependents have of providers.
@@ -69,7 +65,7 @@ import org.apache.derby.impl.sql.compile.CreateViewNode;
  * Note that stored dependencies should not be accessed while holding the
  * monitor of {@code this}, as this may result in deadlocks. So far the need
  * for synchronization across both in-memory and stored dependencies hasn't
- * occured.
+ * occurred.
  */
 public class BasicDependencyManager implements DependencyManager {
   
@@ -334,6 +330,13 @@ public class BasicDependencyManager implements DependencyManager {
 		// if we passed in table descriptor to this function with a bit map,
 		// we really need this, we generate the bitmaps on the fly and update
 		// SYSDEPENDS
+        //
+        // Note: Since the "previous version of server" mentioned above must
+        // be a version that predates Derby, and we don't support upgrade from
+        // those versions, we no longer have code to generate the column
+        // dependency list on the fly. Instead, an assert has been added to
+        // verify that we always have a column bitmap in SYSDEPENDS if the
+        // affectedCols bitmap is non-null.
 
 		FormatableBitSet affectedCols = null, subsetCols = null;
 		if (p instanceof TableDescriptor)
@@ -363,60 +366,20 @@ public class BasicDependencyManager implements DependencyManager {
 					{
 						if (dep instanceof ViewDescriptor)
 						{
-							ViewDescriptor vd = (ViewDescriptor) dep;
-							SchemaDescriptor compSchema;
-							compSchema = dd.getSchemaDescriptor(vd.getCompSchemaId(), null);
-							CompilerContext newCC = lcc.pushCompilerContext(compSchema);
-							Parser	pa = newCC.getParser();
-
-							// Since this is always nested inside another SQL
-							// statement, so topLevel flag should be false
-							CreateViewNode cvn = (CreateViewNode)pa.parseStatement(
-												vd.getViewText());
-
-							// need a current dependent for bind
-							newCC.setCurrentDependent(dep);
-							cvn.bindStatement();
-							lcc.popCompilerContext(newCC);
-
-							boolean		interferent = false;
-
-                            Iterator it = cvn.getProviderInfo().iterator();
-                            while (it.hasNext())
-							{
-                                ProviderInfo info = (ProviderInfo) it.next();
-                                Provider provider = (Provider) info.
-													getDependableFinder().
-													getDependable(dd,
-                                                    info.getObjectId());
-								if (provider instanceof TableDescriptor)
-								{
-									TableDescriptor tab = (TableDescriptor)provider;
-									FormatableBitSet colMap = tab.getReferencedColumnMap();
-									if (colMap == null)
-										continue;
-									// if later on an error is raised such as in
-									// case of interference, this dependency line
-									// upgrade will not happen due to rollback
-									tab.setReferencedColumnMap(null);
-									dropDependency(lcc, vd, tab);
-									tab.setReferencedColumnMap(colMap);
-									addDependency(vd, tab, lcc.getContextManager());
-
-									if (tab.getObjectID().equals(td.getObjectID()))
-									{
-                                        subsetCols.copyFrom( affectedCols );
-										subsetCols.and(colMap);
-										if (subsetCols.anySetBit() != -1)
-										{
-											interferent = true;
-											((TableDescriptor) p).setReferencedColumnMap(subsetCols);
-										}
-									}
-								}	// if provider instanceof TableDescriptor
-							}	// for providerInfos
-							if (! interferent)
-								continue;
+                            // If the table descriptor that was passed in had a
+                            // column bit map, so should the provider's table
+                            // descriptor. Views that were created with a
+                            // database version that predates Derby could lack
+                            // a bitmap in the provider and needed to
+                            // reconstruct it here by parsing and binding the
+                            // original CREATE VIEW statement. However, since
+                            // we don't support upgrade from pre-Derby versions,
+                            // this code was removed as part of DERBY-6169.
+                            if (SanityManager.DEBUG)
+                            {
+                                SanityManager.THROWASSERT("Expected view to " +
+                                        "have referenced column bitmap");
+                            }
 						}	// if dep instanceof ViewDescriptor
 						else
 							((TableDescriptor) p).setReferencedColumnMap(null);
