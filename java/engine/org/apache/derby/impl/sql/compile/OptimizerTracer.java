@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.tools.optional.OptimizerTracer
+   Derby - Class org.apache.derby.impl.sql.compile.OptimizerTracer
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,25 +19,23 @@
 
  */
 
-package org.apache.derby.impl.tools.optional;
+package org.apache.derby.impl.sql.compile;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.db.OptimizerTrace;
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 
-import org.apache.derby.impl.sql.compile.DefaultOptTrace;
-
 /**
  * <p>
- * OptionalTool to create wrapper functions and views for all of the user tables
- * in a foreign database.
+ * OptionalTool for tracing the Optimizer.
  * </p>
  */
 public	class   OptimizerTracer  implements OptionalTool
@@ -93,7 +91,7 @@ public	class   OptimizerTracer  implements OptionalTool
         else if ( "custom".equals( configurationParameters[ 0 ] ) )
         {
             if ( configurationParameters.length != 2 )
-            { throw wrap( LocalizedResource.getMessage( "OT_BadLoadUnloadArgs" ) ); }
+            { throw wrap( MessageService.getTextMessage( SQLState.LANG_BAD_OPTIONAL_TOOL_ARGS ) ); }
 
             String  customOptTraceName = configurationParameters[ 1 ];
 
@@ -108,13 +106,13 @@ public	class   OptimizerTracer  implements OptionalTool
             catch (IllegalAccessException cnfe) { throw cantInstantiate( customOptTraceName ); }
             catch (Throwable t) { throw wrap( t ); }
         }
-        else { throw wrap( LocalizedResource.getMessage( "OT_BadLoadUnloadArgs" ) ); }
+        else { throw wrap( MessageService.getTextMessage( SQLState.LANG_BAD_OPTIONAL_TOOL_ARGS ) ); }
                      
         OptimizerTrace.setOptimizerTracer( tracer );
     }
     private SQLException    cantInstantiate( String className )
     {
-        return wrap( LocalizedResource.getMessage( "OT_CantInstantiateClass", className ) );
+        return wrap( MessageService.getTextMessage( SQLState.LANG_CANT_INSTANTIATE_CLASS, className ) );
     }
 
     /**

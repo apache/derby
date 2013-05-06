@@ -3630,6 +3630,17 @@ Guide.
                 <arg>toolName</arg>
             </msg>
 
+            <msg>
+                <name>X0Y89.S</name>
+                <text>Bad arguments passed to SYSCS_UTIL.SYSCS_REGISTER_TOOL(). Please consult the Reference Manual section which describes this system procedure.</text>
+            </msg>
+
+            <msg>
+                <name>X0Y90.S</name>
+                <text>Cannot create an instance of {0}. Maybe this class is not visible on the classpath. Maybe it doesn not have a 0-arg constructor.</text>
+                <arg>className</arg>
+            </msg>
+
         </family>
 
 
