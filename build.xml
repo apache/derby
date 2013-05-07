@@ -1104,60 +1104,18 @@
   
     <delete dir="${public.api.dir}"/>
     <mkdir dir="${public.api.dir}"/>
-
-    <antcall target="public-jdbc3-api"/>
-    <antcall target="public-jdbc4-api"/>
-
-
-  </target>
-
-  <!--
-    Build the jdbc3 public api. Called by publishedapi target.
-  -->
-  <target name="public-jdbc3-api">
  
     <antcall target="publishedapi-workhorse">
-      <param name="bootClasspath" value="${java15compile.classpath}"/>
-      <param name="extraApi" value="publishedapi_jdbc3.ant"/>
+      <param name="bootClasspath" value="${java16compile.classpath}"/>
+      <param name="extraApi" value="publishedapi_jdbc.ant"/>
     </antcall>
 
   </target>
 
   <!--
-    Build the jdbc4 public api. Called by publishedapi target.
-  -->
-  <target name="public-jdbc4-api">
-
-    <move todir="${out.javadoc.dir}/jdbc3">
-      <fileset dir="${public.api.dir}"/>
-    </move>
-
-    <mkdir dir="${public.api.dir}"/>
-
-    <antcall target="publishedapi-workhorse">
-     <param name="bootClasspath" value="${java16compile.classpath}"/>
-     <param name="extraApi" value="publishedapi_jdbc4.ant"/>
-    </antcall>
-
-    <move todir="${out.javadoc.dir}/jdbc4">
-      <fileset dir="${public.api.dir}"/>
-    </move>
-
-    <mkdir dir="${public.api.dir}"/>
-
-    <move todir="${public.api.dir}/jdbc3">
-      <fileset dir="${out.javadoc.dir}/jdbc3"/>
-    </move>
-
-    <move todir="${public.api.dir}/jdbc4">
-      <fileset dir="${out.javadoc.dir}/jdbc4"/>
-    </move>
-
-  </target>
-
-  <!--
-    This target is called twice, once to build the JDBC3 public api
-    and then a second time to build the JDBC4 api.
+    This target used to be called twice, once to build the JDBC3 public api
+    and then a second time to build the JDBC4 api. Now it is only called once,
+    for the single JDBC4+ api.
 
     bootClasspath    Sensitive to JDBC level.
     extraApi         Extra files to include in the public api.
