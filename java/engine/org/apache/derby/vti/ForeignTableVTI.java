@@ -120,6 +120,7 @@ import org.apache.derby.iapi.util.IdUtil;
  * select lastName from foreignEmployee where employeeID = 2;
  * </pre>
  */
+@SuppressWarnings("deprecation")
 public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
 {
     ////////////////////////////////////////////////////////////////////////

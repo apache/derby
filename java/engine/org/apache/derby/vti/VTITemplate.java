@@ -67,6 +67,7 @@ import java.util.Map;
 	For table functions and virtual tables, the database engine only calls methods defined
 	in the JDBC 2.0 definition of java.sql.ResultSet.
  */
+@SuppressWarnings("deprecation")
 public abstract class VTITemplate   implements ResultSet
 {
     public  boolean 	isWrapperFor(Class<?> iface) throws SQLException { throw notImplemented( "isWrapperFor" ); }
@@ -91,6 +92,7 @@ public abstract class VTITemplate   implements ResultSet
     public java.sql.Time getTime(String columnName) throws SQLException { return getTime(findColumn(columnName)); }
     public java.sql.Timestamp getTimestamp(String columnName) throws SQLException { return getTimestamp(findColumn(columnName)); }
     public Object getObject(String columnName) throws SQLException { return getObject(findColumn(columnName)); }
+    public <T> T getObject(String columnName, Class<T> type) throws SQLException { return getObject(findColumn(columnName), type); }
 	public BigDecimal getBigDecimal(String columnName) throws SQLException { return getBigDecimal(findColumn(columnName)); }
 
     //
@@ -121,6 +123,7 @@ public abstract class VTITemplate   implements ResultSet
     public void clearWarnings() throws SQLException { throw notImplemented( "clearWarnings" ); }
     public String getCursorName() throws SQLException { throw notImplemented( "getCursorName" ); }
     public Object getObject(int columnIndex) throws SQLException { throw notImplemented( "getObject" ); }
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException { throw notImplemented( "getObject" ); }
     public int findColumn(String columnName) throws SQLException { throw notImplemented( "findColumn" ); }
     public java.io.Reader getCharacterStream(int columnIndex) throws SQLException { throw notImplemented( "io.Reader getCharacterStream" ); }
     public java.io.Reader getCharacterStream(String columnName) throws SQLException { throw notImplemented( "io.Reader getCharacterStream" ); }
