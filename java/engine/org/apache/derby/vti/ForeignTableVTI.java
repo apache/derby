@@ -134,7 +134,7 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
     //
     ////////////////////////////////////////////////////////////////////////
 
-    private static  HashMap _connections = new HashMap();
+    private static  HashMap<String,Connection> _connections = new HashMap<String,Connection>();
 
     private String  _foreignSchemaName;
     private String  _foreignTableName;
@@ -339,7 +339,7 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
         ( String connectionURL )
         throws SQLException
     {
-        Connection  conn = (Connection) _connections.get( connectionURL );
+        Connection  conn = _connections.get( connectionURL );
 
         if ( conn == null )
         {
