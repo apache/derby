@@ -36,6 +36,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLData;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
 import java.sql.SQLWarning;
@@ -285,7 +286,7 @@ public abstract class VTITemplate   implements ResultSet
      */
     protected SQLException    notImplemented( String methodName )
     {
-        return new SQLException( "Unimplemented method: " + methodName );
+        return new SQLFeatureNotSupportedException( "Unimplemented method: " + methodName );
     }
     
 }

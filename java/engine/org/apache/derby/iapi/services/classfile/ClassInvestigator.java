@@ -139,7 +139,7 @@ public class ClassInvestigator extends ClassHolder {
 	public Enumeration implementedInterfaces()
 	{
 		int interfaceCount = interfaces == null ? 0 : interfaces.length;
-		Vector implemented = new Vector(interfaceCount);
+		Vector<String> implemented = new Vector<String>(interfaceCount);
 
         for (int i = 0; i < interfaceCount; i++)
         {
@@ -147,16 +147,20 @@ public class ClassInvestigator extends ClassHolder {
         }
         return implemented.elements();
 	}
-    public Enumeration getFields() {
+    public Enumeration<ClassMember> getFields() {
 		if (field_info == null)
-			return Collections.enumeration(Collections.EMPTY_LIST);
+        {
+			return Collections.enumeration( new Vector<ClassMember>() );
+        }
 
 		return field_info.entries.elements();
 	}
 
-    public Enumeration getMethods() {
+    public Enumeration<ClassMember> getMethods() {
 		if (method_info == null)
-			return Collections.enumeration(Collections.EMPTY_LIST);
+        {
+			return Collections.enumeration( new Vector<ClassMember>() );
+        }
 		return method_info.entries.elements();
 	}
 
@@ -168,13 +172,13 @@ public class ClassInvestigator extends ClassHolder {
 		Return an Enumeration of all referenced classes
 	*/
 
-	private Enumeration getClasses(Enumeration methods, Enumeration fields)
+	private Enumeration getClasses(Enumeration<ClassMember> methods, Enumeration<ClassMember> fields)
 	{
 		return new ClassEnumeration(this, cptEntries.elements(), methods, fields);
 	}
 
 	public Enumeration getStrings() {
-		HashSet strings = new HashSet(30, 0.8f);
+		HashSet<String> strings = new HashSet<String>(30, 0.8f);
 		
 		int size = cptEntries.size();
 		for (int i = 1; i < size; i++) {
@@ -240,8 +244,8 @@ public class ClassInvestigator extends ClassHolder {
 		attribute_info = null;
 
 		// fields
-		for (Enumeration e = getFields(); e.hasMoreElements(); ) {
-			ClassMember member = (ClassMember) e.nextElement();
+		for (Enumeration<ClassMember> e = getFields(); e.hasMoreElements(); ) {
+			ClassMember member = e.nextElement();
 
 			Attributes attrs = member.attribute_info;
 
@@ -266,8 +270,8 @@ public class ClassInvestigator extends ClassHolder {
 		}
 
 		// methods
-		for (Enumeration e = getMethods(); e.hasMoreElements(); ) {
-			ClassMember member = (ClassMember) e.nextElement();
+		for (Enumeration<ClassMember> e = getMethods(); e.hasMoreElements(); ) {
+			ClassMember member = e.nextElement();
 
 			Attributes attrs = member.attribute_info;
 
@@ -392,10 +396,10 @@ public class ClassInvestigator extends ClassHolder {
 		renameMembers(getMethods(), classNameMap, memberNameMap);
 	}
 
-	private void renameMembers(Enumeration e, Hashtable classNameMap, Hashtable memberNameMap) {
+	private void renameMembers(Enumeration<ClassMember> e, Hashtable classNameMap, Hashtable memberNameMap) {
 
 		for (; e.hasMoreElements(); ) {
-			ClassMember member = (ClassMember) e.nextElement();
+			ClassMember member = e.nextElement();
 
 			String oldMemberName = nameIndexToString(member.name_index);
 			String newMemberName = (String) memberNameMap.get(oldMemberName);

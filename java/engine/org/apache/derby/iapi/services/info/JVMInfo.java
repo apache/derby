@@ -194,10 +194,10 @@ public abstract class JVMInfo
      */
     private static String getSystemProperty(final String name) {
         
-        return (String) AccessController
-                .doPrivileged(new java.security.PrivilegedAction() {
+        return AccessController
+                .doPrivileged(new java.security.PrivilegedAction<String>() {
                     
-                    public Object run() {
+                    public String run() {
                         return System.getProperty(name);
                         
                     }
@@ -232,12 +232,12 @@ public abstract class JVMInfo
      */
     public static void javaDump() {
         if (isIBMJVM()) {
-            Class ibmc = null;
+            Class<?> ibmc = null;
             try {
                 ibmc = Class.forName("com.ibm.jvm.Dump");
-                final Method ibmm = ibmc.getMethod("JavaDump", new Class[] {});
+                final Method ibmm = ibmc.getMethod("JavaDump", new Class<?>[] {});
                 
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                     public Object run() throws IllegalAccessException,
                             MalformedURLException, InstantiationException,
                             InvocationTargetException {

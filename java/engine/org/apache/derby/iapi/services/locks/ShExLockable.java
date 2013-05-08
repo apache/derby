@@ -96,7 +96,7 @@ public class ShExLockable implements Lockable
      * Any lockable object which DOES NOT want to participate should
      * override this function.
      */
-	public boolean lockAttributes(int flag, Hashtable attributes)
+	public boolean lockAttributes(int flag, Hashtable<String,Object> attributes)
 	{
         if((flag & VirtualLockTable.SHEXLOCK) == 0)
             return false;

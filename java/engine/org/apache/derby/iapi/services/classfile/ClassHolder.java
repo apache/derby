@@ -91,8 +91,8 @@ public class ClassHolder {
 	/*
 	** Fields for Constant Pool Table
 	*/
-	protected Hashtable cptHashTable;
-	protected Vector cptEntries;
+	protected Hashtable<Object,ConstantPoolEntry> cptHashTable;
+	protected Vector<ConstantPoolEntry> cptEntries;
 	private int cptEstimatedSize;
 
 	/**
@@ -108,8 +108,8 @@ public class ClassHolder {
 	protected ClassHolder(int estimatedConstantPoolCount) {
 		// Constant Pool Information
 		// 100 is the estimate of the number of entries that will be generated
-		cptEntries = new Vector(estimatedConstantPoolCount);
-		cptHashTable = new Hashtable(estimatedConstantPoolCount, (float)0.75);
+		cptEntries = new Vector<ConstantPoolEntry>(estimatedConstantPoolCount);
+		cptHashTable = new Hashtable<Object,ConstantPoolEntry>(estimatedConstantPoolCount, (float)0.75);
 
 		// reserve the 0'th constant pool entry
 		cptEntries.setSize(1);
@@ -536,8 +536,8 @@ public class ClassHolder {
 
  	protected void cptPut(ClassFormatOutput out) throws IOException {
 
-		for (Enumeration e = cptEntries.elements(); e.hasMoreElements(); ) {
-			ConstantPoolEntry item = (ConstantPoolEntry) e.nextElement();
+		for (Enumeration<ConstantPoolEntry> e = cptEntries.elements(); e.hasMoreElements(); ) {
+			ConstantPoolEntry item = e.nextElement();
 			if (item == null) {
 				continue;
 			}
@@ -551,7 +551,7 @@ public class ClassHolder {
 	*/
 
 	public ConstantPoolEntry getEntry(int index) {
-		return (ConstantPoolEntry) cptEntries.get(index);
+		return cptEntries.get(index);
 	}
 
 	/**
@@ -657,7 +657,7 @@ public class ClassHolder {
 	}
 
 	protected ConstantPoolEntry findMatchingEntry(Object key) {
-		return (ConstantPoolEntry) cptHashTable.get(key);
+		return cptHashTable.get(key);
 	}
 
 	/** get a string (UTF) given a name_index into the constant pool

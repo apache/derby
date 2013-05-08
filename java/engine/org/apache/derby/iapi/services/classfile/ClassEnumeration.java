@@ -39,7 +39,7 @@ class ClassEnumeration implements Enumeration {
 	ClassHolder	cpt;
 	Enumeration			inner;
 	CONSTANT_Index_info	position;
-	HashSet           foundClasses;
+	HashSet<String>           foundClasses;
     Enumeration         classList;
 
     ClassEnumeration(   ClassHolder cpt,
@@ -49,7 +49,7 @@ class ClassEnumeration implements Enumeration {
     {
 		this.cpt = cpt;
 		inner = e;
-		foundClasses = new HashSet(30, 0.8f);
+		foundClasses = new HashSet<String>(30, 0.8f);
 		findMethodReferences(methods, foundClasses);
 		findFieldReferences(fields, foundClasses);
 		findClassReferences(foundClasses);
@@ -62,7 +62,7 @@ class ClassEnumeration implements Enumeration {
 	}
 
 	// uses cpt and inner
-	private void findClassReferences(HashSet foundClasses)
+	private void findClassReferences(HashSet<String> foundClasses)
 	{
 
 		ConstantPoolEntry	item;
@@ -108,7 +108,7 @@ class ClassEnumeration implements Enumeration {
 	}
 
 	private void findMethodReferences(  Enumeration methods,
-	                                    HashSet foundClasses)
+	                                    HashSet<String> foundClasses)
 	{
 	    while (methods.hasMoreElements())
 	    {
@@ -119,7 +119,7 @@ class ClassEnumeration implements Enumeration {
 	}
 
 	private void findFieldReferences(   Enumeration fields,
-	                                    HashSet foundClasses)
+	                                    HashSet<String> foundClasses)
 	{
 	    while (fields.hasMoreElements())
 	    {
@@ -129,7 +129,7 @@ class ClassEnumeration implements Enumeration {
 	    }
 	}
 
-	void distillClasses(String fieldOrMethodSig, HashSet foundClasses)
+	void distillClasses(String fieldOrMethodSig, HashSet<String> foundClasses)
 	{
 	    if (fieldOrMethodSig == null || fieldOrMethodSig.length() < 1)
 	    {

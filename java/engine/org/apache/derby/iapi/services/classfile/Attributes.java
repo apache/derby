@@ -25,7 +25,7 @@ import java.util.Vector;
 
 import java.io.IOException;
 
-class Attributes extends Vector {
+class Attributes extends Vector<AttributeEntry> {
 	private int classFileSize;
 
 	Attributes(int count) {
@@ -35,7 +35,7 @@ class Attributes extends Vector {
 	void put(ClassFormatOutput out) throws IOException {
 		int size = size();
 		for (int i = 0; i < size; i++) {
-			((AttributeEntry) elementAt(i)).put(out);
+			elementAt(i).put(out);
 		}
 	}
 

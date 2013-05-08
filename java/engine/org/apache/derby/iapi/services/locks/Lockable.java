@@ -147,5 +147,5 @@ public interface Lockable {
 
 		@see VirtualLockTable
 	 */
-	public boolean lockAttributes(int flag, Hashtable attributes);
+	public boolean lockAttributes(int flag, Hashtable<String,Object> attributes);
 }

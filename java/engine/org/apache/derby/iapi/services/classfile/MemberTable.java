@@ -29,13 +29,13 @@ import java.util.Vector;
 
 
 class MemberTable {
-	protected Vector entries;
-	private Hashtable hashtable;
+	protected Vector<ClassMember> entries;
+	private Hashtable<MemberTableHash,MemberTableHash> hashtable;
 	private MemberTableHash	mutableMTH = null;
 
 	public MemberTable(int count) {
-		entries = new Vector(count);
-		hashtable = new Hashtable((count > 50) ? count : 50);
+		entries = new Vector<ClassMember>(count);
+		hashtable = new Hashtable<MemberTableHash,MemberTableHash>((count > 50) ? count : 50);
 		mutableMTH = new MemberTableHash(null, null);
 	}
 
@@ -59,21 +59,21 @@ class MemberTable {
 		mutableMTH.setHashCode();
 
 		/* search the hash table */
-		MemberTableHash mth = (MemberTableHash) hashtable.get(mutableMTH);
+		MemberTableHash mth = hashtable.get(mutableMTH);
 		if (mth == null)
 		{
 			return null;
 		}
 
-		return (ClassMember) entries.get(mth.index);
+		return entries.get(mth.index);
 	}
 
 	void put(ClassFormatOutput out) throws IOException {
 
-		Vector lentries = entries;
+		Vector<ClassMember> lentries = entries;
 		int count = lentries.size();
 		for (int i = 0; i < count; i++) {
-			((ClassMember) lentries.get(i)).put(out);
+			lentries.get(i).put(out);
 		}
 	}
 
@@ -84,10 +84,10 @@ class MemberTable {
 	int classFileSize() {
 		int size = 0;
 
-		Vector lentries = entries;
+		Vector<ClassMember> lentries = entries;
 		int count = lentries.size();
 		for (int i = 0; i < count; i++) {
-			size += ((ClassMember) lentries.get(i)).classFileSize();
+			size += lentries.get(i).classFileSize();
 		}
 
 		return size;
