@@ -971,30 +971,11 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	protected final	void generate(ActivationClassBuilder acb,
-										MethodBuilder mb)
+    final void generate(ActivationClassBuilder acb, MethodBuilder mb)
 								throws StandardException
 	{
 		generateExpression( acb, mb );
 	}
-
-	/**
-	 * The only reason this routine exists is so that I don't have to change
-	 * the protection on generateExpression() and rototill all of QueryTree.
-	 *
-	 * @param ecb	The ExpressionClassBuilder for the class being built
-	 * @param mb	The method the expression will go into
-	 *
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public	void generateFilter(ExpressionClassBuilder ecb,
-										MethodBuilder mb)
-		throws StandardException
-	{
-		generateExpression( ecb, mb );
-	}
-	
 
 	/**
 	 * The default selectivity for value nodes is 50%.  This is overridden
@@ -1116,8 +1097,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 						throws StandardException
 	{
 		if (SanityManager.DEBUG)

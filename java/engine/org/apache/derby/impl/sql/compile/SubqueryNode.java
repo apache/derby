@@ -1925,9 +1925,8 @@ public class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(
-									ExpressionClassBuilder expressionBuilder,
-									MethodBuilder mbex)
+    void generateExpression(
+            ExpressionClassBuilder expressionBuilder, MethodBuilder mbex)
 								throws StandardException
 	{
 		CompilerContext	cc = getCompilerContext();

@@ -248,8 +248,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	protected final	void generate(ActivationClassBuilder acb,
-										MethodBuilder mb)
+    final   void generate(ActivationClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		generateExpression( acb, mb );

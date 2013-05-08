@@ -111,8 +111,7 @@ public class GenerationClauseNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
         throw StandardException.newException( SQLState.HEAP_UNIMPLEMENTED_FEATURE );

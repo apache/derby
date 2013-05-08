@@ -443,8 +443,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
 		/* If this BinaryOperatorNode was created as a part of an IN-list

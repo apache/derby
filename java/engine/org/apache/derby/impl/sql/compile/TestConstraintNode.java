@@ -119,8 +119,7 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 

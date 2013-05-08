@@ -703,11 +703,9 @@ public class JoinNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(TableDescriptor targetTableDescriptor,
-					FromVTI targetVTI,
-					ResultColumnList targetColumnList,
-					DMLStatementNode statement,
-					FromList fromListParam)
+    void bindResultColumns(TableDescriptor targetTableDescriptor,
+            FromVTI targetVTI, ResultColumnList targetColumnList,
+            DMLStatementNode statement, FromList fromListParam)
 				throws StandardException
 	{
 		super.bindResultColumns(targetTableDescriptor,
@@ -1545,8 +1543,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		generateCore(acb, mb, INNERJOIN, null, null);

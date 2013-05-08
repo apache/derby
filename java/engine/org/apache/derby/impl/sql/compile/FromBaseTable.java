@@ -2530,7 +2530,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		// ourSchemaName can be null if correlation name is specified.
@@ -3266,8 +3266,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
         //
@@ -3315,8 +3314,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateResultSet(ExpressionClassBuilder acb,
-								MethodBuilder mb)
+    void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		/* We must have been a best conglomerate descriptor here */

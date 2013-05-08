@@ -773,8 +773,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
      */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 						throws StandardException
 	{
 		/* Verify that a user specifed right outer join is transformed into

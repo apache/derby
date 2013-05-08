@@ -831,11 +831,9 @@ public class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(TableDescriptor targetTableDescriptor,
-					FromVTI targetVTI,
-					ResultColumnList targetColumnList,
-					DMLStatementNode statement,
-					FromList fromListParam)
+    void bindResultColumns(TableDescriptor targetTableDescriptor,
+            FromVTI targetVTI, ResultColumnList targetColumnList,
+            DMLStatementNode statement, FromList fromListParam)
 				throws StandardException
 	{
 		/* We first bind the resultColumns for any FromTable which
@@ -934,7 +932,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		return fromList.getFromTableByName(name, schemaName, exactMatch);

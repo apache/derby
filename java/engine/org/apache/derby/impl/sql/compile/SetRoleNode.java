@@ -101,8 +101,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
      * @exception StandardException         Thrown on error
      */
 
-    public void generate(ActivationClassBuilder acb,
-                         MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
             throws StandardException
     {
         //generate the parameters for the DYNAMIC SET ROLE

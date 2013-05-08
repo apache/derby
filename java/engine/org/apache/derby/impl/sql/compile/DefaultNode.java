@@ -279,8 +279,7 @@ public  class DefaultNode extends ValueNode
 	/**
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb) 
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)

@@ -535,11 +535,9 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(TableDescriptor targetTableDescriptor,
-					FromVTI targetVTI,
-					ResultColumnList targetColumnList,
-					DMLStatementNode statement,
-					FromList fromListParam)
+    void bindResultColumns(TableDescriptor targetTableDescriptor,
+            FromVTI targetVTI, ResultColumnList targetColumnList,
+            DMLStatementNode statement, FromList fromListParam)
 				throws StandardException
 	{
 		leftResultSet.bindResultColumns(targetTableDescriptor,
@@ -565,7 +563,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		FromTable result = leftResultSet.getFromTableByName(name, schemaName, exactMatch);

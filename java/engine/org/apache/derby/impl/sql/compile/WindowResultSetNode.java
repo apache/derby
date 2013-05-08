@@ -344,8 +344,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * override
      * @see QueryTreeNode#generate
      */
-    public void generate(ActivationClassBuilder acb,
-                         MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
             throws StandardException
     {
         // Get the next ResultSet#, so we can number this ResultSetNode, its

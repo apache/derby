@@ -617,8 +617,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		/*  By the time we get here we should be a union all.

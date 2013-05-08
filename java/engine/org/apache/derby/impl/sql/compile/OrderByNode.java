@@ -117,8 +117,7 @@ public class OrderByNode extends SingleChildResultSetNode
      *
 	 * @exception StandardException		Thrown on error
      */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		// Get the cost estimate for the child

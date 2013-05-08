@@ -621,11 +621,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(TableDescriptor targetTableDescriptor,
-					FromVTI targetVTI,
-					ResultColumnList targetColumnList,
-					DMLStatementNode statement,
-					FromList fromListParam)
+    void bindResultColumns(TableDescriptor targetTableDescriptor,
+            FromVTI targetVTI, ResultColumnList targetColumnList,
+            DMLStatementNode statement, FromList fromListParam)
 				throws StandardException
 	{
 		super.bindResultColumns(targetTableDescriptor,
@@ -1003,7 +1001,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		/* We search both sides for a TableOperatorNode (join nodes)

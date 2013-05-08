@@ -1050,11 +1050,10 @@ public class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(ExpressionClassBuilder ecb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
-		expression.generateExpression(ecb, mb);
+        expression.generateExpression(acb, mb);
 	}
 
 	/**

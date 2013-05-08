@@ -90,8 +90,7 @@ public class SetTransactionIsolationNode extends TransactionStatementNode
 	 * @param mb	The method for the method to be built
 	 * @exception StandardException thrown if generation fails
 	 */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		acb.pushGetResultSetFactoryExpression(mb);

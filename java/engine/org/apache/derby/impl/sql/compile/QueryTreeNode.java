@@ -589,9 +589,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	protected void generate(
-								ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		throw StandardException.newException(SQLState.LANG_UNABLE_TO_GENERATE,
@@ -812,7 +810,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public  ConstantNode getNullNode(DataTypeDescriptor type)
+    ConstantNode getNullNode(DataTypeDescriptor type)
 		throws StandardException
 	{
         int constantNodeType;

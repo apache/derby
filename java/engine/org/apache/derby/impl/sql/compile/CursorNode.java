@@ -615,8 +615,7 @@ public class CursorNode extends DMLStatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb) throws StandardException
+    void generate(ActivationClassBuilder acb, MethodBuilder mb) throws StandardException
 	{
 		if (indexOfSessionTableNamesInSavedObjects != -1 ) //if this cursor references session schema tables, do following
 		{

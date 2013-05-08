@@ -1335,7 +1335,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		// Only FromBaseTables have schema names

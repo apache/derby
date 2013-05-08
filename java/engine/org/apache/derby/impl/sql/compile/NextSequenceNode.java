@@ -120,11 +120,9 @@ public class NextSequenceNode extends ValueNode {
     }
 
 
-    public void generateExpression
+    void generateExpression
         (
-         ExpressionClassBuilder acb,
-         MethodBuilder mb
-         )
+         ExpressionClassBuilder acb, MethodBuilder mb)
         throws StandardException
     {
         String sequenceUUIDstring = sequenceDescriptor.getUUID().toString();

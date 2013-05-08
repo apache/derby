@@ -508,11 +508,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(TableDescriptor targetTableDescriptor,
-					FromVTI targetVTI,
-					ResultColumnList targetColumnList,
-					DMLStatementNode statement,
-					FromList fromListParam)
+    void bindResultColumns(TableDescriptor targetTableDescriptor,
+            FromVTI targetVTI, ResultColumnList targetColumnList,
+            DMLStatementNode statement, FromList fromListParam)
 				throws StandardException
 	{
 		/* For insert select, we need to expand any *'s in the
@@ -1408,7 +1406,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateNormalizationResultSet(
+    void generateNormalizationResultSet(
 						ActivationClassBuilder acb,
 						MethodBuilder mb, 
 						int resultSetNumber,
@@ -1628,7 +1626,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -1696,14 +1694,15 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateResultSet(ExpressionClassBuilder acb,
-										   MethodBuilder mb)
+    void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
-		System.out.println("I am a " + getClass());
 		if (SanityManager.DEBUG)
-			SanityManager.NOTREACHED();
-		return;
+        {
+            SanityManager.THROWASSERT(
+                "generateResultSet() not expected to be called for " +
+                getClass().getName());
+        }
 	}
 
 

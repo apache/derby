@@ -780,8 +780,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		// If the DML is on the temporary table, generate the code to

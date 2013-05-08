@@ -107,8 +107,7 @@ public class CurrentRowLocationNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mbex)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mbex)
 									throws StandardException
 	{
 		/* Generate a new method */

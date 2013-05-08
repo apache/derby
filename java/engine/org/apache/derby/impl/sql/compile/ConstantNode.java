@@ -210,11 +210,9 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpression
+    void generateExpression
 	(
-		ExpressionClassBuilder	acb, 
-		MethodBuilder 		mb
-	) throws StandardException
+        ExpressionClassBuilder acb, MethodBuilder mb) throws StandardException
 	{
 		/* Are we generating a SQL null value? */
 	    if (isNull())

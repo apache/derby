@@ -44,8 +44,7 @@ class MaterializeSubqueryNode extends ResultSetNode
 		this.lf = lf;
 	}
 
-	public void generate(ActivationClassBuilder acb,
-						 MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
 		acb.pushThisAsActivation(mb);

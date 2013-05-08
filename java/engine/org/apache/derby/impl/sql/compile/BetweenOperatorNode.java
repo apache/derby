@@ -277,8 +277,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
 		AndNode						 newAnd;

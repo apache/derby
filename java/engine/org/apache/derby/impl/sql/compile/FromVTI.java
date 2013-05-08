@@ -1572,8 +1572,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
         // If necessary, compute the projection to be pushed into the table

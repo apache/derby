@@ -173,8 +173,7 @@ abstract class DDLStatementNode extends StatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public final void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    final void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		if (SanityManager.DEBUG) {

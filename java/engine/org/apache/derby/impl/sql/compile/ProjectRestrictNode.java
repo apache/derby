@@ -1316,8 +1316,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -1347,8 +1346,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateResultSet(ExpressionClassBuilder acb,
-										   MethodBuilder mb)
+    void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		generateMinion( acb, mb, true);
@@ -1773,7 +1771,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
 		return childResult.getFromTableByName(name, schemaName, exactMatch);

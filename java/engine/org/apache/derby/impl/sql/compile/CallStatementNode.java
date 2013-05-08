@@ -183,8 +183,7 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generate(ActivationClassBuilder acb,
-								MethodBuilder mb)
+    void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
 		JavaValueNode		methodCallBody;
