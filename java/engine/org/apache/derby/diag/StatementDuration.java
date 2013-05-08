@@ -87,7 +87,7 @@ public class StatementDuration extends VTITemplate
 	private InputStream inputStream;
 	private BufferedReader bufferedReader;
 	private String inputFileName;
-	private Hashtable hashTable;
+	private Hashtable<String,String[]> hashTable;
 
 	// Variables for current row
 	private String line;
@@ -116,11 +116,11 @@ public class StatementDuration extends VTITemplate
 	{
         DiagUtil.checkAccess();
 
-        final String home = (String)AccessController.doPrivileged
+        final String home = AccessController.doPrivileged
             (
-             new PrivilegedAction()
+             new PrivilegedAction<String>()
              {
-                 public Object run()
+                 public String run()
                  {
                      return System.getProperty( Property.SYSTEM_HOME_PROPERTY );
                  }
@@ -169,7 +169,7 @@ public class StatementDuration extends VTITemplate
 				throw new SQLException(ex.getMessage());
 			}
 
-			hashTable = new Hashtable();
+			hashTable = new Hashtable<String,String[]>();
 		}
 
 		while (true)
@@ -206,14 +206,14 @@ public class StatementDuration extends VTITemplate
 
 				/* NOTE: We need to use the LCCID as the key
 				 */
-				Object previousRow = hashTable.put(newRow[3],
+				String[] previousRow = hashTable.put(newRow[3],
 												   newRow);
 				if (previousRow == null)
 				{
 					continue;
 				}
 
-				currentRow = (String[]) previousRow;
+				currentRow = previousRow;
 				
 				/* Figure out the duration. */
 				Timestamp endTs = stringToTimestamp( newRow[0] );

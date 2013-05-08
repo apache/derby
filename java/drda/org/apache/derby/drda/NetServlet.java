@@ -553,9 +553,9 @@ public class NetServlet extends HttpServlet {
         };
         Thread servThread = null;
         try {
-            servThread = (Thread) AccessController.doPrivileged(
-                                new PrivilegedExceptionAction() {
-                                    public Object run() throws Exception
+            servThread = AccessController.doPrivileged(
+                                new PrivilegedExceptionAction<Thread>() {
+                                    public Thread run() throws Exception
                                     {
                                         return new Thread(service);
                                     }

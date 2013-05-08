@@ -292,7 +292,7 @@ public class PlanExporter {
     private static void deleteFile(final String fileName)
     {
         AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
+        (new java.security.PrivilegedAction<Object>() {
 
             public Object run() {
                 File delFile = new File(fileName);

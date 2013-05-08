@@ -70,7 +70,7 @@ import org.apache.derby.vti.VTITemplate;
 public final class StatementCache extends VTITemplate {
 
 	private int position = -1;
-	private Vector data;
+	private Vector<GenericPreparedStatement> data;
 	private GenericPreparedStatement currentPs;
 	private boolean wasNull;
 
@@ -86,7 +86,7 @@ public final class StatementCache extends VTITemplate {
 
 		if (statementCache != null) {
 			final Collection values = statementCache.values();
-			data = new Vector(values.size());
+			data = new Vector<GenericPreparedStatement>(values.size());
 			for (Iterator i = values.iterator(); i.hasNext(); ) {
 				final CachedStatement cs = (CachedStatement) i.next();
 				final GenericPreparedStatement ps =

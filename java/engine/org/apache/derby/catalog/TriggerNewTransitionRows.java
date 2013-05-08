@@ -37,11 +37,7 @@ import java.math.BigDecimal;
  * trigger action. 
  * 
  * <p>
- * This class implements only JDBC 1.2, not JDBC 2.0.  You cannot
- * compile this class with JDK1.2, since it implements only the
- * JDBC 1.2 ResultSet interface and not the JDBC 2.0 ResultSet
- * interface.  You can only use this class in a JDK 1.2 runtime 
- * environment if no JDBC 2.0 calls are made against it.
+ * You can only use this class if no JDBC 2.0 or later calls are made against it.
  *
  */
 public final class TriggerNewTransitionRows extends org.apache.derby.vti.UpdatableVTITemplate 

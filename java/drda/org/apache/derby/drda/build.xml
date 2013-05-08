@@ -44,8 +44,8 @@
 
   <target name="compile">
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -57,17 +57,18 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/drda/*.java"/>
       <exclude name="${derby.dir}/drda/NetServlet.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 
   <target name="servlet" depends="checkservletjar" if="servletjar.available">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -80,9 +81,10 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${servlet24}"/>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/drda/NetServlet.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 

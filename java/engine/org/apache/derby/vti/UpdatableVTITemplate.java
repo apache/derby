@@ -30,13 +30,16 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -727,4 +730,54 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
     public ParameterMetaData getParameterMetaData() throws SQLException {
         throw new SQLException("getParameterMetaData");
     }
+
+    public  boolean 	isWrapperFor(Class<?> iface) throws SQLException { throw new SQLException( "isWrapperFor" ); }
+    public  <T> T unwrap(Class<T> iface) throws SQLException { throw new SQLException( "unwrap" ); }
+
+    public boolean isClosed() throws SQLException
+    { throw new SQLException("isClosed"); }
+    public boolean isPoolable() throws SQLException
+    { throw new SQLException("isPoolable"); }
+    public void setPoolable(boolean poolable) throws SQLException
+    { throw new SQLException("setPoolable"); }
+	public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException
+    { throw new SQLException("setAsciiStream"); }
+	public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException
+    { throw new SQLException("setAsciiStream"); }
+	public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException
+    { throw new SQLException("setBinaryStream"); }
+	public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException
+    { throw new SQLException("setBinaryStream"); }
+    public void 	setBlob(int parameterIndex, InputStream is) throws SQLException
+    { throw new SQLException("setBlob"); }
+    public void 	setBlob(int parameterIndex, InputStream is, long length) throws SQLException
+    { throw new SQLException("setBlob"); }
+    public void 	setClob(int parameterIndex, Reader reader) throws SQLException
+    { throw new SQLException("setClob"); }
+    public void 	setClob(int parameterIndex, Reader reader, long length) throws SQLException
+    { throw new SQLException("setClob"); }
+    public  void 	setCharacterStream(int parameterIndex, Reader value) throws SQLException
+    { throw new SQLException("setCharacterStream"); }
+    public void 	setCharacterStream(int parameterIndex, Reader value, long length) throws SQLException
+    { throw new SQLException("setCharacterStream"); }
+    public  void 	setNCharacterStream(int parameterIndex, Reader value) throws SQLException
+    { throw new SQLException("setNCharacterStream"); }
+    public void 	setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException
+    { throw new SQLException("setNCharacterStream"); }
+    public void 	setNClob(int parameterIndex, NClob value) throws SQLException
+    { throw new SQLException("setNClob"); }
+    public void 	setNClob(int parameterIndex, Reader reader) throws SQLException
+    { throw new SQLException("setNClob"); }
+    public void 	setNClob(int parameterIndex, Reader reader, long length) throws SQLException
+    { throw new SQLException("setNClob"); }
+    public void  	setNString(int parameterIndex, String value) throws SQLException
+    { throw new SQLException("setNString"); }
+    public void setRowId(int parameterIndex, RowId x) throws SQLException
+    { throw new SQLException("setRowId"); }
+    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException
+    { throw new SQLException("setSQLXML"); }
+    public boolean isCloseOnCompletion() throws SQLException
+    { throw new SQLException("isCloseOnCompletion"); }
+    public void closeOnCompletion() throws SQLException
+    { throw new SQLException("closeOnCompletion"); }
 }

@@ -232,11 +232,11 @@ public class LockTable extends VTITemplate implements VTICosting  {
 	/**
 		Convert the lock information into a hashtable.
 	*/
-    private Hashtable dumpLock(
+    private Hashtable<String,Object> dumpLock(
     Latch                   lock)
         throws StandardException
     {
-		Hashtable	attributes = new Hashtable(17);
+		Hashtable<String,Object>	attributes = new Hashtable<String,Object>(17);
         Object      lock_type =  lock.getQualifier();
 
 

@@ -33,12 +33,12 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="catalog" depends="compile_catalog,java5"/>
+  <target name="catalog" depends="compile_catalog"/>
 
   <target name="compile_catalog">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -50,31 +50,10 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/catalog/**"/>
-      <exclude name="${derby.dir}/catalog/Java5*"/>
-    </javac>
-  </target>
-
-  <target name="java5">
-    <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/catalog/Java5*"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 

@@ -125,11 +125,11 @@ public class ErrorLogReader extends VTITemplate
 	{
         DiagUtil.checkAccess();
 
-        final String home = (String)AccessController.doPrivileged
+        final String home = AccessController.doPrivileged
             (
-             new PrivilegedAction()
+             new PrivilegedAction<String>()
              {
-                 public Object run()
+                 public String run()
                  {
                      return System.getProperty( Property.SYSTEM_HOME_PROPERTY );
                  }

@@ -63,7 +63,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * </UL>
  * 
  */
-public final class ErrorMessages extends VTITemplate implements VTICosting, java.security.PrivilegedAction  {
+public final class ErrorMessages extends VTITemplate implements VTICosting, java.security.PrivilegedAction<InputStream>  {
 	
 	/* The name of the file containing all the SQLSTate codes.
 	 * The class gets the SQLState code from the messages
@@ -162,7 +162,7 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 		p = new Properties();
 		for (int i = 0; i < 50; i++) {
 			msgFile = i;
-			InputStream is = (InputStream) java.security.AccessController.doPrivileged(this);
+			InputStream is = java.security.AccessController.doPrivileged(this);
 			if (is == null)
 				continue;
 
@@ -216,7 +216,7 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 
 	private int msgFile;
 	
-	public final Object run() {
+	public final InputStream run() {
 		InputStream msg = getClass().getResourceAsStream("/org/apache/derby/loc/m" + msgFile + "_en.properties");
 		msgFile = 0;
 		return msg;

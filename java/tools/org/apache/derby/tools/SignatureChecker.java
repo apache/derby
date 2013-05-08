@@ -84,8 +84,8 @@ public class SignatureChecker
 
     private ParsedArgs _parsedArgs;
 
-    private ArrayList   _procedures = new ArrayList();
-    private ArrayList   _functions = new ArrayList();
+    private ArrayList<SQLRoutine>   _procedures = new ArrayList<SQLRoutine>();
+    private ArrayList<SQLRoutine>   _functions = new ArrayList<SQLRoutine>();
 
     private boolean     _debugging = false;
     
@@ -453,9 +453,9 @@ public class SignatureChecker
         } catch (Throwable t) {}
 
         try {
-            Class   driverManagerClass = Class.forName( "java.sql.DriverManager" );
+            Class<?>   driverManagerClass = Class.forName( "java.sql.DriverManager" );
             Method  getConnectionMethod = driverManagerClass.getDeclaredMethod
-                ( "getConnection", new Class[] { String.class } );
+                ( "getConnection", String.class );
 
             return (Connection) getConnectionMethod.invoke
                 ( null, new Object[] { _parsedArgs.getJ2seConnectionUrl() } );
@@ -518,7 +518,7 @@ public class SignatureChecker
      */
     private SQLRoutine getProcedure( int idx )
     {
-        return (SQLRoutine) _procedures.get( idx );
+        return _procedures.get( idx );
     }
 
     /**
@@ -534,7 +534,7 @@ public class SignatureChecker
      */
     private SQLRoutine getFunction( int idx )
     {
-        return (SQLRoutine) _functions.get( idx );
+        return _functions.get( idx );
     }
 
     /**
@@ -639,7 +639,7 @@ public class SignatureChecker
         private String _schema;
         private String _name;
         private boolean _isTableFunction;
-        private ArrayList   _argList = new ArrayList();
+        private ArrayList<String>   _argList = new ArrayList<String>();
 
         public SQLRoutine( String schema, String name, boolean isTableFunction )
         {
@@ -653,7 +653,7 @@ public class SignatureChecker
         public String getSchema() { return _schema; }
         public String getName() { return _name; }
         public int      getArgCount() { return _argList.size(); }
-        public String getArgType( int idx ) { return (String) _argList.get( idx ); }
+        public String getArgType( int idx ) { return _argList.get( idx ); }
         public boolean isTableFunction() { return _isTableFunction; }
 
         public  String  toString()
