@@ -20,6 +20,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import org.apache.derbyTesting.junit.BaseTestCase;
+
 import junit.framework.Test;
 
 /**
@@ -36,7 +38,15 @@ public class JDBCDriversEmbeddedTest extends JDBCDriversPropertyTest {
         // when this property is set and the embedded driver
         // is autoloaded by jdbc.drivers
         System.setProperty("derby.drda.startNetworkServer", "true");
- 
+        // if the property derby.tests.basePort has been set, we need to
+        // ensure we specify the portNumber as well, because we're then
+        // not using 1527 for checks and shutting down.
+        String portNumberString = System.getProperty("derby.tests.basePort");
+        if (portNumberString != null )
+        {
+            System.setProperty("derby.drda.portNumber", portNumberString);
+        } 
+        
         return getSuite("org.apache.derby.jdbc.EmbeddedDriver");
     }
 }
