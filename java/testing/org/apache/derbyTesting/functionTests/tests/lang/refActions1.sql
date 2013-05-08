@@ -3143,7 +3143,8 @@ union all
 -- #BEGIN;
 select * from db2test.dept where dno in (select vdno from
   db2test.vempunion)
-  and dno in ('K55', 'K52');
+  and dno in ('K55', 'K52')
+  order by dno;
 -- #END;
 
 delete from db2test.dept where dno in (select vdno from

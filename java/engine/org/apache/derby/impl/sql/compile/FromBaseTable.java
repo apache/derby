@@ -1328,13 +1328,32 @@ public class FromBaseTable extends FromTable
 				if (statCompositeSelectivity == -1.0d)
 					statCompositeSelectivity = 1.0d;
 			}
-
-			if (seenFirstColumn && statisticsForConglomerate &&
-				(startStopPredCount > 0))
-			{
-				statStartStopSelectivity = 
-					tableDescriptor.selectivityForConglomerate(cd, startStopPredCount);
-			}
+			
+            if (seenFirstColumn && (startStopPredCount > 0))
+            {
+                if (statisticsForConglomerate) {
+                    statStartStopSelectivity =
+                        tableDescriptor.selectivityForConglomerate(cd, 
+                            startStopPredCount);				
+                } else if (cd.isIndex())  {
+                    //DERBY-3790 (Investigate if request for update 
+                    // statistics can be skipped for certain kind of 
+                    // indexes, one instance may be unique indexes based 
+                    // on one column.) But as found in DERBY-6045 (in list
+                    // multi-probe by primary key not chosen on tables with
+                    // >256 rows), even though we do not keep the 
+                    // statistics for single-column unique indexes, we 
+                    // should improve the selectivity of such an index
+                    // when the index is being considered by the optimizer.
+                    IndexRowGenerator irg = cd.getIndexDescriptor();
+                    if (irg.isUnique() 
+                        && irg.numberOfOrderedColumns() == 1 
+                        && startStopPredCount == 1) {
+                            statStartStopSelectivity = 
+                                (double)(1/(double)baseRowCount());
+                    }
+                }
+            }
 
 			/*
 			** Factor the non-base-table predicates into the extra
