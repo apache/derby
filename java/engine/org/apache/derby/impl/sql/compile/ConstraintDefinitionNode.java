@@ -154,7 +154,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @exception StandardException on error
 	 */
-	protected void bind(DDLStatementNode ddlNode, DataDictionary dd)	throws StandardException
+    void bind(DDLStatementNode ddlNode, DataDictionary dd) throws StandardException
 	{
 		// we need to allow drops on constraints with different schemas
 		// to support removing constraints created pre 5.2.

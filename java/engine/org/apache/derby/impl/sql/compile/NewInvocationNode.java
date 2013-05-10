@@ -339,7 +339,7 @@ public class NewInvocationNode extends MethodCallNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -453,9 +453,7 @@ public class NewInvocationNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		/* If this node is for an ungrouped aggregator, 

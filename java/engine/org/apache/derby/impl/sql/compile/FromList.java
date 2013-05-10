@@ -142,7 +142,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void addFromTable(FromTable fromTable) throws StandardException
+    void addFromTable(FromTable fromTable) throws StandardException
 	{
 		/* Don't worry about checking TableOperatorNodes since
 		 * they don't have exposed names.  This will potentially
@@ -262,10 +262,9 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
+    FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
-		boolean			found = false;
 		FromTable		fromTable;
 		FromTable		result = null;
 
@@ -872,7 +871,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @return FromTable	The matching FromTable.
 	 */
-	public FromTable getFromTableByResultColumn(ResultColumn rc)
+    FromTable getFromTableByResultColumn(ResultColumn rc)
 	{
 		FromTable	fromTable = null;
 

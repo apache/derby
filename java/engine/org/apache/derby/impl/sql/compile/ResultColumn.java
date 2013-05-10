@@ -1091,24 +1091,6 @@ public class ResultColumn extends ValueNode
 									getColumnExpress));
 	}
 */
-	/**
-		Generate the code to create a column the same shape and
-		size as this ResultColumn.
-
-		Used in ResultColumnList.generateHolder().
-
-		@exception StandardException  thrown on failure
-	*/
-	public void generateHolder(ExpressionClassBuilder acb,
-									MethodBuilder mb)
-		throws StandardException
-	{
-		// generate expression of the form
-		// (DataValueDescriptor) columnSpace
-
-		acb.generateNull(mb, getTypeCompiler(), getTypeServices().getCollationType());
-		mb.upCast(ClassName.DataValueDescriptor);
-	}
 
 	/**
 	** Check whether the column length and type of this result column

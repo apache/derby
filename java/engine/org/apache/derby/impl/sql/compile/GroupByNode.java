@@ -782,7 +782,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @return the parent node
 	 */
-	public FromTable getParent()
+    final FromTable getParent()
 	{
 		return parent;
 	}

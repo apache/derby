@@ -2952,7 +2952,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * @param acb The ActivationClassBuilder for the class we're building
 	 * @param mb The MethodBuilder for the method we're building
 	 */
-	protected void generateInListValues(ExpressionClassBuilder acb,
+    void generateInListValues(ExpressionClassBuilder acb,
 		MethodBuilder mb) throws StandardException
 	{
 		for (int index = size() - 1; index >= 0; index--)

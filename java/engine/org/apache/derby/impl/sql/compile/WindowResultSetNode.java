@@ -412,7 +412,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * @return parent of this node, a PRN, used by SelectNode to retrieve new
      * top result set node after window result set rewrite of result set tree.
      */
-    public FromTable getParent() {
+    final FromTable getParent() {
         return parent;
     }
 

@@ -889,7 +889,7 @@ public class StaticMethodCallNode extends MethodCallNode
 		Push extra code to generate the casts within the
 		arrays for the parameters passed as arrays.
 	*/
-	public	void generateOneParameter(ExpressionClassBuilder acb,
+    void generateOneParameter(ExpressionClassBuilder acb,
 											MethodBuilder mb,
 											int parameterNumber )
 			throws StandardException
@@ -1026,7 +1026,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -1075,9 +1075,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		if (routineInfo != null) {

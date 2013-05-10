@@ -102,7 +102,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *	@return	name of java class type
 	  *
 	  */
-	public String getJavaTypeName()
+    String getJavaTypeName()
 	throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
@@ -118,7 +118,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
-	public String getPrimitiveTypeName()
+    String getPrimitiveTypeName()
 		throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
@@ -144,7 +144,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *	@return	the corresponding JSQLType
 	  *
 	  */
-	public	JSQLType	getJSQLType	() throws StandardException
+    JSQLType getJSQLType() throws StandardException
 	{
 		if ( jsqlType == null )
 		{
@@ -198,7 +198,7 @@ public class SQLToJavaValueNode extends JavaValueNode
     /**
      * Override behavior in superclass.
      */
-    public DataTypeDescriptor getDataType() throws StandardException
+    DataTypeDescriptor getDataType() throws StandardException
     {
         return value.getTypeServices();
     }
@@ -211,7 +211,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public JavaValueNode remapColumnReferencesToExpressions()
+    JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		value = value.remapColumnReferencesToExpressions();
@@ -244,7 +244,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		return value.categorize(referencedTabs, simplePredsOnly);
@@ -263,7 +263,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -287,7 +287,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
-	protected int getOrderableVariantType() throws StandardException
+    int getOrderableVariantType() throws StandardException
 	{
 		return value.getOrderableVariantType();
 	}
@@ -319,9 +319,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{       
 		/* Compile the expression under us */

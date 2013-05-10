@@ -81,7 +81,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	 * 
 	 * @exception StandardException on error
 	 */
-	protected void bind(DDLStatementNode ddlNode, DataDictionary dd)	throws StandardException
+    void bind(DDLStatementNode ddlNode, DataDictionary dd) throws StandardException
 	{
 		super.bind(ddlNode, dd);
 

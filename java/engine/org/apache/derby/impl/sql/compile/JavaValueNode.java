@@ -74,12 +74,12 @@ abstract class JavaValueNode extends QueryTreeNode
     /**
      * Get the resolved data type of this node. May be overridden by descendants.
      */
-    public DataTypeDescriptor getDataType() throws StandardException
+    DataTypeDescriptor getDataType() throws StandardException
     {
         return DataTypeDescriptor.getSQLDataTypeDescriptor( getJavaTypeName()) ;
     }
 
-	public boolean isPrimitiveType() throws StandardException
+    final boolean isPrimitiveType() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 		
@@ -87,7 +87,7 @@ abstract class JavaValueNode extends QueryTreeNode
 		else { return ( myType.getCategory() == JSQLType.JAVA_PRIMITIVE ); }
 	}
 
-	public String getJavaTypeName() throws StandardException
+    String getJavaTypeName() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 
@@ -108,12 +108,12 @@ abstract class JavaValueNode extends QueryTreeNode
 		return "";
 	}
 
-	public void setJavaTypeName(String javaTypeName)
+    final void setJavaTypeName(String javaTypeName)
 	{
 		jsqlType = new JSQLType( javaTypeName );
 	}
 
-	public String getPrimitiveTypeName()
+    String getPrimitiveTypeName()
 		throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
@@ -140,7 +140,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *	@param	booleanValue	true if we want the code generator to add a cast
 	  *							false otherwise
 	  */
-	public void castToPrimitive(boolean booleanValue)
+    final void castToPrimitive(boolean booleanValue)
 	{
 		mustCastToPrimitive = booleanValue;
 	}
@@ -152,7 +152,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *	@return	true if we want the code generator to add a cast
 	  *				false otherwise
 	  */
-	public	boolean	mustCastToPrimitive() { return mustCastToPrimitive; }
+    final boolean mustCastToPrimitive() { return mustCastToPrimitive; }
 
 	/**
 	  *	Get the JSQLType that corresponds to this node. Could be a SQLTYPE,
@@ -161,8 +161,9 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *	@return	the corresponding JSQLType
 	  *
 	  */
-	public	JSQLType	getJSQLType() throws StandardException
-	{ return jsqlType; }
+    JSQLType getJSQLType() throws StandardException {
+        return jsqlType;
+    }
 
 
 	/**
@@ -173,7 +174,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	  *	@return	the corresponding compilation type id
 	  *
 	  */
-	public	static  TypeId	mapToTypeID( JSQLType jsqlType )
+    static TypeId mapToTypeID(JSQLType jsqlType)
         throws StandardException
 	{
 		DataTypeDescriptor	dts = jsqlType.getSQLType();
@@ -187,7 +188,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * Mark this node as being for a CALL Statement.
 	 * (void methods are only okay for CALL Statements)
 	 */
-	public void markForCallStatement()
+    final void markForCallStatement()
 	{
 		forCallStatement = true;
 	}
@@ -197,7 +198,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	abstract public JavaValueNode remapColumnReferencesToExpressions()
+    abstract JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException;
 
 	/**
@@ -205,7 +206,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	abstract public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    abstract boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException;
 
 	/**
@@ -222,7 +223,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	abstract public void preprocess(int numTables,
+    abstract void preprocess(int numTables,
 									FromList outerFromList,
 									SubqueryList outerSubqueryList,
 									PredicateList outerPredicateList)
@@ -276,7 +277,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected boolean generateReceiver(ExpressionClassBuilder acb,
+    boolean generateReceiver(ExpressionClassBuilder acb,
 													MethodBuilder mb)
 									throws StandardException
 	{
@@ -295,7 +296,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
-	protected int getOrderableVariantType() throws StandardException
+    int getOrderableVariantType() throws StandardException
 	{
 		// The default is VARIANT
 		return Qualifier.VARIANT;
@@ -311,8 +312,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	protected abstract  void generateExpression(
+    abstract void generateExpression(
 											ExpressionClassBuilder acb,
 											MethodBuilder mb)
 									throws StandardException;
@@ -349,7 +349,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected final boolean generateReceiver(ExpressionClassBuilder acb,
+    final boolean generateReceiver(ExpressionClassBuilder acb,
 											MethodBuilder mb,
 											JavaValueNode receiver)
 									throws StandardException
@@ -394,7 +394,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected final void getReceiverExpression(ExpressionClassBuilder acb,
+    final void getReceiverExpression(ExpressionClassBuilder acb,
 									MethodBuilder mb,
 									JavaValueNode receiver)
 										throws StandardException
@@ -410,25 +410,25 @@ abstract class JavaValueNode extends QueryTreeNode
 	}
 
 	/** Inform this node that it returns its value to the SQL domain */
-	protected void returnValueToSQLDomain()
+    void returnValueToSQLDomain()
 	{
 		valueReturnedToSQLDomain = true;
 	}
 
 	/** Tell whether this node returns its value to the SQL domain */
-	protected boolean valueReturnedToSQLDomain()
+    boolean valueReturnedToSQLDomain()
 	{
 		return valueReturnedToSQLDomain;
 	}
 
 	/** Tell this node that nothing is done with the returned value */
-	protected void markReturnValueDiscarded()
+    void markReturnValueDiscarded()
 	{
 		returnValueDiscarded = true;
 	}
 
 	/** Tell whether the return value from this node is discarded */
-	protected boolean returnValueDiscarded()
+    boolean returnValueDiscarded()
 	{
 		return returnValueDiscarded;
 	}
@@ -440,7 +440,7 @@ abstract class JavaValueNode extends QueryTreeNode
 
 		@see org.apache.derby.iapi.sql.compile.CompilerContext
 	*/
-	public void checkReliability(ValueNode sqlNode) throws StandardException {
+    void checkReliability(ValueNode sqlNode) throws StandardException {
         sqlNode.checkReliability( 
                 CompilerContext.FUNCTION_CALL_ILLEGAL,
                 SQLState.LANG_JAVA_METHOD_CALL_OR_FIELD_REF
@@ -450,7 +450,7 @@ abstract class JavaValueNode extends QueryTreeNode
     /**
      * @return collationType as set by setCollationType
      */
-    public int getCollationType() {
+    int getCollationType() {
         return collationType;
     }
     
@@ -462,7 +462,7 @@ abstract class JavaValueNode extends QueryTreeNode
      * @param type one of <code>StringDataValue.COLLATION_TYPE_UCS_BASIC </code> or
      *                    <code>StringDataValue.COLLATION_TYPE_TERRITORY_BASED </code>  
      */
-    public void setCollationType(int type) {
+    void setCollationType(int type) {
         collationType = type;
     }
     

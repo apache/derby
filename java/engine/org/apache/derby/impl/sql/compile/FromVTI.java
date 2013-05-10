@@ -448,7 +448,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	/** 
 	 * Return the constructor or static method invoked from this node
 	 */
-	public MethodCallNode getMethodCall()
+    final MethodCallNode getMethodCall()
 	{
 		return methodCall;
 	}

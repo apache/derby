@@ -692,7 +692,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateStartStopKey(boolean isAsc, boolean isStartKey,
+    void generateStartStopKey(boolean isAsc, boolean isStartKey,
 									 ExpressionClassBuilder acb,
 									 MethodBuilder mb)
 											   throws StandardException

@@ -723,7 +723,7 @@ public class UnaryOperatorNode extends OperatorNode
      * @param resultField the field that contains the previous result
      * @return Number of parameters added.
      */
-    protected int addXmlOpMethodParams(ExpressionClassBuilder acb,
+    int addXmlOpMethodParams(ExpressionClassBuilder acb,
 		MethodBuilder mb, LocalField resultField) throws StandardException
     {
         if ((operatorType != XMLPARSE_OP) && (operatorType != XMLSERIALIZE_OP))

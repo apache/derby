@@ -84,10 +84,9 @@ public class DeleteNode extends DMLModStatementNode
 	private static final String COLUMNNAME = "###RowLocationToDelete";
 
 	/* Filled in by bind. */
-	protected boolean				deferred;
-	protected FromTable				targetTable;
-	protected FKInfo				fkInfo;
-	protected FormatableBitSet readColsBitSet;
+    private boolean deferred;
+    private FromTable targetTable;
+    private FormatableBitSet readColsBitSet;
 
 	private ConstantAction[] dependentConstantActions;
 	private boolean cascadeDelete;

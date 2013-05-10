@@ -197,7 +197,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -233,7 +233,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
-	protected int getOrderableVariantType() throws StandardException
+    int getOrderableVariantType() throws StandardException
 	{
 		int receiverVariant = receiver.getOrderableVariantType();
 
@@ -261,7 +261,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public JavaValueNode remapColumnReferencesToExpressions()
+    JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		if (receiver != null)
@@ -307,7 +307,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -331,9 +331,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		boolean inConditional = false;
@@ -430,7 +428,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected boolean generateReceiver(ExpressionClassBuilder acb,
+    boolean generateReceiver(ExpressionClassBuilder acb,
 											MethodBuilder mb)
 									throws StandardException
 	{

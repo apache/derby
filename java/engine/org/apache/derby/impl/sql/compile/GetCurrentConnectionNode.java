@@ -95,7 +95,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -127,7 +127,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 * @return boolean		Whether or not source.expression is a ColumnReference
 	 *						or a VirtualColumnNode.
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 	{
 		return false;
 	}
@@ -139,7 +139,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 * @return JavaValueNode			The remapped expression tree.
 	 *
 	 */
-	public JavaValueNode remapColumnReferencesToExpressions()
+    JavaValueNode remapColumnReferencesToExpressions()
 	{
 		return this;
 	}
@@ -164,7 +164,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
-	protected int getOrderableVariantType()
+    int getOrderableVariantType()
 	{
 		return Qualifier.QUERY_INVARIANT;
 	}
@@ -177,8 +177,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		mb.pushThis();
@@ -192,7 +191,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 
 		@see org.apache.derby.iapi.sql.compile.CompilerContext
 	*/
-	public void checkReliability(ValueNode sqlNode)
+    void checkReliability(ValueNode sqlNode)
 		throws StandardException {
 		sqlNode.checkReliability("getCurrentConnection()",
 			CompilerContext.CURRENT_CONNECTION_ILLEGAL);

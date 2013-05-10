@@ -132,7 +132,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -164,7 +164,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 * @return boolean		Whether or not source.expression is a ColumnReference
 	 *						or a VirtualColumnNode.
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 	{
 		return true;
 	}
@@ -177,7 +177,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public JavaValueNode remapColumnReferencesToExpressions()
+    JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		return this;
@@ -195,7 +195,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
-	protected int getOrderableVariantType()
+    int getOrderableVariantType()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -220,8 +220,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpression(ExpressionClassBuilder acb,
-											MethodBuilder mb)
+    void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 	throws StandardException
 	{
 		/*

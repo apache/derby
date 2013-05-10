@@ -1508,7 +1508,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
+    FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
 		throws StandardException
 	{
 		/* Can't flatten if no predicates in where clause. */
@@ -1554,7 +1554,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
-	public void generateCore(ActivationClassBuilder acb,
+    void generateCore(ActivationClassBuilder acb,
 								   MethodBuilder mb,
 								   int joinType) 
 			throws StandardException
@@ -1573,7 +1573,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected void generateCore(ActivationClassBuilder acb,
+    void generateCore(ActivationClassBuilder acb,
 									  MethodBuilder mb,
 									  int joinType,
 									  ValueNode joinClause,
@@ -1754,8 +1754,7 @@ public class JoinNode extends TableOperatorNode
 		return finalCostEstimate;
 	}
 
-	protected void oneRowRightSide(ActivationClassBuilder acb,
-									   MethodBuilder mb)
+    void oneRowRightSide(ActivationClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
 		mb.push(rightResultSet.isOneRowResultSet());
@@ -1782,8 +1781,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	 protected int addOuterJoinArguments(ActivationClassBuilder acb,
-											MethodBuilder mb)
+    int addOuterJoinArguments(ActivationClassBuilder acb, MethodBuilder mb)
 		 throws StandardException
 	 {
 		 return 0;

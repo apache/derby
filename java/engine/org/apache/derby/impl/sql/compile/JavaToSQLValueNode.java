@@ -200,7 +200,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 * @return	The JavaValueNode that lives under this node.
 	 */
 
-	public JavaValueNode getJavaValueNode()
+    JavaValueNode getJavaValueNode()
 	{
 		return javaNode;
 	}

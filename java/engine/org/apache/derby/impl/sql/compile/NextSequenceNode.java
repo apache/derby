@@ -148,7 +148,7 @@ public class NextSequenceNode extends ValueNode {
      * @param mb The method the expression will go into
      * @throws StandardException on error
      */
-    public void generateConstant
+    void generateConstant
             (
                     ExpressionClassBuilder ecb,
                     MethodBuilder mb

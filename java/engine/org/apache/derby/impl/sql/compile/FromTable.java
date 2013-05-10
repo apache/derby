@@ -1382,7 +1382,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
+    FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
 		throws StandardException
 	{
 		return this;

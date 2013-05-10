@@ -404,7 +404,7 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
-	static public	void generateParameterValueSet(ExpressionClassBuilder	acb,
+    static void generateParameterValueSet(ExpressionClassBuilder acb,
 								   int		numberOfParameters,
 								   List     parameterList)
 		throws StandardException

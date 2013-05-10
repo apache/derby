@@ -894,7 +894,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FormatableBitSet bindResultColumnsByName(TableDescriptor targetTableDescriptor,
+    FormatableBitSet bindResultColumnsByName(TableDescriptor targetTableDescriptor,
                                                     DMLStatementNode statement)
 					throws StandardException
 	{
@@ -945,7 +945,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnsByName(ResultColumnList fullRCL,
+    void bindResultColumnsByName(ResultColumnList fullRCL,
 										FromVTI targetVTI,
 										DMLStatementNode statement)
 					throws StandardException

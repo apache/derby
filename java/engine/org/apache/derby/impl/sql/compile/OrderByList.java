@@ -343,7 +343,7 @@ public class OrderByList extends OrderedColumnList
 		@param mb	the method the generated code is to go into
 		@exception StandardException thrown on failure
 	 */
-	public void generate(ActivationClassBuilder acb, 
+    void generate(ActivationClassBuilder acb,
 								MethodBuilder mb,
 								ResultSetNode child)
 							throws StandardException 

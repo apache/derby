@@ -55,12 +55,12 @@ public class ParserImpl implements Parser
 
         /* Don't ever access these objects directly, call getParser(), and getTokenManager() */
         private SQLParser cachedParser; 
-	protected Object cachedTokenManager;
+        private Object cachedTokenManager;
 
-	protected CharStream charStream;
+        private CharStream charStream;
         protected String SQLtext;
 
-        protected final CompilerContext cc;
+        private final CompilerContext cc;
 
 	/**
 	 * Constructor for Parser

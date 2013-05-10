@@ -417,7 +417,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -466,7 +466,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -508,7 +508,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public JavaValueNode remapColumnReferencesToExpressions()
+    JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		int	param;
@@ -727,7 +727,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public	void generateOneParameter(ExpressionClassBuilder acb,
+    void generateOneParameter(ExpressionClassBuilder acb,
 											MethodBuilder mb,
 											int parameterNumber )
 			throws StandardException
@@ -1386,7 +1386,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
-	protected int getOrderableVariantType() throws StandardException
+    int getOrderableVariantType() throws StandardException
 	{
 		// beetle 4880. We return the most variant type of the parameters. If no
 		// params then query-invariant. This makes more sense, and we can evaluate
@@ -1426,7 +1426,7 @@ abstract class MethodCallNode extends JavaValueNode
     /**
      * Override method in ancestor.
      */
-    public DataTypeDescriptor getDataType() throws StandardException
+    DataTypeDescriptor getDataType() throws StandardException
     {
         if ( routineInfo != null )
         {

@@ -644,7 +644,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
+    FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
 		throws StandardException
 	{
 		ResultSetNode innerRS;
@@ -802,8 +802,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	 protected int addOuterJoinArguments(ActivationClassBuilder acb,
-											MethodBuilder mb)
+    int addOuterJoinArguments(ActivationClassBuilder acb, MethodBuilder mb)
 		 throws StandardException
 	 {
 		/* Nulls always generated from the right */
@@ -824,8 +823,7 @@ private boolean isNullRejecting (
 		return super.getNumJoinArguments() + 2;
 	}
 
-	protected void oneRowRightSide(ActivationClassBuilder acb,
-									   MethodBuilder mb)
+    void oneRowRightSide(ActivationClassBuilder acb, MethodBuilder mb)
 	{
 		// always return false for now
 		mb.push(false);
