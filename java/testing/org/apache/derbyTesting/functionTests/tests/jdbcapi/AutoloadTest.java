@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.net.InetAddress;
 import java.sql.Driver;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -226,21 +227,6 @@ public class AutoloadTest extends BaseJDBCTestCase
      * </ul>
      */
     static Test fullAutoloadSuite() {
-        if (!TestConfiguration.getCurrent().isDefaultBasePort())
-        {
-            // DERBY-6178
-            //     test is not currently coded to work properly when calling
-            //     system is depending on setting -Dderby.tests.basePort=3500
-            //     to avoid conflict on concurrent tests starting and stopping
-            //     network server.
-
-            // for now just skip this test if tests are setting a non-default
-            // base port.
-            return new TestSuite(
-                    "empty: test not supported with non-default base port: " + 
-                    TestConfiguration.getCurrent().getBasePort());
-        }
-
         TestSuite suite = new TestSuite("AutoloadTest:All");
         suite.addTest(new AutoloadTest(AutoloadTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
@@ -262,15 +248,29 @@ public class AutoloadTest extends BaseJDBCTestCase
      * Run {@code AutoloadTest} in a separate JVM.
      */
     public void spawnProcess() throws Exception {
-        String[] cmd = {
-            "junit.textui.TestRunner", spawnedTestClass.getName()
-        };
-
-        SpawnedProcess proc =
-            new SpawnedProcess(execJavaCmd(cmd), spawnedTestClass.getName());
-
-        if (proc.complete() != 0) {
-            fail(proc.getFailMessage("Test process failed"));
+        if (TestConfiguration.isDefaultBasePort()) {
+            String[] cmd = {
+                    "junit.textui.TestRunner", spawnedTestClass.getName()
+                           };
+            SpawnedProcess proc = new SpawnedProcess
+                    (execJavaCmd(cmd), spawnedTestClass.getName());
+            if (proc.complete() != 0) {
+                fail(proc.getFailMessage("Test process failed"));
+            }
+        }
+        else 
+        {
+            // if we're not using the default port of 1527, ensure we're
+            // passing on the baseport value to the spawned process.
+            String[] cmd = {
+                    "-Dderby.tests.basePort=" + TestConfiguration.getBasePort(),
+                    "junit.textui.TestRunner", spawnedTestClass.getName()
+            };            
+            SpawnedProcess proc = new SpawnedProcess
+                    (execJavaCmd(cmd), spawnedTestClass.getName());
+            if (proc.complete() != 0) {
+                fail(proc.getFailMessage("Test process failed"));
+            }
         }
     }
 
@@ -518,7 +518,9 @@ public class AutoloadTest extends BaseJDBCTestCase
         
         String user = getTestConfiguration().getUserName();
         String pw = getTestConfiguration().getUserPassword();
-        NetworkServerControl control = new NetworkServerControl(user, pw);
+        int port = TestConfiguration.getBasePort();
+        final InetAddress host = InetAddress.getByName(TestConfiguration.getCurrent().getHostName());
+        NetworkServerControl control = new NetworkServerControl(host, port, user, pw);
 
         if (!serverShouldBeUp) {
             // If we expect the server not to come up, wait a little before
