@@ -42,7 +42,7 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 
-public class NetConnectionReply extends Reply
+class NetConnectionReply extends Reply
         implements ConnectionReplyInterface {
     private static MessageUtil msgutil_ = SqlException.getMessageUtil();
     
@@ -330,7 +330,8 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void parseExchangeServerAttributesError() throws DisconnectException {
+    private void parseExchangeServerAttributesError()
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.CMDCHKRM:
@@ -344,7 +345,8 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void parseAccessSecurityError(NetConnection netConnection) throws DisconnectException {
+    private void parseAccessSecurityError(NetConnection netConnection)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.CMDCHKRM:
@@ -382,7 +384,8 @@ public class NetConnectionReply extends Reply
         }
     }
 
-    void parseAccessRdbError(NetConnection netConnection) throws DisconnectException {
+    private void parseAccessRdbError(NetConnection netConnection)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.CMDCHKRM:
@@ -435,7 +438,10 @@ public class NetConnectionReply extends Reply
      * @throws DisconnectException
      *
      */
-    NetSqlca parseAbnormalEndUow(ConnectionCallbackInterface connection,UnitOfWorkListener uwl) throws DisconnectException {
+    private NetSqlca parseAbnormalEndUow(
+            ConnectionCallbackInterface connection,
+            UnitOfWorkListener uwl) throws DisconnectException {
+
         parseABNUOWRM();
         if (peekCodePoint() != CodePoint.SQLCARD) {
             parseTypdefsOrMgrlvlovrs();
@@ -1720,7 +1726,7 @@ public class NetConnectionReply extends Reply
     //   RDBNAM - required
     //
     // Called by all the NET*Reply classes.
-    void parseABNUOWRM() throws DisconnectException {
+    private void parseABNUOWRM() throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
@@ -2794,7 +2800,8 @@ public class NetConnectionReply extends Reply
         doValnsprmSemantics(codePoint, Integer.toString(value));
     }
 
-    void doValnsprmSemantics(int codePoint, String value) throws DisconnectException {
+    private void doValnsprmSemantics(int codePoint, String value)
+            throws DisconnectException {
 
         // special case the FDODTA codepoint not to disconnect.
         if (codePoint == CodePoint.FDODTA) {

@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.FilterInputStream;
-
 import java.io.IOException;
 import org.apache.derby.shared.common.reference.MessageId;
 

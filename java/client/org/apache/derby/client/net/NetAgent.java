@@ -525,14 +525,9 @@ public class NetAgent extends Agent {
     /**
      * Switches the current CCSID manager to EBCDIC
      */
-    public void switchToEbcdicMgr() {
+    void switchToEbcdicMgr() {
         currentCcsidManager_ = ebcdicCcsidManager_;
     }
-
-    protected int getPort() {
-        return port_;
-    }
-
 }
 
 

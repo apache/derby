@@ -429,8 +429,9 @@ class NetStatementReply extends NetPackageReply
     // followed by an optional SQLCARD, followed by an optional
     // SQL Column Information Reply data object, followed by a Query Descriptor.
     // There may also be Query Data or an End of Query Reply Message.
-    NetResultSet parseResultSetCursor(StatementCallbackInterface statementI,
-                                                Section section) throws DisconnectException {
+    private NetResultSet parseResultSetCursor(
+            StatementCallbackInterface statementI,
+            Section section) throws DisconnectException {
         // The first item returne is an OPNQRYRM.
         NetResultSet netResultSet = parseOPNQRYRM(statementI, false);
 
@@ -473,7 +474,7 @@ class NetStatementReply extends NetPackageReply
         return netResultSet;
     }
 
-    void parseOpenQuery(StatementCallbackInterface statementI)
+    private void parseOpenQuery(StatementCallbackInterface statementI)
             throws DisconnectException {
         NetResultSet netResultSet = parseOPNQRYRM(statementI, true);
 
@@ -539,14 +540,16 @@ class NetStatementReply extends NetPackageReply
         resultSetI.earlyCloseComplete(netSqlca);
     }
 
-    void parseOpenQueryFailure(StatementCallbackInterface statementI) throws DisconnectException {
+    private void parseOpenQueryFailure(StatementCallbackInterface statementI)
+            throws DisconnectException {
         parseOPNQFLRM(statementI);
         parseTypdefsOrMgrlvlovrs();
         NetSqlca netSqlca = parseSQLCARD(null);
         statementI.completeOpenQuery(netSqlca, null);
     }
 
-    void parsePrepareError(StatementCallbackInterface statement) throws DisconnectException {
+    private void parsePrepareError(StatementCallbackInterface statement)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -581,7 +584,8 @@ class NetStatementReply extends NetPackageReply
         }
     }
 
-    void parseExecuteImmediateError(StatementCallbackInterface statement) throws DisconnectException {
+    private void parseExecuteImmediateError(StatementCallbackInterface statement)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -618,7 +622,8 @@ class NetStatementReply extends NetPackageReply
     }
 
 
-    void parseDescribeError(StatementCallbackInterface statement) throws DisconnectException {
+    private void parseDescribeError(StatementCallbackInterface statement)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -648,7 +653,8 @@ class NetStatementReply extends NetPackageReply
     }
 
 
-    void parseOpenQueryError(StatementCallbackInterface statementI) throws DisconnectException {
+    private void parseOpenQueryError(StatementCallbackInterface statementI)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -680,7 +686,8 @@ class NetStatementReply extends NetPackageReply
         }
     }
 
-    void parseExecuteError(StatementCallbackInterface statementI) throws DisconnectException {
+    private void parseExecuteError(StatementCallbackInterface statementI)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -716,7 +723,8 @@ class NetStatementReply extends NetPackageReply
         }
     }
 
-    void parseExecuteSetStatementError(StatementCallbackInterface statement) throws DisconnectException {
+    private void parseExecuteSetStatementError(
+            StatementCallbackInterface statement) throws DisconnectException {
         int peekCP = peekCodePoint();
         switch (peekCP) {
         case CodePoint.ABNUOWRM:
@@ -771,7 +779,7 @@ class NetStatementReply extends NetPackageReply
      * @return a <code>NetResultSet</code> value
      * @exception DisconnectException
      */
-    NetResultSet parseOPNQRYRM(StatementCallbackInterface statementI,
+    private NetResultSet parseOPNQRYRM(StatementCallbackInterface statementI,
                                          boolean isOPNQRYreply)
         throws DisconnectException
     {
@@ -957,7 +965,7 @@ class NetStatementReply extends NetPackageReply
     // terminated in such a manner that the query or result set is now closed.
     // It cannot be resumed with the CNTQRY command or closed with the CLSQRY command.
     // The ENDQRYRM is always followed by an SQLCARD.
-    void parseENDQRYRM(ResultSetCallbackInterface resultSetI)
+    private void parseENDQRYRM(ResultSetCallbackInterface resultSetI)
             throws DisconnectException {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
@@ -1200,7 +1208,8 @@ class NetStatementReply extends NetPackageReply
     // Returned from Server:
     //   FDODSC - required
     //   FDODTA - required
-    NetSqlca parseSQLDTARD(NetSqldta netSqldta) throws DisconnectException {
+    private NetSqlca parseSQLDTARD(NetSqldta netSqldta)
+            throws DisconnectException {
         boolean fdodscReceived = false;
         boolean fdodtaReceived = false;
 
@@ -1238,7 +1247,7 @@ class NetStatementReply extends NetPackageReply
         return netSqlca;
     }
 
-    void parseQRYDSC(NetCursor cursor) throws DisconnectException {
+    private void parseQRYDSC(NetCursor cursor) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.QRYDSC);
         parseSQLDTARDarray(cursor, false); // false means don't just skip the bytes
     }
@@ -1487,7 +1496,8 @@ class NetStatementReply extends NetPackageReply
 
     }
 
-    NetSqlca parseFDODTA(NetCursor netCursor) throws DisconnectException {
+    private NetSqlca parseFDODTA(NetCursor netCursor)
+            throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.FDODTA);
         int ddmLength = getDdmLength();
         ensureBLayerDataInBuffer(ddmLength);
@@ -1499,13 +1509,15 @@ class NetStatementReply extends NetPackageReply
         return netSqlca;
     }
 
-    void parseFastSQLDTARDdata(NetCursor netCursor) throws DisconnectException {
+    private void parseFastSQLDTARDdata(NetCursor netCursor)
+            throws DisconnectException {
         netCursor.dataBufferStream_ = getFastData(netCursor.dataBufferStream_);
         netCursor.dataBuffer_ = netCursor.dataBufferStream_.toByteArray();
         netCursor.lastValidBytePosition_ = netCursor.dataBuffer_.length;
     }
 
-    void parseSQLDTARDdata(NetCursor netCursor) throws DisconnectException {
+    private void parseSQLDTARDdata(NetCursor netCursor)
+            throws DisconnectException {
         if (longValueForDecryption_ == null) {
             netCursor.dataBufferStream_ = getData(netCursor.dataBufferStream_);
             netCursor.dataBuffer_ = netCursor.dataBufferStream_.toByteArray();
@@ -1656,7 +1668,7 @@ class NetStatementReply extends NetPackageReply
         return section;
     }
 
-    int parseFastQRYPRCTYP() throws DisconnectException {
+    private int parseFastQRYPRCTYP() throws DisconnectException {
         matchCodePoint(CodePoint.QRYPRCTYP);
         int qryprctyp = readFastUnsignedShort();
         if ((qryprctyp != CodePoint.FIXROWPRC) && (qryprctyp != CodePoint.LMTBLKPRC)) {
@@ -1665,7 +1677,7 @@ class NetStatementReply extends NetPackageReply
         return qryprctyp;
     }
 
-    int parseFastSQLCSRHLD() throws DisconnectException {
+    private int parseFastSQLCSRHLD() throws DisconnectException {
         matchCodePoint(CodePoint.SQLCSRHLD);
         int sqlcsrhld = readFastUnsignedByte();
         // 0xF0 is false (default), 0xF1 is true  // use constants in if
@@ -1675,7 +1687,7 @@ class NetStatementReply extends NetPackageReply
         return sqlcsrhld;
     }
 
-    int parseFastQRYATTSCR() throws DisconnectException {
+    private int parseFastQRYATTSCR() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTSCR);
         int qryattscr = readFastUnsignedByte();  // use constants in if
         if ((qryattscr != 0xF0) && (qryattscr != 0xF1)) {
@@ -1684,7 +1696,7 @@ class NetStatementReply extends NetPackageReply
         return qryattscr;
     }
 
-    int parseFastQRYATTSET() throws DisconnectException {
+    private int parseFastQRYATTSET() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTSET);
         int qryattset = readFastUnsignedByte();  // use constants in if
         if ((qryattset != 0xF0) && (qryattset != 0xF1)) {
@@ -1693,7 +1705,7 @@ class NetStatementReply extends NetPackageReply
         return qryattset;
     }
 
-    int parseFastQRYATTSNS() throws DisconnectException {
+    private int parseFastQRYATTSNS() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTSNS);
         int qryattsns = readFastUnsignedByte();
         switch (qryattsns) {
@@ -1708,7 +1720,7 @@ class NetStatementReply extends NetPackageReply
         return qryattsns;
     }
 
-    int parseFastQRYATTUPD() throws DisconnectException {
+    private int parseFastQRYATTUPD() throws DisconnectException {
         matchCodePoint(CodePoint.QRYATTUPD);
         int qryattupd = readFastUnsignedByte();
         switch (qryattupd) {
@@ -1745,7 +1757,7 @@ class NetStatementReply extends NetPackageReply
         return pkgsnlst;
     }
 
-    NetSqlca parseSQLDARD(ColumnMetaData columnMetaData,
+    private NetSqlca parseSQLDARD(ColumnMetaData columnMetaData,
                                     boolean skipBytes) throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLDARD);
         return parseSQLDARDarray(columnMetaData, skipBytes);
@@ -1757,7 +1769,7 @@ class NetStatementReply extends NetPackageReply
         return parseSQLRSLRDarray(sections);
     }
 
-    ColumnMetaData parseSQLCINRD() throws DisconnectException {
+    private ColumnMetaData parseSQLCINRD() throws DisconnectException {
         parseLengthAndMatchCodePoint(CodePoint.SQLCINRD);
         int ddmLength = getDdmLength();
         ensureBLayerDataInBuffer(ddmLength);
@@ -1782,7 +1794,7 @@ class NetStatementReply extends NetPackageReply
     //   SQLDHROW; ROW LID 0xE0; ELEMENT TAKEN 0(all); REP FACTOR 1
     //   SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
     //   SQLDAROW; ROW LID 0x60; ELEMENT TAKEN 0(all); REP FACTOR 0(all)
-    NetSqlca parseSQLDARDarray(ColumnMetaData columnMetaData,
+    private NetSqlca parseSQLDARDarray(ColumnMetaData columnMetaData,
                                boolean skipBytes) throws DisconnectException {
         int ddmLength = 0;
         if (!ensuredLengthForDecryption_ && longValueForDecryption_ == null) {  //if ensuredLength = true, means we already ensured length in decryptData, so don't need to do it again
@@ -1877,7 +1889,7 @@ class NetStatementReply extends NetPackageReply
     // that specifies information about columns for a result set returned as
     // reply data in the response to an EXCSQLSTT command that invodes a stored
     // procedure
-    ColumnMetaData parseSQLCINRDarray() throws DisconnectException {
+    private ColumnMetaData parseSQLCINRDarray() throws DisconnectException {
         ColumnMetaData columnMetaData = ClientDriver.getFactory().newColumnMetaData(netAgent_.logWriter_);
 
         parseSQLDHROW(columnMetaData);

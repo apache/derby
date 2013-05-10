@@ -126,7 +126,7 @@ class ClobLocatorWriter extends Writer {
     /**
      * @see java.io.Writer#write(char[])
      */
-    public void wriUSLte(char[] c) throws IOException {
+    public void write(char[] c) throws IOException {
         checkClosed();
         writeCharacters(c, 0, c.length);
     }

@@ -54,19 +54,7 @@ public interface ClientJDBCObjectFactory {
             String user,
             String password) throws SQLException;
     
-    /**
-     * This method is used to return an instance of
-     * ClientPooledConnection(or ClientPooledConnection40) class which
-     * implements {@code javax.sql.PooledConnection}.
-     */
-    ClientPooledConnection newClientPooledConnection(
-            ClientBaseDataSourceRoot ds,
-            LogWriter logWriter,
-            String user,
-            String password,
-            int rmId) throws SQLException;
-    
-    /**
+        /**
      * This method is used to return an instance of
      * ClientXAConnection (or ClientXAConnection40) class which
      * implements {@code javax.sql.XAConnection}.
@@ -220,27 +208,6 @@ public interface ClientJDBCObjectFactory {
             StatementCacheInteractor cacheInteractor);
 
     /**
-     * This method returns an instance of NetConnection (or
-     * NetConnection40) class which extends from ClientConnection.  This
-     * implements the {@code java.sql.Connection} interface.
-     */
-    ClientConnection newNetConnection(
-            LogWriter netLogWriter,
-            String databaseName,Properties properties)
-            throws SqlException;
-    
-    /**
-     * This method returns an instance of NetConnection (or NetConnection40) class
-     * which extends from ClientConnection
-     * this implements the {@code java.sql.Connection} interface
-     */
-    ClientConnection newNetConnection(
-            LogWriter netLogWriter,
-            ClientBaseDataSourceRoot clientDataSource,
-            String user,
-            String password) throws SqlException;
-    
-    /**
      * This method returns an instance of NetConnection (or NetConnection40)
      * class which extends from ClientConnection
      * this implements the java.sql.Connection interface
@@ -262,19 +229,6 @@ public interface ClientJDBCObjectFactory {
             String password,
             ClientBaseDataSourceRoot dataSource,
             int rmId,
-            boolean isXAConn) throws SqlException;
-    
-    /**
-     * This method returns an instance of NetConnection
-     * (or NetConnection40) class which extends from
-     * ClientConnection this implements the
-     * {@code java.sql.Connection interface}.
-     */
-    ClientConnection newNetConnection(
-            LogWriter netLogWriter,
-            String ipaddr,
-            int portNumber,
-            ClientBaseDataSourceRoot dataSource,
             boolean isXAConn) throws SqlException;
     
     /**
@@ -331,19 +285,6 @@ public interface ClientJDBCObjectFactory {
     ClientDatabaseMetaData newNetDatabaseMetaData(Agent netAgent,
             ClientConnection netConnection);
     
-    /**
-     * This method provides an instance of Statement or Statement40 
-     * depending on the jdk version under use
-     * @param  agent      Agent
-     * @param  connection Connection
-     * @return a {@code java.sql.Statement} implementation
-     * @throws SqlException
-     *
-     */
-     ClientStatement newStatement(Agent agent,
-             ClientConnection connection)
-             throws SqlException;
-     
      /**
      * This method provides an instance of Statement or Statement40 
      * depending on the jdk version under use

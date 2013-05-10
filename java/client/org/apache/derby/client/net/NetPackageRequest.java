@@ -34,15 +34,6 @@ class NetPackageRequest extends NetConnectionRequest {
         super(netAgent, bufferSize);
     }
 
-    // RDB Package Name, Consistency Token
-    // Scalar Object specifies the fully qualified name of a relational
-    // database package and its consistency token.
-    //
-    // To accomodate larger lengths, the Scalar Data Length
-    // (SCLDTALEN) Field is used to specify the length of the instance
-    // variable which follows.
-    static final String collectionName = "NULLID";
-
     private void buildCommonPKGNAMinfo(Section section) throws SqlException {
         String collectionToFlow = COLLECTIONNAME;
         // the scalar data length field may or may not be required.  it depends

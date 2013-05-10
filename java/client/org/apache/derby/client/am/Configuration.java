@@ -27,7 +27,6 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
-import java.util.StringTokenizer;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
@@ -68,7 +67,7 @@ public class Configuration {
     private final static String[] dncCompatibleJREVersions =
             {"1.5", "1.6", "1.7", "1.8"};
 
-    public static String[] getDncCompatibleJREVersions() {
+    static String[] getDncCompatibleJREVersions() {
         return dncCompatibleJREVersions.clone();
     }
 

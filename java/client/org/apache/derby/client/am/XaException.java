@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import java.io.PrintWriter;
 import javax.transaction.xa.XAException;
 
 
@@ -39,10 +38,6 @@ public class XaException extends XAException implements Diagnosable {
 
     public Sqlca getSqlca() {
         return null;
-    }
-
-    public void printTrace(PrintWriter printWriter, String header) {
-        ExceptionFormatter.printTrace(this, printWriter, header);
     }
 }
 

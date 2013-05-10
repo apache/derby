@@ -38,9 +38,6 @@ import java.util.StringTokenizer;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Configuration;
-import org.apache.derby.client.am.ClientConnection;
-import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
@@ -58,20 +55,8 @@ public abstract class ClientBaseDataSourceRoot implements
 
     private static final long serialVersionUID = -7660172643035173693L;
 
-    // Spec requires DH algorithm with 32bytes prime to be used
-    // Not all JCE implementations have support for this. E.g.
-    // Sun JCE does not support DH(prime of 32bytes).
-    // store information if client JVM has JCE loaded that
-    // can support the necessary algorithms required for EUSRIDPWD
-    // (encrypted userid and password) security mechanism
-    // this information is needed to decide if security mechanism
-    // can be upgraded to EUSRIDPWD or not
-    // See getUpgradedSecurityMechanism()
-    static final boolean SUPPORTS_EUSRIDPWD;
-
     static
     {
-        boolean supports_eusridpwd = false;
         try
         {
             // The EncryptionManager class will instantiate objects of the
@@ -79,15 +64,11 @@ public abstract class ClientBaseDataSourceRoot implements
             // exception will be thrown if support is not available in the JCE
             // implementation in the JVM in which the client is loaded.
             new EncryptionManager(null);
-            supports_eusridpwd = true;
         }catch(Exception e)
         {
             // if an exception is thrown, ignore exception.
-            // set SUPPORTS_EUSRIDPWD to false indicating that the client
-            // does not support EUSRIDPWD security mechanism
         }
 
-        SUPPORTS_EUSRIDPWD = supports_eusridpwd;
     }
 
     // The loginTimeout jdbc 2 data source property is not supported as a jdbc
@@ -1000,7 +981,7 @@ public abstract class ClientBaseDataSourceRoot implements
      * @param properties jdbc url properties
      * @return value of traceLevel property
      */
-    public static int getTraceLevel(Properties properties) {
+    static int getTraceLevel(Properties properties) {
         String traceLevelString;
         traceLevelString  =
             readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX +

@@ -66,7 +66,6 @@ public class ClientPooledConnection implements PooledConnection {
     private int eventIterators;
 
     ClientConnection physicalConnection_ = null;
-    NetConnection netPhysicalConnection_ = null;
     NetXAConnection netXAPhysicalConnection_ = null;
 
     /**
@@ -119,7 +118,7 @@ public class ClientPooledConnection implements PooledConnection {
             //PooledConnection which will then raise the events
             //on the listeners
             
-            netPhysicalConnection_ = (NetConnection)
+            physicalConnection_ =
             ClientDriver.getFactory().newNetConnection(
                     (NetLogWriter) logWriter_,
                     user,
@@ -131,7 +130,6 @@ public class ClientPooledConnection implements PooledConnection {
         } catch (SqlException se) {
             throw se.getSQLException();
         }
-        physicalConnection_ = netPhysicalConnection_;
     }
 
     /**

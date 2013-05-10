@@ -111,7 +111,7 @@ public class NetConfiguration {
     static final int MGRLVL_5 = 0x05;
 
     // Manager Level 7 constant.
-    static final public int MGRLVL_7 = 0x07;
+    static final int MGRLVL_7 = 0x07;
 
     // Indicates userid/encrypted password security mechanism.
     public static final int SECMEC_EUSRIDPWD = 0x09;
@@ -121,9 +121,6 @@ public class NetConfiguration {
 
     // Indicates userid/encrypted password security mechanism.
     public static final int SECMEC_USRENCPWD = 0x07;
-
-    // Indicates userid/new password security mechanism.
-    static final int SECMEC_USRIDNWPWD = 0x05;
 
     // Indicates userid/password security mechanism.
     public static final int SECMEC_USRIDPWD = 0x03;

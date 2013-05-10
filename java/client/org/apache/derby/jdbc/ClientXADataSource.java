@@ -23,9 +23,6 @@ package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
 import javax.sql.XAConnection;
-import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
 
 /**
  * This datasource is suitable for a client/server use of Derby,

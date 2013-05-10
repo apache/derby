@@ -32,7 +32,7 @@ import java.sql.SQLWarning;
  */
 public class SqlWarning extends SqlException implements Diagnosable {
 
-    protected SqlWarning nextWarning_;
+    private SqlWarning nextWarning_;
     
     SqlWarning (LogWriter logwriter, ClientMessageId msgid)
     {

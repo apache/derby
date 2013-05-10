@@ -190,12 +190,4 @@ class NetPreparedStatement extends NetStatement
     public void readDescribeInput_() throws SqlException {
         netAgent_.statementReply_.readDescribeInput(preparedStatement_);
     }
-
-    public void writeDescribeOutput_(Section section) throws SqlException {
-        netAgent_.statementRequest_.writeDescribeOutput(this, section);
-    }
-
-    public void readDescribeOutput_() throws SqlException {
-        netAgent_.statementReply_.readDescribeOutput(preparedStatement_);
-    }
 }

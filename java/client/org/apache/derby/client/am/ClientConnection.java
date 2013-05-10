@@ -872,7 +872,7 @@ public abstract class ClientConnection
 
     // Just like closeX except the socket is not pulled.
     // Physical resources are not closed.
-    synchronized public void closeForReuse(boolean statementPooling)
+    synchronized void closeForReuse(boolean statementPooling)
             throws SqlException {
         if (!open_) {
             return;

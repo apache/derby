@@ -215,7 +215,7 @@ public final class StatementCacheInteractor {
      * A cache interactor is bound to a single (caching) logical connection.
      * @throws SQLException if closing an open logical connection fails
      */
-    public synchronized void closeOpenLogicalStatements()
+    synchronized void closeOpenLogicalStatements()
             throws SQLException {
         // Transist to closing state, to avoid changing the list of open
         // statements as we work our way through the list.

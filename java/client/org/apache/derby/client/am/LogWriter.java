@@ -595,12 +595,6 @@ public class LogWriter {
     }
 
     void traceEntry(Object instance, String methodName,
-                           int arg1, Object arg2, Object arg3, Object arg4) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
                            int arg1, Object arg2, int arg3, int arg4) {
         traceEntryAllArgs(instance, methodName,
                 "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");

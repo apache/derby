@@ -176,7 +176,7 @@ class NetConnectionRequest extends Request
     // The Relational Database Name (RDBNAM) is an optional parameter
     // which will not be sent by this command to reduce size, building,
     // and parsing.
-    void buildRDBCMM() throws SqlException {
+    private void buildRDBCMM() throws SqlException {
         createCommand();
         writeLengthCodePoint(0x04, CodePoint.RDBCMM);
     }

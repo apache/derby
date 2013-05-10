@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
@@ -184,12 +183,16 @@ public class SqlException extends Exception implements Diagnosable {
         this.errorcode_ = sqlcode.getCode();
     }
 
-    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object[] args,
+    private SqlException(
+        LogWriter logWriter,
+        ClientMessageId msgid,
+        Object[] args,
         SqlCode sqlcode) {
+
         this(logWriter, msgid, args, sqlcode, (Throwable)null);
     }
         
-    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
+    SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
         SqlCode sqlcode) {
         this(logWriter, msgid, new Object[] {arg1}, sqlcode);
     }
@@ -296,13 +299,13 @@ public class SqlException extends Exception implements Diagnosable {
     
     // Once all messages are internationalized, these methods should become
     // private
-    protected SqlException(LogWriter logWriter, String reason, String sqlState,
+    private SqlException(LogWriter logWriter, String reason, String sqlState,
         int errorCode)
     {
         this(logWriter, (Throwable)null, reason, sqlState, errorCode);
     }
 
-    protected SqlException(LogWriter logWriter, Throwable throwable,
+    private SqlException(LogWriter logWriter, Throwable throwable,
         String reason, String sqlState, int errorCode ) {
         message_ = reason;
         sqlstate_ = sqlState;
@@ -489,15 +492,11 @@ public class SqlException extends Exception implements Diagnosable {
         }
     }
 
-    public void printTrace(PrintWriter printWriter, String header) {
-        ExceptionFormatter.printTrace(this, printWriter, header);
-    }
-    
     /**
      * Helper method to construct an exception which basically says that
      * we encountered an underlying Java exception
      */
-    public static SqlException javaException(LogWriter logWriter, Throwable e) {
+    static SqlException javaException(LogWriter logWriter, Throwable e) {
         return new SqlException(logWriter, 
             new ClientMessageId (SQLState.JAVA_EXCEPTION), 
             new Object[] {e.getClass().getName(), e.getMessage()}, e);

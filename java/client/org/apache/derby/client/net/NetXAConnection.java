@@ -21,11 +21,7 @@
 
 package org.apache.derby.client.net;
 
-import java.sql.SQLException;
-
-import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientStatement;
@@ -80,10 +76,6 @@ public class NetXAConnection {
 
     public void setCorrelatorToken(byte[] crttoken) {
         netCon.crrtkn_ = crttoken;
-    }
-
-    public byte[] getCorrelatorToken() {
-        return netCon.crrtkn_;
     }
 
     void setNetXAResource(NetXAResource xares) {

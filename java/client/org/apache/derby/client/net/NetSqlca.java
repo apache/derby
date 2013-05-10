@@ -27,7 +27,6 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import java.io.UnsupportedEncodingException;
 import org.apache.derby.client.am.ClientConnection;
-import org.apache.derby.client.am.DisconnectException;
 
 class NetSqlca extends Sqlca {
     // these are the same variables that are in the Sqlca except ccsids

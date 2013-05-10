@@ -29,7 +29,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.StringTokenizer;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -378,7 +377,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         initStatement(agent, connection);
     }
 
-    public void resetStatement(Agent agent, ClientConnection connection)
+    void resetStatement(Agent agent, ClientConnection connection)
             throws SqlException {
         resetStatement();
         initStatement(agent, connection);
@@ -1700,7 +1699,7 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
         materialStatement_.writePrepareDescribeOutput_(sql, section);
     }
 
-    public void readPrepareDescribeOutput() throws SqlException {
+    void readPrepareDescribeOutput() throws SqlException {
         materialStatement_.readPrepareDescribeOutput_();
     }
 

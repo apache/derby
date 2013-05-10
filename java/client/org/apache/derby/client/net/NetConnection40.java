@@ -90,15 +90,6 @@ public class  NetConnection40 extends NetConnection {
         super(netLogWriter,user,password,dataSource,rmId,isXAConn);
     }
 
-    NetConnection40(NetLogWriter netLogWriter,
-                         String ipaddr,
-                         int portNumber,
-                         ClientBaseDataSourceRoot dataSource,
-                         boolean isXAConn) throws SqlException{
-        super(netLogWriter,ipaddr,portNumber,dataSource,isXAConn);
-    }
-    
-    
     /**
      * The constructor for the NetConnection40 class which contains 
      * implementations of JDBC 4.0 specific methods in the java.sql.Connection
@@ -121,14 +112,14 @@ public class  NetConnection40 extends NetConnection {
      * @throws             SqlException
      */
     
-    public NetConnection40(NetLogWriter netLogWriter,
+    NetConnection40(NetLogWriter netLogWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException{
-    super(netLogWriter,user,password,dataSource,rmId,isXAConn,cpc);
+        super(netLogWriter,user,password,dataSource,rmId,isXAConn,cpc);
     }
     
 

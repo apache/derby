@@ -62,7 +62,6 @@ class NetXACallInfo {
      * suspend / resume
      */
 
-    private byte[] crrtkn_;
     private InputStream in_;
     private OutputStream out_;
 
@@ -85,7 +84,6 @@ class NetXACallInfo {
     void saveConnectionVariables() {
         in_ = actualConn_.getNetConnection().getInputStream();
         out_ = actualConn_.getNetConnection().getOutputStream();
-        crrtkn_ = actualConn_.getCorrelatorToken();
     }
 
     public InputStream getInputStream() {

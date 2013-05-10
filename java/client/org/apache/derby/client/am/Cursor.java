@@ -61,13 +61,13 @@ public abstract class Cursor {
     public final static int NULL_TERMINATED_STRING = 3;
 
     public final static int BYTES = 4;
-    public final static int VARIABLE_BYTES = 5;
+    // unused protocol element: VARIABLE_BYTES = 5;
     // unused protocol element: VARIABLE_SHORT_BYTES = 6;
     public final static int NULL_TERMINATED_BYTES = 7;
 
-    public final static int SBCS_CLOB = 8;
-    public final static int MBCS_CLOB = 9;
-    public final static int DBCS_CLOB = 10;
+    // unused protocol element: SBCS_CLOB = 8;
+    // unused protocol element: MBCS_CLOB = 9;
+    // unused protocol element: DBCS_CLOB = 10;
     //-----------------------------internal state---------------------------------
 
     //-------------Structures for holding and scrolling the data -----------------
@@ -114,9 +114,9 @@ public abstract class Cursor {
     private boolean isRowUpdated_;
 
     final static Boolean ROW_IS_NULL = Boolean.TRUE;
-    final static Boolean ROW_IS_NOT_NULL = Boolean.FALSE;
+    private final static Boolean ROW_IS_NOT_NULL = Boolean.FALSE;
 
-    Calendar recyclableCalendar_ = null;
+    private Calendar recyclableCalendar_ = null;
 
     // For the net, this data comes from the query descriptor.
 
@@ -130,7 +130,7 @@ public abstract class Cursor {
     //----------------------------------------------------------------------------
 
     public int[] ccsid_;
-    char[] charBuffer_;
+    private char[] charBuffer_;
 
     //---------------------constructors/finalizer---------------------------------
 

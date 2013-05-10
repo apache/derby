@@ -157,7 +157,7 @@ class ExceptionFormatter {
         }
     }
 
-    static void printTrace(Sqlca sqlca,
+    private static void printTrace(Sqlca sqlca,
                                   PrintWriter printWriter,
                                   String messageHeader) {
         String header = messageHeader + "[" + "Sqlca@" + Integer.toHexString(sqlca.hashCode()) + "]";

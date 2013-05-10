@@ -228,7 +228,7 @@ public abstract class Sqlca {
         return sqlErrd_;
     }
 
-    public String formatSqlErrd() {
+    String formatSqlErrd() {
         return Utils.getStringFromInts(getSqlErrd());
     }
 

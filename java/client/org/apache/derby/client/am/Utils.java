@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.sql.Types;
 import org.apache.derby.shared.common.reference.MessageId;
 
 // Self-contained utilities.

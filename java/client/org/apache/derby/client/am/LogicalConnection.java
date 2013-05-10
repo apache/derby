@@ -206,19 +206,6 @@ public class LogicalConnection implements Connection {
         }
     }
 
-    synchronized
-        public ClientPreparedStatement preparePositionedUpdateStatement(
-            String sql,
-            Section querySection) throws SqlException {
-
-        try {
-            checkForNullPhysicalConnection();
-        } catch ( SQLException se ) {
-            throw new SqlException(se);
-        }
-        return physicalConnection_.preparePositionedUpdateStatement(sql, querySection);
-    }
-
     synchronized public CallableStatement prepareCall(String sql)
             throws SQLException {
         try {

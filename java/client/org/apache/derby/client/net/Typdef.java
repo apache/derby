@@ -22,8 +22,6 @@
 package org.apache.derby.client.net;
 
 import java.sql.Types;
-import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.SignedBinary;

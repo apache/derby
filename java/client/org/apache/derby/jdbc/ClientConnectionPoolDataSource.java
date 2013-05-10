@@ -24,10 +24,7 @@ package org.apache.derby.jdbc;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.sql.SQLException;
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
-import org.apache.derby.client.am.LogWriter;
-import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 

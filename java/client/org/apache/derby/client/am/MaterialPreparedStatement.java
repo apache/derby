@@ -54,8 +54,4 @@ public interface MaterialPreparedStatement extends MaterialStatement {
     public abstract void writeDescribeInput_(Section section) throws SqlException;
 
     public abstract void readDescribeInput_() throws SqlException;
-
-    public abstract void writeDescribeOutput_(Section section) throws SqlException;
-
-    public abstract void readDescribeOutput_() throws SqlException;
 }

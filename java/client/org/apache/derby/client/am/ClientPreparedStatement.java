@@ -996,7 +996,7 @@ public class ClientPreparedStatement extends ClientStatement
         setBinaryStream(parameterIndex,x,(long)length);
     }
 
-    protected void setBinaryStreamX(int parameterIndex,
+    private void setBinaryStreamX(int parameterIndex,
                                  InputStream x,
                                  int length) throws SqlException {
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = Types.BLOB;
@@ -1918,7 +1918,7 @@ public class ClientPreparedStatement extends ClientStatement
         writeDescribeInput(section_);
     }
 
-    void readPrepareDescribeInput() throws SqlException {
+    private void readPrepareDescribeInput() throws SqlException {
         readPrepare();
         readDescribeInput();
         completePrepareDescribe();

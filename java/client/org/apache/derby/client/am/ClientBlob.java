@@ -704,10 +704,6 @@ public class ClientBlob extends Lob implements Blob {
         return ((dataType_ & BINARY_STREAM) == BINARY_STREAM);
     }
 
-    public byte[] getBinaryString() {
-        return binaryString_;
-    }
-
     private long binaryStringPosition(byte[] pattern, long start) {
         // perform a local byte string search, starting at start
         // check that the range of comparison is valid

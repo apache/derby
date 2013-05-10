@@ -41,11 +41,6 @@ class DssConstants {
     // GDS formatter for an RQSDSS.
     static final int GDSFMT_RQSDSS = 0x01;
 
-
-    // GDS formatter for an RQSDSS without a reply.
-    static final int GDSFMT_RQSDSS_NOREPLY = 0x05;
-
-
     // hide the default constructor
     private DssConstants() {
     }

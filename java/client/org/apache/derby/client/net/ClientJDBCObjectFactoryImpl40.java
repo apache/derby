@@ -80,15 +80,6 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
     }
     /**
      * @return an instance of
-     * {@link org.apache.derby.client.ClientPooledConnection40}
-     */
-    public ClientPooledConnection newClientPooledConnection(
-            ClientBaseDataSourceRoot ds, LogWriter logWriter,String user,
-            String password,int rmId) throws SQLException {
-        return new ClientPooledConnection40(ds,logWriter,user,password,rmId);
-    }
-    /**
-     * @return an instance of
      * {@link org.apache.derby.client.ClientXAConnection40}
      */
     public ClientXAConnection newClientXAConnection(
@@ -256,34 +247,6 @@ public class ClientJDBCObjectFactoryImpl40 extends ClientJDBCObjectFactoryImpl {
         return new LogicalCallableStatement40(cs, stmtKey, cacheInteractor);
     }
 
-    /**
-     * @return an instance of {@link NetConnection40}
-     */
-    public ClientConnection newNetConnection(
-            LogWriter netLogWriter,
-            String databaseName,
-            Properties properties) throws SqlException {
-
-        return new NetConnection40(
-                (NetLogWriter)netLogWriter,
-                databaseName,
-                properties);
-    }
-    /**
-     * @return an instance of {@link NetConnection40}
-     */
-    public ClientConnection newNetConnection
-            (LogWriter netLogWriter,
-            ClientBaseDataSourceRoot clientDataSource,
-            String user,
-            String password) throws SqlException {
-
-        return new NetConnection40(
-                (NetLogWriter)netLogWriter,
-                clientDataSource,
-                user,
-                password);
-    }
     /**
      * @return  an instance of
      * {@link org.apache.derby.client.net.NetConnection40}

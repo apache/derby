@@ -23,9 +23,8 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.derby.client.net.NetConfiguration;
@@ -79,7 +78,7 @@ public abstract class Lob implements UnitOfWorkListener {
     private int transactionID_;
 
     //-----------------------------messageId------------------------------------------
-    final static protected ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
+    final static private ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
         new ClientMessageId( SQLState.LOB_OBJECT_LENGTH_UNKNOWN_YET );
     
     

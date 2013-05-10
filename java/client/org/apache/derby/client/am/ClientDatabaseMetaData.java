@@ -2420,7 +2420,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * Check if server supports boolean values
      * @return true if the server supports this
      */
-    final public boolean serverSupportsBooleanValues() {
+    private boolean serverSupportsBooleanValues() {
         return supportsBooleanValues_;
     }
 

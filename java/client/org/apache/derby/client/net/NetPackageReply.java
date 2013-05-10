@@ -22,8 +22,6 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.shared.common.reference.SQLState;
 
 class NetPackageReply extends NetConnectionReply {
     NetPackageReply(NetAgent netAgent, int bufferSize) {
@@ -94,17 +92,9 @@ class NetPackageReply extends NetConnectionReply {
         boolean svrcodReceived = false;
         int svrcod = CodePoint.SVRCOD_INFO;
         boolean rdbnamReceived = false;
-        String rdbnam = null;
 
         parseLengthAndMatchCodePoint(CodePoint.RDBUPDRM);
         pushLengthOnCollectionStack();
-
-        // in XA Global transaction we need to know if we have a read-only
-        //  transaction, if we get a RDBUPDRM this is NOT a read-only transaction
-        //  currently only XAConnections care about read-only transactions, if
-        //  non-XA wants this information they will need to initialize the flag
-        //  at start of UOW
-        netAgent_.netConnection_.setReadOnlyTransactionFlag(false);
 
         int peekCP = peekCodePoint();
 
@@ -122,7 +112,7 @@ class NetPackageReply extends NetConnectionReply {
             if (peekCP == CodePoint.RDBNAM) {
                 foundInPass = true;
                 rdbnamReceived = checkAndGetReceivedFlag(rdbnamReceived);
-                rdbnam = parseRDBNAM(true);
+                parseRDBNAM(true);
                 peekCP = peekCodePoint();
             }
 

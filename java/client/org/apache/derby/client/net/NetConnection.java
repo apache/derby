@@ -25,10 +25,7 @@ import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import javax.transaction.xa.Xid;
@@ -168,14 +165,9 @@ public class NetConnection extends ClientConnection {
         return password;
     }
 
-    protected byte[] cnntkn_ = null;
-
     protected NetXAResource xares_ = null;
     private List<Xid> indoubtTransactions_ = null;
     protected int currXACallInfoOffset_ = 0;
-
-    // Flag to indicate a read only transaction
-    protected boolean readOnlyTransaction_ = true;
 
     //---------------------constructors/finalizer---------------------------------
 
@@ -236,25 +228,6 @@ public class NetConnection extends ClientConnection {
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
         initialize(password, dataSource, isXAConn);
-    }
-
-    NetConnection(NetLogWriter netLogWriter,
-                         String ipaddr,
-                         int portNumber,
-                         ClientBaseDataSourceRoot dataSource,
-                         boolean isXAConn) throws SqlException {
-        super(netLogWriter, isXAConn, dataSource);
-        this.pooledConnection_ = null;
-        this.closeStatementsOnClose = true;
-        netAgent_ = (NetAgent) super.agent_;
-        if (netAgent_.exceptionOpeningSocket_ != null) {
-            throw netAgent_.exceptionOpeningSocket_;
-        }
-        checkDatabaseName();
-        this.isXAConnection_ = isXAConn;
-        flowSimpleConnect();
-        productID_ = targetSrvrlslv_;
-        super.completeConnect();
     }
 
     // For JDBC 2 Connections
@@ -571,10 +544,6 @@ public class NetConnection extends ClientConnection {
             }
             throw sqle;
         }
-    }
-
-    private byte[] getCnnToken() {
-        return cnntkn_;
     }
 
     //--------------------------------flow methods--------------------------------
@@ -1610,10 +1579,6 @@ public class NetConnection extends ClientConnection {
     Xid[] getIndoubtTransactionIds() {
         Xid[] result = new Xid[0];
         return indoubtTransactions_.toArray(result);
-    }
-
-    protected void setReadOnlyTransactionFlag(boolean flag) {
-        readOnlyTransaction_ = flag;
     }
 
     public SectionManager newSectionManager

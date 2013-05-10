@@ -22,34 +22,15 @@ package org.apache.derby.client.net;
 
 class FdocaConstants {
 
-// PROTOCOL FD:OCA constants.
-    static final int FDOCA_TYPE_FIXEDBYTES = 0x01;
-    static final int FDOCA_TYPE_NFIXEDBYTES = 0x81;
+// PROTOCOL FD:OCA constants used (subset)
     static final int FDOCA_TYPE_VARBYTES = 0x02;
-    static final int FDOCA_TYPE_NVARBYTES = 0x82;
-    static final int FDOCA_TYPE_NTBYTES = 0x03;
-    static final int FDOCA_TYPE_NNTBYTES = 0x83;
     static final int FDOCA_TYPE_PSCLBYTE = 0x07;
-    static final int FDOCA_TYPE_NPSCLBYTE = 0x87;
-    static final int FDOCA_TYPE_FIXEDCHAR = 0x10;
-    static final int FDOCA_TYPE_NFIXEDCHAR = 0x90;
     static final int FDOCA_TYPE_VARCHAR = 0x11;
-    static final int FDOCA_TYPE_NVARCHAR = 0x91;
-    static final int FDOCA_TYPE_NTCHAR = 0x14;
-    static final int FDOCA_TYPE_NNTCHAR = 0x94;
     static final int FDOCA_TYPE_PSCLCHAR = 0x19;
-    static final int FDOCA_TYPE_NPSCLCHAR = 0x99;
-    static final int FDOCA_TYPE_INTEGER_BE = 0x23;
-    static final int FDOCA_TYPE_NINTEGER_BE = 0xA3;
     static final int FDOCA_TYPE_DECIMAL = 0x30;
-    static final int FDOCA_TYPE_NDECIMAL = 0xB0;
     static final int FDOCA_TYPE_NUMERIC_CHAR = 0x32;
-    static final int FDOCA_TYPE_FLOAT_IEEE = 0x48;
-    static final int FDOCA_TYPE_NFLOAT_IEEE = 0xC8;
     static final int FDOCA_TYPE_LOBBYTES = 0x50;
-    static final int FDOCA_TYPE_NLOBBYTES = 0xD0;
     static final int FDOCA_TYPE_LOBCHAR = 0x51;
-    static final int FDOCA_TYPE_NLOBCHAR = 0xD1;
 
     static final int CPT_TRIPLET_TYPE = 0x7F;      // CPT triplet type
     static final int MDD_TRIPLET_TYPE = 0x78;      // MDD triplet type

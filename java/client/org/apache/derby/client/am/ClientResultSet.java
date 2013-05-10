@@ -87,11 +87,6 @@ public abstract class ClientResultSet implements ResultSet,
     private final static int scrollOrientation_current__ = 8;
     private final static int scrollOrientation_next__ = 0;
 
-    // public final static int updatability_unknown__ = 0;
-    // public final static int updatability_readOnly__ = 1;
-    public final static int updatability_delete__ = 2;
-    public final static int updatability_update__ = 4;
-
     public final static int sensitivity_unknown__ = 0;
     public final static int sensitivity_insensitive__ = 1;
     public final static int sensitivity_sensitive_static__ = 2;
@@ -476,7 +471,7 @@ public abstract class ClientResultSet implements ResultSet,
         outerStatement_ = null;
     }
 
-    public void nullDataForGC() {
+    private void nullDataForGC() {
         // This method is called by closeX().  We cannot call this if cursor is cached,
         // otherwise it will cause NullPointerException's when cursor is reused.
         // Cursor is only cached for PreparedStatement's.
@@ -487,7 +482,8 @@ public abstract class ClientResultSet implements ResultSet,
         resultSetMetaData_ = null;
     }
 
-    void flowCloseAndAutoCommitIfNotAutoCommitted() throws SqlException {
+    private void flowCloseAndAutoCommitIfNotAutoCommitted()
+            throws SqlException {
         agent_.beginWriteChain(statement_);
         boolean performedAutoCommit = writeCloseAndAutoCommit();
         agent_.flow(statement_);

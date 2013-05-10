@@ -120,7 +120,7 @@ public class DateTime {
      * @return  Time translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
-    public static final Time timeBytesToTime(byte[] buffer,
+    static final Time timeBytesToTime(byte[] buffer,
                                                       int offset,
                                                       Calendar recyclableCal,
                                                       String encoding) 
