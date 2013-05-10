@@ -33,8 +33,6 @@ import java.util.List;
 import java.io.IOException;
 import java.io.StringReader;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
 // -- JDBC 3.0 JAXP API classes.
@@ -126,40 +124,6 @@ public class SqlXmlUtil
     private String queryExpr;
     private String opName;
     private boolean recompileQuery;
-
-    /**
-     * <p>
-     * An object representing the {@code BigDecimal.toPlainString()} method
-     * if it's available on the platform. If it's not available, this field
-     * will be initialized to {@code null}, and in that case the
-     * {@code BigDecimal.toString()} method should be used instead without
-     * reflection.
-     * </p>
-     *
-     * <p>
-     * The behaviour of the {@code toString()} method changed when
-     * {@code toPlainString()} was introduced in Java SE 5. On older
-     * platforms, it behaves just like {@code toPlainString()} does on
-     * newer platforms. So when {@code toPlainString()} is not
-     * available, it is safe to fall back to {@code toString()}. It
-     * behaves differently on newer platforms, so we need to use
-     * {@code toPlainString()} when it is available in order to get
-     * consistent behaviour across all platforms.
-     * </p>
-     *
-     * @see #numberToString(double)
-     */
-    private static final Method TO_PLAIN_STRING;
-    static {
-        Method m = null;
-        try {
-            m = BigDecimal.class.getMethod("toPlainString", new Class[0]);
-        } catch (NoSuchMethodException nsme) {
-            // Couldn't find the method, so we'll just fall back to toString()
-            // on this platform.
-        }
-        TO_PLAIN_STRING = m;
-    }
 
     /**
      * Constructor: Initializes objects required for parsing
@@ -335,7 +299,7 @@ public class SqlXmlUtil
     protected String serializeToString(String xmlAsText)
         throws Exception
     {
-        ArrayList aList = new ArrayList();
+        ArrayList<Document> aList = new ArrayList<Document>();
 
         /* The call to dBuilder.parse() is a call to an external
          * (w.r.t. to Derby) JAXP parser.  If the received XML
@@ -349,9 +313,9 @@ public class SqlXmlUtil
 
             final InputSource is = new InputSource(new StringReader(xmlAsText));
             aList.add(java.security.AccessController.doPrivileged(
-                new java.security.PrivilegedExceptionAction()
+                new java.security.PrivilegedExceptionAction<Document>()
                 {
-                    public Object run() throws IOException, SAXException
+                    public Document run() throws IOException, SAXException
                     {
                         return dBuilder.parse(is);
                     }
@@ -423,9 +387,6 @@ public class SqlXmlUtil
                 "Tried to serialize with uninitialized XML serializer.");
         }
 
-        int sz = items.size();
-        Object obj = null;
-
         /* Step 1: Empty sequence.  If we have an empty sequence then we
          * won't ever enter the for loop and the call to sWriter.toString()
          * at the end of this method will return an empty string, as
@@ -435,9 +396,8 @@ public class SqlXmlUtil
 
         // Iterate through the list and serialize each item.
         boolean lastItemWasString = false;
-        for (int i = 0; i < sz; i++)
+        for (Object obj : items)
         {
-            obj = items.get(i);
             // if it's a string, then this corresponds to some atomic
             // value, so just echo the string as it is.
             if (obj instanceof String)
@@ -663,11 +623,12 @@ public class SqlXmlUtil
             case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
             case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
                 // We have a sequence. Get all nodes.
-                itemRefs = new ArrayList();
+                ArrayList<Node> nodes = new ArrayList<Node>();
                 Node node;
                 while ((node = result.iterateNext()) != null) {
-                    itemRefs.add(node);
+                    nodes.add(node);
                 }
+                itemRefs = nodes;
                 break;
             default:
                 if (SanityManager.DEBUG) {
@@ -754,8 +715,7 @@ public class SqlXmlUtil
      * @param d {@code double} representation of the number
      * @return {@code String} representation of the number
      */
-    private static String numberToString(double d)
-            throws IllegalAccessException, InvocationTargetException {
+    private static String numberToString(double d) {
         if (Double.isNaN(d) || Double.isInfinite(d)) {
             // BigDecimal doesn't know how to handle NaN or +/- infinity, so
             // use Double to handle those cases.
@@ -783,17 +743,8 @@ public class SqlXmlUtil
             }
 
             // Finally, convert the value to a string. The method
-            // BigDecimal.toPlainString() formats the number the way we want
-            // it, but it's only available on Java 5 and later. Luckily, on
-            // older platforms, BigDecimal.toString() is defined the same way
-            // as toPlainString(), so we can fall back to that method if
-            // toPlainString() isn't available. toString() was redefined in
-            // Java 5, so we cannot use toString() unconditionally, however.
-            if (TO_PLAIN_STRING == null) {
-                return dec.toString();
-            } else {
-                return (String) TO_PLAIN_STRING.invoke(dec, (Object[]) null);
-            }
+            // BigDecimal.toPlainString() formats the number the way we want.
+            return dec.toPlainString();
         }
     }
 
