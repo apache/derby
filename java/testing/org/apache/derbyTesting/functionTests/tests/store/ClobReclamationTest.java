@@ -26,15 +26,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.Properties;
-
 import junit.framework.Test;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -281,17 +279,17 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-
-        Properties sysProps = new Properties();
-        sysProps.put("derby.debug.true", "DaemonTrace");
         Test suite = TestConfiguration.embeddedSuite(ClobReclamationTest.class);
-        return new CleanDatabaseTestSetup(new SystemPropertyTestSetup(suite,
-                sysProps, true)) {
+        return new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the table used in the test cases.
              * 
              */
             protected void decorateSQL(Statement s) throws SQLException {
+                if (SanityManager.DEBUG) {
+                    SanityManager.DEBUG_SET("DaemonTrace");
+                }
+
                 Connection conn = s.getConnection();
                 s
                         .executeUpdate("CREATE TABLE CLOBTAB (I INT  PRIMARY KEY NOT NULL, c CLOB)");
@@ -305,6 +303,13 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                 }
                 s.executeUpdate("CREATE TABLE CLOBTAB2 (I INT, C CLOB)");                
                 s.executeUpdate("CREATE TABLE CLOBTAB3 (I INT, C CLOB)");                
+            }
+
+            protected void tearDown() throws Exception {
+                if (SanityManager.DEBUG) {
+                    SanityManager.DEBUG_CLEAR("DaemonTrace");
+                }
+                super.tearDown();
             }
 
         };
