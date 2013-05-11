@@ -20,8 +20,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-
 import junit.framework.Test;
 
 /**
