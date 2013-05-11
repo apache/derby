@@ -124,10 +124,7 @@ class ImportClob implements java.sql.Clob {
      *
      * @see java.sql.Clob 
      */
-    public String getSubString(long pos, int length) throws SQLException {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented"));
-    }
+    public String getSubString(long pos, int length) throws SQLException { throw methodNotImplemented(); }
 
 
     /**
@@ -136,10 +133,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public java.io.InputStream getAsciiStream() throws SQLException {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-    }
+    public java.io.InputStream getAsciiStream() throws SQLException { throw methodNotImplemented(); }
 
 
     /** 
@@ -148,10 +142,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public long position(String searchstr, long start) throws SQLException {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-    }
+    public long position(String searchstr, long start) throws SQLException { throw methodNotImplemented(); }
 
     /** 
      * This routine is not used by the VTI to read the data, so no 
@@ -159,10 +150,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public long position(Clob searchstr, long start) throws SQLException {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-    }
+    public long position(Clob searchstr, long start) throws SQLException { throw methodNotImplemented(); }
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -170,10 +158,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public int setString(long pos, String str) throws SQLException {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented"));  
-    }
+    public int setString(long pos, String str) throws SQLException { throw methodNotImplemented(); }
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -182,11 +167,7 @@ class ImportClob implements java.sql.Clob {
      * @see java.sql.Clob 
      */
     public int setString(long pos, String str, int offset, int len) 
-        throws SQLException
-    {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-    }
+        throws SQLException { throw methodNotImplemented(); }
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -194,11 +175,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public java.io.OutputStream setAsciiStream(long pos) throws SQLException
-    {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-    }
+    public java.io.OutputStream setAsciiStream(long pos) throws SQLException { throw methodNotImplemented(); }
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -206,11 +183,7 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public java.io.Writer setCharacterStream(long pos) throws SQLException
-    {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented")); 
-     }
+    public java.io.Writer setCharacterStream(long pos) throws SQLException { throw methodNotImplemented(); }
 
     /**
      * This routine is not used by the VTI to read the data, so no 
@@ -218,10 +191,18 @@ class ImportClob implements java.sql.Clob {
      * called.  
      * @see java.sql.Clob 
      */
-    public void truncate(long len) throws SQLException 
+    public void truncate(long len) throws SQLException { throw methodNotImplemented(); }
+
+    /** Raise error, not used by import */
+    public  Reader 	getCharacterStream(long pos, long length) throws SQLException { throw methodNotImplemented(); }
+    
+    /** Raise error, not used by import */
+    public  void free() throws SQLException { throw methodNotImplemented(); }
+    
+    /** Return an unimplemented feature error */
+    private SQLException   methodNotImplemented()
     {
-        throw LoadError.unexpectedError(
-                         new Exception("Method not implemented"));  
+		return LoadError.unexpectedError( new Exception("Method not implemented")) ;
     }
 }
 

@@ -304,7 +304,7 @@ class DirFile extends File implements StorageFile
 	 */
 	public URL getURL() throws MalformedURLException {
 		
-		return toURL();
+		return toURI().toURL();
 	}
 
     public void limitAccessToOwner() {

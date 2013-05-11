@@ -61,8 +61,8 @@ public final class DoubleProperties extends Properties {
 
 	}
 
-	public Enumeration propertyNames() {
-        HashSet names = new HashSet();
+	public Enumeration<Object> propertyNames() {
+        HashSet<Object> names = new HashSet<Object>();
         addAllNames(write, names);
         addAllNames(read, names);
         return Collections.enumeration(names);
@@ -72,7 +72,7 @@ public final class DoubleProperties extends Properties {
      * Add all property names in the Properties object {@code src} to the
      * HashSet {@code dest}.
      */
-    private static void addAllNames(Properties src, HashSet dest) {
+    private static void addAllNames(Properties src, HashSet<Object> dest) {
         if (src != null) {
             for (Enumeration e = src.propertyNames(); e.hasMoreElements(); ) {
                 dest.add(e.nextElement());

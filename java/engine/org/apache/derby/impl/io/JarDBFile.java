@@ -149,7 +149,7 @@ class JarDBFile extends InputStreamFile
     public URL getURL() throws MalformedURLException {
         File pathFile = new File(storageFactory.zipData.getName());
 
-        String pathFileURL = pathFile.toURL().toString();
+        String pathFileURL = pathFile.toURI().toURL().toString();
 
         return new URL("jar:" + pathFileURL + "!/" + path);
     }

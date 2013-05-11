@@ -86,32 +86,8 @@
 
   </target>
 
-  <target name="compile" depends="compileCDC,compile6"/>
+  <target name="compile" depends="parser">
 
-  <target name="compileCDC" depends="parser">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/${cur.dir}/**"/>
-	  <exclude name="${derby.dir}/${cur.dir}/compile/OptimizerTracer.java"/>
-    </javac>
-    <copy file="${derby.engine.src.dir}/${derby.dir}/${cur.dir}/catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
-  </target>
-
-  <target name="compile6" depends="compileCDC">
     <javac
       source="1.6"
       target="1.6"
@@ -123,13 +99,15 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
+      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
-	  <include name="${derby.dir}/${cur.dir}/compile/OptimizerTracer.java"/>
+      <include name="${derby.dir}/${cur.dir}/**"/>
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
+    <copy file="${derby.engine.src.dir}/${derby.dir}/${cur.dir}/catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>
   </target>
 
 </project>

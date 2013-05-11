@@ -35,7 +35,6 @@
   <property name="ijTokenManager.src" value="${generated.src.dir}/${derby.dir}/impl/tools/ij/ijTokenManager.java"/>
 
 <!-- Targets -->
-  <target name="compile" depends="compile_tools_impl,optional"/>
 
   <target name="parser">
     <ant antfile="${src.dir}/build.xml" target="genParser">
@@ -91,11 +90,11 @@
 
   </target>
 
-  <target name="compile_tools_impl" depends="parser">
+  <target name="compile" depends="parser">
 
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -107,33 +106,12 @@
       srcdir="${derby.tools.src.dir}:${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/tools/**"/>
-      <exclude name="${derby.dir}/impl/tools/optional/**"/>
-    </javac>
-   </target>
-
-  <target name="optional">
-    <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.tools.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
-      <include name="${derby.dir}/impl/tools/optional/**"/>
+      <include name="${derby.dir}/impl/tools/**"/>
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
-  </target>
+   </target>
 
 </project>
 

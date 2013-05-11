@@ -39,8 +39,8 @@
 
   <target name="compile_iapi_services_io">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -52,9 +52,10 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/services/io/*.java"/>
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
   </target>
 

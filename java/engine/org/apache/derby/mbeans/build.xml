@@ -35,8 +35,8 @@
 <!-- Targets -->
   <target name="compile_mbeans">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -48,11 +48,12 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <sourcepath>
       </sourcepath>
       <include name="${derby.dir}/mbeans/**"/>
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
   </target>
 

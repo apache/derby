@@ -150,13 +150,13 @@ public class ExceptionUtil
             Thread.class.getMethod("getAllStackTraces", new Class[] {});
 
             //Then get the thread dump.
-            Class c = Class.forName("org.apache.derby.iapi.error.ThreadDump");
-            final Method m = c.getMethod("getStackDumpString",new Class[] {});
+            Class<?> c = Class.forName("org.apache.derby.iapi.error.ThreadDump");
+            final Method m = c.getMethod("getStackDumpString",new Class<?>[] {});
 
             String dump;
 
             dump = (String) AccessController.doPrivileged
-            (new PrivilegedExceptionAction(){
+            (new PrivilegedExceptionAction<Object>(){
                 public Object run() throws
                 IllegalArgumentException,
                 IllegalAccessException,

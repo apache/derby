@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="compile_impl_store_15" basedir="../../../../../../..">
+<project default="compile_impl_store" basedir="../../../../../../..">
 
 <!-- Set Properties -->
   <!-- User settings -->
@@ -36,8 +36,8 @@
 
   <target name="compile_impl_store">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -49,58 +49,12 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/store/**"/>
-      <exclude name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
-      <exclude name="${derby.dir}/impl/store/raw/data/BaseDataFileFactoryJ4.java"/>
-      <exclude name="${derby.dir}/impl/store/raw/xact/ConcurrentTransactionMapFactory.java"/>
-      <exclude name="${derby.dir}/impl/store/raw/xact/ConcurrentXactFactory.java"/>
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
   </target>
 
-  <target name="compile_impl_store_14" depends="compile_impl_store">
-      <javac
-        source="1.4"
-        target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
-      <include name="${derby.dir}/impl/store/raw/data/BaseDataFileFactoryJ4.java"/>
-    </javac>
-  </target>
-
-  <target name="compile_impl_store_15" depends="compile_impl_store_14">
-      <javac
-        source="1.5"
-        target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/store/raw/xact/ConcurrentTransactionMapFactory.java"/>
-      <include name="${derby.dir}/impl/store/raw/xact/ConcurrentXactFactory.java"/>
-    </javac>
-  </target>
 </project>
 

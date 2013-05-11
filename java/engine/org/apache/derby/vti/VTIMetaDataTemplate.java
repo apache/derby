@@ -22,6 +22,7 @@
 package org.apache.derby.vti;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.ResultSetMetaData;
 
 /**
@@ -51,6 +52,9 @@ import java.sql.ResultSetMetaData;
  */
 
 public abstract class VTIMetaDataTemplate implements ResultSetMetaData {
+
+    public  boolean 	isWrapperFor(Class<?> iface) throws SQLException { throw notImplemented( "isWrapperFor" ); }
+    public  <T> T unwrap(Class<T> iface) throws SQLException { throw notImplemented( "unwrap" ); }
 
     /**
      * Is the column automatically numbered, and thus read-only?
@@ -282,4 +286,20 @@ public abstract class VTIMetaDataTemplate implements ResultSetMetaData {
 	public String getColumnClassName(int column) throws SQLException {
 		throw new SQLException("getColumnClassName");
 	}
+    
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  MINIONS
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Create a SQLException saying that the calling method is not implemented.
+     * </p>
+     */
+    protected SQLException    notImplemented( String methodName )
+    {
+        return new SQLFeatureNotSupportedException( "Unimplemented method: " + methodName );
+    }
 }
