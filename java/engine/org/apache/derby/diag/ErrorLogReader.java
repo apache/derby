@@ -43,6 +43,7 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 /**
 
@@ -347,7 +348,7 @@ public class ErrorLogReader extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("DRDAID", Types.VARCHAR, true, 50),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH)
 	};
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
+	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
 
 }
 

@@ -56,7 +56,6 @@ import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.ClientXADataSourceInterface;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.functionTests.util.TestRoutines;
@@ -1174,19 +1173,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         DataSource ds = dscs;
         assertConnectionOK(expectedValues, "DataSource", ds.getConnection());
         
-        DataSource dssimple = null;
-        // simple datasource is only supported with embedded
-        if (usingEmbedded())
-        {
-            EmbeddedSimpleDataSource realdssimple = 
-                new EmbeddedSimpleDataSource();
-            realdssimple.setDatabaseName(dbName);
-            ds = realdssimple;
-            dssimple = (DataSource)realdssimple;
-            assertConnectionOK(
-                expectedValues, "SimpleDataSource", ds.getConnection());
-        }
-            
         ConnectionPoolDataSource dsp = 
             J2EEDataSource.getConnectionPoolDataSource();      
         

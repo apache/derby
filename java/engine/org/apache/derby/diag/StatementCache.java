@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
 import org.apache.derby.impl.sql.conn.CachedStatement;
@@ -175,7 +176,7 @@ public final class StatementCache extends VTITemplate {
 
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
+	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
 
 	public ResultSetMetaData getMetaData() {
 

@@ -36,31 +36,8 @@
   <target name="jdbc" depends="checkVMLevel,compile_jdbc3,compile_jdbc4,compile_jdbc42"/>
 
 <!-- build targets which need JDBC 3.0 libs in the end-->
-<!-- first build all non-special (non-JDBC 3.0) targets-->
-  <target name="compile_jsr169">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/jdbc/InternalDriver.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedSimpleDataSource.java"/>
-      <include name="${derby.dir}/jdbc/Driver169.java"/>
-    </javac>
-  </target>
 
-  <target name="compile_jdbc3" depends="compile_jsr169">
+  <target name="compile_jdbc3">
     <javac
       source="1.5"
       target="1.5"
@@ -77,6 +54,7 @@
       <classpath>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <include name="${derby.dir}/jdbc/InternalDriver.java"/>
       <include name="${derby.dir}/jdbc/AutoloadedDriver.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
       <include name="${derby.dir}/jdbc/ReferenceableDataSource.java"/>

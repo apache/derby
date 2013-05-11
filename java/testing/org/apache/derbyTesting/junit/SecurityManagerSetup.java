@@ -306,7 +306,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * Looks for three items:
 	 * 
 	 * Location of derbyTesting.jar via this class
-	 * Location of derby.jar via org.apache.derby.jdbc.EmbeddedSimpleDataSource
+	 * Location of derby.jar via org.apache.derby.jdbc.EmbeddedDataSource
 	 * Location of derbyclient.jar via org.apache.derby.jdbc.ClientDataSource
 	 * 
 	 * Two options are supported, either all are in jar files or
@@ -399,7 +399,7 @@ public final class SecurityManagerSetup extends TestSetup {
         }
         isJars = true;
 		
-		URL derby = getURL("org.apache.derby.jdbc.EmbeddedSimpleDataSource");
+		URL derby = getURL("org.apache.derby.jdbc.EmbeddedDataSource");
         if (derby != null)
 		    classPathSet.setProperty("derbyTesting.codejar", stripJar(derby));
 

@@ -30,7 +30,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
+import org.apache.derby.jdbc.EmbeddedDataSource40;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
@@ -432,7 +432,7 @@ public class SignatureChecker
     private Connection  getJ2MEConnection()
         throws SQLException
     {
-        EmbeddedSimpleDataSource    dataSource = new EmbeddedSimpleDataSource();
+        EmbeddedDataSource40    dataSource = new EmbeddedDataSource40();
 
         dataSource.setDatabaseName( _parsedArgs.getJ2meDatabaseName() );
 

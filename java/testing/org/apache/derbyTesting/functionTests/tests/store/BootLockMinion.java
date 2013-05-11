@@ -27,7 +27,7 @@ import java.net.Socket;
 import java.io.File;
 import java.lang.Integer;
 
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
+import org.apache.derby.jdbc.EmbeddedDataSource40;
 /**
  * Create and boot the supplied db argument. This auxiliary program is used by
  * {@code BootLockTest.java} to boot a db in a different jvm and subsequently
@@ -48,7 +48,7 @@ public class BootLockMinion {
                            "BootLockMinion.log");
         try
         {
-            EmbeddedSimpleDataSource ds = new EmbeddedSimpleDataSource();
+            EmbeddedDataSource40 ds = new EmbeddedDataSource40();
             ds.setDatabaseName(dbName);
             ds.setCreateDatabase("create");
 

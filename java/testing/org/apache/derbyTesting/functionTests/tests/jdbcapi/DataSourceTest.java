@@ -33,7 +33,6 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -182,7 +181,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
 
     // the J2EEDataSourceTest version of this includes testing for
     // setTypeMap, which is supported for both EmbeddedDataSource and
-    // ClientDataSource, but not for JSR169/EmbeddedSimpleDataSource
+    // ClientDataSource
     public void testAllDataSources() throws SQLException, Exception
     {
         //Connection dmc = getConnection();
@@ -201,19 +200,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         DataSource ds = dscs;
         assertConnectionOK(expectedValues, "DataSource", ds.getConnection());
         
-        DataSource dssimple = null;
-        // simple datasource is only supported with embedded
-        if (usingEmbedded())
-        {
-            EmbeddedSimpleDataSource realdssimple = 
-                new EmbeddedSimpleDataSource();
-            realdssimple.setDatabaseName(dbName);
-            ds = realdssimple;
-            dssimple = (DataSource)realdssimple;
-            assertConnectionOK(
-                expectedValues, "SimpleDataSource", ds.getConnection());
-        }
-
         if (JDBC.vmSupportsJDBC4()) {
             BasicEmbeddedDataSource40 nds = new BasicEmbeddedDataSource40();
             nds.setDatabaseName(dbName);

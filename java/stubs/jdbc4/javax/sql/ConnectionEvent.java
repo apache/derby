@@ -22,7 +22,7 @@ import java.sql.SQLException;
 public  class   ConnectionEvent extends java.util.EventObject
 {
     public  ConnectionEvent(PooledConnection con)   { super( con ); }
-    public  ConnectionEvent(PooledConnection con, SQLException ex) throws SQLException { super( con ); }
+    public  ConnectionEvent(PooledConnection con, SQLException ex) { super( con ); }
 
     public  SQLException 	getSQLException() { return null; }
 }

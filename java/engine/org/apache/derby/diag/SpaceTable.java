@@ -39,6 +39,7 @@ import org.apache.derby.iapi.error.PublicAPI;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -377,7 +378,7 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("TABLEID",  Types.CHAR, false, 36),
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
+	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
 
 }
 

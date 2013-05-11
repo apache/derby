@@ -41,6 +41,7 @@ import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
@@ -398,6 +399,6 @@ public class StatementDuration extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("DURATION",  Types.VARCHAR, false, 10),
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
+	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
 }
 

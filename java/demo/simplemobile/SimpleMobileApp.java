@@ -24,7 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;  // from derby.jar
+import org.apache.derby.jdbc.EmbeddedDataSource40;  // from derby.jar
 
 /**
  * <p>This sample program is a small JDBC application showing how to use and
@@ -51,7 +51,7 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;  // from derby.jar
  * as opposed to a Java SE or EE environment is that the JSR-169 specification
  * does not include the <code>java.sql.DriverManager</code> class. However, 
  * Derby provides a DataSource class that can be used to obtain connections to 
- * Derby databases: <code>org.apache.derby.jdbc.EmbeddedSimpleDataSource</code>.
+ * Derby databases: <code>org.apache.derby.jdbc.EmbeddedDataSource40</code>.
  * This is demonstrated in this simple demo application.
  * </p>
  * <p>To compile this application on your own, make sure you include derby.jar 
@@ -105,11 +105,11 @@ public class SimpleMobileApp {
          * 
          * If we were to use a DataSource for Java SE, we could use
          * the org.apache.derby.jdbc.EmbeddedDataSource, rather than the
-         * org.apache.derby.jdbc.EmbeddedSimpleDataSource that we need to 
+         * org.apache.derby.jdbc.EmbeddedDataSource40 that we need to 
          * use for Java ME.
          */
         
-        EmbeddedSimpleDataSource ds = new EmbeddedSimpleDataSource();
+        EmbeddedDataSource40 ds = new EmbeddedDataSource40();
         
         /*
          * The connection specifies "create" in the DataSource settings for
@@ -147,7 +147,7 @@ public class SimpleMobileApp {
              *   Connection conn = ds.getConnection(username, password);
              * or use the
              *    setUser(String) and setPassword(String) methods of
-             * EmbeddedSimpleDataSource.
+             * EmbeddedDataSource40.
              * 
              * Note that user authentication is off by default, meaning that any
              * user can connect to your database using any password. To enable

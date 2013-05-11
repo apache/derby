@@ -32,6 +32,7 @@ import org.apache.derby.vti.VTIEnvironment;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.StringUtil;
@@ -239,6 +240,6 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("SQL_TEXT",      Types.VARCHAR, true,  Limits.DB2_VARCHAR_MAXWIDTH),
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData(columnInfo);
+	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
 }
 
