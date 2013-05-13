@@ -106,7 +106,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                     " JSR169", JDBC.vmSupportsJSR169());
         }
         try {
-            rs.updateBlob(8, null);
+            rs.updateBlob(8, (Blob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
                         " on a read only resultset.");
@@ -118,7 +118,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
-            rs.updateBlob("c", null);
+            rs.updateBlob("c", (Blob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
                         " on a read only resultset.");
@@ -130,7 +130,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
-            rs.updateClob(8, null);
+            rs.updateClob(8, (Clob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
                         " on a read only resultset.");
@@ -142,7 +142,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
-            rs.updateClob("c", null);
+            rs.updateClob("c", (Clob) null);
             if (usingEmbedded()) {
                 fail("FAIL - Shouldn't reach here. Method is being invoked" +
                         " on a read only resultset.");
@@ -220,7 +220,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
             throws Exception
     {
         try {
-            rs.updateBlob("c",null);
+            rs.updateBlob("c", (Blob) null);
             fail("FAIL - rs.updateBlob() on a read-only result set" +
                 "should not have succeeded");
         } catch (SQLException ex) {}

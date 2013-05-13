@@ -56,8 +56,8 @@
   <target name="orderentry"
           description="Build Order Entry system test kit">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -69,7 +69,7 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.system.dir}/oe/**/*.java"/>

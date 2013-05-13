@@ -48,9 +48,6 @@
   <property file="${user.home}/properties/derbytesting.properties"/>
   <property file="${ant.home}/properties/derbytesting.properties"/>
 
-  <!-- Classes which must be compiled against JDK 1.4 or higher -->
-  <property name="junit.14.classes" value="${derby.testing.junit.dir}/JAXPFinder.java,${derby.testing.junit.dir}/ConnectionPoolDataSourceConnector.java,${derby.testing.junit.dir}/J2EEDataSource.java,${derby.testing.junit.dir}/DriverManagerConnector.java,${derby.testing.junit.dir}/XADataSourceConnector.java,${derby.testing.junit.dir}/XATestUtil.java,${derby.testing.junit.dir}/BigDecimalHandler.java"/>
-
   <!-- Release and Version info -->
   <property file="${properties.dir}/release.properties"/>
 
@@ -58,10 +55,9 @@
  
   <target name="junitcomponents" 
           description="Build Derby JUnit test components">
-    <!-- Here we compile the classes which WILL run on small device platforms -->
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -72,30 +68,9 @@
       verbose="${verbose}" 
       srcdir="${derby.testing.src.dir}"
       includes="${derby.testing.junit.dir}/**/*.java"
-      excludes="${junit.14.classes}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-    </javac>
-    <!-- Here we compile the classes which will NOT run on small device platforms -->
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-	  includes="${junit.14.classes}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
     </javac>

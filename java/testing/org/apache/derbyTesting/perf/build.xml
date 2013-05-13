@@ -56,8 +56,8 @@
   <target name="perfcomponents" 
           description="Build Derby Performance test components">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -69,29 +69,9 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
-      <include name="${derby.testing.perf.dir}/basic/jdbc/ValuesTest.java"/>
-    </javac>
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}" 
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-      <exclude name="${derby.testing.perf.dir}/basic/jdbc/ValuesTest.java"/>
       <include name="${derby.testing.perf.dir}/**/*.java"/>
     </javac>
   </target>

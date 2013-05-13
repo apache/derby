@@ -58,7 +58,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet2,compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -67,8 +67,8 @@
 
   <target name="compilet1">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -80,57 +80,12 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <!--pathelement location="${oro}"/-->
-        <pathelement path="${java15compile.classpath};${junit}"/>
+        <pathelement path="${compile.classpath};${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <!--exclude name=""/-->
     </javac>
   </target>
-
-  <target name="compilet2">
-    <!--javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-      <exclude name="**/jdbc4/*"/>
-      <include name="${this.dir}/*.java">
-    </javac-->
-  </target>
-
-  <target name="compilet3">
-    <!--javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name=""/>
-    </javac-->
-  </target> 
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/tools">

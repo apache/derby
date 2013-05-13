@@ -29,8 +29,8 @@
         <mkdir dir="${out.pptesting.dir}"/>
 
         <javac
-            source="1.5"
-            target="1.5"
+            source="1.6"
+            target="1.6"
             fork="yes"
             bootclasspath="${empty}"
             nowarn="on"
@@ -43,7 +43,7 @@
             srcdir="${derby.testing.src.dir}"
             destdir="${out.pptesting.dir}">
             <classpath>
-                <pathelement path="${java15compile.classpath}"/>
+                <pathelement path="${compile.classpath}"/>
                 <pathelement path="${junit}"/>
                 <pathelement path="${out.dir}"/>
             </classpath>

@@ -33,13 +33,10 @@
     <!-- ########    TARGETS    ####### -->
     
     <!-- Compile all tests for Derby's management functionality -->
-    <target name="compile" depends="compile_jdk15"/>
-    
-    <!-- Based on built-in JMX => Requires jdk1.5 or better -->
-    <target name="compile_jdk15">
+    <target name="compile">
         <javac
-            source="1.5"
-            target="1.5"
+            source="1.6"
+            target="1.6"
             fork="yes"
             bootclasspath="${empty}"
             nowarn="on"
@@ -52,7 +49,7 @@
             srcdir="${derby.testing.src.dir}"
             destdir="${out.dir}">
             <classpath>
-                <pathelement path="${java15compile.classpath}"/>
+                <pathelement path="${compile.classpath}"/>
                 <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>

@@ -1612,4 +1612,12 @@ class BlobImplT implements java.sql.Blob {
         throw new SQLException("Not implemented");
     }
 
+    public void free() throws SQLException {
+        throw new SQLException("Not implemented");
+    }
+
+    public InputStream getBinaryStream(long pos, long length) throws SQLException {
+        throw new SQLException("Not implemented");
+    }
+
 }

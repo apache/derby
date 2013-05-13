@@ -331,9 +331,9 @@
 
     <!-- 
             The lowest common denominator compile path for Derby. We expect that
-            the bulk of the Derby product will run on small device platforms (CDC/FP 1.1).
+            the bulk of the Derby product will run on Java SE 6.
     -->
-    <property name="compile.classpath" value="${jsr169compile.classpath}"/>
+    <property name="compile.classpath" value="${java16compile.classpath}"/>
 
     <property name="compilerPropsAlreadySet" value="true"/>
     <antcall target="printCompilerProperties"> <param name="checkEvent" value="After setting properties: "/> </antcall>

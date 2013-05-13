@@ -58,17 +58,17 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet2,compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/derbynet"/>
   </target>
 
-  <target name="compilet1" depends="compilet2, compilet3">
+  <target name="compilet1">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -80,61 +80,10 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
 	<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
-      <exclude name="${this.dir}/dataSourcePermissions_net.java"/>
-      <exclude name="${this.dir}/SqlExceptionTest.java"/>
-      <exclude name="${this.dir}/ProtocolTest.java"/>
-      <exclude name="${this.dir}/NetworkServerControlApiTest.java"/>
-    </javac>
-  </target>
-
-  <target name="compilet2">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${junit}"/>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${this.dir}/dataSourcePermissions_net.java"/>
-      <include name="${this.dir}/SqlExceptionTest.java"/>
-    </javac>
-  </target> 
-
-  <target name="compilet3">
-    <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${junit}"/>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <compilerarg value="-Xlint"/>
-      <include name="${this.dir}/ProtocolTest.java"/>
-      <include name="${this.dir}/NetworkServerControlApiTest.java"/>
     </javac>
   </target>
 

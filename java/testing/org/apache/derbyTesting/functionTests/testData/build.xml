@@ -32,7 +32,7 @@
   <property file="${user.home}/properties/derbytesting.properties"/>
 
 <!-- Targets -->
-  <target name="testdata" depends="copyfiles,compile_jdk15"/>
+  <target name="testdata" depends="copyfiles,compile"/>
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/v1">
@@ -61,10 +61,10 @@
     </copy>
   </target>
 
-  <target name="compile_jdk15" >
+  <target name="compile" >
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -76,7 +76,7 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.testing.functest.dir}/testData/serializedDataSources/*.java"/>
     </javac>

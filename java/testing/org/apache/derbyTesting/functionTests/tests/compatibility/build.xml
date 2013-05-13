@@ -48,8 +48,8 @@
 
     <target name="compile" depends="copyfiles">
         <javac
-            source="1.5"
-            target="1.5"
+            source="1.6"
+            target="1.6"
             bootclasspath="${empty}"
             nowarn="on"
             debug="true"
@@ -61,8 +61,8 @@
             srcdir="${derby.testing.src.dir}"
             destdir="${out.dir}">
             <classpath>
-                <pathelement path="${java15compile.classpath}"/>
-		        <pathelement path="${junit}"/>
+              <pathelement path="${compile.classpath}"/>
+              <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>
         </javac>

@@ -1429,6 +1429,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
             throw new SQLException("not implemented for this test");
         }
 
+        public void free() throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public InputStream getBinaryStream(long pos, long length) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
 	}
 
 	/**
@@ -1518,6 +1526,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         public void truncate(long arg0) throws SQLException {
             throw new SQLException("not implemented for this test");
             
+        }
+
+        public void free() throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public Reader getCharacterStream(long pos, long length) throws SQLException {
+            throw new SQLException("not implemented for this test");
         }
 
 	}

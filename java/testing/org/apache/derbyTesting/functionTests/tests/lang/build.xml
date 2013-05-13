@@ -58,7 +58,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilett4,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
@@ -67,125 +67,8 @@
 
   <target name="compilet1" >
     <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}" 
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <!--pathelement location="${oro}"/-->
-        <pathelement path="${java15compile.classpath}"/>
-      	<pathelement path="${junit}"/>
-      </classpath>
-      <include name="${this.dir}/*.java"/>
-      <exclude name="${this.dir}/FullName.java"/>
-      <exclude name="${this.dir}/LongMagnitude.java"/>
-      <exclude name="${this.dir}/GenericMode.java"/>
-      <exclude name="${this.dir}/ModeAggregate.java"/>
-      <exclude name="${this.dir}/LobMode.java"/>
-      <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
-      <exclude name="${this.dir}/UpdatableResultSetTest.java"/>
-      <exclude name="${this.dir}/holdCursorJavaReflection.java"/>
-      <exclude name="${this.dir}/holdCursorJava.java"/>
-      <exclude name="${this.dir}/StreamsTest.java"/>
-      <exclude name="${this.dir}/procedureJdbc30.java"/>
-      <exclude name="${this.dir}/SpillHash.java"/>
-      <exclude name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
-      <exclude name="${this.dir}/_Suite.java"/>
-      <exclude name="${this.dir}/VarargsRoutines.java"/>
-      <exclude name="${this.dir}/OptionalToolExample.java"/>
-    </javac>
-  </target>
-  <target name="compilet2" depends="compilet1">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-      <include name="${this.dir}/holdCursorJavaReflection.java"/>
-      <include name="${this.dir}/holdCursorJava.java"/>
-      <include name="${this.dir}/StreamsTest.java"/>
-      <include name="${this.dir}/procedureJdbc30.java"/>
-      <include name="${this.dir}/SpillHash.java"/>
-      <include name="${this.dir}/UpdatableResultSetTest.java"/>
-      <include name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
-    </javac>
-  </target>
-
-  <target name="compilet3" depends="compilet2">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
-    </javac>
-  </target> 
-
-  <target name="compilet3.1" depends="compilet3">
-    <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${this.dir}/FullName.java"/>
-      <include name="${this.dir}/GenericMode.java"/>
-      <include name="${this.dir}/LongMagnitude.java"/>
-      <include name="${this.dir}/ModeAggregate.java"/>
-      <include name="${this.dir}/LobMode.java"/>
-      <include name="${this.dir}/VarargsRoutines.java"/>
-      <include name="${this.dir}/OptionalToolExample.java"/>
-    </javac>
-  </target> 
-
-	<!-- Compile _Suite last as it needs to include all other JUnit classes 
-	which may be compiled using a higher compiler level, but it needs to be at
-	base level -->
-	<target name="compilett4" depends="compilet3.1" >
-    <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -200,10 +83,10 @@
         <pathelement path="${compile.classpath}"/>
       	<pathelement path="${junit}"/>
       </classpath>
-
-      <include name="${this.dir}/_Suite.java"/>
+      <include name="${this.dir}/*.java"/>
     </javac>
   </target>
+
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/lang">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang" 

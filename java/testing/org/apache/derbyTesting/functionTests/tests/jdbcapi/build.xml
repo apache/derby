@@ -58,40 +58,17 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compileSuite,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilet1,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/>
   </target>
 
-	  <target name="compileSuite" depends="compilet2">
-	    <javac
-	      source="1.4"
-	      target="1.4"
-	      bootclasspath="${empty}"
-	      nowarn="on"
-	      debug="true"
-	      depend="${depend}"
-	      deprecation="${deprecation}"
-	      optimize="${optimize}"
-	      proceed="${proceed}"
-	      verbose="${verbose}" 
-	      srcdir="${derby.testing.src.dir}"
-	      destdir="${out.dir}">
-	      <classpath>
-	        <!--pathelement location="${oro}"/-->
-	        <pathelement path="${compile.classpath}"/>
-			<pathelement path="${junit}"/>
-	      </classpath>
-	      <include name="${this.dir}/_Suite.java"/>
-	    </javac>
-	  </target>
-	
   <target name="compilet1">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -103,83 +80,10 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <!--pathelement location="${oro}"/-->
-        <pathelement path="${java15compile.classpath}"/>
-		<pathelement path="${junit}"/>
-      </classpath>
-      <include name="${this.dir}/*.java"/>
-      <exclude name="${this.dir}/AutoGenJDBC30Test.java"/>
-      <exclude name="${this.dir}/dbMetaDataJdbc30.java"/>
-      <exclude name="${this.dir}/ResultSetJDBC30Test.java"/>
-      <exclude name="${this.dir}/StatementJdbc30Test.java"/>
-      <exclude name="${this.dir}/savepointJdbc30_XA.java"/>
-      <include name="${this.dir}/ParameterMetaDataJdbc30Test.java"/>
-      <exclude name="${this.dir}/xaJNDI.java"/>
-      <exclude name="${this.dir}/LobStreamsTest.java"/>
-      <exclude name="${this.dir}/XATest.java"/>
-      <exclude name="${this.dir}/XATransactionTest.java"/>
-      <exclude name="${this.dir}/ScrollResultSetTest.java"/>
-      <exclude name="${this.dir}/ClosedObjectTest.java"/>
-      <exclude name="${this.dir}/DatabaseMetaDataTest.java"/>
-      <exclude name="${this.dir}/_Suite.java"/>
-    </javac>
-  </target>
-
-  <target name="compilet2" depends="compilet1,compilex">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
-      <!--exclude name=""/-->
-      <include name="${this.dir}/AutoGenJDBC30Test.java"/>
-      <include name="${this.dir}/dbMetaDataJdbc30.java"/>
-      <include name="${this.dir}/savepointJdbc30_JSR169.java"/>
-      <include name="${this.dir}/savepointJdbc30_XA.java"/>
-      <include name="${this.dir}/ParameterMetaDataJdbc30Test.java"/>
-      <include name="${this.dir}/ResultSetJDBC30Test.java"/>
-      <include name="${this.dir}/StatementJdbc30Test.java"/>
-      <include name="${this.dir}/LobStreamsTest.java"/>
-      <include name="${this.dir}/XATest.java"/>
-      <include name="${this.dir}/XATransactionTest.java"/>
-      <include name="${this.dir}/ScrollResultSetTest.java"/>
-      <include name="${this.dir}/ClosedObjectTest.java"/>
-      <include name="${this.dir}/DatabaseMetaDataTest.java"/>
-    </javac>
-  </target>
-
-  <target name="compilex">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-        <pathelement location="${oro}"/>
-      </classpath>
-      <!--exclude name=""/-->
-      <include name="${this.dir}/xaJNDI.java"/>
+      <include name="${this.dir}/*.java"/>
     </javac>
   </target>
 

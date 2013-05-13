@@ -54,7 +54,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${jsr169compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>
