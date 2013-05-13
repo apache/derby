@@ -32,7 +32,7 @@ import java.sql.Statement;
 /**
 	A Statement implementation that forwards all of its requests to an underlying Statement.
  */
-public class BrokeredStatement implements EngineStatement
+public abstract class BrokeredStatement implements EngineStatement
 {
 
 	/**

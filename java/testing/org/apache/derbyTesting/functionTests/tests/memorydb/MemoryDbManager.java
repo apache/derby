@@ -61,11 +61,11 @@ public class MemoryDbManager {
     }
 
     /** List of openend statements, closed at clean up. */
-    private final ArrayList STATEMENTS = new ArrayList();
+    private final ArrayList<Statement> STATEMENTS = new ArrayList<Statement>();
     /** List of openend connections, closed at clean up. */
-    private final ArrayList CONNECTIONS = new ArrayList();
+    private final ArrayList<Connection> CONNECTIONS = new ArrayList<Connection>();
     /** List of created databases, deleted at clean up. */
-    private final ArrayList DATABASES = new ArrayList();
+    private final ArrayList<String> DATABASES = new ArrayList<String>();
 
     public MemoryDbManager() { }
 
@@ -242,12 +242,12 @@ public class MemoryDbManager {
             throws SQLException {
         // Close all known statements.
         for (int i=STATEMENTS.size() -1; i >= 0; i--) {
-            Statement stmt = (Statement)STATEMENTS.remove(i);
+            Statement stmt = STATEMENTS.remove(i);
             stmt.close();
         }
         // Close all known connections.
         for (int i=CONNECTIONS.size() -1; i >= 0; i--) {
-            Connection con = (Connection)CONNECTIONS.remove(i);
+            Connection con = CONNECTIONS.remove(i);
             try {
                 con.rollback();
             } catch (SQLException sqle) {
@@ -257,7 +257,7 @@ public class MemoryDbManager {
         }
         // Delete all known databases.
         for (int i=DATABASES.size() -1; i >= 0; i--) {
-            dropDatabase((String)DATABASES.remove(i));
+            dropDatabase(DATABASES.remove(i));
         }
     }
 }

@@ -89,7 +89,6 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     {
         ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
 
-        assertNonJDBC4DataSource((DataSource)ds);
         checkJDBC4Interface(ds.getPooledConnection());
     }
 
@@ -101,37 +100,9 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
     {
         XADataSource ds = J2EEDataSource.getXADataSource();
 
-        assertNonJDBC4DataSource((DataSource)ds);
         checkJDBC4Interface(ds.getXAConnection());
     }
 
-    /**
-     * Make sure that the received DataSource is *not* a JDBC 4
-     * data source, since that would defeat the whole purpose
-     * of this test.
-     */
-    private void assertNonJDBC4DataSource(DataSource ds)
-        throws SQLException
-    {
-        // See if we can invoke the JDBC 4.1 getParentLogger() method. If we
-        // can, we have a JDBC 4 data source.
-        try {
-            ds.getClass().getMethod("getParentLogger").invoke(ds);
-            fail("Call to getParentLogger() not expected to pass");
-        } catch (NoSuchMethodException nsme) {
-            // OK. Method not found is expected on Java 6.
-        } catch (InvocationTargetException ite) {
-            // On Java 7 and newer the method is found in the CommonDataSource
-            // interface, so expect an AbstractMethodError instead of
-            // NoSuchMethodException.
-            Throwable cause = ite.getCause();
-            if (!(cause instanceof AbstractMethodError)) {
-                fail("Unexpected exception", cause);
-            }
-        } catch (IllegalAccessException iae) {
-            fail("Unexpected exception", iae);
-        }
-    }
 
     /**
      * Make sure that the received PooledConnection, which we assume came

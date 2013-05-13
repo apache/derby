@@ -26,9 +26,11 @@ import java.sql.Driver;
 import java.sql.Connection;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 import java.io.PrintStream;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Attribute;
@@ -192,6 +194,17 @@ public class AutoloadedDriver implements Driver
 		}
 	}
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger() throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
+    }
+    
 	///////////////////////////////////////////////////////////////////////
 	//
 	// Support for booting and shutting down the engine.

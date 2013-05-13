@@ -582,16 +582,12 @@ public abstract class InternalDriver implements ModuleControl {
 	** their classes into the mix.
 	*/
 
-	public java.sql.Statement newEmbedStatement(
+	public abstract java.sql.Statement newEmbedStatement(
 				EmbedConnection conn,
 				boolean forMetaData,
 				int resultSetType,
 				int resultSetConcurrency,
-				int resultSetHoldability)
-	{
-		return new EmbedStatement(conn, forMetaData, resultSetType, resultSetConcurrency,
-		resultSetHoldability);
-	}
+				int resultSetHoldability);
 	/**
 	 	@exception SQLException if fails to create statement
 	 */
@@ -622,10 +618,8 @@ public abstract class InternalDriver implements ModuleControl {
 	 * Return a new java.sql.DatabaseMetaData instance for this implementation.
 	 	@exception SQLException on failure to create.
 	 */
-	public DatabaseMetaData newEmbedDatabaseMetaData(EmbedConnection conn,
-		String dbname) throws SQLException {
-		return new EmbedDatabaseMetaData(conn,dbname);
-	}
+	public abstract DatabaseMetaData newEmbedDatabaseMetaData
+        (EmbedConnection conn, String dbname) throws SQLException;
 
 	/**
 	 * Return a new java.sql.ResultSet instance for this implementation.
@@ -646,10 +640,8 @@ public abstract class InternalDriver implements ModuleControl {
          * @param columnInfo a ResultColumnDescriptor that stores information 
          *        about the columns in a ResultSet
          */
-        public EmbedResultSetMetaData newEmbedResultSetMetaData
-                           (ResultColumnDescriptor[] columnInfo) {
-            return new EmbedResultSetMetaData(columnInfo);
-        }
+        public abstract EmbedResultSetMetaData newEmbedResultSetMetaData
+            (ResultColumnDescriptor[] columnInfo);
 
     /**
      * Indicate to {@code AutoloadedDriver} whether it should deregister

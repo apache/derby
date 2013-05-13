@@ -42,7 +42,7 @@ import java.net.URL;
   * @see org.apache.derby.impl.jdbc.EmbedPreparedStatement
  *
  */
-public class EmbedPreparedStatement30 extends EmbedPreparedStatement20
+public abstract class EmbedPreparedStatement30 extends EmbedPreparedStatement20
 {
 
 	//////////////////////////////////////////////////////////////

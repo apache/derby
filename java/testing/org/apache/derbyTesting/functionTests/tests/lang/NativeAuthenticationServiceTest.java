@@ -549,7 +549,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             File        nast2Jar = new File( readOnlyDirectory, NAST2_JAR_FILE );
 
             try {
-                result = new ClasspathSetup( result, nast2Jar.toURL() );
+                result = new ClasspathSetup( result, nast2Jar.toURI().toURL() );
             }
             catch (Exception e) { printStackTrace( e ); }
         }

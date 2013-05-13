@@ -60,7 +60,7 @@ public class SysinfoAPITest extends BaseJDBCTestCase {
     /**
      *  Test various invocations of sysinfo.getMajorVersion()
      */
-    public void testMajorVersion() {
+    public void testMajorVersion() throws Exception {
         int dmMajor = dm.getDriverMajorVersion();
         assertEquals(dmMajor, sysinfo.getMajorVersion());
         assertEquals(dmMajor, sysinfo.getMajorVersion(sysinfo.DBMS));
@@ -75,7 +75,7 @@ public class SysinfoAPITest extends BaseJDBCTestCase {
     /**
      *  Test various invocations of sysinfo.getMinorVersion()
      */
-    public void testMinorVersion() {
+    public void testMinorVersion() throws Exception {
         int dmMinor = dm.getDriverMinorVersion();
         assertEquals(dmMinor, sysinfo.getMinorVersion());
         assertEquals(dmMinor, sysinfo.getMinorVersion(sysinfo.DBMS));

@@ -280,7 +280,7 @@ public class SupportFilesSetup extends TestSetup {
             (new java.security.PrivilegedExceptionAction(){
 
                 public Object run() throws MalformedURLException{
-                return file.toURL();
+                    return file.toURI().toURL();
 
                 }
             }

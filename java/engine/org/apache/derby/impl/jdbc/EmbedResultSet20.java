@@ -49,7 +49,7 @@ import java.math.BigDecimal;
  *
  */
 
-public class EmbedResultSet20
+public abstract class EmbedResultSet20
         extends org.apache.derby.impl.jdbc.EmbedResultSet {
 
         //////////////////////////////////////////////////////////////

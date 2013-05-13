@@ -122,7 +122,7 @@ public class dbjarUtil
 
 		File jar = new File(root, jarName);
 		
-		URLClassLoader cl = new URLClassLoader(new URL[] {jar.toURL()});
+		URLClassLoader cl = new URLClassLoader(new URL[] {jar.toURI().toURL()});
     	java.lang.Thread.currentThread().setContextClassLoader(cl);
    
     }

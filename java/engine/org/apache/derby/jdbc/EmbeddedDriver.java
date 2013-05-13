@@ -27,9 +27,12 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.impl.jdbc.Util;
 
 
 /**
@@ -196,6 +199,15 @@ public class EmbeddedDriver  implements Driver {
         new JDBCBoot().boot(Attribute.PROTOCOL, pw);
 	}
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
 
+    public  Logger getParentLogger() throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
+    }
 	
 }

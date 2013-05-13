@@ -202,7 +202,7 @@ public class UpgradeClassLoader
 
             for (int i=0; i < jarFiles.length; i++) {
                 try {
-                    url[i] = new File(lib, jarFiles[i]).toURL();
+                    url[i] = new File(lib, jarFiles[i]).toURI().toURL();
                 } catch (MalformedURLException e) {
                     Assert.fail(e.toString());
                 }

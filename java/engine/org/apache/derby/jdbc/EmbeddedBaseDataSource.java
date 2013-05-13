@@ -25,7 +25,10 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
+
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
@@ -737,4 +740,17 @@ public abstract class EmbeddedBaseDataSource
 
         return ra;
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger() throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.generateCsSQLException
+            ( SQLState.NOT_IMPLEMENTED, "getParentLogger" );
+    }
+    
 }

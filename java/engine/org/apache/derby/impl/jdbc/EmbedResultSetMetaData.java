@@ -57,7 +57,7 @@ import java.sql.ResultSet;
    this sharing must be removed.
  *
  */
-public class EmbedResultSetMetaData
+public abstract class EmbedResultSetMetaData
 	implements ResultSetMetaData {
 
 	private final ResultColumnDescriptor[] columnInfo;

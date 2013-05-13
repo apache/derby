@@ -58,7 +58,7 @@ import java.sql.ResultSet;
    </UL>
 
  */
-public class EmbedStatement extends ConnectionChild
+public abstract class EmbedStatement extends ConnectionChild
     implements EngineStatement {
 
 	private final java.sql.Connection applicationConnection;

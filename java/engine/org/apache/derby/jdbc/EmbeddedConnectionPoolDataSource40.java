@@ -70,16 +70,4 @@ public class EmbeddedConnectionPoolDataSource40
     // http://svn.apache.org/viewvc?view=revision&revision=1438035 .
     private static final long serialVersionUID = -4368824293743156916L;
     
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
-    }
-
 }

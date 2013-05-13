@@ -233,6 +233,7 @@ public class DataSourceSerializationTest
         fname.append('-');
         fname.append(version);
         fname.append(".ser");
+        println( "Deserializing " + fname.toString() );
 
         // De-serialize the data source.
         InputStream is;

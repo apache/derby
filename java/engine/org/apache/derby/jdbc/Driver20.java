@@ -105,13 +105,9 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 		AutoloadedDriver.unregisterDriverModule();
 	}
   
-	public org.apache.derby.impl.jdbc.EmbedResultSet 
+	public abstract org.apache.derby.impl.jdbc.EmbedResultSet 
 	newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, org.apache.derby.impl.jdbc.EmbedStatement statement, boolean isAtomic)
-		throws SQLException
-	{
-		return new EmbedResultSet20(conn, results, forMetaData, statement,
-								 isAtomic); 
-	}
+		throws SQLException;
 
     public abstract BrokeredConnection newBrokeredConnection(
             BrokeredConnectionControl control) throws SQLException;

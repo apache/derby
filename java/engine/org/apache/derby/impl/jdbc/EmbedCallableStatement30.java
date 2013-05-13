@@ -44,7 +44,7 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
  * @see org.apache.derby.impl.jdbc.EmbedCallableStatement
  *
  */
-public class EmbedCallableStatement30 extends EmbedCallableStatement20
+public abstract class EmbedCallableStatement30 extends EmbedCallableStatement20
 {
 
 	//////////////////////////////////////////////////////////////

@@ -62,7 +62,7 @@ import javax.sql.ConnectionEvent;
 	</UL>
 
  */
-class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
+abstract class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
     /** the connection string */
     private String connString;

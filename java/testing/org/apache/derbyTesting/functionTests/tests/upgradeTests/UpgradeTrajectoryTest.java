@@ -209,9 +209,9 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private String             _trajectoryName;
     private boolean[]          _hardUpgradeRequests;
     
-    private HashMap     _unstableColumnValues = new HashMap();
+    private HashMap<String,String>     _unstableColumnValues = new HashMap<String,String>();
 
-    private static ThreadLocal _originalClassLoader = new ThreadLocal();
+    private static ThreadLocal<ClassLoader> _originalClassLoader = new ThreadLocal<ClassLoader>();
 
     // these are the system tables which must be read first in order to
     // prep the mapping of unstable identifiers
@@ -576,11 +576,11 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * list of initial tables.
      * </p>
      */
-    private ArrayList listSystemTables
+    private ArrayList<String> listSystemTables
         ( Connection conn )
         throws Exception
     {
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<String>();
 
         StringBuffer buffer = new StringBuffer();
 
@@ -621,7 +621,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         String rightTableName = rightSchema + "." + tableName;
         StringBuffer columnList = new StringBuffer();
         StringBuffer insertList = new StringBuffer();
-        ArrayList columnNames = new ArrayList();
+        ArrayList<String> columnNames = new ArrayList<String>();
 
         PreparedStatement leftPS = chattyPrepare( leftConn, query );
         PreparedStatement rightPS = chattyPrepare( rightConn, query );
@@ -1215,7 +1215,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     private static Version.Trajectory[] buildMinimalSet( Version[] supportedVersions )
     {
-        ArrayList   trajectoryList = new ArrayList();
+        ArrayList<Version.Trajectory>   trajectoryList = new ArrayList<Version.Trajectory>();
         int  versionCount = supportedVersions.length;
         boolean[]  include = new boolean[ versionCount ];
 
@@ -1238,7 +1238,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     private static Version.Trajectory[] buildPowerSet( Version[] supportedVersions )
     {
-        ArrayList   trajectoryList = new ArrayList();
+        ArrayList<Version.Trajectory>   trajectoryList = new ArrayList<Version.Trajectory>();
         int            versionCount = supportedVersions.length;
         boolean[]  include = new boolean[ versionCount ];
 
@@ -1252,7 +1252,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * Turn a list of trajectories into an array.
      * </p>
      */
-    private static Version.Trajectory[] squeezeArray( ArrayList trajectoryList )
+    private static Version.Trajectory[] squeezeArray( ArrayList<Version.Trajectory> trajectoryList )
     {
         Version.Trajectory[] result = new Version.Trajectory[ trajectoryList.size() ];
         trajectoryList.toArray( result );
@@ -1269,7 +1269,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void buildPowerSetMinion
-        ( Version[] supportedVersions, ArrayList result, boolean[] include, int idx, boolean removeSameBranchNeighbors )
+        ( Version[] supportedVersions, ArrayList<Version.Trajectory> result, boolean[] include, int idx, boolean removeSameBranchNeighbors )
     {
         int  versionCount = supportedVersions.length;
 
@@ -1292,11 +1292,11 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * </p>
      */
     private static void addSubset
-        ( Version[] supportedVersions, ArrayList result, boolean[] include, boolean removeSameBranchNeighbors )
+        ( Version[] supportedVersions, ArrayList<Version.Trajectory> result, boolean[] include, boolean removeSameBranchNeighbors )
     {
         int  versionCount = supportedVersions.length;
 
-        ArrayList seed = new ArrayList();
+        ArrayList<Version> seed = new ArrayList<Version>();
         Version   previousVersion = null;
         
         for ( int i = 0; i < versionCount; i++ )

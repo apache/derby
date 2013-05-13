@@ -86,6 +86,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <!--exclude name=""/-->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 

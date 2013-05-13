@@ -182,7 +182,7 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     public void insertMapsPrivileged() throws Exception {
         try {
 
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
                 public Object run() throws SQLException, FileNotFoundException,
                         IOException {
                     insertMaps();

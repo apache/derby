@@ -92,7 +92,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
    </UL>
  */
 
-public class EmbedResultSet extends ConnectionChild
+public abstract class EmbedResultSet extends ConnectionChild
     implements EngineResultSet, Comparable {
 
     /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */

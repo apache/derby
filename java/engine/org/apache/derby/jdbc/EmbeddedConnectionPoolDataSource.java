@@ -22,7 +22,11 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.PooledConnection;
+
+import org.apache.derby.impl.jdbc.Util;
 
 /** 
     This datasource is suitable for an application using embedded Derby,
@@ -130,6 +134,18 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
          */
         return ((Driver30) findDriver()).getNewPooledConnection(
             this, user, password, requestPassword);
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
     }
 
 }

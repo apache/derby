@@ -78,7 +78,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
    <LI> JSR169
    </UL>
  */
-public class EmbedPreparedStatement
+public abstract class EmbedPreparedStatement
 	extends EmbedStatement
 	implements EnginePreparedStatement
 {

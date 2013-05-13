@@ -86,7 +86,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
  *
  * @see <a href="http://java.sun.com/products/jdbc/download.html#corespec30">JDBC 3.0 Specification</a>
  */
-public class EmbedDatabaseMetaData extends ConnectionChild 
+public abstract class EmbedDatabaseMetaData extends ConnectionChild 
 	implements DatabaseMetaData, java.security.PrivilegedAction {
 
     private static final int ILLEGAL_UDT_TYPE = 0;
