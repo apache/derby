@@ -23,7 +23,6 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.Activation;
@@ -33,7 +32,7 @@ import org.apache.derby.iapi.sql.Activation;
  * a row trigger.  It is instantiated at execution time.
  * There is one per row trigger.
  */
-public class RowTriggerExecutor extends GenericTriggerExecutor
+class RowTriggerExecutor extends GenericTriggerExecutor
 {
 	/**
 	 * Constructor

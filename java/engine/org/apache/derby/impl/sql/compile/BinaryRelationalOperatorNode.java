@@ -25,8 +25,6 @@ import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -34,20 +32,17 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.Orderable;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import java.sql.Types;
 
@@ -330,7 +325,7 @@ public class BinaryRelationalOperatorNode
 	public ValueNode getExpressionOperand(
 								int tableNumber,
 								int columnPosition,
-								FromTable ft)
+								Optimizable ft)
 	{
 		ColumnReference	cr;
 		boolean walkSubtree = true;
@@ -487,11 +482,11 @@ public class BinaryRelationalOperatorNode
 	public void generateExpressionOperand(
 								Optimizable optTable,
 								int columnPosition,
-								ExpressionClassBuilder acb,
+								ExpressionClassBuilderInterface acbi,
 								MethodBuilder mb)
 						throws StandardException
 	{
-		ColumnReference	cr;
+        ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
 		FromBaseTable	ft;
 
 		if (SanityManager.DEBUG)
@@ -782,11 +777,13 @@ public class BinaryRelationalOperatorNode
 	/**
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateQualMethod(ExpressionClassBuilder acb,
+    public void generateQualMethod(ExpressionClassBuilderInterface acbi,
 								   MethodBuilder mb,
 								   Optimizable optTable)
 						throws StandardException
 	{
+        ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
+
 		/* Generate a method that returns the expression */
 		MethodBuilder qualMethod = acb.newUserExprFun();
 
@@ -1734,7 +1731,7 @@ public class BinaryRelationalOperatorNode
 	 *  otherwise.
 	 */
 	private boolean valNodeReferencesOptTable(ValueNode valNode,
-		FromTable optTable, boolean forPush, boolean walkOptTableSubtree)
+        Optimizable optTable, boolean forPush, boolean walkOptTableSubtree)
 	{
 		// Following call will initialize/reset the btnVis,
 		// valNodeBaseTables, and optBaseTables fields of this object.
@@ -1822,7 +1819,7 @@ public class BinaryRelationalOperatorNode
 	 * @param forPush Whether or not we are searching with the intent
 	 *  to push this operator to the target table.
 	 */
-	private void buildTableNumList(FromTable ft, boolean forPush)
+    private void buildTableNumList(Optimizable ft, boolean forPush)
 		throws StandardException
 	{
 		// Start with the target table's own table number.  Note

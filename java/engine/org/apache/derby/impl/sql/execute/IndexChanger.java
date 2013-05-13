@@ -50,9 +50,9 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 
 /**
-  Perform Index maintenace associated with DML operations for a single index.
+  Perform Index maintenance associated with DML operations for a single index.
   */
-public class IndexChanger
+class IndexChanger
 {
 	private IndexRowGenerator irg;
 	//Index Conglomerate ID
@@ -84,8 +84,8 @@ public class IndexChanger
 
 	  @param irg the IndexRowGenerator for the index.
 	  @param indexCID the conglomerate id for the index.
-	  @param indexSCOCI the SCOCI for the idexes. 
-	  @param indexDCOCI the DCOCI for the idexes. 
+	  @param indexSCOCI the SCOCI for the indexes.
+	  @param indexDCOCI the DCOCI for the indexes.
 	  @param baseCC the ConglomerateController for the base table.
 	  @param tc			The TransactionController
 	  @param lockMode	The lock mode (granularity) to use
@@ -95,7 +95,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	  */
-	public IndexChanger
+    IndexChanger
 	(
 		IndexRowGenerator 		irg,
 		long 					indexCID,
@@ -148,7 +148,7 @@ public class IndexChanger
 	 *
 	 * @param rowHolder	the row holder
 	 */
-	public void setRowHolder(TemporaryRowHolderImpl rowHolder)
+    void setRowHolder(TemporaryRowHolderImpl rowHolder)
 	{
 		this.rowHolder = rowHolder;
 		rowHolderPassedIn = (rowHolder != null);
@@ -160,7 +160,7 @@ public class IndexChanger
 	 *
 	 * @param baseCC	The heap's ConglomerateController.
 	 */
-	public void setBaseCC(ConglomerateController baseCC)
+    void setBaseCC(ConglomerateController baseCC)
 	{
 		this.baseCC = baseCC;
 	}
@@ -524,7 +524,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	  */
-	public void open()
+    void open()
 		 throws StandardException
 	{
 	}
@@ -536,8 +536,7 @@ public class IndexChanger
 	  @param baseRowLocation the base table row's location.
 	  @exception StandardException		Thrown on error
 	  */
-	public void delete(ExecRow baseRow,
-					   RowLocation baseRowLocation)
+    void delete(ExecRow baseRow, RowLocation baseRowLocation)
 		 throws StandardException
 	{
 		setOurIndexRow(baseRow, baseRowLocation);
@@ -554,7 +553,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	  */
-	public void update(ExecRow oldBaseRow,
+    void update(ExecRow oldBaseRow,
 					   ExecRow newBaseRow,
 					   RowLocation baseRowLocation
 					   )
@@ -583,7 +582,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	  */
-	public void insert(ExecRow newRow, RowLocation baseRowLocation)
+    void insert(ExecRow newRow, RowLocation baseRowLocation)
 		 throws StandardException
 	{
 		setOurIndexRow(newRow, baseRowLocation);
@@ -625,8 +624,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	 */
-	public void finish()
-		throws StandardException
+    void finish() throws StandardException
 	{
 		ExecRow			deferredRow;
 
@@ -672,8 +670,7 @@ public class IndexChanger
 
 	  @exception StandardException		Thrown on error
 	  */
-	public void close()
-		throws StandardException
+    void close() throws StandardException
 	{
 		closeIndexCC();
 		closeIndexSC();

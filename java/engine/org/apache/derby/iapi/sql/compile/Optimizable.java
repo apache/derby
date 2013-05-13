@@ -35,7 +35,7 @@ import java.util.Properties;
  * Optimizable provides services for optimizing a table in a query.
  */
 
-public interface Optimizable {
+public interface Optimizable extends Visitable {
 
 	/**
 	 * Choose the next access path to evaluate for this Optimizable.

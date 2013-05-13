@@ -28,39 +28,18 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.util.IdUtil;
 
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.sql.Types;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -596,19 +575,6 @@ public	class DD_Version implements	Formatable
 
 		bootingDictionary.clearCaches();
 	}
-	
-	/**
- 	 * Make a catalog.
-	 *	@param	tc	TransactionController
-	 *	@exception StandardException  Standard Derby error policy.
-	 */
-	protected void makeSystemCatalog(TransactionController tc,
-									 TabInfoImpl ti)
-		throws StandardException
-	{
-		SchemaDescriptor sd = bootingDictionary.getSystemSchemaDescriptor();
-		bootingDictionary.makeCatalog(ti,sd,tc);
-	}
 
 	/**
 	  Remove the description of a System table from the data dictionary.
@@ -653,71 +619,6 @@ public	class DD_Version implements	Formatable
 			tc.dropConglomerate(cds[index].getConglomerateNumber());
 		}
 		dropSystemCatalogDescription(tc,td);
-	}
-
-
-	/**
-	 * Populates a new system index from the base system table.
-	 *
-	 *	@param	tc						transaction controller
-	 *	@param	heapConglomerateNumber	identifies system table to Store
-	 *	@param	tabInfo					describes base system table
-	 *	@param	indexNumber				index to populate
-	 *
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	protected	void	fillIndex
-	(
-		TransactionController	tc,
-		long					heapConglomerateNumber,
-		TabInfoImpl					tabInfo,
-		int						indexNumber
-    )
-		throws StandardException
-	{
-		long						indexConglomerateNumber = tabInfo.getIndexConglomerate( indexNumber );
-		IndexRowGenerator			indexRowGenerator = tabInfo.getIndexRowGenerator( indexNumber );
-		CatalogRowFactory			rowFactory = tabInfo.getCatalogRowFactory();
-		ExecRow						heapRow = rowFactory.makeEmptyRow();
-		ExecIndexRow				indexableRow = indexRowGenerator.getIndexRowTemplate();
-
-		ScanController				heapScan =
-			tc.openScan(
-				heapConglomerateNumber,       // conglomerate to open
-				false,                          // don't hold open across commit
-				0,                              // for read
-                TransactionController.MODE_TABLE,
-                TransactionController.ISOLATION_REPEATABLE_READ,
-				(FormatableBitSet) null,                 // all fields as objects
-				null,                           // start position - first row
-				ScanController.GE,              // startSearchOperation
-				null,                           //scanQualifier,
-				null,                           //stop position-through last row
-				ScanController.GT);             // stopSearchOperation
-
-		RowLocation					heapLocation = 
-            heapScan.newRowLocationTemplate();
-
-		ConglomerateController		indexController = 
-			tc.openConglomerate( 
-				indexConglomerateNumber, 
-                false,
-				TransactionController.OPENMODE_FORUPDATE,
-				TransactionController.MODE_TABLE,
-				TransactionController.ISOLATION_REPEATABLE_READ);
-
-		while ( heapScan.fetchNext(heapRow.getRowArray()) )
-        {
- 			heapScan.fetchLocation( heapLocation );
-
-			indexRowGenerator.getIndexRow( heapRow, heapLocation, indexableRow, (FormatableBitSet) null );
-
-			indexController.insert(indexableRow.getRowArray());
-		}
-
-		indexController.close();
-		heapScan.close();
 	}
 
 	////////////////////////////////////////////////////////////////////////

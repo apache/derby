@@ -25,20 +25,19 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 /**
  * This interface is an abstraction of a relational operator.  It was created
  * for optimization, to allow binary comparison operators and IS NULL to
  * be treated the same.
  */
-public interface RelationalOperator
+interface RelationalOperator
 {
 	public final int EQUALS_RELOP = 1;
 	public final int NOT_EQUALS_RELOP = 2;
@@ -111,7 +110,7 @@ public interface RelationalOperator
 	 */
 	ValueNode getExpressionOperand(int tableNumber,
 									int columnPosition,
-									FromTable ft);
+									Optimizable ft);
 
 	/**
 	 * Check whether this RelationalOperator is a comparison of the given
@@ -128,7 +127,7 @@ public interface RelationalOperator
 	 */
 	void generateExpressionOperand(Optimizable optTable,
 										int columnPosition,
-										ExpressionClassBuilder acb,
+										ExpressionClassBuilderInterface acb,
 										MethodBuilder mb)
 						throws StandardException;
 
@@ -248,7 +247,7 @@ public interface RelationalOperator
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	void generateQualMethod(ExpressionClassBuilder acb,
+    void generateQualMethod(ExpressionClassBuilderInterface acb,
 								MethodBuilder mb,
 								Optimizable optTable)
 						throws StandardException;

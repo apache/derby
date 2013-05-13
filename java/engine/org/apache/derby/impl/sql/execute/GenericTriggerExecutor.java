@@ -38,12 +38,12 @@ import org.apache.derby.iapi.reference.SQLState;
  * a trigger.  It is subclassed by row and statement
  * executors.
  */
-public abstract class GenericTriggerExecutor
+abstract class GenericTriggerExecutor
 {
-	protected InternalTriggerExecutionContext	tec;
-	protected TriggerDescriptor					triggerd;
-	protected Activation						activation;
-	protected LanguageConnectionContext			lcc;
+    final InternalTriggerExecutionContext   tec;
+    final TriggerDescriptor                 triggerd;
+    final Activation                        activation;
+    private final LanguageConnectionContext lcc;
 
 	private	boolean			whenClauseRetrieved;
 	private	boolean			actionRetrieved;

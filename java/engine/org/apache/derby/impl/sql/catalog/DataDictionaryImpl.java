@@ -185,7 +185,7 @@ import org.apache.derby.impl.sql.execute.JarUtil;
 
 /**
  * Standard database implementation of the data dictionary
- * that stores the information in the system catlogs.
+ * that stores the information in the system catalogs.
  */
 public final class	DataDictionaryImpl
 	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction
@@ -838,7 +838,7 @@ public final class	DataDictionaryImpl
                         false);
 			} else {
 				// Get the ids for non-core tables
-				loadDictionaryTables(bootingTC, ddg, startParams);
+                loadDictionaryTables(bootingTC, startParams);
 
                 // See if index stats update is disabled by a database prop.
                 String dbIndexStatsUpdateAuto =
@@ -4134,7 +4134,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public SPSDescriptor getUncachedSPSDescriptor(TableKey stmtKey)
+    SPSDescriptor getUncachedSPSDescriptor(TableKey stmtKey)
 				throws StandardException
 	{
 		return getSPSDescriptorIndex1Scan(stmtKey.getTableName(), 
@@ -7983,17 +7983,15 @@ public final class	DataDictionaryImpl
 	 *
 	 *
 	 *	@param	tc		TransactionController
-	 *	@param	ddg		DataDescriptorGenerator
 	 *
 	 * 	@exception StandardException		Thrown on error
 	 */
-	protected void loadDictionaryTables(TransactionController tc,
-										DataDescriptorGenerator ddg,
+    private void loadDictionaryTables(TransactionController tc,
 										Properties startParams)
 		throws StandardException
 	{        
 		// load the core catalogs first
-		loadCatalogs(ddg, coreInfo);
+        loadCatalogs(coreInfo);
 
 		dictionaryVersion = (DD_Version)tc.getProperty(
 											DataDictionary.CORE_DATA_DICTIONARY_VERSION);
@@ -8035,12 +8033,9 @@ public final class	DataDictionaryImpl
 	/**
 	 * Initialize indices for an array of catalogs
 	 *
-	 *	@param	ddg		DataDescriptorGenerator
-	 *
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void loadCatalogs(DataDescriptorGenerator ddg, TabInfoImpl[] catalogArray)
+    private void loadCatalogs(TabInfoImpl[] catalogArray)
 		throws StandardException
 	{
 		int			ictr;
@@ -8058,13 +8053,10 @@ public final class	DataDictionaryImpl
 
 			numIndexes = catalog.getNumberOfIndexes();
 
-			if (numIndexes > 0)
-			{
-				for (indexCtr = 0; indexCtr < numIndexes; indexCtr++)
-				{
-					initSystemIndexVariables(ddg, catalog, indexCtr);	
-				}
-			}
+            for (indexCtr = 0; indexCtr < numIndexes; indexCtr++)
+            {
+                initSystemIndexVariables(catalog, indexCtr);
+            }
 		}
 
 	}
@@ -8416,7 +8408,7 @@ public final class	DataDictionaryImpl
 	 *
 	 *	@exception StandardException Standard Derby error policy
 	 */
-	public	void	makeCatalog( TabInfoImpl					ti,
+    private void    makeCatalog( TabInfoImpl                ti,
 								 SchemaDescriptor			sd,
 								 TransactionController 		tc )
 					throws StandardException
@@ -8607,44 +8599,6 @@ public final class	DataDictionaryImpl
 		}
 
 	}
-
-
-	/**
-	  *	Code to add an index to a catalog during upgrade.
-	  *
-	  *	@param	tc						transaction controller
-	  *	@param	ti						information on the catalog that's having a new index added
-	  *	@param	indexNumber				0-based index number
-	  *	@param	heapConglomerateNumber	what it is
-	  *
-	  * @return The conglomerate number of the new index.
-	  *
-	  * @exception StandardException		Thrown on failure
-	  */
-	public	long	upgrade_makeOneIndex
-	(
-		TransactionController	tc,
-		TabInfoImpl					ti,
-		int						indexNumber,
-		long					heapConglomerateNumber
-    )
-		throws StandardException
-	{
-		SchemaDescriptor		sd = getSystemSchemaDescriptor( );
-		DataDescriptorGenerator ddg = getDataDescriptorGenerator();
-		long					indexConglomerateNumber;
-
-		ConglomerateDescriptor	conglomerateDescriptor = bootstrapOneIndex
-			( sd, tc, ddg, ti, indexNumber, heapConglomerateNumber );
-
-		indexConglomerateNumber = conglomerateDescriptor.getConglomerateNumber();
-
-		addDescriptor(conglomerateDescriptor, sd, 
-					  SYSCONGLOMERATES_CATALOG_NUM, false, tc);
-					  
-		return indexConglomerateNumber;
-	}	  
-
 
 	/**
 	 * Get the UUID for the specified system table.  Prior
@@ -8984,7 +8938,7 @@ public final class	DataDictionaryImpl
 		IndexRowGenerator			irg;
 		ConglomerateDescriptor	conglomerateDescriptor;
 
-		initSystemIndexVariables(ddg, ti, indexNumber);
+		initSystemIndexVariables(ti, indexNumber);
 
 		irg = ti.getIndexRowGenerator(indexNumber);
 
@@ -9057,9 +9011,7 @@ public final class	DataDictionaryImpl
 		return conglomerateDescriptor;
 	}
 
-	public void initSystemIndexVariables(DataDescriptorGenerator ddg,
-										   TabInfoImpl ti,
-										   int indexNumber)
+    private void initSystemIndexVariables(TabInfoImpl ti, int indexNumber)
 		throws StandardException
 	{
 		int					numCols = ti.getIndexColumnCount(indexNumber);
@@ -9975,15 +9927,10 @@ public final class	DataDictionaryImpl
 	{
 		int numIndexes = ti.getNumberOfIndexes();
 
-		if (numIndexes > 0)
-		{
-			DataDescriptorGenerator ddg = getDataDescriptorGenerator();
-
-			for (int indexCtr = 0; indexCtr < numIndexes; indexCtr++)
-			{
-				initSystemIndexVariables(ddg, ti, indexCtr);	
-			}
-		}
+        for (int indexCtr = 0; indexCtr < numIndexes; indexCtr++)
+        {
+            initSystemIndexVariables(ti, indexCtr);
+        }
 	}
 
 	// Expected to be called only during boot time, so no synchronization.
@@ -10000,7 +9947,7 @@ public final class	DataDictionaryImpl
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
-	public	void	faultInTabInfo( TabInfoImpl ti )
+    private void faultInTabInfo(TabInfoImpl ti)
 		throws StandardException
 	{
 		int		numIndexes;

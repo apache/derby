@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -268,7 +269,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 */
 	public ValueNode getExpressionOperand(int tableNumber,
 										  int columnNumber,
-										  FromTable ft)
+										  Optimizable ft)
 	{
 		return null;
 	}
@@ -278,12 +279,13 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateExpressionOperand(Optimizable optTable,
-												int columnPosition,
-												ExpressionClassBuilder acb,
-												MethodBuilder mb)
+    public void generateExpressionOperand(Optimizable optTable,
+                                          int columnPosition,
+                                          ExpressionClassBuilderInterface acbi,
+                                          MethodBuilder mb)
 						throws StandardException
 	{
+        ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
 		acb.generateNull(mb, operand.getTypeCompiler(), 
 				operand.getTypeServices().getCollationType());
 	}
@@ -325,11 +327,12 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateQualMethod(ExpressionClassBuilder acb,
+    public void generateQualMethod(ExpressionClassBuilderInterface acbi,
 										MethodBuilder mb,
 										Optimizable optTable)
 						throws StandardException
 	{
+        ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
 		MethodBuilder qualMethod = acb.newUserExprFun();
 
 		/* Generate a method that returns that expression */

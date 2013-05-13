@@ -307,7 +307,7 @@ public class GenericExecutionFactory
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public InternalTriggerExecutionContext getTriggerExecutionContext
+    InternalTriggerExecutionContext getTriggerExecutionContext
 	(
 		LanguageConnectionContext	lcc,
 		ConnectionContext			cc,

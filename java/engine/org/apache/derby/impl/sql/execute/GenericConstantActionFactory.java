@@ -240,7 +240,7 @@ public class GenericConstantActionFactory
      * @param conglomerateUUID	ID of conglomerate
      * @param properties	The optional properties list associated with the index.
      */
-	public	CreateIndexConstantAction	getCreateIndexConstantAction
+    public IndexConstantAction getCreateIndexConstantAction
 	(
         boolean forCreateTable,
 		boolean			unique,
@@ -565,7 +565,7 @@ public class GenericConstantActionFactory
 	 *  @param  tableConglomerateId	heap conglomerate ID for table
 	 *
 	 */
-	public	DropIndexConstantAction	getDropIndexConstantAction
+    public IndexConstantAction getDropIndexConstantAction
 	(
 		String				fullIndexName,
 		String				indexName,
