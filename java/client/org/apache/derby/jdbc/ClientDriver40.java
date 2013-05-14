@@ -21,38 +21,17 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
-
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.reference.SQLState;
-
 /**
  * <p>
  * Adds driver functionality which is only visible from JDBC 4.0 onward.
  * </p>
+ *
+ * <p>
+ * This class was part of Derby's public API up to Derby 10.10. Even though
+ * it doesn't provide any more functionality than {@code ClientDriver}, it
+ * is preserved for backward compatibility.
+ * </p>
  */
 public class ClientDriver40 extends ClientDriver
 {
-    static
-    {
-        registerMe( new ClientDriver40() );
-    }
-
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        getFactory();
-        throw (SQLFeatureNotSupportedException)
-            (
-             new SqlException( null, new ClientMessageId(SQLState.NOT_IMPLEMENTED), "getParentLogger" )
-             ).getSQLException();
-    }
 }

@@ -338,8 +338,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     private String  getClientDriverName()
     {
-        if ( JDBC.vmSupportsJDBC4() ) { return "org.apache.derby.jdbc.ClientDriver40"; }
-        else { return "org.apache.derby.jdbc.ClientDriver"; }
+        return "org.apache.derby.jdbc.ClientDriver";
     }
     
     /**

@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import org.apache.derby.jdbc.AutoloadedDriver40;
-import org.apache.derby.jdbc.ClientDriver40;
+import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.jdbc.Driver40;
 
 /**
@@ -44,7 +44,7 @@ public  class   Wrapper41Driver
 
     private AutoloadedDriver40    _embedded;
     private Driver40            _driver40;
-    private ClientDriver40      _netclient;
+    private ClientDriver      _netclient;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -56,7 +56,7 @@ public  class   Wrapper41Driver
     {
         if ( wrapped instanceof AutoloadedDriver40 ) { _embedded = (AutoloadedDriver40) wrapped; }
         else if ( wrapped instanceof Driver40 ) { _driver40 = (Driver40) wrapped; }
-        else if ( wrapped instanceof ClientDriver40 ) { _netclient = (ClientDriver40) wrapped; }
+        else if ( wrapped instanceof ClientDriver ) { _netclient = (ClientDriver) wrapped; }
         else { throw nothingWrapped( wrapped ); }
     }
     

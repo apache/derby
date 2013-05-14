@@ -25,16 +25,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import javax.sql.PooledConnection;
+import javax.sql.StatementEvent;
+import javax.sql.StatementEventListener;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
-import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -83,6 +85,15 @@ public class ClientPooledConnection implements PooledConnection {
 
     /** Resource manager identifier. */
     protected int rmId_ = 0;
+
+    /**
+     * List of statement event listeners. The list is copied on each write,
+     * ensuring that it can be safely iterated over even if other threads or
+     * the listeners fired in the same thread add or remove listeners.
+     */
+    private final CopyOnWriteArrayList<StatementEventListener>
+            statementEventListeners =
+                    new CopyOnWriteArrayList<StatementEventListener>();
 
     /**
      * Constructor for non-XA pooled connections.
@@ -431,41 +442,75 @@ public class ClientPooledConnection implements PooledConnection {
     public synchronized void nullLogicalConnection() {
         logicalConnection_ = null;
     }
-    
-    /*-----------------------------------------------------------------*/
-    /*
-     * These methods are needed to provide StatementEvent support for 
-     * derby. 
-     * They are actually implemented in EmbedPooledConnection40 but have
-     * a dummy implementation here
-     */
-    
+
+    // JDBC 4.0 methods
+
     /**
+     * Registers a StatementEventListener with this PooledConnection object.
+     * Components that wish to be informed of events associated with the
+     * PreparedStatement object created by this PooledConnection like the close
+     * or error occurred event can register a StatementEventListener with this
+     * PooledConnection object.
      *
-     * The onStatementClose contains the logic for raising the Statement Closed
-     * events. This method has a dummy implementation here to avoid error when
-     * this class is compiled with jdk1.4. The class the actual implementation 
-     * in ClientPooledConnection40.
+     * @param listener A component that implements the StatementEventListener
+     * interface and wants to be notified of Statement closed or or Statement
+     * error occurred events
+     */
+    public void addStatementEventListener(StatementEventListener listener) {
+        if (logWriter_ != null) {
+            logWriter_.traceEntry(this, "addStatementEventListener", listener);
+        }
+        if (listener != null) {
+            statementEventListeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes the specified previously registered listener object from the list
+     * of components that would be informed of events with a PreparedStatement
+     * object.
+     *
+     * @param listener The previously registered event listener that needs to be
+     * removed from the list of components
+     */
+    public void removeStatementEventListener(StatementEventListener listener) {
+        if (logWriter_ != null) {
+            logWriter_.traceEntry(
+                    this, "removeConnectionEventListener", listener);
+        }
+        statementEventListeners.remove(listener);
+    }
+
+    /**
+     * Raise the statementClosed event for all the listeners when the
+     * corresponding events occurs.
      *
      * @param statement The PreparedStatement that was closed
-     *
      */
     public void onStatementClose(PreparedStatement statement) {
-        
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this, statement);
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementClosed(event);
+            }
+        }
     }
-    
+
     /**
-     * The method contains the logic for raising the Statement error occurred
-     * events. This method has a dummy implementation here to avoid error when
-     * this class is compiled with jdk1.4. The class the actual implementation 
-     * in ClientPooledConnection40.
+     * Raise the statementErrorOccurred event for all the listeners when the
+     * corresponding events occurs.
      *
-     * @param statement The PreparedStatement that was closed
-     * @param sqle      The SQLException associated with the error that caused
-     *                  the invalidation of this PreparedStatement
+     * @param statement The PreparedStatement on which error occurred
+     * @param sqle The SQLException associated with the error that caused the
+     * invalidation of the PreparedStatements
      */
     public void onStatementErrorOccurred(PreparedStatement statement,
-                    SQLException sqle) {
-        
+            SQLException sqle) {
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this, statement, sqle);
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementErrorOccurred(event);
+            }
+        }
     }
 }

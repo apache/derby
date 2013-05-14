@@ -28,7 +28,7 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils42;
 
 
-class NetResultSet42 extends NetResultSet40
+class NetResultSet42 extends NetResultSet
 {
     
     NetResultSet42(NetAgent netAgent,

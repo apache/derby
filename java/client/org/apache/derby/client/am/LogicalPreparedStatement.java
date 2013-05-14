@@ -31,13 +31,16 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -385,6 +388,123 @@ public class LogicalPreparedStatement
 
     public ResultSet executeQuery(String sql) throws SQLException {
         return getPhysPs().executeQuery(sql);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    //
+    //  ADDED BY JDBC 4.0
+    //
+    ////////////////////////////////////////////////////////////////
+
+    public void setRowId(int arg0, RowId arg1)
+            throws SQLException {
+         getPhysPs().setRowId(arg0, arg1);
+    }
+
+    public void setNString(int arg0, String arg1)
+            throws SQLException {
+         getPhysPs().setNString(arg0, arg1);
+    }
+
+    public void setNCharacterStream(int arg0, Reader arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setNCharacterStream(arg0, arg1, arg2);
+    }
+
+    public void setNClob(int arg0, NClob arg1)
+            throws SQLException {
+         getPhysPs().setNClob(arg0, arg1);
+    }
+
+    public void setClob(int arg0, Reader arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setClob(arg0, arg1, arg2);
+    }
+
+    public void setBlob(int arg0, InputStream arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setBlob(arg0, arg1, arg2);
+    }
+
+    public void setNClob(int arg0, Reader arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setNClob(arg0, arg1, arg2);
+    }
+
+    public void setSQLXML(int arg0, SQLXML arg1)
+            throws SQLException {
+         getPhysPs().setSQLXML(arg0, arg1);
+    }
+
+    public void setAsciiStream(int arg0, InputStream arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setAsciiStream(arg0, arg1, arg2);
+    }
+
+    public void setBinaryStream(int arg0, InputStream arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setBinaryStream(arg0, arg1, arg2);
+    }
+
+    public void setCharacterStream(int arg0, Reader arg1, long arg2)
+            throws SQLException {
+         getPhysPs().setCharacterStream(arg0, arg1, arg2);
+    }
+
+    public void setAsciiStream(int arg0, InputStream arg1)
+            throws SQLException {
+         getPhysPs().setAsciiStream(arg0, arg1);
+    }
+
+    public void setBinaryStream(int arg0, InputStream arg1)
+            throws SQLException {
+         getPhysPs().setBinaryStream(arg0, arg1);
+    }
+
+    public void setCharacterStream(int arg0, Reader arg1)
+            throws SQLException {
+         getPhysPs().setCharacterStream(arg0, arg1);
+    }
+
+    public void setNCharacterStream(int arg0, Reader arg1)
+            throws SQLException {
+         getPhysPs().setNCharacterStream(arg0, arg1);
+    }
+
+    public void setClob(int arg0, Reader arg1)
+            throws SQLException {
+         getPhysPs().setClob(arg0, arg1);
+    }
+
+    public void setBlob(int arg0, InputStream arg1)
+            throws SQLException {
+         getPhysPs().setBlob(arg0, arg1);
+    }
+
+    public void setNClob(int arg0, Reader arg1)
+            throws SQLException {
+         getPhysPs().setNClob(arg0, arg1);
+    }
+
+    public synchronized boolean isClosed()
+            throws SQLException {
+        // Note the extra synchronization.
+        boolean closed = isLogicalEntityClosed();
+        if (!closed) {
+            // Consult the underlying physical statement.
+            closed = getPhysPs().isClosed();
+        }
+        return closed;
+    }
+
+    public void setPoolable(boolean arg0)
+            throws SQLException {
+         getPhysPs().setPoolable(arg0);
+    }
+
+    public boolean isPoolable()
+            throws SQLException {
+        return getPhysPs().isPoolable();
     }
 
     ////////////////////////////////////////////////////////////////

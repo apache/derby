@@ -29,8 +29,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
 /**
  * JDBC 4.2 specific wrapper class for a Derby physical prepared statement.
  */
-public class LogicalPreparedStatement42
-    extends LogicalPreparedStatement40
+public class LogicalPreparedStatement42 extends LogicalPreparedStatement
 {
     /**
      * Creates a new logical prepared statement.

@@ -187,7 +187,7 @@ public class StatementPoolingTest
             {
                 expectedName += "42";
             }
-            else
+            else if (usingEmbedded())
             {
                 expectedName += "40";
             }

@@ -23,7 +23,9 @@ package org.apache.derby.client.am;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.RowIdLifetime;
 import java.sql.SQLException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * A metadata object to be used with logical connections when connection
@@ -39,7 +41,7 @@ class LogicalDatabaseMetaData implements DatabaseMetaData {
     /** The associated logical connection. */
     private final LogicalConnection logicalCon;
     /** Error message destination, if any. */
-    final LogWriter logWriter;
+    private final LogWriter logWriter;
     /** Cached value for the driver major version. */
     private final int driverMajorVersion;
     /** Cached value for the driver minor version. */
@@ -818,5 +820,114 @@ class LogicalDatabaseMetaData implements DatabaseMetaData {
 
     public boolean supportsStatementPooling() throws SQLException {
         return getRealMetaDataObject().supportsStatementPooling();
+    }
+
+    // JDBC 4.0 methods
+
+    public boolean autoCommitFailureClosesAllResultSets()
+            throws SQLException {
+        return getRealMetaDataObject().autoCommitFailureClosesAllResultSets();
+    }
+
+    public ResultSet getClientInfoProperties()
+            throws SQLException {
+        return getRealMetaDataObject().getClientInfoProperties();
+    }
+
+    public ResultSet getFunctions(String catalog, String schemaPattern,
+                                  String functionNamePattern)
+            throws SQLException {
+        return getRealMetaDataObject().getFunctions(
+                catalog, schemaPattern, functionNamePattern);
+    }
+
+    public ResultSet getFunctionColumns(
+            String catalog, String schemaPattern,
+            String functionNamePattern,
+            String columnNamePattern) throws SQLException {
+
+        return getRealMetaDataObject().getFunctionColumns(
+                catalog, schemaPattern, functionNamePattern, columnNamePattern);
+    }
+
+    public RowIdLifetime getRowIdLifetime()
+            throws SQLException {
+        return getRealMetaDataObject().getRowIdLifetime();
+    }
+
+    public ResultSet getSchemas(String catalog, String schemaPattern)
+            throws SQLException {
+        return getRealMetaDataObject().getSchemas(catalog, schemaPattern);
+    }
+
+    public boolean isWrapperFor(Class<?> interfaces)
+            throws SQLException {
+        getRealMetaDataObject(); // Check for open connection.
+        return interfaces.isInstance(this);
+    }
+
+    public boolean supportsStoredFunctionsUsingCallSyntax()
+            throws SQLException {
+        return getRealMetaDataObject().supportsStoredFunctionsUsingCallSyntax();
+    }
+
+    public <T> T unwrap(Class<T> interfaces)
+            throws SQLException {
+        getRealMetaDataObject(); // Check for open connection.
+        try {
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw new SqlException(
+                                logWriter,
+                                new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                                interfaces
+                            ).getSQLException();
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.1 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /** See DatabaseMetaData javadoc */
+    public  boolean generatedKeyAlwaysReturned() throws SQLException
+    {
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
+            generatedKeyAlwaysReturned();
+    }
+
+    /**
+    * See DatabaseMetaData javadoc. Empty ResultSet because Derby does
+    * not support pseudo columns.
+    */
+    public ResultSet getPseudoColumns
+        ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
+        throws SQLException
+    {
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
+            getPseudoColumns(catalog,
+                             schemaPattern,
+                             tableNamePattern,
+                             columnNamePattern);
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.2 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /** See DatabaseMetaData javadoc */
+    public  long getMaxLogicalLobSize() throws SQLException
+    {
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
+            getMaxLogicalLobSize();
+    }
+    public  boolean supportsRefCursors() throws SQLException
+    {
+        return ((ClientDatabaseMetaData)getRealMetaDataObject()).
+            supportsRefCursors();
     }
 }

@@ -21,15 +21,24 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Executor;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -640,6 +649,241 @@ public class LogicalConnection implements Connection {
 
     ////////////////////////////////////////////////////////////////////
     //
+    // INTRODUCED BY JDBC 4.0 IN JAVA 6
+    //
+    ////////////////////////////////////////////////////////////////////
+    public Array createArrayOf(String typeName, Object[] elements)
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createArrayOf( typeName, elements );
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public Blob createBlob()
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createBlob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public Clob createClob()
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createClob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public NClob createNClob()
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createNClob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public SQLXML createSQLXML()
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createSQLXML();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes)
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.createStruct( typeName, attributes );
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * <code>getClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     * <code>getClientInfo</code> always returns an empty
+     * <code>Properties</code> object since Derby doesn't support
+     * ClientInfoProperties.
+     *
+     * @return an empty <code>Properties</code> object
+     * @exception SQLException if an error occurs
+     */
+    public Properties getClientInfo()
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.getClientInfo();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * <code>getClientInfo</code> forwards to
+     * <code>physicalConnection_</code>. Always returns a <code>null
+     * String</code> since Derby does not support
+     * ClientInfoProperties.
+     *
+     * @param name a property key to get <code>String</code>
+     * @return a property value <code>String</code>
+     * @exception SQLException if an error occurs
+     */
+    public String getClientInfo(String name)
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.getClientInfo(name);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * Checks if the connection has not been closed and is still valid.
+     * The validity is checked by running a simple query against the
+     * database.
+     *
+     * @param timeout The time in seconds to wait for the database
+     * operation used to validate the connection to complete. If the
+     * timeout period expires before the operation completes, this
+     * method returns false. A value of 0 indicates a timeout is not
+     * applied to the database operation.
+     * @return true if the connection is valid, false otherwise
+     * @throws SQLException if the call on the physical connection throws an
+     * exception.
+     */
+    synchronized public boolean isValid(int timeout) throws SQLException {
+        try
+        {
+            // Check if we have a underlying physical connection
+            if (physicalConnection_ == null) {
+                return false;
+            }
+            return physicalConnection_.isValid(timeout);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+
+    public boolean isWrapperFor(Class<?> interfaces)
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return interfaces.isInstance(this);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * <code>setClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     *
+     * @param properties a <code>Properties</code> object with the
+     * properties to set
+     * @exception SQLClientInfoException if an error occurs
+     */
+    public void setClientInfo(Properties properties)
+        throws SQLClientInfoException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            physicalConnection_.setClientInfo(properties);
+        } catch (SQLClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw new SQLClientInfoException
+            (sqle.getMessage(), sqle.getSQLState(),
+                    sqle.getErrorCode(),
+                    (new FailedProperties40(properties)).getProperties());
+        }
+    }
+
+    /**
+     * <code>setClientInfo</code> forwards to
+     * <code>physicalConnection_</code>.
+     *
+     * @param name a property key <code>String</code>
+     * @param value a property value <code>String</code>
+     * @exception SQLException if an error occurs
+     */
+    public void setClientInfo(String name, String value)
+        throws SQLClientInfoException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            physicalConnection_.setClientInfo(name, value);
+        } catch (SQLClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw new SQLClientInfoException
+            (sqle.getMessage(), sqle.getSQLState(),
+                    sqle.getErrorCode(),
+             new FailedProperties40
+             (FailedProperties40.makeProperties
+              (name,value)).getProperties());
+        }
+    }
+
+    public <T>T unwrap(Class<T> interfaces)
+        throws SQLException {
+        try
+        {
+            checkForNullPhysicalConnection();
+            // Derby does not implement non-standard methods on JDBC objects
+            try {
+                return interfaces.cast(this);
+            } catch (ClassCastException cce) {
+                throw new SqlException(null,
+                                       new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                                       interfaces).getSQLException();
+            }
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7
     //
     ////////////////////////////////////////////////////////////////////
@@ -671,5 +915,43 @@ public class LogicalConnection implements Connection {
             throw sqle;
         }
     }
-    
+
+    public  void    abort( Executor executor )  throws SQLException
+    {
+        try
+        {
+            if ( physicalConnection_ != null )
+            {
+                physicalConnection_.abort( executor );
+            }
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public int getNetworkTimeout() throws SQLException
+    {
+        try
+        {
+            checkForNullPhysicalConnection();
+            return physicalConnection_.getNetworkTimeout();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
+    {
+        try
+        {
+            checkForNullPhysicalConnection();
+            physicalConnection_.setNetworkTimeout( executor, milliseconds );
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
 }

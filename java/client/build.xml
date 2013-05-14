@@ -50,28 +50,6 @@
 <!-- compile classes  -->
 <target name="compile">
     <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.client.src.dir}"
-      excludes="**/*40.java,**/*42.java" 
-      destdir="${out.dir}">
-      <classpath>
-          <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <compilerarg value="-Xlint"/>
-    </javac>
-</target>
-
-<target name="compile_jdbc4">
-    <javac
       source="${compilerLevel16}"
       target="${compilerLevel16}"
       bootclasspath="${empty}"
@@ -83,7 +61,8 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      includes="**/*40.java" 
+      includes="**/*.java"
+      excludes="**/*42.java"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
@@ -115,7 +94,7 @@
 </target> 
   
 <!-- default target  -->
-  <target name="client" depends="checkVMLevel, compile, compile_jdbc4, compile_jdbc42"/>
+  <target name="client" depends="checkVMLevel, compile, compile_jdbc42"/>
 
   <target name="checkVMLevel">
     <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>

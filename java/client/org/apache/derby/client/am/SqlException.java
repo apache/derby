@@ -513,14 +513,6 @@ public class SqlException extends Exception implements Diagnosable {
             return new SqlException(logWriter, getMessage(), getSQLState(), getErrorCode()); // client error
         }
     }
-    
-    /**
-     * Sets the exceptionFactory to be used for creating SQLException
-     * @param factory SQLExceptionFactory
-     */
-    public static void setExceptionFactory (SQLExceptionFactory factory) {
-        exceptionFactory = factory;
-    }
 }
 
 // An intermediate exception encapsulation to provide code-reuse

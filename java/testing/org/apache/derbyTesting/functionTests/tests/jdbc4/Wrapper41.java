@@ -22,13 +22,12 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.SQLException;
-
-import org.apache.derby.impl.jdbc.EmbedResultSet40;
-import org.apache.derby.client.net.NetResultSet40;
-import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
-import org.apache.derby.client.am.ClientCallableStatement40;
+import org.apache.derby.client.am.ClientCallableStatement;
+import org.apache.derby.client.am.ClientResultSet;
+import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement40;
-import org.apache.derby.client.am.LogicalCallableStatement40;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
+import org.apache.derby.impl.jdbc.EmbedResultSet40;
 
 /**
  * A wrapper around the getObject() overloads added by JDBC 4.1.
@@ -44,11 +43,11 @@ public  class   Wrapper41
     ///////////////////////////////////////////////////////////////////////
 
     private EmbedResultSet40    _embedded;
-    private NetResultSet40      _netclient;
+    private ClientResultSet      _netclient;
     private EmbedCallableStatement40 _embedCallableStatement;
-    private ClientCallableStatement40 _callableStatement;
+    private ClientCallableStatement _callableStatement;
     private BrokeredCallableStatement40 _brokeredCallableStatement;
-    private LogicalCallableStatement40 _logicalCallableStatement;
+    private LogicalCallableStatement _logicalCallableStatement;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -61,9 +60,9 @@ public  class   Wrapper41
         if ( wrapped instanceof EmbedResultSet40 ) { _embedded = (EmbedResultSet40) wrapped; }
         else if ( wrapped instanceof EmbedCallableStatement40 ) { _embedCallableStatement = (EmbedCallableStatement40) wrapped; }
         else if ( wrapped instanceof BrokeredCallableStatement40 ) { _brokeredCallableStatement = (BrokeredCallableStatement40) wrapped; }
-        else if ( wrapped instanceof NetResultSet40 ) { _netclient = (NetResultSet40) wrapped; }
-        else if ( wrapped instanceof ClientCallableStatement40 ) { _callableStatement = (ClientCallableStatement40) wrapped; }
-        else if ( wrapped instanceof LogicalCallableStatement40 ) { _logicalCallableStatement = (LogicalCallableStatement40) wrapped; }
+        else if ( wrapped instanceof ClientResultSet ) { _netclient = (ClientResultSet) wrapped; }
+        else if ( wrapped instanceof ClientCallableStatement ) { _callableStatement = (ClientCallableStatement) wrapped; }
+        else if ( wrapped instanceof LogicalCallableStatement ) { _logicalCallableStatement = (LogicalCallableStatement) wrapped; }
         else { throw nothingWrapped(); }
     }
     

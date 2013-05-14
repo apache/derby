@@ -18,32 +18,106 @@
    limitations under the License.
 
 */
-
 package org.apache.derby.client.am;
 
-import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.error.ExceptionSeverity;
+
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.SQLInvalidAuthorizationSpecException;
+import java.sql.SQLNonTransientConnectionException;
+import java.sql.SQLSyntaxErrorException;
+import java.sql.SQLTimeoutException;
+import java.sql.SQLTransactionRollbackException;
+
 
 /**
- * class to create SQLException
+ * SQLException factory class to create jdbc 40 exception classes
  */
 
-public class SQLExceptionFactory {     
-     
-    public static SQLException notImplemented (String feature) {
-        SqlException sqlException = new SqlException (null, 
-                new ClientMessageId (SQLState.NOT_IMPLEMENTED), feature);
-        return sqlException.getSQLException();
-    }
+public class SQLExceptionFactory {
     
+    // Important DRDA SQL States, from DRDA v3 spec, Section 8.2
+    // We have to consider these as well as the standard SQLState classes
+    // when choosing the right exception subclass
+    private static final String DRDA_CONVERSATION_TERMINATED    = "58009";    
+    private static final String DRDA_COMMAND_NOT_SUPPORTED      = "58014";
+    private static final String DRDA_OBJECT_NOT_SUPPORTED       = "58015";
+    private static final String DRDA_PARAM_NOT_SUPPORTED        = "58016";
+    private static final String DRDA_VALUE_NOT_SUPPORTED        = "58017";
+    private static final String DRDA_SQLTYPE_NOT_SUPPORTED      = "56084";
+    private static final String DRDA_CONVERSION_NOT_SUPPORTED   = "57017";
+    private static final String DRDA_REPLY_MSG_NOT_SUPPORTED    = "58018";
+       
     /**
-     * creates SQLException initialized with all the params received from the 
-     * caller. This method will be overwritten to support jdbc version specific 
-     * exception class.
+     * creates jdbc4.0 SQLException and its subclass based on sql state
+     * 
+     * @param message description of the 
+     * @param sqlState 
+     * @param errCode derby error code
      */
     public SQLException getSQLException (String message, String sqlState, 
-            int errCode) {
-        return new SQLException (message, sqlState, errCode);           
-    }    
+                                                            int errCode) { 
+        SQLException ex = null;
+        if (sqlState == null) {
+            ex = new SQLException(message, sqlState, errCode); 
+        } else if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
+            //none of the sqlstate supported by derby belongs to
+            //TransientConnectionException. DERBY-3075
+            ex = new SQLNonTransientConnectionException(message, sqlState, errCode);
+        } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
+            ex = new SQLDataException(message, sqlState, errCode);
+        } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
+            ex = new SQLIntegrityConstraintViolationException(message, sqlState,
+                    errCode);
+        } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
+            ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
+                    errCode);
+        } else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX)) {
+            ex = new SQLTransactionRollbackException(message, sqlState,
+                    errCode);
+        } else if (sqlState.startsWith(SQLState.LSE_COMPILATION_PREFIX)) {
+            ex = new SQLSyntaxErrorException(message, sqlState, errCode);
+        } else if (
+            sqlState.startsWith (SQLState.UNSUPPORTED_PREFIX)   ||
+            sqlState.equals(DRDA_COMMAND_NOT_SUPPORTED)         ||
+            sqlState.equals(DRDA_OBJECT_NOT_SUPPORTED)          ||
+            sqlState.equals(DRDA_PARAM_NOT_SUPPORTED)           ||
+            sqlState.equals(DRDA_VALUE_NOT_SUPPORTED)           ||
+            sqlState.equals(DRDA_SQLTYPE_NOT_SUPPORTED)         ||
+            sqlState.equals(DRDA_REPLY_MSG_NOT_SUPPORTED)           ) {
+            ex = new SQLFeatureNotSupportedException(message, sqlState, 
+                    errCode);
+        } else if
+                (
+                 sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5)) ||
+                 sqlState.equals(SQLState.LOGIN_TIMEOUT.substring(0, 5))
+                 ) {
+            ex = new SQLTimeoutException(message, sqlState, errCode);
+        }
+        // If the sub-class cannot be determined based on the SQLState, use
+        // the severity instead.
+        else if (errCode >= ExceptionSeverity.SESSION_SEVERITY) {
+            ex = new SQLNonTransientConnectionException(
+                    message, sqlState, errCode);
+        } else if (errCode >= ExceptionSeverity.TRANSACTION_SEVERITY) {
+            ex = new SQLTransactionRollbackException(
+                    message, sqlState, errCode);
+        }
+        // If none of the above fit, return a plain SQLException.
+        else {
+            ex = new SQLException(message, sqlState, errCode); 
+        }
+        return ex;
+    }
+
+    public static SQLFeatureNotSupportedException
+            notImplemented(String feature) {
+        SqlException sqlException = new SqlException(null,
+                new ClientMessageId(SQLState.NOT_IMPLEMENTED), feature);
+        return (SQLFeatureNotSupportedException) sqlException.getSQLException();
+    }
 }
- 

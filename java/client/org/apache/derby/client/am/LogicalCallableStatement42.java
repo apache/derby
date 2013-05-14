@@ -31,7 +31,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
  * @see LogicalCallableStatement
  * @see #isClosed
  */
-public class LogicalCallableStatement42 extends LogicalCallableStatement40
+public class LogicalCallableStatement42 extends LogicalCallableStatement
 {
     /**
      * Creates a new logical callable statement.

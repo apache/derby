@@ -26,7 +26,7 @@ import java.sql.SQLType;
 import org.apache.derby.client.ClientPooledConnection;
 
 
-public class ClientCallableStatement42 extends ClientCallableStatement40
+public class ClientCallableStatement42 extends ClientCallableStatement
 {    
     /**
      * Calls the superclass constructor and passes the parameters

@@ -28,8 +28,10 @@ import java.sql.DriverPropertyInfo;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
@@ -60,18 +62,7 @@ public class ClientDriver implements Driver {
 
     static
     {
-        try {
-            //
-            // We'd rather load this slightly more capable driver.
-            // But if the vm level doesn't support it, then we fall
-            // back on the JDBC3 level driver.
-            //
-            Class.forName( "org.apache.derby.jdbc.ClientDriver40" );
-        }
-        catch (Throwable e)
-        {
-            registerMe( new ClientDriver() );
-        }
+        registerMe(new ClientDriver());
     }
 
     protected static void   registerMe( ClientDriver me )
@@ -295,6 +286,22 @@ public class ClientDriver implements Driver {
         return Configuration.jdbcCompliant;
     }
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        getFactory();
+        throw (SQLFeatureNotSupportedException)
+            (
+             new SqlException( null, new ClientMessageId(SQLState.NOT_IMPLEMENTED), "getParentLogger" )
+             ).getSQLException();
+    }
+
     // ----------------helper methods---------------------------------------------
 
     // Tokenize one of the following:
@@ -425,7 +432,7 @@ public class ClientDriver implements Driver {
      *Currently it returns either
      *ClientJDBCObjectFactoryImpl
      *(or)
-     *ClientJDBCObjectFactoryImpl40
+     *ClientJDBCObjectFactoryImpl42
      */
     
     public static ClientJDBCObjectFactory getFactory() {
@@ -435,8 +442,6 @@ public class ClientDriver implements Driver {
             return factoryObject;
         if (Configuration.supportsJDBC42()) {
             factoryObject = createJDBC42FactoryImpl();
-        } else if (Configuration.supportsJDBC40()) {
-            factoryObject = createJDBC40FactoryImpl();
         } else {
             factoryObject = createDefaultFactoryImpl();
         }
@@ -505,6 +510,3 @@ public class ClientDriver implements Driver {
     }
 
 }
-
-
-

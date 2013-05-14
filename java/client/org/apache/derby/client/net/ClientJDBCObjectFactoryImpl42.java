@@ -48,7 +48,7 @@ import org.apache.derby.client.am.stmtcache.StatementKey;
  * Implements the ClientJDBCObjectFactory interface and returns the JDBC 4.2
  * specific classes.
  */
-public class ClientJDBCObjectFactoryImpl42 extends ClientJDBCObjectFactoryImpl40
+public class ClientJDBCObjectFactoryImpl42 extends ClientJDBCObjectFactoryImpl
 {
     /**
      * This method is overridden on JVM 8 to take advantage of long

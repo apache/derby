@@ -27,8 +27,8 @@ import java.util.concurrent.Executor;
 
 import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.iapi.jdbc.BrokeredConnection40;
-import org.apache.derby.client.net.NetConnection40;
-import org.apache.derby.client.am.LogicalConnection40;
+import org.apache.derby.client.am.LogicalConnection;
+import org.apache.derby.client.net.NetConnection;
 
 /**
  * A wrapper around the abort(Executor) method added by JDBC 4.1.
@@ -44,9 +44,9 @@ public  class   Wrapper41Conn
     ///////////////////////////////////////////////////////////////////////
 
     private EmbedConnection40    _embedded;
-    private NetConnection40      _netclient;
+    private NetConnection      _netclient;
     private BrokeredConnection40 _brokeredConnection;
-    private LogicalConnection40 _logicalConnection;
+    private LogicalConnection _logicalConnection;
     
     ///////////////////////////////////////////////////////////////////////
     //
@@ -58,8 +58,8 @@ public  class   Wrapper41Conn
     {
         if ( wrapped instanceof EmbedConnection40 ) { _embedded = (EmbedConnection40) wrapped; }
         else if ( wrapped instanceof BrokeredConnection40 ) { _brokeredConnection = (BrokeredConnection40) wrapped; }
-        else if ( wrapped instanceof NetConnection40 ) { _netclient = (NetConnection40) wrapped; }
-        else if ( wrapped instanceof LogicalConnection40 ) { _logicalConnection = (LogicalConnection40) wrapped; }
+        else if ( wrapped instanceof NetConnection) { _netclient = (NetConnection) wrapped; }
+        else if ( wrapped instanceof LogicalConnection ) { _logicalConnection = (LogicalConnection) wrapped; }
         else { throw nothingWrapped(); }
     }
     
