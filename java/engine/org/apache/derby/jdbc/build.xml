@@ -33,48 +33,8 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="jdbc" depends="checkVMLevel,compile_jdbc3,compile_jdbc4,compile_jdbc42"/>
+  <target name="jdbc" depends="checkVMLevel,compile_jdbc4,compile_jdbc42"/>
 
-<!-- build targets which need JDBC 3.0 libs in the end-->
-
-  <target name="compile_jdbc3">
-    <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/jdbc/InternalDriver.java"/>
-      <include name="${derby.dir}/jdbc/AutoloadedDriver.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
-      <include name="${derby.dir}/jdbc/ReferenceableDataSource.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedDataSourceInterface.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedXADataSourceInterface.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedConnectionPoolDataSourceInterface.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedBaseDataSource.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedDataSource.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedConnectionPoolDataSource.java"/>
-      <include name="${derby.dir}/jdbc/EmbedPooledConnection.java"/>
-      <include name="${derby.dir}/jdbc/Driver20.java"/>
-      <include name="${derby.dir}/jdbc/Driver30.java"/>
-      <include name="${derby.dir}/jdbc/EmbedXAConnection.java"/>
-      <include name="${derby.dir}/jdbc/EmbeddedXADataSource.java"/>
-      <include name="${derby.dir}/jdbc/XATransactionState.java"/>
-      <include name="${derby.dir}/jdbc/XAStatementControl.java"/>
-      <include name="${derby.dir}/jdbc/ResourceAdapterImpl.java"/>
-   </javac>  
-  </target>
-  
   <target name="compile_jdbc4" >
     <javac
       source="${compilerLevel16}"
@@ -92,9 +52,10 @@
         <classpath>
             <pathelement path="${java16compile.classpath}"/>
         </classpath>
-        <include name="${derby.dir}/jdbc/*40.java"/>
+        <include name="${derby.dir}/jdbc/*.java"/>
+        <exclude name="${derby.dir}/jdbc/*42.java"/>
     </javac>
-  </target> 
+  </target>
 
   <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
     <javac
