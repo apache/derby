@@ -21,37 +21,40 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 import javax.sql.XADataSource;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * <p>
  * This datasource is suitable for a client/server use of Derby,
  * running on the following platforms:
+ * </p>
+ *
  * <p>
  * <ul>
- *   <li>Java SE 7 (JDBC 4.1) and
- *   <li>full Java SE 8 (JDBC 4.2).
+ *   <li>Java SE 6 (JDBC 4.0) and</li>
+ *   <li>Java SE 7 (JDBC 4.1) and</li>
+ *   <li>full Java SE 8 (JDBC 4.2).</li>
  * </ul>
+ * </p>
+ *
+ * <p>
+ * Those platforms are also supported by {@code ClientXADataSource}
+ * now, and applications should use {@code ClientXADataSource}
+ * instead of this class. This class is provided only for backward
+ * compatibility and may be removed in later versions of Derby.
+ * </p>
+ *
  * <p>
  * Use BasicClientXADataSource40 if your application runs on Java 8
  * Compact Profile 2.
- * <p>
- * Use ClientXADataSource if your application runs on the following
- * platforms:
- * <p>
- * <ul>
- *   <li> JDBC 4.0 - Java SE 6
- *   <li> JDBC 3.0 - J2SE 5.0
- * </ul>
+ * </p>
+ *
  * <p>
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource
  * interface is typically registered with a JNDI service provider.
- * <P>
+ * </p>
+ *
  * <P>ClientXADataSource40 is serializable and referenceable.</p>
  *
  * <P>See ClientDataSource40 for DataSource properties.</p>
@@ -60,20 +63,4 @@ public class ClientXADataSource40 extends ClientXADataSource
     implements XADataSource /* compile-time check for 4.1 extension */
 {
    private static final long serialVersionUID = -3463444509507830926L;
-
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        throw (SQLFeatureNotSupportedException)
-            (
-             new SqlException( null, new ClientMessageId(SQLState.NOT_IMPLEMENTED), "getParentLogger" )
-             ).getSQLException();
-    }
-    
 }

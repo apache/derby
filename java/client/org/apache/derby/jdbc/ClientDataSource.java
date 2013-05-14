@@ -23,8 +23,7 @@ package org.apache.derby.jdbc;
 
 /**
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
- * If running on Java SE 7 or higher, consider a more capable data source.
+ * running on full Java SE 6, 7 or 8, corresponding to JDBC 4.0, 4.1 and 4.2.
  * <p/>
  * ClientDataSource is a simple data source implementation
  * that can be used for establishing connections in a
@@ -80,7 +79,7 @@ package org.apache.derby.jdbc;
  * it's own private <code>password</code> property.
  * <p/>
  * The specified password, along with the user, is validated by DERBY.
- * This property can be overwritten by specifing
+ * This property can be overwritten by specifying
  * the password parameter on the DataSource.getConnection() method call.
  * <p/>
  * This password property is not declared transient, and therefore

@@ -25,9 +25,9 @@ import java.sql.SQLException;
 import javax.sql.XAConnection;
 
 /**
+ * <p>
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
- * If running on Java SE 7 or higher, consider a more capable data source.
+ * running on full Java SE 6, 7 or 8, corresponding to JDBC 4.0, 4.1 and 4.2.
  * </p>
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource
@@ -36,8 +36,9 @@ import javax.sql.XAConnection;
  * ClientXADataSource automatically supports the correct JDBC specification version
  * for the Java Virtual Machine's environment.
  * <UL>
- * <LI> JDBC 4.0 - Java SE 6
- * <LI> JDBC 3.0 - J2SE 5.0
+ * <LI> JDBC 4.2 - Java SE 8 </LI>
+ * <LI> JDBC 4.1 - Java SE 7 </LI>
+ * <LI> JDBC 4.0 - Java SE 6 </LI>
  * </UL>
  *
  * <P>ClientXADataSource is serializable and referenceable.</p>

@@ -31,15 +31,18 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.LogWriter;
+import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
@@ -1236,6 +1239,18 @@ public abstract class ClientBaseDataSourceRoot implements
         }
     }
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public final Logger getParentLogger()
+            throws SQLFeatureNotSupportedException {
+        throw SQLExceptionFactory.notImplemented("getParentLogger");
+    }
+
+    // Helper methods
 
     protected final PooledConnection getPooledConnectionMinion()
             throws SQLException {

@@ -21,18 +21,13 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This datasource is suitable for client/server use of Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
- * BasicClientDataSource40 is similar to ClientDataSource40 except it
+ * BasicClientDataSource40 is similar to ClientDataSource except it
  * can not be used with JNDI, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
  */
@@ -55,21 +50,5 @@ public class BasicClientDataSource40
      */
     public BasicClientDataSource40() {
         super();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        SqlException e = new SqlException(
-                null,
-                new ClientMessageId(SQLState.NOT_IMPLEMENTED),
-                "getParentLogger");
-
-        throw (SQLFeatureNotSupportedException)e.getSQLException();
     }
 }

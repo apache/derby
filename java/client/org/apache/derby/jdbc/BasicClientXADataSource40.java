@@ -29,7 +29,7 @@ import javax.sql.XADataSource;
  * This datasource is suitable for client/server use of Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
- * Similar to ClientXADataSource40 except it does not support JNDI,
+ * Similar to ClientXADataSource except it does not support JNDI,
  * i.e. it does not implement {@code javax.naming.Referenceable}.
  */
 public class BasicClientXADataSource40

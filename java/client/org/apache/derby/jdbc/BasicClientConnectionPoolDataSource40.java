@@ -34,7 +34,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
  * BasicClientConnectionPoolDataSource40 is similar to
- * ClientConnectionPoolDataSource40 except that it does not support JNDI,
+ * ClientConnectionPoolDataSource except that it does not support JNDI,
  * i.e. it does not implement {@code javax.naming.Referenceable}.
  *
  * @see ClientConnectionPoolDataSource40

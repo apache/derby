@@ -21,32 +21,34 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
+ * <p>
  * This datasource is suitable for a client/server use of Derby,
  * running on the following platforms:
+ * </p>
+ *
  * <p>
  * <ul>
- *   <li>Java SE 7 (JDBC 4.1) and
- *   <li>full Java SE 8 (JDBC 4.2).
+ *   <li>Java SE 6 (JDBC 4.0) and</li>
+ *   <li>Java SE 7 (JDBC 4.1) and</li>
+ *   <li>full Java SE 8 (JDBC 4.2).</li>
  * </ul>
+ * </p>
+ *
+ * <p>
+ * Those platforms are also supported by {@code ClientXADataSource}
+ * now, and applications should use {@code ClientXADataSource}
+ * instead of this class. This class is provided only for backward
+ * compatibility and may be removed in later versions of Derby.
+ * </p>
+ *
  * <p>
  * Use BasicClientDataSource40 if your application runs on Java 8
  * Compact Profile 2.
- * <p>
- * Use ClientDataSource if your application runs on the following
- * platforms:
- * <p>
- * <ul>
- *  <li> JDBC 4.0 - Java SE 6
- *  <li> JDBC 3.0 - J2SE 5.0
- * </ul>
+ * </p>
+ *
  * <p>
  * ClientDataSource40 is a simple data source implementation
  * that can be used for establishing connections in a
@@ -54,6 +56,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * The class ClientConnectionPoolDataSource40 can be used in a connection pooling environment,
  * and the class ClientXADataSource40 can be used in a distributed, and pooling
  * environment.
+ * </p>
  *
  * <p>The example below registers a DNC data source object with a JNDI naming service.
  * <pre>
@@ -119,21 +122,5 @@ public class ClientDataSource40 extends ClientDataSource
     
     public ClientDataSource40() {
         super();
-    }   
-    
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        throw (SQLFeatureNotSupportedException)
-            (
-             new SqlException( null, new ClientMessageId(SQLState.NOT_IMPLEMENTED), "getParentLogger" )
-             ).getSQLException();
     }
-    
 }
