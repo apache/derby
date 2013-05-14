@@ -266,7 +266,7 @@ public class XML {
         //             .getDOMImplementation().getFeature("+XPath", "3.0");
         //
         try {
-            Class factoryClass =
+            Class<?> factoryClass =
                     Class.forName("javax.xml.parsers.DocumentBuilderFactory");
 
             Method newFactory =
@@ -279,7 +279,7 @@ public class XML {
 
             Object builder = newBuilder.invoke(factory, new Object[0]);
 
-            Class builderClass =
+            Class<?> builderClass =
                     Class.forName("javax.xml.parsers.DocumentBuilder");
 
             Method getImpl = builderClass.getMethod(
@@ -287,7 +287,8 @@ public class XML {
 
             Object impl = getImpl.invoke(builder, new Object[0]);
 
-            Class domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
+            Class<?> domImplClass =
+                    Class.forName("org.w3c.dom.DOMImplementation");
 
             Method getFeature = domImplClass.getMethod(
                     "getFeature", new Class[] {String.class, String.class});
@@ -308,7 +309,7 @@ public class XML {
 
     private static boolean checkJAXPImplementation() {
         try {
-            Class factoryClass =
+            Class<?> factoryClass =
                     Class.forName("javax.xml.parsers.DocumentBuilderFactory");
             Method newFactory =
                     factoryClass.getMethod("newInstance", new Class[0]);
@@ -341,10 +342,10 @@ public class XML {
             return null;
 
         try {
-            Class   jaxpFinderClass = Class.forName( "org.apache.derbyTesting.junit.JAXPFinder" );
-            Method  locatorMethod = jaxpFinderClass.getDeclaredMethod( "getJAXPParserLocation", null );
+            Class<?> jaxpFinderClass = Class.forName("org.apache.derbyTesting.junit.JAXPFinder");
+            Method locatorMethod = jaxpFinderClass.getDeclaredMethod("getJAXPParserLocation");
 
-            return (String) locatorMethod.invoke(  null, null );
+            return (String) locatorMethod.invoke(null);
         }
         catch (Exception e)
         {

@@ -379,7 +379,7 @@ public class IndexStatsUtil {
      * @return Mappings from conglomerate id to conglomerate name.
      * @throws SQLException if accessing the system tables fail
      */
-    private Map getIdToNameMap()
+    private Map<String, String> getIdToNameMap()
             throws SQLException {
         if (psGetIdToNameMapConglom == null) {
             psGetIdToNameMapConglom = con.prepareStatement(
@@ -390,7 +390,7 @@ public class IndexStatsUtil {
             psGetIdToNameMapTable = con.prepareStatement(
                     "select TABLEID, TABLENAME from SYS.SYSTABLES");
         }
-        Map map = new HashMap();
+        Map<String, String> map = new HashMap<String, String>();
         ResultSet rs = psGetIdToNameMapConglom.executeQuery();
         while (rs.next()) {
             map.put(rs.getString(1), rs.getString(2));
@@ -412,23 +412,22 @@ public class IndexStatsUtil {
      * @return A list of statistics objects
      * @throws SQLException if accessing the result set fails
      */
-    private IdxStats[] buildStatisticsList(ResultSet rs, Map idToName)
+    private IdxStats[] buildStatisticsList(
+            ResultSet rs, Map<String, String> idToName)
             throws SQLException {
-        List stats = new ArrayList();
+        List<IdxStats> stats = new ArrayList<IdxStats>();
         while (rs.next()) {
             // NOTE: Bad practice to call rs.getString(X) twice, but it works
             //       for Derby with the string type...
             stats.add(new IdxStats(rs.getString(1), rs.getString(2),
-                    (String)idToName.get(rs.getString(2)),
+                    idToName.get(rs.getString(2)),
                     rs.getString(3),
-                    (String)idToName.get(rs.getString(3)),
+                    idToName.get(rs.getString(3)),
                     rs.getTimestamp(4), rs.getInt(7),
                     rs.getString(8)));
         }
         rs.close();
-        IdxStats[] s = new IdxStats[stats.size()];
-        stats.toArray(s);
-        return s;
+        return stats.toArray(new IdxStats[stats.size()]);
     }
 
     /**
@@ -485,13 +484,13 @@ public class IndexStatsUtil {
      */
     private void awaitChange(IdxStats[] current, long timeout)
             throws SQLException {
-        Set oldStats = new HashSet(Arrays.asList(current));
-        Set newStats = null;
+        Set<IdxStats> oldStats = new HashSet<IdxStats>(Arrays.asList(current));
+        Set<IdxStats> newStats = null;
         long start = System.currentTimeMillis();
         // Make sure we run at least once.
         while (System.currentTimeMillis() - start < timeout ||
                 newStats == null) {
-            newStats = new HashSet(Arrays.asList(getStats()));
+            newStats = new HashSet<IdxStats>(Arrays.asList(getStats()));
             newStats.retainAll(oldStats);
             if (newStats.isEmpty()) {
                 return;

@@ -43,8 +43,7 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
  * scenarios, it complicates things quite a bit. Generating the JARs when
  * testing on trunk seems like an acceptable price to pay.
  */
-public class DerbyDistribution
-        implements Comparable {
+public class DerbyDistribution implements Comparable<DerbyDistribution> {
 
     private static File[] EMPTY_FILE_ARRAY = new File[] {};
     public static final String JAR_RUN = "derbyrun.jar";
@@ -160,22 +159,6 @@ public class DerbyDistribution
     /** Returns the version of this distribution. */
     public DerbyVersion getVersion() {
         return version;
-    }
-
-    /**
-     * Orders this distribution and the other distribution based on the version.
-     * <p>
-     * <em>Implementation note</em>: Remove this method when we can use
-     * Java SE 5.0 features.
-     *
-     * @param o the other distribution
-     * @return {@code 1} if this version is newer, {@code 0} if both
-     *      distributions have the same version, and {@code -1} if the other
-     *      version is newer.
-     * @see #compareTo(org.apache.derbyTesting.junit.DerbyDistribution) 
-     */
-    public int compareTo(Object o) {
-        return compareTo((DerbyDistribution)o);
     }
 
     /**
@@ -312,7 +295,7 @@ public class DerbyDistribution
                                                 DerbyVersion version) {
         File[] productionJars = getProductionJars(dir);
         File[] testingJars = getTestingJars(dir);
-        List tmpJars = new ArrayList();
+        List<File> tmpJars = new ArrayList<File>();
         tmpJars.addAll(Arrays.asList(productionJars));
         tmpJars.addAll(Arrays.asList(testingJars));
         if (hasRequiredJars(tmpJars)) {

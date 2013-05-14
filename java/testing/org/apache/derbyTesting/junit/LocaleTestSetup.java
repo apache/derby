@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.junit;
 
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Locale;
 
 import junit.extensions.TestSetup;
@@ -43,27 +44,22 @@ public class LocaleTestSetup extends TestSetup {
 	 * Set up the new locale for the test
 	 */
 	protected void setUp() {
-		AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
-            public Object run() {
-            	Locale.setDefault(newLocale);
-                return null;
-            }
-        }
-        );
+        setDefaultLocale(newLocale);
 	}
 	
 	/**
 	 * Revert the locale back to the old one
 	 */
 	protected void tearDown() {
-		AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
-            public Object run() {
-            	Locale.setDefault(oldLocale);
+        setDefaultLocale(oldLocale);
+	}
+
+    private static void setDefaultLocale(final Locale locale) {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                Locale.setDefault(locale);
                 return null;
             }
-        }
-        );
-	}
+        });
+    }
 }

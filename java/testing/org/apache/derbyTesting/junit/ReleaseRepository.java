@@ -114,7 +114,7 @@ public class ReleaseRepository {
      * List of distributions found in the repository. If {@code null}, the
      * repository hasn't been initialized.
      */
-    private List dists;
+    private List<DerbyDistribution> dists;
 
     /**
      * Creates a new, empty repository.
@@ -171,7 +171,7 @@ public class ReleaseRepository {
         traceit("{ReleaseRepository} " + tmpCandDists.length +
                 " candidate releases at " + reposLocation);
 
-        dists = new ArrayList(tmpCandDists.length);
+        dists = new ArrayList<DerbyDistribution>(tmpCandDists.length);
         for (int i=0; i < tmpCandDists.length; i++) {
             File dir = tmpCandDists[i];
             // We extract the version from the directory name.

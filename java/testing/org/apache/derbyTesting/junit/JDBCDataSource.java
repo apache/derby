@@ -21,11 +21,10 @@ package org.apache.derbyTesting.junit;
 
 import java.lang.reflect.Method;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import javax.sql.DataSource;
 
 import junit.framework.Assert;
 
@@ -113,9 +112,9 @@ public class JDBCDataSource {
      * Create a HashMap with the set of Derby DataSource
      * Java bean properties corresponding to the configuration.
      */
-    static HashMap getDataSourceProperties(TestConfiguration config) 
+    static HashMap<String, Object> getDataSourceProperties(TestConfiguration config)
     {
-        HashMap beanProperties = new HashMap();
+        HashMap<String, Object> beanProperties = new HashMap<String, Object>();
         
         if (!config.getJDBCClient().isEmbedded()) {
             beanProperties.put("serverName", config.getHostName());
@@ -145,11 +144,9 @@ public class JDBCDataSource {
      */
     static javax.sql.DataSource getDataSourceObject(String classname, HashMap beanProperties)
     {
-        ClassLoader contextLoader =
-            (ClassLoader) AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
+        ClassLoader contextLoader = AccessController.doPrivileged(
+                new PrivilegedAction<ClassLoader>() {
+            public ClassLoader run() {
                 return Thread.currentThread().getContextClassLoader();
             }
         });

@@ -73,6 +73,7 @@
         <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
+      <compilerarg value="-Xlint"/>
     </javac>
   </target>
 

@@ -21,7 +21,6 @@ package org.apache.derbyTesting.junit;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -232,7 +231,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         // different schemas.
         for (int count = 0; count < 5; count++) {
             // Fetch all the user schemas into a list
-            List schemas = new ArrayList();
+            List<String> schemas = new ArrayList<String>();
             ResultSet rs = dmd.getSchemas();
             while (rs.next()) {
     
@@ -250,8 +249,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     
             // DROP all the user schemas.
             sqle = null;
-            for (Iterator i = schemas.iterator(); i.hasNext();) {
-                String schema = (String) i.next();
+            for (String schema : schemas) {
                 try {
                     JDBC.dropSchema(dmd, schema);
                 } catch (SQLException e) {
@@ -291,7 +289,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         // Get the users
         Statement stm = conn.createStatement();
         ResultSet rs = stm.executeQuery( "select username from sys.sysusers" );
-        ArrayList   users = new ArrayList();
+        ArrayList<String> users = new ArrayList<String>();
         
         while ( rs.next() ) { users.add( rs.getString( 1 ) ); }
         rs.close();

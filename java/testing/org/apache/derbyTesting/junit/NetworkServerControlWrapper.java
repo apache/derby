@@ -58,22 +58,22 @@ public class NetworkServerControlWrapper {
     NetworkServerControlWrapper()
             throws Exception {
         // Try to load the NetworkServerControl class.
-        Class clazzSC = null;
+        Class<?> clazzSC = null;
         try {
             clazzSC =
                     Class.forName("org.apache.derby.drda.NetworkServerControl");
         } catch (ClassNotFoundException cnfe) {
             BaseTestCase.fail("No runtime support for network server", cnfe);
         }
-        Class clazzTS = Class.forName(
+        Class<?> clazzTS = Class.forName(
                 "org.apache.derbyTesting.junit.NetworkServerTestSetup");
-        Method m = clazzTS.getMethod("getNetworkServerControl", null);
+        Method m = clazzTS.getMethod("getNetworkServerControl");
         // Invoke method to obtain the NSC instance.
-        this.ctrl = m.invoke(null, null);
+        this.ctrl = m.invoke(null);
 
         // Create the NSC method objects.
-        METHODS[PING] = clazzSC.getMethod("ping", null);
-        METHODS[SHUTDOWN] = clazzSC.getMethod("shutdown", null);
+        METHODS[PING] = clazzSC.getMethod("ping");
+        METHODS[SHUTDOWN] = clazzSC.getMethod("shutdown");
         METHODS[START] = clazzSC.getMethod(
                 "start", new Class[] {PrintWriter.class});
     }

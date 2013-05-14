@@ -21,12 +21,13 @@ package org.apache.derbyTesting.junit;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 /**
@@ -157,8 +158,9 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            HashMap hm = DataSourceConnector.makeCreateDBAttributes( config );
-            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            HashMap<String, Object> hm =
+                    DataSourceConnector.makeCreateDBAttributes( config );
+            DataSourceConnector.copyProperties(connectionProperties, hm);
             ConnectionPoolDataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getPooledConnection(user, password).getConnection(); 

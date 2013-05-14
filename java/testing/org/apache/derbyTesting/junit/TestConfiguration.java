@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import junit.extensions.TestSetup;
@@ -183,15 +183,8 @@ public final class TestConfiguration {
         if (!assumeHarness) {
             final   File dsh = new File("system");
 
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    BaseTestCase.setSystemProperty("derby.system.home",
-                                                   dsh.getAbsolutePath());
-                    return null;
-                }
-            }
-             );            
+            BaseTestCase.setSystemProperty(
+                    "derby.system.home", dsh.getAbsolutePath());
         }
      }
     
@@ -200,8 +193,9 @@ public final class TestConfiguration {
      * allow the potential for multiple tests to be running
      * concurrently with different configurations.
      */
-    private static final ThreadLocal CURRENT_CONFIG = new ThreadLocal() {
-        protected Object initialValue() {
+    private static final ThreadLocal<TestConfiguration>
+            CURRENT_CONFIG = new ThreadLocal<TestConfiguration>() {
+        protected TestConfiguration initialValue() {
             return DEFAULT_CONFIG;
         }
     };
@@ -450,10 +444,9 @@ public final class TestConfiguration {
      * A comparator that orders {@code TestCase}s lexicographically by
      * their names.
      */
-    private static final Comparator TEST_ORDERER = new Comparator() {
-        public int compare(Object o1, Object o2) {
-            TestCase t1 = (TestCase) o1;
-            TestCase t2 = (TestCase) o2;
+    private static final Comparator<TestCase> TEST_ORDERER =
+            new Comparator<TestCase>() {
+        public int compare(TestCase t1, TestCase t2) {
             return t1.getName().compareTo(t2.getName());
         }
     };
@@ -467,7 +460,13 @@ public final class TestConfiguration {
      */
     public static Test orderedSuite(Class testClass) {
         // Extract all tests from the test class and order them.
-        ArrayList tests = Collections.list(new TestSuite(testClass).tests());
+        ArrayList<TestCase> tests = new ArrayList<TestCase>();
+
+        Enumeration e = new TestSuite(testClass).tests();
+        while (e.hasMoreElements()) {
+            tests.add((TestCase) e.nextElement());
+        }
+
         Collections.sort(tests, TEST_ORDERER);
 
         // Build a new test suite with the tests in lexicographic order.
@@ -1329,7 +1328,7 @@ public final class TestConfiguration {
         // If this assert will make failures it might be safely removed
         // since having more physical databases accessible throught the same
         // logical database name will access only the last physical database
-        Assert.assertTrue(logicalDbMapping.put(logicalDbName, dbName) == null);
+        Assert.assertNull(logicalDbMapping.put(logicalDbName, dbName));
 
         if (defaultDb) {
             this.defaultDbName = dbName;
@@ -1419,13 +1418,12 @@ public final class TestConfiguration {
      */
     private static final Properties getSystemProperties() {
         // Fetch system properties in a privileged block.
-        Properties sysProps = (Properties)AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
-                        return System.getProperties();
-                    }
-                });
-        return sysProps;
+        return AccessController.doPrivileged(
+                new PrivilegedAction<Properties>() {
+            public Properties run() {
+                return System.getProperties();
+            }
+        });
     }
 
     /**
@@ -1896,9 +1894,9 @@ public final class TestConfiguration {
             NetworkServerControlWrapper networkServer =
                     new NetworkServerControlWrapper();
 
- 	    serverOutput = (FileOutputStream)
-            AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
+ 	    serverOutput = AccessController.doPrivileged(
+                            new PrivilegedAction<FileOutputStream>() {
+                public FileOutputStream run() {
                     File logs = new File("logs");
                     logs.mkdir();
                     File console = new File(logs, "serverConsoleOutput.log");
@@ -2057,19 +2055,16 @@ public final class TestConfiguration {
         // Create the folder
         // TODO: Dump this configuration in some human readable format
         synchronized (base) {
-            
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
+            AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+                public Boolean run() {
                     if (folder.exists()) {
                         // do something
-                    }            
-                    return new Boolean(folder.mkdirs());
+                    }
+                    return folder.mkdirs();
                 }
-            }
-             );            
+            });
         }
-               
+
         return folder;
         
     }
@@ -2082,9 +2077,9 @@ public final class TestConfiguration {
     private final String defaultDbName;
     /** Holds the names of all other databases used in a test to perform a proper cleanup.
      * The <code>defaultDbName</code> is also contained here.  */
-    private final ArrayList usedDbNames = new ArrayList();
+    private final ArrayList<String> usedDbNames = new ArrayList<String>();
     /** Contains the mapping of logical database names to physical database names. */
-    private final Hashtable logicalDbMapping = new Hashtable();
+    private final HashMap<String, String> logicalDbMapping = new HashMap<String, String>();
     private final String url;
     private final String userName; 
     private final String userPassword; 

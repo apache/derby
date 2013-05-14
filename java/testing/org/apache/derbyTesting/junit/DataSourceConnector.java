@@ -19,15 +19,14 @@
  */
 package org.apache.derbyTesting.junit;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import junit.framework.Assert;
 
 /**
  * Connection factory using javax.sql.DataSource.
@@ -126,8 +125,8 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            HashMap hm = makeCreateDBAttributes( config );
-            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            HashMap<String, Object> hm = makeCreateDBAttributes( config );
+            copyProperties(connectionProperties, hm);
             DataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getConnection(user, password); 
@@ -166,17 +165,17 @@ public class DataSourceConnector implements Connector {
         return sds;
     }
 
-    static  HashMap makeCreateDBAttributes( TestConfiguration configuration )
+    static HashMap<String, Object> makeCreateDBAttributes( TestConfiguration configuration )
     {
-        HashMap hm = JDBCDataSource.getDataSourceProperties( configuration );
+        HashMap<String, Object> hm = JDBCDataSource.getDataSourceProperties( configuration );
         hm.put( "createDatabase", "create" );
 
         return hm;
     }
 
-    static  HashMap makeShutdownDBAttributes( TestConfiguration configuration )
+    static HashMap<String, Object> makeShutdownDBAttributes( TestConfiguration configuration )
     {
-        HashMap hm = JDBCDataSource.getDataSourceProperties( configuration );
+        HashMap<String, Object> hm = JDBCDataSource.getDataSourceProperties( configuration );
         hm.put( "shutdownDatabase", "shutdown" );
 
         return hm;
@@ -191,6 +190,17 @@ public class DataSourceConnector implements Connector {
             e.printStackTrace();
         }
         return databaseName;
+    }
+
+    /**
+     * Copy attributes from a {@code Properties} object to a {@code Map}.
+     */
+    static void copyProperties(Properties src, Map<String, Object> dest) {
+        if (src != null) {
+            for (String key : src.stringPropertyNames()) {
+                dest.put(key, src.getProperty(key));
+            }
+        }
     }
 
 }

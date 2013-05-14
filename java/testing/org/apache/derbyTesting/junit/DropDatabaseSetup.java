@@ -20,12 +20,10 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.File;
-import java.security.AccessController;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
  * Shutdown and drop the database identified by the logical
@@ -107,22 +105,11 @@ class DropDatabaseSetup extends BaseTestSetup {
     }
     
     static void removeDirectory(final File dir) {
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-
-            public Object run() {
-                removeDir(dir);
-                return null;
-            }
-        });
-        
-    }
-
-    private static void removeDir(File dir) {
-        
         // Check if anything to do!
         // Database may not have been created.
-        if (!dir.exists())
+        if (!PrivilegedFileOpsForTests.exists(dir)) {
             return;
+        }
 
         BaseTestCase.assertDirectoryDeleted(dir);
     }

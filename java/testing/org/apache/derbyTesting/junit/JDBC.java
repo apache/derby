@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 
@@ -120,7 +121,7 @@ public class JDBC {
     static {
         boolean autoCloseable;
         try {
-            Class acClass = Class.forName("java.lang.AutoCloseable");
+            Class<?> acClass = Class.forName("java.lang.AutoCloseable");
             autoCloseable = acClass.isAssignableFrom(ResultSet.class);
         } catch (Throwable t) {
             autoCloseable = false;
@@ -458,7 +459,7 @@ public class JDBC {
 		String dropLeadIn = "DROP " + dropType + " ";
 		
         // First collect the set of DROP SQL statements.
-        ArrayList ddl = new ArrayList();
+        ArrayList<String> ddl = new ArrayList<String>();
 		while (rs.next())
 		{
             String objectName = rs.getString(mdColumn);
@@ -534,11 +535,11 @@ public class JDBC {
             do {
                 hadError = false;
                 didDrop = false;
-                for (ListIterator i = ddl.listIterator(); i.hasNext();) {
-                    Object sql = i.next();
+                for (ListIterator<String> i = ddl.listIterator(); i.hasNext();) {
+                    String sql = i.next();
                     if (sql != null) {
                         try {
-                            s.executeUpdate(sql.toString());
+                            s.executeUpdate(sql);
                             i.set(null);
                             didDrop = true;
                         } catch (SQLException e) {
@@ -1413,11 +1414,12 @@ public class JDBC {
         Assert.assertEquals("Unexpected column count",
                             expectedRows[0].length, rsmd.getColumnCount());
 
-        ArrayList expected = new ArrayList(expectedRows.length);
+        List<List<String>> expected =
+                new ArrayList<List<String>>(expectedRows.length);
         for (int i = 0; i < expectedRows.length; i++) {
             Assert.assertEquals("Different column count in expectedRows",
                                 expectedRows[0].length, expectedRows[i].length);
-            ArrayList row = new ArrayList(expectedRows[i].length);
+            List<String> row = new ArrayList<String>(expectedRows[i].length);
 
             for (int j = 0; j < expectedRows[i].length; j++) {
                 String val = (String) expectedRows[i][j];
@@ -1428,9 +1430,10 @@ public class JDBC {
             expected.add(row);
         }
 
-        ArrayList actual = new ArrayList(expectedRows.length);
+        List<List<String>> actual =
+                new ArrayList<List<String>>(expectedRows.length);
         while (rs.next()) {
-            ArrayList row = new ArrayList(expectedRows[0].length);
+            List<String> row = new ArrayList<String>(expectedRows[0].length);
             for (int i = 1; i <= expectedRows[0].length; i++) {
                 String s = rs.getString(i);
 

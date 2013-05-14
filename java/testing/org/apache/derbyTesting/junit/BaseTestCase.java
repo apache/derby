@@ -243,20 +243,14 @@ public abstract class BaseTestCase
     protected static void setSystemProperty(final String name, 
 					    final String value)
     {
-	
-	AccessController.doPrivileged
-	    (new java.security.PrivilegedAction(){
-		    
-		    public Object run(){
-			System.setProperty( name, value);
-			return null;
-			
-		    }
-		    
-		}
-	     );
-	
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                System.setProperty(name, value);
+                return null;
+            }
+        });
     }
+
     /**
      * Remove system property
      *
@@ -264,20 +258,14 @@ public abstract class BaseTestCase
      */
     public static void removeSystemProperty(final String name)
 	{
-	
-	AccessController.doPrivileged
-	    (new java.security.PrivilegedAction(){
-		    
-		    public Object run(){
-			System.getProperties().remove(name);
-			return null;
-			
-		    }
-		    
-		}
-	     );
-	
-    }    
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                System.getProperties().remove(name);
+                return null;
+            }
+        });
+    }
+
     /**
      * Get system property.
      *
@@ -285,17 +273,11 @@ public abstract class BaseTestCase
      */
     protected static String getSystemProperty(final String name)
 	{
-
-	return (String )AccessController.doPrivileged
-	    (new java.security.PrivilegedAction(){
-
-		    public Object run(){
-			return System.getProperty(name);
-
-		    }
-
-		}
-	     );
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty(name);
+            }
+        });
     }
     
     /**
@@ -308,9 +290,8 @@ public abstract class BaseTestCase
      * @return The list indicates files with certain prefix.
      */
     protected static String[] getFilesWith(final File dir, String prefix) {
-        return (String[]) AccessController
-                .doPrivileged(new java.security.PrivilegedAction() {
-                    public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<String[]>() {
+                    public String[] run() {
                         //create a FilenameFilter and override its accept-method to file
                         //files start with "javacore"*
                         FilenameFilter filefilter = new FilenameFilter() {
@@ -332,19 +313,12 @@ public abstract class BaseTestCase
      */
     protected static URL getTestResource(final String name)
 	{
-
-	return (URL)AccessController.doPrivileged
-	    (new java.security.PrivilegedAction(){
-
-		    public Object run(){
-			return BaseTestCase.class.getClassLoader().
-			    getResource(name);
-
-		    }
-
-		}
-	     );
-    }  
+        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+            public URL run() {
+                return BaseTestCase.class.getClassLoader().getResource(name);
+            }
+        });
+    }
   
     /**
      * Open the URL for a a test resource, e.g. a policy
@@ -355,16 +329,12 @@ public abstract class BaseTestCase
     protected static InputStream openTestResource(final URL url)
         throws PrivilegedActionException
     {
-    	return (InputStream)AccessController.doPrivileged
-	    (new java.security.PrivilegedExceptionAction(){
-
-		    public Object run() throws IOException{
-			return url.openStream();
-
-		    }
-
-		}
-	     );    	
+        return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<InputStream>() {
+            public InputStream run() throws IOException {
+                return url.openStream();
+            }
+        });
     }
     
     /**
@@ -542,8 +512,8 @@ public abstract class BaseTestCase
      */
 	public static void assertEquals(final File file1, final File file2) {
 		AccessController.doPrivileged
-        (new PrivilegedAction() {
-        	public Object run() {
+        (new PrivilegedAction<Void>() {
+        	public Void run() {
         		try {
 					InputStream f1 = new BufferedInputStream(new FileInputStream(file1));
 					InputStream f2 = new BufferedInputStream(new FileInputStream(file2));
@@ -622,7 +592,7 @@ public abstract class BaseTestCase
         // Is this an invocation of a jar file with java -jar ...?
         final boolean isJarInvocation = cmd.length > 0 && cmd[0].equals("-jar");
 
-	    ArrayList cmdlist = new ArrayList();
+	    ArrayList<String> cmdlist = new ArrayList<String>();
         cmdlist.add(jvm == null ? getJavaExecutableName() : jvm);
 	    if (isJ9Platform())
 	    {
@@ -703,13 +673,11 @@ public abstract class BaseTestCase
 	        println("command[" + i + "]" + command[i]);
 	    }
 	    try {
-	        return (Process) AccessController
-	        .doPrivileged(new PrivilegedExceptionAction() {
-	            public Object run() throws IOException {
-	                Process result = null;
-	                result = Runtime.getRuntime().exec(
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Process>() {
+                public Process run() throws IOException {
+                    return Runtime.getRuntime().exec(
                             command, (String[]) null, dir);
-	                return result;
 	            }
 	        });
 	    } catch (PrivilegedActionException pe) {
@@ -950,8 +918,8 @@ public abstract class BaseTestCase
 
         try {
             AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws
+                new PrivilegedExceptionAction<Void>() {
+                    public Void run() throws
                         IOException, InterruptedIOException {
 
                         TestConfiguration curr = TestConfiguration.getCurrent();
@@ -1205,7 +1173,7 @@ public abstract class BaseTestCase
         }
     }
     
-    private static void setupForDebuggerAttach(ArrayList cmdlist) {
+    private static void setupForDebuggerAttach(ArrayList<String> cmdlist) {
         if (debugPort == 0) {
             // lazy initialization
             String dbp = getSystemProperty("derby.test.debugPortBase");

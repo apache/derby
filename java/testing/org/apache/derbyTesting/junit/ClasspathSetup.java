@@ -22,10 +22,9 @@ package org.apache.derbyTesting.junit;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
+import java.security.PrivilegedAction;
 
 import junit.extensions.TestSetup;
-import junit.framework.Assert;
 import junit.framework.Test;
 
 /**
@@ -75,13 +74,13 @@ public class ClasspathSetup extends TestSetup
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    protected void setUp() throws PrivilegedActionException
+    protected void setUp()
     {
         AccessController.doPrivileged
             (
-             new java.security.PrivilegedExceptionAction()
+             new PrivilegedAction<Void>()
              {
-                 public Object run() throws PrivilegedActionException
+                 public Void run()
                  { 
                      _originalClassLoader = Thread.currentThread().getContextClassLoader();
 
@@ -95,13 +94,13 @@ public class ClasspathSetup extends TestSetup
              );
     }
     
-    protected void tearDown() throws PrivilegedActionException
+    protected void tearDown()
     {
         AccessController.doPrivileged
             (
-             new java.security.PrivilegedExceptionAction()
+             new PrivilegedAction<Void>()
              {
-                 public Object run() throws PrivilegedActionException
+                 public Void run()
                  { 
                      Thread.currentThread().setContextClassLoader( _originalClassLoader );
                      

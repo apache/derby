@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.math.BigDecimal;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 /**
  * This class is for testing method calls on user-defined types.  It has
@@ -504,20 +505,29 @@ public class ManyMethods implements Serializable
 
 	public static Date staticDateMethod()
 	{
-		/* July 2, 1997 */
-		return new Date(97, 7, 2);
+        /* August 2, 1997 */
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(1997, Calendar.AUGUST, 2, 0, 0, 0);
+        return new Date(cal.getTimeInMillis());
 	}
 
 	public static Time staticTimeMethod()
 	{
 		/* 10:58:33 AM */
-		return new Time(10, 58, 33);
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(1970, Calendar.JANUARY, 1, 10, 58, 33);
+        return new Time(cal.getTimeInMillis());
 	}
 
 	public static Timestamp staticTimestampMethod()
 	{
-		/* July 2, 1997 10:59:15.0 AM */
-		return new Timestamp(97, 7, 2, 10, 59, 15, 0);
+        /* August 2, 1997 10:59:15.0 AM */
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(1997, Calendar.AUGUST, 2, 10, 59, 15);
+        return new Timestamp(cal.getTimeInMillis());
 	}
 
 	public static ManyMethods staticManyMethods(Integer value)

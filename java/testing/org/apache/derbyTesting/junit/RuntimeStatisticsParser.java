@@ -34,7 +34,7 @@ public class RuntimeStatisticsParser {
 	private final boolean lastKeyIndexScan;
     private String statistics = "";
     private boolean scrollInsensitive = false;
-    private final HashSet qualifiers;
+    private final HashSet<Qualifier> qualifiers;
     private String [] startPosition = {"None"};
     private String [] stopPosition = {"None"};
 
@@ -119,8 +119,8 @@ public class RuntimeStatisticsParser {
      *
      * @return set of <code>Qualifier</code>s
      */
-    private HashSet findQualifiers() {
-        HashSet set = new HashSet();
+    private HashSet<Qualifier> findQualifiers() {
+        HashSet<Qualifier> set = new HashSet<Qualifier>();
         int startPos = statistics.indexOf("qualifiers:\n");
         if (startPos >= 0) {
             // start search after "qualifiers:\n"

@@ -99,15 +99,15 @@ public final class SecurityManagerSetup extends TestSetup {
 
     static final boolean jacocoEnabled = checkIfJacocoIsRunning();
     private static boolean checkIfJacocoIsRunning() {
-        return ((Boolean)AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+                public Boolean run() {
                     if (getURL("org.jacoco.agent.rt.RT") != null) {
                         System.setProperty("jacoco.active", "");
                         return Boolean.TRUE;
                     }
                     return Boolean.FALSE;
                 }
-		})).booleanValue();
+        });
     }
 
 	private final String decoratorPolicyResource;
@@ -270,10 +270,10 @@ public final class SecurityManagerSetup extends TestSetup {
 			return;
 		
 		// and install
-        AccessController.doPrivileged(new PrivilegedAction() {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
 
-                public Object run() {
+                public Void run() {
                     if (sm == null)
                         System.setSecurityManager(new SecurityManager());
                     else
@@ -461,10 +461,9 @@ public final class SecurityManagerSetup extends TestSetup {
 	 */
 	static URL getURL(final Class cl)
 	{
-		return (URL)
-            AccessController.doPrivileged(new PrivilegedAction() {
+        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
 
-			public Object run() {
+			public URL run() {
 
                 /* It's possible that the class does not have a "codeSource"
                  * associated with it (ex. if it is embedded within the JVM,
@@ -487,9 +486,9 @@ public final class SecurityManagerSetup extends TestSetup {
 
             AccessController.doPrivileged
             (
-             new PrivilegedAction()
+             new PrivilegedAction<Void>()
              {
-                 public Object run() {
+                 public Void run() {
                       System.setSecurityManager(null);
                      return null;
                  }
@@ -588,9 +587,9 @@ public final class SecurityManagerSetup extends TestSetup {
         i2.close();
         o.close();
         try {
-            return (String)
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                    public Object run() throws MalformedURLException {
+            return AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<String>() {
+                    public String run() throws MalformedURLException {
                         return mergedPF.toURI().toURL().toExternalForm();
                     }
                 });
@@ -603,9 +602,9 @@ public final class SecurityManagerSetup extends TestSetup {
     private static InputStream openStream(final URL resource)
             throws IOException {
         try {
-            return (InputStream)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction(){
-                        public Object run() throws IOException {
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<InputStream>(){
+                        public InputStream run() throws IOException {
                             return resource.openStream();
                         }
                     }
@@ -618,8 +617,8 @@ public final class SecurityManagerSetup extends TestSetup {
     /** Creates the specified directory if it doesn't exist. */
     private static void mkdir(final File dir) {
         AccessController.doPrivileged(
-            new PrivilegedAction(){
-                public Object run(){
+            new PrivilegedAction<Void>() {
+                public Void run() {
                     if (!dir.exists() && !dir.mkdir()) {
                         fail("failed to create directory: " + dir.getPath());
                     }

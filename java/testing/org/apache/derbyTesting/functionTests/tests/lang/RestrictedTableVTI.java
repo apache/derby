@@ -28,7 +28,6 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,10 +35,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.vti.RestrictedVTI;
@@ -176,7 +172,8 @@ public	class   RestrictedTableVTI extends VTITemplate implements  RestrictedVTI
     
     public  BigDecimal 	getBigDecimal(int i) throws SQLException
     { return _resultSet.getBigDecimal( mapColumnNumber( i ) ); }
-    
+
+    @Deprecated
     public  BigDecimal 	getBigDecimal(int i, int scale) throws SQLException
     { return _resultSet.getBigDecimal( mapColumnNumber( i ), scale ); }
     

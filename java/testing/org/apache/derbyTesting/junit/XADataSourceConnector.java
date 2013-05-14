@@ -127,8 +127,9 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            HashMap hm = DataSourceConnector.makeCreateDBAttributes( config );
-            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            HashMap<String, Object> hm =
+                    DataSourceConnector.makeCreateDBAttributes( config );
+            DataSourceConnector.copyProperties(connectionProperties, hm);
             XADataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getXAConnection(user, password).getConnection(); 

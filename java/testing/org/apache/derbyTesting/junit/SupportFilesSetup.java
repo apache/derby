@@ -27,11 +27,13 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 import junit.extensions.TestSetup;
-import junit.framework.Assert;
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
  * A decorator that copies test resources from the classpath
@@ -132,10 +134,8 @@ public class SupportFilesSetup extends TestSetup {
     public  static   void privCopyFiles(final String dirName, final String[] resources, final String[] targetNames)
     throws PrivilegedActionException
     {
-        AccessController.doPrivileged
-        (new java.security.PrivilegedExceptionAction(){
-            
-            public Object run() throws IOException, PrivilegedActionException { 
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+            public Void run() throws IOException, PrivilegedActionException {
               copyFiles(dirName, resources, targetNames);
               return null;
             }
@@ -231,24 +231,16 @@ public class SupportFilesSetup extends TestSetup {
     
     /**
      * Get the full name of the file.
-     * @param name Base name for the resouce.
+     * @param name Base name for the resource.
      */
-    public static String getReadOnlyFileName(String name)
-        throws Exception
+    public static String getReadOnlyFileName(final String name)
     {
-        final   String  finalName = name;
-        try {
-            return (String) AccessController.doPrivileged
-            (new java.security.PrivilegedExceptionAction(){
-
-                public Object run() throws MalformedURLException{
-                    return getReadOnly(  finalName ).getAbsolutePath();
-                }
+        return AccessController.doPrivileged(
+                new PrivilegedAction<String>() {
+            public String run() {
+                return getReadOnly(name).getAbsolutePath();
             }
-             );
-        } catch (PrivilegedActionException e) {
-            throw e.getException();
-        } 
+        });
     }
     /**
      * Obtain a File for the local copy of a read-write resource.
@@ -276,15 +268,12 @@ public class SupportFilesSetup extends TestSetup {
     private static URL getURL(final File file) throws MalformedURLException
     {
         try {
-            return (URL) AccessController.doPrivileged
-            (new java.security.PrivilegedExceptionAction(){
-
-                public Object run() throws MalformedURLException{
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<URL>() {
+                public URL run() throws MalformedURLException {
                     return file.toURI().toURL();
-
                 }
-            }
-             );
+            });
         } catch (PrivilegedActionException e) {
             throw (MalformedURLException) e.getException();
         } 
@@ -293,18 +282,9 @@ public class SupportFilesSetup extends TestSetup {
 
     public static void deleteFile(final String fileName) 
     {
-        AccessController.doPrivileged
-            (new java.security.PrivilegedAction() {
-                        
-                    public Object run() {
-                        File delFile = new File(fileName);
-                        if (!delFile.exists())
-                                return null;
-                         Assert.assertTrue(delFile.delete());
-                         return null;
-                    }
-                }
-             );
-            
+        File f = new File(fileName);
+        if (PrivilegedFileOpsForTests.exists(f)) {
+            assertTrue(PrivilegedFileOpsForTests.delete(f));
+        }
     }
 }

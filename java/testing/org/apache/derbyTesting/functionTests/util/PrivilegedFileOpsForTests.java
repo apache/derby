@@ -61,12 +61,12 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        return ((Long)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
-                            return new Long(file.length());
+        return AccessController.doPrivileged(
+                    new PrivilegedAction<Long>() {
+                        public Long run() {
+                            return file.length();
                         }
-                    })).longValue();
+                    });
     }
 
     /**
@@ -83,9 +83,9 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        return (String)AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() throws SecurityException {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<String>() {
+                    public String run() throws SecurityException {
                         return file.getAbsolutePath();
                     }});
     }
@@ -108,12 +108,12 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
-            return ((FileInputStream)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws FileNotFoundException {
-                                return new FileInputStream(file);
-                            }
-                        }));
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileInputStream>() {
+                public FileInputStream run() throws FileNotFoundException {
+                    return new FileInputStream(file);
+                }
+            });
         } catch (PrivilegedActionException pae) {
             throw (FileNotFoundException)pae.getException();
         }
@@ -132,12 +132,12 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        return ((Boolean)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
-                            return Boolean.valueOf(file.exists());
+        return AccessController.doPrivileged(
+                    new PrivilegedAction<Boolean>() {
+                        public Boolean run() {
+                            return file.exists();
                         }
-                    })).booleanValue();
+                    });
     }
 
     /**
@@ -153,12 +153,12 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        return ((Boolean)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
-                            return Boolean.valueOf(file.delete());
+        return AccessController.doPrivileged(
+                    new PrivilegedAction<Boolean>() {
+                        public Boolean run() {
+                            return file.delete();
                         }
-                    })).booleanValue();
+                    });
     }
 
     /**
@@ -176,9 +176,9 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
-            return (FileReader)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run()
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileReader>() {
+                        public FileReader run()
                                 throws FileNotFoundException {
                             return new FileReader(file);
                         }
@@ -204,9 +204,9 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
-            return (FileWriter)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run()
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileWriter>() {
+                        public FileWriter run()
                                 throws IOException {
                             return new FileWriter(file);
                         }
@@ -230,8 +230,8 @@ public class PrivilegedFileOpsForTests {
      */    
     public static void copy(final File source, final File target) throws IOException {
         try {
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                public Void run() throws IOException {
                     recursiveCopy(source,target);
                     return null;
                 }
@@ -351,9 +351,9 @@ public class PrivilegedFileOpsForTests {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
-            return (FileOutputStream)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run()
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileOutputStream>() {
+                        public FileOutputStream run()
                                 throws FileNotFoundException {
                             return new FileOutputStream(file, append);
                         }
@@ -380,17 +380,15 @@ public class PrivilegedFileOpsForTests {
         if (!exists(dir)) {
             throw new FileNotFoundException(getAbsolutePath(dir));
         }
-        final ArrayList notDeleted = new ArrayList();
-        AccessController.doPrivileged(new PrivilegedAction() {
-
-            public Object run() {
-                return Boolean.valueOf(deleteRecursively(dir, notDeleted));
+        final ArrayList<File> notDeleted = new ArrayList<File>();
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                deleteRecursively(dir, notDeleted);
+                return null;
             }
         });
 
-        File[] failedDeletes = new File[notDeleted.size()];
-        notDeleted.toArray(failedDeletes);
-        return failedDeletes;
+        return notDeleted.toArray(new File[notDeleted.size()]);
     }
 
     /**
@@ -404,7 +402,7 @@ public class PrivilegedFileOpsForTests {
      * @return {@code true} is all delete operations succeeded, {@code false}
      *      otherwise.
      */
-    private static boolean deleteRecursively(File dir, List failedDeletes) {
+    private static boolean deleteRecursively(File dir, List<File> failedDeletes) {
         boolean allDeleted = true;
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
@@ -431,7 +429,7 @@ public class PrivilegedFileOpsForTests {
      * @param failedDeletes list keeping track of failed deletes
      * @return {@code true} if the delete succeeded, {@code false} otherwise.
      */
-    private static boolean internalDelete(File f, List failedDeletes) {
+    private static boolean internalDelete(File f, List<File> failedDeletes) {
         boolean deleted = f.delete();
         if (!deleted) {
             failedDeletes.add(f);
@@ -446,13 +444,12 @@ public class PrivilegedFileOpsForTests {
      * @return A string with file information (human-readable).
      */
     public static String getFileInfo(final File f) {
-        return (String)AccessController.doPrivileged(new PrivilegedAction() {
-
-            public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
                 if (!f.exists()) {
                     return "(non-existant)";
                 }
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("(isDir=").append(f.isDirectory()).
                         append(", canRead=").append(f.canRead()).
                         append(", canWrite=").append(f.canWrite()).

@@ -215,6 +215,7 @@ public abstract class TableVTI implements ResultSet {
      *
      * @exception SQLException on unexpected JDBC error
      */
+    @Deprecated
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         throw new SQLException("getBigDecimal");
     }
@@ -269,6 +270,7 @@ public abstract class TableVTI implements ResultSet {
      *
      * @exception SQLException on unexpected JDBC error
      */
+    @Deprecated
     public java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
         throw new SQLException("getUnicodeStream");
     }
@@ -360,6 +362,7 @@ public abstract class TableVTI implements ResultSet {
      *
      * @exception SQLException on unexpected JDBC error
      */
+    @Deprecated
     public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
         return getBigDecimal(findColumn(columnName), scale);
     }
@@ -414,6 +417,7 @@ public abstract class TableVTI implements ResultSet {
      *
      * @exception SQLException on unexpected JDBC error
      */
+    @Deprecated
     public java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
         throw new SQLException("getUnicodeStream");
     }

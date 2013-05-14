@@ -34,6 +34,7 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.iapi.error.ExceptionUtil;
@@ -293,8 +294,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private static void probeServerPort(final int port, final InetAddress addr)
             throws IOException {
         try {
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                public Void run() throws IOException {
                     new ServerSocket(port, 0, addr).close();
                     return null;
                 }
@@ -307,9 +308,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private void startWithAPI() throws Exception
     {
             
-            serverOutput = (FileOutputStream)
-            AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
+            serverOutput = AccessController.doPrivileged(
+                    new PrivilegedAction<FileOutputStream>() {
+                public FileOutputStream run() {
                     File logs = new File("logs");
                     logs.mkdir();
                     File console = new File(logs, "serverConsoleOutput.log");
@@ -344,7 +345,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private SpawnedProcess startSeparateProcess() throws Exception
     {
-        ArrayList       al = new ArrayList();
+        ArrayList<String> al = new ArrayList<String>();
         boolean         skipHostName = false;
 
         // Loading from classes need to work-around the limitation of the
@@ -482,7 +483,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public  static String[] getDefaultStartupArgs( boolean skipHostName )
     {
         TestConfiguration config = TestConfiguration.getCurrent();
-        ArrayList               argsList = new ArrayList();
+        ArrayList<String> argsList = new ArrayList<String>();
 
         argsList.add( "start" );
 

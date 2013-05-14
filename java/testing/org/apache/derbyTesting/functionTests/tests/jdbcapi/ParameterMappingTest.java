@@ -1678,6 +1678,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             SQLException sqleResult = null;
             try {
+                // We want to test that getUnicodeStream() works, even though
+                // it's deprecated. Suppress the compiler warning.
+                @SuppressWarnings("deprecation")
                 InputStream is = rs.getUnicodeStream(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
@@ -3205,13 +3208,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 data[4] = (byte) 0x00;
                 data[5] = (byte) 0x32;
 
-                try {
-                    psi.setUnicodeStream(1, new java.io.ByteArrayInputStream(
+                setUnicodeStream(psi, 1, new java.io.ByteArrayInputStream(
                             data), 6);
-                } catch (NoSuchMethodError e) {
-                    // ResultSet.setUnicodeStream not present - correct for
-                    // JSR169
-                }
 
                 if (JDBC.vmSupportsJDBC3()) {
                     psi.executeUpdate();
@@ -3289,6 +3287,17 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         setXXX_setObject(s, psi, psq, type, new BigInteger( Long.toString( BIG_INTEGER_SEED ) ), "java.math.BigInteger", 15);
         setXXX_setObject(s, psi, psq, type, new java.util.Date( DATE_SEED ), "java.util.Date", 16);
         setXXX_setObject(s, psi, psq, type, makeCalendar( CALENDAR_SEED ), "java.util.Calendar", 17);
+    }
+
+    /**
+     * Helper method for calling the deprecated {@code setUnicodeStream()}
+     * method without getting deprecation warnings from the compiler.
+     */
+    @SuppressWarnings("deprecation")
+    private static void setUnicodeStream(PreparedStatement ps,
+                  int parameterIndex, InputStream stream, int length)
+            throws SQLException {
+        ps.setUnicodeStream(parameterIndex, stream, length);
     }
 
     /**

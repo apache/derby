@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -35,15 +33,14 @@ import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.tools.ij;
-import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.TestNullOutputStream;
 
 
@@ -71,14 +68,14 @@ public abstract class BaseJDBCTestCase
      * were returned by utility methods and close
      * them at teardown.
      */
-    private List statements;
+    private List<Statement> statements;
 
     /**
      * Maintain a list of connection objects that
      * were returned by utility methods and close
      * them at teardown.
      */
-    private List connections;
+    private List<Connection> connections;
     
     /**
      * Create a test case with the given name.
@@ -158,7 +155,7 @@ public abstract class BaseJDBCTestCase
     private void addStatement(Statement s)
     {
         if (statements == null)
-            statements = new ArrayList();
+            statements = new ArrayList<Statement>();
         statements.add(s);
     }
     
@@ -169,7 +166,7 @@ public abstract class BaseJDBCTestCase
     private void addConnection(Connection c)
     {
         if (connections == null)
-            connections = new ArrayList();
+            connections = new ArrayList<Connection>();
         connections.add(c);     
     }
     
@@ -474,18 +471,14 @@ public abstract class BaseJDBCTestCase
     throws java.lang.Exception
     {
         if (statements != null) {
-            for (Iterator i = statements.iterator(); i.hasNext(); )
-            {
-                Statement s = (Statement) i.next();
+            for (Statement s : statements) {
                 s.close();
             }
             // Allow gc'ing of all those statements.
             statements = null;
         }
         if (connections != null) {
-            for (Iterator i = connections.iterator(); i.hasNext(); )
-            {
-                Connection c = (Connection) i.next();
+            for (Connection c : connections) {
                 JDBC.cleanup(c);
             }
             // Allow gc'ing of all those connections.
@@ -1173,9 +1166,9 @@ public abstract class BaseJDBCTestCase
     private static void assertStatementErrorMinion(
             String[] sqlStates, boolean orderedStates,
             Statement st, String query) {
-        ArrayList statesBag = null;
+        ArrayList<String> statesBag = null;
         if (!orderedStates) {
-            statesBag = new ArrayList(Arrays.asList(sqlStates));
+            statesBag = new ArrayList<String>(Arrays.asList(sqlStates));
         }
         try {
             boolean haveRS = st.execute(query);
