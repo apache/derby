@@ -119,7 +119,7 @@ final public class DatabasePermission extends Permission {
     /**
      * The legal database permission action names.
      */
-    static protected final Set LEGAL_ACTIONS = new HashSet();
+    static protected final Set<String> LEGAL_ACTIONS = new HashSet<String>();
     static {
         // when adding new actions, check: implies(Permission), getActions()
         LEGAL_ACTIONS.add(CREATE);
@@ -310,9 +310,9 @@ final public class DatabasePermission extends Permission {
             // doPrivileged() block to allow for confined codebase permission
             // grants
             if (p.startsWith(URL_PATH_RELATIVE_PREFIX)) {
-                final String cwd = (String)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
+                final String cwd = AccessController.doPrivileged(
+                    new PrivilegedAction<String>() {
+                        public String run() {
                             return System.getProperty("user.dir");
                         }
                     });
@@ -327,9 +327,9 @@ final public class DatabasePermission extends Permission {
             // block to allow for confined codebase permission grants
             final File f;
             try {
-                f = (File)AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run() throws IOException {
+                f = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<File>() {
+                        public File run() throws IOException {
                             return (new File(absPath)).getCanonicalFile();
                         }
                     });

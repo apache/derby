@@ -54,7 +54,7 @@ public class VFMemoryStorageFactory
 
     /** References to the databases created / existing. */
     //@GuardedBy("DATABASES")
-    private static final Map DATABASES = new HashMap();
+    private static final Map<String,DataStore> DATABASES = new HashMap<String,DataStore>();
 
     /**
      * Dummy store used to carry out frequent operations that don't

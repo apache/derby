@@ -77,7 +77,7 @@
       </classpath>
       <include name="${derby.dir}/iapi/types/*.java"/>
       <exclude name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 

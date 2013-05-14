@@ -54,7 +54,7 @@ public final class DataStore {
      * The initial size is set to the number of initial files of a Derby
      * database, pluss a few more.
      */
-    private final Map files = new HashMap(80);
+    private final Map<String,DataStoreEntry> files = new HashMap<String,DataStoreEntry>(80);
 
     /**
      * The name of the database this store serves, expected to be the absolute
@@ -119,7 +119,7 @@ public final class DataStore {
             // Make sure the the parent directories exists.
             String[] parents = getParentList(nPath);
             for (int i=parents.length -1; i >= 0; i--) {
-                DataStoreEntry entry = (DataStoreEntry)files.get(parents[i]);
+                DataStoreEntry entry = files.get(parents[i]);
                 if (entry == null) {
                     return null;
                 } else if (!entry.isDirectory()) {
@@ -145,7 +145,7 @@ public final class DataStore {
         synchronized (LOCK) {
             for (int i=parents.length -1; i >= 0; i--) {
                 String subPath = parents[i];
-                DataStoreEntry entry = (DataStoreEntry)files.get(subPath);
+                DataStoreEntry entry = files.get(subPath);
                 if (entry == null) {
                     createEntry(subPath, true);
                 } else if (!entry.isDirectory()) {
@@ -170,7 +170,7 @@ public final class DataStore {
         final String nPath = new File(iPath).getPath();
         DataStoreEntry entry;
         synchronized (LOCK) {
-            entry = (DataStoreEntry)files.remove(nPath);
+            entry = files.remove(nPath);
             if (entry != null) {
                 if (entry.isDirectory()) {
                     String[] children = listChildren(nPath);
@@ -203,7 +203,7 @@ public final class DataStore {
     public DataStoreEntry getEntry(String iPath) {
         synchronized (LOCK) {
             // Use java.io.File to normalize the path.
-            return (DataStoreEntry)files.get(new File(iPath).getPath());
+            return files.get(new File(iPath).getPath());
         }
     }
 
@@ -217,7 +217,7 @@ public final class DataStore {
     public boolean deleteAll(String iPath) {
         final String nPath = new File(iPath).getPath();
         synchronized (LOCK) {
-            DataStoreEntry entry = (DataStoreEntry)files.remove(nPath);
+            DataStoreEntry entry = files.remove(nPath);
             if (entry == null) {
                 // Delete root doesn't exist.
                 return false;
@@ -255,12 +255,12 @@ public final class DataStore {
         if (nPath.charAt(nPath.length() -1) != SEP) {
             nPath += SEP;
         }
-        ArrayList children = new ArrayList();
+        ArrayList<String> children = new ArrayList<String>();
         synchronized (LOCK) {
-            Iterator paths = files.keySet().iterator();
+            Iterator<String> paths = files.keySet().iterator();
             String candidate;
             while (paths.hasNext()) {
-                candidate = (String)paths.next();
+                candidate = paths.next();
                 if (candidate.startsWith(nPath)) {
                     children.add(candidate.substring(nPath.length()));
                 }
@@ -284,8 +284,7 @@ public final class DataStore {
             if (files.containsKey(newPath)) {
                 return false;
             }
-            DataStoreEntry current = (DataStoreEntry)
-                    files.remove(currentPath);
+            DataStoreEntry current = files.remove(currentPath);
             if (current == null) {
                 return false;
             }
@@ -299,9 +298,9 @@ public final class DataStore {
      */
     public void purge() {
         synchronized (LOCK) {
-            Iterator fileIter = files.values().iterator();
+            Iterator<DataStoreEntry> fileIter = files.values().iterator();
             while (fileIter.hasNext()) {
-                ((DataStoreEntry)fileIter.next()).release();
+                (fileIter.next()).release();
             }
             // Clear all the mappings.
             files.clear();
@@ -323,11 +322,11 @@ public final class DataStore {
         if (prefixPath.charAt(prefixPath.length() -1) != SEP) {
             prefixPath += SEP;
         }
-        ArrayList toDelete = new ArrayList();
-        Iterator paths = files.keySet().iterator();
+        ArrayList<String> toDelete = new ArrayList<String>();
+        Iterator<String> paths = files.keySet().iterator();
         // Find all the entries to delete.
         while (paths.hasNext()) {
-            String path = (String)paths.next();
+            String path = paths.next();
             if (path.startsWith(prefixPath)) {
                 toDelete.add(path);
             }
@@ -337,8 +336,7 @@ public final class DataStore {
         // Iterate through all entries found and release them.
         Iterator keys = toDelete.iterator();
         while (keys.hasNext()) {
-            DataStoreEntry entry = (DataStoreEntry)
-                    files.remove((String)keys.next());
+            DataStoreEntry entry = files.remove((String)keys.next());
             entry.release();
         }
         return true;
@@ -365,7 +363,7 @@ public final class DataStore {
      * @return A list of parents.
      */
     private String[] getParentList(String path) {
-        ArrayList parents = new ArrayList();
+        ArrayList<String> parents = new ArrayList<String>();
         String parent = path;
         // Build the list of parents.
         while ((parent = new File(parent).getParent()) != null) {

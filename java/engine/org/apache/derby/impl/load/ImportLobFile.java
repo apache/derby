@@ -71,9 +71,9 @@ class ImportLobFile
         try {
             // open the lob file under a privelged block.
             try {
-                lobRaf = (RandomAccessFile)AccessController.doPrivileged
-                (new java.security.PrivilegedExceptionAction(){
-                        public Object run() throws IOException{
+                lobRaf = AccessController.doPrivileged
+                (new java.security.PrivilegedExceptionAction<RandomAccessFile>(){
+                        public RandomAccessFile run() throws IOException{
                             return new RandomAccessFile(lobFile, "r");
                         }   
                     }

@@ -49,10 +49,10 @@ import org.apache.derby.iapi.jdbc.EngineConnection;
  */
 class ColumnInfo {
 
-	private ArrayList vtiColumnNames ;
-    private ArrayList insertColumnNames;
-    private ArrayList columnTypes ;
-    private ArrayList jdbcColumnTypes;
+	private ArrayList<String> vtiColumnNames ;
+    private ArrayList<String> insertColumnNames;
+    private ArrayList<String> columnTypes ;
+    private ArrayList<Integer> jdbcColumnTypes;
 	private int noOfColumns;
 	private ArrayList columnPositions;
 	private boolean createolumnNames = true;
@@ -61,7 +61,7 @@ class ColumnInfo {
 	private Connection conn;
 	private String tableName;
 	private String schemaName;
-    private HashMap udtClassNames;
+    private HashMap<String,String> udtClassNames;
 
 	/**
 	 * Initialize the column type and name  information
@@ -82,11 +82,11 @@ class ColumnInfo {
 		throws SQLException 
 	{
 
-		vtiColumnNames = new ArrayList(1);
-		insertColumnNames = new ArrayList(1);
-		columnTypes = new ArrayList(1);
-        jdbcColumnTypes = new ArrayList(1);
-        udtClassNames = new HashMap();
+		vtiColumnNames = new ArrayList<String>(1);
+		insertColumnNames = new ArrayList<String>(1);
+		columnTypes = new ArrayList<String>(1);
+        jdbcColumnTypes = new ArrayList<Integer>(1);
+        udtClassNames = new HashMap<String,String>();
 		noOfColumns = 0;
 		this.conn = conn;
 
@@ -528,7 +528,8 @@ class ColumnInfo {
         ( String columnTypeNamesString, int noOfColumns )
         throws Exception
     {
-        ArrayList list = (ArrayList) ImportAbstract.destringifyObject( columnTypeNamesString );
+        @SuppressWarnings({"unchecked"})
+        ArrayList<String> list = (ArrayList<String>) ImportAbstract.destringifyObject( columnTypeNamesString );
 
         String[] retval = new String[ list.size() ];
 
@@ -554,7 +555,7 @@ class ColumnInfo {
 
         if ( stringMap == null ) { return null; }
         
-        HashMap retval = new HashMap();
+        HashMap<String,Class<?>> retval = new HashMap<String,Class<?>>();
         Iterator entries = stringMap.entrySet().iterator();
 
         while ( entries.hasNext() )
@@ -563,7 +564,7 @@ class ColumnInfo {
             String columnName = (String) entry.getKey();
             String className = (String) entry.getValue();
 
-            Class classValue = Class.forName( className );
+            Class<?> classValue = Class.forName( className );
 
             retval.put( columnName, classValue );
         }

@@ -51,7 +51,7 @@ public class Import extends ImportAbstract{
     // beginning and the very end of its run. We cannot use Hashmap
     // because different threads may simultaneously put and delete entries.
     //
-    private static  Hashtable   _importers = new Hashtable();
+    private static  Hashtable<Integer,Import>   _importers = new Hashtable<Integer,Import>();
 
     private String inputFileName;
 

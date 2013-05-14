@@ -33,7 +33,7 @@ import java.net.URL;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.SQLException;
 
-final class ImportReadData implements java.security.PrivilegedExceptionAction {
+final class ImportReadData implements java.security.PrivilegedExceptionAction<Object> {
   //Read data from this file
   private String inputFileName;
 

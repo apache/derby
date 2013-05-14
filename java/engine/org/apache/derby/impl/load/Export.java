@@ -156,9 +156,9 @@ public class Export extends ExportAbstract{
      * @throws SecurityException if the required privileges are missing
      */
     private final boolean fileExists(final File file) {
-        return ((Boolean)AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
+        return (AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    public Boolean run() {
                         return new Boolean(file.exists());
                     }
             })).booleanValue();

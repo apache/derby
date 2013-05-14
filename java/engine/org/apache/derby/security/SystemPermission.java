@@ -91,7 +91,7 @@ final public class SystemPermission extends BasicPermission {
     /**
      * The legal system permission names.
      */
-    static private final Set LEGAL_NAMES = new HashSet();    
+    static private final Set<String> LEGAL_NAMES = new HashSet<String>();    
     static {
         // when adding new permissions, check whether to override inherited
         // method: implies(Permission)
@@ -103,7 +103,7 @@ final public class SystemPermission extends BasicPermission {
     /**
      * Set of legal actions in their canonical form.
      */
-    static private final List LEGAL_ACTIONS = new ArrayList();
+    static private final List<String> LEGAL_ACTIONS = new ArrayList<String>();
     static {
         LEGAL_ACTIONS.add(CONTROL);
         LEGAL_ACTIONS.add(MONITOR);
