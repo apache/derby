@@ -125,7 +125,7 @@ final class UpdateLoader implements LockOwner {
             // Creating class loaders is a restricted operation
             // so we need to use a privileged block.
             AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
+            (new java.security.PrivilegedAction<Object>(){
                 
                 public Object run(){    
     		      for (int i = 0; i < jarCount; i++) {

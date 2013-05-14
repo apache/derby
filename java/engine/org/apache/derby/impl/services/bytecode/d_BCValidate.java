@@ -75,7 +75,7 @@ class d_BCValidate
 
 				Class[] params = NO_PARAMS;
 
-				Class declaring = loadClass(declaringClass);
+				Class<?> declaring = loadClass(declaringClass);
 
 				if (debugParameterTypes != null) {
 					params = new Class[debugParameterTypes.length];
@@ -105,7 +105,7 @@ class d_BCValidate
 				String actualReturnType;
 
 				if (methodName.equals("<init>")) {
-					Constructor c;
+					Constructor<?> c;
 					
 					if (sameClassLoader)
 					{
@@ -192,11 +192,11 @@ class d_BCValidate
 		}
 	}
 
-	private static Hashtable primitives;
+	private static Hashtable<String,Class<?>> primitives;
 
 	static {
 		if (SanityManager.DEBUG) {
-			primitives = new Hashtable();
+			primitives = new Hashtable<String,Class<?>>();
 			primitives.put("boolean", Boolean.TYPE);
 			primitives.put("byte", Byte.TYPE);
 			primitives.put("char", Character.TYPE);

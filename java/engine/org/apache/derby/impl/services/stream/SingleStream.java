@@ -70,7 +70,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  *
  */
 public final class SingleStream
-implements InfoStreams, ModuleControl, java.security.PrivilegedAction
+implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrintWriter>
 {
 
 	/*
@@ -216,7 +216,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 
 		Throwable t;
 		try {
-			Class theClass = Class.forName(className);
+			Class<?> theClass = Class.forName(className);
 
 			try {
 				Method theMethod = theClass.getMethod(methodName,  new Class[0]);
@@ -370,7 +370,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
     }
 
 
-    public final Object run()
+    public final HeaderPrintWriter run()
     {
         // SECURITY PERMISSION - OP4, OP5
         return PBmakeFileHPW(PBfileName, PBheader);

@@ -33,7 +33,7 @@ import java.util.Hashtable;
 
 public final class ReflectGeneratedClass extends LoadedGeneratedClass {
 
-	private final Hashtable methodCache;
+	private final Hashtable<String,GeneratedMethod> methodCache;
 	private static final GeneratedMethod[] directs;
 
 	static {
@@ -45,13 +45,13 @@ public final class ReflectGeneratedClass extends LoadedGeneratedClass {
 
 	public ReflectGeneratedClass(ClassFactory cf, Class jvmClass) {
 		super(cf, jvmClass);
-		methodCache = new Hashtable();
+		methodCache = new Hashtable<String,GeneratedMethod>();
 	}
 
 	public GeneratedMethod getMethod(String simpleName)
 		throws StandardException {
 
-		GeneratedMethod rm = (GeneratedMethod) methodCache.get(simpleName);
+		GeneratedMethod rm = methodCache.get(simpleName);
 		if (rm != null)
 			return rm;
 

@@ -75,8 +75,8 @@ final class LockSet implements LockTable {
 	private final SinglePool factory;
 
     /** Hash table which maps <code>Lockable</code> objects to
-     * <code>Lock</code>s. */
-    private final HashMap locks;
+     * <code>Control</code>s. */
+    private final HashMap<Lockable,Control> locks;
 
 	/**
 		Timeout for deadlocks, in ms.
@@ -103,7 +103,7 @@ final class LockSet implements LockTable {
 
 	protected LockSet(SinglePool factory) {
 		this.factory = factory;
-		locks = new HashMap();
+		locks = new HashMap<Lockable,Control>();
 	}
 
 
@@ -706,7 +706,7 @@ forever:	for (;;) {
             String str = "";
 
             int i = 0;
-            for (Iterator it = locks.values().iterator(); it.hasNext(); )
+            for (Iterator<Control> it = locks.values().iterator(); it.hasNext(); )
             {
                 str += "\n  lock[" + i + "]: " + 
                     DiagnosticUtil.toDiagString(it.next());
@@ -725,9 +725,9 @@ forever:	for (;;) {
      * <br>
      * MT - must be synchronized on this <code>LockSet</code> object.
      */
-    public void addWaiters(Map waiters) {
-        for (Iterator it = locks.values().iterator(); it.hasNext(); ) {
-            Control control = (Control) it.next();
+    public void addWaiters(Map<Object,Object> waiters) {
+        for (Iterator<Control> it = locks.values().iterator(); it.hasNext(); ) {
+            Control control = it.next();
             control.addWaiters(waiters);
         }
     }
@@ -736,13 +736,13 @@ forever:	for (;;) {
 	/**
 	 * make a shallow clone of myself and my lock controls
 	 */
-	public synchronized Map shallowClone()
+	public synchronized Map<Lockable,Control> shallowClone()
 	{
-		HashMap clone = new HashMap();
+		HashMap<Lockable,Control> clone = new HashMap<Lockable,Control>();
 
-		for (Iterator it = locks.keySet().iterator(); it.hasNext(); )
+		for (Iterator<Lockable> it = locks.keySet().iterator(); it.hasNext(); )
 		{
-			Lockable lockable = (Lockable) it.next();
+			Lockable lockable = it.next();
 			Control control = getControl(lockable);
 
 			clone.put(lockable, control.shallowClone());
@@ -790,6 +790,6 @@ forever:	for (;;) {
 	 * MT - must be synchronized on this <code>LockSet</code> object.
 	 */
 	private final Control getControl(Lockable ref) {
-		return (Control) locks.get(ref);
+		return locks.get(ref);
 	}
 }

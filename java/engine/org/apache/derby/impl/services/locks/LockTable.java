@@ -154,5 +154,5 @@ interface LockTable {
      * @param waiters the map to add the waiters to
      * @see LockControl#addWaiters
      */
-    void addWaiters(Map waiters);
+    void addWaiters(Map<Object,Object> waiters);
 }

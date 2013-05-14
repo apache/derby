@@ -137,10 +137,10 @@ class BCClass extends GClass {
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON("DumpClassFile")) {
 				/* Dump the file in derby.system.home */
-				String systemHome = (String )AccessController.doPrivileged
-				(new java.security.PrivilegedAction(){
+				String systemHome = AccessController.doPrivileged
+				(new java.security.PrivilegedAction<String>(){
 
-					public Object run(){
+					public String run(){
 						return System.getProperty(Property.SYSTEM_HOME_PROPERTY,".");
 
 					}

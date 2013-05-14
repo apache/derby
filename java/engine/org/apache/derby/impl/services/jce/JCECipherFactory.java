@@ -68,7 +68,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
 
 	@see CipherFactory
  */
-public final class JCECipherFactory implements CipherFactory, java.security.PrivilegedExceptionAction
+public final class JCECipherFactory implements CipherFactory, java.security.PrivilegedExceptionAction<Object>
 {
     private final static String MESSAGE_DIGEST = "MD5";
 

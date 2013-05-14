@@ -54,7 +54,7 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 		// leaking class loaders.
 		try {
             AccessController.doPrivileged(
-             new PrivilegedAction() {
+             new PrivilegedAction<Object>() {
                 public Object run()  {
                     daemonThread.setContextClassLoader(null);
                     return null;

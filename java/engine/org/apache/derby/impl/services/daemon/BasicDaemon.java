@@ -80,7 +80,7 @@ public class BasicDaemon implements DaemonService, Runnable
 
 	private static final int OPTIMAL_QUEUE_SIZE = 100;
 
-	private final Vector subscription;
+	private final Vector<ServiceRecord> subscription;
 
 	// the context this daemon should run with
 	protected final ContextService contextService;
@@ -90,8 +90,8 @@ public class BasicDaemon implements DaemonService, Runnable
 		Queues for the work to be done.
 		These are synchronized by this object.
 	*/
-	private final List highPQ;		// high priority queue
-	private final List normPQ;		// normal priority queue
+	private final List<ServiceRecord> highPQ;		// high priority queue
+	private final List<ServiceRecord> normPQ;		// normal priority queue
 
 	/**
 		which subscribed clients to service next?
@@ -130,9 +130,9 @@ public class BasicDaemon implements DaemonService, Runnable
 		this.contextService = contextService;
 		this.contextMgr = contextService.newContextManager();
 
-		subscription = new Vector(1, 1);
-		highPQ = new java.util.LinkedList();
-		normPQ = new java.util.LinkedList();
+		subscription = new Vector<ServiceRecord>(1, 1);
+		highPQ = new java.util.LinkedList<ServiceRecord>();
+		normPQ = new java.util.LinkedList<ServiceRecord>();
 		
 		lastServiceTime = System.currentTimeMillis();
 	}
@@ -206,7 +206,7 @@ public class BasicDaemon implements DaemonService, Runnable
 		}
 
 
-		List queue = serviceNow ? highPQ : normPQ;
+		List<ServiceRecord> queue = serviceNow ? highPQ : normPQ;
 
 		int highPQsize;
 		synchronized (this) {
@@ -336,7 +336,7 @@ public class BasicDaemon implements DaemonService, Runnable
 
 			if (status == Serviceable.REQUEUE)
 			{
-				List queue = client.serviceASAP() ? highPQ : normPQ;
+				List<ServiceRecord> queue = client.serviceASAP() ? highPQ : normPQ;
 				synchronized (this) {
 					queue.add(clientRecord);
 

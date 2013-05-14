@@ -91,7 +91,7 @@ public abstract class LoadedGeneratedClass
 	/*
 	** Methods for subclass
 	*/
-	protected Class getJVMClass() {
+	protected Class<?> getJVMClass() {
 		return ci.getClassObject();
 	}
 }

@@ -27,10 +27,10 @@ import org.apache.derby.iapi.util.ByteArray;
 */
 
 public class ReflectClassesJava2 extends DatabaseClasses
-	implements java.security.PrivilegedAction
+	implements java.security.PrivilegedAction<Object>
 {
 
-	private java.util.HashMap preCompiled;
+	private java.util.HashMap<String,ReflectGeneratedClass> preCompiled;
 
 	private int action = -1;
 
@@ -39,10 +39,10 @@ public class ReflectClassesJava2 extends DatabaseClasses
 		if (classDump == null || classDump.getArray() == null) {
 
 			if (preCompiled == null)
-				preCompiled = new java.util.HashMap();
+				preCompiled = new java.util.HashMap<String,ReflectGeneratedClass>();
 			else
 			{
-				ReflectGeneratedClass gc = (ReflectGeneratedClass) preCompiled.get(fullyQualifiedName);
+				ReflectGeneratedClass gc = preCompiled.get(fullyQualifiedName);
 				if (gc != null)
 					return gc;
 			}

@@ -105,10 +105,10 @@ final class Clock implements CacheManager, Serviceable {
 	** Fields
 	*/
 	private final CacheStat stat;
-	private final HashMap cache_;
+	private final HashMap<Object,CachedItem> cache_;
 	private DaemonService		cleaner;	// the background worker thread who is going to
 									// do pre-flush for this cache. 
-	private final ArrayList		holders;
+	private final ArrayList<CachedItem>		holders;
     private int validItemCount = 0;
 	private long			maximumSize;
     private boolean useByteCount; // regulate the total byte count or the entry count
@@ -150,7 +150,7 @@ final class Clock implements CacheManager, Serviceable {
 	*/
 	Clock(CacheableFactory holderFactory, String name,
 		  int initialSize, long maximumSize, boolean useByteCount) {
-		cache_ = new HashMap(initialSize, (float) 0.95);
+		cache_ = new HashMap<Object,CachedItem>(initialSize, (float) 0.95);
 		this.maximumSize = maximumSize;
 		this.holderFactory = holderFactory;
 		this.useByteCount = useByteCount;
@@ -165,7 +165,7 @@ final class Clock implements CacheManager, Serviceable {
 		//if (delta < 5)
 		//	delta = 5;
 
-		holders = new ArrayList(initialSize);
+		holders = new ArrayList<CachedItem>(initialSize);
 		this.name = name;
 		active = true;
 
@@ -643,7 +643,7 @@ final class Clock implements CacheManager, Serviceable {
 			boolean shrunk = false;
 
 			for (int position = 0; position < size; position++) {
-				CachedItem item = (CachedItem) holders.get(position);
+				CachedItem item = holders.get(position);
 
 				if (item.isKept())
 					continue;
@@ -729,7 +729,7 @@ final class Clock implements CacheManager, Serviceable {
 			boolean shrunk = false;
 
 			for (int position = 0; position < size; position++) {
-				CachedItem item = (CachedItem) holders.get(position);
+				CachedItem item = holders.get(position);
 
 				if (!item.isValid())
 					continue;
@@ -884,7 +884,7 @@ final class Clock implements CacheManager, Serviceable {
 				// items should start from the end.
 
 				for (int i = holders.size() - 1; (invalidItems > 0) && (i >= 0) ; i--) {
-					CachedItem item = (CachedItem) holders.get(i);
+					CachedItem item = holders.get(i);
 
 					if (item.isKept()) {
 						if (!item.isValid()) invalidItems--;
@@ -987,7 +987,7 @@ restartClock:
 							clockHand = 0;
 						}
 
-						item = (CachedItem) holders.get(clockHand);
+						item = holders.get(clockHand);
 
 						if (item.isKept())
 						{
@@ -1221,7 +1221,7 @@ restartClock:
 
 			for (int position = 0; position < size; position++) {
 
-				CachedItem item = (CachedItem) holders.get(position);
+				CachedItem item = holders.get(position);
 
 				if (item.isValid()) {
 					inUse++;
@@ -1349,7 +1349,7 @@ innerscan:
 				// items up, we may skip some items without cleaning.
 				for ( ;  position >= 0; position--, item = null) {
 
-					item = (CachedItem) holders.get(position);
+					item = holders.get(position);
 
 					if (!item.isValid())
 						continue innerscan;
@@ -1506,7 +1506,7 @@ innerscan:
 					break;			// done one round
 				}
 
-				item = (CachedItem) holders.get(currentPosition);
+				item = holders.get(currentPosition);
 
 				if (item.isKept())
 					continue;
@@ -1744,7 +1744,7 @@ innerscan:
                     
                 for( ; position < holders.size(); position++)
                 {
-                    item = (CachedItem) holders.get( position);
+                    item = holders.get( position);
                     if( null != item)
                     {
                         try
@@ -1795,7 +1795,7 @@ innerscan:
 		int invalidCount = 0;
         for (int i = 0; i <= endPosition; i++)
         {
-            CachedItem item = (CachedItem) holders.get(i);
+            CachedItem item = holders.get(i);
 
 			if (item.isKept())
 				continue;
@@ -1808,7 +1808,7 @@ innerscan:
 			// swap with an item later in the list
 			// try to keep free items at the end of the holders array.
 			for (; endPosition > i; endPosition--) {
-				CachedItem last = (CachedItem) holders.get(endPosition);
+				CachedItem last = holders.get(endPosition);
 				if (last.isValid()) {
 					holders.set(i, last);
 					holders.set(endPosition, item);
@@ -1837,7 +1837,7 @@ innerscan:
 		// remove items, starting at the end,  where
 		// hopefully most of the free items are.
 		for (int r = size - 1; r > newSize; r--) {
-			CachedItem remove = (CachedItem) holders.get(r);
+			CachedItem remove = holders.get(r);
 			if (remove.isKept() || remove.isValid()) {
 				continue;
 			}
@@ -1872,9 +1872,9 @@ innerscan:
 	 * @return a Collection of the cache elements.
 	 */
 	public synchronized Collection values() {
-		ArrayList al = new ArrayList();
-		for (Iterator i = cache_.values().iterator(); i.hasNext();){
-			al.add(((CachedItem)i.next()).getEntry());
+		ArrayList<Cacheable> al = new ArrayList<Cacheable>();
+		for (Iterator<CachedItem> i = cache_.values().iterator(); i.hasNext();){
+			al.add((i.next()).getEntry());
 		}
 		return al;
 	}

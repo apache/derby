@@ -155,7 +155,7 @@ class Deadlock  {
 		// - Compatibility space of waiter A
 		// - Stack of compatibility spaces with granted lock for waiter A
 
-		Stack chain = new Stack();
+		Stack<Object> chain = new Stack<Object>();
 
 		chain.push(startingLock.getCompatabilitySpace());
 		chain.push(control.getGrants());
@@ -167,7 +167,8 @@ outer:	for (;;) {
 				break outer;
 			}
 
-			List grants = (List) chain.peek();
+            @SuppressWarnings("unchecked")
+			List<Object> grants = (List<Object>) chain.peek();
 			if (grants.isEmpty()) {
                 // All granted locks in this lock control have been examined.
 				// pop this list of granted locks and back to the previous one
@@ -366,7 +367,7 @@ inner:		for (;;) {
      * @see LockControl#addWaiters(java.util.Map)
      */
 	private static Hashtable getWaiters(LockTable set) {
-		Hashtable waiters = new Hashtable();
+		Hashtable<Object,Object> waiters = new Hashtable<Object,Object>();
 		set.addWaiters(waiters);
 		return waiters;
 	}
@@ -466,7 +467,7 @@ inner:		for (;;) {
 
 		StringBuffer sb = new StringBuffer(200);
 
-		Hashtable attributes = new Hashtable(17);
+		Hashtable<String,Object> attributes = new Hashtable<String,Object>(17);
 
 		String victimXID = null;
 

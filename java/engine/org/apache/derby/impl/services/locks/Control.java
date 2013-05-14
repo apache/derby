@@ -50,7 +50,7 @@ public interface Control {
 
 	public boolean unlock(Latch lockInGroup, int unlockCount);
 
-	public void addWaiters(Map waiters);
+	public void addWaiters(Map<Object,Object> waiters);
 
 	public Lock getFirstGrant();
 

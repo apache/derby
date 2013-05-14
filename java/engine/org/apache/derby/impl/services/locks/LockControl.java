@@ -56,8 +56,8 @@ final class LockControl implements Control {
 		has been created it is always used.
 	*/
 	private Lock				firstGrant;
-	private List				granted;
-	private List				waiting;
+	private List<Lock>				granted;
+	private List<Lock>				waiting;
 	private Lock				lastPossibleSkip;
 
 	protected LockControl(Lock firstLock, Lockable ref) {
@@ -78,10 +78,10 @@ final class LockControl implements Control {
 		this.firstGrant = copyFrom.firstGrant;
 
 		if (copyFrom.granted != null)
-			this.granted = new java.util.LinkedList(copyFrom.granted);
+			this.granted = new java.util.LinkedList<Lock>(copyFrom.granted);
 
 		if (copyFrom.waiting != null)
-			this.waiting = new java.util.LinkedList(copyFrom.waiting);
+			this.waiting = new java.util.LinkedList<Lock>(copyFrom.waiting);
 
 		this.lastPossibleSkip = copyFrom.lastPossibleSkip;
 	}
@@ -108,7 +108,7 @@ final class LockControl implements Control {
 
 		lockItem.grant();
 
-		List lgranted = granted;
+		List<Lock> lgranted = granted;
 		
 		if (lgranted == null) {
 			if (firstGrant == null) {
@@ -116,7 +116,7 @@ final class LockControl implements Control {
 				firstGrant = lockItem;
 			} else {
 				// second ever lock on this item
-				lgranted = granted = new java.util.LinkedList();
+				lgranted = granted = new java.util.LinkedList<Lock>();
 				lgranted.add(firstGrant);
 				lgranted.add(lockItem);
 				firstGrant = null;
@@ -136,7 +136,7 @@ final class LockControl implements Control {
 		if (unlockCount == 0)
 			unlockCount = lockInGroup.getCount();
 
-		List lgranted = granted;
+		List<Lock> lgranted = granted;
 			
 		// start at the begining of the list when there is one
 		for (int index = 0; unlockCount > 0; ) {
@@ -155,7 +155,7 @@ final class LockControl implements Control {
 				if (SanityManager.DEBUG) {
 					SanityManager.ASSERT(index != -1);
 				}
-				lockInSet = (Lock) lgranted.get(index);
+				lockInSet = lgranted.get(index);
 			}
 
 			unlockCount -= lockInSet.unlock(unlockCount);
@@ -201,7 +201,7 @@ final class LockControl implements Control {
         boolean grantLock    = false;
 
 		Lockable lref = ref;
-		List lgranted = granted;
+		List<Lock> lgranted = granted;
 
         {
             // Check to see if the only locks on the granted queue that
@@ -212,7 +212,7 @@ final class LockControl implements Control {
 			int endIndex = firstGrant == null ? lgranted.size() : 0;
 			do {
 
-				Lock gl = firstGrant == null ? (Lock) lgranted.get(index) : firstGrant;
+				Lock gl = firstGrant == null ? lgranted.get(index) : firstGrant;
 
                 boolean sameSpace = 
                     (gl.getCompatabilitySpace() == compatibilitySpace);
@@ -301,7 +301,7 @@ final class LockControl implements Control {
 			int endIndex = firstGrant == null ? granted.size() : 0;
 			do {
 
-				Lock gl = firstGrant == null ? (Lock) granted.get(index) : firstGrant;
+				Lock gl = firstGrant == null ? granted.get(index) : firstGrant;
 
 
 				boolean sameSpace =
@@ -374,7 +374,7 @@ final class LockControl implements Control {
 		}
 
 		if (waiting == null)
-			waiting = new java.util.LinkedList();
+			waiting = new java.util.LinkedList<Lock>();
 
 		// Add lock to the waiting list
 		addWaiter(waitingLock, ls);
@@ -392,7 +392,7 @@ final class LockControl implements Control {
 		if (firstGrant != null)
 			return false;
 
-		List lgranted = granted;
+		List<Lock> lgranted = granted;
 
 		return (lgranted == null) || lgranted.isEmpty();
 	}
@@ -493,10 +493,10 @@ final class LockControl implements Control {
 	public Lock getFirstGrant() {
 		return firstGrant;
 	}
-	public List getGranted() {
+	public List<Lock> getGranted() {
 		return granted;
 	}
-	public List getWaiting() {
+	public List<Lock> getWaiting() {
 		return waiting;
 	}
 
@@ -533,7 +533,7 @@ final class LockControl implements Control {
 		<LI>key=ActiveLock - value={LockControl for first waiter|ActiveLock of previosue waiter}
 		</OL>
 	*/
-	public void addWaiters(Map waiters) {
+	public void addWaiters(Map<Object,Object> waiters) {
 		
 		if ((waiting == null) || waiting.isEmpty())
 			return;
@@ -555,17 +555,17 @@ final class LockControl implements Control {
 		Return a Stack of the
 		held locks (Lock objects) on this Lockable.
 	*/
-	List getGrants() {
+	List<Lock> getGrants() {
 
-		List ret;
+		List<Lock> ret;
 
 		if (firstGrant != null) {
-			ret = new java.util.LinkedList();
+			ret = new java.util.LinkedList<Lock>();
 			ret.add(firstGrant);
 		}
 		else
 		{
-			ret = new java.util.LinkedList(granted);
+			ret = new java.util.LinkedList<Lock>(granted);
 		}
 
 		return ret;
@@ -580,14 +580,14 @@ final class LockControl implements Control {
 		if (isUnlocked())
 			return null;
 
-		List lgranted = granted;
+		List<Lock> lgranted = granted;
 
 
 		int index = 0;
 		int endIndex = firstGrant == null ? lgranted.size() : 0;
 		do {
 
-			Lock gl = firstGrant == null ? (Lock) lgranted.get(index) : firstGrant;
+			Lock gl = firstGrant == null ? lgranted.get(index) : firstGrant;
 
             if (gl.getCompatabilitySpace() != compatibilitySpace)
 				continue;

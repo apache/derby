@@ -98,7 +98,7 @@ class BCMethod implements MethodBuilder {
     private final String[] parameterTypes;
     
     
-	Vector thrownExceptions; // expected to be names of Classes under Throwable
+	Vector<String> thrownExceptions; // expected to be names of Classes under Throwable
 
 	CodeChunk myCode;
 	protected ClassMember myEntry;
@@ -210,7 +210,7 @@ class BCMethod implements MethodBuilder {
 		}
 
 		if (thrownExceptions == null)
-			thrownExceptions = new Vector();
+			thrownExceptions = new Vector<String>();
 		thrownExceptions.add(exceptionClass);
 	}
 

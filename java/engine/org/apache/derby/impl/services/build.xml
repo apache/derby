@@ -52,7 +52,7 @@
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/services/**"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
  </target> 
 

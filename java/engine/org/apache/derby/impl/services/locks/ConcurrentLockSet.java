@@ -953,7 +953,7 @@ forever:	for (;;) {
      * been seen and locked will be unlocked after the deadlock detection has
      * finished.
      */
-    public void addWaiters(Map waiters) {
+    public void addWaiters(Map<Object,Object> waiters) {
         seenByDeadlockDetection = new ArrayList<Entry>(locks.size());
         for (Entry entry : locks.values()) {
             seenByDeadlockDetection.add(entry);

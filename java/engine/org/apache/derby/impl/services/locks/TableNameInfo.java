@@ -40,15 +40,15 @@ public class TableNameInfo {
 	private DataDictionary dd;
 	private Hashtable ddCache;			// conglomId -> conglomerateDescriptor
 	private Hashtable tdCache;			// tableID UUID -> table descriptor
-	private Hashtable tableCache;		// conglomId -> table descriptor
-	private Hashtable indexCache;		// conglomId -> indexname
+	private Hashtable<Long,TableDescriptor> tableCache;		// conglomId -> table descriptor
+	private Hashtable<Long,String> indexCache;		// conglomId -> indexname
 
 	public TableNameInfo(LanguageConnectionContext lcc, boolean andIndex)
 		throws StandardException {
 
-		tableCache = new Hashtable(31);
+		tableCache = new Hashtable<Long,TableDescriptor>(31);
 		if (andIndex)
-			indexCache = new Hashtable(13);
+			indexCache = new Hashtable<Long,String>(13);
 
 		TransactionController tc = lcc.getTransactionExecute();
 
@@ -63,7 +63,7 @@ public class TableNameInfo {
 			return "?";
 
 		// see if we have already seen this conglomerate
-		TableDescriptor td = (TableDescriptor) tableCache.get(conglomId);
+		TableDescriptor td = tableCache.get(conglomId);
 		if (td == null)
 		{
 			// first time we see this conglomerate, get it from the
@@ -137,7 +137,7 @@ public class TableNameInfo {
 
 		String type;
 
-		TableDescriptor td = (TableDescriptor) tableCache.get(conglomId);
+		TableDescriptor td = tableCache.get(conglomId);
 		if (td != null)
 		{
 			switch(td.getTableType())
@@ -170,6 +170,6 @@ public class TableNameInfo {
 	public String getIndexName(Long conglomId) {
 		if (conglomId == null)
 			return "?";
-		return (String) indexCache.get(conglomId);
+		return indexCache.get(conglomId);
 	}
 }

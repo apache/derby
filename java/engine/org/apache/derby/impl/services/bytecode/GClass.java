@@ -81,9 +81,9 @@ public abstract class GClass implements ClassBuilder {
 		FileOutputStream fos = null;
 		try {
 			try {
-				fos =  (FileOutputStream)AccessController.doPrivileged(
-						new PrivilegedExceptionAction() {
-							public Object run()
+				fos =  AccessController.doPrivileged(
+						new PrivilegedExceptionAction<FileOutputStream>() {
+							public FileOutputStream run()
 							throws FileNotFoundException {
 								return new FileOutputStream(classFile);
 							}

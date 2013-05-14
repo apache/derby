@@ -68,9 +68,9 @@ public class SingletonTimerFactory
         ClassLoader savecl = null;
         boolean hasGetClassLoaderPerms = false;
         try {
-            savecl = (ClassLoader)AccessController.doPrivileged(
-            new PrivilegedAction() {
-                public Object run()  {
+            savecl = AccessController.doPrivileged(
+            new PrivilegedAction<ClassLoader>() {
+                public ClassLoader run()  {
                     return Thread.currentThread().getContextClassLoader();
                 }
             });
@@ -84,7 +84,7 @@ public class SingletonTimerFactory
         if (hasGetClassLoaderPerms)
             try {
                 AccessController.doPrivileged(
-                new PrivilegedAction() {
+                new PrivilegedAction<Object>() {
                     public Object run()  {
                         Thread.currentThread().setContextClassLoader(null);
                         return null;
@@ -101,7 +101,7 @@ public class SingletonTimerFactory
             try {
                 final ClassLoader tmpsavecl = savecl;
                 AccessController.doPrivileged(
-                new PrivilegedAction() {
+                new PrivilegedAction<Object>() {
                     public Object run()  {
                         Thread.currentThread().setContextClassLoader(tmpsavecl);
                         return null;

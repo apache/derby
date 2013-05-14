@@ -262,7 +262,7 @@ public final class Timeout
      */
     private void dumpLock() throws StandardException
     {
-        Hashtable attributes = new Hashtable(17);
+        Hashtable<String,Object> attributes = new Hashtable<String,Object>(17);
         Object lock_type = currentLock.getQualifier();
 
         // want containerId, segmentId, pageNum, recId from locktable

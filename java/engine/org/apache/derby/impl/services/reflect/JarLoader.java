@@ -105,10 +105,10 @@ final class JarLoader extends SecureClassLoader {
 
 			if (installedJar instanceof File) {
                 try {
-                    jar = (JarFile) AccessController.doPrivileged
-                    (new java.security.PrivilegedExceptionAction(){
+                    jar = AccessController.doPrivileged
+                    (new java.security.PrivilegedExceptionAction<JarFile>(){
 
-                        public Object run() throws IOException {
+                        public JarFile run() throws IOException {
                         return new JarFile((File) installedJar);
 
                         }

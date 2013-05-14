@@ -181,9 +181,9 @@ abstract class DatabaseClasses
 		try {
             FileOutputStream fis;
             try {
-                fis = (FileOutputStream) AccessController.doPrivileged(
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws IOException {
+                fis = AccessController.doPrivileged(
+                        new PrivilegedExceptionAction<FileOutputStream>() {
+                            public FileOutputStream run() throws IOException {
                                 return new FileOutputStream(classFile);
                             }
                         });
