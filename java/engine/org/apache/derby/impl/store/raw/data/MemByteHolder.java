@@ -38,7 +38,7 @@ implements ByteHolder
 
 	boolean writing = true;
 	
-	Vector bufV;
+	Vector<byte[]> bufV;
 	int curBufVEleAt;
 
 	byte[] curBuf;
@@ -69,7 +69,7 @@ implements ByteHolder
 		this.curBuf = new byte[bufSize];
 		this.curBufPos = 0;
 
-		this.bufV = new Vector(128);
+		this.bufV = new Vector<byte[]>(128);
 		bufV.addElement(curBuf);
 		this.curBufVEleAt = 0;
 	}
@@ -170,7 +170,7 @@ implements ByteHolder
 	{
 		writing = true;
 		
-		curBuf = (byte[])bufV.elementAt(0);
+		curBuf = bufV.elementAt(0);
 		this.curBufVEleAt = 0;
 		this.curBufPos = 0;
 		
@@ -194,7 +194,7 @@ implements ByteHolder
 		//
 		//Reposition so reads start from the first
 		//byte.
-		curBuf = (byte[])bufV.elementAt(0);
+		curBuf = bufV.elementAt(0);
 		this.curBufVEleAt = 0;
 		this.curBufPos = 0;
 		if (curBufVEleAt == lastBufVEleAt)
@@ -444,7 +444,7 @@ implements ByteHolder
 		}
 		else
 		{
-			curBuf = (byte[])bufV.elementAt(curBufVEleAt);
+			curBuf = bufV.elementAt(curBufVEleAt);
 		}
 		
 		initBuffer_w();
@@ -489,7 +489,7 @@ implements ByteHolder
 			SanityManager.ASSERT(writing == false,
 								 "Reading should be true 5");
 		if (curBufVEleAt >= lastBufVEleAt) return true;
-		curBuf = (byte[])bufV.elementAt(++curBufVEleAt);
+		curBuf = bufV.elementAt(++curBufVEleAt);
 		curBufPos = 0;
 		if (curBufVEleAt == lastBufVEleAt)
 			curBufDataBytes = lastBufDataBytes;
@@ -506,7 +506,7 @@ implements ByteHolder
 	{
 		StringBuffer sb = new StringBuffer(100);
 
-		byte[] buf = (byte[])bufV.elementAt(bufVEleAt);
+		byte[] buf = bufV.elementAt(bufVEleAt);
 		sb.append("(");
 		for (int ix = 0;ix<buf.length;ix++)
 			sb.append(buf[ix]+".");

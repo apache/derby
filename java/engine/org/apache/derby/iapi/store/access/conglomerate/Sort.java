@@ -28,6 +28,7 @@ import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 
 /**
 
@@ -58,7 +59,7 @@ public interface Sort
     @exception StandardException Standard exception policy.
 	**/
 
-	ScanController openSortScan(
+	ScanManager openSortScan(
     TransactionManager  tran,
     boolean             hold)
 			throws StandardException;

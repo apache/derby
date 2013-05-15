@@ -216,10 +216,10 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 	private LogInstant		logLast;  // the last log record written by this
 									  // transaction 
 
-	private Stack			savePoints;	// stack of SavePoint objects.
+	private Stack<SavePoint>			savePoints;	// stack of SavePoint objects.
 
-	protected List   		postCommitWorks; // a list of post commit work
-	protected List		    postTerminationWorks; // work to be done after
+	protected List<Serviceable>   		postCommitWorks; // a list of post commit work
+	protected List<Serviceable>		    postTerminationWorks; // work to be done after
 												  // transaction terminates,
 												  // commit or abort
 	private boolean			recoveryTransaction;  // this transaction is being
@@ -1246,7 +1246,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 					    // set the top savepoint to rollback to this record if
                         // it doesn't yet have a point saved
 
-						SavePoint sp = (SavePoint) savePoints.elementAt(i);
+						SavePoint sp = savePoints.elementAt(i);
 						if (sp.getSavePoint() == null) {
 							sp.setSavePoint(instant);
 						} else
@@ -1270,7 +1270,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 			return;
 
 		if (postCommitWorks == null)
-			postCommitWorks = new ArrayList(1);
+			postCommitWorks = new ArrayList<Serviceable>(1);
 		postCommitWorks.add(work);
 	}
 
@@ -1280,7 +1280,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 			return;
 
 		if (postTerminationWorks == null)
-			postTerminationWorks = new ArrayList(2);
+			postTerminationWorks = new ArrayList<Serviceable>(2);
 		postTerminationWorks.add(work);
 	}
 
@@ -1476,7 +1476,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
         }
 
 		if (savePoints == null)
-			savePoints = new Stack();
+			savePoints = new Stack<SavePoint>();
 
 		savePoints.push(new SavePoint(name, kindOfSavepoint));
 
@@ -1507,7 +1507,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 		if ((savePoints != null) && !savePoints.empty()) {
 			for (int i = savePoints.size() - 1; i >= 0; i--) {
-				SavePoint sp = (SavePoint) savePoints.elementAt(i);
+				SavePoint sp = savePoints.elementAt(i);
 				if (sp.isThisUserDefinedsavepoint()) 
 				{
                     //found a user defined savepoint
@@ -2048,7 +2048,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 			0 : postTerminationWorks.size(); 
 
 		for (int i = 0; i < count; i++)
-			addPostCommitWork((Serviceable)postTerminationWorks.get(i));
+			addPostCommitWork(postTerminationWorks.get(i));
 
 		if (count > 0)
 			postTerminationWorks.clear();
@@ -2173,7 +2173,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
         for (int i = savePoints.size() - 1; i >= 0; i--)
         {
-            SavePoint savepoint = (SavePoint)savePoints.elementAt(i);
+            SavePoint savepoint = savePoints.elementAt(i);
 
             if (savepoint.getName().equals(name))
             {
@@ -2214,7 +2214,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 		int size = savePoints.size();
 		for (int i = position; i < size; i++) {
-			SavePoint rollbackSavePoint = (SavePoint) savePoints.elementAt(i);
+			SavePoint rollbackSavePoint = savePoints.elementAt(i);
 
 			LogInstant li = rollbackSavePoint.getSavePoint();
 			if (li != null) {
@@ -2437,7 +2437,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		throws StandardException {
 
 		// Count row locks by table
-		Dictionary containers = new java.util.Hashtable();
+		Dictionary<ContainerKey,LockCount> containers = new java.util.Hashtable<ContainerKey,LockCount>();
 
 		for (; lockList.hasMoreElements(); ) {
 
@@ -2467,10 +2467,10 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		// this threshold
 
 		boolean didEscalate = false;
-		for (Enumeration e = containers.keys(); e.hasMoreElements(); ) {
-			ContainerKey ckey = (ContainerKey) e.nextElement();
+		for (Enumeration<ContainerKey> e = containers.keys(); e.hasMoreElements(); ) {
+			ContainerKey ckey = e.nextElement();
 
-			LockCount lc = (LockCount) containers.get(ckey);
+			LockCount lc = containers.get(ckey);
 
 			if (lc.count < threshold) {
 				continue;

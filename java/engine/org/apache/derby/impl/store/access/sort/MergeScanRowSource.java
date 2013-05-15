@@ -58,7 +58,7 @@ public class MergeScanRowSource extends MergeScan implements ScanControllerRowSo
     MergeSort           sort, 
     TransactionManager  tran,
     SortBuffer          sortBuffer, 
-    Vector              mergeRuns,
+    Vector<Long>              mergeRuns,
 	SortObserver		sortObserver,
     boolean             hold)
     {

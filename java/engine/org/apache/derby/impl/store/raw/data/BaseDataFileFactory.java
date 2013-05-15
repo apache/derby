@@ -112,7 +112,7 @@ that file was made to inherit from this one.
 **/
 
 public class BaseDataFileFactory
-    implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
+    implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction<Object>
 {
 
     StorageFactory storageFactory;
@@ -194,9 +194,9 @@ public class BaseDataFileFactory
 
 
 	//hash table to keep track of information about dropped containers stubs
-	private Hashtable droppedTableStubInfo;
+	private Hashtable<LogInstant,Object[]> droppedTableStubInfo;
 
-	private Hashtable postRecoveryRemovedFiles;
+	private Hashtable<String,StorageFile> postRecoveryRemovedFiles;
 
     // PrivilegedAction actions
     private int actionCode;
@@ -435,7 +435,7 @@ public class BaseDataFileFactory
                 (noLog != null && Boolean.valueOf(noLog).booleanValue());
 		}
 
-		droppedTableStubInfo = new Hashtable();
+		droppedTableStubInfo = new Hashtable<LogInstant,Object[]>();
 
         // If derby.system.durability=test then set flags to disable sync of
         // data pages at allocation when file is grown, disable sync of data
@@ -1642,15 +1642,15 @@ public class BaseDataFileFactory
 		{
 			synchronized(droppedTableStubInfo)
 			{
-				for (Enumeration e = droppedTableStubInfo.keys(); 
+				for (Enumeration<LogInstant> e = droppedTableStubInfo.keys(); 
                      e.hasMoreElements(); ) 
 				{
-					LogInstant logInstant  = (LogInstant) e.nextElement();
+					LogInstant logInstant  = e.nextElement();
 					if(logInstant.lessThan(redoLWM))
 					{
 						
 						Object[] removeInfo = 
-                            (Object[]) droppedTableStubInfo.get(logInstant);
+                            droppedTableStubInfo.get(logInstant);
 						Object identity = removeInfo[1];
 						//delete the entry in the container cache.
 						Cacheable ccentry =	containerCache.findCached(identity);
@@ -2131,9 +2131,9 @@ public class BaseDataFileFactory
      **/
     private static String jarClassPath(final Class cls)
     {
-        return (String)AccessController.doPrivileged( new PrivilegedAction()
+        return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
-          public Object run()
+          public String run()
           {
               CodeSource cs = null;
               try {
@@ -2160,8 +2160,8 @@ public class BaseDataFileFactory
      * security exception.
      */
     private static String buildOSinfo () {
-    	return (String)AccessController.doPrivileged(new PrivilegedAction(){
-    		public Object run() {
+    	return AccessController.doPrivileged(new PrivilegedAction<String>(){
+    		public String run() {
     			String osInfo = "";
     			try {
     				String currentProp = PropertyUtil.getSystemProperty("os.name");
@@ -2187,9 +2187,9 @@ public class BaseDataFileFactory
      * security exception.
      */
     private static String buildJvmVersion () {
-        return (String)AccessController.doPrivileged( new PrivilegedAction()
+        return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
-           public Object run()
+           public String run()
            {      
              String jvmversion = "";
              try {
@@ -2260,7 +2260,7 @@ public class BaseDataFileFactory
 	void fileToRemove( StorageFile file, boolean remove) 
     {
 		if (postRecoveryRemovedFiles == null)
-			postRecoveryRemovedFiles = new Hashtable();
+			postRecoveryRemovedFiles = new Hashtable<String,StorageFile>();
         String path = null;
         synchronized( this)
         {
@@ -2544,9 +2544,9 @@ public class BaseDataFileFactory
          * This will fail with a security exception unless the database engine 
          * and all its callers have permission to read the backup directory.
          */
-        String[] bfilelist = (String[])AccessController.doPrivileged(
-                                            new PrivilegedAction() {
-                                                public Object run() {
+        String[] bfilelist = AccessController.doPrivileged(
+                                            new PrivilegedAction<String[]>() {
+                                                public String[] run() {
                                                     return backupRoot.list();
                                                 }
                                             });
@@ -2560,19 +2560,19 @@ public class BaseDataFileFactory
                 {
                     // Segment directory in the backup
                     final File bsegdir = new File(backupRoot , bfilelist[i]);
-                    boolean bsegdirExists = ((Boolean)
+                    boolean bsegdirExists = (
                             AccessController.doPrivileged(
-                                new PrivilegedAction() {
-                                    public Object run() {
+                                new PrivilegedAction<Boolean>() {
+                                    public Boolean run() {
                                         return Boolean.valueOf(bsegdir.exists());
                                     }
                             })).booleanValue();
                     if (bsegdirExists) {
                         // Make sure the file object points at a directory.
-                        boolean isDirectory = ((Boolean)
+                        boolean isDirectory = (
                             AccessController.doPrivileged(
-                            new PrivilegedAction() {
-                                public Object run() {
+                            new PrivilegedAction<Boolean>() {
+                                public Boolean run() {
                                     return Boolean.valueOf(bsegdir.isDirectory());
                                 }
                             })).booleanValue();
@@ -2841,10 +2841,10 @@ public class BaseDataFileFactory
 
         case POST_RECOVERY_REMOVE_ACTION:
         {
-			for (Enumeration e = postRecoveryRemovedFiles.elements(); 
+			for (Enumeration<StorageFile> e = postRecoveryRemovedFiles.elements(); 
                     e.hasMoreElements(); )
             {
-				StorageFile f = (StorageFile) e.nextElement();
+				StorageFile f = e.nextElement();
 				if (f.exists())
                 {
 					boolean delete_status = f.delete();

@@ -158,9 +158,8 @@ public class ReplicationMessageReceive {
         try {
             //Start listening on the socket and accepting the connection
             client =
-                (Socket)
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                    public Object run() throws IOException {
+                AccessController.doPrivileged(new PrivilegedExceptionAction<Socket>() {
+                    public Socket run() throws IOException {
                         return serverSocket.accept();
                     }
                 });
@@ -198,9 +197,9 @@ public class ReplicationMessageReceive {
         //port number.
         ServerSocket ss = null;
         try { 
-            ss =   (ServerSocket) AccessController.doPrivileged
-            (new PrivilegedExceptionAction() {
-                public Object run() throws IOException  {
+            ss = AccessController.doPrivileged
+            (new PrivilegedExceptionAction<ServerSocket>() {
+                public ServerSocket run() throws IOException  {
                     ServerSocketFactory sf = ServerSocketFactory.getDefault();
                     return sf.createServerSocket(slaveAddress.getPortNumber(),
                             0, slaveAddress.getHostAddress());

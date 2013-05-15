@@ -54,7 +54,7 @@ import java.security.PrivilegedActionException;
 	for FileContainers which are implemented on java.io.RandomAccessFile.
 */
 
-class RAFContainer extends FileContainer implements PrivilegedExceptionAction
+class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Object>
 {
 
 	/*
@@ -823,9 +823,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      */
     private void copyFile(final StorageFile from, final File to)
             throws StandardException {
-        Boolean success = (Boolean) AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
+        Boolean success = AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    public Boolean run() {
                         return ReuseFactory.getBoolean(FileUtil.copyFile(
                                 dataFactory.getStorageFactory(), from, to));
                     }
@@ -844,9 +844,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * @throws StandardException if the file could not be removed
      */
     private void removeFile(final File file) throws StandardException {
-        Boolean success = (Boolean) AccessController.doPrivileged(
-            new PrivilegedAction() {
-                public Object run() {
+        Boolean success = AccessController.doPrivileged(
+            new PrivilegedAction<Boolean>() {
+                public Boolean run() {
                     return ReuseFactory.getBoolean(
                             !file.exists() || file.delete());
                 }
@@ -1315,9 +1315,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private RandomAccessFile getRandomAccessFile(final File file)
             throws FileNotFoundException {
         try {
-            return (RandomAccessFile) AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run() throws FileNotFoundException {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<RandomAccessFile>() {
+                    public RandomAccessFile run() throws FileNotFoundException {
                         boolean preExisting = file.exists();
                         RandomAccessFile raf = new RandomAccessFile(file, "rw");
                         if (!preExisting) {

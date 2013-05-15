@@ -111,20 +111,20 @@ public class RAMTransaction
 
 	// XXX (nat) management of the controllers is still embryonic.
 	// XXX (nat) would be nice if sort controllers were like conglom controllers
-	private ArrayList scanControllers;
-	private ArrayList conglomerateControllers;
-	private ArrayList sorts;
-	private ArrayList sortControllers;
+	private ArrayList<ScanManager> scanControllers;
+	private ArrayList<ConglomerateController> conglomerateControllers;
+	private ArrayList<Sort> sorts;
+	private ArrayList<SortController> sortControllers;
 
     /** List of sort identifiers (represented as <code>Integer</code> objects)
      * which can be reused. Since sort identifiers are used as array indexes,
      * we need to reuse them to avoid leaking memory (DERBY-912). */
-    private ArrayList freeSortIds;
+    private ArrayList<Integer> freeSortIds;
 
 	/**
 	Where to look for temporary conglomerates.
 	**/
-	protected HashMap tempCongloms;
+	protected HashMap<Long,Conglomerate> tempCongloms;
 
 	/**
 	Next id to use for a temporary conglomerate.
@@ -160,8 +160,8 @@ public class RAMTransaction
 		this.rawtran            = theRawTran;
         this.parent_tran        = parent_tran;
 		accessmanager           = myaccessmanager;
-		scanControllers         = new ArrayList();
-		conglomerateControllers = new ArrayList();
+		scanControllers         = new ArrayList<ScanManager>();
+		conglomerateControllers = new ArrayList<ConglomerateController>();
 
 		sorts                   = null; // allocated on demand.
 		freeSortIds             = null; // allocated on demand.
@@ -240,7 +240,7 @@ public class RAMTransaction
             // loop from end to beginning, removing scans which are not held.
             for (int i = scanControllers.size() - 1; i >= 0; i--)
             {
-                ScanManager sc = (ScanManager) scanControllers.get(i);
+                ScanManager sc = scanControllers.get(i);
 
                 if (sc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -266,9 +266,7 @@ public class RAMTransaction
             // loop from end to beginning, removing scans which are not held.
             for (int i = conglomerateControllers.size() - 1; i >= 0; i--)
             {
-                ConglomerateController cc = 
-                    (ConglomerateController) 
-                        conglomerateControllers.get(i);
+                ConglomerateController cc = conglomerateControllers.get(i);
 
                 if (cc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -297,7 +295,7 @@ public class RAMTransaction
                 // element from the list.
                 for (int i = sortControllers.size() - 1; i >= 0; i--)
                 {
-                    SortController sc = (SortController) sortControllers.get(i);
+                    SortController sc = sortControllers.get(i);
                     sc.completedInserts();
                 }
                 sortControllers.clear();
@@ -312,7 +310,7 @@ public class RAMTransaction
                 // element from the list.
                 for (int i = sorts.size() - 1; i >= 0; i--)
                 {
-                    Sort sort = (Sort) sorts.get(i);
+                    Sort sort = sorts.get(i);
                     if (sort != null)
                         sort.drop(this);
                 }
@@ -813,7 +811,7 @@ public class RAMTransaction
 		{
 			conglomId = nextTempConglomId--;
 			if (tempCongloms == null)
-				tempCongloms = new HashMap();
+				tempCongloms = new HashMap<Long,Conglomerate>();
 			tempCongloms.put(new Long(conglomId), conglom);
 		}
 		else
@@ -925,25 +923,24 @@ public class RAMTransaction
 
             str = "";
 
-            for (Iterator it = scanControllers.iterator(); it.hasNext(); )
+            for (Iterator<ScanManager> it = scanControllers.iterator(); it.hasNext(); )
             {
-                ScanController sc = (ScanController) it.next();
+                ScanController sc = it.next();
                 str += "open scan controller: " + sc + "\n";
             }
 
-            for (Iterator it = conglomerateControllers.iterator();
+            for (Iterator<ConglomerateController> it = conglomerateControllers.iterator();
                  it.hasNext(); )
             {
-                ConglomerateController cc = 
-                    (ConglomerateController) it.next();
+                ConglomerateController cc = (ConglomerateController) it.next();
                 str += "open conglomerate controller: " + cc + "\n";
             }
 
             if (sortControllers != null)
             {
-                for (Iterator it = sortControllers.iterator(); it.hasNext(); )
+                for (Iterator<SortController> it = sortControllers.iterator(); it.hasNext(); )
                 {
-                    SortController sc = (SortController) it.next();
+                    SortController sc = it.next();
                     str += "open sort controller: " + sc + "\n";
                 }
             }
@@ -952,7 +949,7 @@ public class RAMTransaction
             {
                 for (int i = 0; i < sorts.size(); i++)
                 {
-                    Sort sort = (Sort) sorts.get(i);
+                    Sort sort = sorts.get(i);
 
                     if (sort != null)
                     {
@@ -965,11 +962,11 @@ public class RAMTransaction
 
 			if (tempCongloms != null)
 			{
-                for (Iterator it = tempCongloms.keySet().iterator();
+                for (Iterator<Long> it = tempCongloms.keySet().iterator();
                      it.hasNext(); )
                 {
-					Long conglomId = (Long) it.next();
-					Conglomerate c = (Conglomerate) tempCongloms.get(conglomId);
+					Long conglomId = it.next();
+					Conglomerate c = tempCongloms.get(conglomId);
 					str += "temp conglomerate id = " + conglomId + ": " + c;
 				}
 			}
@@ -1694,8 +1691,8 @@ public class RAMTransaction
 
 		// Add the sort to the sorts vector
 		if (sorts == null) {
-			sorts = new ArrayList();
-            freeSortIds = new ArrayList();
+			sorts = new ArrayList<Sort>();
+            freeSortIds = new ArrayList<Integer>();
         }
 
         int sortid;
@@ -1705,7 +1702,7 @@ public class RAMTransaction
             sorts.add(sort);
         } else {
             // reuse a sort identifier
-            sortid = ((Integer) freeSortIds.remove(freeSortIds.size() - 1))
+            sortid = (freeSortIds.remove(freeSortIds.size() - 1))
                 .intValue();
             sorts.set(sortid, sort);
         }
@@ -1730,7 +1727,7 @@ public class RAMTransaction
         throws StandardException
     {
         // should call close on the sort.
-        Sort sort = (Sort) sorts.get((int) sortid);
+        Sort sort = sorts.get((int) sortid);
 
         if (sort != null)
         {
@@ -1822,7 +1819,7 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
-			|| (sort = ((Sort) sorts.get((int) id))) == null)
+			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
                     SQLState.AM_NO_SUCH_SORT, new Long(id));
@@ -1833,7 +1830,7 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		if (sortControllers == null)
-			sortControllers = new ArrayList();
+			sortControllers = new ArrayList<SortController>();
 		sortControllers.add(sc);
 
 		return sc;
@@ -1898,7 +1895,7 @@ public class RAMTransaction
 		}
 
 		// Open a scan on it.
-		ScanController sc = sort.openSortScan(this, hold);
+		ScanManager sc = sort.openSortScan(this, hold);
 
 		// Keep track of it so we can release on close.
 		scanControllers.add(sc);
@@ -1918,7 +1915,7 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
-			|| (sort = ((Sort) sorts.get((int) id))) == null)
+			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
                     SQLState.AM_NO_SUCH_SORT, new Long(id));
@@ -1928,7 +1925,7 @@ public class RAMTransaction
 		ScanControllerRowSource sc = sort.openSortRowSource(this);
 
 		// Keep track of it so we can release on close.
-		scanControllers.add(sc);
+		scanControllers.add( (ScanManager) sc );
 
 		return sc;
 	}

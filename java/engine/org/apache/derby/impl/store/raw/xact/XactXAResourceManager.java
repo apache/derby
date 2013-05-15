@@ -242,7 +242,7 @@ public class XactXAResourceManager implements XAResourceManager
 
         if ((flags & XAResource.TMSTARTRSCAN) != 0)
         {
-            final ArrayList xid_list = new ArrayList();
+            final ArrayList<XAXactId> xid_list = new ArrayList<XAXactId>();
 
             // Create a visitor that adds each of the prepared transactions
             // to xid_list.

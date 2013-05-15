@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
+import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.Sort;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
@@ -153,7 +154,7 @@ class MergeSort implements Sort
 	Might be null if no merge runs were produced.
 	It is a vector of container ids.
 	**/
-	private Vector mergeRuns = null;
+	private Vector<Long> mergeRuns = null;
 
 	/**
 	An ordered set of the leftover rows that didn't go
@@ -223,7 +224,7 @@ class MergeSort implements Sort
 	@see Sort#openSortScan
 	**/
 
-	public ScanController openSortScan(
+	public ScanManager openSortScan(
     TransactionManager tran,
     boolean            hold)
 			throws StandardException
@@ -571,7 +572,7 @@ class MergeSort implements Sort
 	An inserter is closing.
 	**/
 	void doneInserting(MergeInserter inserter,
-		SortBuffer sortBuffer, Vector mergeRuns)
+		SortBuffer sortBuffer, Vector<Long> mergeRuns)
 	{
         if (SanityManager.DEBUG)
         {
@@ -603,7 +604,7 @@ class MergeSort implements Sort
 	}
 
 	void doneScanning(Scan scan, SortBuffer sortBuffer,
-		Vector mergeRuns)
+		Vector<Long> mergeRuns)
 	{
 		this.mergeRuns = mergeRuns;
 
@@ -620,7 +621,7 @@ class MergeSort implements Sort
 	{
 		if (mergeRuns != null)
 		{
-			Enumeration e = mergeRuns.elements();
+			Enumeration<Long> e = mergeRuns.elements();
 
 			try 
 			{
@@ -629,7 +630,7 @@ class MergeSort implements Sort
 
 				while (e.hasMoreElements())
 				{
-					long containerId = ((Long) e.nextElement()).longValue();
+					long containerId = (e.nextElement()).longValue();
 					rawTran.dropStreamContainer(segmentId, containerId);
 				}
 			}
@@ -667,26 +668,26 @@ class MergeSort implements Sort
 	private void multiStageMerge(TransactionManager tran)
 		throws StandardException
 	{
-		Enumeration e;
+		Enumeration<Long> e;
 		//int iterations = 0; // DEBUG (nat)
 		int maxMergeRuns = sortBuffer.capacity();
 
 		if (maxMergeRuns > ExternalSortFactory.DEFAULT_MAX_MERGE_RUN)
 			maxMergeRuns = ExternalSortFactory.DEFAULT_MAX_MERGE_RUN;
 
-		Vector subset;
-		Vector leftovers;
+		Vector<Long> subset;
+		Vector<Long> leftovers;
 
 		while (mergeRuns.size() > maxMergeRuns)
 		{
 			// Move maxMergeRuns elements from the merge runs
 			// vector into a subset, leaving the rest.
-			subset = new Vector(maxMergeRuns);
-			leftovers = new Vector(mergeRuns.size() - maxMergeRuns);
+			subset = new Vector<Long>(maxMergeRuns);
+			leftovers = new Vector<Long>(mergeRuns.size() - maxMergeRuns);
 			e = mergeRuns.elements();
 			while (e.hasMoreElements())
 			{
-				Long containerId = (Long) e.nextElement();
+				Long containerId = e.nextElement();
 				if (subset.size() < maxMergeRuns)
 					subset.addElement(containerId);
 				else

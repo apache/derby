@@ -360,12 +360,14 @@ class PropertyConglomerate
 		}
 	}
 
+    @SuppressWarnings("unchecked")
 	void savePropertyDefault(TransactionController tc, String key, Serializable value)
 		 throws StandardException
 	{
 		if (saveServiceProperty(key,value)) return;
 
-		Dictionary defaults = (Dictionary)readProperty(tc,AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
+		Dictionary<String,Object> defaults = (Dictionary<String,Object>)
+            readProperty(tc,AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
 		if (defaults == null) defaults = new FormatableHashtable();
 		if (value==null)
 			defaults.remove(key);
@@ -655,7 +657,7 @@ class PropertyConglomerate
 		}
 	}
 									
-	private Dictionary copyValues(Dictionary to, Dictionary from, boolean stringsOnly)
+	private Dictionary<String,Object> copyValues(Dictionary<String,Object> to, Dictionary<String,Object> from, boolean stringsOnly)
 	{
 		if (from == null) return to; 
 		for (Enumeration keys = from.keys(); keys.hasMoreElements(); ) {
@@ -677,6 +679,7 @@ class PropertyConglomerate
 		return p;
 	}
 
+    @SuppressWarnings("unchecked")
 	public void getProperties(TransactionController tc,
 							   Dictionary d,
 							   boolean stringsOnly,
@@ -703,10 +706,10 @@ class PropertyConglomerate
 	void resetCache() {cachedSet = null;}
 
 	/** Read the database properties and add in the service set. */
-	private Dictionary readDbProperties(TransactionController tc)
+	private Dictionary<String,Object> readDbProperties(TransactionController tc)
 		 throws StandardException
 	{
-		Dictionary set = new Hashtable();
+		Dictionary<String,Object> set = new Hashtable<String,Object>();
 
         // scan the table for a row with no matching "key"
 		ScanController scan = openScan(tc, (String) null, 0);
@@ -722,7 +725,7 @@ class PropertyConglomerate
                     SanityManager.THROWASSERT(
                         "Key is not a string " + key.getClass().getName());
 			}
-			set.put(key, value);
+			set.put((String)key, value);
 		}
 		scan.close();
 

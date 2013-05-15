@@ -98,7 +98,7 @@ import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 	and implements PrivilegedExceptionAction.
 */
 
-public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
+public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction<Object>
 {
 	private static final String BACKUP_HISTORY = "BACKUP.HISTORY";
 	protected TransactionFactory	xactFactory;

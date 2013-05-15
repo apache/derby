@@ -34,15 +34,9 @@ import org.apache.derby.iapi.store.raw.xact.TransactionId;
  */
 class ConcurrentTransactionMapFactory extends TransactionMapFactory {
     @Override
-    Map newMap() {
+    Map<TransactionId,TransactionTableEntry> newMap() {
         Map<TransactionId, TransactionTableEntry> map =
                 new ConcurrentHashMap<TransactionId, TransactionTableEntry>();
-
-        if (SanityManager.DEBUG) {
-            // Add some extra type checks to detect bugs earlier
-            map = Collections.checkedMap(
-                    map, TransactionId.class, TransactionTableEntry.class);
-        }
 
         return map;
     }

@@ -246,7 +246,7 @@ class RFResource implements FileResource {
 } // end of class RFResource
 
 
-final class RemoveFile implements Serviceable, PrivilegedExceptionAction
+final class RemoveFile implements Serviceable, PrivilegedExceptionAction<Object>
 {
 	private final StorageFile fileToGo;
 

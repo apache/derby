@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.derby.iapi.store.raw.xact.TransactionId;
+
 /**
  * Helper class for {@code TransactionTable} which allows it to plug in a
  * different {@code java.util.Map} implementation for the map that contains
@@ -53,8 +55,8 @@ class TransactionMapFactory {
      *
      * @return a thread-safe map instance
      */
-    Map newMap() {
-        return new Hashtable();
+    Map<TransactionId,TransactionTableEntry> newMap() {
+        return new Hashtable<TransactionId,TransactionTableEntry>();
     }
 
     /**

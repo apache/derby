@@ -223,7 +223,7 @@ import java.util.zip.CRC32;
 	*/
 
 public final class LogToFile implements LogFactory, ModuleControl, ModuleSupportable,
-								  Serviceable, java.security.PrivilegedExceptionAction
+								  Serviceable, java.security.PrivilegedExceptionAction<Object>
 {
 
 	private static final    long INT_LENGTH = 4L;

@@ -51,7 +51,7 @@ public class MergeScan extends SortScan
 	/**
 	The merge runs.
 	**/
-	protected Vector mergeRuns;
+	protected Vector<Long> mergeRuns;
 
 	/**
 	Array of scan controllers for the merge runs.
@@ -70,7 +70,7 @@ public class MergeScan extends SortScan
     MergeSort           sort, 
     TransactionManager  tran,
     SortBuffer          sortBuffer, 
-    Vector              mergeRuns,
+    Vector<Long>              mergeRuns,
 	SortObserver		sortObserver,
     boolean             hold)
 	{
@@ -182,11 +182,11 @@ public class MergeScan extends SortScan
 
 		// Open a scan on each merge run.
 		int scanindex = 0;
-		Enumeration e = mergeRuns.elements();
+		Enumeration<Long> e = mergeRuns.elements();
 		while (e.hasMoreElements())
 		{
 			// get the container id
-			long id = ((Long) e.nextElement()).longValue();
+			long id = (e.nextElement()).longValue();
 
 			Transaction rawTran = tran.getRawStoreXact();  // get raw transaction
 			int segmentId = StreamContainerHandle.TEMPORARY_SEGMENT;

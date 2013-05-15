@@ -90,12 +90,12 @@ public abstract class RAMAccessManager
     /**
     Hash table on primary implementation type.
     **/
-    private Hashtable implhash;
+    private Hashtable<String,MethodFactory> implhash;
 
     /**
     Hash table on primary format.
     **/
-    private Hashtable formathash;
+    private Hashtable<UUID,MethodFactory> formathash;
 
 	/**
 	Service properties.  These are supplied from ModuleControl.boot(),
@@ -159,8 +159,8 @@ public abstract class RAMAccessManager
     {
         // Intialize the hash tables that hold the access methods that
         // this access manager knows about.
-        implhash   = new Hashtable();
-        formathash = new Hashtable();
+        implhash   = new Hashtable<String,MethodFactory>();
+        formathash = new Hashtable<UUID,MethodFactory>();
     }
 
     /**************************************************************************
@@ -585,16 +585,16 @@ public abstract class RAMAccessManager
         
         // See if there's an access method that supports the desired
         // format type as its primary format type.
-        factory = (MethodFactory) formathash.get(format);
+        factory = formathash.get(format);
         if (factory != null)
             return factory;
 
         // No primary format.  See if one of the access methods
         // supports it as a secondary format.
-        Enumeration e = formathash.elements();
+        Enumeration<MethodFactory> e = formathash.elements();
         while (e.hasMoreElements())
         {
-            factory = (MethodFactory) e.nextElement();
+            factory = e.nextElement();
             if (factory.supportsFormat(format))
                 return factory;
         }
@@ -612,16 +612,16 @@ public abstract class RAMAccessManager
     {
         // See if there's an access method that supports the desired
         // implementation type as its primary implementation type.
-        MethodFactory factory = (MethodFactory) implhash.get(impltype);
+        MethodFactory factory = implhash.get(impltype);
         if (factory != null)
 				return factory;
 
         // No primary implementation.  See if one of the access methods
         // supports the implementation type as a secondary.
-        Enumeration e = implhash.elements();
+        Enumeration<MethodFactory> e = implhash.elements();
         while (e.hasMoreElements())
         {
-            factory = (MethodFactory) e.nextElement();
+            factory = e.nextElement();
             if (factory.supportsImplementation(impltype))
                 return factory;
         }

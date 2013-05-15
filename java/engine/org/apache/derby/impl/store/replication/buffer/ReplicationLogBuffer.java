@@ -64,8 +64,8 @@ public class ReplicationLogBuffer {
 
     public static final int DEFAULT_NUMBER_LOG_BUFFERS = 10;
 
-    private final LinkedList dirtyBuffers;// LogBufferElements with unsent log
-    private final LinkedList freeBuffers; // currently unused LogBufferElements
+    private final LinkedList<LogBufferElement> dirtyBuffers;// LogBufferElements with unsent log
+    private final LinkedList<LogBufferElement> freeBuffers; // currently unused LogBufferElements
 
     // the buffer we currently APPEND chunks of log records to
     private LogBufferElement currentDirtyBuffer;
@@ -113,14 +113,14 @@ public class ReplicationLogBuffer {
         outBufferLastInstant = 0;
         validOutBuffer = false; // no valid data in outBuffer yet
 
-        dirtyBuffers = new LinkedList();
-        freeBuffers = new LinkedList();
+        dirtyBuffers = new LinkedList<LogBufferElement>();
+        freeBuffers = new LinkedList<LogBufferElement>();
 
         for (int i = 0; i < DEFAULT_NUMBER_LOG_BUFFERS; i++){
             LogBufferElement b = new LogBufferElement(bufferSize);
             freeBuffers.addLast(b);
         }
-        currentDirtyBuffer = (LogBufferElement)freeBuffers.removeFirst();
+        currentDirtyBuffer = freeBuffers.removeFirst();
     }
 
     /**
@@ -219,7 +219,7 @@ public class ReplicationLogBuffer {
             synchronized (outputLatch) {
                 if (dirtyBuffers.size() > 0 ) {
                     LogBufferElement current =
-                        (LogBufferElement)dirtyBuffers.removeFirst();
+                        dirtyBuffers.removeFirst();
 
                     // The outBufferData byte[] should have the
                     // default size or the size of the current
@@ -351,7 +351,7 @@ public class ReplicationLogBuffer {
         if (currentDirtyBuffer == null) {
             try {
                 currentDirtyBuffer =
-                    (LogBufferElement)freeBuffers.removeFirst();
+                    freeBuffers.removeFirst();
                 currentDirtyBuffer.init();
             } catch (NoSuchElementException nsee) {
                 throw new LogBufferFullException();

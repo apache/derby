@@ -59,7 +59,7 @@ import java.security.PrivilegedAction;
  *      after a successful checkpoint with a new key or on a rollback.
  */
 
-public class EncryptOrDecryptData implements PrivilegedAction {
+public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
 
     private BaseDataFileFactory dataFactory;
     private StorageFactory storageFactory;
@@ -368,9 +368,9 @@ public class EncryptOrDecryptData implements PrivilegedAction {
     {
         actionCode = STORAGE_FILE_EXISTS_ACTION;
         actionStorageFile = file;
-        Object ret = AccessController.doPrivileged(this);
+        Boolean ret = AccessController.doPrivileged(this);
         actionStorageFile = null;
-        return ((Boolean) ret).booleanValue();
+        return ret.booleanValue();
 
     }
 
@@ -379,9 +379,9 @@ public class EncryptOrDecryptData implements PrivilegedAction {
     {
         actionCode = STORAGE_FILE_DELETE_ACTION;
         actionStorageFile = file;
-        Object ret = AccessController.doPrivileged(this);
+        Boolean ret = AccessController.doPrivileged(this);
         actionStorageFile = null;
-        return ((Boolean) ret).booleanValue();
+        return ret.booleanValue();
 
     }
 
@@ -391,17 +391,17 @@ public class EncryptOrDecryptData implements PrivilegedAction {
         actionCode = STORAGE_FILE_RENAME_ACTION;
         actionStorageFile = fromFile;
         actionDestStorageFile = destFile;
-        Object ret = AccessController.doPrivileged(this);
+        Boolean ret = AccessController.doPrivileged(this);
         actionStorageFile = null;
         actionDestStorageFile = null;
-        return ((Boolean) ret).booleanValue();
+        return ret.booleanValue();
 
     }
 
 
 
     // PrivilegedAction method
-    public Object run()
+    public Boolean run()
     {
         switch(actionCode)
         {

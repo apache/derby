@@ -120,9 +120,8 @@ public class ReplicationMessageTransmit {
         final int timeout_ = timeout;
         try {
             //create a connection to the slave.
-            s = (Socket)
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            s = AccessController.doPrivileged(new PrivilegedExceptionAction<Socket>() {
+                public Socket run() throws IOException {
                     SocketFactory sf = SocketFactory.getDefault();
                     InetSocketAddress sockAddr = new InetSocketAddress(
                             slaveAddress.getHostAddress(), 

@@ -35,6 +35,7 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionId;
+import org.apache.derby.impl.store.raw.xact.TransactionTableEntry;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
@@ -98,7 +99,7 @@ public class TransactionTable implements Formatable
 	 */
 
     private final TransactionMapFactory mapFactory;
-	private final Map trans;
+	private final Map<TransactionId,TransactionTableEntry> trans;
 
 	private TransactionId largestUpdateXactId;
 
@@ -123,7 +124,7 @@ public class TransactionTable implements Formatable
                 id != null, "findTransacionEntry with null id");
 
 		// Hashtable is synchronized
-		return (TransactionTableEntry)trans.get(id);
+		return trans.get(id);
 	}
 
     /**
@@ -239,7 +240,7 @@ public class TransactionTable implements Formatable
         }
 
 		// Hashtable is synchronized
-		 TransactionTableEntry ent = (TransactionTableEntry)trans.remove(id);
+		 TransactionTableEntry ent = trans.remove(id);
 		 return (ent == null || ent.needExclusion());
 	}
 
@@ -596,9 +597,9 @@ public class TransactionTable implements Formatable
 	*/
 	public boolean hasRollbackFirstTransaction()
 	{
-		for (Iterator it = trans.values().iterator(); it.hasNext(); )
+		for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext(); )
 		{
-			TransactionTableEntry ent = (TransactionTableEntry) it.next();
+			TransactionTableEntry ent = it.next();
 
 			if (ent != null && ent.isRecovery() && 
 				(ent.getTransactionStatus() & 
@@ -648,9 +649,9 @@ public class TransactionTable implements Formatable
 
     private boolean hasPreparedXact(boolean recovered)
     {
-        for (Iterator it = trans.values().iterator(); it.hasNext(); )
+        for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext(); )
         {
-            TransactionTableEntry ent = (TransactionTableEntry) it.next();
+            TransactionTableEntry ent = it.next();
 
             if (ent != null && 
                 (ent.getTransactionStatus() & Xact.END_PREPARED) != 0)
@@ -690,9 +691,9 @@ public class TransactionTable implements Formatable
 		}
 
 		TransactionId id = null;
-		for (Iterator it = trans.values().iterator(); it.hasNext(); )
+		for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext(); )
 		{
-			TransactionTableEntry ent = (TransactionTableEntry) it.next();
+			TransactionTableEntry ent = it.next();
 
 			if (ent != null && ent.isUpdate() && ent.isRecovery() &&
 				(ent.getTransactionStatus() & Xact.RECOVERY_ROLLBACK_FIRST) != 0)
@@ -744,9 +745,9 @@ public class TransactionTable implements Formatable
 
         if (!trans.isEmpty())
 		{
-			for (Iterator it = trans.values().iterator(); it.hasNext() ; )
+			for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext() ; )
 			{
-				TransactionTableEntry ent = (TransactionTableEntry) it.next();
+				TransactionTableEntry ent = it.next();
 
 				if (ent != null         && 
                     ent.isUpdate()      && 
@@ -783,10 +784,10 @@ public class TransactionTable implements Formatable
                 else
                 {
                     // all transactions in the table must be prepared.
-                    for (Iterator it = trans.values().iterator(); it.hasNext();)
+                    for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext();)
                     {
                         TransactionTableEntry ent =
-                            (TransactionTableEntry) it.next();
+                            it.next();
                         SanityManager.ASSERT(ent.isPrepared());
                     }
                 }
@@ -841,9 +842,9 @@ public class TransactionTable implements Formatable
             GlobalTransactionId     gid         = null;
             TransactionTableEntry   ent;
 
-			for (Iterator it = trans.values().iterator(); it.hasNext(); )
+			for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext(); )
 			{
-				ent = (TransactionTableEntry) it.next();
+				ent = it.next();
 
 				if (ent != null         && 
                     ent.isRecovery()    && 
@@ -866,9 +867,9 @@ public class TransactionTable implements Formatable
                     // if no entry's were found then the transaction table
                     // should have the passed in idle tran, and the rest should
                     // be non-recover, prepared global transactions.
-                    for (Iterator it = trans.values().iterator(); it.hasNext();)
+                    for (Iterator<TransactionTableEntry> it = trans.values().iterator(); it.hasNext();)
                     {
-                        ent = (TransactionTableEntry) it.next();
+                        ent = it.next();
 
                         if (XactId.compare(ent.getXid(), tran.getId()) != 0)
                         {
@@ -891,7 +892,7 @@ public class TransactionTable implements Formatable
                 //             - the entry of the transaction that we are going
                 //               to take over.
                 TransactionTableEntry new_ent =
-                    (TransactionTableEntry) trans.remove(tran.getId());
+                    trans.remove(tran.getId());
 
                 // At this point only the found_ent should be in the table.
                 if (SanityManager.DEBUG)
@@ -998,12 +999,12 @@ public class TransactionTable implements Formatable
             SanityManager.DEBUG("TranTrace", toString());
         }
 
-        final ArrayList tinfo = new ArrayList();
+        final ArrayList<TransactionTableEntry> tinfo = new ArrayList<TransactionTableEntry>();
 
         // Get clones of all the entries in the transaction table.
         visitEntries(new EntryVisitor() {
             public boolean visit(TransactionTableEntry entry) {
-                tinfo.add(entry.clone());
+                tinfo.add( (TransactionTableEntry) entry.clone());
                 return true; // scan entire transaction table
             }
         });

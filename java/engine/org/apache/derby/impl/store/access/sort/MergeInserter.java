@@ -50,7 +50,7 @@ final class MergeInserter implements SortController
 	/**
 	A vector of the conglomerate ids of the merge runs.
 	**/
-	private Vector mergeRuns;
+	private Vector<Long> mergeRuns;
 
 	/**
 	An in-memory ordered set that is used to sort rows
@@ -73,7 +73,7 @@ final class MergeInserter implements SortController
     int     stat_numRowsInput;
     int     stat_numRowsOutput;
     int     stat_numMergeRuns;
-    Vector  stat_mergeRunsSize;
+    Vector<Integer>  stat_mergeRunsSize;
 
 
 	/*
@@ -177,7 +177,7 @@ final class MergeInserter implements SortController
             stat_sortType = "external";
 			long conglomid = sort.createMergeRun(tran, sortBuffer);
 			if (mergeRuns == null)
-				mergeRuns = new Vector();
+				mergeRuns = new Vector<Long>();
 			mergeRuns.addElement(new Long(conglomid));
 
             stat_numMergeRuns++;
@@ -275,7 +275,7 @@ final class MergeInserter implements SortController
         stat_numMergeRuns = 0;
         stat_numRowsInput = 0;
         stat_numRowsOutput = 0;
-        stat_mergeRunsSize = new Vector();
+        stat_mergeRunsSize = new Vector<Integer>();
         runSize = 0;
         totalRunSize = 0;
 

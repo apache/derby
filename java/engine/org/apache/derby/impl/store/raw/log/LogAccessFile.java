@@ -94,8 +94,8 @@ public class LogAccessFile
     private static final int            LOG_NUMBER_LOG_BUFFERS = 3;
 
 
-	private LinkedList    freeBuffers;  //list of free buffers
-	private LinkedList    dirtyBuffers; //list of dirty buffers to flush
+	private LinkedList<LogAccessFileBuffer>    freeBuffers;  //list of free buffers
+	private LinkedList<LogAccessFileBuffer>    dirtyBuffers; //list of dirty buffers to flush
 	private  LogAccessFileBuffer currentBuffer; //current active buffer
 	private boolean flushInProgress = false;
 	
@@ -147,8 +147,8 @@ public class LogAccessFile
             SanityManager.ASSERT(LOG_NUMBER_LOG_BUFFERS >= 1);
 				
 		//initialize buffers lists
-		freeBuffers = new LinkedList();
-		dirtyBuffers = new LinkedList();
+		freeBuffers = new LinkedList<LogAccessFileBuffer>();
+		dirtyBuffers = new LinkedList<LogAccessFileBuffer>();
 
 
 		//add all buffers to free list
@@ -519,7 +519,7 @@ public class LogAccessFile
 		
 				noOfBuffers = dirtyBuffers.size();
 				if(noOfBuffers > 0)
-					buf = (LogAccessFileBuffer) dirtyBuffers.removeFirst();
+					buf = dirtyBuffers.removeFirst();
 				
 				flushInProgress = true;
 			}
@@ -536,7 +536,7 @@ public class LogAccessFile
 					//add the buffer that was written previosly to the free list
 					freeBuffers.addLast(buf);
 					if(nFlushed < noOfBuffers)
-						buf = (LogAccessFileBuffer) dirtyBuffers.removeFirst();
+						buf = dirtyBuffers.removeFirst();
 					else
 					{
 						//see if we can flush more, that came when we are at it.
@@ -546,7 +546,7 @@ public class LogAccessFile
 						if(size > 0 && nFlushed <= LOG_NUMBER_LOG_BUFFERS)
 						{
 							noOfBuffers += size;
-							buf = (LogAccessFileBuffer) dirtyBuffers.removeFirst();
+							buf = dirtyBuffers.removeFirst();
 						}
 					}
 				}
@@ -616,7 +616,7 @@ public class LogAccessFile
 				SanityManager.ASSERT(freeBuffers.size() > 0);
 
 			//switch over to the next log buffer, let someone else write it.
-			currentBuffer = (LogAccessFileBuffer) freeBuffers.removeFirst();
+			currentBuffer = freeBuffers.removeFirst();
 			currentBuffer.init(checksumLogRecordSize);
 
 			if (SanityManager.DEBUG)
