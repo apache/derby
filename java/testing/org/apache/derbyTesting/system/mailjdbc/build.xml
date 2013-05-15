@@ -73,6 +73,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.system.dir}/mailjdbc/**/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
 
 	 <copy todir="${out.dir}/${derby.testing.system.dir}/mailjdbc/schema">

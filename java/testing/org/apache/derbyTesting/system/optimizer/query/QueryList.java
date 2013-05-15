@@ -34,7 +34,7 @@ import java.util.Properties;
 import org.apache.derbyTesting.system.optimizer.StaticValues;
 
 public class QueryList {
-	private static ArrayList qList=new ArrayList();
+	private static ArrayList<GenericQuery> qList = new ArrayList<GenericQuery>();
 	public static boolean queryListOnly=false;
 	public static void init(Connection conn){
 		GenericQuery q=new GenericQuery();
@@ -69,7 +69,7 @@ public class QueryList {
 		getQList().add(q);
 		
 	}
-	public static ArrayList getQList() {
+	public static ArrayList<GenericQuery> getQList() {
 		return qList;
 	}
 }

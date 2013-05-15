@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -163,7 +162,7 @@ public class SequenceGeneratorConcurrency
         private int _clientNumber;
         private int _transactionCount;
         private int _errorCount = 0;
-        private HashMap _errorLog;
+        private HashMap<String, int[]> _errorLog;
 
         private static int _clientCount = 0;
 
@@ -175,7 +174,7 @@ public class SequenceGeneratorConcurrency
         {
             _clientNumber = _clientCount++;
             _transactionCount = 0;
-            _errorLog = new HashMap();
+            _errorLog = new HashMap<String, int[]>();
             _loadOptions = new LoadOptions();
 
             _psArray = new PreparedStatement[ _loadOptions.getNumberOfGenerators() ] [ _loadOptions.getTablesPerGenerator() + 1 ];
@@ -325,11 +324,7 @@ public class SequenceGeneratorConcurrency
 
         public void printReport(PrintStream out)
         {
-            Iterator keyIterator = _errorLog.keySet().iterator();
-
-            while ( keyIterator.hasNext() )
-            {
-                String key = (String) keyIterator.next();
+            for (String key : _errorLog.keySet()) {
                 int[] value = (int[]) _errorLog.get( key );
 
                 String message = "    Client " + _clientNumber + " saw " + value[0] + " instances of this error: " + key;
@@ -358,7 +353,7 @@ public class SequenceGeneratorConcurrency
             _errorCount++;
             
             String key = t.getClass().getName() + ": " + t.getMessage();
-            int[] value = (int[]) _errorLog.get( key );
+            int[] value = _errorLog.get( key );
 
             if ( value != null ) { value[ 0 ] = value[ 0 ] + 1; }
             else

@@ -58,7 +58,8 @@ public class Runner {
     /** The name of the type of load to use in the test. */
     private static String load; // required argument
     /** Map containing load-specific options. */
-    private final static HashMap loadOpts = new HashMap();
+    private final static HashMap<String, String> loadOpts =
+            new HashMap<String, String>();
     /** The name of the load generator to use in the test. */
     private static String generator = "b2b";
     /** The number of client threads to use in the test. */

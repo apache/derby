@@ -68,7 +68,7 @@ public class ByteArrayCombinerStreamTest
     public void testCombineAvailable4bytes()
             throws IOException {
         byte[] array = {65,66,77,79};
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(array);
         combiner = new ByteArrayCombinerStream(list, 4);
         assertEquals(4, combiner.available());
@@ -85,7 +85,7 @@ public class ByteArrayCombinerStreamTest
     public void testCombineWithExtraEmptyByteArray()
             throws IOException {
         byte[] array = {65,66,77,79};
-        ArrayList list = new ArrayList(2);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(2);
         list.add(array);
         list.add(new byte[4]);
         combiner = new ByteArrayCombinerStream(list, array.length);
@@ -97,7 +97,7 @@ public class ByteArrayCombinerStreamTest
 
     public void testCombineOneArray()
             throws IOException {
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(defaultArray);
         combiner = new ByteArrayCombinerStream(list, defaultArray.length);
         byte[] resArray = new byte[defaultArray.length];
@@ -111,7 +111,7 @@ public class ByteArrayCombinerStreamTest
             throws IOException {
         int arrays = 100;
         byte[] array = {65,66,77,79};
-        ArrayList list = new ArrayList(arrays);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(arrays);
         long length = 0;
         for (int i=0; i < arrays; i++) {
             list.add(array);
@@ -134,7 +134,7 @@ public class ByteArrayCombinerStreamTest
     public void testTruncateDataFromOneArray()
             throws IOException {
         int length = defaultArray.length -5;
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(defaultArray);
         byte[] targetArray = new byte[length];
         System.arraycopy(defaultArray, 0,
@@ -149,7 +149,7 @@ public class ByteArrayCombinerStreamTest
     public void testTruncateDataFromTwoArrays()
             throws IOException {
         int length = (defaultArray.length *2) -7;
-        ArrayList list = new ArrayList(2);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(2);
         list.add(defaultArray);
         list.add(defaultArray);
         byte[] targetArray = new byte[length];
@@ -170,7 +170,7 @@ public class ByteArrayCombinerStreamTest
      * the specified length.
      */
     public void testTooLittleDataNoCombine() {
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(new byte[5]);
         try {
             combiner = new ByteArrayCombinerStream(list, 10);
@@ -186,7 +186,7 @@ public class ByteArrayCombinerStreamTest
      * the specified length.
      */
     public void testTooLittleDataWithCombine() {
-        ArrayList list = new ArrayList(3);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(3);
         byte[] data = {65,66,67,68,69};
         list.add(data);
         list.add(data);
@@ -204,7 +204,7 @@ public class ByteArrayCombinerStreamTest
      * Make sure an exception is thrown if a negative length is specified.
      */
     public void testNegativeLengthArgument() {
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(new byte[1234]);
         try {
             combiner = new ByteArrayCombinerStream(list, -54);
@@ -227,7 +227,7 @@ public class ByteArrayCombinerStreamTest
         byte[] data = {66,67,-123,68,69};
         byte[] targetData = {66,67,0,0,0};
         byte[] resData = new byte[5];
-        ArrayList list = new ArrayList(1);
+        ArrayList<byte[]> list = new ArrayList<byte[]>(1);
         list.add(data);
         combiner = new ByteArrayCombinerStream(list, data.length);
         byte b;

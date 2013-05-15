@@ -32,6 +32,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
@@ -376,9 +377,9 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 new Integer(firstAlternatePort).toString());
 
         final String derbyHome = getSystemProperty("derby.system.home");
-        Boolean b = (Boolean)AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            public Object run(){
+        boolean b = AccessController.doPrivileged
+        (new java.security.PrivilegedAction<Boolean>(){
+            public Boolean run(){
                 boolean fail = false;
                 try {
                     FileOutputStream propFile = 
@@ -388,10 +389,10 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 } catch (IOException ioe) {
                     fail = true;
                 }
-                return new Boolean(fail);
+                return fail;
             }
         });
-        if (b.booleanValue())
+        if (b)
         {
             checkWhetherNeedToShutdown(new int[] {TestConfiguration.getCurrent().getPort()}, "failed to write derby.properties");
         }
@@ -461,15 +462,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         checkWhetherNeedToShutdown ( new int[] {basePort, firstAlternatePort},
             actionResult);
         // remove derby.properties
-        Boolean ret = (Boolean) AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
-            public Object run() {
-                return Boolean.valueOf((new File(
-                    derbyHome+File.separator + "derby.properties")).delete());
-            }
-        }
-        );
-        if (ret.booleanValue() == false) {
+        if (!PrivilegedFileOpsForTests.delete(
+                new File(derbyHome, "derby.properties"))) {
             checkWhetherNeedToShutdown ( new int[] {basePort, firstAlternatePort},
                 "unable to remove derby.properties");
         }

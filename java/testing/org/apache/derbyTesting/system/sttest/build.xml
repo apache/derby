@@ -73,6 +73,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.system.dir}/sttest/**/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
 
 	 

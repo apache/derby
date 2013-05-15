@@ -28,9 +28,9 @@ import java.util.ArrayList;
  * 
  */
 public class TestViews {
-	static ArrayList dropViews = new ArrayList();
+	static ArrayList<String> dropViews = new ArrayList<String>();
 
-	static ArrayList createViews = new ArrayList();
+	static ArrayList<String> createViews = new ArrayList<String>();
 
 	public static void init() {
 		setDropViews();

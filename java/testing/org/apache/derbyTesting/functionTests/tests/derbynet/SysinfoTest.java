@@ -22,7 +22,6 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.net.URL;
-import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -46,7 +45,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
     private static final String POLICY_FILE_NAME=
         "org/apache/derbyTesting/functionTests/tests/derbynet/SysinfoTest.policy";
-    private ArrayList OUTPUT;
+    private ArrayList<String> OUTPUT;
 
     /**
      * Set to true before adding a test to the suite to add some extra properties.
@@ -63,7 +62,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output from sysinfo without the extra properties. 
          */
-        ArrayList OUTPUT1 = new ArrayList();
+        ArrayList<String> OUTPUT1 = new ArrayList<String>();
         OUTPUT1.add("--------- Derby Network Server Information --------");
         OUTPUT1.add("derby.drda.maxThreads=0");
         OUTPUT1.add("derby.drda.sslMode=off"); 
@@ -82,7 +81,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output by sysinfo with the extra properties.
          */
-        ArrayList OUTPUT2 = (ArrayList) OUTPUT1.clone();
+        ArrayList<String> OUTPUT2 = new ArrayList<String>(OUTPUT1);
         OUTPUT2.add("--------- Derby Network Server Information --------"); 
         OUTPUT2.add("derby.drda.securityMechanism=USER_ONLY_SECURITY"); 
 
@@ -223,20 +222,8 @@ public class SysinfoTest extends BaseJDBCTestCase {
     }
 
     private static String findClassDir() {
-        URL url = null;
-        try {
-            final Class cl = Class.forName("org.apache.derbyTesting." +
+        URL url = SecurityManagerSetup.getURL("org.apache.derbyTesting." +
                     "functionTests.tests.derbynet.SysinfoTest");
-        url = (URL)
-           AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                return cl.getProtectionDomain().getCodeSource().getLocation();
-            }
-        });
-        } catch (ClassNotFoundException e) {
-            // need catch to silence compiler, but as we're referring to *this*
-            // class, it ok to ignore this.
-        }
         return url.getPath();
     }
 
@@ -251,8 +238,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
      * @param actualOutput Actual sysinfo output 
      */
     private void assertMatchingStringExists(String actualOutput) {
-        for (int i=0; i < OUTPUT.size(); i ++ ) {
-            String s = (String) OUTPUT.get(i);
+        for (String s : OUTPUT) {
             assertTrue("cannot find " + s + " in actualOutput:" + actualOutput,
                     actualOutput.indexOf(s) >=0);            
         }        

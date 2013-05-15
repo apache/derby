@@ -51,6 +51,7 @@
                  won't check the timestamp on the other Java files to determine
                  if they have been changed since last compile then. -->
             <include name="org/apache/derby/**/*java"/>
+            <compilerarg value="-Xlint"/>
         </javac>
     </target>
 

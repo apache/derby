@@ -73,6 +73,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.system.dir}/optimizer/**/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
 
 	 

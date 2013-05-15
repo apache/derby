@@ -24,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.derbyTesting.system.oe.model.Address;
@@ -60,7 +59,8 @@ class StatementHelper {
      * such as a Java procedure which could have a different
      * prepareStatement method.
      */
-    private Map statements = new IdentityHashMap();
+    private Map<String, PreparedStatement> statements =
+            new IdentityHashMap<String, PreparedStatement>();
 
     /**
      * Prepare a statement, looking in the map first.
@@ -68,7 +68,7 @@ class StatementHelper {
      * it is prepared and put into the map for future use.
      */
     protected PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement ps = (PreparedStatement) statements.get(sql);
+        PreparedStatement ps = statements.get(sql);
         if (ps != null)
             return ps;
         
@@ -82,11 +82,7 @@ class StatementHelper {
     }
 
     public void close() throws SQLException {
-              
-        for (Iterator i = statements.keySet().iterator(); i.hasNext(); )
-        {
-            String sql = (String) i.next();
-            PreparedStatement ps = (PreparedStatement) statements.get(sql);
+        for (PreparedStatement ps : statements.values()) {
             ps.close();
         }
     }

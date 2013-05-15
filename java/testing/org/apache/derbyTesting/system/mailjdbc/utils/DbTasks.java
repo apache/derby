@@ -662,8 +662,7 @@ public class DbTasks {
 			int del_count = 0;
 			int count = 0;
 			int diff = 0;
-			ArrayList idArray = new ArrayList();
-			Integer id_element = new Integer(0);
+			ArrayList<Integer> idArray = new ArrayList<Integer>();
 			Statement stmt = conn.createStatement();
 			Statement stmt1 = conn.createStatement();
 			Statement stmt2 = conn.createStatement();
@@ -679,8 +678,7 @@ public class DbTasks {
 				ResultSet rs1 = stmt1
 						.executeQuery("select id from REFRESH.INBOX");
 				while (rs1.next()) {
-					id_element = new Integer(rs1.getInt(1));
-					idArray.add(id_element);
+					idArray.add(rs1.getInt(1));
 				}
 				for (int i = 0; i <= diff; i++) {
 					del_count = del_count

@@ -54,7 +54,7 @@ public class LocaleTestSetup extends TestSetup {
         setDefaultLocale(oldLocale);
 	}
 
-    private static void setDefaultLocale(final Locale locale) {
+    public static void setDefaultLocale(final Locale locale) {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 Locale.setDefault(locale);

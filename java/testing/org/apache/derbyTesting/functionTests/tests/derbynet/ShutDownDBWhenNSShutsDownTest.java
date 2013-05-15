@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.File;
-import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,6 +29,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -195,27 +195,17 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
                 TestConfiguration.getCurrent().getDefaultDatabaseName() +
                 java.io.File.separator + "db.lck";
 
+        File lockFile = new File(fileName);
+
         boolean fileNotFound = false;
         int i = 0;
         do {
             Thread.sleep(500);
-            fileNotFound = !fileExists(fileName);
+            fileNotFound = !PrivilegedFileOpsForTests.exists(lockFile);
             i ++;
         } while (fileNotFound != dbShutDown && i < 120);
 
         assertEquals("Database is shut down", dbShutDown, fileNotFound);
-    }
-
-    private boolean fileExists (final String fileName) throws Exception {
-        Boolean b = (Boolean) AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    File file = new File(fileName);
-                    return new Boolean(file.exists());
-                }
-        });
-
-        return b.booleanValue();
     }
 
     private void createDatabase() throws SQLException {

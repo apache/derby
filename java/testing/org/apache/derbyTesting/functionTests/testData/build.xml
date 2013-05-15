@@ -79,6 +79,7 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.testing.functest.dir}/testData/serializedDataSources/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
   </target>
 

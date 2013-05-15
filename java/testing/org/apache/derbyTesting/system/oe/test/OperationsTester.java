@@ -73,7 +73,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             short d = rand.district();
             int threshold = rand.threshold();
             
-            HashMap inputData = new HashMap();
+            HashMap<String, Number> inputData = new HashMap<String, Number>();
             inputData.put("d", new Short(d));
             inputData.put("threshold", new Integer(threshold));
             
@@ -101,7 +101,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             short d = rand.district();
             int c = rand.NURand1023();
             
-            HashMap inputData = new HashMap();
+            HashMap<String, Number> inputData = new HashMap<String, Number>();
             inputData.put("d", new Short(d));
             inputData.put("c", new Integer(c));
 
@@ -118,7 +118,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             short d = rand.district();
             String customerLast = rand.randomCLast();
             
-            HashMap inputData = new HashMap();
+            HashMap<String, Object> inputData = new HashMap<String, Object>();
             inputData.put("d", new Short(d));
             inputData.put("customerLast", customerLast);
 

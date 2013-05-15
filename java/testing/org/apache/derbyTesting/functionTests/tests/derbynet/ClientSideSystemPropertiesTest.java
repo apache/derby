@@ -26,7 +26,6 @@ import java.security.AccessController;
 import java.util.Properties;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -44,8 +43,8 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
         //made in the privilege block below by looking inside the 
         //trace Directory and making sure the file count is greater than 0.
         AccessController.doPrivileged
-		    (new java.security.PrivilegedAction(){
-		    	public Object run(){
+		    (new java.security.PrivilegedAction<Void>(){
+		    	public Void run(){
 		    		File dir = new File(getSystemProperty("derby.client.traceDirectory"));
 		    		int fileCounter = 0;
     	            File[] list = dir.listFiles();
@@ -64,8 +63,8 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
     protected void setUp() throws Exception
     {
     	AccessController.doPrivileged(
-    			new java.security.PrivilegedAction(){
-    				public Object run(){
+    			new java.security.PrivilegedAction<Void>(){
+    				public Void run(){
     					File dir = new File(getSystemProperty("derby.client.traceDirectory"));
     					if (dir.exists() == false) //create the trace Directory
     						junit.framework.Assert.assertTrue(dir.mkdir() || dir.mkdirs());

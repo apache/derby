@@ -44,9 +44,9 @@ import org.apache.derbyTesting.system.optimizer.utils.TestUtils;
 public  class GenericQuery {
 	protected String description="Custom Test Query";
 	protected Connection conn=null;
-	protected ArrayList queries=new ArrayList(); 
-	protected ArrayList prepStmtRunResults=new ArrayList(); //times using PreparedStatement
-	protected ArrayList stmtRunResults=new ArrayList(); //times using Statement
+	protected ArrayList<String> queries = new ArrayList<String>();
+	protected ArrayList<String[]> prepStmtRunResults = new ArrayList<String[]>(); //times using PreparedStatement
+	protected ArrayList<String[]> stmtRunResults = new ArrayList<String[]>(); //times using Statement
 	protected int[] rowsExpected=null; //add rows expected
 	
 	public void setConnection(Connection con){
@@ -59,7 +59,7 @@ public  class GenericQuery {
 		Enumeration qenum=prop.keys();
 		while(qenum.hasMoreElements()){
 			String queryName=(String)qenum.nextElement();
-			queries.add(prop.get(queryName));
+			queries.add(prop.getProperty(queryName));
 		}
 	}
 		
@@ -80,7 +80,7 @@ public  class GenericQuery {
 		try{
 			for(int k=0;k<queries.size();k++){
 				
-				query=(String)queries.get(k);
+				query = queries.get(k);
 				String [] times=new String [StaticValues.ITER];
 				int rowsReturned=0;
 				for (int i=0;i<StaticValues.ITER;i++){ 
@@ -139,10 +139,10 @@ public  class GenericQuery {
 			throw new SQLException("Failed query:\n "+query+"\n SQLState= "+sqe.getSQLState()+"\n ErrorCode= "+sqe.getErrorCode()+"\n Message= "+sqe.getMessage());
 		}
 	}
-	public ArrayList getPrepStmtRunResults() {
+	public ArrayList<String[]> getPrepStmtRunResults() {
 		return prepStmtRunResults;
 	}
-	public ArrayList getStmtRunResults() {
+	public ArrayList<String[]> getStmtRunResults() {
 		return stmtRunResults;
 	}
 	public int getRowsExpected(int index) {

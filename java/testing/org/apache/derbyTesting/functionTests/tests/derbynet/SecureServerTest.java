@@ -263,7 +263,7 @@ public class SecureServerTest extends BaseJDBCTestCase
      */
     private static  String[]    getStartupArgs( boolean setUnsecureOption, String wildCardHost )
     {
-        ArrayList       list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
 
         if ( setUnsecureOption )
         {
@@ -275,12 +275,8 @@ public class SecureServerTest extends BaseJDBCTestCase
             list.add( NetworkServerTestSetup.HOST_OPTION );
             list.add( wildCardHost );
         }
-        
-        String[]    result = new String[ list.size() ];
 
-        list.toArray( result );
-
-        return result;
+        return list.toArray(new String[list.size()]);
     }
     
     /**
@@ -290,7 +286,7 @@ public class SecureServerTest extends BaseJDBCTestCase
      */
     private static  String[]  getStartupProperties( boolean authenticationRequired, String customDerbyProperties )
     {
-        ArrayList       list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
 
         if ( authenticationRequired )
         {
@@ -304,11 +300,7 @@ public class SecureServerTest extends BaseJDBCTestCase
             list.add( "derby.system.home=extinout" );
         }
 
-        String[]    result = new String[ list.size() ];
-
-        list.toArray( result );
-
-        return result;
+        return list.toArray(new String[list.size()]);
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +427,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     public String toString()
     {
-        StringBuffer    buffer = new StringBuffer();
+        StringBuilder    buffer = new StringBuilder();
 
         buffer.append( "SecureServerTest( " );
         buffer.append( "Opened = " ); buffer.append( _unsecureSet);
@@ -463,7 +455,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     {
         String          portNumber = Integer.toString( getTestConfiguration().getPort() );
 
-        ArrayList cmdList = new ArrayList();
+        ArrayList<String> cmdList = new ArrayList<String>();
         cmdList.add("-Demma.verbosity.level=silent");
         cmdList.add("org.apache.derby.drda.NetworkServerControl");
         cmdList.add("-p");

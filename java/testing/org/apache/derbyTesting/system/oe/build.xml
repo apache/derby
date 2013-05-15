@@ -73,6 +73,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.system.dir}/oe/**/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
 
 	 <copy todir="${out.dir}/${derby.testing.system.dir}/oe/schema">

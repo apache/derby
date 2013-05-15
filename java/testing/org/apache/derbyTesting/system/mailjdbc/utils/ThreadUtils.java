@@ -32,7 +32,7 @@ import org.apache.derbyTesting.system.mailjdbc.tasks.Purge;
 import org.apache.derbyTesting.system.mailjdbc.tasks.Refresh;
 
 public class ThreadUtils {
-	private static ArrayList userThreads = new ArrayList();
+	private static ArrayList<Thread> userThreads = new ArrayList<Thread>();
 
 	public static ThreadUtils threadutil = new ThreadUtils();
 

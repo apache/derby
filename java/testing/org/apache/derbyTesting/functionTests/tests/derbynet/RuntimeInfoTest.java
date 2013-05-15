@@ -246,9 +246,9 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
         return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
 	
-	private static final HashMap outputs;
+	private static final HashMap<Locale, HashMap<String, String>> outputs;
 	static {
-		HashMap englishOutputs = new HashMap();
+		HashMap<String, String> englishOutputs = new HashMap<String, String>();
 		englishOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Derby Network Server Runtime Information ---\n" + 
 				"---------- Session Information ---------------\n" + 
@@ -277,7 +277,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		englishOutputs.put("sedMemoryReplace", "Memory : #####");
 		englishOutputs.put("RuntimeInfoLocaleString", "\tStmt ID\t\tSQLText\n\t-------------\t-----------\n\n\n\nSession");
 		
-		HashMap germanOutputs = new HashMap();
+		HashMap<String, String> germanOutputs = new HashMap<String, String>();
 		germanOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
 				"---------- Sessioninformationen ---------------\n" + 
@@ -306,7 +306,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		germanOutputs.put("sedMemoryReplace", "Speicher gesamt: #####	Freier Speicher: #####");
 		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSessionnummer");
 		
-		outputs = new HashMap();
+		outputs = new HashMap<Locale, HashMap<String, String>>();
 		outputs.put(englishLocale, englishOutputs);
 		outputs.put(germanLocale, germanOutputs);
 	}

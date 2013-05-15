@@ -23,7 +23,6 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -1171,14 +1170,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
 
     private javax.sql.DataSource getDS(String user, String password)
     {
-        return getDS(user,password,null);
-    }
-
-    private javax.sql.DataSource getDS(
-        String user, String password, HashMap attrs)
-    {
-        if (attrs == null)
-            attrs = new HashMap();
+        HashMap<String, Object> attrs = new HashMap<String, Object>();
         if (user != null)
             attrs.put("user", user);
         if (password != null)
@@ -1186,16 +1178,15 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         attrs = addRequiredAttributes(attrs);
 
         DataSource ds = JDBCDataSource.getDataSource();
-        for (Iterator i = attrs.keySet().iterator(); i.hasNext(); )
-        {
-            String property = (String) i.next();
+        for (String property : attrs.keySet()) {
             Object value = attrs.get(property);
             JDBCDataSource.setBeanProperty(ds, property, value);
         }
         return ds;
     }
 
-    private HashMap addRequiredAttributes(HashMap attrs)
+    private HashMap<String, Object> addRequiredAttributes(
+            HashMap<String, Object> attrs)
     {
         String hostName = TestConfiguration.getCurrent().getHostName();
         int port = TestConfiguration.getCurrent().getPort();
@@ -1218,7 +1209,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private javax.sql.ConnectionPoolDataSource getCPDS(
         String user, String password)
     {
-        HashMap attrs = new HashMap();
+        HashMap<String, Object> attrs = new HashMap<String, Object>();
         if (user != null)
             attrs.put("user", user);
         if (password != null)
@@ -1227,9 +1218,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         attrs = addRequiredAttributes(attrs);
         ConnectionPoolDataSource cpds = 
             J2EEDataSource.getConnectionPoolDataSource();
-        for (Iterator i = attrs.keySet().iterator(); i.hasNext(); )
-        {
-            String property = (String) i.next();
+        for (String property : attrs.keySet()) {
             Object value = attrs.get(property);
             JDBCDataSource.setBeanProperty(cpds, property, value);
         }

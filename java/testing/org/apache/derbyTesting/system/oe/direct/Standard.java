@@ -68,7 +68,7 @@ public class Standard extends StatementHelper implements Operations {
     
     private final Order order = new Order();
     
-    private final List nameList = new ArrayList();
+    private final List<Object> nameList = new ArrayList<Object>();
 
 
     /**

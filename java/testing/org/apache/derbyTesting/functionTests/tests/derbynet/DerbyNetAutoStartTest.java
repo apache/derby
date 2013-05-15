@@ -42,6 +42,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -155,8 +156,8 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         final PrintStream realSystemErr = System.err;
         ByteArrayOutputStream serverOutputBOS = new ByteArrayOutputStream();
         final PrintStream serverOutputOut = new PrintStream( serverOutputBOS);
-        AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
                 System.setOut(new PrintStream(serverOutputOut));
                 System.setErr(new PrintStream(serverOutputOut));
                 return null;
@@ -178,8 +179,8 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
             }
         } finally {
             // Restore the original out streams
-            AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
                     System.setOut(realSystemOut);
                     System.setErr(realSystemErr);
                     return null;
@@ -238,16 +239,8 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
      */
     public void testStartNetworkServerLogMessageOnDualStart()
             throws Exception {
-        final Locale newLocale = Locale.ENGLISH;
         // first force English locale
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
-            public Object run() {
-                Locale.setDefault(newLocale);
-                return null;
-            }
-        }
-        );
+        LocaleTestSetup.setDefaultLocale(Locale.ENGLISH);
         int doubleport = TestConfiguration.getCurrent().getPort();
         // start a network server
         NetworkServerControl ns = 
@@ -359,14 +352,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         removeSystemProperty("derby.drda.startNetworkServer");
         removeSystemProperty("derby.drda.portNumber");
         // set the old locale back to the original
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction() {
-            public Object run() {
-                Locale.setDefault(oldLocale);
-                return null;
-            }
-        }
-        );
+        LocaleTestSetup.setDefaultLocale(oldLocale);
         oldLocale=null;
         super.tearDown();
     }

@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -123,12 +122,10 @@ public class SSLTest extends BaseJDBCTestCase
      */
     private static  String[]  getStartupProperties()
     {
-        ArrayList list = new ArrayList();
-        list.add("javax.net.ssl.keyStore=extinout/SSLTestServerKey.key");
-        list.add("javax.net.ssl.keyStorePassword=qwerty");
-        String[] result = new String[ list.size()];
-        list.toArray(result);
-        return result;
+        return new String[] {
+            "javax.net.ssl.keyStore=extinout/SSLTestServerKey.key",
+            "javax.net.ssl.keyStorePassword=qwerty",
+        };
     }
     
     // JUnit Tests
