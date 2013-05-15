@@ -22,7 +22,6 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-import java.security.AccessController;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -136,24 +135,5 @@ public abstract class HarnessJavaTest extends CanonTestCase {
         dtest = new CleanDatabaseTestSetup(dtest);
         
         return dtest;
-    }
-    
-    /**
-     * Need to capture System.out so that we can compare it.
-     * @param out
-     */
-    private void setSystemOut(final PrintStream out)
-    {
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run(){
-            System.setOut(out);
-            return null;
-            
-            }
-            
-        }
-         );       
     }
 }

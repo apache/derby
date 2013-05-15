@@ -20,8 +20,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
-import java.io.File;
-import java.security.AccessController;
 import java.util.Properties;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
@@ -118,58 +116,8 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
         // not be saved in the 'fail' directory.
         // We can't rely on an additionalDatabaseDecorator because 'detest'
         // is not just a logical, but a physical db name.
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                    removeDatabase("detest");
-                return null;
-            }
-            
-            void removeDatabase(String dbName)
-            {
-                //TestConfiguration config = TestConfiguration.getCurrent();
-                dbName = dbName.replace('/', File.separatorChar);
-                String dsh = getSystemProperty("derby.system.home");
-                if (dsh == null) {
-                    fail("not implemented");
-                } else {
-                    dbName = dsh + File.separator + dbName;
-                }
-                removeDirectory(dbName);
-            }
-
-            void removeDirectory(String path)
-            {
-                final File dir = new File(path);
-                removeDir(dir);
-            }
-
-            private void removeDir(File dir) {
-                
-                // Check if anything to do!
-                // Database may not have been created.
-                if (!dir.exists())
-                    return;
-
-                String[] list = dir.list();
-
-                // Some JVMs return null for File.list() when the
-                // directory is empty.
-                if (list != null) {
-                    for (int i = 0; i < list.length; i++) {
-                        File entry = new File(dir, list[i]);
-
-                        if (entry.isDirectory()) {
-                            removeDir(entry);
-                        } else {
-                            entry.delete();
-                            //assertTrue(entry.getPath(), entry.delete());
-                        }
-                    }
-                }
-                dir.delete();
-                //assertTrue(dir.getPath(), dir.delete());
-            }
-        });
+        removeDirectory(
+            TestConfiguration.getCurrent().getDatabasePath("detest"));
         super.tearDown();
     }    
 }

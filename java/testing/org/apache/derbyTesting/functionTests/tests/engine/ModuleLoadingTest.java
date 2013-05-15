@@ -67,7 +67,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
         // Active threads count.
         final int[] activeThreads = new int[1];
         // List of exceptions/throwables thrown by the forked threads.
-        final ArrayList exceptions = new ArrayList();
+        final ArrayList<Throwable> exceptions = new ArrayList<Throwable>();
 
         Thread[] threads = new Thread[numThreads];
 
@@ -132,7 +132,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
         // At least one of the threads failed. Re-throw the first error
         // reported.
         if (!exceptions.isEmpty()) {
-            throw (Throwable) exceptions.get(0);
+            throw exceptions.get(0);
         }
     }
 }

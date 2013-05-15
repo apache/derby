@@ -77,7 +77,7 @@ public class derbyrunjartest extends BaseTestCase {
               derbyrunloc = derbyrunloc.substring(1);
         }
 
-        ArrayList cmdArgs = new ArrayList();
+        ArrayList<String> cmdArgs = new ArrayList<String>();
 
         // Invoke java -jar derbyrun.jar if we are running from jars, or
         // with fully qualified class name if we are running from classes.
@@ -90,7 +90,7 @@ public class derbyrunjartest extends BaseTestCase {
 
         cmdArgs.addAll(Arrays.asList(toolArgs));
 
-        String[] cmd = (String[]) cmdArgs.toArray(new String[cmdArgs.size()]);
+        String[] cmd = cmdArgs.toArray(new String[cmdArgs.size()]);
         assertExecJavaCmdAsExpected(output, cmd, exitCode);
     }
 

@@ -83,7 +83,7 @@
         <pathelement path="${compile.classpath};${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
-      <!--exclude name=""/-->
+      <compilerarg value="-Xlint"/>
     </javac>
   </target>
 

@@ -34,6 +34,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -385,26 +386,11 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         }
     }
 
-
-    private static void assertIsDirectory(final File f) throws IOException {
-        try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    assertTrue("assertIsDirectory failed: " +
-                          f.getCanonicalPath(), f.isDirectory());
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            // e.getException() should be an instance of IOException.
-            throw (IOException) e.getException();
-        }
-    }
-
     private static void assertNotDirectory(final File f) throws IOException {
         try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                public Void run() throws IOException {
                     assertFalse("assertNotDirectory failed: " +
                           f.getCanonicalPath(), f.isDirectory());
                     return null;
@@ -417,25 +403,19 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void assertIsEmpty(final File f) throws IOException {
-        try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    assertTrue("assertIsEmpty failed: " + f.getCanonicalPath(),
-                          (f.exists() && (f.length() == 0)));
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            // e.getException() should be an instance of IOException.
-            throw (IOException) e.getException();
-        }
+        String path = getCanonicalPath(f);
+        assertTrue(path + " doesn't exist",
+                PrivilegedFileOpsForTests.exists(f));
+        assertEquals(path + " is not empty",
+                0, PrivilegedFileOpsForTests.length(f));
     }
 
 
     private static void assertNotEmpty(final File f) throws IOException {
         try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                public Void run() throws IOException {
                     assertTrue("assertNotEmpty failed: " + f.getCanonicalPath()
                           + " does not exist.", f.exists());
                     FileInputStream fis = new FileInputStream(f);
@@ -453,52 +433,27 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     private static void assertIsExisting(final File f) throws IOException {
-        try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    assertTrue("assertIsExisting failed: " +
-                          f.getCanonicalPath(), f.exists());
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            // e.getException() should be an instance of IOException.
-            throw (IOException) e.getException();
-        }
+        String path = getCanonicalPath(f);
+        assertTrue(path + " doesn't exist",
+                PrivilegedFileOpsForTests.exists(f));
     }
 
 
     private static void assertNotExisting(final File f) throws IOException {
-        try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    assertFalse("assertNotExisting failed: " +
-                          f.getCanonicalPath(), f.exists());
-                    return null;
-                }
-            });
-        } catch (PrivilegedActionException e) {
-            // e.getException() should be an instance of IOException.
-            throw (IOException) e.getException();
-        }
+        String path = getCanonicalPath(f);
+        assertFalse(path + " exists",
+                PrivilegedFileOpsForTests.exists(f));
     }
 
     private static boolean deleteFile(final File f) {
-        Boolean deleted = (Boolean) AccessController.doPrivileged(
-              new PrivilegedAction() {
-            public Object run() {
-                return new Boolean(f.delete());
-            }
-        });
-        return deleted.booleanValue();
+        return PrivilegedFileOpsForTests.delete(f);
     }
 
     private static String getCanonicalPath(final File f) throws IOException {
-        String path = null;
         try {
-            path = (String) AccessController.doPrivileged(
-                  new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+            return AccessController.doPrivileged(
+                  new PrivilegedExceptionAction<String>() {
+                public String run() throws IOException {
                     return f.getCanonicalPath();
                 }
             });
@@ -506,12 +461,11 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
             // e.getException() should be an instance of IOException.
             throw (IOException) e.getException();
         }
-        return path;
     }
 
     private static void makeDirIfNotExisting(final String filename) {
-        AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
                 File f = new File(filename);
                 if(!f.exists()) {
                     f.mkdir();
@@ -521,22 +475,12 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         });
     }
 
-    private static void setSystemErr(final PrintStream err) {
-        AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                System.setErr(err);
-                return null;
-            }
-        });
-    }
-
     private static FileOutputStream newFileOutputStream(final File f)
     throws FileNotFoundException {
-        FileOutputStream outStream = null;
         try {
-            outStream = (FileOutputStream) AccessController.doPrivileged(
-                  new PrivilegedExceptionAction() {
-                public Object run() throws FileNotFoundException {
+            return AccessController.doPrivileged(
+                  new PrivilegedExceptionAction<FileOutputStream>() {
+                public FileOutputStream run() throws FileNotFoundException {
                     return new FileOutputStream(f);
                 }
             });
@@ -544,7 +488,6 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
                 // e.getException() should be a FileNotFoundException.
                 throw (FileNotFoundException) e.getException();
             }
-        return outStream;
     }
 
 

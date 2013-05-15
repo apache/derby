@@ -25,21 +25,13 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Timestamp;
-
-import java.io.PrintWriter;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 
 import org.apache.derby.tools.dblook;
-import org.apache.derby.tools.ij;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
@@ -48,9 +40,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Set;
-import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 public class dblook_test {
 
@@ -750,7 +740,7 @@ public class dblook_test {
 
 		// Load any id-to-name mappings that will be useful
 		// when dumping the catalogs.
-		HashMap idToNameMap = loadIdMappings(stmt, conn);
+		HashMap<String, String> idToNameMap = loadIdMappings(stmt);
 
 		// Go through and dump all system catalog information,
 		// filtering out database-dependent id's so that they
@@ -902,7 +892,7 @@ public class dblook_test {
 	 ****/
 
 	private void dumpResultSet (ResultSet rs,
-		HashMap idToNameMap, Connection conn)
+		HashMap<String, String> idToNameMap, Connection conn)
 		throws Exception
 	{
 
@@ -921,9 +911,10 @@ public class dblook_test {
 		// which is why we use object names.
 		StringBuffer uniqueName = new StringBuffer();
 
-		TreeMap orderedRows = new TreeMap();
-		ArrayList rowValues = new ArrayList();
-		ArrayList duplicateRowIds = new ArrayList();
+		TreeMap<String, ArrayList<String>> orderedRows =
+                new TreeMap<String, ArrayList<String>>();
+		ArrayList<String> rowValues = new ArrayList<String>();
+		ArrayList<String> duplicateRowIds = new ArrayList<String>();
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int cols = rsmd.getColumnCount();
 		while (rs.next()) {
@@ -932,7 +923,7 @@ public class dblook_test {
 
 				String colName = rsmd.getColumnName(i);
 				String value = rs.getString(i);
-				String mappedName = (String)idToNameMap.get(value);
+				String mappedName = idToNameMap.get(value);
 
 				if ((colName.indexOf("SCHEMAID") != -1) &&
 					(mappedName != null) &&
@@ -1022,8 +1013,8 @@ public class dblook_test {
 				// id.
 					handleDuplicateRow(rowValues, null, orderedRows);
 				else {
-					ArrayList oldRow = (ArrayList)(orderedRows.put(
-						uniqueName.toString(), rowValues));
+					ArrayList<String> oldRow = orderedRows.put(
+						uniqueName.toString(), rowValues);
 					if (oldRow != null) {
 					// Duplicate row id.
 						duplicateRowIds.add(uniqueName.toString());
@@ -1035,23 +1026,19 @@ public class dblook_test {
 			}
 
 			uniqueName = new StringBuffer();
-			rowValues = new ArrayList();
+			rowValues = new ArrayList<String>();
 
 		}
 
 		// Now, print out all of the data in this result set
 		// using the order of the unique names that we created.
-		Set objectNames = orderedRows.keySet();
-		for (Iterator itr = objectNames.iterator();
-			itr.hasNext(); ) {
-
-			String row = (String)itr.next();
-			ArrayList colData = (ArrayList)orderedRows.get(row);
-			for (int i = 0; i < colData.size(); i++)
-				writeOut((String)colData.get(i));
-			writeOut("----");
-
-		}
+        Set<String> objectNames = orderedRows.keySet();
+        for (String row : objectNames) {
+            ArrayList<String> colData = orderedRows.get(row);
+            for (int i = 0; i < colData.size(); i++)
+                writeOut((String)colData.get(i));
+            writeOut("----");
+        }
 
 		orderedRows = null;
 		rs.close();
@@ -1082,7 +1069,7 @@ public class dblook_test {
 	 ****/
 
 	private String dumpColumnData(String colName,
-		String value, String mappedName, ArrayList rowVals)
+		String value, String mappedName, ArrayList<String> rowVals)
 	{
 
 		if (mappedName == null) {
@@ -1174,8 +1161,8 @@ public class dblook_test {
 	 ****/
 
 	private void handleDuplicateRow(
-		ArrayList newRow, ArrayList oldRow,
-		TreeMap orderedRows)
+		ArrayList<String> newRow, ArrayList<String> oldRow,
+		TreeMap<String, ArrayList<String>> orderedRows)
 	{
 
 		// Add the received rows (old and new) with
@@ -1185,8 +1172,7 @@ public class dblook_test {
 		for (int i = 0; i < newRow.size(); i++)
 			newRowId.append((String)newRow.get(i));
 
-		Object obj = (ArrayList)(orderedRows.put(
-						newRowId.toString(), newRow));
+		ArrayList<String> obj = orderedRows.put(newRowId.toString(), newRow);
 		if (obj != null)
 		// entire row is a duplicate.
 			orderedRows.put(newRowId.toString() + 
@@ -1198,8 +1184,7 @@ public class dblook_test {
 			for (int i = 0; i < oldRow.size(); i++)
 				oldRowId.append((String)oldRow.get(i));
 
-			obj = (ArrayList)(orderedRows.put(
-				oldRowId.toString(), oldRow));
+			obj = orderedRows.put(oldRowId.toString(), oldRow);
 			if (obj != null)
 			// entire row is a duplicate.
 				orderedRows.put(oldRowId.toString() +
@@ -1299,10 +1284,10 @@ public class dblook_test {
 	 *  name mappings has been returned.
 	 ****/
 
-	private HashMap loadIdMappings(Statement stmt,
-		Connection conn) throws Exception {
+    private HashMap<String, String> loadIdMappings(Statement stmt)
+            throws Exception {
 
-		HashMap idToNameMap = new HashMap();
+		HashMap<String, String> idToNameMap = new HashMap<String, String>();
 
 		// Table ids.
 		ResultSet rs = stmt.executeQuery(

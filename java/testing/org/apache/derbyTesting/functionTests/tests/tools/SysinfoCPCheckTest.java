@@ -26,10 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.security.AccessController;
 import java.util.Locale;
 
 import junit.framework.Test;
@@ -223,23 +220,6 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         if (kind.equals("client"))
             return isClient;
         return true;
-    }
-
-    /**
-     * Need to capture System.out so that we can compare it.
-     * @param out
-     */
-    private void setSystemOut(final PrintStream out)
-    {
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-
-            public Object run(){
-                System.setOut(out);
-                return null;
-            }
-        }
-        );       
     }
 
     ByteArrayOutputStream getOutputStream() {

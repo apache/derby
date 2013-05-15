@@ -23,8 +23,6 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.io.PrintStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -46,13 +44,8 @@ public class IjSecurityManagerTest extends BaseTestCase {
 	    final PrintStream out = System.out;
 	    
 	    /* Mute the test */
-	    AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                System.setOut(new PrintStream(new TestNullOutputStream()));
-                return null;
-            }
-        });
-	    
+        setSystemOut(new PrintStream(new TestNullOutputStream()));
+
 	    try {
 	        /* Run ij */
 	        ij.main(new String[]{"extinout/IjSecurityManagerTest.sql"});
@@ -60,12 +53,7 @@ public class IjSecurityManagerTest extends BaseTestCase {
 	        fail("Failed to run ij under security manager.",e);
 	    } finally {
 	        /* Restore the original out stream */
-	        AccessController.doPrivileged(new PrivilegedAction() {
-	            public Object run() {
-	                System.setOut(out);
-	                return null;
-	            }
-	        });
+            setSystemOut(out);
 	    }
 	}
 	

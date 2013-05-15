@@ -168,7 +168,7 @@ public class SysinfoLocaleTest extends BaseTestCase {
         }
         URLClassLoader loader = new URLClassLoader(urls, null);
 
-        Class copy = Class.forName(className, true, loader);
+        Class<?> copy = Class.forName(className, true, loader);
         Method main = copy.getMethod("main", new Class[] { String[].class });
         main.invoke(null, new Object[] { new String[0] });
     }

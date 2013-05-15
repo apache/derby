@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 
@@ -47,7 +46,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class Derby3980DeadlockTest extends BaseJDBCTestCase {
     private final int THREAD_COUNT = 2;
-    private final LinkedList listExceptions = new LinkedList();
+    private final LinkedList<Throwable> listExceptions =
+            new LinkedList<Throwable>();
     private final Object syncObject = new Object();
     private int startedCount = 0;
     private static final String fprefix = "javacore";
@@ -73,9 +73,12 @@ public class Derby3980DeadlockTest extends BaseJDBCTestCase {
     private void checkExceptions() {        
         //Due to timing, you might see ERROR 40XL1: A lock could not be obtained
         //instead of ERROR 40001 (DERBY-3980)
-        for( Iterator i = listExceptions.iterator(); i.hasNext(); ) {
-            SQLException e = (SQLException) i.next();
-            assertSQLState("40001",e);
+        for (Throwable t : listExceptions) {
+            if (t instanceof SQLException) {
+                assertSQLState("40001", (SQLException) t);
+            } else {
+                fail("Unexpected exception", t);
+            }
         }
         assertEquals("Expected 1 exception, got" + listExceptions.size(),
                 1,listExceptions.size());

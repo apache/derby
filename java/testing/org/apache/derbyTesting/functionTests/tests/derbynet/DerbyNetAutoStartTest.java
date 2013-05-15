@@ -28,8 +28,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -156,13 +154,8 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         final PrintStream realSystemErr = System.err;
         ByteArrayOutputStream serverOutputBOS = new ByteArrayOutputStream();
         final PrintStream serverOutputOut = new PrintStream( serverOutputBOS);
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            public Void run() {
-                System.setOut(new PrintStream(serverOutputOut));
-                System.setErr(new PrintStream(serverOutputOut));
-                return null;
-            }
-        });
+        setSystemOut(new PrintStream(serverOutputOut));
+        setSystemErr(new PrintStream(serverOutputOut));
 
         try {
             try
@@ -179,13 +172,8 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
             }
         } finally {
             // Restore the original out streams
-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                public Void run() {
-                    System.setOut(realSystemOut);
-                    System.setErr(realSystemErr);
-                    return null;
-                }
-            });
+            setSystemOut(realSystemOut);
+            setSystemErr(realSystemErr);
         }
 
         // Verify the server - use default port - is not up

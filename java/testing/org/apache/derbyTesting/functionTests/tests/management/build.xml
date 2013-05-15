@@ -53,6 +53,7 @@
                 <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>
+            <compilerarg value="-Xlint"/>
         </javac>
         <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/management">
           <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/management"

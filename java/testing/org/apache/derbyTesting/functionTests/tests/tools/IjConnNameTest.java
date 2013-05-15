@@ -21,9 +21,6 @@
 */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
-import java.io.File;
-
-import java.security.AccessController;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -33,8 +30,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 
@@ -77,58 +74,8 @@ public class IjConnNameTest extends ScriptTestCase {
         // attempt to get rid of the extra database.
         // this also will get done if there are failures, and the database will
         // not be saved in the 'fail' directory.
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                    removeDatabase("lemming" );
-                return null;
-            }
-            
-            void removeDatabase(String dbName)
-            {
-                //TestConfiguration config = TestConfiguration.getCurrent();
-                dbName = dbName.replace('/', File.separatorChar);
-                String dsh = getSystemProperty("derby.system.home");
-                if (dsh == null) {
-                    fail("not implemented");
-                } else {
-                    dbName = dsh + File.separator + dbName;
-                }
-                removeDirectory(dbName);
-            }
-
-            void removeDirectory(String path)
-            {
-                final File dir = new File(path);
-                removeDir(dir);
-            }
-
-            private void removeDir(File dir) {
-                
-                // Check if anything to do!
-                // Database may not have been created.
-                if (!dir.exists())
-                    return;
-
-                String[] list = dir.list();
-
-                // Some JVMs return null for File.list() when the
-                // directory is empty.
-                if (list != null) {
-                    for (int i = 0; i < list.length; i++) {
-                        File entry = new File(dir, list[i]);
-
-                        if (entry.isDirectory()) {
-                            removeDir(entry);
-                        } else {
-                            entry.delete();
-                            //assertTrue(entry.getPath(), entry.delete());
-                        }
-                    }
-                }
-                dir.delete();
-                //assertTrue(dir.getPath(), dir.delete());
-            }
-        });
+        removeDirectory(
+            TestConfiguration.getCurrent().getDatabasePath("lemming"));
         super.tearDown();
     }   
 }

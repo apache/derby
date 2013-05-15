@@ -233,7 +233,35 @@ public abstract class BaseTestCase
     }
 
     private final static PrintStream out = System.out;
-    
+
+    /**
+     * Change the value of {@code System.out}.
+     *
+     * @param out the new stream
+     */
+    protected void setSystemOut(final PrintStream out) {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                System.setOut(out);
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Change the value of {@code System.err}.
+     *
+     * @param err the new stream
+     */
+    protected void setSystemErr(final PrintStream err) {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
+                System.setErr(err);
+                return null;
+            }
+        });
+    }
+
     /**
      * Set system property
      *

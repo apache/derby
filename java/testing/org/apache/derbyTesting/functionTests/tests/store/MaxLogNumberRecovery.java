@@ -97,9 +97,9 @@ public class MaxLogNumberRecovery extends MaxLogNumber {
     {
     
     AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
+        (new java.security.PrivilegedAction<Void>(){
             
-            public Object run(){
+            public Void run(){
             System.setProperty( name, value);
             return null;
             

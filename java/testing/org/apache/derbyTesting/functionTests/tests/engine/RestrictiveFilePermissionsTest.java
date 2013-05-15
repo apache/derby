@@ -498,21 +498,19 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
     private static boolean initialized = false;
 
     // Reflection helper objects for calling into Java >= 7
-    private static Class filesClz;
-    private static Class pathClz;
-    private static Class pathsClz;
-    private static Class aclEntryClz;
-    private static Class aclFileAttributeViewClz;
-    private static Class posixFileAttributeViewClz;
-    private static Class posixFileAttributesClz;
-    private static Class posixFilePermissionClz;
-    private static Class userPrincipalClz;
-    private static Class linkOptionArrayClz;
-    private static Class linkOptionClz;
-    private static Class stringArrayClz;
-    private static Class aclEntryBuilderClz;
-    private static Class aclEntryTypeClz;
-    private static Class fileStoreClz;
+    private static Class<?> filesClz;
+    private static Class<?> pathClz;
+    private static Class<?> pathsClz;
+    private static Class<?> aclEntryClz;
+    private static Class<?> aclFileAttributeViewClz;
+    private static Class<?> posixFileAttributeViewClz;
+    private static Class<?> posixFileAttributesClz;
+    private static Class<?> posixFilePermissionClz;
+    private static Class<?> userPrincipalClz;
+    private static Class<?> linkOptionArrayClz;
+    private static Class<?> linkOptionClz;
+    private static Class<?> stringArrayClz;
+    private static Class<?> fileStoreClz;
 
     private static Method get;
     private static Method getFileAttributeView;
@@ -532,7 +530,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
     private static Field OTHERS_EXECUTE;
     private static Field OTHERS_READ;
     private static Field OTHERS_WRITE;
-    private static Set unwantedPermissions;
+    private static Set<Object> unwantedPermissions;
     /**
      * Check that the file has access only for the owner. Will throw (JUnit
      * failure) if permissions are not strict.
@@ -580,8 +578,9 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
             // visit immediately contained file in this directory also
             checkAccessToOwner(file, false, expectedOutcome);
 
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws Exception {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                public Void run() throws Exception {
                     File [] files = file.listFiles();
                     for (int i = 0; i < files.length; i++){
                         checkAccessToOwner(
@@ -591,11 +590,10 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                 }});
         }
 
-        Boolean result =
-            (Boolean)AccessController.
-            doPrivileged(new PrivilegedExceptionAction() {
+        return AccessController.
+            doPrivileged(new PrivilegedExceptionAction<Boolean>() {
 
-                public Object run() throws Exception {
+                public Boolean run() throws Exception {
                     // lazy initialization
                     if (!initialized) {
                         initialized = true;
@@ -629,10 +627,6 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                             "java.nio.file.LinkOption");
                         stringArrayClz = Class.forName(
                             "[Ljava.lang.String;");
-                        aclEntryBuilderClz = Class.forName(
-                            "java.nio.file.attribute.AclEntry$Builder");
-                        aclEntryTypeClz = Class.forName(
-                            "java.nio.file.attribute.AclEntryType");
                         fileStoreClz = Class.forName(
                             "java.nio.file.FileStore");
 
@@ -681,7 +675,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                             posixFilePermissionClz.getField("OTHERS_READ");
                         OTHERS_WRITE =
                             posixFilePermissionClz.getField("OTHERS_WRITE");
-                        unwantedPermissions = new HashSet();
+                        unwantedPermissions = new HashSet<Object>();
                         unwantedPermissions.add(GROUP_EXECUTE.get(null));
                         unwantedPermissions.add(GROUP_READ.get(null));
                         unwantedPermissions.add(GROUP_WRITE.get(null));
@@ -839,7 +833,5 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                         return Boolean.FALSE;
                     }
                 }});
-
-        return result.booleanValue();
     }
 }

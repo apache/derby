@@ -181,18 +181,19 @@ public class TestDiskHashtable
 
         boolean[] isDuplicate = new boolean[ rows.length];
         boolean[] found = new boolean[ rows.length];
-        HashMap simpleHash = new HashMap( rows.length);
+        HashMap<Object, Vector<DataValueDescriptor[]>> simpleHash =
+            new HashMap<Object, Vector<DataValueDescriptor[]>>(rows.length);
 
-        testElements( removeDups, dht, keyCols, 0, rows, simpleHash, isDuplicate, found);
+        testElements( removeDups, dht, 0, rows, isDuplicate, found);
 
         for( int i = 0; i < rows.length; i++)
         {
             Object key = KeyHasher.buildHashKey( rows[i], keyCols);
-            Vector al = (Vector) simpleHash.get( key);
+            Vector<DataValueDescriptor[]> al = simpleHash.get( key);
             isDuplicate[i] = (al != null);
             if( al == null)
             {
-                al = new Vector(4);
+                al = new Vector<DataValueDescriptor[]>(4);
                 simpleHash.put( key, al);
             }
             if( (!removeDups) || !isDuplicate[i])
@@ -208,7 +209,7 @@ public class TestDiskHashtable
                     REPORT_FAILURE( "  get returned wrong value on key " + j);
             }
 
-            testElements( removeDups, dht, keyCols, i+1, rows, simpleHash, isDuplicate, found);
+            testElements( removeDups, dht, i+1, rows, isDuplicate, found);
         }
         // Remove them
         for( int i = 0; i < rows.length; i++)
@@ -220,7 +221,7 @@ public class TestDiskHashtable
             if( dht.get( key) != null)
                 REPORT_FAILURE( "  remove did not delete key " + i);
         }
-        testElements( removeDups, dht, keyCols, 0, rows, simpleHash, isDuplicate, found);
+        testElements( removeDups, dht, 0, rows, isDuplicate, found);
 
         testLargeTable( dht, keyCols, rows[0]);
         dht.close();
@@ -314,10 +315,8 @@ public class TestDiskHashtable
 
     private void testElements( boolean removeDups,
                                DiskHashtable dht,
-                               int[] keyCols,
                                int rowCount,
                                DataValueDescriptor[][] rows,
-                               HashMap simpleHash,
                                boolean[] isDuplicate,
                                boolean[] found)
         throws StandardException

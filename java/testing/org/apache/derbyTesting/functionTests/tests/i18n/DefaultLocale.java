@@ -21,13 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
-import java.util.Locale;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.sql.DriverManager;
-import java.sql.Connection;
 import java.sql.SQLException;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 
 public class DefaultLocale { 
 
@@ -75,16 +70,8 @@ public class DefaultLocale {
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it. Needs write permission on user.language
-		AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-            	java.util.Locale.setDefault(new java.util.Locale(Locale.trim(),Code.trim()));
-                return null; // nothing to return
-            }
-        });		
-		
+        LocaleTestSetup.setDefaultLocale(
+                new java.util.Locale(Locale.trim(), Code.trim()));
 	}
-
-
-
 
 }
