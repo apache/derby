@@ -43,9 +43,8 @@ import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 public interface ClientJDBCObjectFactory {
     
     /**
-     * This method is used to return an instance of {@link
-     * org.apache.derby.client.ClientPooledConnection} (or {@link
-     * org.apache.derby.client.ClientPooledConnection40}) class which
+     * This method is used to return an instance of the {@link
+     * org.apache.derby.client.ClientPooledConnection} class which
      * implements {@code javax.sql.PooledConnection}.
      */
     ClientPooledConnection newClientPooledConnection(
