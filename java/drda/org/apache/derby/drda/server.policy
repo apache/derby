@@ -17,40 +17,36 @@
 
 grant codeBase "${derby.install.url}derby.jar"
 {
-//
-// These permissions are needed for everyday, embedded Derby usage.
-//
+  // These permissions are needed for everyday, embedded Derby usage.
+  //
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.util.PropertyPermission "user.dir", "read";
-  permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
-      "write"; 
+
   // The next two properties are used to determine if the VM is 32 or 64 bit.
+  //
   permission java.util.PropertyPermission "sun.arch.data.model", "read";
   permission java.util.PropertyPermission "os.arch", "read";
   permission java.io.FilePermission "${derby.system.home}","read";
-  permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}-",
+      "read,write,delete";
 
-//
-// This permission lets you backup and restore databases
-// to and from arbitrary locations in your file system.
-//
-// This permission also lets you import/export data to and from
-// arbitrary locations in your file system.
-//
-// You may want to restrict this access to specific directories.
-//
+  // This permission lets you backup and restore databases to and from
+  // arbitrary locations in your file system.
+  //
+  // This permission also lets you import/export data to and from arbitrary
+  // locations in your file system.
+  //
+  // You may want to restrict this access to specific directories.
+  //
   permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
 
-//
-// Needed by sysinfo. The file permission is needed to
-// check the existence of jars on the classpath. You can
-// limit this permission to just the locations which hold
-// your jar files. This block is reproduced for all codebases
-// which include the sysinfo classes--the policy file syntax
-// does not let you grant permissions to several codebases
-// all at once.
-//
+  // Needed by sysinfo. The file permission is needed to check the existence of
+  // jars on the classpath. You can limit this permission to just the locations
+  // which hold your jar files. This block is reproduced for all codebases
+  // which include the sysinfo classes--the policy file syntax does not let you
+  // grant permissions to several codebases all at once.
+  //
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
@@ -61,85 +57,89 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
 
-//
-// Permissions needed for JMX based management and monitoring, which is only
-// available for JVMs supporting "platform management", that is J2SE 5.0 or better.
-//
-// Allows this code to create an MBeanServer:
-//
+  // Permissions needed for JMX based management and monitoring.
+  //
+  // Allows this code to create an MBeanServer:
+  //
   permission javax.management.MBeanServerPermission "createMBeanServer";
-//
-// Allows access to Derby's built-in MBeans, within the domain org.apache.derby.
-// Derby must be allowed to register and unregister these MBeans.
-// To fine tune this permission, see the javadoc of javax.management.MBeanPermission
-// or the JMX Instrumentation and Agent Specification.
-//
-  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","registerMBean,unregisterMBean";
-//
-// Trusts Derby code to be a source of MBeans and to register these in the MBean server.
-//
+
+  // Allows access to Derby's built-in MBeans, within the domain
+  // org.apache.derby.  Derby must be allowed to register and unregister these
+  // MBeans.  To fine tune this permission, see the javadoc of
+  // javax.management.MBeanPermission or the JMX Instrumentation and Agent
+  // Specification.
+  //
+  permission javax.management.MBeanPermission
+       "org.apache.derby.*#[org.apache.derby:*]",
+       "registerMBean,unregisterMBean";
+
+  // Trusts Derby code to be a source of MBeans and to register these in the
+  // MBean server.
+  //
   permission javax.management.MBeanTrustPermission "register";
-  
-  // Gives permission for jmx to be used against Derby but
-  // only if JMX authentication is not being used.
-  // In that case the application would need to create
-  // a whole set of fine-grained permissions to allow specific
-  // users access to MBeans and actions they perform.
+
+  // Gives permission for jmx to be used against Derby but only if JMX
+  // authentication is not being used.  In that case the application would need
+  // to create a whole set of fine-grained permissions to allow specific users
+  // access to MBeans and actions they perform.
+  //
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "monitor";
 
-  // getProtectionDomain is an optional permission needed for printing classpath
-  // information to derby.log
+  // getProtectionDomain is an optional permission needed for printing
+  // classpath information to derby.log
+  //
   permission java.lang.RuntimePermission "getProtectionDomain";
 
-  //
-  // The following permission must be granted for Connection.abort(Executor) to work.
-  // Note that this permission must also be granted to outer (application) code domains.
+  // The following permission must be granted for Connection.abort(Executor) to
+  // work. Note that this permission must also be granted to outer
+  // (application) code domains.
   //
   permission java.sql.SQLPermission "callAbort";
 
   // Needed by FileUtil#limitAccessToOwner
+  //
   permission java.lang.RuntimePermission "accessUserInformation";
   permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
+
 grant codeBase "${derby.install.url}derbynet.jar"
 {
-//
-// This permission lets the Network Server manage connections from clients.
-//
+  // These permissions lets the Network Server manage connections from clients.
 
-// Accept connections from any host. Derby is listening to the host
-// interface specified via the -h option to "NetworkServerControl
-// start" on the command line, via the address parameter to the
-// org.apache.derby.drda.NetworkServerControl constructor in the API
-// or via the property derby.drda.host; the default is localhost.
-// You may want to restrict allowed hosts, e.g. to hosts in a specific
-// subdomain, e.g. "*.example.com".
+  // Accept connections from any host. Derby is listening to the host interface
+  // specified via the -h option to "NetworkServerControl start" on the command
+  // line, via the address parameter to the
+  // org.apache.derby.drda.NetworkServerControl constructor in the API or via
+  // the property derby.drda.host; the default is localhost.  You may want to
+  // restrict allowed hosts, e.g. to hosts in a specific subdomain,
+  // e.g. "*.example.com".
+  //
+  permission java.net.SocketPermission "*", "accept";
 
-  permission java.net.SocketPermission "*", "accept"; 
+  // Needed for server tracing.
+  //
+  permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-",
+      "read,write,delete";
 
-//
-// Needed for server tracing.
-//
-  permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
   // Needed by FileUtil#limitAccessToOwner
+  //
   permission java.lang.RuntimePermission "accessUserInformation";
   permission java.lang.RuntimePermission "getFileStoreAttributes";
-  
-  // Needed for NetworkServerMBean access (see JMX section above)
-  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
 
-//
-// Needed by sysinfo. The file permission is needed to
-// check the existence of jars on the classpath. You can
-// limit this permission to just the locations which hold
-// your jar files. This block is reproduced for all codebases
-// which include the sysinfo classes--the policy file syntax
-// does not let you grant permissions to several codebases
-// all at once.
-//
+  // Needed for NetworkServerMBean access (see JMX section above)
+  //
+  permission org.apache.derby.security.SystemPermission "server",
+      "control,monitor";
+
+  // Needed by sysinfo. The file permission is needed to check the existence of
+  // jars on the classpath. You can limit this permission to just the locations
+  // which hold your jar files. This block is reproduced for all codebases
+  // which include the sysinfo classes--the policy file syntax does not let you
+  // grant permissions to several codebases all at once.
+  //
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
@@ -154,15 +154,12 @@ grant codeBase "${derby.install.url}derbynet.jar"
 
 grant codeBase "${derby.install.url}derbytools.jar"
 {
-//
-// Needed by sysinfo. The file permission is needed to
-// check the existence of jars on the classpath. You can
-// limit this permission to just the locations which hold
-// your jar files. This block is for all codebases
-// which include the sysinfo classes--the policy file syntax
-// does not let you grant permissions to several codebases
-// all at once.
-//
+  // Needed by sysinfo. The file permission is needed to check the existence of
+  // jars on the classpath. You can limit this permission to just the locations
+  // which hold your jar files. This block is for all codebases which include
+  // the sysinfo classes--the policy file syntax does not let you grant
+  // permissions to several codebases all at once.
+  //
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
@@ -176,15 +173,12 @@ grant codeBase "${derby.install.url}derbytools.jar"
 
 grant codeBase "${derby.install.url}derbyclient.jar"
 {
-//
-// Needed by sysinfo. The file permission is needed to
-// check the existence of jars on the classpath. You can
-// limit this permission to just the locations which hold
-// your jar files. This block is reproduced for all codebases
-// which include the sysinfo classes--the policy file syntax
-// does not let you grant permissions to several codebases
-// all at once.
-//
+  // Needed by sysinfo. The file permission is needed to check the existence of
+  // jars on the classpath. You can limit this permission to just the locations
+  // which hold your jar files. This block is reproduced for all codebases
+  // which include the sysinfo classes--the policy file syntax does not let you
+  // grant permissions to several codebases all at once.
+  //
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
@@ -195,13 +189,9 @@ grant codeBase "${derby.install.url}derbyclient.jar"
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
 
-  //
-  // The following permission must be granted for Connection.abort(Executor) to work.
-  // Note that this permission must also be granted to outer (application) code domains.
+  // The following permission must be granted for Connection.abort(Executor) to
+  // work.  Note that this permission must also be granted to outer
+  // (application) code domains.
   //
   permission java.sql.SQLPermission "callAbort";
 };
-
-
-
-
