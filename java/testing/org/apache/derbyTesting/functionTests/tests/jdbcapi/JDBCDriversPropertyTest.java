@@ -20,9 +20,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -56,12 +53,10 @@ abstract class JDBCDriversPropertyTest extends TestCase {
     private static Test getAutoLoadSuite()
        throws Exception
     {
-        Class alt = Class.forName(
+        Class<?> alt = Class.forName(
            "org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest");
-        
-        Method suiteMethod = alt.getMethod("suite", null);
-        
-        return (Test) suiteMethod.invoke(null, null);
+
+        return (Test) alt.getMethod("suite").invoke(null);
     }
     
     JDBCDriversPropertyTest() {

@@ -44,7 +44,6 @@ import java.util.Arrays;
 //import java.util.HashMap;
 //import java.util.Iterator;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -742,25 +741,21 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DERBY-4886: Embedded returns the URL without connection attributes,
         // client returns the URL with connection attributes.
         if (usingDerbyNetClient()) {
-            String[] urlComponents = url.split(";");
+            List<String> urlComponents = Arrays.asList(url.split(";"));
 
             // Only compare whatever comes before the first semi-colon with
             // the expected URL. Check connection attributes separately.
-            url = urlComponents[0];
+            url = urlComponents.get(0);
 
             // Put each actual connection attribute in a HashSet for easy
             // comparison.
-            HashSet attrs = new HashSet();
-            for (int i = 1; i < urlComponents.length; i++) {
-                attrs.add(urlComponents[i]);
-            }
+            HashSet<String> attrs = new HashSet<String>(
+                    urlComponents.subList(1, urlComponents.size()));
 
             // Put each expected connection attribute in a HashSet.
-            HashSet expectedAttrs = new HashSet();
+            HashSet<String> expectedAttrs = new HashSet<String>();
             Properties ca = config.getConnectionAttributes();
-            Enumeration e = ca.propertyNames();
-            while (e.hasMoreElements()) {
-                String key = (String) e.nextElement();
+            for (String key : ca.stringPropertyNames()) {
                 expectedAttrs.add(key + '=' + ca.getProperty(key));
             }
 
@@ -1478,7 +1473,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private int createTablesForTest(boolean skipXML) throws Exception
     {
         getConnection().setAutoCommit(false);
-        List types = getSQLTypes(getConnection());
+        List<String> types = getSQLTypes(getConnection());
         if (skipXML)
             types.remove("XML");
             
@@ -2158,7 +2153,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 	 Derby-2258 Removed 3 data types which are not supported by Derby
 	 and added XML data type which is supported by Derby
 	*/
-        int[] allTypes = new int[] {
+        List<Integer> supportedTypes = new ArrayList<Integer>(Arrays.asList(
           Types.BIGINT, Types.BINARY, Types.BLOB, Types.BOOLEAN,
           Types.CHAR, Types.CLOB, Types.DATE,
           Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
@@ -2166,12 +2161,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.NUMERIC, Types.REAL, Types.SMALLINT,
           Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
           Types.VARCHAR, JDBC.SQLXML, Types.JAVA_OBJECT
-        };
-
-        ArrayList supportedTypes = new ArrayList();
-        for (int i = 0; i < allTypes.length; i++) {
-            supportedTypes.add(new Integer(allTypes[i]));
-        }
+        ));
 
         Version dataVersion = getDataVersion(getConnection());
         boolean booleanSupported =
@@ -2767,9 +2757,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * expected. For variable sized types the string will
      * have random valid length information. E.g. CHAR(37).
      */
-    public static List getSQLTypes(Connection conn) throws SQLException
+    public static List<String> getSQLTypes(Connection conn) throws SQLException
     {
-        List list = new ArrayList();
+        List<String> list = new ArrayList<String>();
         
         Random rand = new Random();
         
@@ -4625,7 +4615,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             jdbcRow[14] = jdbcRow[15] = null;
 
             // ODBC variant lacks column #20 (SPECIFIC_NAME)...
-            ArrayList odbcRow = new ArrayList(Arrays.asList(row));
+            ArrayList<Object> odbcRow =
+                    new ArrayList<Object>(Arrays.asList(row));
             odbcRow.remove(19);
             // ... and it is a bit different in the datetime rows
             if (i == 9) {

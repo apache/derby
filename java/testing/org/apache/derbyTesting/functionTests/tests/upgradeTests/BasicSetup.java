@@ -1433,7 +1433,7 @@ public class BasicSetup extends UpgradeChange {
 
     private int[][] constructPowerSet( int count )
     {
-    	java.util.ArrayList list = new java.util.ArrayList();
+    	ArrayList<int[]> list = new ArrayList<int[]>();
         boolean[]           inclusions = new boolean[ count ];
 
         include( list, 0, inclusions );
@@ -1444,7 +1444,7 @@ public class BasicSetup extends UpgradeChange {
         return result;
     }
 
-    private void    include( ArrayList list, int idx, boolean[] inclusions )
+    private void include( ArrayList<int[]> list, int idx, boolean[] inclusions )
     {
         if ( idx >= inclusions.length )
         {
@@ -1474,7 +1474,8 @@ public class BasicSetup extends UpgradeChange {
         include( list, idx, inclusions, true );
     }
 
-    private void    include( ArrayList list, int idx, boolean[] inclusions, boolean currentCell )
+    private void include(ArrayList<int[]> list, int idx, boolean[] inclusions,
+                         boolean currentCell)
     {
         inclusions[ idx++ ] = currentCell;
 
@@ -1489,7 +1490,7 @@ public class BasicSetup extends UpgradeChange {
     ////////////////////////////////////////////////
     private int[][] permute( int[][] original )
     {
-        ArrayList list = new ArrayList();
+        ArrayList<int[]> list = new ArrayList<int[]>();
 
         for ( int i = 0; i < original.length; i++ )
         {
@@ -1502,7 +1503,7 @@ public class BasicSetup extends UpgradeChange {
         return result;
     }
 
-    private void   permute( ArrayList list, int[] start, int[] remainder )
+    private void permute( ArrayList<int[]> list, int[] start, int[] remainder )
     {
         int startLength = start.length;
         int remainderLength = remainder.length;

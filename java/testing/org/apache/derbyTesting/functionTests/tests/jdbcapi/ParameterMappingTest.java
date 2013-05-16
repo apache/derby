@@ -1000,14 +1000,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 "char_col", "varchar_col"
             };
         
-        HashSet smallIntColumns = new HashSet();
+        HashSet<String> smallIntColumns = new HashSet<String>();
         for ( int i = 0; i < allColumns.length; i++ )
         {
             String  colName = allColumns[ i ];
             if ( colName.endsWith( "int_col" ) ) { smallIntColumns.add( colName ); }
         }
 
-        HashSet smallCharColumns = new HashSet();
+        HashSet<String> smallCharColumns = new HashSet<String>();
         for ( int i = 0; i < allColumns.length; i++ )
         {
             String  colName = allColumns[ i ];

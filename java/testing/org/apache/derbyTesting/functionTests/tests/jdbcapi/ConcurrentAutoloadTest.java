@@ -59,7 +59,8 @@ public class ConcurrentAutoloadTest extends BaseJDBCTestCase {
         final String user = tc.getUserName();
         final String pw = tc.getUserPassword();
 
-        final List errors = Collections.synchronizedList(new ArrayList());
+        final List<Throwable> errors =
+                Collections.synchronizedList(new ArrayList<Throwable>());
 
         Runnable r = new Runnable() {
             public void run() {

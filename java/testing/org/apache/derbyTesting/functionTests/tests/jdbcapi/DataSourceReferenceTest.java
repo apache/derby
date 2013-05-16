@@ -447,7 +447,7 @@ public class DataSourceReferenceTest
      */
     private static String[] getPropertyBeanList(Object ds) {
         Method[] allMethods = ds.getClass().getMethods();
-        ArrayList properties = new ArrayList();
+        ArrayList<String> properties = new ArrayList<String>();
 
         for (int i = 0; i < allMethods.length; i++) {
             Method method = allMethods[i];
@@ -477,7 +477,7 @@ public class DataSourceReferenceTest
             }
         }
 
-        return (String[])properties.toArray(new String[properties.size()]);
+        return properties.toArray(new String[properties.size()]);
     }
 
     /**

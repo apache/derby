@@ -19,9 +19,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.security.AccessController;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -32,7 +30,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -81,62 +78,11 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         // attempt to get rid of any databases. 
         // only 5 dbs (in addition to defaultdb) should actually get
         // created, but just in case, try all...
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < ADDITIONAL_DBS.length ; i++)
-                {   
-                    removeDatabase("emb" + ADDITIONAL_DBS[i]);
-                    removeDatabase("srv" + ADDITIONAL_DBS[i]);
-                } 
-                return null;
-            }
-            
-            void removeDatabase(String dbName)
-            {
-                //TestConfiguration config = TestConfiguration.getCurrent();
-                dbName = dbName.replace('/', File.separatorChar);
-                String dsh = BaseTestCase.getSystemProperty("derby.system.home");
-                if (dsh == null) {
-                    fail("not implemented");
-                } else {
-                    dbName = dsh + File.separator + dbName;
-                }
-                removeDirectory(dbName);
-            }
-
-            void removeDirectory(String path)
-            {
-                final File dir = new File(path);
-                removeDir(dir);
-            }
-
-            private void removeDir(File dir) {
-                
-                // Check if anything to do!
-                // Database may not have been created.
-                if (!dir.exists())
-                    return;
-
-                String[] list = dir.list();
-
-                // Some JVMs return null for File.list() when the
-                // directory is empty.
-                if (list != null) {
-                    for (int i = 0; i < list.length; i++) {
-                        File entry = new File(dir, list[i]);
-
-                        if (entry.isDirectory()) {
-                            removeDir(entry);
-                        } else {
-                            entry.delete();
-                            //assertTrue(entry.getPath(), entry.delete());
-                        }
-                    }
-                }
-                dir.delete();
-                //assertTrue(dir.getPath(), dir.delete());
-            }
-        });
+        TestConfiguration conf = TestConfiguration.getCurrent();
+        for (int i = 0; i < ADDITIONAL_DBS.length; i++) {
+            removeDirectory(conf.getDatabasePath("emb" + ADDITIONAL_DBS[i]));
+            removeDirectory(conf.getDatabasePath("srv" + ADDITIONAL_DBS[i]));
+        }
         super.tearDown();
     }
 

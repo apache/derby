@@ -660,7 +660,7 @@ public class Changes10_9 extends UpgradeChange
      * where <em>h</em> id a lower case hex digit.
      */
     private void initPattern() {
-        List l = new ArrayList(100);
+        List<Goal> l = new ArrayList<Goal>(100);
         // The UUID format is determined by
         // org.apache.derby.impl.services.uuid.BasicUUID#toString
 
@@ -689,8 +689,8 @@ public class Changes10_9 extends UpgradeChange
         l.add(new SingleChar('.'));
         l.add(new SingleChar('G'));
         l.add(new CharRange(new char[][]{{'0','9'}}, Goal.REPEAT));
-        this.pattern = new Goal[l.size()];
-        System.arraycopy(l.toArray(), 0, this.pattern, 0, l.size());
+
+        this.pattern = l.toArray(new Goal[l.size()]);
     }
 
     /**

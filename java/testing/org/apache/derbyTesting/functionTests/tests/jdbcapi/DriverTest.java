@@ -22,7 +22,6 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.File;
-import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -31,8 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -122,73 +121,20 @@ public class DriverTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < 2 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    if (traceFile.exists())
-                    {
-                        // if it exists, attempt to get rid of it
-                        traceFile.delete();
-                    }
-                } 
-                removeDatabases();
-                return null;
+        for (int i = 0; i < 2; i++) {
+            String traceFileName = "trace" + (i + 1) + ".out";
+            File traceFile = new File(traceFileName);
+            if (PrivilegedFileOpsForTests.exists(traceFile)) {
+                // if it exists, attempt to get rid of it
+                PrivilegedFileOpsForTests.delete(traceFile);
             }
-            
-            // attempt to get rid of any databases. 
-            void removeDatabases()
-            {
-                for ( int i=0 ; i<ADDITIONAL_DBS.length ; i++)
-                {
-                    String dbName = ADDITIONAL_DBS[i];
-                    //TestConfiguration config = TestConfiguration.getCurrent();
-                    dbName = dbName.replace('/', File.separatorChar);
-                    String dsh = BaseTestCase.getSystemProperty("derby.system.home");
-                    if (dsh == null) {
-                        fail("not implemented");
-                    } else {
-                        dbName = dsh + File.separator + dbName;
-                    }
-                    removeDirectory(dbName);
-                }
-            }
+        }
 
-            void removeDirectory(String path)
-            {
-                final File dir = new File(path);
-                removeDir(dir);
-            }
+        TestConfiguration config = TestConfiguration.getCurrent();
+        for (String dbName : ADDITIONAL_DBS) {
+            removeDirectory(config.getDatabasePath(dbName));
+        }
 
-            private void removeDir(File dir) {
-
-                // Check if anything to do!
-                // Database may not have been created.
-                if (!dir.exists())
-                    return;
-
-                String[] list = dir.list();
-
-                // Some JVMs return null for File.list() when the
-                // directory is empty.
-                if (list != null) {
-                    for (int i = 0; i < list.length; i++) {
-                        File entry = new File(dir, list[i]);
-
-                        if (entry.isDirectory()) {
-                            removeDir(entry);
-                        } else {
-                            entry.delete();
-                            //assertTrue(entry.getPath(), entry.delete());
-                        }
-                    }
-                }
-                dir.delete();
-                //assertTrue(dir.getPath(), dir.delete());
-            }
-        });
         super.tearDown();
     }
     
@@ -421,20 +367,11 @@ public class DriverTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExist() 
     {
-        
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < 2 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    //System.out.println("user.dir=" + System.getProperty("user.dir"));
-                    //System.out.println("fullpath = " + traceFile.getAbsolutePath());
-                        assertTrue(traceFile.exists());
-                } 
-                return null;
-            }
-        });
+        for (int i = 0; i < 2; i++) {
+            String traceFileName = "trace" + (i + 1) + ".out";
+            File traceFile = new File(traceFileName);
+            assertTrue(PrivilegedFileOpsForTests.exists(traceFile));
+        }
     }
 
     /**

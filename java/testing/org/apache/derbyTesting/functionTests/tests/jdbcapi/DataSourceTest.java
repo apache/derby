@@ -22,7 +22,6 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.File;
-import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -34,6 +33,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -65,7 +65,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * the connections are closed when we are done, so they are stored
      * in this hashtable
      */
-    protected static Hashtable conns = new Hashtable();
+    protected static Hashtable<String, Connection> conns =
+            new Hashtable<String, Connection>();
     
     /** The expected format of a connection string. In English:
      * "<classname>@<hashcode> (XID=<xid>), (SESSION = <sessionid>),
@@ -161,21 +162,14 @@ public class DataSourceTest extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < 6 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    if (traceFile.exists())
-                    {
-                        // if it exists, attempt to get rid of it
-                        traceFile.delete();
-                    }
-                } 
-                return null;
+        for (int i = 0; i < 6; i++) {
+            String traceFileName = "trace" + (i + 1) + ".out";
+            File traceFile = new File(traceFileName);
+            if (PrivilegedFileOpsForTests.exists(traceFile)) {
+                // if it exists, attempt to get rid of it
+                PrivilegedFileOpsForTests.delete(traceFile);
             }
-        });
+        }
         super.tearDown();
     }
 
@@ -396,22 +390,11 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExist() 
     {
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < 2 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    if (i == 2)
-                        continue;
-                    else
-                    {
-                        assertTrue(traceFile.exists());
-                    }
-                } 
-                return null;
-            }
-        });
+        for (int i = 0; i < 2; i++) {
+            String traceFileName = "trace" + (i + 1) + ".out";
+            File traceFile = new File(traceFileName);
+            assertTrue(PrivilegedFileOpsForTests.exists(traceFile));
+        }
     }
 
     /**
@@ -783,10 +766,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     private static void clearConnections() throws SQLException
     {
-        java.util.Iterator it = conns.values().iterator();
-        while ( it.hasNext() )
-        {
-            Connection conn = (Connection)it.next();
+        for (Connection conn : conns.values()) {
             conn.close();
         }
         conns.clear();

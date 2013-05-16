@@ -91,13 +91,13 @@ public class SURQueryMixTest extends SURBaseTest
         checkRowDeleted = dbMeta.ownDeletesAreVisible(rs.getType());
         
         // Create map with rows
-        Map rows = createRowMap(rs);
+        Map<Integer, String> rows = createRowMap(rs);
         
         // Set of rows which are updated (contains Integer with position in RS)
-        final Set updatedRows = new HashSet();
+        final Set<Integer> updatedRows = new HashSet<Integer>();
         
         // Set of rows which are deleted (contains Integer with position in RS)
-        final Set deletedRows = new HashSet();
+        final Set<Integer> deletedRows = new HashSet<Integer>();
                 
         // Test navigation
         testNavigation(rs, rows, updatedRows, deletedRows);
@@ -149,10 +149,10 @@ public class SURQueryMixTest extends SURBaseTest
      * ResultSet (Integer 1..n), while the value is a
      * concatenation of the strings for all columns in the row.
      */
-    private Map createRowMap(final ResultSet rs) 
+    private Map<Integer, String> createRowMap(final ResultSet rs)
         throws SQLException
     {
-        final Map rows = new HashMap();        
+        final Map<Integer, String> rows = new HashMap<Integer, String>();
         rs.beforeFirst();
         assertTrue("Unexpected return from isBeforeFirst()",
                    rs.isBeforeFirst());
@@ -166,7 +166,7 @@ public class SURQueryMixTest extends SURBaseTest
             i++;
             String row = getRowString(rs);
             println(row);
-            rows.put(new Integer(i), row);
+            rows.put(i, row);
             sum += rs.getInt(1);
             if (rs.getInt(1) < 0) {
                 checkSum = false;
@@ -191,12 +191,11 @@ public class SURQueryMixTest extends SURBaseTest
      * @param k number of rows in the sample
      * @return a list containing k elements of rows
      **/
-    private List createRandomSample(final Map rows, int k) {
+    private List createRandomSample(final Map<Integer, String> rows, int k) {
         Random r = new Random();
-        ArrayList sampledKeys = new ArrayList();
+        ArrayList<Integer> sampledKeys = new ArrayList<Integer>();
         int n = 0;        
-        for (Iterator i = rows.keySet().iterator(); i.hasNext();) {
-            Object key = i.next();
+        for (Integer key : rows.keySet()) {
             n++;            
             if (n<=k) {
                 sampledKeys.add(key);
@@ -223,8 +222,8 @@ public class SURQueryMixTest extends SURBaseTest
      * @param k number of records to be deleted
      */
     private void deleteRandomSampleOfNRecords(final ResultSet rs, 
-                                              final Map rows,
-                                              final Set deletedRows,
+                                              final Map<Integer, String> rows,
+                                              final Set<Integer> deletedRows,
                                               final int k) 
         throws SQLException
     {
@@ -260,8 +259,8 @@ public class SURQueryMixTest extends SURBaseTest
      * @param k number of records to be updated
      */
     private void updateRandomSampleOfNRecords(final ResultSet rs, 
-                                              final Map rows,
-                                              final Set updatedRows,
+                                              final Map<Integer, String> rows,
+                                              final Set<Integer> updatedRows,
                                               final int k) 
         throws SQLException
     {

@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import junit.framework.Assert;
 
@@ -48,32 +49,17 @@ public class UpgradeClassLoader
             //"derbytools.jar"
             };
 
-    static final String oldVersionsPath;
-    static final String jarPath;
-    
-    static {
-         
-        oldVersionsPath = (String) AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
+    static final String oldVersionsPath =
+            getSystemProperty(_Suite.OLD_VERSIONS_PATH_PROPERTY);
+    static final String jarPath =
+            getSystemProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
 
-            public Object run(){
-            return System.getProperty(_Suite.OLD_VERSIONS_PATH_PROPERTY);
-
+    private static String getSystemProperty(final String key) {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty(key);
             }
-
-        }
-         );
-
-         jarPath = (String ) AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-
-            public Object run(){
-            return System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
-
-            }
-
-        }
-         );
+        });
     }
 
     protected static String getTextVersion(int[] iv)
@@ -90,17 +76,13 @@ public class UpgradeClassLoader
      */
     public static ClassLoader makeClassLoader( final int[] version )
     {
-        ClassLoader oldLoader = (ClassLoader )AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-
-            public Object run(){
-            return createClassLoader(version);
-
+        ClassLoader oldLoader = AccessController.doPrivileged(
+                new PrivilegedAction<ClassLoader>() {
+            public ClassLoader run() {
+                return createClassLoader(version);
             }
+        });
 
-        }
-         );
-        
         if (oldLoader == null)
         {
             BaseTestCase.traceit("Empty: Skip upgrade Tests (no jars) for " + getTextVersion(version));
@@ -115,11 +97,8 @@ public class UpgradeClassLoader
      * </p>
      */
     public static void setThreadLoader(final ClassLoader which) {
-
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
                 java.lang.Thread.currentThread().setContextClassLoader(which);
               return null;
             }
@@ -132,11 +111,9 @@ public class UpgradeClassLoader
      * </p>
      */
     public static ClassLoader getThreadLoader() {
-
-        return (ClassLoader) AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
+        return AccessController.doPrivileged(
+                new PrivilegedAction<ClassLoader>() {
+            public ClassLoader run() {
                 return Thread.currentThread().getContextClassLoader();
             }
         });

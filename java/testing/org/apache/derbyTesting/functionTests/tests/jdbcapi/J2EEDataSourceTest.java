@@ -25,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -36,8 +35,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Savepoint;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
@@ -92,7 +94,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * the connections are closed when we are done, so they are stored
      * in this hashtable
      */
-    protected static Hashtable conns = new Hashtable();
+    protected static Hashtable<String, Connection> conns =
+            new Hashtable<String, Connection>();
     
     /** The expected format of a connection string. In English:
      * "<classname>@<hashcode> (XID=<xid>), (SESSION = <sessionid>),
@@ -266,21 +269,14 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         // attempt to get rid of any left-over trace files
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=0 ; i < 6 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    if (traceFile.exists())
-                    {
-                        // if it exists, attempt to get rid of it
-                        traceFile.delete();
-                    }
-                } 
-                return null;
+        for (int i = 0; i < 6; i++) {
+            String traceFileName = "trace" + (i + 1) + ".out";
+            File traceFile = new File(traceFileName);
+            if (PrivilegedFileOpsForTests.exists(traceFile)) {
+                // if it exists, attempt to get rid of it
+                PrivilegedFileOpsForTests.delete(traceFile);
             }
-        });
+        }
         super.tearDown();
     }
 
@@ -3024,16 +3020,13 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     private static void assertTraceFilesExistAndCanBeDeleted()
     {
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                for (int i=3 ; i <= 6 ; i++) {
-                    File traceFile = new File("trace" + i + ".out");
-                    assertTrue("Doesn't exist", traceFile.exists());
-                    assertTrue("Delete failed", traceFile.delete());
-                } 
-                return null;
-            }
-        });
+        for (int i = 3; i <= 6; i++) {
+            File traceFile = new File("trace" + i + ".out");
+            assertTrue("Doesn't exist",
+                    PrivilegedFileOpsForTests.exists(traceFile));
+            assertTrue("Delete failed",
+                    PrivilegedFileOpsForTests.delete(traceFile));
+        }
     }
 
     /**
@@ -4181,7 +4174,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // Derby-33 - setTypeMap on connection
         try {
-            conn.setTypeMap(java.util.Collections.EMPTY_MAP);
+            Map<String, Class<?>> empty = Collections.emptyMap();
+            conn.setTypeMap(empty);
             if (!((String)expectedValues[5]).equals("OK"))
                 fail (" expected an sqlexception on setTypeMap(EMPTY_MAP)");
         } catch (SQLException sqle) {
@@ -4200,8 +4194,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
         try {
             // a populated map, not implemented
-            java.util.Map map = new java.util.HashMap();
-            map.put("name", "class");
+            Map<String, Class<?>> map = new HashMap<String, Class<?>>();
+            map.put("name", Class.class);
             conn.setTypeMap(map);
             if (!((String)expectedValues[7]).equals("OK"))
                 fail (" expected an sqlexception on setTypeMap(map)");
@@ -4417,10 +4411,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     private static void clearConnections() throws SQLException
     {
-        java.util.Iterator it = conns.values().iterator();
-        while ( it.hasNext() )
-        {
-            Connection conn = (Connection)it.next();
+        for (Connection conn : conns.values()) {
             conn.close();
         }
         conns.clear();
@@ -4456,7 +4447,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         //  First get a bunch of pooled connections
         //  and make sure they're all unique
-        Hashtable xaConns = new Hashtable();
+        HashMap<String, XAConnection> xaConns =
+                new HashMap<String, XAConnection>();
         for ( int i = 0 ; i < numConnections ; i++ )
         {
             XAConnection xc = xds.getXAConnection();
@@ -4501,7 +4493,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         //  First get a bunch of pooled connections
         //  and make sure they're all unique
-        Hashtable pooledConns = new Hashtable();
+        HashMap<String, PooledConnection> pooledConns =
+                new HashMap<String, PooledConnection>();
         for ( int i = 0 ; i < numConnections ; i++ )
         {
             PooledConnection pc = pds.getPooledConnection();

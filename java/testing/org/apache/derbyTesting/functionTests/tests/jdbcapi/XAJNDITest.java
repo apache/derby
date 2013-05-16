@@ -78,7 +78,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
     private InitialDirContext getInitialDirContext()
     {
         try {
-            Hashtable env = new Hashtable();
+            Hashtable<String, String> env = new Hashtable<String, String>();
             // using properties - these will have been passed in.
             String ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
             if (ldapContextFactory == null || ldapContextFactory.length() < 1)
@@ -146,7 +146,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
      */
     private static String[] getPropertyBeanList(Object ds) {
         Method[] allMethods = ds.getClass().getMethods();
-        ArrayList properties = new ArrayList();
+        ArrayList<String> properties = new ArrayList<String>();
 
         for (int i = 0; i < allMethods.length; i++) {
             Method method = allMethods[i];
@@ -175,6 +175,7 @@ public class XAJNDITest extends BaseJDBCTestCase {
                     rt.isPrimitive());
             }
         }
-        return (String[])properties.toArray(new String[properties.size()]);
+
+        return properties.toArray(new String[properties.size()]);
     }
 }

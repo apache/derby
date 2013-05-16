@@ -222,7 +222,9 @@ public class DisposableIndexStatistics {
             // instance statistics for single column unique indexes).
             expected--;
         }
-        ArrayList entries = new ArrayList(); // used for reporting only
+        // used for reporting only
+        ArrayList<IndexStatsUtil.IdxStats> entries =
+                new ArrayList<IndexStatsUtil.IdxStats>();
         int found = getAllRelevantStats(entries);
         if (found != expected) {
             Assert.assertEquals(
@@ -234,11 +236,9 @@ public class DisposableIndexStatistics {
     }
 
     /** Converts the list of statistics to an array. */
-    private IndexStatsUtil.IdxStats[] getStatArray(List list) {
-        int size = list.size();
-        IndexStatsUtil.IdxStats[] ret = new IndexStatsUtil.IdxStats[size];
-        list.toArray(ret);
-        return ret;
+    private IndexStatsUtil.IdxStats[] getStatArray(
+            List<IndexStatsUtil.IdxStats> list) {
+        return list.toArray(new IndexStatsUtil.IdxStats[list.size()]);
     }
 
     /**
@@ -248,7 +248,7 @@ public class DisposableIndexStatistics {
      * @return The number of relevant statistics entries found.
      * @throws SQLException if something goes wrong
      */
-    private int getAllRelevantStats(List list)
+    private int getAllRelevantStats(List<IndexStatsUtil.IdxStats> list)
             throws SQLException {
         boolean oldAutoCommitValue = con.getAutoCommit();
         con.setAutoCommit(true);

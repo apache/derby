@@ -31,7 +31,7 @@ import org.apache.derby.iapi.services.info.ProductVersionHolder;
  * A Derby version.
  * </p>
  */
-public class Version implements Comparable
+public class Version implements Comparable<Version>
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -53,7 +53,8 @@ public class Version implements Comparable
 
     // we keep one class loader per version so that we don't have an explosion
     // of class loaders for redundant versions
-    private static HashMap _classLoaders = new HashMap();
+    private static HashMap<String, ClassLoader> _classLoaders =
+            new HashMap<String, ClassLoader>();
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -158,16 +159,13 @@ public class Version implements Comparable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public int compareTo( Object other )
+    public int compareTo( Version other )
     {
         if ( other == null ) { return 1; }
-        if ( !(other instanceof Version) ) { return 1; }
-
-        Version that = (Version) other;
 
         for ( int i = 0; i < EXPECTED_LEG_COUNT; i++ )
         {
-            int result = this._legs[ i ] - that._legs[ i ];
+            int result = this._legs[ i ] - other._legs[ i ];
 
             if ( result != 0 ) { return result; }
         }
@@ -175,7 +173,9 @@ public class Version implements Comparable
         return 0;
     }
 
-    public boolean equals( Object other ) { return ( compareTo( other ) == 0 ); }
+    public boolean equals( Object other ) {
+        return (other instanceof Version) && (compareTo((Version) other) == 0);
+    }
     public int hashCode() { return toString().hashCode(); }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -236,9 +236,11 @@ public class Version implements Comparable
          * Construct from a list of Versions.
          * </p>
          */
-        public Trajectory( ArrayList versionList )
+        public Trajectory( ArrayList<Version> versionList )
         {
-            if ( versionList == null ) { versionList = new ArrayList(); }
+            if (versionList == null) {
+                versionList = new ArrayList<Version>();
+            }
 
             Version[] versions = new Version[ versionList.size() ];
             versionList.toArray( versions );

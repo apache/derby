@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
@@ -920,7 +919,7 @@ public class XATest extends BaseJDBCTestCase {
         shh.executeUpdate("DELETE FROM APP.foo966 where A < -99");
         sch.executeUpdate("DELETE FROM APP.foo966 where A < -99");
 
-        ArrayList openRS = new ArrayList();
+        ArrayList<ResultSet> openRS = new ArrayList<ResultSet>();
 
         // Statements obtained while default was hold.
         // All should work, holability will be downgraded
@@ -967,8 +966,7 @@ public class XATest extends BaseJDBCTestCase {
         // JDBC 4.0 method getHoldabilty to ensure the
         // holdability is reported correctly.
         int orsCount = 0;
-        for (Iterator i = openRS.iterator(); i.hasNext();) {
-            ResultSet ors = (ResultSet) i.next();
+        for (ResultSet ors : openRS) {
             ors.clearWarnings();
             orsCount++;
         }
@@ -1039,8 +1037,7 @@ public class XATest extends BaseJDBCTestCase {
         // test, clearWarnings throws an error if the ResultSet
         // is closed.
         int crsCount = 0;
-        for (Iterator i = openRS.iterator(); i.hasNext();) {
-            ResultSet crs = (ResultSet) i.next();
+        for (ResultSet crs : openRS) {
             try {
                 crs.clearWarnings();
             } catch (SQLException sqle) {

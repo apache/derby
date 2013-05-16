@@ -34,14 +34,14 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
      * Thread local for the phase of the test set.
      * Contains an Integer object.
      */
-    static ThreadLocal phase = new ThreadLocal();
+    static final ThreadLocal<Integer> phase = new ThreadLocal<Integer>();
     
     /**
      * Thread local for the old version of the engine.
      * Contains a int array with four entries corresponding
      * to the four part Derby number.
      */
-    static ThreadLocal oldVersion = new ThreadLocal();
+    static final ThreadLocal<int[]> oldVersion = new ThreadLocal<int[]>();
     
     /**
      * SWL state thrown when a feature requires upgrade
@@ -92,7 +92,7 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
      */
     final int getPhase()
     {
-        return ((Integer) phase.get()).intValue();
+        return phase.get();
     }
     
     /**

@@ -172,12 +172,12 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
 
         /** Array with all values */
         private final static Set values = Collections.unmodifiableSet
-            (new HashSet((Arrays.asList(new SURDataModel[] {
+            (new HashSet<SURDataModel>(Arrays.asList(
                 MODEL_WITH_NO_KEYS, 
                 MODEL_WITH_PK, 
                 MODEL_WITH_SECONDARY_KEY,
                 MODEL_WITH_PK_AND_SECONDARY_KEY
-            }))));
+            )));
         
         /**
          * Returns an unmodifyable set of all valid data models

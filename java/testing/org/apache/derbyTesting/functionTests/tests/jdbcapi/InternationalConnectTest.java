@@ -55,7 +55,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      */
    
     /* Keep track of the databases created in the fixtures to cleanup in tearDown() */
-    private ArrayList databasesForCleanup;
+    private ArrayList<String> databasesForCleanup;
     
     /**
      * @param name
@@ -63,7 +63,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
     public InternationalConnectTest(String name) {
         super(name);
         
-        databasesForCleanup = new ArrayList();
+        databasesForCleanup = new ArrayList<String>();
     }
 
     public void testBoundaries() throws SQLException, UnsupportedEncodingException {

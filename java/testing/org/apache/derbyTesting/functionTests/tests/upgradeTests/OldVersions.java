@@ -92,7 +92,7 @@ public class OldVersions
      */
     private static int[][] getSupportedVersions( int[][] old )
     {
-        ArrayList list = new ArrayList();
+        ArrayList<int[]> list = new ArrayList<int[]>();
         int count = old.length;
         
         for (int i = 0; i < count; i++) {
@@ -125,10 +125,7 @@ public class OldVersions
             list.add( old[ i ] );
         }
 
-        int[][] result = new int[ list.size() ][ 4 ];
-        list.toArray( result );
-
-        return result;
+        return list.toArray(new int[list.size()][]);
     }
     
     private static int[][] getVersions(String oldVersionsPath)

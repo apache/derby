@@ -67,7 +67,7 @@ final class PhaseChanger extends BaseTestSetup {
      */
     protected void setUp() throws SQLException
     {
-        UpgradeChange.phase.set(new Integer(phase));
+        UpgradeChange.phase.set(phase);
         UpgradeChange.oldVersion.set(version);
         
         TestConfiguration config = TestConfiguration.getCurrent();
@@ -178,7 +178,7 @@ final class PhaseChanger extends BaseTestSetup {
             // that live in a class loader that is able to load the driver. So
             // create an instance of DriverUnloader in the old driver's class
             // loader.
-            Class unloader = Class.forName(
+            Class<?> unloader = Class.forName(
                     DriverUnloader.class.getName(), true, loader);
             Method m = unloader.getMethod("unload", (Class[]) null);
             Boolean res = (Boolean) m.invoke(null, (Object[]) null);
@@ -282,7 +282,7 @@ final class PhaseChanger extends BaseTestSetup {
             // setting the field to null.
             Field tclField = cls.getDeclaredField("threadContextList");
             tclField.setAccessible(true);
-            ThreadLocal tcl = (ThreadLocal) tclField.get(contextService);
+            ThreadLocal<?> tcl = (ThreadLocal) tclField.get(contextService);
             tcl.set(null);
 
             // The field allContexts is a HashSet. Calling clear() should be

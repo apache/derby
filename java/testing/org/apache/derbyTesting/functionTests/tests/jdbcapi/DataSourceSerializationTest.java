@@ -238,9 +238,9 @@ public class DataSourceSerializationTest
         // De-serialize the data source.
         InputStream is;
         try {
-            is = (FileInputStream)AccessController.doPrivileged(
-                  new PrivilegedExceptionAction() {
-                public Object run() throws FileNotFoundException {
+            is = AccessController.doPrivileged(
+                  new PrivilegedExceptionAction<InputStream>() {
+                public InputStream run() throws FileNotFoundException {
                     return new FileInputStream(
                             SupportFilesSetup.getReadOnly(fname.toString()));
                 }

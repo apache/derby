@@ -140,7 +140,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     private boolean isImplemented() throws NoSuchMethodException {
         // Check if the method is implemented in one of the Derby classes
         // that the JDBC object belongs to.
-        for (Class c = decorator_.getClosedObject().getClass();
+        for (Class<?> c = decorator_.getClosedObject().getClass();
                 c != null; c = c.getSuperclass()) {
             if (c.getName().startsWith("org.apache.derby.")) {
                 try {

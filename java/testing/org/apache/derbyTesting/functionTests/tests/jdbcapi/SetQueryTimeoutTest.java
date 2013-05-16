@@ -191,7 +191,7 @@ public class SetQueryTimeoutTest
         throws
             TestFailedException
     {
-        Collection ignore = new HashSet();
+        HashSet<String> ignore = new HashSet<String>();
         ignore.add("42Y55");
         
         exec(conn, "drop table " + tablePrefix + "_orig", ignore);

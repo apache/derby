@@ -1217,7 +1217,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                       getDatabaseProperty(BUILTIN_ALGO_PROP));
 
         // Store a set of generated password tokens to detect collisions
-        HashSet tokens = new HashSet();
+        HashSet<String> tokens = new HashSet<String>();
 
         for (int i = 0; i < USERS.length; i++) {
             String user = USERS[i];

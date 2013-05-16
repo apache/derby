@@ -143,8 +143,8 @@ public class Changes10_7 extends UpgradeChange
      * @return a set with the names of all supported types in the loaded
      * version of Derby
      */
-    private Set getSupportedTypes() throws SQLException {
-        HashSet types = new HashSet();
+    private Set<String> getSupportedTypes() throws SQLException {
+        HashSet<String> types = new HashSet<String>();
         ResultSet rs = getConnection().getMetaData().getTypeInfo();
         while (rs.next()) {
             types.add(rs.getString("TYPE_NAME"));
