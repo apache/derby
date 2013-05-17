@@ -22,13 +22,10 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -122,8 +119,8 @@ public class CompressTableTest extends BaseJDBCTestCase {
         s.execute("insert into d4275 values 1");
 
         // Object used by the main thread to tell the helper thread to stop.
-        // The helper thread stops once the list is non-empty.
-        final List stop = Collections.synchronizedList(new ArrayList());
+        // The helper thread stops once the value is set to true.
+        final AtomicBoolean stop = new AtomicBoolean();
 
         // Holder for anything thrown by the run() method in the helper thread.
         final Throwable[] error = new Throwable[1];
@@ -136,7 +133,7 @@ public class CompressTableTest extends BaseJDBCTestCase {
         Thread t = new Thread() {
             public void run() {
                 try {
-                    while (stop.isEmpty()) {
+                    while (!stop.get()) {
                         JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
                     }
                 } catch (Throwable t) {
@@ -158,7 +155,7 @@ public class CompressTableTest extends BaseJDBCTestCase {
             }
         } finally {
             // We're done, so tell the helper thread to stop.
-            stop.add(Boolean.TRUE);
+            stop.set(true);
         }
 
         t.join();

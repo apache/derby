@@ -23,8 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.security.AccessControlException;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
@@ -63,26 +61,6 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     // INNER CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
-
-    public  static  class   PropReadingAction   implements PrivilegedExceptionAction
-    {
-        private final   String  _propName;
-        
-        public     PropReadingAction( String propName )
-        {
-            _propName = propName;
-        }
-
-        //
-        // This will throw an AccessControlException if we don't have
-        // privilege to read the property.
-        //
-        public  Object  run()
-        throws Exception
-        {
-            return System.getProperty( _propName );
-        }
-    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -312,22 +290,10 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
         throws Exception
     {
         try {
-            String  propValue = readProperty( "SecurityPolicyReloadingTest.property" );
-
+            getSystemProperty("SecurityPolicyReloadingTest.property");
             return true;
         }
         catch (AccessControlException ace) { return false; }
-    }
-
-    /**
-     * Read a system property.
-     */
-    public  static   String readProperty( String propName )
-        throws Exception
-    {
-        PropReadingAction   action = new PropReadingAction( propName );
-        
-        return (String) AccessController.doPrivileged( action );
     }
 
     /**

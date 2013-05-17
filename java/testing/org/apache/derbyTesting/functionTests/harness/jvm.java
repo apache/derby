@@ -102,7 +102,7 @@ public abstract class jvm {
     // -nojit            turn off the jit
     public boolean nojit = false;
     // -Dprop=name       define property; can be specified more than once
-    public Vector D = null;
+    public Vector<String> D = null;
     // java cmd (java, java_g)
     public String javaCmd = "java";
     // major and minor version
@@ -122,7 +122,7 @@ public abstract class jvm {
 
     public jvm(boolean noasyncgc, boolean verbosegc, boolean noclassgc,
     long ss, long oss, long ms, long mx, String classpath, String prof,
-    boolean verify, boolean noverify, boolean nojit, Vector D) {
+    boolean verify, boolean noverify, boolean nojit, Vector<String> D) {
         this.noasyncgc=noasyncgc;
         this.noclassgc=noclassgc;
         this.verbosegc=verbosegc;
@@ -138,12 +138,12 @@ public abstract class jvm {
         this.D=D;
     }
     // more typical use:
-    public jvm(String classpath, Vector D) {
+    public jvm(String classpath, Vector<String> D) {
         this.classpath=classpath;
         this.D=D;
     }
     // more typical use:
-    public jvm(long ms, long mx, String classpath, Vector D) {
+    public jvm(long ms, long mx, String classpath, Vector<String> D) {
         this.ms=ms;
         this.mx=mx;
         this.classpath=classpath;
@@ -168,14 +168,14 @@ public abstract class jvm {
     public void setVerify(boolean verify) { this.verify=verify; }
     public void setNoverify(boolean noverify) { this.noverify=noverify; }
     public void setNojit(boolean nojit) { this.nojit=nojit; }
-    public void setD(Vector D) { this.D = D; }
+    public void setD(Vector<String> D) { this.D = D; }
     public void setFlags(String flags) { this.flags = flags; }
     public void setJavaCmd(String jcmd) { this.javaCmd = jcmd; }
 
 	
-    public Vector getCommandLine()
+    public Vector<String> getCommandLine()
     {
-        Vector v = new Vector();
+        Vector<String> v = new Vector<String>();
         v.addElement(javaCmd);
         v.addElement("-Duser.language=en");
         v.addElement("-Duser.country=US");
@@ -345,10 +345,11 @@ public abstract class jvm {
 		
 	}
 	
-	static Vector getSecurityProps(Vector D) throws ClassNotFoundException, IOException
+    static Vector<String> getSecurityProps(Vector<String> D)
+            throws ClassNotFoundException, IOException
 	{
 		if (D == null)
-			D = new Vector();
+			D = new Vector<String>();
 		
 		String userDir = System.getProperty("user.dir");
 		String policyFile = userDir + baseName(DEFAULT_POLICY);

@@ -74,8 +74,8 @@ public class FTFileUtil
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it.
-        AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run() throws Exception {
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                public Void run() throws Exception {
                     if(!src.renameTo(dst))
                     {
                         throw new Exception("unable to rename File: " +
@@ -98,10 +98,8 @@ public class FTFileUtil
      * @param fileName the file's name.
      * @return     <tt>"true"</tt> if the given file exists 
      *             <tt>"false"</tt> otherwise.
-     * @exception Exception if any exception occurs 
      */
     public static String fileExists(String fileName) 
-        throws PrivilegedActionException
     {
         final File fl = new File(fileName);
                 
@@ -110,17 +108,7 @@ public class FTFileUtil
 		// class. The generated class on the stack has no permissions
 		// granted to it.
 
-        return (String) 
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                public Object run()
-                {
-                    if(fl.exists()) {
-                        return "true";
-                    }else {
-                        return "false";
-                    }
-                }
-            });
+        return Boolean.toString(PrivilegedFileOpsForTests.exists(fl));
     }
 
 
@@ -183,9 +171,8 @@ public class FTFileUtil
 		// class. The generated class on the stack has no permissions
 		// granted to it.
 
-        return (String) 
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                    public Object run()
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+                    public String run()
                     {
                         return (removeDirectory(
                                new File(directory)) ? "true" : "false");
@@ -194,6 +181,3 @@ public class FTFileUtil
 	}
     
 }
-
-
-

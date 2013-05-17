@@ -26,9 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -313,8 +311,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         s.execute("create table d4275(x int)");
 
         // Object used by the main thread to tell the helper thread to stop.
-        // The helper thread stops once the list is non-empty.
-        final List stop = Collections.synchronizedList(new ArrayList());
+        // The helper thread stops once the value is set to true.
+        final AtomicBoolean stop = new AtomicBoolean();
 
         // Holder for anything thrown by the run() method in the helper thread.
         final Throwable[] error = new Throwable[1];
@@ -327,7 +325,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         Thread t = new Thread() {
             public void run() {
                 try {
-                    while (stop.isEmpty()) {
+                    while (!stop.get()) {
                         JDBC.assertEmpty(ps.executeQuery());
                     }
                 } catch (Throwable t) {
@@ -348,7 +346,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
             }
         } finally {
             // We're done, so tell the helper thread to stop.
-            stop.add(Boolean.TRUE);
+            stop.set(true);
         }
 
         t.join();

@@ -74,7 +74,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
         if (lengthless) {
             Method m = null;
             try {
-                Class c = ps.getClass();
+                Class<?> c = ps.getClass();
                 m = c.getMethod("setBinaryStream",new Class[] {Integer.TYPE,
                             InputStream.class});                
             } catch (NoSuchMethodException e) {

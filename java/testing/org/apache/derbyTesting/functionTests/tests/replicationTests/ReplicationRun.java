@@ -26,7 +26,6 @@ import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Properties;
 
 import java.sql.*;
@@ -160,7 +159,7 @@ public class ReplicationRun extends BaseTestCase
      * waited for. Wait for these to complete in {@link #tearDown()} so that
      * they don't interfere with subsequent test cases.
      */
-    private ArrayList helperThreads = new ArrayList();
+    private ArrayList<Thread> helperThreads = new ArrayList<Thread>();
 
     private String db_uid = null;
     private String db_passwd = null;
@@ -207,10 +206,7 @@ public class ReplicationRun extends BaseTestCase
         
         stopServer(jvmVersion, derbyVersion,
                 masterServerHost, masterServerPort);
-
-        // Wait for all threads to complete.
-        for (Iterator it = helperThreads.iterator(); it.hasNext(); ) {
-            Thread t = (Thread) it.next();
+        for (Thread t : helperThreads) {
             t.join();
         }
         helperThreads = null;
@@ -573,7 +569,7 @@ public class ReplicationRun extends BaseTestCase
         final boolean isRemote = !testClientHost.equals("localhost");
         final boolean isIjTest = (replicationTest.indexOf(".sql") >= 0);
 
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -670,7 +666,7 @@ public class ReplicationRun extends BaseTestCase
         final boolean isRemote = !serverHost.equals("localhost");
         final boolean isIjTest = (replicationTest.indexOf(".sql") >= 0);
 
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -764,7 +760,7 @@ public class ReplicationRun extends BaseTestCase
         
         util.DEBUG("load: " + load);
 
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -1917,7 +1913,7 @@ public class ReplicationRun extends BaseTestCase
         
         String workingDirName = masterDatabasePath +FS+ dbSubDirPath;
         
-        ArrayList   ceArray = new ArrayList();
+        ArrayList<String> ceArray = new ArrayList<String>();
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath
@@ -2046,7 +2042,7 @@ public class ReplicationRun extends BaseTestCase
 
         final boolean isRemote = !serverHost.equals("localhost");
 
-        ArrayList   ceArray = new ArrayList();
+        ArrayList<String> ceArray = new ArrayList<String>();
 
         // For remote tests, we need to specify the Java VM to use and the
         // classpath. For local tests, we'll just use the JVM and the classpath

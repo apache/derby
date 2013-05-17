@@ -28,8 +28,6 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.*;
 import java.io.*;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
-
 
 /**
 	Utility methods for tests routines, in order to bring some consistency to test output.
@@ -85,8 +83,8 @@ public class TestRoutines {
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it.
-		AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run() {
             	System.setProperty(key, value);
                 return null; // nothing to return
             }
@@ -126,9 +124,9 @@ public class TestRoutines {
 		// called through a SQL statement and thus a generated
 		// class. The generated class on the stack has no permissions
 		// granted to it.
-    	FileInputStream fin = (FileInputStream)
-    	    AccessController.doPrivileged(new PrivilegedExceptionAction() {
-			public Object run() throws FileNotFoundException {
+        FileInputStream fin = AccessController.doPrivileged(
+        new PrivilegedExceptionAction<FileInputStream>() {
+            public FileInputStream run() throws FileNotFoundException {
 				return new FileInputStream(fileName); // nothing to return
 			}
 		});

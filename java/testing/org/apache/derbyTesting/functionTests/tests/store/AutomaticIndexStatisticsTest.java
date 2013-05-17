@@ -536,9 +536,9 @@ public class AutomaticIndexStatisticsTest
         // We expect the security manager to stop us from creating directories
         // where we aren't supposed to.
         if (!PrivilegedFileOpsForTests.exists(dest.getParentFile())) {
-            AccessController.doPrivileged(new PrivilegedAction() {
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
-                public Object run() {
+                public Void run() {
                     assertTrue(dest.getParentFile().mkdirs());
                     return null;
                 }

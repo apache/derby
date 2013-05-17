@@ -28,19 +28,9 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
 import java.util.ArrayList;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.catalog.DefaultInfo;
+import java.util.Arrays;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
@@ -498,14 +488,9 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
      * Fill an ArrayList from an array.
      * </p>
      */
-    protected ArrayList   fill( Object[] raw )
+    protected <T> ArrayList<T> fill( T[] raw )
     {
-        ArrayList   result = new ArrayList();
-        int             count = raw.length;
-
-        for ( int i = 0; i < count; i++ ) { result.add( raw[ i ] ); }
-
-        return result;
+        return new ArrayList<T>(Arrays.asList(raw));
     }
     
 

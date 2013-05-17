@@ -65,7 +65,8 @@ public class TriggerTest extends BaseJDBCTestCase {
      * Thread local that a trigger can access to
      * allow recording information about the firing.
      */
-    private static ThreadLocal TRIGGER_INFO = new ThreadLocal();
+    private static ThreadLocal<List<String>> TRIGGER_INFO =
+            new ThreadLocal<List<String>>();
     StringBuffer listOfCreatedTriggers = new StringBuffer();
 
 
@@ -314,7 +315,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         int triggerCount = createRandomTriggers()[0];
         
-        List info = new ArrayList();
+        List<String> info = new ArrayList<String>();
         TRIGGER_INFO.set(info);
         
         // Check ordering with a single row.
@@ -469,7 +470,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         int beforeCount = createRandomTriggers()[1];
         
-        List info = new ArrayList();
+        List<String> info = new ArrayList<String>();
         TRIGGER_INFO.set(info);
         
         // constraint violation on primary key
@@ -592,7 +593,7 @@ public class TriggerTest extends BaseJDBCTestCase {
       */
     public static void logTriggerInfo(String info)
     {
-        ((List) TRIGGER_INFO.get()).add(info);  
+        TRIGGER_INFO.get().add(info);
     }
 
     /** 

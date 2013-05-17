@@ -45,7 +45,7 @@ public class ConnectionHandling {
         conn.close();
         conn = null;
         
-        ArrayList list = new ArrayList();
+        ArrayList<Connection> list = new ArrayList<Connection>();
         list.ensureCapacity(30000);
         
         Properties p = new Properties();
@@ -121,8 +121,7 @@ public class ConnectionHandling {
         int alreadyClosed = 0;
         for (int i = 0; i < list.size(); i++)
         {
-            Connection c = (Connection) list.get(i);
-            list.set(i, null);
+            Connection c = list.set(i, null);
             if (c.isClosed())
                 alreadyClosed++;
             else 

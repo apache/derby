@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -406,7 +405,8 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
             "(name LIKE ? escape '\\') and (source like ? escape '\\') " +
             "order by source asc, name asc");
 
-        HashMap inputOutput = new HashMap();
+        HashMap<String[], Object[][]> inputOutput =
+                new HashMap<String[], Object[][]>();
         inputOutput.put(
             new String[] {"%", "%"},
             new Object[][] {
@@ -447,10 +447,9 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
             new Object[][] { CEI_ROWS[8] });
         inputOutput.put(new String[] {"Bogus", "Name"}, new Object[][] {});
 
-        for (Iterator it = inputOutput.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String[] args = (String[]) entry.getKey();
-            Object[][] rows = (Object[][]) entry.getValue();
+        for (Map.Entry<String[], Object[][]> entry : inputOutput.entrySet()) {
+            String[] args = entry.getKey();
+            Object[][] rows = entry.getValue();
             ps.setObject(1, args[0]);
             ps.setObject(2, args[1]);
             JDBC.assertFullResultSet(ps.executeQuery(), rows, false);

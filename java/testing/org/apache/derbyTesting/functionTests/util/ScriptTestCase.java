@@ -21,16 +21,15 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.security.AccessController;
 import java.sql.Connection;
 import java.util.Locale;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.Derby;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 
 /**
  * Run a .sql script as a test comparing it to
@@ -209,13 +208,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
      */
     protected void setUp() {
         oldLocale = Locale.getDefault();
-
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                Locale.setDefault(Locale.US);
-                return null;
-            }
-        });
+        LocaleTestSetup.setDefaultLocale(Locale.US);
 
         // Reset IJ's locale to allow it to pick up the new locale from
         // the environment.
@@ -228,12 +221,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
 
-        AccessController.doPrivileged(new java.security.PrivilegedAction() {
-            public Object run() {
-                Locale.setDefault(oldLocale);
-                return null;
-            }
-        });
+        LocaleTestSetup.setDefaultLocale(oldLocale);
 
         // Forget the locale used by this test.
         LocalizedResource.resetLocalizedResourceCache();

@@ -34,7 +34,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class Derby4676Test extends BaseJDBCTestCase {
     /** List of {@code HelperThread}s used in the test. */
-    private List threads;
+    private List<HelperThread> threads;
 
     public Derby4676Test(String name) {
         super(name);
@@ -47,19 +47,19 @@ public class Derby4676Test extends BaseJDBCTestCase {
 
     /** Set up the test environment. */
     protected void setUp() {
-        threads = new ArrayList();
+        threads = new ArrayList<HelperThread>();
     }
 
     /** Tear down the test environment. */
     protected void tearDown() throws Exception {
         super.tearDown();
 
-        List localThreads = threads;
+        List<HelperThread> localThreads = threads;
         threads = null;
 
         // First, wait for all threads to terminate and close all connections.
         for (int i = 0; i < localThreads.size(); i++) {
-            HelperThread t = (HelperThread) localThreads.get(i);
+            HelperThread t = localThreads.get(i);
             t.join();
             Connection c = t.conn;
             if (c != null && !c.isClosed()) {
@@ -70,7 +70,7 @@ public class Derby4676Test extends BaseJDBCTestCase {
 
         // Then check if any of the helper threads failed.
         for (int i = 0; i < localThreads.size(); i++) {
-            HelperThread t = (HelperThread) localThreads.get(i);
+            HelperThread t = localThreads.get(i);
             if (t.exception != null) {
                 fail("Helper thread failed", t.exception);
             }

@@ -21,20 +21,15 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.lang.reflect.*;
 import java.io.*;
 import java.sql.*;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.ArrayList;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -2682,47 +2677,16 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         println( "\nExpecting correct function metadata from " + functionName );
-        ResultSet                   rs = getFunctions(  null, "APP", functionName );
+        ResultSet rs =
+            _databaseMetaData.getFunctions( null, "APP", functionName );
         JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
         rs.close();
         
         println( "\nExpecting correct function column metadata from " + functionName );
-        rs = getFunctionColumns(  null, "APP", functionName, "%" );
+        rs = _databaseMetaData.getFunctionColumns( null, "APP", functionName, "%" );
         //prettyPrint( getConnection(), getFunctionColumns(  null, "APP", functionName, "%" ) );
         JDBC.assertFullResultSet( rs, expectedGetFunctionColumnsResult, false );
         rs.close();
-    }
-
-    /**
-     * Call DatabaseMetaData.getFunctions(). We do this by reflection because
-     * the calls exist in our JDBC3.0 implementations even though they don't
-     * appear in the JDBC 3.0 java.sql.DatabaseMetaData api.
-     */
-    public ResultSet    getFunctions( String catalog, String schemaPattern, String functionNamePattern )
-        throws Exception
-    {
-        Class       metadataClass = _databaseMetaData.getClass();
-        Method  method = metadataClass.getMethod( "getFunctions", new Class[] { String.class, String.class, String.class } );
-        ResultSet   result = (ResultSet) method.invoke( _databaseMetaData, new Object[] { catalog, schemaPattern, functionNamePattern } );
-
-        return result;
-    }
-
-    /**
-     * Call DatabaseMetaData.getFunctionColumnss(). We do this by reflection because
-     * the calls exist in our JDBC3.0 implementations even though they don't
-     * appear in the JDBC 3.0 java.sql.DatabaseMetaData api.
-     */
-    public ResultSet    getFunctionColumns
-        ( String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern )
-        throws Exception
-    {
-        Class       metadataClass = _databaseMetaData.getClass();
-        Method  method = metadataClass.getMethod( "getFunctionColumns", new Class[] { String.class, String.class, String.class, String.class } );
-        ResultSet   result = (ResultSet) method.invoke
-            ( _databaseMetaData, new Object[] { catalog, schemaPattern, functionNamePattern, columnNamePattern } );
-
-        return result;
     }
 
     /**

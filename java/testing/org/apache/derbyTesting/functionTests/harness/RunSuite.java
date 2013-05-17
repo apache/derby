@@ -48,7 +48,7 @@ public class RunSuite
     static final boolean verbose=true;
 
     static String suites; // list of subsuites in this suite
-    static Vector suitesToRun; // Vector of suites to run
+    static Vector<String> suitesToRun; // Vector of suites to run
 
     // Properties which may be specified
 	static String jvmName = "";
@@ -116,7 +116,7 @@ public class RunSuite
 	    System.out.println("Top suite: " + suiteName);
 
 	    // suiteName may be one suite or a list of suites
-        suitesToRun = new Vector();
+        suitesToRun = new Vector<String>();
 
         // Get properties set in the suite's properties file
 		suiteProperties = getSuiteProperties(suiteName, true);

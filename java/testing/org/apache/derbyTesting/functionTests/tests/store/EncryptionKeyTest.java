@@ -31,8 +31,7 @@ import java.sql.SQLWarning;
 
 import javax.sql.DataSource;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -444,20 +443,13 @@ public abstract class EncryptionKeyTest
      * @return A string with the absolute path to the database.
      * @see SupportFilesSetup
      */
-    private String obtainDbName(String dbName, String subdirectory) {
+    String obtainDbName(String dbName, String subdirectory) {
         File tmp = new File(dbName);
         if (subdirectory != null) {
             tmp = new File(subdirectory, dbName);
         }
-        final File db = tmp;
-        return (String)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
-                            return new File(SupportFilesSetup.EXTINOUT,
-                                            db.getPath()).getAbsolutePath();
-                        }
-                    }
-                );
+        return PrivilegedFileOpsForTests.getAbsolutePath(
+                new File(SupportFilesSetup.EXTINOUT, tmp.getPath()));
     }
 
     /**

@@ -31,21 +31,16 @@ import java.sql.SQLWarning;
 
 import javax.sql.DataSource;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * <p>
@@ -308,15 +303,8 @@ extends BaseJDBCTestCase {
      */
     private String obtainDbName(String dbName) {
         File tmp = new File(dbName);
-        final File db = tmp;
-        return (String)AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
-                        return new File(SupportFilesSetup.EXTINOUT,
-                                db.getPath()).getAbsolutePath();
-                    }
-                }
-        );
+        return PrivilegedFileOpsForTests.getAbsolutePath(
+                new File(SupportFilesSetup.EXTINOUT, tmp.getPath()));
     }
 
     /**

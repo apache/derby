@@ -33,7 +33,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -150,7 +149,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      * key id, that means an IN list with "N" values in it will return
      * greater than N rows.
      */
-    protected TreeMap foreignIdToRowsMap;
+    protected TreeMap<String, List<DataRow>> foreignIdToRowsMap;
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -337,7 +336,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
          */
         readAllRows(createStatement());
 
-        List strategies = new ArrayList();
+        List<QueryStrategy> strategies = new ArrayList<QueryStrategy>();
         Random ran = new Random(2);
         Connection c = getConnection();
 
@@ -1425,16 +1424,15 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      * @param strategies Different query strategies to execute
      * @param cnt Size of the IN list with which to query.
      */
-    private void testOneSize(List strategies, int cnt) throws SQLException
+    private void testOneSize(List<QueryStrategy> strategies, int cnt)
+            throws SQLException
     {
         if (cnt > allIds.length)
             return;
 
         String failedStrategy = null;
         Statement st = createStatement();
-        for (Iterator iter = strategies.iterator(); iter.hasNext();)
-        {
-            QueryStrategy strategy = (QueryStrategy) iter.next();
+        for (QueryStrategy strategy : strategies) {
             int numRows = strategy.testSize(cnt);
 
             ResultSet rs = st.executeQuery(GET_RUNTIME_STATS_QUERY);
@@ -1475,14 +1473,14 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         throws SQLException
     {
         ResultSet rs = stmt.executeQuery(SELECT_ALL);
-        foreignIdToRowsMap = new TreeMap();
+        foreignIdToRowsMap = new TreeMap<String, List<DataRow>>();
         while (rs.next())
         {
             DataRow c = new DataRow(rs);
-            List list = (List) foreignIdToRowsMap.get(c.foreign_key_uuid);
+            List<DataRow> list = foreignIdToRowsMap.get(c.foreign_key_uuid);
             if (list == null)
             {
-                list = new ArrayList();
+                list = new ArrayList<DataRow>();
                 foreignIdToRowsMap.put(c.foreign_key_uuid, list);
             }
             list.add(c);
@@ -1711,22 +1709,17 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
          * as well.  This comparator object allows that sort to happen using
          * the JVM's own sort algorithm.
          */
-        Comparator rowComparator = new Comparator()
+        Comparator<String[]> rowComparator = new Comparator<String[]>()
         {
-            public int compare(Object o1, Object o2)
+            public int compare(String[] o1, String[] o2)
             {
                 /* "6" here is the index of the "id" field w.r.t the array
                  * returned from DataRow.getColumns().
                  */
-                long id1 = Long.valueOf(((String[])o1)[6]).longValue();
-                long id2 = Long.valueOf(((String[])o2)[6]).longValue();
+                Long id1 = Long.valueOf(o1[6]);
+                Long id2 = Long.valueOf(o2[6]);
 
-                if (id1 < id2)
-                    return -1;
-                else if (id1 == id2)
-                    return 0;
-                else
-                    return 1;
+                return id1.compareTo(id2);
             }
         };
 
@@ -1750,7 +1743,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         public final int testSize(int size)
             throws SQLException
         {
-            Set s = new HashSet();
+            Set<String> s = new HashSet<String>();
 
             /* A Set contains no duplicate elements.  So if we, in our
              * randomness, try to insert a duplicate value, it will be
@@ -1799,14 +1792,15 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             throws SQLException
         {
             // This will be a list of String arrays.
-            List expected = new ArrayList(foreignIdToRowsMap.size());
+            List<String[]> expected =
+                    new ArrayList<String[]>(foreignIdToRowsMap.size());
 
             // Search the in-memory map to find all expected rows.
             for (int i = 0; i < foreignIds.length; i++)
             {
-                List list = (List)foreignIdToRowsMap.get(foreignIds[i]);
+                List<DataRow> list = foreignIdToRowsMap.get(foreignIds[i]);
                 for (int j = list.size() - 1; j >= 0; j--)
-                    expected.add(((DataRow)list.get(j)).getColumns());
+                    expected.add(list.get(j).getColumns());
             }
 
             // Sort the rows.

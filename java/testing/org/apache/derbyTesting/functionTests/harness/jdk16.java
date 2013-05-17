@@ -30,25 +30,25 @@ public class jdk16 extends jvm {
     public String getName(){return "jdk16";}
     public jdk16(boolean noasyncgc, boolean verbosegc, boolean noclassgc,
         long ss, long oss, long ms, long mx, String classpath, String prof,
-        boolean verify, boolean noverify, boolean nojit, Vector D) {
+        boolean verify, boolean noverify, boolean nojit, Vector<String> D) {
         super(noasyncgc,verbosegc,noclassgc,ss,oss,ms,mx,classpath,prof,
             verify,noverify,nojit,D);
     }
     
-    public jdk16(String classpath, Vector D) {
+    public jdk16(String classpath, Vector<String> D) {
         super(classpath,D);
     }
     
-    public jdk16(long ms, long mx, String classpath, Vector D) {
+    public jdk16(long ms, long mx, String classpath, Vector<String> D) {
         super(ms,mx,classpath,D);
     }
     
     public jdk16() { }
     
     
-    public Vector getCommandLine() {
+    public Vector<String> getCommandLine() {
         StringBuffer sb = new StringBuffer();
-        Vector v = super.getCommandLine();
+        Vector<String> v = super.getCommandLine();
         appendOtherFlags(sb);
         String s = sb.toString();
         StringTokenizer st = new StringTokenizer(s);

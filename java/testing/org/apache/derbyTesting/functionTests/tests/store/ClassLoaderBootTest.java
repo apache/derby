@@ -26,12 +26,8 @@ import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
 import java.sql.*;
 import java.security.AccessController;
-import java.security.AccessControlContext;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.io.File;
-import java.net.MalformedURLException;
 import java.security.CodeSource;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -40,7 +36,6 @@ import junit.framework.TestSuite;
 import junit.extensions.TestSetup;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -141,10 +136,9 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     private DerbyURLClassLoader createDerbyClassLoader(final URL[] urls) 
         throws Exception 
     {
-        return (DerbyURLClassLoader)AccessController.doPrivileged
-            (
-             new java.security.PrivilegedExceptionAction(){   
-                 public Object run()
+        return AccessController.doPrivileged(
+            new PrivilegedAction<DerbyURLClassLoader>(){
+                 public DerbyURLClassLoader run()
                  {
                      return new DerbyURLClassLoader(urls);
                  }
@@ -218,11 +212,8 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
 }
 
     private void setThreadLoader(final ClassLoader which) {
-
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
+        AccessController.doPrivileged(new PrivilegedAction<Void>(){
+            public Void run()  {
                 java.lang.Thread.currentThread().setContextClassLoader(which);
               return null;
             }

@@ -1582,14 +1582,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     String[] getAllColumns(String schema, String table) throws SQLException
     {
     	DatabaseMetaData dbmd = getConnection().getMetaData();
-        ArrayList columnList = new ArrayList();
+        ArrayList<String> columnList = new ArrayList<String>();
         ResultSet rs = dbmd.getColumns( (String) null, schema, table, (String) null);
         while(rs.next())
         {
             columnList.add(rs.getString(4));
         }
           
-        return (String[]) columnList.toArray(new String[0]);
+        return columnList.toArray(new String[columnList.size()]);
     }
     
     /**

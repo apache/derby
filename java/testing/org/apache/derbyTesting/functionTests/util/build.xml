@@ -64,6 +64,7 @@
       <include name="${this.dir}/StaticInitializers/*.java"/> 
       <include name="${this.dir}/streams/*.java"/> 
       <include name="${this.dir}/corruptio/*.java"/>
+      <compilerarg value="-Xlint"/>
     </javac>
   </target>
 

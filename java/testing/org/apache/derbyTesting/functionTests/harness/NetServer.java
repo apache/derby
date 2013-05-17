@@ -22,15 +22,12 @@
 package org.apache.derbyTesting.functionTests.harness;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
-import java.net.ConnectException;
 import java.net.Socket;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
@@ -59,7 +56,7 @@ public class NetServer
 
 	private static String NETWORK_SERVER_CLASS_NAME="org.apache.derby.drda.NetworkServerControl";
     
-    public static Hashtable m;
+    public static Hashtable<String, Object[]> m;
     public static int PREFIX_POS = 0;
     public static int SUFFIX_POS = 1;
     public static int DRIVER_POS = 2;
@@ -71,7 +68,7 @@ public class NetServer
     
     static {
     	hostName=TestUtil.getHostName();
-	m =  new Hashtable();
+	m =  new Hashtable<String, Object[]>();
 	// Hashtable is keyed on framework name and has 
 	// an array of the framework prefix, suffix, driver, port  and 
 	// String[] command arguments to start the server
@@ -167,7 +164,7 @@ public class NetServer
 		else if (javaCmd != null)
 		    jvm.setJavaCmd(javaCmd);
 		
-		Vector jvmProps = new Vector();
+		Vector<String> jvmProps = new Vector<String>();
 		if ( (clPath != null) && (clPath.length()>0) )
 		    jvm.setClasspath(clPath);
 
@@ -183,7 +180,7 @@ public class NetServer
         // For some platforms (like Mac) the process exec command
         // must be a string array; so we build this with a Vector
         // first because some strings (paths) could have spaces
-	Vector vCmd = jvm.getCommandLine();
+	Vector<String> vCmd = jvm.getCommandLine();
 	for (int i = 0; i < startcmd.length; i++)
 	    vCmd.addElement(startcmd[i]);
 
@@ -254,17 +251,14 @@ public class NetServer
 			return true;
 		}
 		
-	    Object[] testConnectionArg  = null;
 		if (networkServer == null)
 		{
-			Constructor serverConstructor;
-			Class serverClass = Class.forName(NETWORK_SERVER_CLASS_NAME);
-			serverConstructor = serverClass.getConstructor(null);
-			networkServer = serverConstructor.newInstance(null);
-			pingMethod = networkServer.getClass().getMethod("ping",
-															 null);
+			Class<?> serverClass = Class.forName(NETWORK_SERVER_CLASS_NAME);
+			Constructor<?> serverConstructor = serverClass.getConstructor();
+			networkServer = serverConstructor.newInstance();
+			pingMethod = networkServer.getClass().getMethod("ping");
 		}
-		pingMethod.invoke(networkServer,null);
+		pingMethod.invoke(networkServer);
 		return true;
 	}
 
@@ -280,12 +274,12 @@ public class NetServer
 						 + framework);
 	jvm jvm = null; // to quiet the compiler
 	jvm = jvm.getJvm(jvmName);
-	Vector jvmCmd = jvm.getCommandLine();
+	Vector<String> jvmCmd = jvm.getCommandLine();
 	
-	Vector connV = new Vector();
+	Vector<String> connV = new Vector<String>();
 	for (int i = 0; i < jvmCmd.size(); i++)
 	{
-	    connV.addElement((String)jvmCmd.elementAt(i));
+	    connV.addElement(jvmCmd.elementAt(i));
         }
 	
 	String[] stopcmd1 = (String[]) frameworkInfo[STOP_CMD1_POS];
@@ -313,7 +307,7 @@ public class NetServer
 		}		    
 		
 		
-		Vector stopV = new Vector();
+		Vector<String> stopV = new Vector<String>();
 		for (int i = 0; i < jvmCmd.size(); i++)
 		{
 		    stopV.addElement((String)jvmCmd.elementAt(i));

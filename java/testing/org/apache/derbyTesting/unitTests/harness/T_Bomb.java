@@ -23,11 +23,9 @@ package org.apache.derbyTesting.unitTests.harness;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.context.Context;
 
-import java.util.Enumeration;
 import java.util.Vector;
 
 public class T_Bomb implements Runnable { 
@@ -37,7 +35,7 @@ public class T_Bomb implements Runnable {
 	private static T_Bomb me;
 	
 	private Thread t;
-	private Vector v;
+	private Vector<T_Bombable> v;
 	private long delay;
 	private boolean armed = false;
 
@@ -47,7 +45,7 @@ public class T_Bomb implements Runnable {
 			PropertyUtil.getSystemInt(BOMB_DELAY_PN,0,
 									  Integer.MAX_VALUE,
 									  DEFAULT_BOMB_DELAY);
-		v = new Vector();
+		v = new Vector<T_Bombable>();
 		t = new Thread(this);
 		t.setDaemon(true);
 		t.start();
@@ -135,9 +133,8 @@ public class T_Bomb implements Runnable {
 
 	private void performLastGasp()
 	{
-		for (Enumeration e = v.elements() ; e.hasMoreElements() ;) {
+        for (T_Bombable b : v) {
 			try{
-             T_Bombable b = (T_Bombable)e.nextElement();
 			 b.lastChance();
 			}
 

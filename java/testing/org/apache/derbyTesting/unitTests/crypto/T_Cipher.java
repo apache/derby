@@ -28,21 +28,13 @@ import org.apache.derby.iapi.services.crypto.*;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.db.PropertyInfo;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import java.security.AccessController;
 import java.security.Key;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.io.IOException;
 
@@ -104,8 +96,8 @@ public class T_Cipher extends T_Generic
 	// allow for alternate providers
 	String testProvider = 
 		
-    	(String) AccessController.doPrivileged(new PrivilegedAction() {
-		    public Object run()  {
+        AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
 		    	return System.getProperty("testEncryptionProvider");
 		    }
 	    });
@@ -618,8 +610,8 @@ public class T_Cipher extends T_Generic
 	 */
 	private void deleteFile(final File f)
 	{
-	   	AccessController.doPrivileged(new PrivilegedAction() {
-		    public Object run()  {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            public Void run()  {
 		    	if (f.exists())
 		    	    f.delete();
 		    	return null;

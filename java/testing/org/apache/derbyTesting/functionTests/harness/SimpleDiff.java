@@ -75,7 +75,7 @@ public class SimpleDiff
     public String[] readFile(BufferedReader input) throws IOException
     {
 
-        Vector vec = new Vector();
+        Vector<String> vec = new Vector<String>();
 
         String aLine = "";
         //int count = 0;
@@ -122,7 +122,7 @@ public class SimpleDiff
 
         int currentLine1 = 0;
         int currentLine2 = 0;
-        Vector returnVec = new Vector();
+        Vector<String> returnVec = new Vector<String>();
 
         while ( file1.isValidOffset(currentLine1) &&
                 file2.isValidOffset(currentLine2))
@@ -256,7 +256,7 @@ public class SimpleDiff
         file1.close();
         file2.close();
 
-        if (returnVec.size() == 0)
+        if (returnVec.isEmpty())
         {
             return null;
         }
@@ -366,7 +366,7 @@ public class SimpleDiff
         }
     }
 
-    class DiffBuffer extends Vector
+    class DiffBuffer extends Vector<String>
     {
 
 

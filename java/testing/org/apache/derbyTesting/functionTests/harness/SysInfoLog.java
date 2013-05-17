@@ -69,7 +69,7 @@ public class SysInfoLog
                     javavm.setClasspath(classpath);
                 }
 
-				Vector v = javavm.getCommandLine();
+				Vector<String> v = javavm.getCommandLine();
                 v.addElement("org.apache.derby.tools.sysinfo");
                 // Now convert the vector into a string array
                 String[] sCmd = new String[v.size()];

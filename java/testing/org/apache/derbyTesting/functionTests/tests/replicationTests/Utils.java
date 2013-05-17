@@ -135,8 +135,8 @@ class Utils
     /**
      * Convert a list of strings to an array of strings.
      */
-    String[] toStringArray(List list) {
-        return (String[]) list.toArray(new String[list.size()]);
+    String[] toStringArray(List<String> list) {
+        return list.toArray(new String[list.size()]);
     }
 
     /**

@@ -80,7 +80,7 @@ public class AutomaticIndexStatisticsMultiTest
 
         int total = 0;
         int totalError = 0;
-        List errors = new ArrayList();
+        List<SQLException> errors = new ArrayList<SQLException>();
         for (int i=0; i < threadCount; i++) {
             MTCompileThread ct = compileThreads[i];
             int count = ct.getCount();
@@ -95,9 +95,8 @@ public class AutomaticIndexStatisticsMultiTest
             StringWriter msg = new StringWriter();
             PrintWriter out = new PrintWriter(msg);
             out.println(totalError + " select/compile errors reported:");
-            for (Iterator ei = errors.iterator(); ei.hasNext(); ) {
+            for (SQLException sqle : errors) {
                 out.println("------");
-                SQLException sqle = (SQLException)ei.next();
                 sqle.printStackTrace(out);
             }
             out.close();
@@ -142,7 +141,7 @@ public class AutomaticIndexStatisticsMultiTest
 
         int total = 0;
         int totalError = 0;
-        List errors = new ArrayList();
+        List<SQLException> errors = new ArrayList<SQLException>();
         for (int i=0; i < threadCount; i++) {
             MTCompileThread ct = compileThreads[i];
             int count = ct.getCount();
@@ -165,9 +164,8 @@ public class AutomaticIndexStatisticsMultiTest
                 createThread.getError().printStackTrace(out);
             }
             out.println("select/compile errors:");
-            for (Iterator ei = errors.iterator(); ei.hasNext(); ) {
+            for (SQLException sqle : errors) {
                 out.println("------");
-                SQLException sqle = (SQLException)ei.next();
                 sqle.printStackTrace(out);
             }
             out.close();
@@ -255,7 +253,8 @@ public class AutomaticIndexStatisticsMultiTest
         private final Random rand = new Random();
         private final Connection con;
         private final long runTime;
-        private final ArrayList errors = new ArrayList();
+        private final ArrayList<SQLException> errors =
+                new ArrayList<SQLException>();
         private volatile int count;
 
         public MTCompileThread(Connection con, long runTime)
@@ -289,8 +288,8 @@ public class AutomaticIndexStatisticsMultiTest
             return errors.size();
         }
 
-        public synchronized List getErrors() {
-            return (List)errors.clone();
+        public synchronized List<SQLException> getErrors() {
+            return new ArrayList<SQLException>(errors);
         }
     }
 

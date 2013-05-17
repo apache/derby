@@ -23,7 +23,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import junit.framework.Test;
@@ -40,7 +39,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * 
  */
 public class LiveLockTest extends BaseJDBCTestCase {
-    private LinkedList listExceptions = new LinkedList();
+    private LinkedList<Exception> listExceptions = new LinkedList<Exception>();
 
     private Object syncObject = new Object();
     private boolean updateDone = false;
@@ -50,12 +49,11 @@ public class LiveLockTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Start three threads. Two doing staggered selets and a third trying 
+     * Start three threads. Two doing staggered selects and a third trying
      * to do an update.  The update should not be starved by the staggered
      * selects.
-     * @throws SQLException
      */
-    public void testLiveLock() throws SQLException {
+    public void testLiveLock() throws Exception {
 
         Thread[] t = createThreads();
         waitForThreads(t);
@@ -65,16 +63,13 @@ public class LiveLockTest extends BaseJDBCTestCase {
     /**
      * There should be no exceptions. The update should have gotten through
      * 
-     * @throws SQLException
+     * @throws Exception
      *             if any occurred
      */
-    private void checkExceptions() throws SQLException {
-
-        for (Iterator i = listExceptions.iterator(); i.hasNext();) {
-            SQLException e = (SQLException) i.next();
+    private void checkExceptions() throws Exception {
+        for (Exception e : listExceptions) {
             throw e;
         }
-
     }
 
     private void waitForThreads(Thread[] t) {

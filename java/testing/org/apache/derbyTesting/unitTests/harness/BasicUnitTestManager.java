@@ -28,10 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derbyTesting.unitTests.harness.UnitTest;
-import org.apache.derbyTesting.unitTests.harness.UnitTestConstants;
-import org.apache.derbyTesting.unitTests.harness.UnitTestManager;
-import org.apache.derbyTesting.unitTests.harness.T_Bomb;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -40,8 +36,8 @@ import java.util.Hashtable;
 
 public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 {
-	private Vector vectorOfTests;
-	private Hashtable	namesOfTests;
+    private Vector<UnitTest> vectorOfTests;
+    private Hashtable<String, String> namesOfTests;
 
 	private	static	boolean	alreadyRun = false;
 	private HeaderPrintWriter output;
@@ -78,8 +74,8 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 		this.currentOutput = output;
 
-		vectorOfTests = new Vector();
-		namesOfTests = new Hashtable();
+		vectorOfTests = new Vector<UnitTest>();
+		namesOfTests = new Hashtable<String, String>();
 
 		findTests(startParams, startParams);
 		try {

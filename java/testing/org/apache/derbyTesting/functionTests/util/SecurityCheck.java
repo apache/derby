@@ -25,7 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -74,7 +74,8 @@ public class SecurityCheck {
 	 * the class is being inspected. Otherwise the value is
 	 * a String description of the risks.
 	 */
-	private static final SortedMap allInspectedClasses = new TreeMap();
+	private static final SortedMap<String, String> allInspectedClasses =
+            new TreeMap<String, String>();
 	
 	/**
 	 * Perform security analysis of the public api for the embedded engine.
@@ -112,10 +113,10 @@ public class SecurityCheck {
 	{
 		synchronized (allInspectedClasses)
 		{
-		for (Iterator it = allInspectedClasses.keySet().iterator(); it.hasNext(); )
+		for (Map.Entry<String, String> entry : allInspectedClasses.entrySet())
 		{
-			Object key = it.next();
-			Object value = allInspectedClasses.get(key);
+			String key = entry.getKey();
+			String value = entry.getValue();
 			if (value == null)
 			{
 				if (reportClear)

@@ -350,7 +350,7 @@ public class RunList
         // Build command string for RunTest()
         StringBuffer sb = new StringBuffer();
 	    jvm = jvm.getJvm(jvmName);
-	    Vector jvmProps = new Vector();
+	    Vector<String> jvmProps = new Vector<String>();
 	    if ((javaCmd.length()>0) )
 	    {
 	        jvm.setJavaCmd(javaCmd);
@@ -490,7 +490,7 @@ public class RunList
             jvm.setClasspath(classpath);
 
         jvm.setD(jvmProps);
-        Vector v = jvm.getCommandLine();
+        Vector<String> v = jvm.getCommandLine();
         v.addElement("org.apache.derbyTesting.functionTests.harness.RunTest");
 
         String str = "";
@@ -1212,7 +1212,7 @@ public class RunList
 
 	if (excludeJCC != null)
 	{
-	    Class c = null;
+	    Class<?> c = null;
 	    Method m = null;
 	    Object o = null;
 	    Integer i = null;

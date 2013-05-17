@@ -24,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import junit.framework.Test;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -38,7 +37,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class BTreeMaxScanTest extends BaseJDBCTestCase {
     /** List of SanityManager debug flags to reset on teardown. */
-    private List traceFlags = new ArrayList();
+    private List<String> traceFlags = new ArrayList<String>();
 
     public BTreeMaxScanTest(String name) {
         super(name);
@@ -59,10 +58,7 @@ public class BTreeMaxScanTest extends BaseJDBCTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         if (SanityManager.DEBUG) {
-            // If we've enabled tracing for the test case, disable it now.
-            Iterator it = traceFlags.iterator();
-            while (it.hasNext()) {
-                String flag = (String) it.next();
+            for (String flag : traceFlags) {
                 SanityManager.DEBUG_PRINT(
                         flag, "Disable tracing for " + getName());
                 SanityManager.DEBUG_CLEAR(flag);

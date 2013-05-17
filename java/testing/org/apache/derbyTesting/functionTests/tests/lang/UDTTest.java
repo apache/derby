@@ -1237,7 +1237,8 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     public static HashMap makeHashMap() { return new HashMap(); }
 
-    public static HashMap putValue( HashMap map, String key, String value )
+    public static HashMap putValue(
+            HashMap<String, String> map, String key, String value)
     {
         map.put( key, value );
 

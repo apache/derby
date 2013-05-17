@@ -31,7 +31,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -617,9 +616,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         final String db = getTestConfiguration().getDefaultDatabaseName();
         AccessController.doPrivileged
-        (new java.security.PrivilegedExceptionAction(){
-            
-            public Object run() throws Exception { 
+        (new java.security.PrivilegedExceptionAction<Void>() {
+            public Void run() throws Exception {
                 createArchive("dclt.jar", new File(backupDir, db), "dbro");;
               return null;
             }
@@ -1354,9 +1352,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     private static void setContextClassLoader(final URL url)
     {
         AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
+        (new java.security.PrivilegedAction<Void>() {
+            public Void run()  {
                 URLClassLoader cl = 
                     url == null ? null : new URLClassLoader(new URL[] {url});
                 java.lang.Thread.currentThread().setContextClassLoader(cl);

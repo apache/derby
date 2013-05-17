@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.Barrier;
@@ -48,7 +47,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     /**
      * List of threads (AsyncThread objects) to wait for after running the test.
      */
-    private List threads = new ArrayList();
+    private List<AsyncThread> threads = new ArrayList<AsyncThread>();
 
     public IndexSplitDeadlockTest(String name) {
         super(name);
@@ -71,11 +70,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         // Rollback all uncommitted operations so that we don't hold any
         // locks that may block the other threads.
         rollback();
-
-        // Go through all the threads and call waitFor() so that we
-        // detect errors that happened in another thread.
-        for (Iterator it = threads.iterator(); it.hasNext();) {
-            AsyncThread thread = (AsyncThread) it.next();
+        for (AsyncThread thread : threads) {
             thread.waitFor();
         }
         threads = null;

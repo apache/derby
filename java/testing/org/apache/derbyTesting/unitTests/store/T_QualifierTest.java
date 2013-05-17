@@ -84,12 +84,12 @@ public class T_QualifierTest
      * Private/Protected methods of This class:
      **************************************************************************
      */
-    private static HashSet create_hash_set(
+    private static HashSet<Long> create_hash_set(
     int     expect_key,
     int     expect_numrows,
 	int 	order)
     {
-        HashSet set = new HashSet(10, 0.8f);
+        HashSet<Long> set = new HashSet<Long>(10, 0.8f);
 
         int key_val = expect_key;
         for (int i = 0; i < expect_numrows; i++)

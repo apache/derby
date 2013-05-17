@@ -554,14 +554,14 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Runs a privileged user action for a given principal.
      */
-    private void execute(SystemPrincipal principal,
-                         PrivilegedAction action,
+    private <T> void execute(SystemPrincipal principal,
+                         PrivilegedAction<T> action,
                          boolean isGrantExpected) {
         //println();
         //println("    testing action " + action);
         
-        final RunAsPrivilegedUserAction runAsPrivilegedUserAction
-            = new RunAsPrivilegedUserAction(principal, action);
+        final RunAsPrivilegedUserAction<T> runAsPrivilegedUserAction
+            = new RunAsPrivilegedUserAction<T>(principal, action);
         try {
             AccessController.doPrivileged(runAsPrivilegedUserAction);
             //println("    Congrats! access granted " + action);
@@ -679,14 +679,14 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Shutdown server and engine action.
      */
     public class ShutdownAction
-        implements PrivilegedAction {
+        implements PrivilegedAction<Void> {
         protected final Permission permission;
 
         public ShutdownAction(Permission permission) {
             this.permission = permission;
         }
     
-        public Object run() {
+        public Void run() {
             //println("    checking access " + permission + "...");
             AccessController.checkPermission(permission);
             //println("    granted access " + this);
@@ -702,14 +702,14 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Create Database action.
      */
     public class CreateDatabaseAction
-        implements PrivilegedAction {
+        implements PrivilegedAction<Void> {
         protected final Permission permission;
 
         public CreateDatabaseAction(Permission permission) {
             this.permission = permission;
         }
 
-        public Object run() {
+        public Void run() {
             //println("    checking access " + permission + "...");
             AccessController.checkPermission(permission);
             //println("    granted access " + this);
@@ -745,20 +745,21 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Represents a Privileged User action.
      */
-    static public class RunAsPrivilegedUserAction
-        implements PrivilegedAction {
+    static public class RunAsPrivilegedUserAction<T>
+        implements PrivilegedAction<T> {
         final private SystemPrincipal principal;
-        final private PrivilegedAction action;
+        final private PrivilegedAction<? extends T> action;
 
         public RunAsPrivilegedUserAction(SystemPrincipal principal,
-                                         PrivilegedAction action) {
+                                         PrivilegedAction<? extends T> action) {
             this.principal = principal;
             this.action = action;
         }
         
-        public Object run() {
+        public T run() {
             final boolean readOnly = true;
-            final Set principals = new HashSet();
+            final Set<SystemPrincipal> principals =
+                    new HashSet<SystemPrincipal>();
             final Set publicCredentials = new HashSet();
             final Set privateCredentials = new HashSet();
             // add the given principal
@@ -785,9 +786,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             // permission.  In contrast, doAsPrivileged() with a null ACC
             // seems to effectively ignore the caller's protection domain, so
             // the check now only depends on the principal's permissions.
-            Subject.doAsPrivileged(subject, action, null);
+            return Subject.doAsPrivileged(subject, action, null);
             //Subject.doAs(subject, action);
-            return null;
         }
     }
 }

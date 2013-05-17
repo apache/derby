@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.Barrier;
@@ -83,7 +82,8 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         final Barrier readLockBarrier = new Barrier(threads.length);
 
         // Exceptions seen by the threads.
-        final List exceptions = Collections.synchronizedList(new ArrayList());
+        final List<Exception> exceptions =
+                Collections.synchronizedList(new ArrayList<Exception>());
 
         // Start the two threads. Both should first obtain a read lock, and
         // when both have the read lock, they should try to lock the same row
@@ -132,8 +132,7 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         }
 
         // Verify that we only got deadlock exceptions.
-        for (Iterator it = exceptions.iterator(); it.hasNext(); ) {
-            Exception e = (Exception) it.next();
+        for (Exception e : exceptions) {
             if (e instanceof SQLException) {
                 assertSQLState(DEADLOCK, (SQLException) e);
             } else {
@@ -184,7 +183,8 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
         // The transactions that have exclusive locks should attempt to lock
         // another row than the one they already have locked, otherwise there
         // will be no deadlock.
-        final List exceptions = Collections.synchronizedList(new ArrayList());
+        final List<Exception> exceptions =
+                Collections.synchronizedList(new ArrayList<Exception>());
         for (int i = 0; i < threads.length; i++) {
             final PreparedStatement ps = conns[i].prepareStatement(
                     "select x from derby5073 where x = ?");
@@ -225,9 +225,7 @@ public class DeadlockDetectionTest extends BaseJDBCTestCase {
             conns[i].close();
         }
 
-        // Verify that we only got deadlock exceptions.
-        for (Iterator it = exceptions.iterator(); it.hasNext(); ) {
-            Exception e = (Exception) it.next();
+        for (Exception e : exceptions) {
             if (e instanceof SQLException) {
                 assertSQLState(DEADLOCK, (SQLException) e);
             } else {

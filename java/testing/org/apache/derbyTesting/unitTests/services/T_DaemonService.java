@@ -41,12 +41,12 @@ public class T_DaemonService extends T_MultiThreadedIterations
 	/*
 	 * fields for testing serviceable, one per test object
 	 */
-	private Vector serviceRecord; // a vectory of T_Serviceable
+	private Vector<T_Serviceable> serviceRecord;
 
 	public T_DaemonService()
 	{
 		super();
-		serviceRecord = new Vector(9, 1);
+		serviceRecord = new Vector<T_Serviceable>(9, 1);
 		random = new Random();
 	}
 

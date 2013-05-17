@@ -146,8 +146,8 @@ public class PredicateTest extends BaseJDBCTestCase {
      * @param stats the runtime statistics
      * @return a list of all operators
      */
-    private List extractOperators(String stats) throws IOException {
-        ArrayList ops = new ArrayList();
+    private List<String> extractOperators(String stats) throws IOException {
+        ArrayList<String> ops = new ArrayList<String>();
         BufferedReader r = new BufferedReader(new StringReader(stats));
         String line;
         while ((line = r.readLine()) != null) {

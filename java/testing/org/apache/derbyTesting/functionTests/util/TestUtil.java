@@ -171,9 +171,9 @@ public class TestUtil {
 	{
 		if (framework != UNKNOWN_FRAMEWORK)
 			return framework;
-              String frameworkString = (String) AccessController.doPrivileged
-                  (new PrivilegedAction() {
-                          public Object run() {
+              String frameworkString = AccessController.doPrivileged
+                  (new PrivilegedAction<String>() {
+                          public String run() {
                               return System.getProperty("framework");
                           }
                       }
@@ -219,9 +219,9 @@ public class TestUtil {
     */
     public static String getHostName()
     {
-        String hostName = (String) AccessController.doPrivileged
-            (new PrivilegedAction() {
-                    public Object run() {
+        String hostName = AccessController.doPrivileged
+            (new PrivilegedAction<String>() {
+                    public String run() {
                         return System.getProperty("hostName");
                     }
                 }
@@ -291,9 +291,10 @@ public class TestUtil {
                                 
               try {
                   AccessController.doPrivileged
-                      (new PrivilegedExceptionAction() {
-                              public Object run() throws Exception {
-                                  return Class.forName(driverName).newInstance();
+                      (new PrivilegedExceptionAction<Void>() {
+                              public Void run() throws Exception {
+                                  Class.forName(driverName).newInstance();
+                                  return null;
                               }
                           }
                        );
@@ -412,7 +413,7 @@ public class TestUtil {
 	static private Class[] INT_ARG_TYPE = {Integer.TYPE};
 	static private Class[] BOOLEAN_ARG_TYPE = { Boolean.TYPE };
 	// A hashtable of special non-string attributes.
-	private static Hashtable specialAttributes = null;
+	private static Hashtable<String, Class[]> specialAttributes = null;
 	
 
 	private static Object getDataSourceWithReflection(String classname, Properties attrs)
@@ -424,7 +425,7 @@ public class TestUtil {
 		
 		if (specialAttributes == null)
 		{
-			specialAttributes = new Hashtable();
+			specialAttributes = new Hashtable<String, Class[]>();
 			specialAttributes.put("portNumber",INT_ARG_TYPE);
 			specialAttributes.put("driverType",INT_ARG_TYPE);
 			specialAttributes.put("retrieveMessagesFromServerOnGetMessage",
@@ -923,9 +924,9 @@ public class TestUtil {
     public static void dumpAllStackTracesIfSupported(PrintWriter log)
 	{
 		try {
-			String version =  (String) AccessController.doPrivileged
-				(new java.security.PrivilegedAction(){
-						public Object run(){
+			String version = AccessController.doPrivileged
+				(new PrivilegedAction<String>(){
+						public String run(){
 							return System.getProperty("java.version");
 						}
 					}
@@ -934,18 +935,18 @@ public class TestUtil {
 			JavaVersionHolder j=  new JavaVersionHolder(version); 
 			
 			if (j.atLeast(1,5)){
-				Class c = Class.forName("org.apache.derbyTesting.functionTests.util.ThreadDump");
+				Class<?> c = Class.forName("org.apache.derbyTesting.functionTests.util.ThreadDump");
 				final Method m = c.getMethod("getStackDumpString",new Class[] {});
 				
 				String dump;
 				try {
-					dump = (String) AccessController.doPrivileged
-						(new PrivilegedExceptionAction(){
-								public Object run() throws 
+					dump = AccessController.doPrivileged
+						(new PrivilegedExceptionAction<String>(){
+								public String run() throws
 									IllegalArgumentException, 
 									IllegalAccessException, 
 									InvocationTargetException{
-									return m.invoke(null, null);
+									return (String) m.invoke(null);
 								}
 							}
 						 );

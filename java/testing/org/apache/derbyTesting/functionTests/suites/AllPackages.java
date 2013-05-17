@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.suites;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +84,7 @@ public class AllPackages extends BaseTestCase {
      * @return list of test classes
      */
     private static List getTestClasses() {
-        ArrayList classes = new ArrayList();
+        ArrayList<Object> classes = new ArrayList<Object>();
 
         classes.add(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class); 
@@ -173,10 +172,9 @@ public class AllPackages extends BaseTestCase {
      * @return the test suite returned by {@code suite()}
      * @throws Exception if the suite() method cannot be called or fails
      */
-    private static Test invokeSuite(Class klass) throws Exception {
+    private static Test invokeSuite(Class<?> klass) throws Exception {
         try {
-            Method suite = klass.getMethod("suite", null);
-            return (Test) suite.invoke(null, null);
+            return (Test) klass.getMethod("suite").invoke(null);
         } catch (Exception e) {
             System.err.println("Failed to invoke class " + klass.getName());
             e.printStackTrace();

@@ -32,11 +32,8 @@ import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 
-import org.apache.derby.iapi.services.io.Storable;
-
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -45,12 +42,10 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import java.io.File;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -290,20 +285,21 @@ public class T_AccessFactory extends T_Generic
 		cc.insertAndFetchLocation(r1.getRowArray(), rowloc);
 
         // quick test to make sure we can hash insert and find row location.
-        Hashtable test_rowloc_hash = new Hashtable();
+        Hashtable<RowLocation, RowLocation> test_rowloc_hash =
+                new Hashtable<RowLocation, RowLocation>();
         test_rowloc_hash.put(rowloc, rowloc);
 
-        RowLocation hash_find = (RowLocation) test_rowloc_hash.get(rowloc);
+        RowLocation hash_find = test_rowloc_hash.get(rowloc);
 
         if (!hash_find.equals(rowloc))
             throw T_Fail.testFailMsg("(insertAndFetch) bad hash lookup 1");
 
-        hash_find = (RowLocation) test_rowloc_hash.remove(rowloc);
+        hash_find = test_rowloc_hash.remove(rowloc);
 
         if (!hash_find.equals(rowloc))
             throw T_Fail.testFailMsg("(insertAndFetch) bad hash lookup 2");
 
-        hash_find = (RowLocation) test_rowloc_hash.remove(rowloc);
+        hash_find = test_rowloc_hash.remove(rowloc);
 
         if (hash_find != null)
             throw T_Fail.testFailMsg("(insertAndFetch) bad hash lookup 3");

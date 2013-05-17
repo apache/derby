@@ -70,8 +70,8 @@ public class T_SortController extends T_Generic
 	}
 
 	private void setSortBufferSize(final String buf_length) {
-    	AccessController.doPrivileged(new PrivilegedAction() {
-		    public Object run()  {
+    	AccessController.doPrivileged(new PrivilegedAction<Void>() {
+		    public Void run()  {
 		    	System.setProperty("derby.storage.sortBufferMax", buf_length);
 		    	return null;
 		    }
@@ -728,7 +728,7 @@ public class T_SortController extends T_Generic
         {
             int numMergeRuns = Integer.parseInt(sortprop.getProperty(
 			 MessageService.getTextMessage(SQLState.STORE_RTS_NUM_MERGE_RUNS)));
-            Vector mergeRuns = new Vector();
+            Vector<Integer> mergeRuns = new Vector<Integer>();
             StringTokenizer st = new StringTokenizer(sortprop.getProperty(
 			 MessageService.getTextMessage(SQLState.STORE_RTS_MERGE_RUNS_SIZE)),
 			 "[],",false);
@@ -742,7 +742,7 @@ public class T_SortController extends T_Generic
 
             int totRunSize = 0;
             for (int i = 0; i < mergeRuns.size(); i++)
-                totRunSize += ((Integer) mergeRuns.elementAt(i)).intValue();
+                totRunSize += mergeRuns.elementAt(i);
             if (totRunSize != numRowsInput)
                FAIL("(testSort) the sum of the elements of the vector SortInfo.mergeRunsSize (value: " +
                 totRunSize + " ) is not equal to SortInfo.numRowsInput (value: " +
@@ -843,12 +843,12 @@ public class T_SortController extends T_Generic
 class T_DummySortObserver implements SortObserver
 {
 	T_AccessRow  template;
-	Vector vector;
+	Vector<DataValueDescriptor[]> vector;
 
 	T_DummySortObserver(T_AccessRow template)
 	{
 		this.template = template;
-		vector = new Vector();
+		vector = new Vector<DataValueDescriptor[]>();
 	}
 
 	/*
@@ -884,10 +884,7 @@ class T_DummySortObserver implements SortObserver
 
 		if (lastElement > 0)
 		{
-			DataValueDescriptor[] retval = 
-                (DataValueDescriptor[]) vector.elementAt(lastElement - 1);
-			vector.removeElementAt(lastElement - 1);
-			return retval;
+            return vector.remove(lastElement - 1);
 		}
 		return template.getRowArrayClone();
 	}

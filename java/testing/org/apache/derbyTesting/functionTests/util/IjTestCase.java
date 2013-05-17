@@ -85,8 +85,9 @@ public class IjTestCase extends ScriptTestCase {
 			+ getName() + ".out";
 		
 		final File out = outfile;
-		FileInputStream fis = (FileInputStream) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		FileInputStream fis = AccessController.doPrivileged(
+                new PrivilegedAction<FileInputStream>() {
+			public FileInputStream run() {
 				FileInputStream fis = null;
 				try {
 					fis = new FileInputStream(out);
@@ -102,17 +103,12 @@ public class IjTestCase extends ScriptTestCase {
 			os.write(b);
 		}
 		fis.close();
+
+        boolean deleted = PrivilegedFileOpsForTests.delete(outfile);
 		
-		Boolean deleted = (Boolean) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				boolean d = outfile.delete();
-				
-				return new Boolean(d);
-			}
-		});
-		
-		if (!deleted.booleanValue())
+		if (!deleted) {
 			println("Could not delete outfile for " + scriptName);
+        }
 		
 		this.compareCanon(canon);
 	}

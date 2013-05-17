@@ -220,10 +220,10 @@ public class wisconsin {
     protected static InputStream openTestResource(final URL url)
         throws PrivilegedActionException
     {
-        return (InputStream)AccessController.doPrivileged
-        (new java.security.PrivilegedExceptionAction(){
+        return AccessController.doPrivileged
+        (new java.security.PrivilegedExceptionAction<InputStream>(){
 
-            public Object run() throws IOException{
+            public InputStream run() throws IOException {
             return url.openStream();
 
             }
@@ -241,10 +241,10 @@ public class wisconsin {
     protected static URL getTestResource(final String name)
     {
 
-    return (URL)AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
+    return AccessController.doPrivileged
+        (new java.security.PrivilegedAction<URL>(){
 
-            public Object run(){
+            public URL run(){
             return this.getClass().getClassLoader().
                 getResource(name);
 

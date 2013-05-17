@@ -30,7 +30,6 @@ package org.apache.derbyTesting.functionTests.harness;
  ***/
 
 import java.io.*;
-import java.lang.reflect.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
@@ -81,20 +80,12 @@ public class FileCompare
         // for later use if that is the case.
         if (framework.startsWith("DerbyNet"))
         {
-	  Class c = null;
-	  Method m = null;
-	  Object o = null;
-	  Integer i = null;
 	  try	
 	  {
-	    c = Class.forName(NetServer.getDriverName(framework));
-	    o = c.newInstance();
-	    m = c.getMethod("getMajorVersion", null);
-	    i = (Integer)m.invoke(o, null);
-	    driverVersionMajor = i.intValue();
-	    m = c.getMethod("getMinorVersion", null);
-	    i = (Integer)m.invoke(o, null);
-	    driverVersionMinor = i.intValue();
+        Class<?> c = Class.forName(NetServer.getDriverName(framework));
+        Object o = c.newInstance();
+        driverVersionMajor = (Integer) c.getMethod("getMajorVersion").invoke(o);
+        driverVersionMinor = (Integer) c.getMethod("getMinorVersion").invoke(o);
             if (framework.startsWith("DerbyNet")) searchDriverVersion = true;
 	  } catch ( Exception e )
 	  {

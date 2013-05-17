@@ -77,7 +77,7 @@ public class ClobMemTest extends BaseJDBCTestCase {
         if (lengthless) {
             Method m = null;
             try {
-                Class c = ps.getClass();
+                Class<?> c = ps.getClass();
                 m = c.getMethod("setCharacterStream",new Class[] {Integer.TYPE,
                             InputStream.class});
             } catch (NoSuchMethodException e) {

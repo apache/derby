@@ -696,7 +696,7 @@ public class CompatibilityCombinations extends BaseTestCase
         
         boolean testOK = false;
         
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("-Ddrb.tests.debug=true");      // Used by JDBCDriverTest
         // cmd.add("-Dderby.tests.debug=true"); // Used by DerbyJUnitTest
         cmd.add("-Dderby.tests.trace=true");    // Used by DerbyJUnitTest
@@ -950,8 +950,8 @@ public class CompatibilityCombinations extends BaseTestCase
         
     }
 
-    private static String[] toStringArray(List list) {
-        return (String[]) list.toArray(new String[list.size()]);
+    private static String[] toStringArray(List<String> list) {
+        return list.toArray(new String[list.size()]);
     }
 
     private void startServer(int serverVM, int serverVersion)
@@ -970,7 +970,7 @@ public class CompatibilityCombinations extends BaseTestCase
         String command = "start";
         String allowedClients = "0.0.0.0"; // I.e. any
 
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("-Dderby.infolog.append=true");
         cmd.add(networkServerControl);
         cmd.add(command);
@@ -1049,7 +1049,7 @@ public class CompatibilityCombinations extends BaseTestCase
         
         String creator = compatibilityTestSuite + "$Creator";
 
-        ArrayList cmd = new ArrayList();
+        ArrayList<String> cmd = new ArrayList<String>();
         cmd.add("-Ddrb.tests.debug=true");      // Used by JDBCDriverTest.
         // cmd.add("-Dderby.tests.debug=true"); // Used by DerbyJUnitTest
         cmd.add("-Dderby.tests.trace=true");    // Used by DerbyJUnitTest

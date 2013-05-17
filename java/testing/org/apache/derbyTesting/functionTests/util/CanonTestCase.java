@@ -31,6 +31,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
@@ -143,10 +144,9 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         File folder = getFailureFolder();
         final File outFile = new File(folder, getName() + ".out");
 
-        OutputStream outStream = (OutputStream) AccessController
-                .doPrivileged(new java.security.PrivilegedExceptionAction() {
-
-                    public Object run() throws IOException {
+        OutputStream outStream = AccessController
+                .doPrivileged(new PrivilegedExceptionAction<OutputStream>() {
+                    public OutputStream run() throws IOException {
                         return new FileOutputStream(outFile);
                     }
                 });

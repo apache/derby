@@ -203,10 +203,12 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	/////////////////////////////////////////////////////////////
 
 	// map derby type name to type descriptor
-	private	static	HashMap		_types = new HashMap();	// maps Derby type names to TypeDescriptors
+    private static HashMap<String, TypeDescriptor> _types =
+            new HashMap<String, TypeDescriptor>();
 
 	// map jdbc type to index into COERCIONS
-	private	static	HashMap		_coercionIndex = new HashMap();	// maps jdbc types to legal coercions
+    private static HashMap<Integer, Integer> _coercionIndex =
+            new HashMap<Integer, Integer>();
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -668,7 +670,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		
 		checkDBMetadata( conn, tableName );
 		stuffTable( conn, tableName, types, rows );
-		readTable( conn, tableName, types, rows, null );
+		readTable( conn, tableName, types, rows );
 	}
 	
 	//
@@ -777,7 +779,8 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	// Verify that we can select all legal datatypes in a table.
 	//
 	private	void	readTable
-		( Connection conn, String tableName, TypeDescriptor[] types, Object[][] rows, List casts )
+		( Connection conn, String tableName, TypeDescriptor[] types,
+          Object[][] rows )
 		throws Exception
 	{
 		PreparedStatement	ps = readTableQuery( conn, tableName, types );
@@ -786,7 +789,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		checkRSMD( rs );
 		close( rs );
         // Execute the statement again for each cast / coercion we check.
-        checkRows( ps, types, rows, casts );
+        checkRows( ps, types, rows );
 
 		close( ps );
 	}
@@ -874,12 +877,10 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
      * @param ps the query used to obtain the results
      * @param types the type descriptions of the columns
      * @param rows the values expected to be returned
-     * @param casts a list to which objects retrieved from the result rows
-     *      are added, specify {@code null} if you don't need this
      * @throws Exception
      */
     private void checkRows(PreparedStatement ps, TypeDescriptor[] types,
-                           Object[][] rows, List casts)
+                           Object[][] rows)
             throws Exception {
         int typeCount = types.length;
 
@@ -895,7 +896,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
                 // Make sure we're using the correct type descriptor.
                 assertEquals(types[colIndex], type);
                 checkPlainGet(ps, colIndex, type, rows);
-                checkCoercions(ps, type, casts);
+                checkCoercions(ps, type);
             }
         }
     }
@@ -935,10 +936,8 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
      *
      * @param ps the query used to obtain the rows
      * @param type the type description of the column
-     * @param casts
      */
-    private void checkCoercions(PreparedStatement ps, TypeDescriptor type,
-                                List casts)
+    private void checkCoercions(PreparedStatement ps, TypeDescriptor type)
             throws Exception {
         String columnName = type.getDerbyTypeName();
         T_CN coercionDesc = COERCIONS[ getCoercionIndex(type.getJdbcType()) ];
@@ -956,10 +955,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
                 while (rs.next()) {
                     int jdbcType = COERCIONS[i].getJdbcType();
                     Object retval = getColumn( rs, columnName, jdbcType );
-
-                    if (casts != null) {
-                        casts.add(retval);
-                    }
 
                     println( "\t" + jdbcType + ":\t" + retval );
                 }
@@ -1061,9 +1056,9 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	//
 	private	TypeDescriptor	getType( String typeName )
 	{
-		if ( _types.size() == 0 ) { buildTypeMap(); }
+		if ( _types.isEmpty() ) { buildTypeMap(); }
 		
-		return (TypeDescriptor) _types.get( typeName );
+		return _types.get( typeName );
 	}
 
 	//
@@ -1077,7 +1072,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	}
 	private	void	putCoercionIndex( int index )
 	{
-		_coercionIndex.put( new Integer( COERCIONS[ index ].getJdbcType() ), new Integer( index ) );
+        _coercionIndex.put(COERCIONS[index].getJdbcType(), index);
 	}
 
 	//
@@ -1085,9 +1080,9 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	//
 	private	int	getCoercionIndex( int jdbcType )
 	{
-		if ( _coercionIndex.size() == 0 ) { buildCoercionMap(); }
+		if ( _coercionIndex.isEmpty() ) { buildCoercionMap(); }
 		
-		return ((Integer) _coercionIndex.get( new Integer( jdbcType ) )).intValue();
+		return _coercionIndex.get(jdbcType);
 	}
 	
 	/////////////////////////////////////////////////////////////

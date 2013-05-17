@@ -34,10 +34,9 @@ public class userDefMethods
     {
 		Connection con = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement statement = null;
-        String delStr = null;
         Statement s = con.createStatement();
         ResultSet rs = s.executeQuery("SELECT c1 from new org.apache.derby.catalog.TriggerOldTransitionRows() AS EQ");
-        Vector keys = new Vector();
+        Vector<Long> keys = new Vector<Long>();
         while(rs.next()){
             keys.addElement(new Long(rs.getLong(1)));
         }
@@ -45,8 +44,7 @@ public class userDefMethods
 
         statement = 
         con.prepareStatement("delete from t1  where c1  = ?");
-        for(int i = 0; i < keys.size() ; i++){ 
-           long key = ((Long)keys.elementAt(i)).longValue();
+        for (long key : keys) {
            statement.setLong(1, key);
            statement.executeUpdate();
 		}

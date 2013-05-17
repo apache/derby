@@ -55,7 +55,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     private int startedCount = 0;
     
     /* Exceptions thrown by threads (if any) */
-    private LinkedList listExceptions = new LinkedList();
+    private LinkedList<Exception> listExceptions = new LinkedList<Exception>();
     
     /**
      * Creates a new instance of DeadlockModeTest

@@ -67,7 +67,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     private static  int _minusCounter;
 
-    private static  ArrayList   _triggerReports = new ArrayList();
+    private static ArrayList<String> _triggerReports = new ArrayList<String>();
 
     private String  _clearingProcName;
     private String  _triggerReportVTIName;
@@ -5714,7 +5714,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
         for ( int i = 0; i < count; i++ )
         {
-            rows[ i ] = new String[] { (String) _triggerReports.get( i ) };
+            rows[ i ] = new String[] { _triggerReports.get( i ) };
         }
 
         return new StringArrayVTI( new String[] { "contents" }, rows );

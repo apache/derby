@@ -179,45 +179,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      */
     private String getPhysicalDbName() {
         String pdbName =TestConfiguration.getCurrent().getJDBCUrl();
-        if (pdbName != null)
-            pdbName=pdbName.substring(pdbName.lastIndexOf("oneuse"),pdbName.length());
-        else {
-            // with JSR169, we don't *have* a protocol, and so, no url, and so
-            // we'll have had a null.
-            // But we know the name of the db is something like system/singleUse/oneuse#
-            // So, let's see if we can look it up, if everything's been properly
-            // cleaned, there should be just 1...
-            pdbName = (String) AccessController.doPrivileged(new java.security.PrivilegedAction() {
-                String filesep = getSystemProperty("file.separator");
-                public Object run() {
-                    File dbdir = new File("system" + filesep + "singleUse");
-                    String[] list = dbdir.list();
-                    // Some JVMs return null for File.list() when the directory is empty
-                    if( list != null)
-                    {
-                        if(list.length > 1)
-                        {
-                            for( int i = 0; i < list.length; i++ )
-                            {
-                                if(list[i].indexOf("oneuse")<0)
-                                    continue;
-                                else
-                                {
-                                    return list[i];
-                                }
-                            }
-                            // give up trying to be smart, assume it's 0
-                            return "oneuse0";
-                        }
-                        else
-                            return list[0];
-                    }
-                    return null;
-                }
-            });
-            
-        }
-        return pdbName;
+        return pdbName.substring(pdbName.lastIndexOf("oneuse"));
     }
     
     private void shutdownDB(DataSource ds) throws SQLException {
@@ -306,9 +268,9 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      */
     private void createDummyLockFile(String dbDir) {
         final File f = new File(constructDbPath(dbDir), "db.lck");
-        AccessController.doPrivileged(new PrivilegedAction() {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
 
-            public Object run() {
+            public Void run() {
                 if (!f.exists()) {
                     try {
                         FileOutputStream fos = new FileOutputStream(f);
@@ -356,9 +318,9 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
             return false;
         final File sdirectory = directory;
 
-        Boolean b = (Boolean)AccessController.doPrivileged(
-            new java.security.PrivilegedAction() {
-                public Object run() {
+        return AccessController.doPrivileged(
+            new java.security.PrivilegedAction<Boolean>() {
+                public Boolean run() {
                     // set fail to true to start with; unless it works, we
                     // want to specifically set the value.
                     boolean success = true;
@@ -386,13 +348,8 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                     // again, which means we cannot delete the directory and
                     // its content...
                     //success &= sdirectory.setReadOnly();
-                    return new Boolean(success);
+                    return success;
                 }
             });        
-        if (b.booleanValue())
-        {
-            return true;
-        }
-        else return false;
     }
 }

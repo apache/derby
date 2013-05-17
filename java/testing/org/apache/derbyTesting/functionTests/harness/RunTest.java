@@ -1071,7 +1071,7 @@ public class RunTest
         if ( framework.equals("DerbyNet") && (! jvmName.startsWith("j9_foundation")))
 		{	
 
-			Class c = null;
+			Class<?> c = null;
 			Method m = null;
 			Object o = null;
 			Integer i = null;
@@ -2240,7 +2240,7 @@ clp.list(System.out);
     }
 
 	public static void
-	addStandardTestJvmProps(Vector testJvmProps,String derbySystemHome,
+	addStandardTestJvmProps(Vector<String> testJvmProps,String derbySystemHome,
 							String userDirName, jvm jvm)
 	{
 		if (derbySystemHome==null || derbySystemHome.length() == 0)
@@ -2271,7 +2271,7 @@ clp.list(System.out);
         if ( (classpath != null) && (classpath.length()>0) )
             jvm.setClasspath(classpath);
 
-		Vector jvmProps = new Vector();
+		Vector<String> jvmProps = new Vector<String>();
 		if ( testType.equals("java"))
 		    addStandardTestJvmProps(jvmProps,systemHome,
 			    outDir.getCanonicalPath(),null);		    
@@ -2360,7 +2360,7 @@ clp.list(System.out);
         else
         	System.out.println("-- SecurityManager not installed --");
             
-        Vector v = jvm.getCommandLine();
+        Vector<String> v = jvm.getCommandLine();
         if ( ij.startsWith("ij") )
         {
             // As of cn1411-20030930 IBM jvm the system takes the default
@@ -2718,7 +2718,7 @@ clp.list(System.out);
             Class[] classArray = new Class[1];
             classArray[0] = args.getClass();
             String testName = javaPath + "." + testBase;
-            Class JavaTest = Class.forName(testName);
+            Class<?> JavaTest = Class.forName(testName);
             PrintStream stdout = System.out;
             PrintStream stderr = System.err;
             System.setOut(ps);
@@ -2830,7 +2830,7 @@ clp.list(System.out);
             // do if invoked in a separate process (useprocess=true).
            
             // Load the test class
-            Class testClass = Class.forName(testName);
+            Class<?> testClass = Class.forName(testName);
             
             TestSuite junitTestSuite = null;
             
@@ -2955,10 +2955,8 @@ clp.list(System.out);
     	{
         	// Get the set of -D options that would be needed
         	// for a spawned VM and convert them to system properties.
-    	    Vector propList = jvm.getSecurityProps(null);
-    	    for (Enumeration e = propList.elements(); e.hasMoreElements();)
+            for (String dashDOpt : jvm.getSecurityProps(null))
     	    {
-    	    	String dashDOpt = (String) e.nextElement();
     	    	if ("java.security.manager".equals(dashDOpt))
     	    		continue;
     	    	

@@ -79,7 +79,7 @@ public abstract class HarnessJavaTest extends CanonTestCase {
                 false, outputEncoding);
         setSystemOut(testOut);
                 
-        Class test = Class.forName(testClassName);
+        Class<?> test = Class.forName(testClassName);
         
         Method main = test.getDeclaredMethod("main", MAIN_ARG_TYPE);
         

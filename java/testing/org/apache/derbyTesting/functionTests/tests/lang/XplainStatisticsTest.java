@@ -665,9 +665,9 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	DocumentBuilder builder = factory.newDocumentBuilder();
 
     	InputSource xml = new InputSource(
-    			(InputStream)AccessController.doPrivileged
-    			(new java.security.PrivilegedExceptionAction(){
-    				public Object run()throws Exception{
+    			AccessController.doPrivileged
+    			(new java.security.PrivilegedExceptionAction<InputStream>(){
+    				public InputStream run()throws Exception{
     					return new FileInputStream(
     							SupportFilesSetup.getReadWriteURL(file+".xml").getPath()
     					);}})

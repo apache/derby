@@ -242,9 +242,10 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
         Connection c = DriverManager.getConnection("jdbc:default:connection");
 
-        ArrayList workers = new ArrayList();
+        ArrayList<WorkerThread> workers = new ArrayList<WorkerThread>();
 
-        ArrayList interruptors = new ArrayList();
+        ArrayList<InterruptorThread> interruptors =
+                new ArrayList<InterruptorThread>();
 
         for (int i = 0; i < NO_OF_THREADS; i++) {
             WorkerThread w = new WorkerThread(
@@ -266,7 +267,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         }
 
         for (int i = 0; i < workers.size(); i++) {
-            WorkerThread w = (WorkerThread)workers.get(i);
+            WorkerThread w = workers.get(i);
             w.join();
 
             if (w.e != null) {
@@ -277,7 +278,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         allDone = true;
 
         for (int i = 0; i < interruptors.size(); i++) {
-            ((Thread)interruptors.get(i)).join();
+            interruptors.get(i).join();
         }
 
         try {
@@ -325,11 +326,11 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         // Wait till here to start works, so interruptors don't get too late to
         // the game
         for (int i = 0; i < workers.size(); i++) {
-            ((Thread)workers.get(i)).start();
+            workers.get(i).start();
         }
 
         for (int i = 0; i < workers.size(); i++) {
-            WorkerThread w = (WorkerThread)workers.get(i);
+            WorkerThread w = workers.get(i);
             w.join();
 
             if (w.e != null) {
@@ -340,7 +341,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         allDone = true;
 
         for (int i = 0; i < interruptors.size(); i++) {
-            ((Thread)interruptors.get(i)).join();
+            interruptors.get(i).join();
         }
 
         c.close();

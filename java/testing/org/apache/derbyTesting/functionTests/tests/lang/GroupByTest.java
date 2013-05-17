@@ -2244,11 +2244,13 @@ public class GroupByTest extends BaseJDBCTestCase {
 
         for (int i = 0; i < queries.length; i++) {
             final String query1 = queries[i];
-            final List rows1 = resultArrayToList(expectedResults[i]);
+            final List<List<String>> rows1 =
+                    resultArrayToList(expectedResults[i]);
 
             for (int j = 0; j < queries.length; j++) {
                 final String query2 = queries[j];
-                final List rows2 = resultArrayToList(expectedResults[j]);
+                final List<List<String>> rows2 =
+                        resultArrayToList(expectedResults[j]);
 
                 String query = query1 + " UNION " + query2;
                 String[][] rows = union(rows1, rows2, false);
@@ -2319,10 +2321,10 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @return the union of {@code rows1} and {@code rows2}, as a {@code
      * String[][]}
      */
-    private static String[][] union(Collection rows1,
-                                    Collection rows2,
+    private static String[][] union(Collection<List<String>> rows1,
+                                    Collection<List<String>> rows2,
                                     boolean all) {
-        Collection bagOrSet = newBagOrSet(all);
+        Collection<List<String>> bagOrSet = newBagOrSet(all);
         bagOrSet.addAll(rows1);
         bagOrSet.addAll(rows2);
         return toResultArray(bagOrSet);
@@ -2339,14 +2341,14 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @return the difference between {@code rows1} and {@code rows2}, as a
      * {@code String[][]}
      */
-    private static String[][] except(Collection rows1,
-                                     Collection rows2,
+    private static String[][] except(Collection<List<String>> rows1,
+                                     Collection<List<String>> rows2,
                                      boolean all) {
-        Collection bagOrSet = newBagOrSet(all);
+        Collection<List<String>> bagOrSet = newBagOrSet(all);
         bagOrSet.addAll(rows1);
         // could use removeAll() for sets, but need other behaviour for bags
-        for (Iterator it = rows2.iterator(); it.hasNext(); ) {
-            bagOrSet.remove(it.next());
+        for (List<String> row : rows2) {
+            bagOrSet.remove(row);
         }
         return toResultArray(bagOrSet);
     }
@@ -2362,14 +2364,13 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @return the intersection between {@code rows1} and {@code rows2}, as a
      * {@code String[][]}
      */
-    private static String[][] intersect(Collection rows1,
-                                        Collection rows2,
+    private static String[][] intersect(Collection<List<String>> rows1,
+                                        Collection<List<String>> rows2,
                                         boolean all) {
-        Collection bagOrSet = newBagOrSet(all);
-        List copyOfRows2 = new ArrayList(rows2);
+        Collection<List<String>> bagOrSet = newBagOrSet(all);
+        List<List<String>> copyOfRows2 = new ArrayList<List<String>>(rows2);
         // could use retainAll() for sets, but need other behaviour for bags
-        for (Iterator it = rows1.iterator(); it.hasNext(); ) {
-            Object x = it.next();
+        for (List<String> x : rows1) {
             if (copyOfRows2.remove(x)) {
                 // x is present in both of the collections, add it
                 bagOrSet.add(x);
@@ -2384,11 +2385,11 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @param bag tells whether or not the collection should be a bag
      * @return a {@code List} if a bag is requested, or a {@code Set} otherwise
      */
-    private static Collection newBagOrSet(boolean bag) {
+    private static Collection<List<String>> newBagOrSet(boolean bag) {
         if (bag) {
-            return new ArrayList();
+            return new ArrayList<List<String>>();
         } else {
-            return new HashSet();
+            return new HashSet<List<String>>();
         }
     }
 
@@ -2400,12 +2401,12 @@ public class GroupByTest extends BaseJDBCTestCase {
      * @param rows a collection of rows, where each row is a list of strings
      * @return a {@code String[][]} containing the same values as {@code rows}
      */
-    private static String[][] toResultArray(Collection rows) {
+    private static String[][] toResultArray(Collection<List<String>> rows) {
         String[][] results = new String[rows.size()][];
-        Iterator it = rows.iterator();
+        Iterator<List<String>> it = rows.iterator();
         for (int i = 0; i < results.length; i++) {
-            List row = (List) it.next();
-            results[i] = (String[]) row.toArray(new String[row.size()]);
+            List<String> row = it.next();
+            results[i] = row.toArray(new String[row.size()]);
         }
         return results;
     }
@@ -2419,8 +2420,9 @@ public class GroupByTest extends BaseJDBCTestCase {
      * results from a query}
      * @return the values of {@code results} in a list of lists
      */
-    private static List resultArrayToList(String[][] results) {
-        ArrayList rows = new ArrayList(results.length);
+    private static List<List<String>> resultArrayToList(String[][] results) {
+        ArrayList<List<String>> rows =
+                new ArrayList<List<String>>(results.length);
         for (int i = 0; i < results.length; i++) {
             rows.add(Arrays.asList(results[i]));
         }

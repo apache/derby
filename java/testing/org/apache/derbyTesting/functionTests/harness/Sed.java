@@ -65,7 +65,7 @@ public class Sed
     	String hostName = TestUtil.getHostName();
     	
         // Vector for storing lines to be deleted
-        Vector deleteLines = new Vector();
+        Vector<String> deleteLines = new Vector<String>();
         deleteLines.addElement("^ij version.*$");
         deleteLines.addElement("^\\*\\*\\*\\* Test Run Started .* \\*\\*\\*\\*$");
         deleteLines.addElement("^\\*\\*\\*\\* Test Run Completed .* \\*\\*\\*\\*$");
@@ -113,7 +113,7 @@ public class Sed
         deleteLines.addElement("^OK \\(.*$");
 
         // Vectors for substitutions
-        Vector searchStrings = new Vector();
+        Vector<String> searchStrings = new Vector<String>();
         searchStrings.addElement("^Transaction:\\(.*\\) *\\|"); 
         searchStrings.addElement("^Read [0-9]* of [0-9]* bytes$");
         searchStrings.addElement("Directory .*connect.wombat.seg0");
@@ -208,7 +208,7 @@ public class Sed
 			searchStrings.addElement("\\[\\.fffffffff\\]");			
 		}
 		
-        Vector subStrings = new Vector();
+        Vector<String> subStrings = new Vector<String>();
         subStrings.addElement("Transaction:(XXX)|");
         subStrings.addElement("Read ... bytes");
         subStrings.addElement("Directory DBLOCATION/seg0");
@@ -282,14 +282,14 @@ public class Sed
         throws IOException
     {
         // Vector for storing lines to be deleted
-        Vector deleteLines = new Vector();
+        Vector<String> deleteLines = new Vector<String>();
 
         // Vectors for substitutions
-        Vector searchStrings = new Vector();
+        Vector<String> searchStrings = new Vector<String>();
         searchStrings.addElement("[ ]*\\|");
         searchStrings.addElement("^--*");
 
-        Vector subStrings = new Vector();
+        Vector<String> subStrings = new Vector<String>();
         // true and false show up as 1 and 0 in JCC. 
         //because they have no boolean support
         subStrings.addElement(" |");
@@ -299,16 +299,18 @@ public class Sed
 
     }
 
-    private void doWork(File srcFile, File dstFile, InputStream is, Vector deleteLines, 
-        Vector searchStrings, Vector subStrings, InputStream isSed)
+    private void doWork(File srcFile, File dstFile, InputStream is,
+        Vector<String> deleteLines,  Vector<String> searchStrings,
+        Vector<String> subStrings, InputStream isSed)
         throws IOException
     {
         doWork(srcFile, dstFile, is, deleteLines, searchStrings, subStrings, isSed, false);
     }
 		
 
-    private void doWork(File srcFile, File dstFile, InputStream is, Vector deleteLines, 
-        Vector searchStrings, Vector subStrings, InputStream isSed, boolean isI18N)
+    private void doWork(File srcFile, File dstFile, InputStream is,
+        Vector<String> deleteLines, Vector<String> searchStrings,
+        Vector<String> subStrings, InputStream isSed, boolean isI18N)
         throws IOException
     {
 		
@@ -320,8 +322,8 @@ public class Sed
         PrintWriter outFile;
         String result = "";
         String regex;
-        Vector delPatternVector = new Vector();
-        Vector subPatternVector = new Vector();
+        Vector<Pattern> delPatternVector = new Vector<Pattern>();
+        Vector<Pattern> subPatternVector = new Vector<Pattern>();
 
         // ---------------------------------
         // Try loading the sed properties if they exist (see jdbc_sed.properties as an example)

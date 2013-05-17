@@ -2642,7 +2642,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     {
         Connection c = getConnection();
         DatabaseMetaData dbmd = c.getMetaData();
-        ArrayList columnList = new ArrayList();
+        ArrayList<String> columnList = new ArrayList<String>();
         ResultSet rs =
             dbmd.getColumns( (String) null, schema, table, (String) null);
 
@@ -2651,7 +2651,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                 columnList.add(rs.getString(4));
             }
 
-        return (String[]) columnList.toArray(new String[]{});
+        return columnList.toArray(new String[columnList.size()]);
     }
 
     /**

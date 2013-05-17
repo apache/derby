@@ -24,15 +24,10 @@ package org.apache.derbyTesting.functionTests.harness;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.io.*;
 import java.util.*;
-import java.lang.Long;
-import java.util.Vector;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
 
@@ -122,8 +117,8 @@ public class dbcleanup {
 
 		Enumeration schemalist = null;
 		Enumeration list = null;
-		Vector schemavec = new Vector();
-		Vector tablevec = null;
+		Vector<String> schemavec = new Vector<String>();
+		Vector<String> tablevec = null;
 		// get a list of the user schemas
 		try {
 			s = conn.createStatement();
@@ -148,7 +143,7 @@ public class dbcleanup {
 		String n = null;
 		boolean viewdependencyFound = false;
 		boolean tabledependencyFound = false;
-		Vector viewvec = null;
+		Vector<String> viewvec = null;
 		int count = 0;
 		for (schemalist = schemavec.elements(); schemalist.hasMoreElements();) {
 			schema = (String)schemalist.nextElement();
@@ -173,7 +168,7 @@ public class dbcleanup {
 				}
 			}
 
-			Vector stmtvec = new Vector();
+			Vector<String> stmtvec = new Vector<String>();
 			try {
 				rs = s.executeQuery( " select stmtname " +
 					" from sys.sysstatements t, sys.sysschemas  s " +
@@ -307,10 +302,10 @@ public class dbcleanup {
 		return(dependencyFound);
 	}
 
-	static  Vector findTables(Connection conn, Statement s, char c, String schema) throws Exception {
+	static  Vector<String> findTables(Connection conn, Statement s, char c, String schema) throws Exception {
 
 		ResultSet rs = null;
-		Vector tableviewvec = new Vector();
+		Vector<String> tableviewvec = new Vector<String>();
 
 		try {
 			rs = s.executeQuery( " select t.tablename " +
@@ -337,7 +332,7 @@ public class dbcleanup {
 		ResultSet rs = null;
 		Statement s = null;
 		String typestring = null;
-		Vector aliasvec = new Vector();
+		Vector<String> aliasvec = new Vector<String>();
 		String n = null;
 		int count = 0;
 
