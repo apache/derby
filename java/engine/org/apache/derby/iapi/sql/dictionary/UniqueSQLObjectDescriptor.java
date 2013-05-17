@@ -37,15 +37,19 @@ import org.apache.derby.catalog.UUID;
  * UUIDS.
  *
  */
-public interface UniqueSQLObjectDescriptor extends UniqueTupleDescriptor
+public abstract class UniqueSQLObjectDescriptor extends UniqueTupleDescriptor
 {
+    /** Pass-through constructors */
+    public  UniqueSQLObjectDescriptor() { super(); }
+    public  UniqueSQLObjectDescriptor( DataDictionary dd ) { super( dd ); }
+    
 	/**
 	 * Get the name of this object.  E.g. for a table descriptor,
 	 * this will be the table name.
 	 * 
 	 * @return the name
 	 */
-	public String getName();
+	public abstract String getName();
 
 	/**
 	 * Get the objects schema descriptor
@@ -54,6 +58,6 @@ public interface UniqueSQLObjectDescriptor extends UniqueTupleDescriptor
 	 *
 	 * @exception StandardException on error
 	 */
-	public SchemaDescriptor getSchemaDescriptor()
+	public abstract SchemaDescriptor getSchemaDescriptor()
 		throws StandardException;
 }

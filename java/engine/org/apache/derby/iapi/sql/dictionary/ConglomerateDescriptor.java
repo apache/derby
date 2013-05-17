@@ -59,8 +59,8 @@ import org.apache.derby.iapi.services.monitor.Monitor;
  * @version 0.1
  */
 
-public final class ConglomerateDescriptor extends TupleDescriptor
-	implements UniqueTupleDescriptor, Provider
+public final class ConglomerateDescriptor extends UniqueTupleDescriptor
+	implements Provider
 {
 	// Implementation
 	private long	conglomerateNumber;

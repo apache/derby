@@ -26,9 +26,15 @@ import org.apache.derby.iapi.sql.depend.Provider;
 /**
  * This is a descriptor for schema object which can have privileges granted on it.
  */
-public interface PrivilegedSQLObject extends UniqueSQLObjectDescriptor, Provider
+public abstract class PrivilegedSQLObject
+    extends UniqueSQLObjectDescriptor
+    implements Provider
 {
+    /** Pass-through constructors */
+    public  PrivilegedSQLObject() { super(); }
+    public  PrivilegedSQLObject( DataDictionary dd ) { super( dd ); }
+    
     /** Get the type of the object for storage in SYS.SYSPERMS */
-    public String getObjectTypeName();
+    public abstract String getObjectTypeName();
     
 }

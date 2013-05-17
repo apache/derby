@@ -188,7 +188,7 @@ import org.apache.derby.impl.sql.execute.JarUtil;
  * that stores the information in the system catalogs.
  */
 public final class	DataDictionaryImpl
-	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction
+	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction<Properties>
 {
 
     private static final String		CFG_SYSTABLES_ID = "SystablesIdentifier";
@@ -399,7 +399,7 @@ public final class	DataDictionaryImpl
 	CacheManager	nameTdCache;
 	private CacheManager	spsNameCache;
     private CacheManager sequenceGeneratorCache;
-	private Hashtable		spsIdHash;
+	private Hashtable<UUID,SPSDescriptor>		spsIdHash;
 	// private Hashtable       spsTextHash;
 	int				tdCacheSize;
 	int				stmtCacheSize;
@@ -422,7 +422,7 @@ public final class	DataDictionaryImpl
 	/* Number of readers that start in DDL_MODE */
 	volatile int	readersInDDLMode;
 
-    private HashMap sequenceIDs;
+    private HashMap<String,HashMap<String,String>> sequenceIDs;
     
 	/**
 		True if the database is read only and requires
@@ -700,14 +700,14 @@ public final class	DataDictionaryImpl
 					"SPSNameDescriptorCache",
 					stmtCacheSize,
 					stmtCacheSize);
-			spsIdHash = new Hashtable(stmtCacheSize);
+			spsIdHash = new Hashtable<UUID,SPSDescriptor>(stmtCacheSize);
 			// spsTextHash = new Hashtable(stmtCacheSize);
 		}
 
 		sequenceGeneratorCache = cf.newCacheManager
             ( this, "SequenceGeneratorCache", seqgenCacheSize, seqgenCacheSize );
 
-        sequenceIDs = new HashMap();
+        sequenceIDs = new HashMap<String,HashMap<String,String>>();
 
 		/* Get the object to coordinate cache transitions */
 		cacheCoordinator = new ShExLockable();
@@ -789,7 +789,7 @@ public final class	DataDictionaryImpl
 				String userName = IdUtil.getUserNameFromURLProps(startParams);
 				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
 
-                HashSet newlyCreatedRoutines = new HashSet();
+                HashSet<String> newlyCreatedRoutines = new HashSet<String>();
                 
 				// create any required tables.
 				createDictionaryTables(startParams, bootingTC, ddg);
@@ -1801,7 +1801,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false,
 						isolationLevel,
 						tc);
@@ -1844,7 +1844,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false,
                         TransactionController.ISOLATION_REPEATABLE_READ,
 						tc);
@@ -2267,7 +2267,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 
 		return finishTableDescriptor(td);
@@ -2377,7 +2377,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 
 		return finishTableDescriptor(td);
@@ -2677,7 +2677,7 @@ public final class	DataDictionaryImpl
              (ScanQualifier [][]) null,
              ti,
              (TupleDescriptor) null,
-             (List) null,
+             (List<TupleDescriptor>) null,
              true,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -2754,7 +2754,7 @@ public final class	DataDictionaryImpl
              (ScanQualifier [][]) null,
              aliasTI,
              (TupleDescriptor) null,
-             (List) null,
+             (List<TupleDescriptor>) null,
              true,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -2820,7 +2820,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(DefaultDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -3058,7 +3058,7 @@ public final class	DataDictionaryImpl
 
 		// First get all the ColPermsDescriptor for the given tableid from   
 		//SYSCOLPERMS using getDescriptorViaIndex(). 
-		List permissionDescriptorsList;//all ColPermsDescriptor for given tableid
+		List<TupleDescriptor> permissionDescriptorsList;//all ColPermsDescriptor for given tableid
 		DataValueDescriptor		tableIDOrderable = getIDValueAsCHAR(tableID);
 		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
 		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
@@ -3350,10 +3350,10 @@ public final class	DataDictionaryImpl
 	 * FIXME: Need to cache graph and invalidate when role graph is modified.
 	 * Currently, we always read from SYSROLES.
 	 */
-	HashMap getRoleGrantGraph(TransactionController tc, boolean inverse)
+	HashMap<String,List<RoleGrantDescriptor>> getRoleGrantGraph(TransactionController tc, boolean inverse)
 			throws StandardException {
 
-		HashMap hm = new HashMap();
+		HashMap<String,List<RoleGrantDescriptor>> hm = new HashMap<String,List<RoleGrantDescriptor>>();
 
 		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
 		SYSROLESRowFactory rf = (SYSROLESRowFactory) ti.getCatalogRowFactory();
@@ -3409,9 +3409,9 @@ public final class	DataDictionaryImpl
 				hashKey = grantDescr.getRoleName();
 			}
 
-			List arcs = (List)hm.get(hashKey);
+			List<RoleGrantDescriptor> arcs = hm.get(hashKey);
 			if (arcs == null) {
-				arcs = new LinkedList();
+				arcs = new LinkedList<RoleGrantDescriptor>();
 			}
 
 			arcs.add(grantDescr);
@@ -3901,7 +3901,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 
 		if (vd != null)
@@ -3963,7 +3963,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -4006,7 +4006,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
         return r;
 	}
@@ -4065,7 +4065,7 @@ public final class	DataDictionaryImpl
 		if ((spsNameCache != null) && 
 			(getCacheMode() == DataDictionary.COMPILE_ONLY_MODE))
 		{
-			sps = (SPSDescriptor)spsIdHash.get(uuid);
+			sps = spsIdHash.get(uuid);
 			if (sps != null)
 			{
 				//System.out.println("found in hash table ");
@@ -4188,7 +4188,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 
 		return spsd;
@@ -4282,7 +4282,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	
 		/*
@@ -4294,7 +4294,7 @@ public final class	DataDictionaryImpl
 		*/
 		if (spsd != null)
 		{
-            List tmpDefaults = new ArrayList();
+            List<DataValueDescriptor> tmpDefaults = new ArrayList<DataValueDescriptor>();
             spsd.setParams(getSPSParams(spsd, tmpDefaults));
             Object[] defaults = tmpDefaults.toArray();
 			spsd.setParameterDefaults(defaults);
@@ -4405,7 +4405,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List defaults)
+    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List<DataValueDescriptor> defaults)
         throws StandardException
 	{
 		ColumnDescriptorList cdl = new ColumnDescriptorList();
@@ -4714,12 +4714,12 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getAllSPSDescriptors()
+	public List<TupleDescriptor> getAllSPSDescriptors()
 		throws StandardException
 	{
 		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
-		List list = newSList();
+		List<TupleDescriptor> list = newSList();
 
         // DERBY-3870: The compiled plan may not be possible to deserialize
         // during upgrade. Skip the column that contains the compiled plan to
@@ -4804,13 +4804,12 @@ public final class	DataDictionaryImpl
      * Comparator that can be used for sorting lists of column references
      * on the position they have in the SQL query string.
      */
-    private static final Comparator OFFSET_COMPARATOR = new Comparator() {
-        public int compare(Object o1, Object o2) {
+    private static final Comparator<ColumnReference> OFFSET_COMPARATOR = new Comparator<ColumnReference>() {
+        public int compare(ColumnReference o1, ColumnReference o2) {
             // Return negative int, zero, or positive int if the first column
             // reference has an offset which is smaller than, equal to, or
             // greater than the offset of the second column reference.
-            return ((ColumnReference) o1).getBeginOffset() -
-                    ((ColumnReference) o2).getBeginOffset();
+            return o1.getBeginOffset() - o2.getBeginOffset();
         }
     };
 
@@ -4943,9 +4942,9 @@ public final class	DataDictionaryImpl
 			}
 		}
 
-		CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
+		CollectNodesVisitor<ColumnReference> visitor = new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 		actionStmt.accept(visitor);
-		List refs = visitor.getList();
+		List<ColumnReference> refs = visitor.getList();
 		/* we need to sort on position in string, beetle 4324
 		 */
 		Collections.sort(refs, OFFSET_COMPARATOR);
@@ -5422,7 +5421,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -5462,7 +5461,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -5755,7 +5754,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
-		List statDescriptorList = newSList();
+		List<TupleDescriptor> statDescriptorList = newSList();
 		DataValueDescriptor UUIDStringOrderable;
 
 		/* set up the start/stop position for the scan */
@@ -6134,7 +6133,7 @@ public final class	DataDictionaryImpl
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List list)
+						ConstraintDescriptorList list)
 			throws StandardException
 	{
 		SYSCONSTRAINTSRowFactory rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
@@ -6237,7 +6236,7 @@ public final class	DataDictionaryImpl
 	public TableDescriptor getConstraintTableDescriptor(UUID constraintId)
 			throws StandardException
 	{
-		List slist = getConstraints(constraintId,
+		List<UUID> slist = getConstraints(constraintId,
 											SYSCONSTRAINTSRowFactory.SYSCONSTRAINTS_INDEX1_ID,
 											SYSCONSTRAINTSRowFactory.SYSCONSTRAINTS_TABLEID);
 
@@ -6265,7 +6264,7 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSFOREIGNKEYS_CATALOG_NUM);
-		List fkList = newSList();
+		List<TupleDescriptor> fkList = newSList();
 
 		// Use constraintIDOrderable in both start and stop positions for scan
 		DataValueDescriptor constraintIDOrderable = getIDValueAsCHAR(constraintId);
@@ -6310,7 +6309,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public List getConstraints(UUID uuid, int indexId, int columnNum)
+	public List<UUID> getConstraints(UUID uuid, int indexId, int columnNum)
 			throws StandardException
 	{
 		ExecIndexRow	  		indexRow1;
@@ -6322,7 +6321,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl 				ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 		SYSCONSTRAINTSRowFactory rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
 		TableDescriptor			td = null;
-		List					slist = newSList();
+		List<UUID>				slist = new ArrayList<UUID>();
 
 		if (SanityManager.DEBUG)
 		{
@@ -6704,7 +6703,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -6880,7 +6879,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -6924,10 +6923,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public Hashtable hashAllConglomerateDescriptorsByNumber(TransactionController tc)
+	public Hashtable<Long,ConglomerateDescriptor> hashAllConglomerateDescriptorsByNumber(TransactionController tc)
 		throws StandardException
 	{
-		Hashtable ht = new Hashtable();
+		Hashtable<Long,ConglomerateDescriptor> ht = new Hashtable<Long,ConglomerateDescriptor>();
 		ConglomerateDescriptor	  cd = null;
 		ScanController			  scanController;
 		ExecRow 				  outRow;
@@ -6981,10 +6980,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public Hashtable hashAllTableDescriptorsByTableId(TransactionController tc)
+	public Hashtable<UUID,TableDescriptor> hashAllTableDescriptorsByTableId(TransactionController tc)
 		throws StandardException
 	{
-		Hashtable ht = new Hashtable();
+		Hashtable<UUID,TableDescriptor> ht = new Hashtable<UUID,TableDescriptor>();
 		ScanController			  scanController;
 		ExecRow 				  outRow;
 		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
@@ -7065,7 +7064,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		UUIDStringOrderable;
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
-		List cdl = newSList();
+		List<TupleDescriptor> cdl = newSList();
 
         if ( uuid != null )
         {
@@ -7249,7 +7248,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						forUpdate);
 	}
 									
@@ -7477,10 +7476,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getDependentsDescriptorList(String dependentID)
+	public List<TupleDescriptor> getDependentsDescriptorList(String dependentID)
 		throws StandardException
 	{
-		List					ddlList = newSList();
+		List<TupleDescriptor>					ddlList = newSList();
 		DataValueDescriptor		dependentIDOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
@@ -7514,10 +7513,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getProvidersDescriptorList(String providerID)
+	public List<TupleDescriptor> getProvidersDescriptorList(String providerID)
 		throws StandardException
 	{
-		List					ddlList = newSList();
+		List<TupleDescriptor>					ddlList = newSList();
 		DataValueDescriptor		providerIDOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
@@ -7549,14 +7548,14 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getAllDependencyDescriptorsList()
+	public List<TupleDescriptor> getAllDependencyDescriptorsList()
 				throws StandardException
 	{
 		ScanController			 	scanController;
 		TransactionController	  	tc;
 		ExecRow					  	outRow;
 		ExecRow					 	templateRow;
-		List						ddl = newSList();
+		List<TupleDescriptor>				ddl = newSList();
 		TabInfoImpl						ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 		SYSDEPENDSRowFactory		rf = (SYSDEPENDSRowFactory) ti.getCatalogRowFactory();
 
@@ -7741,7 +7740,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -7785,7 +7784,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -7797,18 +7796,18 @@ public final class	DataDictionaryImpl
 		but instead look up the routines from the in-meomry table driven
 		by the contents of SYSFUN_FUNCTIONS.
 	 */
-	public java.util.List getRoutineList(String schemaID, String routineName, char nameSpace)
+	public java.util.List<AliasDescriptor> getRoutineList(String schemaID, String routineName, char nameSpace)
 		throws StandardException {
+
+        // We expect to find just a single function, since we currently
+        // don't support multiple routines with the same name, but use a
+        // list to support future extension.
+        List<AliasDescriptor> list = new ArrayList<AliasDescriptor>(1);
 
 		// Special in-memory table lookup for SYSFUN
 		if (schemaID.equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID)
 				&& nameSpace == AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR)
 		{
-            // We expect to find just a single function, since we currently
-            // don't support multiple routines with the same name, but use a
-            // list to support future extension.
-            List list = new ArrayList(1);
-
 			for (int f = 0; f < DataDictionaryImpl.SYSFUN_FUNCTIONS.length; f++)
 			{
 				String[] details = DataDictionaryImpl.SYSFUN_FUNCTIONS[f];
@@ -7862,9 +7861,9 @@ public final class	DataDictionaryImpl
 		}
 		
 		AliasDescriptor ad = getAliasDescriptor(schemaID, routineName, nameSpace);
-        return ad == null ?
-                Collections.EMPTY_LIST :
-                Collections.singletonList(ad);
+        if ( ad !=null ) { list.add( ad ); }
+
+        return list;
 	}
 
 	/** 
@@ -7952,7 +7951,7 @@ public final class	DataDictionaryImpl
              (ScanQualifier [][]) null,
              ti,
              (TupleDescriptor) null,
-             (List) null,
+             (List<TupleDescriptor>) null,
              false
              );
 	}
@@ -8370,7 +8369,7 @@ public final class	DataDictionaryImpl
                 (DataValueDescriptor[]) null, // stop position -through last row
                 0);                           // stopSearchOperation - none
 
-        Map schemas = new HashMap();
+        Map<String,Object> schemas = new HashMap<String,Object>();
 
         try
         {
@@ -8387,7 +8386,7 @@ public final class	DataDictionaryImpl
             scanController.close();
         }
 
-        Iterator i = schemas.keySet().iterator();
+        Iterator<String> i = schemas.keySet().iterator();
         FileResource fh = tc.getFileHandler();
 
         // remove those directories with their contents
@@ -8395,7 +8394,7 @@ public final class	DataDictionaryImpl
             fh.removeJarDir(
                     FileResource.JAR_DIRECTORY_NAME +
                     File.separatorChar +
-                    (String)i.next());
+                    i.next());
         }
     }
 
@@ -9379,7 +9378,7 @@ public final class	DataDictionaryImpl
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List list,
+						List<TupleDescriptor> list,
 						boolean forUpdate)
 			throws StandardException
 	{
@@ -9432,7 +9431,7 @@ public final class	DataDictionaryImpl
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List list,
+						List<TupleDescriptor> list,
 						boolean forUpdate,
 						int isolationLevel,
 						TransactionController tc)
@@ -9460,7 +9459,7 @@ public final class	DataDictionaryImpl
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List list,
+						List<TupleDescriptor> list,
 						boolean forUpdate,
 						int isolationLevel,
 						TransactionController tc)
@@ -9721,7 +9720,7 @@ public final class	DataDictionaryImpl
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List list)
+						List<TupleDescriptor> list)
 			throws StandardException
 	{
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
@@ -10330,7 +10329,7 @@ public final class	DataDictionaryImpl
              (ScanQualifier[][]) null,
              ti,
              (TupleDescriptor) null,
-             (List) null,
+             (List<TupleDescriptor>) null,
              false,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -10714,7 +10713,7 @@ public final class	DataDictionaryImpl
     boolean               isDeterministic,
     boolean               hasVarargs,
     TypeDescriptor          return_type,
-    HashSet               newlyCreatedRoutines,
+    HashSet<String>               newlyCreatedRoutines,
     TransactionController   tc,
     String procClass)
         throws StandardException
@@ -10835,7 +10834,7 @@ public final class	DataDictionaryImpl
     boolean               isDeterministic,
     boolean               hasVarargs,
     TypeDescriptor          return_type,
-    HashSet               newlyCreatedRoutines,
+    HashSet<String>               newlyCreatedRoutines,
     TransactionController   tc)
         throws StandardException
     {
@@ -10861,7 +10860,7 @@ public final class	DataDictionaryImpl
 	 * @exception  StandardException  Standard exception policy.
      **/
     private final void create_SYSCS_procedures(
-                                               TransactionController   tc, HashSet newlyCreatedRoutines )
+                                               TransactionController   tc, HashSet<String> newlyCreatedRoutines )
         throws StandardException
     {
         // Types used for routine parameters and return types, all nullable.
@@ -11514,7 +11513,7 @@ public final class	DataDictionaryImpl
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected final void create_SYSIBM_procedures(
-                                                  TransactionController   tc, HashSet newlyCreatedRoutines )
+                                                  TransactionController   tc, HashSet<String> newlyCreatedRoutines )
         throws StandardException
     {
         /*
@@ -12125,7 +12124,7 @@ public final class	DataDictionaryImpl
      **/
     void create_10_1_system_procedures(
     TransactionController   tc,
-    HashSet               newlyCreatedRoutines,
+    HashSet<String>               newlyCreatedRoutines,
     UUID                    sysUtilUUID)
 		throws StandardException
     { 
@@ -12186,7 +12185,7 @@ public final class	DataDictionaryImpl
      **/
     void create_10_2_system_procedures(
     TransactionController   tc,
-    HashSet               newlyCreatedRoutines,
+    HashSet<String>               newlyCreatedRoutines,
     UUID                    sysUtilUUID)
 		throws StandardException
     {
@@ -12334,7 +12333,7 @@ public final class	DataDictionaryImpl
      **/
     private void create_10_3_system_procedures_SYSIBM(
         TransactionController   tc,
-        HashSet               newlyCreatedRoutines )
+        HashSet<String>               newlyCreatedRoutines )
         throws StandardException {
         //create 10.3 functions used by LOB methods.
         UUID schema_uuid = getSysIBMSchemaDescriptor().getUUID();
@@ -12735,7 +12734,7 @@ public final class	DataDictionaryImpl
      * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @throws StandardException Standard exception policy.
      */
-    void create_10_5_system_procedures(TransactionController tc, HashSet newlyCreatedRoutines )
+    void create_10_5_system_procedures(TransactionController tc, HashSet<String> newlyCreatedRoutines )
     throws StandardException
     {
         // Create the procedures in the SYSCS_UTIL schema.
@@ -12777,7 +12776,7 @@ public final class	DataDictionaryImpl
      * @throws StandardException Standard exception policy.
      */
     void create_10_6_system_procedures(TransactionController tc,
-            HashSet newlyCreatedRoutines)
+            HashSet<String> newlyCreatedRoutines)
     throws StandardException
     {
         // Create the procedures in the SYSCS_UTIL schema.
@@ -12876,7 +12875,7 @@ public final class	DataDictionaryImpl
      * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @throws StandardException Standard exception policy. 
      */
-    void create_10_3_system_procedures(TransactionController tc, HashSet newlyCreatedRoutines ) 
+    void create_10_3_system_procedures(TransactionController tc, HashSet<String> newlyCreatedRoutines ) 
     throws StandardException {
         // Create the procedures in the SYSCS_UTIL schema.
         create_10_3_system_procedures_SYSCS_UTIL(tc, newlyCreatedRoutines );
@@ -12895,7 +12894,7 @@ public final class	DataDictionaryImpl
      * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @exception  StandardException  Standard exception policy.
      **/
-    void create_10_3_system_procedures_SYSCS_UTIL( TransactionController   tc, HashSet newlyCreatedRoutines )
+    void create_10_3_system_procedures_SYSCS_UTIL( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
         throws StandardException
     {
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
@@ -13160,7 +13159,7 @@ public final class	DataDictionaryImpl
      * @param tc an instance of the Transaction Controller.
      * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      **/
-    void create_10_9_system_procedures( TransactionController   tc, HashSet newlyCreatedRoutines )
+    void create_10_9_system_procedures( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
         throws StandardException
     {
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
@@ -13358,7 +13357,7 @@ public final class	DataDictionaryImpl
      * @param tc an instance of the Transaction Controller.
      * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      **/
-    void create_10_10_system_procedures( TransactionController   tc, HashSet newlyCreatedRoutines )
+    void create_10_10_system_procedures( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
         throws StandardException
     {
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
@@ -13422,10 +13421,10 @@ public final class	DataDictionaryImpl
 	private String spsSet;
 	private final synchronized Properties getQueryDescriptions(boolean net) {
 		spsSet = net ? "metadata_net.properties" : "/org/apache/derby/impl/jdbc/metadata.properties";
-		return (Properties) java.security.AccessController.doPrivileged(this);
+		return java.security.AccessController.doPrivileged(this);
 	}
 
-	public final Object run() {
+	public final Properties run() {
 		// SECURITY PERMISSION - IP3
 		Properties p = new Properties();
 		try {
@@ -13439,8 +13438,8 @@ public final class	DataDictionaryImpl
 	}
 
 
-	private static List newSList() {
-		return java.util.Collections.synchronizedList(new java.util.LinkedList());
+	private static List<TupleDescriptor> newSList() {
+		return java.util.Collections.synchronizedList(new java.util.LinkedList<TupleDescriptor>());
 	}
 
     /**
@@ -13828,7 +13827,7 @@ public final class	DataDictionaryImpl
                                  (ScanQualifier [][]) null,
                                  ti,
                                  (TupleDescriptor) null,
-                                 (List) null,
+                                 (List<TupleDescriptor>) null,
                                  false);
     } // end of getUncachedPermissionsDescriptor
 
@@ -13968,7 +13967,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -14011,7 +14010,7 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
-						(List) null,
+						(List<TupleDescriptor>) null,
 						false);
 	}
 
@@ -14063,7 +14062,7 @@ public final class	DataDictionaryImpl
 				(ScanQualifier [][]) null,
 				ti,
 				(TupleDescriptor) null,
-				(List) null,
+				(List<TupleDescriptor>) null,
 				false);
 	}
 
@@ -14186,7 +14185,7 @@ public final class	DataDictionaryImpl
                         (ScanQualifier[][]) null,
                         ti,
                         (TupleDescriptor) null,
-                        (List) null,
+                        (List<TupleDescriptor>) null,
                         false);
 
         putSequenceID( sequenceDescriptor );
@@ -14226,7 +14225,7 @@ public final class	DataDictionaryImpl
                         (ScanQualifier[][]) null,
                         ti,
                         (TupleDescriptor) null,
-                        (List) null,
+                        (List<TupleDescriptor>) null,
                         false);
 
         putSequenceID( sequenceDescriptor );
@@ -14245,10 +14244,10 @@ public final class	DataDictionaryImpl
         String  sequenceName = sd.getSequenceName();
         String  uuid = sd.getUUID().toString();
         
-        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        HashMap<String,String> sequencesInSchema = sequenceIDs.get( schemaName );
         if ( sequencesInSchema == null )
         {
-            sequencesInSchema = new HashMap();
+            sequencesInSchema = new HashMap<String,String>();
             sequenceIDs.put( schemaName, sequencesInSchema );
         }
 
@@ -14268,7 +14267,7 @@ public final class	DataDictionaryImpl
         String  schemaName = schema.getSchemaName();
         String  sequenceName = sd.getSequenceName();
         
-        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        HashMap<String,String> sequencesInSchema = (HashMap<String,String>) sequenceIDs.get( schemaName );
         if ( sequencesInSchema == null ) { return; }
 
         if ( sequencesInSchema.get( sequenceName ) == null ) { return; }
@@ -14285,7 +14284,7 @@ public final class	DataDictionaryImpl
     private String  getSequenceID( String schemaName, String sequenceName )
         throws StandardException
     {
-        HashMap sequencesInSchema = (HashMap) sequenceIDs.get( schemaName );
+        HashMap<String,String> sequencesInSchema = sequenceIDs.get( schemaName );
         if ( sequencesInSchema != null )
         {
             String  uuid = (String) sequencesInSchema.get( sequenceName );

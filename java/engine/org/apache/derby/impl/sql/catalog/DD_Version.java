@@ -363,7 +363,7 @@ public	class DD_Version implements	Formatable
 		
 		*/
 
-        HashSet  newlyCreatedRoutines = new HashSet();
+        HashSet<String>  newlyCreatedRoutines = new HashSet<String>();
         
 		if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_3)
 		{

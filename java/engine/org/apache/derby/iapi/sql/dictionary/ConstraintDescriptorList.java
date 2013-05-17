@@ -39,7 +39,7 @@ import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
 
-public class ConstraintDescriptorList extends ArrayList
+public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 {
 
 	private boolean scanned;
@@ -243,7 +243,7 @@ public class ConstraintDescriptorList extends ArrayList
 	 */
 	public ConstraintDescriptor elementAt(int n)
 	{
-		return (ConstraintDescriptor) get(n);
+		return get(n);
 	}
 
 	/**

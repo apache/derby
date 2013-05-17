@@ -35,8 +35,7 @@ import org.apache.derby.iapi.sql.depend.Provider;
  * 
  * 
  */
-public class DependencyDescriptor extends TupleDescriptor 
-	implements UniqueTupleDescriptor
+public class DependencyDescriptor extends UniqueTupleDescriptor 
 {
 	/** public interface for this class is:
 		<ol>

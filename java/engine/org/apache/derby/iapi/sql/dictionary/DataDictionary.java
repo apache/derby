@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.catalog.DependableFinder;
@@ -1102,7 +1103,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List defaults)
+    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List<DataValueDescriptor> defaults)
             throws StandardException;
 
 	/**
@@ -1583,7 +1584,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getDependentsDescriptorList(String dependentID)
+	public List<TupleDescriptor> getDependentsDescriptorList(String dependentID)
 		throws StandardException;
 
 	/**
@@ -1597,7 +1598,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getProvidersDescriptorList(String providerID)
+	public List<TupleDescriptor> getProvidersDescriptorList(String providerID)
 		throws StandardException;
 
 	/**

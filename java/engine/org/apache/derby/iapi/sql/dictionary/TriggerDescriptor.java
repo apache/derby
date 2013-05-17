@@ -90,8 +90,8 @@ import java.io.IOException;
  * <li> public String getNewReferencingName();
  * </ol>
  */
-public class TriggerDescriptor extends TupleDescriptor
-	implements UniqueSQLObjectDescriptor, Provider, Dependent, Formatable 
+public class TriggerDescriptor extends UniqueSQLObjectDescriptor
+	implements Provider, Dependent, Formatable 
 {
 	// field that we want users to be able to know about
 	public static final int SYSTRIGGERS_STATE_FIELD = 8;

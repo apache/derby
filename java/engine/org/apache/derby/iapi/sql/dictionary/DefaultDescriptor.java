@@ -40,8 +40,8 @@ import org.apache.derby.iapi.sql.depend.Provider;
  */
 
 public final class DefaultDescriptor 
-	extends TupleDescriptor
-	implements UniqueTupleDescriptor, Provider, Dependent
+	extends UniqueTupleDescriptor
+	implements Provider, Dependent
 {
 	private final int			columnNumber;
 	private final UUID		defaultUUID;

@@ -60,8 +60,8 @@ import org.apache.derby.iapi.util.IdUtil;
  */
 
 public final class AliasDescriptor 
-	extends TupleDescriptor
-	implements PrivilegedSQLObject, Provider, Dependent
+	extends PrivilegedSQLObject
+	implements Provider, Dependent
 {
 	private final UUID		aliasID;
 	private final String		aliasName;

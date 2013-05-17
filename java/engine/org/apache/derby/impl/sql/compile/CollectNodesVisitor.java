@@ -35,9 +35,9 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * parameter.
  *
  */
-public class CollectNodesVisitor implements Visitor
+public class CollectNodesVisitor<T extends Visitable> implements Visitor
 {
-    private final List nodeList;
+    private final List<T> nodeList;
     private final Class nodeClass;
     private final Class skipOverClass;
 
@@ -62,7 +62,7 @@ public class CollectNodesVisitor implements Visitor
 	 */
 	public CollectNodesVisitor(Class nodeClass, Class skipOverClass)
 	{
-        this.nodeList = new ArrayList();
+        this.nodeList = new ArrayList<T>();
         this.nodeClass = nodeClass;
 		this.skipOverClass = skipOverClass;
 	}
@@ -93,7 +93,7 @@ public class CollectNodesVisitor implements Visitor
 	{
 		if (nodeClass.isInstance(node))
 		{
-			nodeList.add(node);
+			nodeList.add( (T) node);
 		}
 		return node;
 	}
@@ -122,7 +122,7 @@ public class CollectNodesVisitor implements Visitor
      * is never {@code null}.
 	 *
 	 */
-	public List getList()
+	public List<T> getList()
 	{
 		return nodeList;
 	}

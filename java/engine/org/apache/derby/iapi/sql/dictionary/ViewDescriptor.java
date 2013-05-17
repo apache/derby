@@ -51,8 +51,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  * @version 0.1
  */
 
-public final class ViewDescriptor extends TupleDescriptor
-	implements UniqueTupleDescriptor, Dependent, Provider
+public final class ViewDescriptor extends UniqueTupleDescriptor
+	implements Dependent, Provider
 {
 	private final int			checkOption;
 	private String		viewName;

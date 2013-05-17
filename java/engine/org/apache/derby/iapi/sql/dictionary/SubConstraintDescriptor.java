@@ -34,8 +34,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * @version 0.1
  */
 
-public abstract class SubConstraintDescriptor extends TupleDescriptor
-	implements UniqueTupleDescriptor
+public abstract class SubConstraintDescriptor extends UniqueTupleDescriptor
 {
 
 	/**

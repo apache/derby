@@ -57,7 +57,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
      *   <li>Value: none</li>
      * </ul>
      */
-    private HashMap seenSoFar;
+    private HashMap<String,Object> seenSoFar;
 
     /**
      * Holds the grant graph.
@@ -67,18 +67,18 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
      *        in graph</li>
      * </ul>
      */
-    private HashMap graph;
+    private HashMap<String,List<RoleGrantDescriptor>> graph;
 
     /**
      * Holds discovered, but not yet handed out, roles in the closure.
      */
-    private List lifo;
+    private List<RoleGrantDescriptor> lifo;
 
     /**
      * Last node returned by next; a logical pointer into the arcs
      * list of a node we are currently processing.
      */
-    private Iterator currNodeIter;
+    private Iterator<RoleGrantDescriptor> currNodeIter;
 
     /**
      * DataDictionaryImpl used to get closure graph
@@ -120,8 +120,8 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         this.root = root;
         this.dd = dd;
         this.tc = tc;
-        seenSoFar = new HashMap();
-        lifo      = new ArrayList(); // remaining work stack
+        seenSoFar = new HashMap<String,Object>();
+        lifo      = new ArrayList<RoleGrantDescriptor>(); // remaining work stack
 
         RoleGrantDescriptor dummy = new RoleGrantDescriptor
             (null,
@@ -131,7 +131,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
              null,
              false,
              false);
-        List dummyList = new ArrayList();
+        List<RoleGrantDescriptor> dummyList = new ArrayList<RoleGrantDescriptor>();
         dummyList.add(dummy);
         currNodeIter = dummyList.iterator();
         initial = true;
@@ -150,7 +150,7 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         } else if (graph == null) {
             // We get here the second time next is called.
             graph = dd.getRoleGrantGraph(tc, inverse);
-            List outArcs = (List)graph.get(root);
+            List<RoleGrantDescriptor> outArcs = graph.get(root);
             if (outArcs != null) {
                 currNodeIter = outArcs.iterator();
             }
@@ -182,12 +182,12 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
 
                 while (lifo.size() > 0 && currNodeIter == null) {
 
-                    newNode = (RoleGrantDescriptor)lifo.remove(lifo.size() - 1);
+                    newNode = lifo.remove(lifo.size() - 1);
 
                     // In the example (see interface doc), the
                     // iterator of outgoing arcs for f (grant inverse)
                     // would contain {e,c,d}.
-                    List outArcs = (List)graph.get(
+                    List<RoleGrantDescriptor> outArcs = graph.get(
                         inverse? newNode.getRoleName(): newNode.getGrantee());
 
                     if (outArcs != null) {

@@ -47,8 +47,8 @@ import org.apache.derby.iapi.store.access.TransactionController;
  */
 
 public abstract class ConstraintDescriptor 
-	extends TupleDescriptor
-	implements UniqueTupleDescriptor, Provider, Dependent
+	extends UniqueTupleDescriptor
+	implements Provider, Dependent
 {
 	// used to indicate what type of constraints we 
 	// are interested in

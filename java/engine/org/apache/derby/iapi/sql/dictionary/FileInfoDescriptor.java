@@ -35,8 +35,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 /**
  * A Descriptor for a file that has been stored in the database.
  */
-public final class  FileInfoDescriptor extends TupleDescriptor 
-	implements Provider, UniqueSQLObjectDescriptor
+public final class  FileInfoDescriptor extends UniqueSQLObjectDescriptor 
+	implements Provider
 {
 	/** A type tho indicate the file is a jar file **/
 	public static final int JAR_FILE_TYPE = 0;

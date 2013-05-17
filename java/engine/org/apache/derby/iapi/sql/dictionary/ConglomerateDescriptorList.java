@@ -32,7 +32,7 @@ import org.apache.derby.catalog.UUID;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-public class ConglomerateDescriptorList extends ArrayList
+public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 {
 
 	/**

@@ -89,8 +89,8 @@ import org.apache.derby.iapi.util.IdUtil;
 	*
 	*/
 
-public class TableDescriptor extends TupleDescriptor
-	implements UniqueSQLObjectDescriptor, Provider, Dependent
+public class TableDescriptor extends UniqueSQLObjectDescriptor
+	implements Provider, Dependent
 {
 	public static final int BASE_TABLE_TYPE = 0;
 	public static final int SYSTEM_TABLE_TYPE = 1;

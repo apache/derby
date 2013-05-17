@@ -24,16 +24,20 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.catalog.UUID;
 
 /**
- * Simple interface for Tuple Descriptors that have
+ * Extension for Tuple Descriptors that have
  * UUIDS.
  *
  */
-public interface UniqueTupleDescriptor
+public abstract class UniqueTupleDescriptor extends TupleDescriptor
 {
+    /** Pass-through constructors */
+    public  UniqueTupleDescriptor() { super(); }
+    public  UniqueTupleDescriptor( DataDictionary dd ) { super( dd ); }
+    
 	/**
 	 * Return the UUID for this Descriptor
 	 *
 	 * @return the uuid
 	 */
-	public UUID getUUID();
+	public abstract UUID getUUID();
 }

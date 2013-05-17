@@ -41,8 +41,9 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * is null, then the sequence has been exhausted and no more values
  * can be generated from it.
  */
-public class SequenceDescriptor extends TupleDescriptor
-        implements Provider, Dependent, PrivilegedSQLObject
+public class SequenceDescriptor
+    extends PrivilegedSQLObject
+    implements Provider, Dependent
 {
 
     private UUID sequenceUUID;

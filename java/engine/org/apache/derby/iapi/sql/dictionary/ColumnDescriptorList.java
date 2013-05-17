@@ -36,7 +36,7 @@ import java.util.Iterator;
  * This represents a list of column descriptors. 
  */
 
-public class ColumnDescriptorList extends ArrayList
+public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
 {
 	/**
 	 * Add the column.  Currently, the table id is ignored.
@@ -71,7 +71,7 @@ public class ColumnDescriptorList extends ArrayList
 	{
 		ColumnDescriptor	returnValue = null;
 
-		for (Iterator iterator = iterator(); iterator.hasNext(); )
+		for (Iterator<TupleDescriptor> iterator = iterator(); iterator.hasNext(); )
 		{
 			ColumnDescriptor columnDescriptor = (ColumnDescriptor) iterator.next();
 
@@ -98,7 +98,7 @@ public class ColumnDescriptorList extends ArrayList
 	{
 		ColumnDescriptor	returnValue = null;
 
-		for (Iterator iterator = iterator(); iterator.hasNext(); )
+		for (Iterator<TupleDescriptor> iterator = iterator(); iterator.hasNext(); )
 		{
 			ColumnDescriptor columnDescriptor = (ColumnDescriptor) iterator.next();
 			if ( ( columnID == columnDescriptor.getPosition() ) &&
@@ -138,7 +138,7 @@ public class ColumnDescriptorList extends ArrayList
 
 		for (int index = 0; index < size; index++)
 		{
-			ColumnDescriptor columnDescriptor = elementAt(index);
+			ColumnDescriptor columnDescriptor = (ColumnDescriptor) elementAt(index);
 			strings[index] = columnDescriptor.getColumnName();
 		}
 		return strings;

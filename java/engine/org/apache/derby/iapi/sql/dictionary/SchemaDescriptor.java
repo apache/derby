@@ -40,8 +40,8 @@ import org.apache.derby.catalog.Dependable;
  * @version 0.1
  */
 
-public final class SchemaDescriptor extends TupleDescriptor 
-	implements UniqueTupleDescriptor, Provider
+public final class SchemaDescriptor extends UniqueTupleDescriptor 
+	implements Provider
 {
 	
 	/*

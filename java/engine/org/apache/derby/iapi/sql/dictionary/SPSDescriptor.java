@@ -68,8 +68,8 @@ import org.apache.derby.iapi.types.DataTypeUtilities;
  *
  *
  */
-public class SPSDescriptor extends TupleDescriptor
-	implements UniqueSQLObjectDescriptor, Dependent, Provider
+public class SPSDescriptor extends UniqueSQLObjectDescriptor
+	implements Dependent, Provider
 {
 	/**
 	 * Statement types.  
