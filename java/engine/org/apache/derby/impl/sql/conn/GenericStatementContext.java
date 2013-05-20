@@ -65,7 +65,7 @@ final class GenericStatementContext
 	private boolean		setSavePoint;
 	private String		internalSavePointName;
 	private ResultSet	topResultSet;
-	private ArrayList		dependencies;
+	private ArrayList<Dependency>		dependencies;
 	private NoPutResultSet[] subqueryTrackingArray;
 	private NoPutResultSet[] materializedSubqueries;
 	private	final LanguageConnectionContext lcc;
@@ -462,7 +462,7 @@ final class GenericStatementContext
 		
 		if (dependencies == null)
 		{
-			dependencies = new ArrayList();
+			dependencies = new ArrayList<Dependency>();
 		}
 		dependencies.add(dy);
 	}
@@ -562,9 +562,9 @@ final class GenericStatementContext
 		{
 			DependencyManager dmgr = lcc.getDataDictionary().getDependencyManager();
 
-			for (Iterator iterator = dependencies.iterator(); iterator.hasNext(); ) 
+			for (Iterator<Dependency> iterator = dependencies.iterator(); iterator.hasNext(); ) 
 			{
-				Dependency dy = (Dependency) iterator.next();
+				Dependency dy = iterator.next();
 				dmgr.clearInMemoryDependency(dy);
 			}
 

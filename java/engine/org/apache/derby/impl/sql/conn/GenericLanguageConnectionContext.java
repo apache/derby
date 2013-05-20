@@ -113,7 +113,7 @@ public class GenericLanguageConnectionContext
         fields
      */
 
-    private final ArrayList acts;
+    private final ArrayList<Activation> acts;
     private volatile boolean unusedActs=false;
     /** The maximum size of acts since the last time it was trimmed. Used to
      * determine whether acts should be trimmed to reclaim space. */
@@ -141,10 +141,10 @@ public class GenericLanguageConnectionContext
      * can be prepared and used to insert rows into the table during the
      * capturing of statistics data into the user XPLAIN tables.
      */
-    private Map xplain_statements = new HashMap();
+    private Map<Object,Object> xplain_statements = new HashMap<Object,Object>();
     
     //all the temporary tables declared for this connection
-    private ArrayList allDeclaredGlobalTempTables;
+    private ArrayList<TempTableInfo> allDeclaredGlobalTempTables;
 
     //The currentSavepointLevel is used to provide the rollback behavior of 
     //temporary tables.  At any point, this variable has the total number of 
@@ -269,9 +269,9 @@ public class GenericLanguageConnectionContext
     // database is booted.
     private int lockEscalationThreshold; 
 
-    private ArrayList stmtValidators;
-    private ArrayList triggerExecutionContexts;
-    private ArrayList triggerTables;
+    private ArrayList<ExecutionStmtValidator> stmtValidators;
+    private ArrayList<TriggerExecutionContext> triggerExecutionContexts;
+    private ArrayList <TableDescriptor> triggerTables;
 
     // OptimizerTrace
     private OptTrace    optimizerTracer;
@@ -282,7 +282,7 @@ public class GenericLanguageConnectionContext
      * To support lastAutoincrementValue: This is a hashtable which maps
      * schemaName,tableName,columnName to a Long value.
      */
-    private HashMap autoincrementHT;
+    private HashMap<Object,Long> autoincrementHT;
     /**
      * whether to allow updates or not. 
      */
@@ -291,7 +291,7 @@ public class GenericLanguageConnectionContext
     private boolean identityNotNull;    //frugal programmer
 
     // cache of ai being handled in memory (bulk insert + alter table).
-    private HashMap autoincrementCacheHashtable;
+    private HashMap<String,AutoincrementCounter> autoincrementCacheHashtable;
 
     // User-written inspector to print out query tree
     private ASTVisitor astWalker;
@@ -308,7 +308,7 @@ public class GenericLanguageConnectionContext
      * for keeping track of referenced columns for a table during DDL
      * operations.
      */
-    private WeakHashMap referencedColumnMap;
+    private WeakHashMap<TableDescriptor,FormatableBitSet> referencedColumnMap;
 
     /*
        constructor
@@ -328,7 +328,7 @@ public class GenericLanguageConnectionContext
          throws StandardException
     {
         super(cm, org.apache.derby.iapi.reference.ContextId.LANG_CONNECTION);
-        acts = new ArrayList();
+        acts = new ArrayList<Activation>();
         tran = tranCtrl;
 
         dataFactory = lcf.getDataValueFactory();
@@ -360,9 +360,9 @@ public class GenericLanguageConnectionContext
                                        Property.MIN_LOCKS_ESCALATION_THRESHOLD,
                                        Integer.MAX_VALUE,
                                        Property.DEFAULT_LOCKS_ESCALATION_THRESHOLD);                                                             
-        stmtValidators = new ArrayList();
-        triggerExecutionContexts = new ArrayList();
-        triggerTables = new ArrayList();
+        stmtValidators = new ArrayList<ExecutionStmtValidator>();
+        triggerExecutionContexts = new ArrayList<TriggerExecutionContext>();
+        triggerTables = new ArrayList<TableDescriptor>();
     }
 
     /**
@@ -396,7 +396,7 @@ public class GenericLanguageConnectionContext
         }
 
         setDefaultSchema(initDefaultSchemaDescriptor());
-        referencedColumnMap = new WeakHashMap();
+        referencedColumnMap = new WeakHashMap<TableDescriptor,FormatableBitSet>();
     }
 
     /**
@@ -520,7 +520,7 @@ public class GenericLanguageConnectionContext
                 if (i >= acts.size())
                     continue;
 
-                Activation a1 = (Activation) acts.get(i);
+                Activation a1 = acts.get(i);
                 if (!a1.isInUse()) {
                     a1.close();
                 }
@@ -577,7 +577,7 @@ public class GenericLanguageConnectionContext
         // tables currently active in the transaction.
 
         if (allDeclaredGlobalTempTables == null)
-            allDeclaredGlobalTempTables = new ArrayList();
+            allDeclaredGlobalTempTables = new ArrayList<TempTableInfo>();
 
         allDeclaredGlobalTempTables.add(tempTableInfo);
     }
@@ -654,7 +654,7 @@ public class GenericLanguageConnectionContext
         for (int i = 0; i < allDeclaredGlobalTempTables.size(); i++) 
         {
             TempTableInfo tempTableInfo = 
-                (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+                allDeclaredGlobalTempTables.get(i);
 
             if (tempTableInfo.getDroppedInSavepointLevel() > 
                     currentSavepointLevel)
@@ -705,7 +705,7 @@ public class GenericLanguageConnectionContext
         for (int i = allDeclaredGlobalTempTables.size()-1; i >= 0; i--) 
         {
             TempTableInfo tempTableInfo = 
-                (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+                allDeclaredGlobalTempTables.get(i);
 
             if (tempTableInfo.getDroppedInSavepointLevel() != -1)
             {
@@ -739,8 +739,8 @@ public class GenericLanguageConnectionContext
         for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
         {
             TableDescriptor td = 
-                ((TempTableInfo) (allDeclaredGlobalTempTables.
-                                      get(i))).getTableDescriptor();
+                allDeclaredGlobalTempTables.
+                                      get(i).getTableDescriptor();
             if (td.isOnCommitDeleteRows() == false) 
             {
                 // do nothing for temp table with ON COMMIT PRESERVE ROWS
@@ -784,8 +784,7 @@ public class GenericLanguageConnectionContext
         {
             // remove all temp tables from this context.
             TableDescriptor td = 
-                ((TempTableInfo) 
-                 (allDeclaredGlobalTempTables.get(i))).getTableDescriptor();
+                allDeclaredGlobalTempTables.get(i).getTableDescriptor();
 
             //remove the conglomerate created for this temp table
             tc.dropConglomerate(td.getHeapConglomerateId()); 
@@ -821,7 +820,7 @@ public class GenericLanguageConnectionContext
         // Reset the current user
         getCurrentSQLSessionContext().setUser(getSessionUserId());
 
-        referencedColumnMap = new WeakHashMap();
+        referencedColumnMap = new WeakHashMap<TableDescriptor,FormatableBitSet>();
     }
 
     // debug methods
@@ -851,7 +850,7 @@ public class GenericLanguageConnectionContext
             try 
             {
                 TempTableInfo tempTableInfo = 
-                    (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+                    allDeclaredGlobalTempTables.get(i);
 
                 TableDescriptor td = tempTableInfo.getTableDescriptor();
 
@@ -937,7 +936,7 @@ public class GenericLanguageConnectionContext
         for (int i = allDeclaredGlobalTempTables.size()-1; i >= 0; i--) 
         {
             TempTableInfo tempTableInfo = 
-                (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+                allDeclaredGlobalTempTables.get(i);
 
             if (tempTableInfo.getDeclaredInSavepointLevel() >= 
                     currentSavepointLevel)
@@ -1076,8 +1075,8 @@ public class GenericLanguageConnectionContext
             return null;
 
         for (int i = 0; i < allDeclaredGlobalTempTables.size(); i++) {
-            if (((TempTableInfo)allDeclaredGlobalTempTables.get(i)).matches(tableName))
-                return (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+            if ((allDeclaredGlobalTempTables.get(i)).matches(tableName))
+                return allDeclaredGlobalTempTables.get(i);
         }
         return null;
     }
@@ -1163,7 +1162,7 @@ public class GenericLanguageConnectionContext
             int cursorHash = cursorName.hashCode();
 
             for (int i = 0; i < size; i++) {
-                 Activation a = (Activation) acts.get(i);
+                 Activation a = acts.get(i);
 
                  if (!a.isInUse())
                  {
@@ -1970,7 +1969,7 @@ public class GenericLanguageConnectionContext
             throws StandardException
     {
         for (int i = acts.size() - 1; i >= 0; i--) {
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
             if (a.checkIfThisActivationHasHoldCursor(tableName))
                 return true;
     }
@@ -1998,7 +1997,7 @@ public class GenericLanguageConnectionContext
         /* For every activation */
         for (int i = acts.size() - 1; i >= 0; i--) {
 
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
 
             if (SanityManager.DEBUG)
             {
@@ -2037,7 +2036,7 @@ public class GenericLanguageConnectionContext
         /* For every activation */
         for (int i = acts.size() - 1; i >= 0; i--) {
                 
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
 
             if (SanityManager.DEBUG)
             {
@@ -2094,7 +2093,7 @@ public class GenericLanguageConnectionContext
         // in this list, thus invalidating the Enumeration
         for (int i = acts.size() - 1; i >= 0; i--) {
                 
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
 
             if (!a.isInUse())
             {
@@ -2131,7 +2130,7 @@ public class GenericLanguageConnectionContext
         // in this list, thus invalidating the Enumeration
         for (int i = acts.size() - 1; i >= 0; i--) {
                 
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
 
             if (!a.isInUse())
             {
@@ -2713,8 +2712,7 @@ public class GenericLanguageConnectionContext
     {
         return triggerExecutionContexts.size() == 0 ? 
                 (TriggerExecutionContext)null :
-                (TriggerExecutionContext)triggerExecutionContexts.get(
-                    triggerExecutionContexts.size() - 1);   
+                triggerExecutionContexts.get( triggerExecutionContexts.size() - 1 );   
     }
 
     /**
@@ -2737,9 +2735,9 @@ public class GenericLanguageConnectionContext
 
         if (stmtValidators.size() > 0)
         {
-            for (Iterator it = stmtValidators.iterator(); it.hasNext(); )
+            for (Iterator<ExecutionStmtValidator> it = stmtValidators.iterator(); it.hasNext(); )
             {
-                ((ExecutionStmtValidator)it.next())
+                it.next()
                     .validateStatement(constantAction);
             }
         }
@@ -2786,7 +2784,7 @@ public class GenericLanguageConnectionContext
     {
         return triggerTables.size() == 0 ? 
             (TableDescriptor)null :
-            (TableDescriptor)triggerTables.get(triggerTables.size() - 1);
+            triggerTables.get(triggerTables.size() - 1);
     }
     /**
      * @see LanguageConnectionContext#getDatabase
@@ -3093,7 +3091,7 @@ public class GenericLanguageConnectionContext
                 // the end of the array
                 if (i >= acts.size())
                     continue;
-                Activation a = (Activation) acts.get(i);
+                Activation a = acts.get(i);
                 a.reset();
                 a.close();
             }
@@ -3159,7 +3157,7 @@ public class GenericLanguageConnectionContext
             if (i >= acts.size())
                 continue;
 
-            Activation a = (Activation) acts.get(i);
+            Activation a = acts.get(i);
             /*
             ** Look for stale activations.  Activations are
             ** marked as unused during statement finalization.
@@ -3328,8 +3326,7 @@ public class GenericLanguageConnectionContext
         for (int i = size - 1; i >= 0; i--)
         {
             // first loop through triggers.
-            TriggerExecutionContext itec =
-                (TriggerExecutionContext) triggerExecutionContexts.get(i);
+            TriggerExecutionContext itec = triggerExecutionContexts.get(i);
             Long value = itec.getAutoincrementValue(aiKey);
             if (value == null)
                 continue;
@@ -3368,11 +3365,11 @@ public class GenericLanguageConnectionContext
         
         if (autoincrementCacheHashtable == null)
         {
-            autoincrementCacheHashtable = new HashMap();
+            autoincrementCacheHashtable = new HashMap<String,AutoincrementCounter>();
         }
 
         AutoincrementCounter aic = 
-            (AutoincrementCounter)autoincrementCacheHashtable.get(key);
+            autoincrementCacheHashtable.get(key);
         if (aic != null)
         {
             if (SanityManager.DEBUG)            
@@ -3407,7 +3404,7 @@ public class GenericLanguageConnectionContext
                                                        columnName);
         
         AutoincrementCounter aic = 
-            (AutoincrementCounter)autoincrementCacheHashtable.get(key);
+            autoincrementCacheHashtable.get(key);
 
         if (aic == null)
         {
@@ -3440,15 +3437,15 @@ public class GenericLanguageConnectionContext
             return;
 
         if (autoincrementHT == null)
-            autoincrementHT = new HashMap();
+            autoincrementHT = new HashMap<Object,Long>();
 
         DataDictionary dd = getDataDictionary();
-        for (Iterator it = autoincrementCacheHashtable.keySet().iterator();
+        for (Iterator<String> it = autoincrementCacheHashtable.keySet().iterator();
              it.hasNext(); )
         {
             Object key = it.next();
             AutoincrementCounter aic = 
-                (AutoincrementCounter)autoincrementCacheHashtable.get(key);
+                autoincrementCacheHashtable.get(key);
             Long value = aic.getCurrentValue();
             aic.flushToDisk(getTransactionExecute(), dd, tableUUID);
             if (value != null)
@@ -3464,12 +3461,12 @@ public class GenericLanguageConnectionContext
      * into autoincrementHT, the cache of autoincrement values 
      * kept in the languageconnectioncontext.
      */
-    public void copyHashtableToAIHT(Map from)
+    public void copyHashtableToAIHT(Map<Object,Long> from)
     {
         if (from.isEmpty())
             return;
         if (autoincrementHT == null)
-            autoincrementHT = new HashMap();
+            autoincrementHT = new HashMap<Object,Long>();
         
         autoincrementHT.putAll(from);
     }
@@ -3511,7 +3508,7 @@ public class GenericLanguageConnectionContext
      */
     public Activation getLastActivation()
     {
-        return (Activation)acts.get(acts.size() - 1);
+        return acts.get(acts.size() - 1);
     }
 
     public StringBuffer appendErrorInfo() {

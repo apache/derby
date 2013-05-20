@@ -49,7 +49,7 @@ public class TablePrivilegesNode extends QueryTreeNode
 	private ResultColumnList[] columnLists = new ResultColumnList[ TablePrivilegeInfo.ACTION_COUNT];
 	private FormatableBitSet[] columnBitSets = new FormatableBitSet[ TablePrivilegeInfo.ACTION_COUNT];
 	private TableDescriptor td;  
-	private List descriptorList; 
+	private List<Provider> descriptorList; 
 	
 	/**
 	 * Add all actions
@@ -141,7 +141,7 @@ public class TablePrivilegesNode extends QueryTreeNode
 		ViewDescriptor vd = dd.getViewDescriptor(td);
 		DependencyManager dm = dd.getDependencyManager();
 		ProviderInfo[] pis = dm.getPersistentProviderInfos(vd);
-		this.descriptorList = new ArrayList();
+		this.descriptorList = new ArrayList<Provider>();
 					
 		int siz = pis.length;
 		for (int i=0; i < siz; i++) 

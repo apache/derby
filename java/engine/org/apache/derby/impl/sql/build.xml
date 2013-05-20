@@ -84,6 +84,23 @@
       </fileset>
     </replaceregexp>
 
+    <!-- Generify some types so they will compile cleanly on Java 6. -->
+    <replaceregexp match="java.util.Vector" replace="java.util.Vector&lt;Object&gt;" flags="m">
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="SQLParser.java"/>
+      </fileset>
+    </replaceregexp>
+    <replaceregexp match="java.util.Vector\(\)" replace="java.util.Vector&lt;Object&gt;()" flags="m">
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="SQLParser.java"/>
+      </fileset>
+    </replaceregexp>
+    <replaceregexp match="java.util.Enumeration" replace="java.util.Enumeration&lt;Object&gt;" flags="m">
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="SQLParser.java"/>
+      </fileset>
+    </replaceregexp>
+
   </target>
 
   <target name="compile" depends="parser">
@@ -106,6 +123,7 @@
       </classpath>
       <include name="${derby.dir}/${cur.dir}/catalog/**"/>
       <include name="${derby.dir}/${cur.dir}/depend/**"/>
+      <include name="${derby.dir}/${cur.dir}/conn/**"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
@@ -128,6 +146,7 @@
       <include name="${derby.dir}/${cur.dir}/**"/>
       <exclude name="${derby.dir}/${cur.dir}/catalog/**"/>
       <exclude name="${derby.dir}/${cur.dir}/depend/**"/>
+      <exclude name="${derby.dir}/${cur.dir}/conn/**"/>
       <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
 

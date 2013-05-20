@@ -173,7 +173,7 @@ public class SQLParser
 	private int			parameterNumber;
 
 	/* The list of ? parameters */
-    private ArrayList parameterList;
+    private ArrayList<ParameterNode> parameterList;
 
 	/* Remember if the last identifier or keyword was a
 	 * delimited identifier.  This is used for remembering
@@ -481,7 +481,7 @@ public class SQLParser
 	 */
 	void	initUnnamedParameterList()
 	{
-		parameterList = new ArrayList();
+		parameterList = new ArrayList<ParameterNode>();
 	}
 
 	/**
@@ -3318,7 +3318,7 @@ CursorNode
 preparableSelectStatement(boolean checkParams) throws StandardException :
 {
 	ResultSetNode	  queryExpression;
-	ArrayList updateColumns = new ArrayList();
+	ArrayList<String> updateColumns = new ArrayList<String>();
 	int               forUpdateState = CursorNode.UNSPECIFIED;
 	int				  isolationLevel = TransactionControl.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
@@ -5874,7 +5874,7 @@ nonStaticMethodCallOrFieldAccess(ValueNode receiver) throws StandardException :
 ValueNode
 nonStaticMethodInvocation(ValueNode receiver) throws StandardException :
 {
-	ArrayList				parameterList = new ArrayList();
+	ArrayList<ValueNode>	parameterList = new ArrayList<ValueNode>();
 	MethodCallNode			methodNode;
 }
 {
@@ -5996,7 +5996,7 @@ staticMethodName(String javaClassName) throws StandardException :
  * <A NAME="methodParameter">methodParameter</A>
  */
 void
-methodParameter(List parameterList) throws StandardException :
+methodParameter(List<ValueNode> parameterList) throws StandardException :
 {
 	ValueNode	parameter;
 }
@@ -6216,7 +6216,7 @@ escapedValueFunction() throws StandardException :
 ValueNode
 escapedSYSFUNFunction() throws StandardException :
 {
-    ArrayList parameterList = new ArrayList();
+    ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
 	Token tok;
 }
 {
@@ -7678,7 +7678,7 @@ JavaToSQLValueNode
 newInvocation() throws StandardException :
 {
 	QueryTreeNode	newNode;
-	ArrayList parameterList = new ArrayList();
+	ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
 	String	javaClassName;
 }
 {
@@ -7736,7 +7736,7 @@ vtiTableConstruct() throws StandardException :
 {
     NewInvocationNode newNode = null;
     QueryTreeNode invocationNode = null;
-    ArrayList parameterList = new ArrayList();
+    ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
     TableName vtiTableName = null;
     TableDescriptor td;
     MethodCallNode	methodNode;
@@ -7795,7 +7795,7 @@ vtiTableConstruct() throws StandardException :
 ValueNode
 staticMethodInvocation(String javaClassName) throws StandardException :
 {
-	ArrayList parameterList = new ArrayList();
+	ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
 	MethodCallNode	methodNode;
 }
 {
@@ -7819,7 +7819,7 @@ staticMethodInvocation(String javaClassName) throws StandardException :
  * <A NAME="methodCallParameterList">methodCallParameterList</A>
 */
 
-void methodCallParameterList(List parameterList) throws StandardException :
+void methodCallParameterList(List<ValueNode> parameterList) throws StandardException :
 {
 }
 {
@@ -7857,7 +7857,7 @@ routineInvocation() throws StandardException :
 ValueNode
 routineExpression() throws StandardException :
 {
-	ArrayList parameterList = new ArrayList();
+	ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
 	TableName	routineName;
 	MethodCallNode	methodNode;
 }
@@ -8385,7 +8385,7 @@ fetchFirstClause() throws StandardException :
  * <A NAME="forUpdateClause">forUpdateClause</A>
  */
 int
-forUpdateClause(List columnList) throws StandardException :
+forUpdateClause(List<String> columnList) throws StandardException :
 {
 }
 {
@@ -8409,7 +8409,7 @@ forUpdateClause(List columnList) throws StandardException :
  * <A NAME="forUpdateColumnList">forUpdateColumnList</A>
  */
 void
-forUpdateColumnList(List columnList) throws StandardException :
+forUpdateColumnList(List<String> columnList) throws StandardException :
 {
 }
 {
@@ -8420,7 +8420,7 @@ forUpdateColumnList(List columnList) throws StandardException :
  * <A NAME="forUpdateColumn">forUpdateColumn</A>
  */
 void
-forUpdateColumn(List columnList) throws StandardException :
+forUpdateColumn(List<String> columnList) throws StandardException :
 {
 	String		 columnName;
 }
@@ -9390,7 +9390,7 @@ columnNameItem(ResultColumnList columnList) throws StandardException :
  * <A NAME="indexColumnList">indexColumnList</A>
  */
 void
-indexColumnList(List columnList) throws StandardException :
+indexColumnList(List<String> columnList) throws StandardException :
 {}
 {
 	indexColumnItem(columnList) ( <COMMA> indexColumnItem(columnList) ) *
@@ -9400,7 +9400,7 @@ indexColumnList(List columnList) throws StandardException :
  * <A NAME="indexColumnItem">indexColumnItem</A>
  */
 void
-indexColumnItem(List columnList) throws StandardException :
+indexColumnItem(List<String> columnList) throws StandardException :
 {
 	String		columnName;
 }
@@ -10584,7 +10584,7 @@ indexDefinition() throws StandardException :
 	Properties	properties = null;
 	TableName	indexName;
 	TableName	tableName;
-	ArrayList indexColumnList = new ArrayList();
+	ArrayList<String> indexColumnList = new ArrayList<String>();
 }
 {
 	/*
@@ -10833,23 +10833,27 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 Object[]
 procedureParameterList( Object[] procedureElements ) throws StandardException :
 {
-    List[] list = {
-        new ArrayList(), // name
-        new ArrayList(), // type
-        new ArrayList(), // in/out
-    };
+    List<String>    names = new ArrayList<String>();
+    List<TypeDescriptor>    types = new ArrayList<TypeDescriptor>();
+    List<Integer>    inOut = new ArrayList<Integer>();
+    Object[]         result = new Object[ 3 ];
     Boolean ellipsis = null;
 }
 {
 	<LEFT_PAREN>
-		[ procedureParameterDefinition(list)
-				( <COMMA> procedureParameterDefinition(list) )*
+		[ procedureParameterDefinition( names, types, inOut )
+				( <COMMA> procedureParameterDefinition( names, types, inOut ) )*
           [ ellipsis = ellipsis() ]
         ]
 	<RIGHT_PAREN>
 	{
         procedureElements[ CreateAliasNode.VARARGS ] = ellipsis;
-		return list;
+
+        result[ 0 ] = names;
+        result[ 1 ] = types;
+        result[ 2 ] = inOut;
+
+		return result;
 	}
 }
 
@@ -10857,7 +10861,12 @@ procedureParameterList( Object[] procedureElements ) throws StandardException :
  * <A NAME="Definition">procedureParameterDefinition</A>
  */
 void
-procedureParameterDefinition(List[] list) throws StandardException :
+procedureParameterDefinition
+(
+    List<String> names,
+    List<TypeDescriptor>    types,
+    List<Integer>    inOut
+) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	String				parameterName = "";
@@ -10872,9 +10881,9 @@ procedureParameterDefinition(List[] list) throws StandardException :
 	]
 	typeDescriptor = dataTypeDDL()
 	{
-		list[0].add(parameterName);
-		list[1].add(typeDescriptor.getCatalogType());
-		list[2].add(inout);
+		names.add(parameterName);
+		types.add(typeDescriptor.getCatalogType());
+		inOut.add(inout);
 	}
 }
 
@@ -10935,23 +10944,27 @@ functionDefinition() throws StandardException :
 Object[]
 functionParameterList( Object[] functionElements ) throws StandardException :
 {
-    List[] list = {
-        new ArrayList(), // name
-        new ArrayList(), // type
-        new ArrayList(), // in/out - ALWAYS IN
-    };
+    List<String>    names = new ArrayList<String>();
+    List<TypeDescriptor>    types = new ArrayList<TypeDescriptor>();
+    List<Integer>    inOut = new ArrayList<Integer>(); // in/out - ALWAYS IN
+    Object[]         result = new Object[ 3 ];
     Boolean ellipsis = null;
 }
 {
 	<LEFT_PAREN>
-		[ functionParameterDefinition(list)
-				( <COMMA> functionParameterDefinition(list) )*
+		[ functionParameterDefinition( names, types,inOut )
+				( <COMMA> functionParameterDefinition( names, types,inOut ) )*
           [ ellipsis = ellipsis() ]
         ]
 	<RIGHT_PAREN>
 	{
         functionElements[ CreateAliasNode.VARARGS ] = ellipsis;
-		return list;
+
+        result[ 0 ] = names;
+        result[ 1 ] = types;
+        result[ 2 ] = inOut;
+
+		return result;
 	}
 }
 
@@ -10970,7 +10983,12 @@ ellipsis() throws StandardException :
  * <A NAME="Definition">functionParameterDefinition</A>
  */
 void
-functionParameterDefinition(List[] list) throws StandardException :
+functionParameterDefinition
+(
+    List<String>    names,
+    List<TypeDescriptor>    types,
+    List<Integer>    inOut
+) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	String				parameterName = "";
@@ -10982,9 +11000,9 @@ functionParameterDefinition(List[] list) throws StandardException :
 	]
 	typeDescriptor = dataTypeDDL() 
 	{
-		list[0].add(parameterName);
-		list[1].add(typeDescriptor.getCatalogType());
-		list[2].add(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
+		names.add(parameterName);
+		types.add(typeDescriptor.getCatalogType());
+		inOut.add(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
 	}
 }
 
@@ -11014,8 +11032,8 @@ functionReturnDataType() throws StandardException :
 TypeDescriptor
 functionTableType() throws StandardException :
 {
-	ArrayList                       names = new ArrayList();
-	ArrayList                         types = new ArrayList();
+	ArrayList<String>                       names = new ArrayList<String>();
+	ArrayList<TypeDescriptor>          types = new ArrayList<TypeDescriptor>();
 	String[]                          nameArray;
 	TypeDescriptor[]        typeArray;
 	int                                     columnCount;
@@ -11056,8 +11074,8 @@ functionTableType() throws StandardException :
 void
 functionTableReturnColumn
 (
-    ArrayList names,
-    ArrayList types
+    ArrayList<String> names,
+    ArrayList<TypeDescriptor> types
 )
 throws StandardException :
 {
@@ -11338,7 +11356,7 @@ rowOrStatement() :
 List
 triggerReferencingClause() throws StandardException :
 {
-	ArrayList expressions = new ArrayList();
+	ArrayList<TriggerReferencingStruct> expressions = new ArrayList<TriggerReferencingStruct>();
 }
 {
 	<REFERENCING> triggerReferencingExpression(expressions) ( triggerReferencingExpression(expressions) )*
@@ -11348,7 +11366,7 @@ triggerReferencingClause() throws StandardException :
 }
 
 void
-triggerReferencingExpression(List expressions) throws StandardException :
+triggerReferencingExpression(List<TriggerReferencingStruct> expressions) throws StandardException :
 {
 	String	identifier;
 	boolean isNew = true;
@@ -14029,7 +14047,7 @@ RoutineDesignator routineDesignator() throws StandardException :
 {
     Token procOrFunction;
     TableName name;
-    List paramTypeList = null;
+    List<TypeDescriptor> paramTypeList = null;
 }
 {
     ( procOrFunction = <FUNCTION> | procOrFunction = <PROCEDURE> )
@@ -14047,9 +14065,9 @@ RoutineDesignator routineDesignator() throws StandardException :
 /*
  * <A NAME="parameterTypeList">parameterTypeList</A>
  */
-List/*<TypeDescriptor>*/ parameterTypeList( ) throws StandardException :
+List<TypeDescriptor> parameterTypeList( ) throws StandardException :
 {
-    ArrayList list = new ArrayList();
+    ArrayList<TypeDescriptor> list = new ArrayList<TypeDescriptor>();
     TypeDescriptor type;
 }
 {
@@ -14127,7 +14145,7 @@ ResultColumnList privilegeColumnList() throws StandardException :
  */
 List granteeList() throws StandardException :
 {
-    ArrayList list = new ArrayList();
+    ArrayList<String> list = new ArrayList<String>();
 }
 {
     grantee( list) ( <COMMA> grantee( list) ) *
@@ -14137,7 +14155,7 @@ List granteeList() throws StandardException :
 }
 
 void
-grantee( List list)  throws StandardException :
+grantee( List<String> list)  throws StandardException :
 {
     String str;
 }
@@ -14191,7 +14209,7 @@ roleGrantStatement() throws StandardException :
  */
 List roleList() throws StandardException :
 {
-    ArrayList list = new ArrayList();
+    ArrayList<String> list = new ArrayList<String>();
 }
 {
     roleElement(list) ( <COMMA> roleElement(list) ) *
@@ -14205,7 +14223,7 @@ List roleList() throws StandardException :
  * <A NAME="roleElement">roleElement</A>
  */
 void
-roleElement( List list)  throws StandardException :
+roleElement( List<String> list)  throws StandardException :
 {
     String str;
 }

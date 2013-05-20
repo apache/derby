@@ -139,7 +139,7 @@ public class PrivilegeNode extends QueryTreeNode
      *
      * @exception StandardException	Standard error policy.
      */
-	public QueryTreeNode bind( HashMap dependencies, List grantees, boolean isGrant ) throws StandardException
+	public QueryTreeNode bind( HashMap<Provider,Provider> dependencies, List grantees, boolean isGrant ) throws StandardException
 	{
         // The below code handles the case where objectName.getSchemaName()
         // returns null, in which case we'll fetch the schema descriptor for
