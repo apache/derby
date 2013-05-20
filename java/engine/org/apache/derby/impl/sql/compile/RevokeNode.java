@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -93,7 +94,7 @@ public class RevokeNode extends DDLStatementNode
      */
 	public void bindStatement() throws StandardException
 	{
-        privileges = (PrivilegeNode) privileges.bind( new HashMap(), grantees, false);
+        privileges = (PrivilegeNode) privileges.bind( new HashMap<Provider,Provider>(), grantees, false);
     } // end of bind
 
 

@@ -107,7 +107,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	protected TableName synonymTableName;
 
     /** Set of dependent tables for cascading deletes. */
-    Set dependentTables;
+    Set<String> dependentTables;
 
 	/**
 	 * Initializer for a DMLModStatementNode -- delegate to DMLStatementNode

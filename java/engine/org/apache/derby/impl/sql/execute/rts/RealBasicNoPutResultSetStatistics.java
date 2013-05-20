@@ -144,8 +144,8 @@ abstract class RealBasicNoPutResultSetStatistics
    *
 	 * @return java.util.Vector	A vector of objects.
 	 */
-  public Vector getChildren(){
-    return new Vector();
+  public Vector<ResultSetStatistics> getChildren(){
+    return new Vector<ResultSetStatistics>();
   }
 	/**
    * Return the time for all operations performed by this node, and the children

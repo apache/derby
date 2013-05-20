@@ -118,8 +118,8 @@ abstract class RealNoRowsResultSetStatistics
    *
 	 * @return java.util.Vector	A vector of objects.
 	 */
-  public Vector getChildren(){
-    Vector children = new Vector();
+  public Vector<ResultSetStatistics> getChildren(){
+    Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
     children.addElement(sourceResultSetStatistics);
     return children;
   }

@@ -129,8 +129,8 @@ public class RealRowCountStatistics
     /**
      * @see RealBasicNoPutResultSetStatistics#getChildren
      */
-    public Vector getChildren() {
-        Vector children = new Vector();
+    public Vector<ResultSetStatistics> getChildren() {
+        Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
         children.addElement(childResultSetStatistics);
 
         return children;

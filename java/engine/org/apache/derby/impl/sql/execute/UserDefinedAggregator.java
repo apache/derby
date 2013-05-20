@@ -106,6 +106,7 @@ public final class UserDefinedAggregator  implements ExecAggregator
 
 	public boolean didEliminateNulls() { return _eliminatedNulls; }
 
+    @SuppressWarnings("unchecked")
 	public void accumulate( DataValueDescriptor addend, Object ga ) 
 		throws StandardException
 	{
@@ -120,6 +121,7 @@ public final class UserDefinedAggregator  implements ExecAggregator
         _aggregator.accumulate( value );
 	}
 
+    @SuppressWarnings("unchecked")
 	public void merge(ExecAggregator addend)
 		throws StandardException
 	{

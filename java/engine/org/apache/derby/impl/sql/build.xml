@@ -35,7 +35,7 @@
   <property name="cur.dir" value="impl/sql"/>
 
 <!-- Targets -->
-  <target name="parser">
+  <target name="parser" depends="chkparser" >
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating SQL parser..."/>
       <property name="srcroot" value="engine"/>
@@ -84,6 +84,12 @@
       </fileset>
     </replaceregexp>
 
+    <antcall target="postProcessParser"/>
+
+  </target>
+
+  <target name="postProcessParser" unless="parser.compiled">
+
     <!-- Generify some types so they will compile cleanly on Java 6. -->
     <replaceregexp match="java.util.Vector" replace="java.util.Vector&lt;Object&gt;" flags="m">
       <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
@@ -101,6 +107,13 @@
       </fileset>
     </replaceregexp>
 
+  </target>
+
+  <target name="chkparser">
+    <uptodate property="parser.compiled"
+              targetfile="${generated.src.dir}/${derby.dir}/impl/sql/compile/SQLParser.java" >
+      <srcfiles dir="compile"  includes="sqlgrammar.jj" />
+    </uptodate>
   </target>
 
   <target name="compile" depends="parser">
@@ -121,33 +134,8 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
-      <include name="${derby.dir}/${cur.dir}/catalog/**"/>
-      <include name="${derby.dir}/${cur.dir}/depend/**"/>
-      <include name="${derby.dir}/${cur.dir}/conn/**"/>
-      <compilerarg value="-Xlint:unchecked"/>
-    </javac>
-
-    <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java16compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/${cur.dir}/**"/>
-      <exclude name="${derby.dir}/${cur.dir}/catalog/**"/>
-      <exclude name="${derby.dir}/${cur.dir}/depend/**"/>
-      <exclude name="${derby.dir}/${cur.dir}/conn/**"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
     <copy file="${derby.engine.src.dir}/${derby.dir}/${cur.dir}/catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>

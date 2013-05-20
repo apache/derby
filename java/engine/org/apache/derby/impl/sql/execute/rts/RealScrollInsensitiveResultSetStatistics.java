@@ -145,8 +145,8 @@ public class RealScrollInsensitiveResultSetStatistics
 	{
 		return getStatementExecutionPlanText(0);
 	}
-  public java.util.Vector getChildren(){
-    java.util.Vector children = new java.util.Vector();
+  public java.util.Vector<ResultSetStatistics> getChildren(){
+    java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
     children.addElement(childResultSetStatistics);
     return children;
   }

@@ -411,7 +411,7 @@ public class CreateTriggerNode extends DDLStatementNode
 		*/
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
-            HashSet columnNames = new HashSet();
+            HashSet<String> columnNames = new HashSet<String>();
 			int tcSize = triggerCols.size();
 			for (int i = 0; i < tcSize; i++)
 			{
@@ -458,13 +458,13 @@ public class CreateTriggerNode extends DDLStatementNode
      * Comparator that can be used for sorting lists of FromBaseTables
      * on the position they have in the SQL query string.
      */
-    private static final Comparator OFFSET_COMPARATOR = new Comparator() {
-        public int compare(Object o1, Object o2) {
+    private static final Comparator<FromBaseTable> OFFSET_COMPARATOR = new Comparator<FromBaseTable>() {
+        public int compare(FromBaseTable o1, FromBaseTable o2) {
             // Return negative int, zero, or positive int if the offset of the
             // first table is less than, equal to, or greater than the offset
             // of the second table.
-            return ((FromBaseTable) o1).getTableNameField().getBeginOffset() -
-                    ((FromBaseTable) o2).getTableNameField().getBeginOffset();
+            return o1.getTableNameField().getBeginOffset() -
+                    o2.getTableNameField().getBeginOffset();
         }
     };
 
@@ -599,13 +599,13 @@ public class CreateTriggerNode extends DDLStatementNode
 			** the from table is NEW or OLD (or user designated alternates
 			** REFERENCING), we turn them into a trigger table VTI.
 			*/
-			CollectNodesVisitor visitor = new CollectNodesVisitor(FromBaseTable.class);
+			CollectNodesVisitor<FromBaseTable> visitor = new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
 			actionNode.accept(visitor);
-			List tabs = visitor.getList();
+			List<FromBaseTable> tabs = visitor.getList();
 			Collections.sort(tabs, OFFSET_COMPARATOR);
 			for (int i = 0; i < tabs.size(); i++)
 			{
-				FromBaseTable fromTable = (FromBaseTable) tabs.get(i);
+				FromBaseTable fromTable = tabs.get(i);
 				String refTableName = fromTable.getTableName().getTableName();
 				String baseTableName = fromTable.getBaseTableName();
 				if ((baseTableName == null) ||

@@ -643,7 +643,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		}
 
         // Build a list of all the hash key columns
-        ArrayList hashKeys = new ArrayList();
+        ArrayList<Integer> hashKeys = new ArrayList<Integer>();
         for (int colCtr = 0; colCtr < columns.length; colCtr++)
 		{
 			// Is there an equijoin condition on this column?

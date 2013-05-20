@@ -337,7 +337,7 @@ public class DeleteNode extends DMLModStatementNode
 
 				if(!isDependentTable){
 					//graph node
-                    dependentTables = new HashSet();
+                    dependentTables = new HashSet<String>();
 				}
 
 				/*Check whether the current target has already been explored.

@@ -379,8 +379,8 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
    *
 	 * @return java.util.Vector	A vector of objects.
 	 */
-  public Vector getChildren(){
-    Vector children = new Vector();
+  public Vector<ResultSetStatistics> getChildren(){
+    Vector<ResultSetStatistics> children = new Vector<ResultSetStatistics>();
     children.addElement(topResultSetStatistics);
     return children;
   }

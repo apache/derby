@@ -294,7 +294,7 @@ public class CreateIndexNode extends DDLStatementNode
 				throws StandardException
 	{
 		int size = columnNameList.size();
-        HashSet seenNames = new HashSet(size + 2, 0.999f);
+        HashSet<String> seenNames = new HashSet<String>(size + 2, 0.999f);
 		columnNames = new String[size];
 		isAscending = new boolean[size];
 

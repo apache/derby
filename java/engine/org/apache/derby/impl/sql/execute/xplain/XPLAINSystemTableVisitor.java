@@ -79,17 +79,17 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     private UUID stmtUUID; // the UUID to save for the resultsets
     
     // now the lists of descriptors regarding the resultsets
-    private List rsets; // for the resultset descriptors
-    private List rsetsTimings; // for the resultset timings descriptors
-    private List sortrsets; // for the sort props descriptors
-    private List scanrsets; // fot the scan props descriptors
+    private List<XPLAINResultSetDescriptor> rsets; // for the resultset descriptors
+    private List<Object> rsetsTimings; // for the resultset timings descriptors
+    private List<XPLAINSortPropsDescriptor> sortrsets; // for the sort props descriptors
+    private List<XPLAINScanPropsDescriptor> scanrsets; // fot the scan props descriptors
     
     // the number of children of the current explained node
     private int noChildren;
     
     // this stack keeps track of the result set UUIDs, which get popped by the
     // children of the current explained node
-    private Stack UUIDStack;
+    private Stack<UUID> UUIDStack;
     
     // ---------------------------------------------------------
     // Constructor
@@ -98,13 +98,13 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     public XPLAINSystemTableVisitor(){
         // System.out.println("System Table Visitor created...");
         // initialize lists
-        rsets        = new ArrayList();
-        rsetsTimings = new ArrayList();
-        sortrsets    = new ArrayList();
-        scanrsets    = new ArrayList();
+        rsets        = new ArrayList<XPLAINResultSetDescriptor>();
+        rsetsTimings = new ArrayList<Object>();
+        sortrsets    = new ArrayList<XPLAINSortPropsDescriptor>();
+        scanrsets    = new ArrayList<XPLAINScanPropsDescriptor>();
         
         // init UUIDStack
-        UUIDStack    = new Stack();
+        UUIDStack    = new Stack<UUID>();
         
     }
 
@@ -143,27 +143,27 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         
         if(considerTimingInformation){
             timingID = dd.getUUIDFactory().createUUID();
-            rsetsTimings.add( 
+            rsetsTimings.add(
                     statistics.getResultSetTimingsDescriptor(timingID));
         }
         
         UUID sortID = dd.getUUIDFactory().createUUID();
-        Object sortRSDescriptor = statistics.getSortPropsDescriptor(sortID);
+        XPLAINSortPropsDescriptor sortRSDescriptor = (XPLAINSortPropsDescriptor) statistics.getSortPropsDescriptor(sortID);
         if (sortRSDescriptor != null)
             sortrsets.add(sortRSDescriptor);
         else
             sortID = null;
         
         UUID scanID = dd.getUUIDFactory().createUUID();
-        Object scanRSDescriptor = statistics.getScanPropsDescriptor(scanID);
+        XPLAINScanPropsDescriptor scanRSDescriptor = (XPLAINScanPropsDescriptor)statistics.getScanPropsDescriptor(scanID);
         if (scanRSDescriptor != null)
             scanrsets.add(scanRSDescriptor);
         else
             scanID = null;
 
         UUID rsID = dd.getUUIDFactory().createUUID();
-        rsets.add(statistics.getResultSetDescriptor(rsID,
-           UUIDStack.empty()?  null: (UUID)UUIDStack.pop(),
+        rsets.add( (XPLAINResultSetDescriptor) statistics.getResultSetDescriptor(rsID,
+             UUIDStack.empty()?  (UUID)null: UUIDStack.pop(),
            scanID, sortID, stmtUUID, timingID));
         
         pushUUIDnoChildren(rsID);
@@ -364,18 +364,17 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     private void addArraysToSystemCatalogs()
         throws StandardException, SQLException
     {
-        Iterator iter;
         boolean statsSave = lcc.getRunTimeStatisticsMode();
         lcc.setRunTimeStatisticsMode(false);
         Connection conn = getDefaultConn();
 
         PreparedStatement ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_RESULTSETS"));
-        iter = rsets.iterator();
-        while (iter.hasNext())
+        Iterator<XPLAINResultSetDescriptor> rsetsiter = rsets.iterator();
+        while (rsetsiter.hasNext())
         {
             XPLAINResultSetDescriptor rset =
-                (XPLAINResultSetDescriptor)iter.next();
+                rsetsiter.next();
             rset.setStatementParameters(ps);
             ps.executeUpdate();
         }
@@ -386,11 +385,11 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         {
             ps = conn.prepareStatement(
                 (String)lcc.getXplainStatement("SYSXPLAIN_RESULTSET_TIMINGS"));
-            iter = rsetsTimings.iterator();
-            while (iter.hasNext())
+            Iterator<Object> timingsiter = rsetsTimings.iterator();
+            while (timingsiter.hasNext())
             {
                 XPLAINResultSetTimingsDescriptor rsetT =
-                    (XPLAINResultSetTimingsDescriptor)iter.next();
+                    (XPLAINResultSetTimingsDescriptor)timingsiter.next();
                 rsetT.setStatementParameters(ps);
                 ps.executeUpdate();
             }
@@ -398,11 +397,11 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         }
         ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_SCAN_PROPS"));
-        iter = scanrsets.iterator();
-        while (iter.hasNext())
+        Iterator<XPLAINScanPropsDescriptor> scaniter = scanrsets.iterator();
+        while (scaniter.hasNext())
         {
             XPLAINScanPropsDescriptor scanProps =
-                (XPLAINScanPropsDescriptor)iter.next();
+                scaniter.next();
             scanProps.setStatementParameters(ps);
             ps.executeUpdate();
         }
@@ -410,11 +409,11 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
 
         ps = conn.prepareStatement(
             (String)lcc.getXplainStatement("SYSXPLAIN_SORT_PROPS"));
-        iter = sortrsets.iterator();
-        while (iter.hasNext())
+        Iterator<XPLAINSortPropsDescriptor> sortiter = sortrsets.iterator();
+        while (sortiter.hasNext())
         {
             XPLAINSortPropsDescriptor sortProps =
-                (XPLAINSortPropsDescriptor)iter.next();
+                sortiter.next();
             sortProps.setStatementParameters(ps);
             ps.executeUpdate();
         }

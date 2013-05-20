@@ -183,9 +183,9 @@ public class RealNestedLoopJoinStatistics
 		return getStatementExecutionPlanText(0);
 	}
 
-	public java.util.Vector getChildren()
+	public java.util.Vector<ResultSetStatistics> getChildren()
 	{
-		java.util.Vector children = new java.util.Vector();
+		java.util.Vector<ResultSetStatistics> children = new java.util.Vector<ResultSetStatistics>();
 	    children.addElement(leftResultSetStatistics);
 		children.addElement(rightResultSetStatistics);
 	    return children;
