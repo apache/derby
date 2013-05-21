@@ -24,9 +24,8 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
-public class GenericDescriptorList extends ArrayList<TupleDescriptor>
+public class GenericDescriptorList extends ArrayList<UniqueTupleDescriptor>
 {
 	private boolean scanned;
 
@@ -64,9 +63,8 @@ public class GenericDescriptorList extends ArrayList<TupleDescriptor>
 	 */
 	public UniqueTupleDescriptor getUniqueTupleDescriptor(UUID uuid)
 	{
-		for (Iterator<TupleDescriptor> iterator = iterator(); iterator.hasNext(); )
+        for (UniqueTupleDescriptor ud : this)
 		{
-			UniqueTupleDescriptor ud = (UniqueTupleDescriptor) iterator.next();
 			if (ud.getUUID().equals(uuid))
 			{
 				return ud;

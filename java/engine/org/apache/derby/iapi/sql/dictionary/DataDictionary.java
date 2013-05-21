@@ -1584,7 +1584,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List<TupleDescriptor> getDependentsDescriptorList(String dependentID)
+    List<DependencyDescriptor> getDependentsDescriptorList(String dependentID)
 		throws StandardException;
 
 	/**
@@ -1598,7 +1598,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List<TupleDescriptor> getProvidersDescriptorList(String providerID)
+    List<DependencyDescriptor> getProvidersDescriptorList(String providerID)
 		throws StandardException;
 
 	/**

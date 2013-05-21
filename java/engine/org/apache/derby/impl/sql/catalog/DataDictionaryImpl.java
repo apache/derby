@@ -71,6 +71,8 @@ import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
@@ -1794,14 +1796,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
-		return (SchemaDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSSCHEMASRowFactory.SYSSCHEMAS_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SchemaDescriptor.class,
 						false,
 						isolationLevel,
 						tc);
@@ -1837,14 +1839,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, schemaNameOrderable);
 
-		return (SchemaDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSSCHEMASRowFactory.SYSSCHEMAS_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SchemaDescriptor.class,
 						false,
                         TransactionController.ISOLATION_REPEATABLE_READ,
 						tc);
@@ -2260,14 +2262,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(1, tableNameOrderable);
 		keyRow.setColumn(2, schemaIDOrderable);
 
-		td = (TableDescriptor)
-					getDescriptorViaIndex(
+        td = getDescriptorViaIndex(
 						SYSTABLESRowFactory.SYSTABLES_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        TableDescriptor.class,
 						false);
 
 		return finishTableDescriptor(td);
@@ -2370,14 +2372,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, tableIDOrderable);
 
-		td = (TableDescriptor)
-					getDescriptorViaIndex(
+        td = getDescriptorViaIndex(
 						SYSTABLESRowFactory.SYSTABLES_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        TableDescriptor.class,
 						false);
 
 		return finishTableDescriptor(td);
@@ -2670,7 +2672,7 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(2, aliasNameOrderable);
 		keyRow.setColumn(3, nameSpaceOrderable);
 
-        AliasDescriptor      oldAD = (AliasDescriptor) getDescriptorViaIndex
+        AliasDescriptor oldAD = getDescriptorViaIndex
             (
              SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
              keyRow,
@@ -2678,6 +2680,7 @@ public final class	DataDictionaryImpl
              ti,
              (TupleDescriptor) null,
              (List<TupleDescriptor>) null,
+             AliasDescriptor.class,
              true,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -2747,7 +2750,7 @@ public final class	DataDictionaryImpl
 		aliasKeyRow.setColumn(2, aliasNameOrderable);
 		aliasKeyRow.setColumn(3, nameSpaceOrderable);
 
-        AliasDescriptor      oldAD = (AliasDescriptor) getDescriptorViaIndex
+        AliasDescriptor oldAD = getDescriptorViaIndex
             (
              SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
              aliasKeyRow,
@@ -2755,6 +2758,7 @@ public final class	DataDictionaryImpl
              aliasTI,
              (TupleDescriptor) null,
              (List<TupleDescriptor>) null,
+             AliasDescriptor.class,
              true,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -2813,14 +2817,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
-		return (ColumnDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(DefaultDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        ColumnDescriptor.class,
 						false);
 	}
 
@@ -2880,7 +2884,8 @@ public final class	DataDictionaryImpl
 						(ScanQualifier [][]) null,
 						ti,
 						td,
-						(ColumnDescriptorList) cdl,
+                        cdl,
+                        ColumnDescriptor.class,
 						false);
 
 		/* The TableDescriptor's column descriptor list must be ordered by
@@ -3058,7 +3063,7 @@ public final class	DataDictionaryImpl
 
 		// First get all the ColPermsDescriptor for the given tableid from   
 		//SYSCOLPERMS using getDescriptorViaIndex(). 
-		List<TupleDescriptor> permissionDescriptorsList;//all ColPermsDescriptor for given tableid
+        List<ColPermsDescriptor> permissionDescriptorsList;//all ColPermsDescriptor for given tableid
 		DataValueDescriptor		tableIDOrderable = getIDValueAsCHAR(tableID);
 		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
 		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
@@ -3072,20 +3077,19 @@ public final class	DataDictionaryImpl
 			ti,
 			(TupleDescriptor) null,
 			permissionDescriptorsList,
+            ColPermsDescriptor.class,
 			false);
 
 		/* Next, using each of the ColPermDescriptor's uuid, get the unique row 
 		in SYSCOLPERMS and adjust the "COLUMNS" column in SYSCOLPERMS to 
 		accomodate the added or dropped column in the tableid*/
-		ColPermsDescriptor colPermsDescriptor;
 		ExecRow curRow;
 		ExecIndexRow uuidKey;
 		// Not updating any indexes on SYSCOLPERMS
 		boolean[] bArray = new boolean[SYSCOLPERMSRowFactory.TOTAL_NUM_OF_INDEXES];
 		int[] colsToUpdate = {SYSCOLPERMSRowFactory.COLUMNS_COL_NUM};
-		for (Iterator iterator = permissionDescriptorsList.iterator(); iterator.hasNext(); )
+        for (ColPermsDescriptor colPermsDescriptor : permissionDescriptorsList)
 		{
-			colPermsDescriptor = (ColPermsDescriptor) iterator.next();
 			removePermEntryInCache(colPermsDescriptor);
 			uuidKey = rf.buildIndexKeyRow(rf.COLPERMSID_INDEX_NUM, colPermsDescriptor);
 			curRow=ti.getRow(tc, uuidKey, rf.COLPERMSID_INDEX_NUM);
@@ -3894,14 +3898,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, viewIdOrderable);
 
-		vd = (ViewDescriptor)
-					getDescriptorViaIndex(
+        vd = getDescriptorViaIndex(
 						SYSVIEWSRowFactory.SYSVIEWS_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        ViewDescriptor.class,
 						false);
 
 		if (vd != null)
@@ -3956,14 +3960,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, idOrderable);
 
-		return (FileInfoDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSFILESRowFactory.SYSFILES_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        FileInfoDescriptor.class,
 						false);
 	}
 
@@ -3999,14 +4003,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
 		keyRow.setColumn(1, nameOrderable);
 		keyRow.setColumn(2, schemaIDOrderable);
-		FileInfoDescriptor r = (FileInfoDescriptor)
-					getDescriptorViaIndex(
+        FileInfoDescriptor r = getDescriptorViaIndex(
 						SYSFILESRowFactory.SYSFILES_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        FileInfoDescriptor.class,
 						false);
         return r;
 	}
@@ -4181,14 +4185,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, stmtIDOrderable);
 
-		SPSDescriptor spsd = (SPSDescriptor)
-					getDescriptorViaIndex(
+        SPSDescriptor spsd = getDescriptorViaIndex(
 						SYSSTATEMENTSRowFactory.SYSSTATEMENTS_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SPSDescriptor.class,
 						false);
 
 		return spsd;
@@ -4275,14 +4279,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(1, stmtNameOrderable);
 		keyRow.setColumn(2, schemaIDOrderable);
 
-		SPSDescriptor spsd = (SPSDescriptor)
-					getDescriptorViaIndex(
+        SPSDescriptor spsd = getDescriptorViaIndex(
 						SYSSTATEMENTSRowFactory.SYSSTATEMENTS_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SPSDescriptor.class,
 						false);
 	
 		/*
@@ -4714,12 +4718,12 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List<TupleDescriptor> getAllSPSDescriptors()
+    public List<SPSDescriptor> getAllSPSDescriptors()
 		throws StandardException
 	{
 		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
-		List<TupleDescriptor> list = newSList();
+        List<SPSDescriptor> list = newSList();
 
         // DERBY-3870: The compiled plan may not be possible to deserialize
         // during upgrade. Skip the column that contains the compiled plan to
@@ -4741,7 +4745,8 @@ public final class	DataDictionaryImpl
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
-						list);
+                        list,
+                        SPSDescriptor.class);
 
 		return list;
 
@@ -4796,7 +4801,8 @@ public final class	DataDictionaryImpl
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
-						list);
+                        list,
+                        UniqueTupleDescriptor.class);
 		return list;
 	}
 
@@ -5414,14 +5420,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, triggerIdOrderable);
 
-		return (TriggerDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSTRIGGERSRowFactory.SYSTRIGGERS_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        TriggerDescriptor.class,
 						false);
 	}
 
@@ -5454,14 +5460,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(1, triggerNameOrderable);
 		keyRow.setColumn(2, schemaIDOrderable);
 
-		return (TriggerDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSTRIGGERSRowFactory.SYSTRIGGERS_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        TriggerDescriptor.class,
 						false);
 	}
 
@@ -5539,6 +5545,7 @@ public final class	DataDictionaryImpl
 					ti,
 					(TupleDescriptor) null,
 					gdl,
+                    UniqueTupleDescriptor.class,
 					forUpdate);
 		gdl.setScanned(true);
 	}
@@ -5754,7 +5761,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
-		List<TupleDescriptor> statDescriptorList = newSList();
+        List<StatisticsDescriptor> statDescriptorList = newSList();
 		DataValueDescriptor UUIDStringOrderable;
 
 		/* set up the start/stop position for the scan */
@@ -5768,6 +5775,7 @@ public final class	DataDictionaryImpl
                               ti,
                               (TupleDescriptor)null,
                               statDescriptorList,
+                              StatisticsDescriptor.class,
                               false,
                               TransactionController.ISOLATION_READ_UNCOMMITTED,
                               getTransactionCompile());
@@ -6264,7 +6272,7 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSFOREIGNKEYS_CATALOG_NUM);
-		List<TupleDescriptor> fkList = newSList();
+        List<SubKeyConstraintDescriptor> fkList = newSList();
 
 		// Use constraintIDOrderable in both start and stop positions for scan
 		DataValueDescriptor constraintIDOrderable = getIDValueAsCHAR(constraintId);
@@ -6280,15 +6288,14 @@ public final class	DataDictionaryImpl
 						ti,
 						(TupleDescriptor) null,
 						fkList,
+                        SubKeyConstraintDescriptor.class,
 						false);
 
-		SubKeyConstraintDescriptor cd;
 		TableDescriptor td;
 		ConstraintDescriptorList cdl = new ConstraintDescriptorList();
 
-		for (Iterator iterator = fkList.iterator(); iterator.hasNext(); )
+        for (SubKeyConstraintDescriptor cd : fkList)
 		{
-			cd = (SubKeyConstraintDescriptor) iterator.next();
 			td = getConstraintTableDescriptor(cd.getUUID());
 			cdl.add(getConstraintDescriptors(td).getConstraintDescriptorById(cd.getUUID()));
 		}
@@ -6696,14 +6703,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, constraintIDOrderable);
 
-		return (SubKeyConstraintDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						indexNum,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SubKeyConstraintDescriptor.class,
 						false);
 	}
 
@@ -6872,14 +6879,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, constraintIDOrderable);
 
-		return (SubCheckConstraintDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSCHECKSRowFactory.SYSCHECKS_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        SubCheckConstraintDescriptor.class,
 						false);
 	}
 
@@ -7064,7 +7071,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		UUIDStringOrderable;
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
-		List<TupleDescriptor> cdl = newSList();
+        List<ConglomerateDescriptor> cdl = newSList();
 
         if ( uuid != null )
         {
@@ -7082,6 +7089,7 @@ public final class	DataDictionaryImpl
                                   ti,
                                   (TupleDescriptor) null,
                                   cdl,
+                                  ConglomerateDescriptor.class,
                                   false);
         }
         else
@@ -7092,13 +7100,12 @@ public final class	DataDictionaryImpl
                  (ScanQualifier[][]) null,
                  ti,
                  (TupleDescriptor) null,
-                 cdl
+                 cdl,
+                 ConglomerateDescriptor.class
                  );
         }
 
-		ConglomerateDescriptor[] cda = new ConglomerateDescriptor[cdl.size()];
-		cdl.toArray(cda);
-		return cda;
+        return cdl.toArray(new ConglomerateDescriptor[cdl.size()]);
 
 	}
 
@@ -7159,14 +7166,10 @@ public final class	DataDictionaryImpl
   				false);
 
 		ConglomerateDescriptorList cdl = new ConglomerateDescriptorList();
-		getDescriptorViaHeap(null, scanQualifier, ti, null, cdl);
+        getDescriptorViaHeap(
+            null, scanQualifier, ti, null, cdl, ConglomerateDescriptor.class);
 
-		int size = cdl.size();
-		ConglomerateDescriptor[] cda = new ConglomerateDescriptor[size];
-		for (int index = 0; index < size; index++)
-			cda[index] = (ConglomerateDescriptor) cdl.get(index);
-
-		return cda;
+        return cdl.toArray(new ConglomerateDescriptor[cdl.size()]);
 	}
 	
 
@@ -7204,6 +7207,7 @@ public final class	DataDictionaryImpl
 				ti,
 				(TupleDescriptor) null,
 				cdl,
+                ConglomerateDescriptor.class,
 				false);
 	}
 
@@ -7241,14 +7245,14 @@ public final class	DataDictionaryImpl
 		keyRow2.setColumn(1, nameOrderable);
 		keyRow2.setColumn(2, schemaIDOrderable);
 
-		return (ConglomerateDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSCONGLOMERATESRowFactory.SYSCONGLOMERATES_INDEX2_ID,
 						keyRow2,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        ConglomerateDescriptor.class,
 						forUpdate);
 	}
 									
@@ -7476,10 +7480,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List<TupleDescriptor> getDependentsDescriptorList(String dependentID)
+    public List<DependencyDescriptor> getDependentsDescriptorList(String dependentID)
 		throws StandardException
 	{
-		List<TupleDescriptor>					ddlList = newSList();
+        List<DependencyDescriptor> ddlList = newSList();
 		DataValueDescriptor		dependentIDOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
@@ -7497,6 +7501,7 @@ public final class	DataDictionaryImpl
 			ti,
 			(TupleDescriptor) null,
 			ddlList,
+            DependencyDescriptor.class,
 			false);
 				
 		return ddlList;
@@ -7513,10 +7518,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List<TupleDescriptor> getProvidersDescriptorList(String providerID)
+    public List<DependencyDescriptor> getProvidersDescriptorList(String providerID)
 		throws StandardException
 	{
-		List<TupleDescriptor>					ddlList = newSList();
+        List<DependencyDescriptor> ddlList = newSList();
 		DataValueDescriptor		providerIDOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
@@ -7534,6 +7539,7 @@ public final class	DataDictionaryImpl
 			ti,
 			(TupleDescriptor) null,
 			ddlList,
+            DependencyDescriptor.class,
 			false);
 
 		return ddlList;
@@ -7733,14 +7739,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
-		return (AliasDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSALIASESRowFactory.SYSALIASES_INDEX2_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        AliasDescriptor.class,
 						false);
 	}
 
@@ -7777,14 +7783,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(2, aliasNameOrderable);
 		keyRow.setColumn(3, nameSpaceOrderable);
 
-		return (AliasDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        AliasDescriptor.class,
 						false);
 	}
 
@@ -7944,7 +7950,7 @@ public final class	DataDictionaryImpl
 		keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
 		keyRow.setColumn( 1, new SQLVarchar( userName ) );
 
-		return (UserDescriptor) getDescriptorViaIndex
+        return getDescriptorViaIndex
             (
              SYSUSERSRowFactory.SYSUSERS_INDEX1_ID,
              keyRow,
@@ -7952,6 +7958,7 @@ public final class	DataDictionaryImpl
              ti,
              (TupleDescriptor) null,
              (List<TupleDescriptor>) null,
+             UserDescriptor.class,
              false
              );
 	}
@@ -9366,19 +9373,21 @@ public final class	DataDictionaryImpl
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
 	 * @param list      The list to build, if supplied.  If null, then
 	 *                  caller expects a single descriptor
+     * @param returnType The type of descriptor to return
 	 * @param forUpdate	Whether or not to open the index for update.
 	 *
 	 * @return	The last matching descriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	private final TupleDescriptor getDescriptorViaIndex(
+    private <T extends TupleDescriptor> T getDescriptorViaIndex(
 						int indexId,
 						ExecIndexRow keyRow,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List<TupleDescriptor> list,
+                        List<? super T> list,
+                        Class<T> returnType,
 						boolean forUpdate)
 			throws StandardException
 	{
@@ -9392,6 +9401,7 @@ public final class	DataDictionaryImpl
                 ti,
                 parentTupleDescriptor,
                 list,
+                returnType,
                 forUpdate,
                 TransactionController.ISOLATION_REPEATABLE_READ,
                 tc);
@@ -9410,6 +9420,7 @@ public final class	DataDictionaryImpl
 	 * @param parentTupleDescriptor The parentDescriptor, if applicable.
 	 * @param list      The list to build, if supplied.  If null, then
 	 *                  caller expects a single descriptor
+     * @param returnType The type of descriptor to return
 	 * @param forUpdate Whether or not to open the index for update.
 	 * @param isolationLevel
 	 *                  Use this explicit isolation level. Only
@@ -9425,13 +9436,14 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException Thrown on error.
 	 */
-	private final TupleDescriptor getDescriptorViaIndex(
+    private <T extends TupleDescriptor> T getDescriptorViaIndex(
 						int indexId,
 						ExecIndexRow keyRow,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List<TupleDescriptor> list,
+                        List<? super T> list,
+                        Class<T> returnType,
 						boolean forUpdate,
 						int isolationLevel,
 						TransactionController tc)
@@ -9447,19 +9459,21 @@ public final class	DataDictionaryImpl
 										   ti,
 										   parentTupleDescriptor,
 										   list,
+                                           returnType,
 										   forUpdate,
 										   isolationLevel,
 										   tc);
 	}
 
 
-	private final TupleDescriptor getDescriptorViaIndexMinion(
+    private <T extends TupleDescriptor> T getDescriptorViaIndexMinion(
 						int indexId,
 						ExecIndexRow keyRow,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List<TupleDescriptor> list,
+                        List<? super T> list,
+                        Class<T> returnType,
 						boolean forUpdate,
 						int isolationLevel,
 						TransactionController tc)
@@ -9471,7 +9485,7 @@ public final class	DataDictionaryImpl
 		ExecRow 				outRow;
 		RowLocation				baseRowLocation;
 		ScanController			scanController;
-		TupleDescriptor			td = null;
+        T                       td = null;
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT
@@ -9618,7 +9632,8 @@ public final class	DataDictionaryImpl
 
 			} else {
 				// normal case
-				td = rf.buildDescriptor(outRow, parentTupleDescriptor, this);
+                td = returnType.cast(
+                    rf.buildDescriptor(outRow, parentTupleDescriptor, this));
 			}
 
 
@@ -9710,24 +9725,26 @@ public final class	DataDictionaryImpl
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
 	 * @param list						The list to build, if supplied.  
 	 *									If null, then caller expects a single descriptor
+     * @param returnType                The type of descriptor to look for
 	 *
 	 * @return	The last matching descriptor
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected TupleDescriptor getDescriptorViaHeap(
+    protected <T extends TupleDescriptor> T getDescriptorViaHeap(
                         FormatableBitSet columns,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
-						List<TupleDescriptor> list)
+                        List<? super T> list,
+                        Class<T> returnType)
 			throws StandardException
 	{
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
 		ExecRow 				outRow;
 		ScanController			scanController;
 		TransactionController	tc;
-		TupleDescriptor			td = null;
+        T                       td = null;
 
 		// Get the current transaction controller
 		tc = getTransactionCompile();
@@ -9752,7 +9769,8 @@ public final class	DataDictionaryImpl
 
 		while (scanController.fetchNext(outRow.getRowArray()))
 		{
-			td = rf.buildDescriptor(outRow, parentTupleDescriptor, this);
+            td = returnType.cast(
+                    rf.buildDescriptor(outRow, parentTupleDescriptor, this));
 
 			/* If dList is null, then caller only wants a single descriptor - we're done
 			 * else just add the current descriptor to the list.
@@ -10321,7 +10339,7 @@ public final class	DataDictionaryImpl
         
 		rowLocation[ 0 ] = ti.getRowLocation( tc, keyRow, SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID );
         
-        sequenceDescriptor[ 0 ] = (SequenceDescriptor)
+        sequenceDescriptor[ 0 ] =
             getDescriptorViaIndex
             (
              SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID,
@@ -10330,6 +10348,7 @@ public final class	DataDictionaryImpl
              ti,
              (TupleDescriptor) null,
              (List<TupleDescriptor>) null,
+             SequenceDescriptor.class,
              false,
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
@@ -13438,8 +13457,8 @@ public final class	DataDictionaryImpl
 	}
 
 
-	private static List<TupleDescriptor> newSList() {
-		return java.util.Collections.synchronizedList(new java.util.LinkedList<TupleDescriptor>());
+    private static <T> List<T> newSList() {
+        return Collections.synchronizedList(new LinkedList<T>());
 	}
 
     /**
@@ -13766,17 +13785,19 @@ public final class	DataDictionaryImpl
     	{
     		//the TABLEPERMSID for SYSTABLEPERMS is not known, so use
     		//table id, grantor and granteee to find TablePermsDescriptor
-            return (TablePermsDescriptor)
+            return
               getUncachedPermissionsDescriptor( SYSTABLEPERMS_CATALOG_NUM,
                                                 SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
-                                                key);
+                                                key,
+                                                TablePermsDescriptor.class);
     	} else
     	{
     		//we know the TABLEPERMSID for SYSTABLEPERMS, so use that to
     		//find TablePermsDescriptor from the sytem table
-    		return (TablePermsDescriptor)
-			getUncachedPermissionsDescriptor(SYSTABLEPERMS_CATALOG_NUM,
-					SYSTABLEPERMSRowFactory.TABLEPERMSID_INDEX_NUM,key);
+            return
+                getUncachedPermissionsDescriptor(SYSTABLEPERMS_CATALOG_NUM,
+                    SYSTABLEPERMSRowFactory.TABLEPERMSID_INDEX_NUM,
+                    key, TablePermsDescriptor.class);
     	}
     } // end of getUncachedTablePermsDescriptor
 
@@ -13798,24 +13819,28 @@ public final class	DataDictionaryImpl
     	{
     		//the COLPERMSID for SYSCOLPERMS is not known, so use tableid,
     		//privilege type, grantor and granteee to find ColPermsDescriptor
-            return (ColPermsDescriptor)
+            return
 	          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
 	                                            SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
-	                                            key);
+                                                key,
+                                                ColPermsDescriptor.class);
     	}else
     	{
     		//we know the COLPERMSID for SYSCOLPERMS, so use that to
     		//find ColPermsDescriptor from the sytem table
-            return (ColPermsDescriptor)
+            return
 	          getUncachedPermissionsDescriptor( SYSCOLPERMS_CATALOG_NUM,
 	                                            SYSCOLPERMSRowFactory.COLPERMSID_INDEX_NUM,
-	                                            key);
+                                                key,
+                                                ColPermsDescriptor.class);
     	}
     } // end of getUncachedColPermsDescriptor
 
-    private TupleDescriptor getUncachedPermissionsDescriptor( int catalogNumber,
-                                                              int indexNumber,
-                                                              PermissionsDescriptor key)
+    private <T extends PermissionsDescriptor>
+            T getUncachedPermissionsDescriptor( int catalogNumber,
+                                                int indexNumber,
+                                                T key,
+                                                Class<T> returnType)
         throws StandardException
     {
 		TabInfoImpl ti = getNonCoreTI( catalogNumber);
@@ -13828,6 +13853,7 @@ public final class	DataDictionaryImpl
                                  ti,
                                  (TupleDescriptor) null,
                                  (List<TupleDescriptor>) null,
+                                 returnType,
                                  false);
     } // end of getUncachedPermissionsDescriptor
 
@@ -13847,18 +13873,18 @@ public final class	DataDictionaryImpl
     	{
     		//the ROUTINEPERMSID for SYSROUTINEPERMS is not known, so use aliasid,
     		//grantor and granteee to find RoutinePermsDescriptor
-            return (RoutinePermsDescriptor)
+            return
             getUncachedPermissionsDescriptor( SYSROUTINEPERMS_CATALOG_NUM,
             		SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
-                                              key);
+                    key, RoutinePermsDescriptor.class);
     	} else
     	{
     		//we know the ROUTINEPERMSID for SYSROUTINEPERMS, so use that to
     		//find RoutinePermsDescriptor from the sytem table
-    		return (RoutinePermsDescriptor)
-			getUncachedPermissionsDescriptor(SYSROUTINEPERMS_CATALOG_NUM,
-					SYSROUTINEPERMSRowFactory.ROUTINEPERMSID_INDEX_NUM,key);
-
+            return
+                getUncachedPermissionsDescriptor(SYSROUTINEPERMS_CATALOG_NUM,
+                    SYSROUTINEPERMSRowFactory.ROUTINEPERMSID_INDEX_NUM,
+                    key, RoutinePermsDescriptor.class);
     	}
     } // end of getUncachedRoutinePermsDescriptor
  
@@ -13960,14 +13986,14 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
-		return (RoleGrantDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSROLESRowFactory.SYSROLES_INDEX_UUID_IDX,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        RoleGrantDescriptor.class,
 						false);
 	}
 
@@ -14003,14 +14029,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(1, roleNameOrderable);
 		keyRow.setColumn(2, isDefOrderable);
 
-		return (RoleGrantDescriptor)
-					getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 						SYSROLESRowFactory.SYSROLES_INDEX_ID_DEF_IDX,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
 						(TupleDescriptor) null,
 						(List<TupleDescriptor>) null,
+                        RoleGrantDescriptor.class,
 						false);
 	}
 
@@ -14055,14 +14081,14 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(2, granteeOrderable);
 		keyRow.setColumn(3, grantorOrderable);
 
-		return (RoleGrantDescriptor)
-			getDescriptorViaIndex(
+        return getDescriptorViaIndex(
 				SYSROLESRowFactory.SYSROLES_INDEX_ID_EE_OR_IDX,
 				keyRow,
 				(ScanQualifier [][]) null,
 				ti,
 				(TupleDescriptor) null,
 				(List<TupleDescriptor>) null,
+                RoleGrantDescriptor.class,
 				false);
 	}
 
@@ -14178,7 +14204,7 @@ public final class	DataDictionaryImpl
         ExecIndexRow keyRow = exFactory.getIndexableRow(1);
         keyRow.setColumn(1, UUIDStringOrderable);
 
-        SequenceDescriptor  sequenceDescriptor = (SequenceDescriptor)
+        SequenceDescriptor sequenceDescriptor =
                 getDescriptorViaIndex(
                         SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID,
                         keyRow,
@@ -14186,6 +14212,7 @@ public final class	DataDictionaryImpl
                         ti,
                         (TupleDescriptor) null,
                         (List<TupleDescriptor>) null,
+                        SequenceDescriptor.class,
                         false);
 
         putSequenceID( sequenceDescriptor );
@@ -14218,7 +14245,7 @@ public final class	DataDictionaryImpl
         keyRow.setColumn(1, schemaIDOrderable);
         keyRow.setColumn(2, sequenceNameOrderable);
 
-        SequenceDescriptor  sequenceDescriptor = (SequenceDescriptor)
+        SequenceDescriptor sequenceDescriptor =
                 getDescriptorViaIndex(
                         SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX2_ID,
                         keyRow,
@@ -14226,6 +14253,7 @@ public final class	DataDictionaryImpl
                         ti,
                         (TupleDescriptor) null,
                         (List<TupleDescriptor>) null,
+                        SequenceDescriptor.class,
                         false);
 
         putSequenceID( sequenceDescriptor );
@@ -14317,16 +14345,18 @@ public final class	DataDictionaryImpl
     		//the PERMISSSIONID for SYSRPERMS is not known, so use the id of the
     		//protected object plus the
     		//grantor and granteee to find a PermDescriptor
-            return (PermDescriptor)
+            return
                 getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
-                        SYSPERMSRowFactory.GRANTEE_OBJECTID_GRANTOR_INDEX_NUM, key);
+                        SYSPERMSRowFactory.GRANTEE_OBJECTID_GRANTOR_INDEX_NUM,
+                        key, PermDescriptor.class);
     	} else
     	{
     		//we know the PERMISSIONID for SYSPERMS, so use that to
     		//find a PermDescriptor from the sytem table
-    		return (PermDescriptor)
-			getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
-					SYSPERMSRowFactory.PERMS_UUID_IDX_NUM,key);
+            return
+                getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
+                    SYSPERMSRowFactory.PERMS_UUID_IDX_NUM,
+                    key, PermDescriptor.class);
     	}
 
     } // end of getUncachedGenericPermDescriptor

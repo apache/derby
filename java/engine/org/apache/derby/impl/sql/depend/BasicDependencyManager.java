@@ -46,7 +46,6 @@ import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -966,13 +965,14 @@ public class BasicDependencyManager implements DependencyManager {
 	 *
 	 * @exception StandardException thrown if something goes wrong
 	 */
-	private List<Dependency> getDependencyDescriptorList(List<TupleDescriptor> storedList,
+    private List<Dependency> getDependencyDescriptorList(
+            List<DependencyDescriptor> storedList,
 			Provider providerForList)
 		throws StandardException
 	{
         List<Dependency>    retval = new ArrayList<Dependency>();
         
-		if (storedList.size() != 0)
+        if (!storedList.isEmpty())
 		{
 			/* For each DependencyDescriptor, we need to instantiate
 			 * object descriptors of the appropriate type for both
@@ -981,14 +981,11 @@ public class BasicDependencyManager implements DependencyManager {
 			 * back into the same place in the List
 			 * so that the call gets an enumerations of Dependencys.
 			 */
-			for (ListIterator<TupleDescriptor> depsIterator = storedList.listIterator();
-				 depsIterator.hasNext(); ) 
+            for (DependencyDescriptor depDesc : storedList)
 			{
 				Dependent 			tempD;
 				Provider  			tempP;
 				DependableFinder	finder = null;
-
-				DependencyDescriptor depDesc = (DependencyDescriptor) depsIterator.next();
 
 					finder = depDesc.getDependentFinder();
 					tempD = (Dependent) finder.getDependable(dd, depDesc.getUUID() );

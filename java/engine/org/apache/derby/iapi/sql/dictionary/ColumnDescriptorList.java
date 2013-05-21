@@ -21,13 +21,7 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,7 +30,7 @@ import java.util.Iterator;
  * This represents a list of column descriptors. 
  */
 
-public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
+public class ColumnDescriptorList extends ArrayList<ColumnDescriptor>
 {
 	/**
 	 * Add the column.  Currently, the table id is ignored.
@@ -71,10 +65,8 @@ public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
 	{
 		ColumnDescriptor	returnValue = null;
 
-		for (Iterator<TupleDescriptor> iterator = iterator(); iterator.hasNext(); )
+        for (ColumnDescriptor columnDescriptor : this)
 		{
-			ColumnDescriptor columnDescriptor = (ColumnDescriptor) iterator.next();
-
 			if ( columnName.equals( columnDescriptor.getColumnName() ) &&
 			    tableID.equals( columnDescriptor.getReferencingUUID() ) )
 			{
@@ -98,9 +90,8 @@ public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
 	{
 		ColumnDescriptor	returnValue = null;
 
-		for (Iterator<TupleDescriptor> iterator = iterator(); iterator.hasNext(); )
+        for (ColumnDescriptor columnDescriptor : this)
 		{
-			ColumnDescriptor columnDescriptor = (ColumnDescriptor) iterator.next();
 			if ( ( columnID == columnDescriptor.getPosition() ) &&
 				tableID.equals( columnDescriptor.getReferencingUUID() ) )
 			{
@@ -121,7 +112,7 @@ public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
 	 */
 	public ColumnDescriptor elementAt(int n)
 	{
-		return (ColumnDescriptor) get(n);
+        return get(n);
 	}
 
 	/**
@@ -138,7 +129,7 @@ public class ColumnDescriptorList extends ArrayList<TupleDescriptor>
 
 		for (int index = 0; index < size; index++)
 		{
-			ColumnDescriptor columnDescriptor = (ColumnDescriptor) elementAt(index);
+            ColumnDescriptor columnDescriptor = elementAt(index);
 			strings[index] = columnDescriptor.getColumnName();
 		}
 		return strings;

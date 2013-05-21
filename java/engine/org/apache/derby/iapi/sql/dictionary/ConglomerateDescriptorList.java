@@ -21,18 +21,16 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.catalog.UUID;
 
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
+public class ConglomerateDescriptorList extends
+        ArrayList<ConglomerateDescriptor>
 {
 
 	/**
@@ -45,13 +43,10 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	 */
 	public ConglomerateDescriptor getConglomerateDescriptor(long conglomerateNumber)
 	{
-		ConglomerateDescriptor conglomerateDescriptor;
 		ConglomerateDescriptor	returnValue = null;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
-			conglomerateDescriptor = (ConglomerateDescriptor) get(index);
 			if (conglomerateNumber == conglomerateDescriptor.getConglomerateNumber())
 			{
 				returnValue = conglomerateDescriptor;
@@ -74,24 +69,19 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	 */
 	public ConglomerateDescriptor[] getConglomerateDescriptors(long conglomerateNumber)
 	{
-		ConglomerateDescriptor conglomerateDescriptor;
-
 		int size = size(), j = 0;
 		ConglomerateDescriptor[] draft = new ConglomerateDescriptor[size];
 
-		for (int index = 0; index < size; index++)
+        for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
-			conglomerateDescriptor = (ConglomerateDescriptor) get(index);
 			if (conglomerateNumber == conglomerateDescriptor.getConglomerateNumber())
 				draft[j++] = conglomerateDescriptor;
 		}
 
 		if (j == size)
 			return draft;
-		ConglomerateDescriptor[] returnValue = new ConglomerateDescriptor[j];
-        System.arraycopy(draft, 0, returnValue, 0, j);
 
-		return returnValue;
+        return Arrays.copyOf(draft, j);
 	}
 
 
@@ -106,13 +96,10 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 
 	public ConglomerateDescriptor getConglomerateDescriptor(String conglomerateName)
 	{
-		ConglomerateDescriptor conglomerateDescriptor;
 		ConglomerateDescriptor	returnValue = null;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
-			conglomerateDescriptor = (ConglomerateDescriptor) get(index);
 			if (conglomerateName.equals(conglomerateDescriptor.getConglomerateName()))
 			{
 				returnValue = conglomerateDescriptor;
@@ -136,14 +123,10 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	public ConglomerateDescriptor getConglomerateDescriptor(UUID uuid)
 						throws StandardException
 	{
-		ConglomerateDescriptor conglomerateDescriptor;
 		ConglomerateDescriptor	returnValue = null;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
-			conglomerateDescriptor = (ConglomerateDescriptor) get(index);
-
 			if (uuid.equals(conglomerateDescriptor.getUUID()))
 			{
 				returnValue = conglomerateDescriptor;
@@ -165,24 +148,19 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	 */
 	public ConglomerateDescriptor[] getConglomerateDescriptors(UUID uuid)
 	{
-		ConglomerateDescriptor conglomerateDescriptor;
-
 		int size = size(), j = 0;
 		ConglomerateDescriptor[] draft = new ConglomerateDescriptor[size];
 
-		for (int index = 0; index < size; index++)
+        for (ConglomerateDescriptor conglomerateDescriptor : this)
 		{
-			conglomerateDescriptor = (ConglomerateDescriptor) get(index);
 			if (uuid.equals(conglomerateDescriptor.getUUID()))
 				draft[j++] = conglomerateDescriptor;
 		}
 
 		if (j == size)
 			return draft;
-		ConglomerateDescriptor[] returnValue = new ConglomerateDescriptor[j];
-        System.arraycopy(draft, 0, returnValue, 0, j);
 
-		return returnValue;
+        return Arrays.copyOf(draft, j);
 	}
 
 	/**
@@ -198,9 +176,10 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	public void dropConglomerateDescriptor(UUID tableID, ConglomerateDescriptor cgDesc) 
 						throws StandardException
 	{
-		for (Iterator iterator = iterator(); iterator.hasNext(); )
+        Iterator<ConglomerateDescriptor> iterator = iterator();
+        while (iterator.hasNext())
 		{
-			ConglomerateDescriptor localCgDesc = (ConglomerateDescriptor) iterator.next();
+            ConglomerateDescriptor localCgDesc = iterator.next();
 			if (localCgDesc.getConglomerateNumber() == cgDesc.getConglomerateNumber() &&
 				localCgDesc.getConglomerateName().equals(cgDesc.getConglomerateName()) &&
 				localCgDesc.getSchemaID().equals(cgDesc.getSchemaID()))
@@ -223,9 +202,10 @@ public class ConglomerateDescriptorList extends ArrayList<TupleDescriptor>
 	public void dropConglomerateDescriptorByUUID(UUID conglomerateID) 
 						throws StandardException
 	{
-		for (Iterator iterator = iterator(); iterator.hasNext(); )
+        Iterator<ConglomerateDescriptor> iterator = iterator();
+        while (iterator.hasNext())
 		{
-			ConglomerateDescriptor localCgDesc = (ConglomerateDescriptor) iterator.next();
+            ConglomerateDescriptor localCgDesc = iterator.next();
 			if ( conglomerateID.equals( localCgDesc.getUUID() ) )
 			{
 				iterator.remove();
