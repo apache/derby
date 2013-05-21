@@ -23,12 +23,14 @@ package org.apache.derby.iapi.sql.depend;
 
 import java.util.Hashtable;
 
+import org.apache.derby.catalog.UUID;
+
 /**
  * ProviderList is a list of Providers that is being
  * tracked for some object other than the current dependent.
  */
 
-public class ProviderList extends Hashtable
+public class ProviderList extends Hashtable<UUID,Provider>
 {
 	/**
 	 * Add a Provider to the list.

@@ -39,7 +39,7 @@ class ProtocolKey {
 	/**
 		The class of the factory
 	*/
-	protected Class factoryInterface;
+	protected Class<?> factoryInterface;
 
 	/**
 		name of module, can be null
@@ -50,7 +50,7 @@ class ProtocolKey {
 	** Constructor
 	*/
 
-	protected ProtocolKey(Class factoryInterface, String identifier)
+	protected ProtocolKey(Class<?> factoryInterface, String identifier)
 	{
 		super();
 		this.factoryInterface = factoryInterface;
@@ -78,7 +78,7 @@ class ProtocolKey {
 	** Methods required to use this key
 	*/
 
-	protected Class getFactoryInterface() {
+	protected Class<?> getFactoryInterface() {
 		return factoryInterface;
 	}
 

@@ -251,6 +251,7 @@ public class DiskHashtable
         return getRemove(key, false, false);
     }
 
+    @SuppressWarnings("unchecked")
     private Object getRemove(Object key, boolean remove, boolean existenceOnly)
         throws StandardException
     {
@@ -296,19 +297,19 @@ public class DiskHashtable
                         // if there is more than one row, return a vector of
                         // the rows.
                         //
-                        Vector v;
+                        Vector<Object> v;
                         if( rowCount == 2)
                         {
                             // convert the "single" row retrieved from the
                             // first trip in the loop, to a vector with the
                             // first two rows.
-                            v = new Vector( 2);
+                            v = new Vector<Object>( 2);
                             v.add( retValue);
                             retValue = v;
                         }
                         else
                         {
-                            v = (Vector) retValue;
+                            v = (Vector<Object>) retValue;
                         }
                         v.add( BackingStoreHashtable.shallowCloneRow( row));
                     }
@@ -380,13 +381,13 @@ public class DiskHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public Enumeration elements()
+    public Enumeration<Object> elements()
         throws StandardException
     {
         return new ElementEnum();
     }
 
-    private class ElementEnum implements Enumeration
+    private class ElementEnum implements Enumeration<Object>
     {
         private ScanController scan;
         private boolean hasMore;

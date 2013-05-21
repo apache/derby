@@ -600,21 +600,21 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Method setExec = null;
 
     // Reflection helper objects for calling into Java >= 7
-    private static Class fileClz = File.class;
-    private static Class filesClz;
-    private static Class pathClz;
-    private static Class pathsClz;
-    private static Class aclEntryClz;
-    private static Class aclFileAttributeViewClz;
-    private static Class posixFileAttributeViewClz;
-    private static Class userPrincipalClz;
-    private static Class linkOptionArrayClz;
-    private static Class linkOptionClz;
-    private static Class stringArrayClz;
-    private static Class aclEntryBuilderClz;
-    private static Class aclEntryTypeClz;
-    private static Class fileStoreClz;
-    private static Class aclEntryPermissionClz;
+    private static Class<File> fileClz = File.class;
+    private static Class<?> filesClz;
+    private static Class<?> pathClz;
+    private static Class<?> pathsClz;
+    private static Class<?> aclEntryClz;
+    private static Class<?> aclFileAttributeViewClz;
+    private static Class<?> posixFileAttributeViewClz;
+    private static Class<?> userPrincipalClz;
+    private static Class<?> linkOptionArrayClz;
+    private static Class<?> linkOptionClz;
+    private static Class<?> stringArrayClz;
+    private static Class<?> aclEntryBuilderClz;
+    private static Class<?> aclEntryTypeClz;
+    private static Class<?> fileStoreClz;
+    private static Class<?> aclEntryPermissionClz;
 
     private static Method get;
     private static Method getFileAttributeView;
@@ -948,7 +948,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             // aceb.setPermissions(new HashSet(Arrays.asList(perms);
             // newAcl.add(aceb);
 
-            List newAcl = new ArrayList();
+            List<Object> newAcl = new ArrayList<Object>();
             Object[] perms = (Object[]) values.invoke(null, (Object[]) null);
             Object aceb = newBuilder.invoke(null, (Object[]) null);
             Object allowValue = allow.get(aclEntryTypeClz);
@@ -956,7 +956,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             aceb = setType.invoke(aceb, new Object[]{allowValue});
             aceb = setPermissions.invoke(
                 aceb,
-                new Object[] {new HashSet(Arrays.asList(perms))});
+                new Object[] {new HashSet<Object>(Arrays.asList(perms))});
             newAcl.add(build.invoke(aceb, (Object[]) null));
 
             // view.setAcl(newAcl);

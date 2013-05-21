@@ -34,7 +34,7 @@ import java.io.IOException;
  * A formatable holder for a java.util.Hashtable.
  * Used to avoid serializing Properties.
  */
-public class FormatableHashtable extends Hashtable implements Formatable
+public class FormatableHashtable extends Hashtable<Object,Object> implements Formatable
 {
 	/********************************************************
 	**

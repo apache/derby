@@ -165,7 +165,7 @@ public final class ContainerKey implements Matchable, Lockable
 	/**
 		This lockable wants to participate in the Virtual Lock table.
 	 */
-	public boolean lockAttributes(int flag, Hashtable attributes)
+	public boolean lockAttributes(int flag, Hashtable<String,Object> attributes)
 	{
 		if (SanityManager.DEBUG)
 		{

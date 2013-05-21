@@ -349,6 +349,7 @@ public class UserType extends DataType
 	 *
 	 * @exception StandardException thrown on failure
 	 */
+    @SuppressWarnings("unchecked")
 	public int compare(DataValueDescriptor other)
 		throws StandardException
 	{
@@ -388,7 +389,7 @@ public class UserType extends DataType
 
 		try
 		{
-			comparison = ((java.lang.Comparable) value).compareTo(other.getObject());
+			comparison = ((java.lang.Comparable<Object>) value).compareTo(other.getObject());
 		}
 		catch (ClassCastException cce)
 		{

@@ -1033,14 +1033,14 @@ public class XML
      */
     private static Object checkJAXPRequirement() {
         try {
-            Class factoryClass =
+            Class<?> factoryClass =
                     Class.forName("javax.xml.parsers.DocumentBuilderFactory");
             Method newFactory = factoryClass.getMethod(
                     "newInstance", new Class[0]);
             Method newBuilder = factoryClass.getMethod(
                     "newDocumentBuilder", new Class[0]);
 
-            Class builderClass =
+            Class<?> builderClass =
                     Class.forName("javax.xml.parsers.DocumentBuilder");
             Method getImpl = builderClass.getMethod(
                     "getDOMImplementation", new Class[0]);
@@ -1068,7 +1068,7 @@ public class XML
      */
     private static boolean checkXPathRequirement(Object domImpl) {
         try {
-            Class domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
+            Class<?> domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
             Method getFeature = domImplClass.getMethod(
                     "getFeature", new Class[] {String.class, String.class});
             Object impl =

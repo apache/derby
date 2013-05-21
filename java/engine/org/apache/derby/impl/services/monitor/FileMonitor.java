@@ -194,8 +194,8 @@ public final class FileMonitor extends BaseMonitor
 	final boolean initialize(final boolean lite)
 	{
         // SECURITY PERMISSION - OP2, OP2a, OP2b
-        return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+        return (AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
                 return Boolean.valueOf(PBinitialize(lite));
             }
         })).booleanValue();
@@ -203,9 +203,9 @@ public final class FileMonitor extends BaseMonitor
 
 	final Properties getDefaultModuleProperties() {
         // SECURITY PERMISSION - IP1
-        return (Properties) AccessController.doPrivileged(
-                new PrivilegedAction() {
-            public Object run() {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<Properties>() {
+            public Properties run() {
                 return FileMonitor.super.getDefaultModuleProperties();
             }
         });
@@ -216,8 +216,8 @@ public final class FileMonitor extends BaseMonitor
 			return PBgetJVMProperty(key);
 
         // SECURITY PERMISSION - OP1
-        return (String) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
                 return PBgetJVMProperty(key);
             }
         });
@@ -227,8 +227,8 @@ public final class FileMonitor extends BaseMonitor
             final Runnable task,
             final String name,
             final boolean setMinPriority) {
-        return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
+        return AccessController.doPrivileged(new PrivilegedAction<Thread>() {
+            public Thread run() {
                 try {
                     return FileMonitor.super.getDaemonThread(
                             task, name, setMinPriority);
@@ -250,7 +250,7 @@ public final class FileMonitor extends BaseMonitor
     }
 
 	public final void setThreadPriority(final int priority) {
-        AccessController.doPrivileged(new PrivilegedAction() {
+        AccessController.doPrivileged(new PrivilegedAction<Object>() {
             public Object run() {
                 FileMonitor.super.setThreadPriority(priority);
                 return null;
@@ -262,9 +262,9 @@ public final class FileMonitor extends BaseMonitor
 	  throws IOException {
 		try {
 			// SECURITY PERMISSION - OP3
-			return (InputStream) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
+			return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<InputStream>() {
+                public InputStream run() throws IOException {
                     return PBapplicationPropertiesStream();
                 }
             });

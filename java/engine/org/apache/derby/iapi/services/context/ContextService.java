@@ -157,7 +157,7 @@ public final class ContextService //OLD extends Hashtable
         cm3.activeCount = -1; // nesting in stack
         </pre>   
 	*/
-	private ThreadLocal threadContextList = new ThreadLocal();
+	private ThreadLocal<Object> threadContextList = new ThreadLocal<Object>();
 
     /**
      * Collection of all ContextManagers that are open
@@ -168,7 +168,7 @@ public final class ContextService //OLD extends Hashtable
      * @see #newContextManager()
      * @see SystemContext#cleanupOnError(Throwable)
      */
-	private HashSet allContexts;
+	private HashSet<ContextManager> allContexts;
 
     /**
      * Create a new ContextService for a Derby system.
@@ -182,7 +182,7 @@ public final class ContextService //OLD extends Hashtable
 
 		ContextService.factory = this;
 
-		allContexts = new HashSet();
+		allContexts = new HashSet<ContextManager>();
 
 	}
 
@@ -262,7 +262,7 @@ public final class ContextService //OLD extends Hashtable
 	 */
 	public ContextManager getCurrentContextManager() {
 
-		ThreadLocal tcl = threadContextList;
+		ThreadLocal<Object> tcl = threadContextList;
 		if (tcl == null) {
 			// The context service is already stopped.
 			return null;
@@ -294,7 +294,7 @@ public final class ContextService //OLD extends Hashtable
      * see that method for details.
      */
 	public void resetCurrentContextManager(ContextManager cm) {
-		ThreadLocal tcl = threadContextList;
+		ThreadLocal<Object> tcl = threadContextList;
 
 		if (tcl == null) {
 			// The context service is already stopped.
@@ -389,9 +389,10 @@ public final class ContextService //OLD extends Hashtable
      * @see ContextManager#activeCount
      * @see ContextManager#activeThread
     */
+    @SuppressWarnings("unchecked")
 	private boolean addToThreadList(Thread me, ContextManager associateCM) {
 
-		ThreadLocal tcl = threadContextList;
+		ThreadLocal<Object> tcl = threadContextList;
 
 		if (tcl == null) {
 			// The context service is already stopped.
@@ -411,7 +412,7 @@ public final class ContextService //OLD extends Hashtable
 			return true;
 		}
 
- 		java.util.Stack stack;
+ 		java.util.Stack<ContextManager> stack;
 		if (list instanceof ContextManager) {
             
             // Could be two situations:
@@ -431,7 +432,7 @@ public final class ContextService //OLD extends Hashtable
             
             // Nested, need to create a Stack of ContextManagers,
             // the top of the stack will be the active one.
-			stack = new java.util.Stack();
+			stack = new java.util.Stack<ContextManager>();
 			tcl.set(stack);
             
             // The stack represents the true nesting
@@ -448,7 +449,7 @@ public final class ContextService //OLD extends Hashtable
 		{
             // existing stack, nesting represented
             // by stack entries, not activeCount.
-			stack = (java.util.Stack) list;
+			stack = (java.util.Stack<ContextManager>) list;
 		}
 
 		stack.push(associateCM);
@@ -544,9 +545,9 @@ public final class ContextService //OLD extends Hashtable
 		Thread me = Thread.currentThread();
 
 		synchronized (this) {
-			for (Iterator i = allContexts.iterator(); i.hasNext(); ) {
+			for (Iterator<ContextManager> i = allContexts.iterator(); i.hasNext(); ) {
 
-				ContextManager cm = (ContextManager) i.next();
+				ContextManager cm = i.next();
 
 				Thread active = cm.activeThread;
 
@@ -560,7 +561,7 @@ public final class ContextService //OLD extends Hashtable
 				if (cm.setInterrupted(c))
                 {
                     AccessController.doPrivileged(
-                            new PrivilegedAction() {
+                            new PrivilegedAction<Object>() {
                                 public Object run()  {
                                     fActive.interrupt();
                                     return null;

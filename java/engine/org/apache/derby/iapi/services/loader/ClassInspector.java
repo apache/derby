@@ -94,13 +94,13 @@ public class ClassInspector
 	{
 		try
 		{
-			Class toClass = getClass(toClassName);
+			Class<?> toClass = getClass(toClassName);
 			// is toClass an untyped null
 			if (toClass == null) {
 				return false;
 			}
 
-			Class fromClass = getClass(fromClassName);
+			Class<?> fromClass = getClass(fromClassName);
 
 			// is fromClass an untyped null
 			if (fromClass == null)
@@ -228,7 +228,7 @@ public class ClassInspector
          )
         throws ClassNotFoundException, StandardException
 	{
-		Class receiverClass = getClass(receiverType);
+		Class<?> receiverClass = getClass(receiverType);
 		if (receiverClass == null)
 			return null;
 
@@ -444,7 +444,7 @@ public class ClassInspector
 									boolean[] isParam)
 						throws ClassNotFoundException, StandardException 
 	{
-		Class receiverClass = getClass(receiverType);
+		Class<?> receiverClass = getClass(receiverType);
 		if (receiverClass == null)
 			return null;
 

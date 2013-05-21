@@ -71,9 +71,9 @@ public class ContextManager
 	 */
 	private static final class CtxStack {
 		/** Internal list with all the elements of the stack. */
-		private final ArrayList stack_ = new ArrayList();
+		private final ArrayList<Context> stack_ = new ArrayList<Context>();
 		/** Read-only view of the internal list. */
-		private final List view_ = Collections.unmodifiableList(stack_);
+		private final List<Context> view_ = Collections.unmodifiableList(stack_);
 
 		// Keeping a reference to the top element on the stack
 		// optimizes the frequent accesses to this element. The
@@ -116,12 +116,12 @@ public class ContextManager
 	 * with a String key.
 	 * @see ContextManager#pushContext(Context)
 	 */
-	private final HashMap ctxTable = new HashMap();
+	private final HashMap<String,CtxStack> ctxTable = new HashMap<String,CtxStack>();
 
 	/**
 	 * List of all Contexts
 	 */
-	private final ArrayList holder = new ArrayList();
+	private final ArrayList<Context> holder = new ArrayList<Context>();
 
 	/**
 	 * Add a Context object to the ContextManager. The object is added
@@ -133,7 +133,7 @@ public class ContextManager
 	{
 		checkInterrupt();
 		final String contextId = newContext.getIdName();
-		CtxStack idStack = (CtxStack) ctxTable.get(contextId);
+		CtxStack idStack = ctxTable.get(contextId);
 
 		// if the stack is null, create a new one.
 		if (idStack == null) {
@@ -157,7 +157,7 @@ public class ContextManager
 	public Context getContext(String contextId) {
 		checkInterrupt();
 		
-		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
+		final CtxStack idStack = ctxTable.get(contextId);
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( idStack == null ||
 								  idStack.isEmpty() ||
@@ -178,11 +178,11 @@ public class ContextManager
 		}
 
 		// remove the top context from the global stack
-		Context theContext = (Context) holder.remove(holder.size()-1);
+		Context theContext = holder.remove(holder.size()-1);
 
 		// now find its id and remove it from there, too
 		final String contextId = theContext.getIdName();
-		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
+		final CtxStack idStack = ctxTable.get(contextId);
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT( idStack != null &&
@@ -207,7 +207,7 @@ public class ContextManager
 		holder.remove(holder.lastIndexOf(theContext));
 
 		final String contextId = theContext.getIdName();
-		final CtxStack idStack = (CtxStack) ctxTable.get(contextId);
+		final CtxStack idStack = ctxTable.get(contextId);
 
 		// now remove it from its id's stack.
 		idStack.remove(theContext);
@@ -234,7 +234,7 @@ public class ContextManager
 	 * @see org.apache.derby.iapi.sql.conn.StatementContext#resetSavePoint()
 	 */
 	public final List getContextStack(String contextId) {
-		final CtxStack cs = (CtxStack) ctxTable.get(contextId);
+		final CtxStack cs = ctxTable.get(contextId);
 		return (cs==null?Collections.EMPTY_LIST:cs.getUnmodifiableList());
 	}
     
@@ -337,7 +337,7 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 						break;
 					}
 
-					Context ctx = ((Context) holder.get(index));
+					Context ctx = (holder.get(index));
 					lastHandler = ctx.isLastHandler(errorSeverity);
 
 					ctx.cleanupOnError(error);

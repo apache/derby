@@ -29,11 +29,11 @@ public class ClassInfo implements InstanceGetter {
 	private static final Class[] noParameters = new Class[0];
 	private static final Object[] noArguments = new Object[0];
 
-	private final Class clazz;
+	private final Class<?> clazz;
 	private boolean useConstructor = true;
 	private Constructor noArgConstructor;
 
-	public ClassInfo(Class clazz) {
+	public ClassInfo(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 

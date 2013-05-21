@@ -125,7 +125,7 @@ public abstract class IdUtil
 	private static String[] parseMultiPartSQLIdentifier(StringReader r)
 		 throws StandardException
 	{
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		while (true)
 		{
 			String thisId = parseId(r,true);
@@ -411,7 +411,7 @@ public abstract class IdUtil
 		if (input.length() == 0)
 			return new String[0][];
 
-		Vector v = new Vector();
+		Vector<String[]> v = new Vector<String[]>();
 		java.io.StringReader r = new java.io.StringReader(input);
 		//
 		while (true)
@@ -486,7 +486,7 @@ public abstract class IdUtil
 	private static String[] parseIdList(StringReader r, boolean normalize)
 		 throws StandardException
 	{
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		while (true)
 		{
 			int delim;
@@ -529,9 +529,9 @@ public abstract class IdUtil
 	public static String intersect(String[] l1, String[] l2)
 	{
 		if (l1 == null || l2 == null) return null;
-		HashSet h = new HashSet();
+		HashSet<String> h = new HashSet<String>();
 		for(int ix=0;ix<l2.length;ix++) h.add(l2[ix]); 
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		for(int ix=0;ix<l1.length;ix++) if (h.contains(l1[ix])) v.add(l1[ix]);
 		return vectorToIdList(v,true); 
 	}
@@ -543,7 +543,7 @@ public abstract class IdUtil
 	  @param normal True means the ids in v are in normal form
 	         and false means they are in external form.
 	  */
-	private static String vectorToIdList(Vector v,boolean normal)
+	private static String vectorToIdList(Vector<String> v,boolean normal)
 	{
 		if (v.size() == 0) return null;
 		String[] a = new String[v.size()];
@@ -596,8 +596,8 @@ public abstract class IdUtil
 	public static String dups(String[] l)
 	{
 		if (l == null) return null;
-		HashSet h = new HashSet();
-		Vector v = new Vector();
+		HashSet<String> h = new HashSet<String>();
+		Vector<String> v = new Vector<String>();
 		for(int ix=0;ix<l.length;ix++)
 		{
 			if (!h.contains(l[ix]))
@@ -619,8 +619,8 @@ public abstract class IdUtil
 		String[] normal_a = parseIdList(l);
 		StringReader r = new StringReader(l);
 		String[] external_a = parseIdList(r,false);
-		HashSet h = new HashSet();
-		Vector v = new Vector();
+		HashSet<String> h = new HashSet<String>();
+		Vector<String> v = new Vector<String>();
 		for(int ix=0;ix<normal_a.length;ix++)
 		{
 			if (!h.contains(normal_a[ix]))
@@ -698,7 +698,7 @@ public abstract class IdUtil
 		 throws StandardException
 	{
 		if (list==null) return null;
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		StringReader r = new StringReader(list);
 		String[] enteredList_a = parseIdList(r,false);
         

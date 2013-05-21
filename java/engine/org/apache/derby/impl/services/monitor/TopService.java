@@ -61,11 +61,11 @@ final class TopService {
 	/**
 		List of protocols.
 	*/
-	Hashtable		protocolTable;
+	Hashtable<ProtocolKey,ModuleInstance>		protocolTable;
 
 	/**
 	*/
-	Vector		moduleInstances;
+	Vector<ModuleInstance>		moduleInstances;
 
 	/**
 	*/
@@ -88,8 +88,8 @@ final class TopService {
 	TopService(BaseMonitor monitor) {
 		super();
 		this.monitor = monitor;
-		protocolTable = new Hashtable();
-		moduleInstances = new Vector(0, 5);
+		protocolTable = new Hashtable<ProtocolKey,ModuleInstance>();
+		moduleInstances = new Vector<ModuleInstance>(0, 5);
 	}
 
 	TopService(BaseMonitor monitor, ProtocolKey key, PersistentService serviceType, Locale serviceLocale)
@@ -208,7 +208,7 @@ final class TopService {
 	*/
 	synchronized Object findModule(ProtocolKey key, boolean findOnly, Properties properties) {
 
-		ModuleInstance module = (ModuleInstance) protocolTable.get(key);
+		ModuleInstance module = protocolTable.get(key);
 
 		if (module == null)
 			return null;
@@ -235,7 +235,7 @@ final class TopService {
         // ArrayIndexOutOfBoundsException.
         synchronized (moduleInstances) {
             for (int i = 0; i < moduleInstances.size(); i++) {
-                ModuleInstance module = (ModuleInstance) moduleInstances.get(i);
+                ModuleInstance module = moduleInstances.get(i);
                 if (module.getInstance() == instance) {
                     return module;
                 }
@@ -281,7 +281,7 @@ final class TopService {
                 // and result in an ArrayIndexOutOfBoundsException.
                 synchronized (moduleInstances) {
                     if (i < moduleInstances.size()) {
-                        module = (ModuleInstance) moduleInstances.get(i);
+                        module = moduleInstances.get(i);
                     } else {
                         // No more instances to look at, break out of the loop.
                         break;
@@ -386,7 +386,7 @@ final class TopService {
 				if (moduleInstances.isEmpty())
 					return true;
 
-				module = (ModuleInstance) moduleInstances.get(0);
+				module = moduleInstances.get(0);
 
 			}
 			

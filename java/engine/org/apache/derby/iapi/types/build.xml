@@ -57,6 +57,7 @@
         <pathelement path="${xmlApis};${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
     <javac

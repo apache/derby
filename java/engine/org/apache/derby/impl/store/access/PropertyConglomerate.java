@@ -366,7 +366,7 @@ class PropertyConglomerate
 	{
 		if (saveServiceProperty(key,value)) return;
 
-		Dictionary<String,Object> defaults = (Dictionary<String,Object>)
+		Hashtable<Object,Object> defaults = (Hashtable<Object,Object>)
             readProperty(tc,AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
 		if (defaults == null) defaults = new FormatableHashtable();
 		if (value==null)

@@ -107,7 +107,7 @@ public class BackingStoreHashtable
      **************************************************************************
      */
     private TransactionController tc;
-    private HashMap     hash_table;
+    private HashMap<Object,Object>     hash_table;
     private int[]       key_column_numbers;
     private boolean     remove_duplicates;
 	private boolean		skipNullKeyColumns;
@@ -217,8 +217,8 @@ public class BackingStoreHashtable
         {
             hash_table = 
                 ((loadFactor == -1) ? 
-                     new HashMap(initialCapacity) :
-                     new HashMap(initialCapacity, loadFactor));
+                     new HashMap<Object,Object>(initialCapacity) :
+                     new HashMap<Object,Object>(initialCapacity, loadFactor));
         }
         else
         {
@@ -249,9 +249,9 @@ public class BackingStoreHashtable
              */
             hash_table = 
                 (((estimated_rowcnt <= 0) || (row_source == null)) ?
-                     new HashMap() :
+                     new HashMap<Object,Object>() :
                      (estimated_rowcnt < max_inmemory_size) ?
-                         new HashMap((int) estimated_rowcnt) :
+                         new HashMap<Object,Object>((int) estimated_rowcnt) :
                          null);
         }
 
@@ -277,7 +277,7 @@ public class BackingStoreHashtable
                     // capacity of the hash table.
                     double rowUsage = getEstimatedMemUsage(row);
                     hash_table =
-                        new HashMap((int)(max_inmemory_size / rowUsage));
+                        new HashMap<Object,Object>((int)(max_inmemory_size / rowUsage));
                 }
                
                 add_row_to_hash_table(row, needsToClone);
@@ -292,7 +292,7 @@ public class BackingStoreHashtable
         // BackingStoreHashtable (ex. "size()") will have a working hash_table
         // on which to operate.
         if (hash_table == null)
-            hash_table = new HashMap();
+            hash_table = new HashMap<Object,Object>();
     }
 
     /**************************************************************************
@@ -394,6 +394,7 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
+    @SuppressWarnings("unchecked")
     private void add_row_to_hash_table(DataValueDescriptor[] row, boolean needsToClone)
 		throws StandardException
     {
@@ -413,18 +414,18 @@ public class BackingStoreHashtable
         {
             if (!remove_duplicates)
             {
-                List row_vec;
+                List<Object> row_vec;
 
                 // inserted a duplicate
                 if (duplicate_value instanceof List)
                 {
                     doSpaceAccounting( row, false);
-                    row_vec = (List) duplicate_value;
+                    row_vec = (List<Object>) duplicate_value;
                 }
                 else
                 {
                     // allocate list to hold duplicates
-                    row_vec = new ArrayList(2);
+                    row_vec = new ArrayList<Object>(2);
 
                     // insert original row into vector
                     row_vec.add(duplicate_value);
@@ -572,7 +573,7 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public Enumeration elements()
+    public Enumeration<Object> elements()
         throws StandardException
     {
         if( diskHashtable == null)
@@ -746,10 +747,10 @@ public class BackingStoreHashtable
         return hash_table.size() + diskHashtable.size();
     }
 
-    private class BackingStoreHashtableEnumeration implements Enumeration
+    private class BackingStoreHashtableEnumeration implements Enumeration<Object>
     {
-        private Iterator memoryIterator;
-        private Enumeration diskEnumeration;
+        private Iterator<Object> memoryIterator;
+        private Enumeration<Object> diskEnumeration;
 
         BackingStoreHashtableEnumeration()
         {

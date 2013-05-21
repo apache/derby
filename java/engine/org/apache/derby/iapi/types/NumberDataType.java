@@ -418,12 +418,13 @@ public abstract class NumberDataType extends DataType
 		setValue for integral exact numerics. Converts the BigDecimal
 		to a long to preserve precision
 	*/
+    @SuppressWarnings("unchecked")
 	public void setBigDecimal(Number bigDecimal) throws StandardException
 	{
 		if (objectNull(bigDecimal))
 			return;
 
-		Comparable bdc = (Comparable) bigDecimal;
+		Comparable  bdc = (Comparable) bigDecimal;
 
 
 		// See comment in SQLDecimal.getLong()

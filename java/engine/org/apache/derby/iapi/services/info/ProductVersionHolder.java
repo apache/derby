@@ -109,7 +109,7 @@ import java.util.Properties;
   </PRE>
 
   */
-public final class ProductVersionHolder implements java.security.PrivilegedAction
+public final class ProductVersionHolder implements java.security.PrivilegedAction<Properties>
 {
 
 	//
@@ -523,7 +523,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	** Security related methods 
 	*/
 	private String productGenus;
-	public final Object run() {
+	public final Properties run() {
 
 		// SECURITY PERMISSION - IP4
 		return loadProperties(this.productGenus);

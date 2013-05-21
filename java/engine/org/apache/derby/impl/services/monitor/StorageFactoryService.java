@@ -94,7 +94,7 @@ final class StorageFactoryService implements PersistentService
             try
             {
                 AccessController.doPrivileged(
-                    new java.security.PrivilegedExceptionAction()
+                    new java.security.PrivilegedExceptionAction<Object>()
                     {
                         public Object run() throws IOException, StandardException
                         {
@@ -130,7 +130,7 @@ final class StorageFactoryService implements PersistentService
             catch( IOException ioe){ throw Monitor.exceptionStartingModule(/*serviceName, */ ioe); }
         }
         AccessController.doPrivileged(
-            new java.security.PrivilegedAction()
+            new java.security.PrivilegedAction<Object>()
             {
                 public Object run()
                 {
@@ -181,10 +181,10 @@ final class StorageFactoryService implements PersistentService
     {
         try
         {
-            return (StorageFactory) AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<StorageFactory>()
                 {
-                    public Object run() throws InstantiationException, IllegalAccessException, IOException
+                    public StorageFactory run() throws InstantiationException, IllegalAccessException, IOException
                     {
                         return privGetStorageFactoryInstance( useHome, databaseName, tempDirName, uniqueName);
                     }
@@ -265,7 +265,7 @@ final class StorageFactoryService implements PersistentService
 		try
         {
             AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+                new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
                         throws IOException, StandardException,
@@ -337,7 +337,7 @@ final class StorageFactoryService implements PersistentService
         try
         {
             AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+                new PrivilegedExceptionAction<Object>()
                 {
                     public Object run() throws StandardException
                     {
@@ -434,7 +434,7 @@ final class StorageFactoryService implements PersistentService
         try
         {
             AccessController.doPrivileged(
-            	    new PrivilegedExceptionAction()
+            	    new PrivilegedExceptionAction<Object>()
                     {
                         public Object run() throws StandardException
                         {
@@ -488,7 +488,7 @@ final class StorageFactoryService implements PersistentService
         try
         {
             AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+                new PrivilegedExceptionAction<Object>()
                 {
                     public Object run() throws StandardException
                     {
@@ -679,7 +679,7 @@ final class StorageFactoryService implements PersistentService
                     try
                     {
                         if( AccessController.doPrivileged(
-                                new PrivilegedExceptionAction()
+                                new PrivilegedExceptionAction<Object>()
                                 {
                                     public Object run()
                                         throws IOException, StandardException, InstantiationException, IllegalAccessException
@@ -726,7 +726,7 @@ final class StorageFactoryService implements PersistentService
                     try
                     {
                         AccessController.doPrivileged(
-                            new PrivilegedExceptionAction()
+                            new PrivilegedExceptionAction<Object>()
                             {
                                 public Object run()
                                     throws IOException, StandardException, InstantiationException, IllegalAccessException
@@ -783,7 +783,7 @@ final class StorageFactoryService implements PersistentService
         try
         {
             return getProtocolLeadIn() + (String) AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+                new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
                         throws StandardException, IOException, InstantiationException, IllegalAccessException
@@ -888,7 +888,7 @@ final class StorageFactoryService implements PersistentService
         try
         {
             return AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+                new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
                         throws StandardException, IOException, InstantiationException, IllegalAccessException
@@ -949,10 +949,10 @@ final class StorageFactoryService implements PersistentService
 
         try
         {
-            return getProtocolLeadIn() + (String) AccessController.doPrivileged(
-                new PrivilegedExceptionAction()
+            return getProtocolLeadIn() + AccessController.doPrivileged(
+                new PrivilegedExceptionAction<String>()
                 {
-                    public Object run()
+                    public String run()
                         throws StandardException, IOException, InstantiationException, IllegalAccessException
                     {
                         StorageFactory storageFactory = privGetStorageFactoryInstance( true, nm, null, null);
@@ -1010,9 +1010,9 @@ final class StorageFactoryService implements PersistentService
      * @throws SecurityException if the required privileges are missing
      */
     private final boolean fileExists(final File file) {
-        return ((Boolean)AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run() {
+        return (AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    public Boolean run() {
                         return new Boolean(file.exists());
                     }
             })).booleanValue();
@@ -1046,7 +1046,7 @@ final class StorageFactoryService implements PersistentService
         }
     }
     
-    final class DirectoryList implements Enumeration, PrivilegedAction
+    final class DirectoryList implements Enumeration, PrivilegedAction<DirectoryList>
     {
         private String[] contents;
         private StorageFile systemDirectory;	 
@@ -1086,7 +1086,7 @@ final class StorageFactoryService implements PersistentService
         } // end of nextElement
 
         // PrivilegedAction method
-        public final Object run()
+        public final DirectoryList run()
         {
             switch( actionCode)
             {

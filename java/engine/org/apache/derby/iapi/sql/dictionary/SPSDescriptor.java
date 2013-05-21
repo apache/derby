@@ -48,6 +48,7 @@ import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * A SPSDescriptor describes a Stored Prepared Statement.
@@ -589,7 +590,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 		throws StandardException
 	{
         if (params == null && !lookedUpParams) {
-            List tmpDefaults = new ArrayList();
+            List<DataValueDescriptor> tmpDefaults = new ArrayList<DataValueDescriptor>();
             params = getDataDictionary().getSPSParams(this, tmpDefaults);
             paramDefaults = tmpDefaults.toArray();
             lookedUpParams = true;

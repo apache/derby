@@ -102,7 +102,7 @@ abstract class BaseMonitor
 	/**
 		Hash table of objects that implement PersistentService keyed by their getType() method.
 	*/
-	private HashMap serviceProviders = new HashMap();
+	private HashMap<String,PersistentService> serviceProviders = new HashMap<String,PersistentService>();
 	private static final String LINE = 
         "----------------------------------------------------------------";
 
@@ -111,7 +111,7 @@ abstract class BaseMonitor
 
 	Vector[]     implementationSets;
 
-	private Vector	  services;					// Vector of TopServices
+	private Vector<TopService>	  services;					// Vector of TopServices
 
 	Properties bootProperties;		// specifc properties provided by the boot method, override everything else
 	Properties applicationProperties;
@@ -140,7 +140,7 @@ abstract class BaseMonitor
 	BaseMonitor() {
 		super();
 
-		services = new Vector(0, 1);
+		services = new Vector<TopService>(0, 1);
 		services.add(new TopService(this));	// first element is always the free-floating service
 	}
 
@@ -182,7 +182,7 @@ abstract class BaseMonitor
 				if (position == 0)
 					break;
 
-				ts = (TopService) services.get(position);
+				ts = services.get(position);
 			}
 
 			// push a new context manager
@@ -203,7 +203,7 @@ abstract class BaseMonitor
 		}
 		
 		Monitor.getStream().println(LINE);
-		((TopService) services.get(0)).shutdown();
+		(services.get(0)).shutdown();
 
 		ContextService.stop();
 		Monitor.clearMonitor();
@@ -279,10 +279,10 @@ abstract class BaseMonitor
 			}
 		}
 
-		Vector bootImplementations = getImplementations(bootProperties, false);
+		Vector<Class<?>> bootImplementations = getImplementations(bootProperties, false);
 
-		Vector systemImplementations = null;
-		Vector applicationImplementations = null;
+		Vector<Class<?>> systemImplementations = null;
+		Vector<Class<?>> applicationImplementations = null;
 
 		// TEMP - making this sanity only breaks the unit test code
 		// I will fix soon, djd.
@@ -417,7 +417,7 @@ abstract class BaseMonitor
 		TopService myts = null;
 		synchronized (this) {
 			for (int i = 1; i < services.size(); i++) {
-				TopService ts = (TopService) services.get(i);
+				TopService ts = services.get(i);
 				if (ts.isPotentialService(key)) {
 					myts = ts;
 					break;
@@ -548,10 +548,10 @@ abstract class BaseMonitor
 	private synchronized TopService findTopService(Object serviceModule) {
 
 		if (serviceModule == null)
-			return (TopService) services.get(0);
+			return services.get(0);
 
 		for (int i = 1; i < services.size(); i++) {
-			TopService ts = (TopService) services.get(i);
+			TopService ts = services.get(i);
 			if (ts.inService(serviceModule))
 				return ts;
 		}
@@ -708,18 +708,18 @@ abstract class BaseMonitor
 
 		The module's start or create method is not called.
 	*/
-
-	protected Object loadInstance(Class factoryInterface, Properties properties) {
+    @SuppressWarnings("unchecked")
+	protected Object loadInstance(Class<?> factoryInterface, Properties properties) {
 
 		Object instance = null;
 
-		Vector localImplementations = getImplementations(properties, false);
+		Vector<Class<?>> localImplementations = getImplementations(properties, false);
 		if (localImplementations != null) {
 			instance = loadInstance(localImplementations, factoryInterface, properties);
 		}
 
 		for (int i = 0; i < implementationSets.length; i++) {
-			instance = loadInstance(implementationSets[i], factoryInterface, properties);
+			instance = loadInstance( (Vector<Class<?>>) implementationSets[i], factoryInterface, properties);
 			if (instance != null)
 				break;
 		}
@@ -728,7 +728,7 @@ abstract class BaseMonitor
 	}
 
 
-	private Object loadInstance(Vector implementations, Class factoryInterface, Properties properties) {
+	private Object loadInstance(Vector<Class<?>> implementations, Class<?> factoryInterface, Properties properties) {
 
 		for (int index = 0; true; index++) {
 
@@ -751,12 +751,12 @@ abstract class BaseMonitor
 		into the implementations vecotr of that class. Returns -1 if no class
 		could be found.
 	*/
-	private static int findImplementation(Vector implementations, int startIndex, Class factoryInterface) {
+	private static int findImplementation(Vector<Class<?>> implementations, int startIndex, Class<?> factoryInterface) {
 
 		for (int i = startIndex; i < implementations.size(); i++) {
 
 			//try {
-				Class factoryClass = (Class) implementations.get(i);
+				Class<?> factoryClass = implementations.get(i);
 				if (!factoryInterface.isAssignableFrom(factoryClass)) {
 					continue;
 				}
@@ -840,7 +840,7 @@ abstract class BaseMonitor
 
 			// count the number of services that implement the required protocol
 			for (int i = 1; i < services.size(); i++) {
-				ts = (TopService) services.get(i);
+				ts = services.get(i);
 				if (ts.isActiveService()) {
 					if (ts.getKey().getFactoryInterface().getName().equals(protocol))
 						count++;
@@ -852,7 +852,7 @@ abstract class BaseMonitor
 			if (count != 0) {
 				int j = 0;
 				for (int i = 1; i < services.size(); i++) {
-					ts = (TopService) services.get(i);
+					ts = services.get(i);
 					if (ts.isActiveService()) {
 						if (ts.getKey().getFactoryInterface().getName().equals(protocol)) {
 							list[j++] = ts.getServiceType().getUserServiceName(ts.getKey().getIdentifier());
@@ -1047,12 +1047,12 @@ abstract class BaseMonitor
 		If no implementations are listed in the properties object
 		then null is returned.
 	*/
-	private Vector getImplementations(Properties moduleList, boolean actualModuleList) {
+	private Vector<Class<?>> getImplementations(Properties moduleList, boolean actualModuleList) {
 
 		if (moduleList == null)
 			return null;
 
-		Vector implementations = actualModuleList ? new Vector(moduleList.size()) : new Vector(0,1);
+		Vector<Class<?>> implementations = actualModuleList ? new Vector<Class<?>>(moduleList.size()) : new Vector<Class<?>>(0,1);
 
 		// Get my current JDK environment
 		int theJDKId = JVMInfo.JDK_ID;
@@ -1126,7 +1126,7 @@ nextModule:
 			}
 
 			try {
-				Class possibleModule = Class.forName(className);
+				Class<?> possibleModule = Class.forName(className);
 
 				// Look for the monitors special modules, PersistentService ones.
 				if (getPersistentServiceImplementation(possibleModule))
@@ -1218,7 +1218,7 @@ nextModule:
 		return implementations;
 	}
 
-    private boolean getPersistentServiceImplementation( Class possibleModule)
+    private boolean getPersistentServiceImplementation( Class<?> possibleModule)
     {
         if( ! PersistentService.class.isAssignableFrom(possibleModule))
             return false;
@@ -1232,7 +1232,7 @@ nextModule:
         return true;
     } // end of getPersistentServiceImplementation
         
-	private Vector getDefaultImplementations() {
+	private Vector<Class<?>> getDefaultImplementations() {
 
 		Properties moduleList = getDefaultModuleProperties();
 
@@ -1408,9 +1408,9 @@ nextModule:
 	*/
 	private void determineSupportedServiceProviders() {
 
-		for (Iterator i = serviceProviders.values().iterator(); i.hasNext(); ) {
+		for (Iterator<PersistentService> i = serviceProviders.values().iterator(); i.hasNext(); ) {
 
-			Object provider = i.next();
+			PersistentService provider = i.next();
 
 			// see if this provider can live in this environment
 			if (!BaseMonitor.canSupport(provider, (Properties) null)) {
@@ -1651,10 +1651,10 @@ nextModule:
         String className = PropertyUtil.getSystemProperty( propertyName);
         if( className != null)
             return className;
-        return (String) storageFactories.get( subSubProtocol);
+        return storageFactories.get( subSubProtocol);
     } // end of getStorageFactoryClassName
 
-    private static final HashMap storageFactories = new HashMap();
+    private static final HashMap<String,String> storageFactories = new HashMap<String,String>();
     static {
 		String dirStorageFactoryClass;
         if (!JVMInfo.J2ME)
@@ -1724,7 +1724,7 @@ nextModule:
 				}
 
 				for (int i = 1; i < services.size(); i++) {
-					TopService ts2 = (TopService) services.get(i);
+					TopService ts2 = services.get(i);
 					if (ts2.isPotentialService(serviceKey)) {
 						// if the service already exists then  just return null
 						return null;
@@ -2101,9 +2101,9 @@ nextModule:
 	*/
 	abstract boolean initialize(boolean lite);
 
-    class ProviderEnumeration implements Enumeration
+    class ProviderEnumeration implements Enumeration<PersistentService>
     {
-        private Enumeration serviceProvidersKeys = (serviceProviders == null) ? null :
+        private Enumeration<String> serviceProvidersKeys = (serviceProviders == null) ? null :
             Collections.enumeration(serviceProviders.keySet());
         private Properties startParams;
         private Enumeration paramEnumeration;
@@ -2117,12 +2117,12 @@ nextModule:
                 paramEnumeration = startParams.keys();
         }
 
-        public Object nextElement() throws NoSuchElementException
+        public PersistentService nextElement() throws NoSuchElementException
         {
             if( serviceProvidersKeys != null && serviceProvidersKeys.hasMoreElements())
                 return serviceProviders.get( serviceProvidersKeys.nextElement());
             getNextStorageFactory();
-            Object ret = storageFactoryPersistentService;
+            PersistentService ret = storageFactoryPersistentService;
             storageFactoryPersistentService = null;
             return ret;
         }

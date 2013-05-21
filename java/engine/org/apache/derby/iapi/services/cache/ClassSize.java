@@ -29,6 +29,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 
+@SuppressWarnings("unchecked")
 public class ClassSize
 {
     public static final int refSize;
@@ -59,12 +60,12 @@ public class ClassSize
      * compile it. This may fail because ClassSizeCatalog.java is not created
      * until everything else has been compiled. Bury ClassSizeCatalog in a string.
      */
-    private static java.util.Hashtable catalog;
+    private static java.util.Hashtable<String,int[]> catalog;
     static
     {
         try
         {
-            catalog = (java.util.Hashtable)
+            catalog = (java.util.Hashtable<String,int[]>)
               Class.forName( "org.apache.derby.iapi.services.cache.ClassSizeCatalog").newInstance();
         }
         catch( Exception e){}
@@ -210,7 +211,7 @@ public class ClassSize
         return estimateBaseFromCatalog( cls, false);
     }
     
-    private static int estimateBaseFromCatalog( Class cls, boolean addToCatalog)
+    private static int estimateBaseFromCatalog( Class<?> cls, boolean addToCatalog)
     {
         if( dummyCatalog)
             return 0;
@@ -351,9 +352,9 @@ public class ClassSize
      */
     private static final String getSystemProperty(final String propName) {
         try {
-            return (String)AccessController.doPrivileged(
-                    new PrivilegedAction() {
-                        public Object run() {
+            return AccessController.doPrivileged(
+                    new PrivilegedAction<String>() {
+                        public String run() {
                             return System.getProperty(propName, null);
                         }
                 });
