@@ -167,8 +167,7 @@ outer:	for (;;) {
 				break outer;
 			}
 
-            @SuppressWarnings("unchecked")
-			List<Object> grants = (List<Object>) chain.peek();
+			List grants = (List) chain.peek();
 			if (grants.isEmpty()) {
                 // All granted locks in this lock control have been examined.
 				// pop this list of granted locks and back to the previous one

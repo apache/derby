@@ -252,15 +252,14 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return Set of ObjectNames for all of Derby's registered MBeans.
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
         final ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
         final MBeanServerConnection serverConn = getMBeanServerConnection(); 
         
-        return  (Set<ObjectName>) AccessController.doPrivileged(
-            new PrivilegedExceptionAction<Object>() {
-                public Object run() throws IOException {
+        return AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Set<ObjectName>>() {
+                public Set<ObjectName> run() throws IOException {
                     return serverConn.queryNames(derbyDomain, null);
                }   
             }

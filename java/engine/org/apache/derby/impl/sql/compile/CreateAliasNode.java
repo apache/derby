@@ -127,7 +127,6 @@ public class CreateAliasNode extends DDLStatementNode
      *
 	 * @exception StandardException		Thrown on error
 	 */
-    @SuppressWarnings("unchecked")
 	public void init(
 						Object aliasName,
 						Object targetObject,
@@ -212,14 +211,13 @@ public class CreateAliasNode extends DDLStatementNode
 				
 				if (paramCount != 0) {
 
-                    names = (String[]) ((List<String>) parameters[0]).toArray(
-                            new String[paramCount]);
-
-                    types = (TypeDescriptor[]) ((List<TypeDescriptor>) parameters[1]).toArray(
-                            new TypeDescriptor[paramCount]);
-
+                    names = new String[paramCount];
+                    types = new TypeDescriptor[paramCount];
 					modes = new int[paramCount];
+
 					for (int i = 0; i < paramCount; i++) {
+                        names[i] = (String) ((List) parameters[0]).get(i);
+                        types[i] = (TypeDescriptor) ((List) parameters[1]).get(i);
                         int currentMode =  ((Integer) (((List) parameters[2]).get(i))).intValue();
                         modes[i] = currentMode;
   

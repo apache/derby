@@ -116,11 +116,10 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         vetWrappedString( wrapper, 18, "VARCHARCOL" );
         vetWrappedBinary( wrapper, 19, "VARCHARFORBITDATACOL" );
     }
-    @SuppressWarnings("unchecked")
     private void    vetWrappedNull( Wrapper41 wrapper ) throws Exception
     {
             try {
-                wrapper.getObject( 1, (Class) null );
+                wrapper.getObject( 1, (Class<?>) null );
                 fail( "Did not expect to get a result for a null class type." );
             }
             catch (SQLException e)
@@ -132,7 +131,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
             if ( wrapper.getWrappedObject() instanceof CallableStatement ) { return; }
             
             try {
-                wrapper.getObject( "BIGINTCOL", (Class) null );
+                wrapper.getObject( "BIGINTCOL", (Class<?>) null );
                 fail( "Did not expect to get a result for a null class type." );
             }
             catch (SQLException e)
@@ -512,7 +511,6 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              );
     }
 
-    @SuppressWarnings("unchecked")
     private void    vetWrapperOK
         ( Wrapper41 wrapper, int colID, String colName, Object expectedValue, Class[] supportedCoercions )
         throws Exception
@@ -520,7 +518,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         int coercionCount = supportedCoercions.length;
         for ( int i = 0; i < coercionCount; i++ )
         {
-            Class   candidate = supportedCoercions[ i ];
+            Class<?> candidate = supportedCoercions[ i ];
             vetCandidate( candidate, expectedValue, wrapper.getObject( colID, candidate ) );
             
             // you can only retrieve a LOB once
@@ -531,8 +529,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
             { vetCandidate( candidate, expectedValue, wrapper.getObject( colName, candidate ) ); }
         }
     }
-    @SuppressWarnings("unchecked")
-    private void    vetCandidate( Class candidate, Object expectedValue, Object actualValue )
+    private void vetCandidate( Class<?> candidate, Object expectedValue, Object actualValue )
         throws Exception
     {
         if ( actualValue != null ) { assertTrue( candidate.getName(), candidate.isAssignableFrom( actualValue.getClass( ) ) ); }
@@ -582,7 +579,6 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     {
         vetCoercionError( wrapper, colID, colName, unsupportedCoercions, UNSUPPORTED_COERCION );
     }
-    @SuppressWarnings("unchecked")
     private void    vetCoercionError
         ( Wrapper41 wrapper, int colID, String colName, Class[] unsupportedCoercions, String expectedSQLState )
         throws Exception
@@ -593,7 +589,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         int coercionCount = unsupportedCoercions.length;
         for ( int i = 0; i < coercionCount; i++ )
         {
-            Class   candidate = unsupportedCoercions[ i ];
+            Class<?> candidate = unsupportedCoercions[ i ];
 
             try {
                 wrapper.getObject( colID, candidate );

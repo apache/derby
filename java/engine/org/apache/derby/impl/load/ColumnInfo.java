@@ -528,13 +528,15 @@ class ColumnInfo {
         ( String columnTypeNamesString, int noOfColumns )
         throws Exception
     {
-        @SuppressWarnings({"unchecked"})
-        ArrayList<String> list = (ArrayList<String>) ImportAbstract.destringifyObject( columnTypeNamesString );
+        ArrayList list = (ArrayList)
+                ImportAbstract.destringifyObject( columnTypeNamesString );
 
         String[] retval = new String[ list.size() ];
 
-        list.toArray( retval );
-        
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = (String) list.get(i);
+        }
+
         return retval;
     }
 

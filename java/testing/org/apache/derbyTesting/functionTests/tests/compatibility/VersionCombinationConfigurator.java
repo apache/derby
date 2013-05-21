@@ -305,15 +305,9 @@ public class VersionCombinationConfigurator {
     /**
      * Sorts and filters out distributions based on the configurator settings.
      *
-     * We suppress warnings here because DerbyDistribution needs to
-     * implement Comparable<DerbyVersion> and not just Comparable. But DerbyDistribution
-     * lives in a package which has to compile at level 1.4 and so cannot be
-     * declared that way.
-     *
      * @param distributions list of distributions to filter
      * @return A filtered list of distributions.
      */
-    @SuppressWarnings("unchecked")
     private List<DerbyDistribution> sortAndFilterVersions(
             List<DerbyDistribution> distributions) {
         // Sort the releases based on the version number (highest first).

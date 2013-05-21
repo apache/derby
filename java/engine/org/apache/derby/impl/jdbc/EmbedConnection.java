@@ -45,7 +45,6 @@ import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -78,6 +77,7 @@ import java.sql.SQLPermission;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.Collections;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -3863,11 +3863,10 @@ public abstract class EmbedConnection implements EngineConnection
      * @return type map for this connection
      * @exception SQLException if a database access error occurs
      */
-    @SuppressWarnings("unchecked")
     public final Map<String, Class<?>> getTypeMap() throws SQLException {
         checkIfClosed();
 		// just return an immuntable empty map
-		return java.util.Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
     
     /**
@@ -3891,7 +3890,7 @@ public abstract class EmbedConnection implements EngineConnection
      *
      * @param  interfaces a Class defining an interface
      * @return an object that implements the interface
-     * @throws java.sql.SQLExption if no object if found that implements the 
+     * @throws SQLException if no object is found that implements the
      * interface
      */
     public <T> T unwrap(java.lang.Class<T> interfaces) 
