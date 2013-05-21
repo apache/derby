@@ -377,6 +377,92 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         conn.commit();
 
     }
+
+    public void helperTestDerby6214(int numberOfRowsToUpdate, 
+            int testVariation) throws Exception
+    {
+        // create large (>32k) string to put in the CLOB
+        final int size = 53000;
+        StringBuilder sb = new StringBuilder(size);
+        for (int i = 0; i < size; i += 10) {
+            sb.append("1234567890");
+        }
+
+        PreparedStatement ps = prepareStatement("UPDATE Test3 SET C16 = ?, " + 
+            "I07 = I07 + 1 WHERE S02 IN (?, ?)");
+
+        switch (testVariation) {
+        case 1 :
+            ps.setString(1, "abc");
+            break;
+        case 2 :
+            //Following fails for client server for stream close error
+            // if we are updating more than one row
+            ps.setString(1, sb.toString());
+            break;
+        case 3 :
+            //Following fails for client server for stream close error
+            // if we are updating more than one row
+            ps.setObject(1, "abc", Types.CLOB);
+            break;
+        case 4 :
+            //Following fails for client server for stream close error
+            // if we are updating more than one row
+            ps.setObject(1, sb.toString(), Types.CLOB);
+            break;
+        }
+        
+        //First value in IN clause is getting set to 'AAAAA'
+        ps.setObject(2, "AAAAA", Types.VARCHAR);
+        if (numberOfRowsToUpdate == 1 ) {
+            //Second value in IN clause is also getting set to 'AAAAA', which 
+            // means prepared statement will update only one row
+            ps.setObject(3, "AAAAA", Types.VARCHAR);
+        } else {
+            //Second value in IN clause is also getting set to 'EEEEE', which 
+            // means prepared statement will update two rows
+            ps.setObject(3, "EEEEE", Types.VARCHAR);
+        }
+        	
+        ps.execute();
+
+    }
+
+    /**
+     * DERBY-6214 (PreparedStatement.setObject(int, Object, Types.CLOB) 
+     * 	 fail with DerbyNet) 
+     * Test setObject and setString on CLOB columns 
+     * @throws Exception
+     */
+    public void testDerby6214() throws Exception
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE Test3 ("+
+                "S02 VARCHAR(64) NOT NULL, " +
+          	    "I07 INTEGER, " +
+                "C16 CLOB)"); 
+        s.executeUpdate("INSERT INTO Test3 (S02, I07) " +
+                "VALUES ('AAAAA', 1)");
+        s.executeUpdate("INSERT INTO Test3 (S02, I07) " +
+                "VALUES ('EEEEE', 1)");
+        
+        for (int i=1; i<3; i++) 
+        {
+        	for (int j=1; j<5; j++)
+        	{
+        		//once DERBY-6214 is fixed, we can remove following check
+        		if (usingDerbyNetClient() && //we are in network server mode
+                        i==2 && //we are going to update 2 rows 
+                        (j==2 || //we are using setString to insert large string
+                        j == 3 || //we are using setObject
+                        j == 4)) //we are using setObject
+        		{
+        			continue;
+        		}
+        		helperTestDerby6214(i,j);
+        	}
+        }
+    }
     /**
      * Test setBigDecimal does not lose fractional digits
      * @throws Exception
