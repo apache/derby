@@ -1240,13 +1240,19 @@ public final class NetworkServerControlImpl {
         String user = null;
         String password = null;
 
-            
+            try {
             writeCommandHeader(COMMAND_TESTCONNECTION);
             writeLDString(database);
             writeLDString(user);
             writeLDString(password);
             send();
             readResult();
+            } catch (IOException ioe) {
+                consolePropertyMessage("DRDA_NoIO.S",
+                        new String [] {hostArg, 
+                        (new Integer(portNumber)).toString(), 
+                        ioe.getMessage()}); 
+    }
     }
 
 
@@ -3532,7 +3538,7 @@ public final class NetworkServerControlImpl {
      */
     private boolean isMsgProperty(String msg)
     {
-        if (msg.startsWith(DRDA_MSG_PREFIX))
+        if (msg != null && msg.startsWith(DRDA_MSG_PREFIX))
             return true;
         else
             return false;
