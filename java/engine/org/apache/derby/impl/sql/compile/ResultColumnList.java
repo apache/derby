@@ -817,7 +817,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
     void bindExpressions(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
+            FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
 		/* First we expand the *'s in the result column list */
@@ -951,7 +951,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throws StandardException
 	{
 		int			size = size();
-        HashSet     seenNames = new HashSet(size + 2, 0.999f);
+        HashSet<String>     seenNames = new HashSet<String>(size + 2, 0.999f);
 
 		for (int index = 0; index < size; index++)
 		{
@@ -2096,7 +2096,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throws StandardException
 	{
 		int size = size();
-        HashSet seenNames = new HashSet(size + 2, 0.999f);
+        HashSet<String> seenNames = new HashSet<String>(size + 2, 0.999f);
 		ResultColumn rc;
 
 		for (int index = 0; index < size; index++)
@@ -3626,7 +3626,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		ResultColumn	resultColumn;
 
         // key: virtual column number, value: index
-        Map seenMap = new HashMap();
+        Map<Integer,Integer> seenMap = new HashMap<Integer,Integer>();
 
 		int size = size();
 
@@ -4388,7 +4388,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
     private static void updateArrays(int[] mapArray,
                              boolean[] cloneMap,
-                             Map seenMap,
+                             Map<Integer,Integer> seenMap,
                              ResultColumn rc,
                              int index) {
 

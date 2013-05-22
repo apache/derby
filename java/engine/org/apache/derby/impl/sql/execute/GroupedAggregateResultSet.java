@@ -118,7 +118,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	//   has seen during this group instance, to eliminate duplicates.
 	//
 	private boolean resultsComplete;
-	private List finishedResults;
+	private List<ExecRow> finishedResults;
 	private ExecIndexRow[]			resultRows;
 	private HashSet [][]			distinctValues;
 
@@ -164,7 +164,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
 		rollup = isRollup;
-		finishedResults = new ArrayList();
+		finishedResults = new ArrayList<ExecRow>();
 		order = (ColumnOrdering[])
 					((FormatableArrayHolder)
 						(a.getPreparedStatement().getSavedObject(orderingItem)))
@@ -762,8 +762,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 					if (distinctValues[level][i].contains(
 						    newValue.getString()))
 						continue;
-					distinctValues[level][i].add(
-						newValue.getString());
+                    addDistinctValue( level, i, newValue );
 				}
 			}
 
@@ -771,6 +770,16 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			currAggregate.merge(newRow, currRow);
 		}
 	}
+
+    /** Helper routine to do casting to shut up the compiler */
+    @SuppressWarnings("unchecked")
+    private void    addDistinctValue( int level, int aggregateNumber, DataValueDescriptor newValue )
+		throws StandardException
+    {
+        HashSet<String> set = (HashSet<String>) distinctValues[ level ][ aggregateNumber ];
+
+        set.add( newValue.getString() );
+    }
 
 	private void initializeDistinctMaps(int r, boolean allocate)
 	    throws StandardException
@@ -782,12 +791,12 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			if (aInfo.isDistinct())
 			{
 				if (allocate)
-					distinctValues[r][a] = new HashSet();
+					distinctValues[r][a] = new HashSet<String>();
 				else
 					distinctValues[r][a].clear();
 				DataValueDescriptor newValue =
 					aggregates[a].getInputColumnValue(resultRows[r]);
-				distinctValues[r][a].add(newValue.getString());
+                addDistinctValue( r, a, newValue );
 			}
 		}
 	}

@@ -160,7 +160,7 @@ public class IndexStatisticsDaemonImpl
      * Note that the descriptor isn't removed before the work has
      * been completed.
      */
-    private final ArrayList queue = new ArrayList(MAX_QUEUE_LENGTH);
+    private final ArrayList<TableDescriptor> queue = new ArrayList<TableDescriptor>(MAX_QUEUE_LENGTH);
     /**
      * The thread in which the index statistics refresh operation is being
      * executed, if any. Created as needed, but there will only be one
@@ -306,7 +306,7 @@ public class IndexStatisticsDaemonImpl
             // duplicates should yield acceptable performance. Also, we don't
             // look for duplicates if the queue is already full.
             for (int i=0; i < queue.size(); i++) {
-                TableDescriptor work = (TableDescriptor)queue.get(i);
+                TableDescriptor work = queue.get(i);
                 if (work.tableNameEquals(table, schema)) {
                     accept = false;
                     break;
@@ -472,7 +472,7 @@ public class IndexStatisticsDaemonImpl
         // Note that the algorithm would drop valid statistics entries if
         // working on a subset of the table conglomerates/indexes.
         if (identifyDisposableStats) {
-            List existingStats = td.getStatistics();
+            List<StatisticsDescriptor> existingStats = td.getStatistics();
             StatisticsDescriptor[] stats = (StatisticsDescriptor[])
                     existingStats.toArray(
                         new StatisticsDescriptor[existingStats.size()]);
@@ -891,7 +891,7 @@ public class IndexStatisticsDaemonImpl
                         trace(1, "queue empty");
                         break;
                     }
-                    td = (TableDescriptor)queue.get(0);
+                    td = queue.get(0);
                 }
                 try {
                     start = System.currentTimeMillis();

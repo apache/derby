@@ -72,7 +72,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
         super.bindExpression(fromList, subqueryList, aggregates);

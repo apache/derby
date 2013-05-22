@@ -97,7 +97,7 @@ public class GroupByColumn extends OrderedColumn
     void bindExpression(
 			FromList fromList, 
 			SubqueryList subqueryList,
-            List aggregates)
+            List<AggregateNode> aggregates)
 				throws StandardException
 	{
 		/* Bind the ColumnReference to the FromList */

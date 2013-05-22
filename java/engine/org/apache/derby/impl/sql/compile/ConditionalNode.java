@@ -196,7 +196,7 @@ public class ConditionalNode extends ValueNode
 	 * @exception             StandardException Thrown on error.
 	 */
 	private DataTypeDescriptor findType(ValueNodeList thenElseList,
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 		throws StandardException
 	{
 		/* We need to "prebind" because we want the Types.  Provide
@@ -282,7 +282,7 @@ public class ConditionalNode extends ValueNode
 	 */
 	private void recastNullNodes(ValueNodeList thenElseList,
 	                           DataTypeDescriptor castType, FromList fromList,
-                               SubqueryList subqueryList, List aggregates)
+                               SubqueryList subqueryList, List<AggregateNode> aggregates)
 	 throws StandardException {
 
 		// Don't do anything if we couldn't find a castType.
@@ -366,7 +366,7 @@ public class ConditionalNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
         CompilerContext cc = getCompilerContext();

@@ -32,13 +32,13 @@ class ColumnOrdering {
 	int	myDirection;
 
     /** A list of column numbers (Integers). */
-    private final ArrayList columns = new ArrayList();
+    private final ArrayList<Integer> columns = new ArrayList<Integer>();
 
     /**
      * A list of table numbers (Integers), corresponding to the {@code columns}
      * list by position.
      */
-    private final ArrayList tables = new ArrayList();
+    private final ArrayList<Integer> tables = new ArrayList<Integer>();
 
 	/**
 	 * @param direction	See RowOrdering for possible values
@@ -81,8 +81,8 @@ class ColumnOrdering {
 	boolean contains(int tableNumber, int columnNumber)
 	{
 		for (int i = 0; i < columns.size(); i++) {
-			Integer col = (Integer) columns.get(i);
-			Integer tab = (Integer) tables.get(i);
+			Integer col = columns.get(i);
+			Integer tab = tables.get(i);
 
 			if (tab.intValue() == tableNumber &&
 				col.intValue() == columnNumber) {
@@ -125,7 +125,7 @@ class ColumnOrdering {
 		*/
 		for (int i = tables.size() - 1; i >= 0; i--)
 		{
-			Integer tab = (Integer) tables.get(i);
+			Integer tab = tables.get(i);
 			if (tab.intValue() == tableNumber)
 			{
 				tables.remove(i);
@@ -164,7 +164,7 @@ class ColumnOrdering {
 	boolean hasAnyOtherTable(int tableNumber) {
 
 		for (int i = 0; i < tables.size(); i++) {
-			Integer tab = (Integer) tables.get(i);
+			Integer tab = tables.get(i);
 			
 			if (tab.intValue() != tableNumber)
 				return true;

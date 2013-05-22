@@ -69,7 +69,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		TypeId	operandType;

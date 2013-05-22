@@ -51,7 +51,7 @@ public abstract class OrderedColumnList extends QueryTreeNodeVector
 			We don't know how many columns are in the source,
 			so we use a hashtable for lookup of the positions
 		*/
-        HashSet hashColumns = new HashSet();
+        HashSet<Integer> hashColumns = new HashSet<Integer>();
 
 		actualCols = 0;
 

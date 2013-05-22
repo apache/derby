@@ -135,7 +135,7 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 					throws StandardException
 	{
 		//bind all the arguments

@@ -723,7 +723,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 									throws StandardException
 	{
 		boolean			flattened = true;
-		ArrayList		flattenedTableNumbers = new ArrayList();
+		ArrayList<Integer>		flattenedTableNumbers = new ArrayList<Integer>();
 
 		if (SanityManager.DEBUG)
 		{

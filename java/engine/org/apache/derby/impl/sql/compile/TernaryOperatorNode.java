@@ -193,7 +193,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		receiver = receiver.bindExpression(fromList, subqueryList, 

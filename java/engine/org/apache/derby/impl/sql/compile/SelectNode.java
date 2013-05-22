@@ -69,11 +69,11 @@ public class SelectNode extends ResultSetNode
 	FromTable targetTable;
 
     /** Aggregates in the SELECT list. */
-    private List selectAggregates;
+    private List<AggregateNode> selectAggregates;
     /** Aggregates in the WHERE clause. */
-    private List whereAggregates;
+    private List<AggregateNode> whereAggregates;
     /** Aggregates in the HAVING clause. */
-    private List havingAggregates;
+    private List<AggregateNode> havingAggregates;
 
 	/**
 	 * The ValueNode for the WHERE clause must represent a boolean
@@ -97,7 +97,7 @@ public class SelectNode extends ResultSetNode
 	/**
 	 * List of window function calls (e.g. ROW_NUMBER, AVG(i), DENSE_RANK).
 	 */
-	List windowFuncCalls;
+	List<WindowFunctionNode> windowFuncCalls;
 
 	/** User specified a group by without aggregates and we turned 
 	 * it into a select distinct 
@@ -188,15 +188,15 @@ public class SelectNode extends ResultSetNode
             // any inside nested SELECTs) used in result columns, and
             // check them for any <in-line window specification>s.
 
-			CollectNodesVisitor cnvw =
-                new CollectNodesVisitor(WindowFunctionNode.class,
+			CollectNodesVisitor<WindowFunctionNode> cnvw =
+                new CollectNodesVisitor<WindowFunctionNode>(WindowFunctionNode.class,
                                         SelectNode.class);
 			resultColumns.accept(cnvw);
 			windowFuncCalls = cnvw.getList();
 
 			for (int i=0; i < windowFuncCalls.size(); i++) {
 				WindowFunctionNode wfn =
-					(WindowFunctionNode) windowFuncCalls.get(i);
+					windowFuncCalls.get(i);
 
 				// Some window function, e.g. ROW_NUMBER() contains an inline
 				// window specification, so we add it to our list of window
@@ -556,7 +556,7 @@ public class SelectNode extends ResultSetNode
 		selectSubquerys = (SubqueryList) getNodeFactory().getNode(
 											C_NodeTypes.SUBQUERY_LIST,
 											getContextManager());
-		selectAggregates = new ArrayList();
+		selectAggregates = new ArrayList<AggregateNode>();
 
 		/* Splice our FromList on to the beginning of fromListParam, before binding
 		 * the expressions, for correlated column resolution.
@@ -594,7 +594,7 @@ public class SelectNode extends ResultSetNode
 			return;
 		}
 
-		whereAggregates = new ArrayList();
+		whereAggregates = new ArrayList<AggregateNode>();
 		whereSubquerys = (SubqueryList) getNodeFactory().getNode(
 												C_NodeTypes.SUBQUERY_LIST,
 												getContextManager());
@@ -640,7 +640,7 @@ public class SelectNode extends ResultSetNode
         {
             int previousReliability = orReliability( CompilerContext.HAVING_CLAUSE_RESTRICTION );
 
-			havingAggregates = new ArrayList();
+			havingAggregates = new ArrayList<AggregateNode>();
 			havingSubquerys = (SubqueryList) getNodeFactory().getNode(
 					C_NodeTypes.SUBQUERY_LIST,
 					getContextManager());
@@ -672,7 +672,7 @@ public class SelectNode extends ResultSetNode
 		{
             // We expect zero aggregates, so initialize the holder array
             // with zero capacity.
-            ArrayList groupByAggregates = new ArrayList(0);
+            ArrayList<AggregateNode> groupByAggregates = new ArrayList<AggregateNode>(0);
 
             groupByList.bindGroupByColumns(this, groupByAggregates);
 
@@ -1545,7 +1545,7 @@ public class SelectNode extends ResultSetNode
 		if (((selectAggregates != null) && (selectAggregates.size() > 0)) 
 			|| (groupByList != null))
 		{
-			List aggs = selectAggregates;
+			List<AggregateNode> aggs = selectAggregates;
 			if (havingAggregates != null && !havingAggregates.isEmpty()) {
 				havingAggregates.addAll(selectAggregates);
 				aggs = havingAggregates;
@@ -1632,7 +1632,7 @@ public class SelectNode extends ResultSetNode
 			if (origFromListSize == 1 && !orderByAndDistinctMerged)
 			{
 				boolean simpleColumns = true;
-				HashSet distinctColumns = new HashSet();
+				HashSet<BaseColumnNode> distinctColumns = new HashSet<BaseColumnNode>();
 				int size = resultColumns.size();
 				for (int i = 1; i <= size; i++) {
 					BaseColumnNode bc = resultColumns.getResultColumn(i).getBaseColumnNode();
@@ -1864,7 +1864,7 @@ public class SelectNode extends ResultSetNode
 			}
 		}
 
-		return newTopRSN.isOrderedOn(crs, permuteOrdering, (List) null);
+		return newTopRSN.isOrderedOn(crs, permuteOrdering, (List<FromBaseTable> ) null);
 	}
 
 	/**

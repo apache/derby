@@ -282,7 +282,7 @@ public class GenericLanguageConnectionContext
      * To support lastAutoincrementValue: This is a hashtable which maps
      * schemaName,tableName,columnName to a Long value.
      */
-    private HashMap<Object,Long> autoincrementHT;
+    private HashMap<String,Long> autoincrementHT;
     /**
      * whether to allow updates or not. 
      */
@@ -3437,13 +3437,13 @@ public class GenericLanguageConnectionContext
             return;
 
         if (autoincrementHT == null)
-            autoincrementHT = new HashMap<Object,Long>();
+            autoincrementHT = new HashMap<String,Long>();
 
         DataDictionary dd = getDataDictionary();
         for (Iterator<String> it = autoincrementCacheHashtable.keySet().iterator();
              it.hasNext(); )
         {
-            Object key = it.next();
+            String key = it.next();
             AutoincrementCounter aic = 
                 autoincrementCacheHashtable.get(key);
             Long value = aic.getCurrentValue();
@@ -3461,12 +3461,12 @@ public class GenericLanguageConnectionContext
      * into autoincrementHT, the cache of autoincrement values 
      * kept in the languageconnectioncontext.
      */
-    public void copyHashtableToAIHT(Map<Object,Long> from)
+    public void copyHashtableToAIHT(Map<String,Long> from)
     {
         if (from.isEmpty())
             return;
         if (autoincrementHT == null)
-            autoincrementHT = new HashMap<Object,Long>();
+            autoincrementHT = new HashMap<String,Long>();
         
         autoincrementHT.putAll(from);
     }
@@ -3793,14 +3793,14 @@ public class GenericLanguageConnectionContext
      * compiler phase, so as to be able to avoid printing a node more than once.
      * @see org.apache.derby.impl.sql.compile.QueryTreeNode#treePrint(int)
      */
-    Map printedObjectsMap = null;
+    Map<Object,Object> printedObjectsMap = null;
 
     /**
      * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#getPrintedObjectsMap
      */
-    public Map getPrintedObjectsMap() {
+    public Map<Object,Object> getPrintedObjectsMap() {
         if (printedObjectsMap == null) {
-            printedObjectsMap = new IdentityHashMap();
+            printedObjectsMap = new IdentityHashMap<Object,Object>();
         }
         return printedObjectsMap;
     }

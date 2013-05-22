@@ -71,7 +71,7 @@ public final class TransactionControl {
 		{ "RR", "REPEATABLE READ", "SERIALIZABLE"}
 	};
 
-    private final ArrayList listeners;
+    private final ArrayList<TransactionListener> listeners;
 
     /** Map a Derby isolation level to the corresponding JDBC level */
     public  static  int jdbcIsolationLevel( int derbyIsolationLevel )
@@ -90,7 +90,7 @@ public final class TransactionControl {
     
     public TransactionControl()
     {
-        listeners = new ArrayList();
+        listeners = new ArrayList<TransactionListener>();
     }
     
     /**
@@ -126,10 +126,10 @@ public final class TransactionControl {
         if (listeners.isEmpty())
             return;
         
-        for (Iterator i = listeners.iterator(); i.hasNext(); )
+        for (Iterator<TransactionListener> i = listeners.iterator(); i.hasNext(); )
         {
             TransactionListener listener =
-                (TransactionListener) i.next();
+                i.next();
             
             try {
                 if(listener.preCommit())
@@ -167,10 +167,10 @@ public final class TransactionControl {
         if (listeners.isEmpty())
             return;
         
-        for (Iterator i = listeners.iterator(); i.hasNext(); )
+        for (Iterator<TransactionListener> i = listeners.iterator(); i.hasNext(); )
         {
             TransactionListener listener =
-                (TransactionListener) i.next();
+                i.next();
             
             try {
                 listener.preRollback();

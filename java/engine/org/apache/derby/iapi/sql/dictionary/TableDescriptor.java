@@ -204,7 +204,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 
 	/** A list of statistics pertaining to this table-- 
 	 */
-	private List					statisticsDescriptorList;
+	private List<StatisticsDescriptor>					statisticsDescriptorList;
 
 	/**
 	 * Constructor for a TableDescriptor (this is for a temporary table).
@@ -1316,7 +1316,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	
 	/** Returns a list of statistics for this table.
 	 */
-	public synchronized List getStatistics() throws StandardException
+	public synchronized List<StatisticsDescriptor> getStatistics() throws StandardException
 	{
 		// if table already has the statistics descriptors initialized
 		// no need to do anything

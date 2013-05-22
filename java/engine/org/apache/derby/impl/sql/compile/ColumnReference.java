@@ -109,7 +109,7 @@ public class ColumnReference extends ValueNode
 	/* List of saved remap data if this ColumnReference is scoped
 	   and has been remapped multiple times.
 	 */
-	private java.util.ArrayList remaps;
+	private java.util.ArrayList<RemapInfo> remaps;
 
 	/**
 	 * Initializer.
@@ -702,7 +702,7 @@ public class ColumnReference extends ValueNode
 		if (scoped && (origSource != null))
 		{
 			if (remaps == null)
-				remaps = new java.util.ArrayList();
+				remaps = new java.util.ArrayList<RemapInfo>();
 			remaps.add(new RemapInfo(
 				columnNumber, tableNumber, columnName, source));
 		}
@@ -763,7 +763,7 @@ public class ColumnReference extends ValueNode
 		{
 			// This CR is multiply-remapped, so undo the most
 			// recent (and only the most recent) remap operation.
-			RemapInfo rI = (RemapInfo)remaps.remove(remaps.size() - 1);
+			RemapInfo rI = remaps.remove(remaps.size() - 1);
 			source = rI.getSource();
 			columnName = rI.getColumnName();
 			tableNumber = rI.getTableNumber();

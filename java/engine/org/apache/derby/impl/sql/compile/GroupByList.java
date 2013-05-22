@@ -101,7 +101,7 @@ public class GroupByList extends OrderedColumnList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    void bindGroupByColumns(SelectNode select, List aggregates)
+    void bindGroupByColumns(SelectNode select, List<AggregateNode> aggregates)
 					throws StandardException
 	{
 		FromList		 fromList = select.getFromList();

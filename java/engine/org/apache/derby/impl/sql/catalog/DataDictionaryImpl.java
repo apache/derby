@@ -5757,7 +5757,7 @@ public final class	DataDictionaryImpl
      * @param td {@code TableDescriptor} for which I need statistics
      * @return A list of tuple descriptors, possibly empty.
      */
-	public List getStatisticsDescriptors(TableDescriptor td)
+	public List<StatisticsDescriptor> getStatisticsDescriptors(TableDescriptor td)
 		throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);

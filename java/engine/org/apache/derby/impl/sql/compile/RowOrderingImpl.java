@@ -34,7 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 class RowOrderingImpl implements RowOrdering {
 
     /** List of ColumnOrderings. */
-	private final ArrayList ordering = new ArrayList();
+	private final ArrayList<ColumnOrdering> ordering = new ArrayList<ColumnOrdering>();
 
 	/*
 	** This ColumnOrdering represents the columns that can be considered
@@ -50,12 +50,12 @@ class RowOrderingImpl implements RowOrdering {
      * List of table numbers for tables that are always ordered.
      * This happens for one-row tables.
      */
-    private final ArrayList alwaysOrderedOptimizables = new ArrayList();
+    private final ArrayList<Optimizable> alwaysOrderedOptimizables = new ArrayList<Optimizable>();
 
 	ColumnOrdering	currentColumnOrdering;
 
     /** List of unordered Optimizables. */
-    private final ArrayList unorderedOptimizables = new ArrayList();
+    private final ArrayList<Optimizable> unorderedOptimizables = new ArrayList<Optimizable>();
 
 	RowOrderingImpl() {
 		columnsAlwaysOrdered = new ColumnOrdering(RowOrdering.DONTCARE);
@@ -174,7 +174,7 @@ class RowOrderingImpl implements RowOrdering {
 		else
 		{
 			currentColumnOrdering =
-				(ColumnOrdering) ordering.get(ordering.size() - 1);
+				ordering.get(ordering.size() - 1);
 		}
 
 		if (SanityManager.DEBUG)
@@ -256,9 +256,9 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#alwaysOrdered */
 	public boolean alwaysOrdered(int tableNumber)
 	{
-        Iterator it = alwaysOrderedOptimizables.iterator();
+        Iterator<Optimizable> it = alwaysOrderedOptimizables.iterator();
         while (it.hasNext()) {
-            Optimizable optTable = (Optimizable) it.next();
+            Optimizable optTable = it.next();
 
             if (optTable.hasTableNumber()) {
                 if (optTable.getTableNumber() == tableNumber) {
@@ -353,7 +353,7 @@ class RowOrderingImpl implements RowOrdering {
 		}
 
 		for (int i = 0; i < ordering.size(); i++) {
-			ColumnOrdering co = (ColumnOrdering) ordering.get(i);
+			ColumnOrdering co = ordering.get(i);
 
 			dest.ordering.add(co.cloneMe());
 
@@ -397,7 +397,7 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < alwaysOrderedOptimizables.size(); i++) 
 			{
-				Optimizable opt = (Optimizable) alwaysOrderedOptimizables.get(i);
+				Optimizable opt = alwaysOrderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
 					retval += opt.getBaseTableName();
@@ -427,7 +427,7 @@ class RowOrderingImpl implements RowOrdering {
 		for (int i = 0; i < unorderedOptimizables.size(); i++)
 		{
 			Optimizable thisOpt =
-				(Optimizable) unorderedOptimizables.get(i);
+				unorderedOptimizables.get(i);
 
 			if (thisOpt != optimizable)
 				return true;

@@ -614,7 +614,7 @@ public class ColumnDefinitionNode extends TableElementNode
 								getNodeFactory().doJoinOrderOptimization(),
 								getContextManager()), 
 							(SubqueryList) null,
-							(List) null);
+							(List<AggregateNode>) null);
 
 			TypeId columnTypeId = getType().getTypeId();
 			TypeId defaultTypeId = defaultTree.getTypeId();

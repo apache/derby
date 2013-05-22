@@ -148,7 +148,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.

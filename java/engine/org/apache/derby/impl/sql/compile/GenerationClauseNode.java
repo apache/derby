@@ -95,7 +95,7 @@ public class GenerationClauseNode extends ValueNode
 	 * Binding the generation clause.
 	 */
     ValueNode bindExpression
-        ( FromList fromList, SubqueryList subqueryList, List aggregates)
+        ( FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
 	{
         _boundExpression = _generationExpression.bindExpression( fromList, subqueryList, aggregates );

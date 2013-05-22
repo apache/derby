@@ -74,7 +74,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    void bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    void bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		int size = size();

@@ -152,7 +152,7 @@ public class OptimizerImpl implements Optimizer
 	// of Optimizer.  Each outer query could potentially have a different
 	// idea of what this OptimizerImpl's "best join order" is, so we have
 	// to keep track of them all.
-	private HashMap savedJoinOrders;
+	private HashMap<Object,int[]> savedJoinOrders;
 
 	// Value used to figure out when/if we've timed out for this
 	// Optimizable.
@@ -2639,9 +2639,9 @@ public class OptimizerImpl implements Optimizer
 				// If the savedJoinOrder map already exists, search for the
 				// join order for the target optimizer and reuse that.
 				if (savedJoinOrders == null)
-					savedJoinOrders = new HashMap();
+					savedJoinOrders = new HashMap<Object,int[]>();
 				else
-					joinOrder = (int[])savedJoinOrders.get(planKey);
+					joinOrder = savedJoinOrders.get(planKey);
 
 				// If we don't already have a join order array for the optimizer,
 				// create a new one.
@@ -2664,7 +2664,7 @@ public class OptimizerImpl implements Optimizer
 				// for which there was no valid plan.
 				if (savedJoinOrders != null)
 				{
-					joinOrder = (int[])savedJoinOrders.get(planKey);
+					joinOrder = savedJoinOrders.get(planKey);
 					if (joinOrder != null)
 					{
 						// Load the join order we found into our

@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementGenericPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
@@ -331,7 +332,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	public int addSavedObject(Object obj) {
         if (savedObjects == null) {
-            savedObjects = new ArrayList();
+            savedObjects = new ArrayList<Object>();
         }
 
 		savedObjects.add(obj);
@@ -347,9 +348,9 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/** @see CompilerContext#setSavedObjects */
-    public void setSavedObjects(List objs)
+    public void setSavedObjects(List<Object> objs)
 	{
-        Iterator it = objs.iterator();
+        Iterator<Object> it = objs.iterator();
         while (it.hasNext()) {
             addSavedObject(it.next());
         }
@@ -441,7 +442,7 @@ public class CompilerContextImpl extends ContextImpl
 
         // Try to find the given conglomerate number among the already
         // opened conglomerates.
-        StoreCostController retval = (StoreCostController)
+        StoreCostController retval =
                 storeCostControllers.get(conglomNum);
 
         if (retval == null) {
@@ -459,10 +460,10 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	private void closeStoreCostControllers()
 	{
-        Iterator it = storeCostControllers.values().iterator();
+        Iterator<StoreCostController> it = storeCostControllers.values().iterator();
         while (it.hasNext())
 		{
-            StoreCostController scc = (StoreCostController) it.next();
+            StoreCostController scc = it.next();
 			try {
 				scc.close();
 			} catch (StandardException se) {
@@ -540,7 +541,7 @@ public class CompilerContextImpl extends ContextImpl
 	public void pushCompilationSchema(SchemaDescriptor sd)
 	{
 		if (defaultSchemaStack == null) {
-			defaultSchemaStack = new ArrayList(2);
+			defaultSchemaStack = new ArrayList<SchemaDescriptor>(2);
 		}
 
 		defaultSchemaStack.add(defaultSchemaStack.size(),
@@ -554,7 +555,7 @@ public class CompilerContextImpl extends ContextImpl
 	public void popCompilationSchema()
 	{
 		SchemaDescriptor sd =
-			(SchemaDescriptor)defaultSchemaStack.remove(
+			defaultSchemaStack.remove(
 				defaultSchemaStack.size() - 1);
 		setCompilationSchema(sd);
 	}
@@ -690,12 +691,12 @@ public class CompilerContextImpl extends ContextImpl
 		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
 		if( lcc.usesSqlAuthorization())
 		{
-			requiredColumnPrivileges = new HashMap();
-			requiredTablePrivileges = new HashMap();
-			requiredSchemaPrivileges = new HashMap();
-			requiredRoutinePrivileges = new HashMap();
-			requiredUsagePrivileges = new HashMap();
-			requiredRolePrivileges = new HashMap();
+			requiredColumnPrivileges = new HashMap<StatementTablePermission,StatementColumnPermission>();
+			requiredTablePrivileges = new HashMap<StatementTablePermission,StatementTablePermission>();
+			requiredSchemaPrivileges = new HashMap<StatementSchemaPermission,StatementSchemaPermission>();
+			requiredRoutinePrivileges = new HashMap<UUID,Integer>();
+			requiredUsagePrivileges = new HashMap<UUID,String>();
+			requiredRolePrivileges = new HashMap<StatementRolePermission,StatementRolePermission>();
 		}
 	} // end of initRequiredPriv
 
@@ -715,7 +716,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	public void popCurrentPrivType( )
 	{
-        Integer top = (Integer) privTypeStack.remove(privTypeStack.size() - 1);
+        Integer top = privTypeStack.remove(privTypeStack.size() - 1);
         currPrivType = top.intValue();
 	}
 
@@ -770,7 +771,7 @@ public class CompilerContextImpl extends ContextImpl
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.SELECT_PRIV);
 			StatementColumnPermission tableColumnPrivileges
-			  = (StatementColumnPermission) requiredColumnPrivileges.get( key);
+			  = requiredColumnPrivileges.get( key);
 			if( tableColumnPrivileges != null)
 				return;
 		}
@@ -783,14 +784,14 @@ public class CompilerContextImpl extends ContextImpl
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.MIN_SELECT_PRIV);
 			StatementColumnPermission tableColumnPrivileges
-			  = (StatementColumnPermission) requiredColumnPrivileges.get( key);
+			  = requiredColumnPrivileges.get( key);
 			if( tableColumnPrivileges != null)
 				requiredColumnPrivileges.remove(key);
 		}
 		
 		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
 		StatementColumnPermission tableColumnPrivileges
-		  = (StatementColumnPermission) requiredColumnPrivileges.get( key);
+		  = requiredColumnPrivileges.get( key);
 		if( tableColumnPrivileges == null)
 		{
 			tableColumnPrivileges = new StatementColumnPermission( tableUUID,
@@ -825,7 +826,7 @@ public class CompilerContextImpl extends ContextImpl
 			StatementTablePermission key = new StatementTablePermission( 
 					table.getUUID(), Authorizer.MIN_SELECT_PRIV);
 			StatementColumnPermission tableColumnPrivileges
-			  = (StatementColumnPermission) requiredColumnPrivileges.get( key);
+			  = requiredColumnPrivileges.get( key);
 			if( tableColumnPrivileges != null)
 				requiredColumnPrivileges.remove(key);
 		}
@@ -904,7 +905,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * @return The list of required privileges.
 	 */
-	public List getRequiredPermissionsList()
+	public List<StatementPermission> getRequiredPermissionsList()
 	{
 		int size = 0;
 		if( requiredRoutinePrivileges != null)
@@ -920,49 +921,49 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredRolePrivileges != null)
         { size += requiredRolePrivileges.size(); }
 		
-		ArrayList list = new ArrayList( size);
+		ArrayList<StatementPermission> list = new ArrayList<StatementPermission>( size);
 		if( requiredRoutinePrivileges != null)
 		{
-			for( Iterator itr = requiredRoutinePrivileges.keySet().iterator(); itr.hasNext();)
+			for( Iterator<UUID> itr = requiredRoutinePrivileges.keySet().iterator(); itr.hasNext();)
 			{
-				UUID routineUUID = (UUID) itr.next();
+				UUID routineUUID = itr.next();
 				
 				list.add( new StatementRoutinePermission( routineUUID));
 			}
 		}
 		if( requiredUsagePrivileges != null)
 		{
-			for( Iterator itr = requiredUsagePrivileges.keySet().iterator(); itr.hasNext();)
+			for( Iterator<UUID> itr = requiredUsagePrivileges.keySet().iterator(); itr.hasNext();)
 			{
-				UUID objectID = (UUID) itr.next();
+				UUID objectID = itr.next();
 				
 				list.add( new StatementGenericPermission( objectID, (String) requiredUsagePrivileges.get( objectID ), PermDescriptor.USAGE_PRIV ) );
 			}
 		}
 		if( requiredTablePrivileges != null)
 		{
-			for( Iterator itr = requiredTablePrivileges.values().iterator(); itr.hasNext();)
+			for( Iterator<StatementTablePermission> itr = requiredTablePrivileges.values().iterator(); itr.hasNext();)
 			{
 				list.add( itr.next());
 			}
 		}
 		if( requiredSchemaPrivileges != null)
 		{
-			for( Iterator itr = requiredSchemaPrivileges.values().iterator(); itr.hasNext();)
+			for( Iterator<StatementSchemaPermission> itr = requiredSchemaPrivileges.values().iterator(); itr.hasNext();)
 			{
 				list.add( itr.next());
 			}
 		}
 		if( requiredColumnPrivileges != null)
 		{
-			for( Iterator itr = requiredColumnPrivileges.values().iterator(); itr.hasNext();)
+			for( Iterator<StatementColumnPermission> itr = requiredColumnPrivileges.values().iterator(); itr.hasNext();)
 			{
 				list.add( itr.next());
 			}
 		}
 		if( requiredRolePrivileges != null)
 		{
-			for( Iterator itr = requiredRolePrivileges.values().iterator();
+			for( Iterator<StatementRolePermission> itr = requiredRolePrivileges.values().iterator();
 				 itr.hasNext();)
 			{
 				list.add( itr.next());
@@ -973,7 +974,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	public void addReferencedSequence( SequenceDescriptor sd )
     {
-        if ( referencedSequences == null ) { referencedSequences = new HashMap(); }
+        if ( referencedSequences == null ) { referencedSequences = new HashMap<UUID,SequenceDescriptor>(); }
 
         referencedSequences.put( sd.getUUID(), sd );
     }
@@ -1008,7 +1009,7 @@ public class CompilerContextImpl extends ContextImpl
 	private int					scanIsolationLevel;
 	private int					nextEquivalenceClass = -1;
 	private long				nextClassName;
-	private List				savedObjects;
+	private List<Object>				savedObjects;
 	private String				classPrefix;
 	private SchemaDescriptor	compilationSchema;
 
@@ -1016,7 +1017,7 @@ public class CompilerContextImpl extends ContextImpl
 	 * Saved execution time default schema, if we need to change it
 	 * temporarily.
 	 */
-	private ArrayList        	defaultSchemaStack;
+	private ArrayList<SchemaDescriptor>        	defaultSchemaStack;
 
 	private ProviderList		currentAPL;
 	private boolean returnParameterFlag;
@@ -1025,7 +1026,7 @@ public class CompilerContextImpl extends ContextImpl
      * Map that contains all store cost controllers opened in this compiler
      * context. Conglomerate id (long) is the key.
      */
-    private final HashMap storeCostControllers = new HashMap();
+    private final HashMap<Long,StoreCostController> storeCostControllers = new HashMap<Long,StoreCostController>();
 
 	private SortCostController	sortCostController;
 
@@ -1038,13 +1039,13 @@ public class CompilerContextImpl extends ContextImpl
 
 	private SQLWarning warnings;
 
-	private final ArrayList privTypeStack = new ArrayList();
+	private final ArrayList<Integer> privTypeStack = new ArrayList<Integer>();
 	private int currPrivType = Authorizer.NULL_PRIV;
-	private HashMap requiredColumnPrivileges;
-	private HashMap requiredTablePrivileges;
-	private HashMap requiredSchemaPrivileges;
-	private HashMap requiredRoutinePrivileges;
-	private HashMap requiredUsagePrivileges;
-	private HashMap requiredRolePrivileges;
-    private HashMap referencedSequences;
+	private HashMap<StatementTablePermission,StatementColumnPermission> requiredColumnPrivileges;
+	private HashMap<StatementTablePermission,StatementTablePermission> requiredTablePrivileges;
+	private HashMap<StatementSchemaPermission,StatementSchemaPermission> requiredSchemaPrivileges;
+	private HashMap<UUID,Integer> requiredRoutinePrivileges;
+	private HashMap<UUID,String> requiredUsagePrivileges;
+	private HashMap<StatementRolePermission,StatementRolePermission> requiredRolePrivileges;
+    private HashMap<UUID,SequenceDescriptor> referencedSequences;
 } // end of class CompilerContextImpl

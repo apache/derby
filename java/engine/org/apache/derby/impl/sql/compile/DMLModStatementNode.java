@@ -747,7 +747,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		expression = expression.bindExpression(
 										fakeFromList,
 										(SubqueryList) null,
-										(List) null);
+										(List<AggregateNode>) null);
 	}
 
 	/**
@@ -876,7 +876,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
     )
 		throws StandardException
 	{
-        ArrayList                           fkList = new ArrayList();
+        ArrayList<FKInfo>         fkList = new ArrayList<FKInfo>();
 		int 								type;
 		UUID[] 								uuids = null;
 		long[] 								conglomNumbers = null;
@@ -887,11 +887,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ConstraintDescriptorList			activeList = dd.getActiveConstraintDescriptors(cdl);
 		int[]								rowMap = getRowMap(readColsBitSet, td);
 		int[]                               raRules = null;
-		ArrayList                           refTableNames = new ArrayList(1);
-		ArrayList                           refIndexConglomNum = new ArrayList(1);
-		ArrayList                           refActions = new ArrayList(1);
-		ArrayList                           refColDescriptors = new ArrayList(1);
-		ArrayList                           fkColMap = new ArrayList(1);
+		ArrayList<String>              refTableNames = new ArrayList<String>(1);
+		ArrayList<Long>               refIndexConglomNum = new ArrayList<Long>(1);
+		ArrayList<Integer>            refActions = new ArrayList<Integer>(1);
+		ArrayList<ColumnDescriptorList> refColDescriptors = new ArrayList<ColumnDescriptorList>(1);
+		ArrayList<int[]>                fkColMap = new ArrayList<int[]>(1);
 		int activeSize = activeList.size();
 		for (int index = 0; index < activeSize; index++)
 		{
@@ -1020,13 +1020,13 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			fkColArrays = new int[size][];
 			for (int i = 0; i < size; i++)
 			{
-				fkTableNames[i] = (String)refTableNames.get(i);
-				fkRefActions[i]  = ((Integer) refActions.get(i)).intValue();
+				fkTableNames[i] = refTableNames.get(i);
+				fkRefActions[i]  = (refActions.get(i)).intValue();
 				fkColDescriptors[i] =
-					(ColumnDescriptorList)refColDescriptors.get(i);
+					refColDescriptors.get(i);
 				fkIndexConglomNumbers[i] =
-					((Long)refIndexConglomNum.get(i)).longValue();
-				fkColArrays[i] = ((int[])fkColMap.get(i));
+					(refIndexConglomNum.get(i)).longValue();
+				fkColArrays[i] = (fkColMap.get(i));
 			}
 		}		
 
@@ -1674,7 +1674,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	)
 					throws StandardException
 	{
-        ArrayList conglomerates = new ArrayList();
+        ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
 
         DMLModStatementNode.getXAffectedIndexes(
                 td, updatedColumns, colBitSet, conglomerates);
@@ -1703,7 +1703,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		TableDescriptor		baseTable,
 		ResultColumnList	updatedColumns,
         FormatableBitSet    colBitSet,
-        List                conglomerates
+        List<ConglomerateDescriptor>                conglomerates
 	)
 		throws StandardException
 	{

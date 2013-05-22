@@ -148,7 +148,7 @@ public  class DefaultNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 		throws StandardException
 	{
 		ColumnDescriptor	cd;

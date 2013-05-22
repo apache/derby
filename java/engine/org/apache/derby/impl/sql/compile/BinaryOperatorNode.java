@@ -280,7 +280,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		leftOperand = leftOperand.bindExpression(fromList, subqueryList, 

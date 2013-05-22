@@ -166,7 +166,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 			tmpCdl = dd.getConstraintDescriptors((TableDescriptor)null);
 		}
 	
-		Hashtable checkConstraintTables = null;
+		Hashtable<UUID,ConstraintDescriptorList> checkConstraintTables = null;
 		int cdlSize = tmpCdl.size();
 		for (int index = 0; index < cdlSize; index++)
 		{
@@ -204,10 +204,10 @@ class SetConstraintsConstantAction extends DDLConstantAction
 
 					if (checkConstraintTables == null)
 					{
-						checkConstraintTables = new Hashtable(10);
+						checkConstraintTables = new Hashtable<UUID,ConstraintDescriptorList>(10);
 					}
 
-					ConstraintDescriptorList tabCdl = (ConstraintDescriptorList)
+					ConstraintDescriptorList tabCdl =
 												checkConstraintTables.get(td.getUUID());
 					if (tabCdl == null)
 					{
@@ -291,7 +291,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 		validateAllCheckConstraints(lcc, checkConstraintTables);
 	}
 
-	private void validateAllCheckConstraints(LanguageConnectionContext lcc, Hashtable ht)
+	private void validateAllCheckConstraints(LanguageConnectionContext lcc, Hashtable<UUID,ConstraintDescriptorList> ht)
 		throws StandardException
 	{
 		ConstraintDescriptorList	cdl;
@@ -305,10 +305,10 @@ class SetConstraintsConstantAction extends DDLConstantAction
 			return;
 		}
 
-		for (Enumeration e = ht.elements(); e.hasMoreElements(); )
+		for (Enumeration<ConstraintDescriptorList> e = ht.elements(); e.hasMoreElements(); )
 		{
 		
-			cdl = (ConstraintDescriptorList) e.nextElement();
+			cdl = e.nextElement();
 			text = null;
 			constraintNames = null;
 

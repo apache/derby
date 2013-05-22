@@ -977,7 +977,7 @@ public interface LanguageConnectionContext extends Context {
 	 * Copy a map of autoincrement key value pairs into the cache of
 	 * ai values stored in the language connection context.
 	 */
-	public void copyHashtableToAIHT(Map<Object,Long> from);
+	public void copyHashtableToAIHT(Map<String,Long> from);
 	
 	/**
 	 * returns the <b>next</b> value to be inserted into an autoincrement col.
@@ -1194,7 +1194,7 @@ public interface LanguageConnectionContext extends Context {
 	 * @see org.apache.derby.impl.sql.compile.QueryTreeNode#treePrint(int)
 	 * @return the map
 	 */
-    public Map getPrintedObjectsMap();
+    public Map<Object,Object> getPrintedObjectsMap();
 	
     /**
      * sets the XplainOnlyMode.

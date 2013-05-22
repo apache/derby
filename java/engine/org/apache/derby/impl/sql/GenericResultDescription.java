@@ -80,7 +80,7 @@ public final class GenericResultDescription
      * A map which maps a column name to a column number.
      * Entries only added when accessing columns with the name.
      */
-    private Map columnNameMap;
+    private Map<String,Integer> columnNameMap;
 	
 	/**
 	 * Niladic constructor for Formatable
@@ -303,14 +303,14 @@ public final class GenericResultDescription
      */
     public int findColumnInsenstive(String columnName) {
         
-        final Map workMap; 
+        final Map<String,Integer> workMap; 
         
         synchronized (this) {
             if (columnNameMap==null) {
                 // updateXXX and getXXX methods are case insensitive and the 
                 // first column should be returned. The loop goes backward to 
                 // create a map which preserves this property.
-                Map map = new HashMap();
+                Map<String,Integer> map = new HashMap<String,Integer>();
                 for (int i = getColumnCount(); i>=1; i--) {
                     
                     final String key = StringUtil.

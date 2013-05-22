@@ -98,7 +98,7 @@ final class LOBStreamControl {
         final DataFactory df = (DataFactory) Monitor.findServiceModule(
                 monitor, DataFactory.MODULE);
         try {
-            AccessController.doPrivileged (new PrivilegedExceptionAction() {
+            AccessController.doPrivileged (new PrivilegedExceptionAction<Object>() {
                 public Object run() throws IOException {
                     //create a temporary file
                     StorageFile lobFile =
@@ -494,7 +494,7 @@ final class LOBStreamControl {
     }
 
     private void deleteFile(final StorageFile file) {
-        AccessController.doPrivileged(new PrivilegedAction() {
+        AccessController.doPrivileged(new PrivilegedAction<Object>() {
             public Object run() {
                 file.delete();
                 return null;

@@ -850,10 +850,10 @@ abstract class DDLConstantAction implements ConstantAction
 		TransactionController tc = lcc.getTransactionExecute();
 
         int changedColumnCount = columnInfos == null ? 0 : columnInfos.length;
-        HashMap addUdtMap = new HashMap();
-        HashMap dropUdtMap = new HashMap();
-        HashSet addColumnNames = new HashSet();
-        HashSet dropColumnNames = new HashSet();
+        HashMap<String,AliasDescriptor> addUdtMap = new HashMap<String,AliasDescriptor>();
+        HashMap<String,AliasDescriptor> dropUdtMap = new HashMap<String,AliasDescriptor>();
+        HashSet<String> addColumnNames = new HashSet<String>();
+        HashSet<String> dropColumnNames = new HashSet<String>();
 
         // first find all of the new ansi udts which the table must depend on
         // and the old ones which are candidates for removal
@@ -1008,9 +1008,9 @@ abstract class DDLConstantAction implements ConstantAction
         }
         
 		TransactionController tc = lcc.getTransactionExecute();
-        HashMap               addUdtMap = new HashMap();
-        HashMap               dropUdtMap = new HashMap();
-        HashMap               udtMap = adding ? addUdtMap : dropUdtMap;
+        HashMap<String,AliasDescriptor>               addUdtMap = new HashMap<String,AliasDescriptor>();
+        HashMap<String,AliasDescriptor>               dropUdtMap = new HashMap<String,AliasDescriptor>();
+        HashMap<String,AliasDescriptor>               udtMap = adding ? addUdtMap : dropUdtMap;
         TypeDescriptor        rawReturnType = aggInfo != null ?
             aggInfo.getReturnType() : routineInfo.getReturnType();
 

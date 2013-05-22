@@ -220,7 +220,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		// method invocations are not allowed in ADD TABLE clauses.

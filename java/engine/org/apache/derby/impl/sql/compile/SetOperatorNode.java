@@ -79,8 +79,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 	// Mapping of original predicates to scoped predicates, used to
 	// avoid re-scoping predicates unnecessarily.
-	private HashMap leftScopedPreds;
-	private HashMap rightScopedPreds;
+	private HashMap<Predicate,Predicate> leftScopedPreds;
+	private HashMap<Predicate,Predicate> rightScopedPreds;
 
 	/**
 	 * Initializer for a SetOperatorNode.
@@ -396,9 +396,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// and if so just use that.
 		Predicate scopedPred = null;
 		if (leftScopedPreds == null)
-			leftScopedPreds = new HashMap();
+			leftScopedPreds = new HashMap<Predicate,Predicate>();
 		else
-			scopedPred = (Predicate)leftScopedPreds.get(pred);
+			scopedPred = leftScopedPreds.get(pred);
 		if (scopedPred == null)
 		{
 			scopedPred = pred.getPredScopedForResultSet(
@@ -411,9 +411,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 		scopedPred = null;
 		if (rightScopedPreds == null)
-			rightScopedPreds = new HashMap();
+			rightScopedPreds = new HashMap<Predicate,Predicate>();
 		else
-			scopedPred = (Predicate)rightScopedPreds.get(pred);
+			scopedPred = rightScopedPreds.get(pred);
 		if (scopedPred == null)
 		{
 			scopedPred = pred.getPredScopedForResultSet(

@@ -88,7 +88,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 		boolean clearDeps) throws StandardException
 	{
 		dropConstraint(consDesc, (TableDescriptor)null,
-			(List)null, activation, lcc, clearDeps);
+			(List<ConstantAction>)null, activation, lcc, clearDeps);
 	}
 
 	/**
@@ -105,7 +105,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 		throws StandardException
 	{
 		dropConstraint(consDesc, skipCreate,
-			(List)null, activation, lcc, clearDeps);
+			(List<ConstantAction>)null, activation, lcc, clearDeps);
 	}
 
 	/**
@@ -122,7 +122,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 	 *  ex. when dropping a table).
 	 */
 	void dropConstraint(ConstraintDescriptor consDesc,
-		TableDescriptor skipCreate, List newConglomActions,
+		TableDescriptor skipCreate, List<ConstantAction> newConglomActions,
 		Activation activation, LanguageConnectionContext lcc,
 		boolean clearDeps) throws StandardException
 	{
@@ -195,7 +195,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 		throws StandardException
 	{
 		dropConglomerate(congDesc, td,
-			false, (List)null, activation, lcc);
+			false, (List<ConstantAction>)null, activation, lcc);
 	}
 
 	/**
@@ -215,7 +215,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
 	 */
 	void dropConglomerate(
 		ConglomerateDescriptor congDesc, TableDescriptor td,
-		boolean skipCreate, List newConglomActions,
+		boolean skipCreate, List<ConstantAction> newConglomActions,
 		Activation activation, LanguageConnectionContext lcc)
 		throws StandardException
 	{
@@ -280,7 +280,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
         //get index property
         Properties prop = new Properties ();
         loadIndexProperties(lcc, cd, prop);
-        ArrayList list = new ArrayList();
+        ArrayList<ConstantAction> list = new ArrayList<ConstantAction>();
 
         // drop the existing index.
         dropConglomerate(cd, td, false, list, activation, lcc);

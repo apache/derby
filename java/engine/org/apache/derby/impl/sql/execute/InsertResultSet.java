@@ -119,7 +119,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	** from it's old conglom number to the new one.  It is
 	** bulk insert specific.
 	*/
-	private Hashtable				indexConversionTable;
+	private Hashtable<Long,Long>				indexConversionTable;
 
 	// indexedCols is 1-based
 	private FormatableBitSet					indexedCols;
@@ -539,7 +539,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 		if (aiCache != null)
 		{
-			HashMap aiHashtable = new HashMap();
+			HashMap<String,Long> aiHashtable = new HashMap<String,Long>();
 			int numColumns = aiCache.length;
 			// this insert updated ai values, store them in some persistent
 			// place so that I can see these values.
@@ -1105,10 +1105,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		{
 			if (triggerInfo != null)
 			{
-				Vector v = null;
+				Vector<AutoincrementCounter> v = null;
 				if (aiCache != null)
 				{
-					v = new Vector();
+					v = new Vector<AutoincrementCounter>();
 					for (int i = 0; i < aiCache.length; i++)
 					{
 						String s, t, c;
@@ -1478,9 +1478,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						/* Self-referencing foreign key.  Both conglomerate
 						 * #s have changed.
 						 */
-						pkConglom = ((Long)indexConversionTable.get(
+						pkConglom = (indexConversionTable.get(
 									new Long(fkInfo.refConglomNumber))).longValue();
-						fkConglom = ((Long)indexConversionTable.get(
+						fkConglom = (indexConversionTable.get(
 										new Long(fkInfo.fkConglomNumbers[index]))).longValue();
 					}
 					else
@@ -1493,9 +1493,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						 * we use the compile time conglomerate #.  This
 						 * is very simple, though not very elegant.
 						 */
-						Long pkConglomLong = (Long)indexConversionTable.get(
+						Long pkConglomLong = indexConversionTable.get(
 												new Long(fkInfo.refConglomNumber));
-						Long fkConglomLong = (Long)indexConversionTable.get(
+						Long fkConglomLong = indexConversionTable.get(
 										new Long(fkInfo.fkConglomNumbers[index]));
 						if (pkConglomLong == null)
 						{
@@ -1532,7 +1532,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					SanityManager.ASSERT(fkInfo.type == FKInfo.FOREIGN_KEY, 
 						"error, expected to only check foreign keys on insert");
 				}
-				Long fkConglom = (Long)indexConversionTable.get(
+				Long fkConglom = indexConversionTable.get(
 										new Long(fkInfo.fkConglomNumbers[0]));
 				bulkValidateForeignKeysCore(
 						tc, cm, fkInfoArray[i], fkConglom.longValue(),
@@ -1865,7 +1865,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		dd.dropStatisticsDescriptors(td.getUUID(), null, tc);
 		long[] newIndexCongloms = new long[numIndexes];
 
-		indexConversionTable = new Hashtable(numIndexes);
+		indexConversionTable = new Hashtable<Long,Long>(numIndexes);
 		// Populate each index
 		for (int index = 0; index < numIndexes; index++)
 		{

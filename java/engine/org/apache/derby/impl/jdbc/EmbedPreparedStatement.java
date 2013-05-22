@@ -1051,7 +1051,7 @@ public abstract class EmbedPreparedStatement
 	  // away
   	  synchronized (getConnectionSynchronization()) {
   			if (batchStatements == null)
-  				batchStatements = new Vector();
+  				batchStatements = new Vector<Object>();
 
           //get a clone of the parameterValueSet and save it in the vector
           //which will be used later on at the time of batch execution.

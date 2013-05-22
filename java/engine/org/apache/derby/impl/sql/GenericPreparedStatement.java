@@ -128,7 +128,7 @@ public class GenericPreparedStatement
 
 	// fields used for cursors
 	protected ExecCursorTableReference	targetTable; 
-    protected List                      updateColumns;
+    protected List<String>           updateColumns;
 	protected int 						updateMode;
 
 	protected ConstantAction	executionConstants;
@@ -733,7 +733,7 @@ recompileOutOfDatePlan:
 	 *
 	 *	@return all the saved objects
 	 */
-    public final List getSavedObjects()
+    public final List<Object> getSavedObjects()
 	{
         // Return an unmodifiable view of the underlying array, so that
         // the caller cannot modify the internal state.
@@ -1286,7 +1286,7 @@ recompileOutOfDatePlan:
     private static class RowCountStatistics {
         private int stalePlanCheckInterval;
         private int executionCount;
-        private ArrayList rowCounts;
+        private ArrayList<Long> rowCounts;
 
         // No synchronization for executionCount. Since it's accessed on
         // every execution, we want to avoid synchronization. Nothing serious
@@ -1307,7 +1307,7 @@ recompileOutOfDatePlan:
         synchronized long getInitialRowCount(int rsNum, long rowCount) {
             // Allocate the list of row counts lazily.
             if (rowCounts == null) {
-                rowCounts = new ArrayList();
+                rowCounts = new ArrayList<Long>();
             }
 
             // Make sure the list is big enough to hold the row count for
@@ -1315,12 +1315,12 @@ recompileOutOfDatePlan:
             if (rsNum >= rowCounts.size()) {
                 int newSize = rsNum + 1;
                 rowCounts.addAll(
-                        Collections.nCopies(newSize - rowCounts.size(), null));
+                                 Collections.nCopies(newSize - rowCounts.size(), (Long) null));
             }
 
             // Get the initial row count for the specified result set, and
             // set it if it is not already set.
-            Long initialCount = (Long) rowCounts.get(rsNum);
+            Long initialCount = rowCounts.get(rsNum);
             if (initialCount == null) {
                 rowCounts.set(rsNum, ReuseFactory.getLong(rowCount));
                 return rowCount;

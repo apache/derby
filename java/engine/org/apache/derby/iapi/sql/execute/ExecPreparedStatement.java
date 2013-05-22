@@ -69,7 +69,7 @@ public interface ExecPreparedStatement
 	 *
      *  @return a list with all the saved objects
 	 */
-    List getSavedObjects();
+    List<Object> getSavedObjects();
 
 	/**
 	 *	Get the saved cursor info.  Used for stored prepared

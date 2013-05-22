@@ -1317,7 +1317,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // drop any generated columns which reference this column
         ColumnDescriptorList    generatedColumnList = td.getGeneratedColumns();
         int                                 generatedColumnCount = generatedColumnList.size();
-        ArrayList                   cascadedDroppedColumns = new ArrayList();
+        ArrayList<String>           cascadedDroppedColumns = new ArrayList<String> ();
         for ( int i = 0; i < generatedColumnCount; i++ )
         {
             ColumnDescriptor    generatedColumn = generatedColumnList.elementAt( i );
@@ -1370,7 +1370,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // now drop dependent generated columns
         for ( int i = 0; i < cascadedDrops; i++ )
         {
-            String      generatedColumnName = (String) cascadedDroppedColumns.get( i );
+            String      generatedColumnName = cascadedDroppedColumns.get( i );
             
             activation.addWarning
                 ( StandardException.newWarning( SQLState.LANG_GEN_COL_DROPPED, generatedColumnName, td.getName() ) );
@@ -1563,7 +1563,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		ConstraintDescriptorList csdl = dd.getConstraintDescriptors(td);
 		int csdl_size = csdl.size();
 
-		ArrayList newCongloms = new ArrayList();
+		ArrayList<ConstantAction> newCongloms = new ArrayList<ConstantAction>();
 
 		// we want to remove referenced primary/unique keys in the second
 		// round.  This will ensure that self-referential constraints will
@@ -2702,7 +2702,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		if (! (compressTable || truncateTable))		// then it's drop column
 		{
-		    ArrayList newCongloms = new ArrayList();
+		    ArrayList<ConstantAction> newCongloms = new ArrayList<ConstantAction>();
 			for (int i = 0; i < compressIRGs.length; i++)
 			{
 				int[] baseColumnPositions = compressIRGs[i].baseColumnPositions();
@@ -2854,7 +2854,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *   be updated to have the conglomerate number of the newly-created
 	 *   physical conglomerate.
 	 */
-	private void createNewBackingCongloms(ArrayList newConglomActions,
+	private void createNewBackingCongloms(ArrayList<ConstantAction> newConglomActions,
                                           long [] ixCongNums)
 		throws StandardException
 	{

@@ -135,7 +135,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
         return source.isOrderedOn(crs, permuteOrdering, fbtHolder);

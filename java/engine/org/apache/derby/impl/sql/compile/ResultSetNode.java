@@ -1030,7 +1030,7 @@ public abstract class ResultSetNode extends QueryTreeNode
                         String defaultText = defaultInfo.getDefaultText();
                         ValueNode defaultTree = parseDefault(defaultText);
                         defaultTree = defaultTree.bindExpression
-                            (getFromList(), (SubqueryList) null, (List) null);
+                            (getFromList(), (SubqueryList) null, (List<AggregateNode>) null);
                         newResultColumn = (ResultColumn) getNodeFactory().getNode
                             ( C_NodeTypes.RESULT_COLUMN, defaultTree.getTypeServices(), defaultTree, getContextManager());
                     }
@@ -1742,7 +1742,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
 		return false;

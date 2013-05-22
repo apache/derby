@@ -113,7 +113,7 @@ class VTIDeferModPolicy implements Visitor
     private DeferModification deferralControl;
     private int statementType;
     private int tableNumber;
-    private final HashSet columns = new HashSet();
+    private final HashSet<String> columns = new HashSet<String>();
 
     private VTIDeferModPolicy( FromVTI targetVTI,
                                String[] columnNames,

@@ -98,7 +98,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 idea of what this Optimizable's "best access path" is, so we have to
 	 keep track of them all.
 	*/
-	private HashMap bestPlanMap;
+	private HashMap<Object,AccessPathImpl> bestPlanMap;
 
 	/** Operations that can be performed on bestPlanMap. */
 	protected static final short REMOVE_PLAN = 0;
@@ -530,9 +530,9 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			// If the bestPlanMap already exists, search for an
 			// AccessPath for the received key and use that if we can.
 			if (bestPlanMap == null)
-				bestPlanMap = new HashMap();
+				bestPlanMap = new HashMap<Object,AccessPathImpl>();
 			else
-				ap = (AccessPathImpl)bestPlanMap.get(planKey);
+				ap = bestPlanMap.get(planKey);
 
 			// If we don't already have an AccessPath for the key,
 			// create a new one.  If the key is an OptimizerImpl then
@@ -560,7 +560,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		if (bestPlanMap == null)
 			return;
 
-		ap = (AccessPathImpl)bestPlanMap.get(planKey);
+		ap = bestPlanMap.get(planKey);
 
 		// It might be the case that there is no plan stored for
 		// the key, in which case there's nothing to load.

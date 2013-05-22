@@ -60,7 +60,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 public class RowResultSetNode extends FromTable
 {
 	SubqueryList subquerys;
-    private List aggregates;
+    private List<AggregateNode> aggregates;
 	OrderByList	 orderByList;
     ValueNode    offset; // OFFSET n ROWS
     ValueNode    fetchFirst; // FETCH FIRST n ROWS ONLY
@@ -231,7 +231,7 @@ public class RowResultSetNode extends FromTable
 										C_NodeTypes.SUBQUERY_LIST,
 										getContextManager());
 
-        aggregates = new ArrayList();
+        aggregates = new ArrayList<AggregateNode>();
 
 		/* Verify that there are no DEFAULTs in the RCL.
 		 * DEFAULT is only valid for an insert, and it has

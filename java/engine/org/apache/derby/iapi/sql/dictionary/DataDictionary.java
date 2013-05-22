@@ -1860,7 +1860,7 @@ public interface DataDictionary
 	/**
 	 * Gets all statistics Descriptors for a given table.
 	 */
-	public List getStatisticsDescriptors(TableDescriptor td)
+	public List<StatisticsDescriptor> getStatisticsDescriptors(TableDescriptor td)
 		throws StandardException;
 
 	/**

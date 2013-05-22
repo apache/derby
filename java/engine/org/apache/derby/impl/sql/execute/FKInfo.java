@@ -190,7 +190,7 @@ public class FKInfo implements Formatable
 			return (FKInfo[])null;
 		}
 
-		Vector newfksVector = new Vector();
+		Vector<FKInfo> newfksVector = new Vector<FKInfo>();
 		FKInfo[] newfks = null;
 
 		/*

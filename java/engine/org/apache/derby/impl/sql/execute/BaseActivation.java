@@ -112,7 +112,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	private GeneratedClass gc;	// my Generated class object.
 
 	private boolean checkRowCounts;
-	private HashSet rowCountsCheckedThisExecution = new HashSet(4, 0.9f);
+	private HashSet<Integer> rowCountsCheckedThisExecution = new HashSet<Integer>(4, 0.9f);
 
 	private static final long MAX_SQRT = (long) Math.sqrt(Long.MAX_VALUE);
 
@@ -1535,7 +1535,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		throws StandardException
 	{
 		rs.openCore();
-		Vector rowCache = new Vector();
+		Vector<ExecRow> rowCache = new Vector<ExecRow>();
 		ExecRow aRow;
 		int cacheSize = 0;
 		FormatableBitSet toClone = null;
@@ -1616,16 +1616,16 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 	// maintain hash table of parent result set vector
 	// a table can have more than one parent source.
-	protected Hashtable parentResultSets;
+	protected Hashtable<String,Vector<TemporaryRowHolder>> parentResultSets;
 	public void setParentResultSet(TemporaryRowHolder rs, String resultSetId)
 	{
-		Vector  rsVector;
+		Vector<TemporaryRowHolder>  rsVector;
 		if(parentResultSets == null)
-			parentResultSets = new Hashtable();
-		rsVector = (Vector) parentResultSets.get(resultSetId);
+			parentResultSets = new Hashtable<String,Vector<TemporaryRowHolder>>();
+		rsVector = (Vector<TemporaryRowHolder>) parentResultSets.get(resultSetId);
 		if(rsVector == null)
 		{
-			rsVector = new Vector();
+			rsVector = new Vector<TemporaryRowHolder>();
 			rsVector.addElement(rs);
 		}else
 		{
@@ -1638,12 +1638,12 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * get the reference to parent table ResultSets, that will be needed by the 
 	 * referential action dependent table scans.
 	 */
-	public Vector getParentResultSet(String resultSetId)
+	public Vector<TemporaryRowHolder> getParentResultSet(String resultSetId)
 	{
-		return (Vector) parentResultSets.get(resultSetId);
+		return (Vector<TemporaryRowHolder>) parentResultSets.get(resultSetId);
 	}
 
-	public Enumeration getParentResultSetKeys()
+	public Enumeration<String> getParentResultSetKeys()
 	{
 		return parentResultSets.keys();
 	}

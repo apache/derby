@@ -4284,7 +4284,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
 		/* The following conditions must be met, regardless of the value of permuteOrdering,
@@ -4365,7 +4365,7 @@ public class FromBaseTable extends FromTable
 			return false;
 		}
 
-		HashSet columns = new HashSet();
+		HashSet<ValueNode> columns = new HashSet<ValueNode>();
 		for (int i = 0; i < resultColumns.size(); i++) {
 			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
 			columns.add(rc.getExpression());

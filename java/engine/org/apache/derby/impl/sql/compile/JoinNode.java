@@ -87,7 +87,7 @@ public class JoinNode extends TableOperatorNode
 	private PredicateList rightPredicateList;
 
 	protected boolean flattenableJoin = true;
-    List                aggregates;
+    List<AggregateNode>                aggregates;
 	SubqueryList		subqueryList;
 	ValueNode			joinClause;
 	boolean	            joinClauseNormalized;
@@ -806,7 +806,7 @@ public class JoinNode extends TableOperatorNode
 		subqueryList = (SubqueryList) getNodeFactory().getNode(
 											C_NodeTypes.SUBQUERY_LIST,
 											getContextManager());
-        aggregates = new ArrayList();
+        aggregates = new ArrayList<AggregateNode>();
 
         CompilerContext cc = getCompilerContext();
         
@@ -973,7 +973,7 @@ public class JoinNode extends TableOperatorNode
         ResultColumnList rightRCL =
                 getRightResultSet().getAllResultColumns(null);
 
-        List columnNames = extractColumnNames(leftRCL);
+        List<String> columnNames = extractColumnNames(leftRCL);
         columnNames.retainAll(extractColumnNames(rightRCL));
 
         ResultColumnList commonColumns =
@@ -1000,8 +1000,8 @@ public class JoinNode extends TableOperatorNode
      * @param rcl the result column list to extract the names from
      * @return a list of all the column names in the RCL
      */
-    private static List extractColumnNames(ResultColumnList rcl) {
-        ArrayList names = new ArrayList();
+    private static List<String> extractColumnNames(ResultColumnList rcl) {
+        ArrayList<String> names = new ArrayList<String>();
 
         for (int i = 0; i < rcl.size(); i++) {
             ResultColumn rc = (ResultColumn) rcl.elementAt(i);
@@ -1897,7 +1897,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
 		/* RESOLVE - easiest thing for now is to only consider the leftmost child */
@@ -1948,7 +1948,7 @@ public class JoinNode extends TableOperatorNode
 		this.subqueryList = subqueryList;
 	}
 
-    void setAggregates(List aggregates)
+    void setAggregates(List<AggregateNode> aggregates)
 	{
         this.aggregates = aggregates;
 	}

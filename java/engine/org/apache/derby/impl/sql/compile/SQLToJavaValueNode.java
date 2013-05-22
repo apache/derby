@@ -185,7 +185,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     JavaValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		/* Bind the expression under us */

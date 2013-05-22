@@ -105,7 +105,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * @see ValueNode#bindExpression
      */
     ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
+            FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
     {
         if (window instanceof WindowReferenceNode) {

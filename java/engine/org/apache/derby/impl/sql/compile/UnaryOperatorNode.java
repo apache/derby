@@ -306,7 +306,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 */
 
     ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
+            FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
         bindOperand(fromList, subqueryList, aggregates);
@@ -324,7 +324,7 @@ public class UnaryOperatorNode extends OperatorNode
      * method to bind the operand.
 	 */
 	protected void bindOperand(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
+            FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
         operand = operand.bindExpression(fromList, subqueryList, aggregates);

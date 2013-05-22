@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
@@ -342,7 +343,7 @@ public interface CompilerContext extends Context
 	 * @param objs	 The new saved objects
      * @throws NullPointerException if {@code objs} is null
 	 */
-    void setSavedObjects(List objs);
+    void setSavedObjects(List<Object> objs);
 
 	/**
 	 * Set the in use state for the compiler context.
@@ -576,7 +577,7 @@ public interface CompilerContext extends Context
 	/**
 	 * @return The list of required privileges.
 	 */
-	public List getRequiredPermissionsList();
+	public List<StatementPermission>getRequiredPermissionsList();
     
 	/**
 	 * Add a sequence descriptor to the list of referenced sequences.

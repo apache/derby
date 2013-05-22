@@ -42,7 +42,7 @@ public class BasicSortObserver implements SortObserver
 	protected boolean	distinct;
 	private	  boolean	reuseWrappers;
 	private	  ExecRow	execRow;
-	private	  Vector	vector;
+	private	  Vector<DataValueDescriptor[]>	vector;
 
 	/**
 	 * Simple constructor
@@ -64,7 +64,7 @@ public class BasicSortObserver implements SortObserver
 		this.distinct = distinct;
 		this.execRow = execRow;
 		this.reuseWrappers = reuseWrappers;
-		vector = new Vector();
+		vector = new Vector<DataValueDescriptor[]>();
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class BasicSortObserver implements SortObserver
 
 		if (lastElement > 0)
 		{
-			DataValueDescriptor[] retval = (DataValueDescriptor[]) vector.elementAt(lastElement - 1);
+			DataValueDescriptor[] retval = vector.elementAt(lastElement - 1);
 			vector.removeElementAt(lastElement - 1);
 			return retval;
 		}

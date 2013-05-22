@@ -186,6 +186,7 @@ public	class	DDUtils
 	**checks whether the foreign key relation ships referential action
 	**is violating the restrictions we have in the current system.
 	**/
+    @SuppressWarnings("unchecked")
 	public static void validateReferentialActions
     (
 		DataDictionary	dd,
@@ -226,7 +227,7 @@ public	class	DDUtils
 		//check whether the foreign key relation ships referential action
 		//is not violating the restrictions we have in the current system.
 		TableDescriptor refTd = otherConstraintInfo.getReferencedTableDescriptor(dd);
-		Hashtable deleteConnHashtable = new Hashtable();
+		Hashtable<String,Integer> deleteConnHashtable = new Hashtable<String,Integer>();
 		//find whether the foreign key is self referencing.
 		boolean isSelfReferencingFk = (refTd.getUUID().equals(td.getUUID()));
 		String refTableName = refTd.getSchemaName() + "." + refTd.getName();
@@ -234,7 +235,7 @@ public	class	DDUtils
 		int currentSelfRefValue = getCurrentDeleteConnections(dd, td, -1, deleteConnHashtable, false, true);
 		validateDeleteConnection(dd, td, refTd, 
 								 refAction, 
-								 deleteConnHashtable, (Hashtable) deleteConnHashtable.clone(),
+								 deleteConnHashtable, (Hashtable<String,Integer>) deleteConnHashtable.clone(),
 								 true, myConstraintName, false , 
 								 new StringBuffer(0), refTableName,
 								 isSelfReferencingFk,
@@ -263,7 +264,7 @@ public	class	DDUtils
 	 DataDictionary	dd,
 	 TableDescriptor	td,
 	 int refActionType,
-	 Hashtable dch,
+	 Hashtable<String,Integer> dch,
 	 boolean prevNotCascade,
 	 boolean findSelfRef
 	 )
@@ -366,8 +367,8 @@ public	class	DDUtils
 		TableDescriptor actualTd,  // the table we are adding the foriegn key.
 		TableDescriptor	refTd,
 		int refActionType,
-		Hashtable dch,
-		Hashtable ech,  //existing delete connections
+		Hashtable<String,Integer> dch,
+		Hashtable<String,Integer> ech,  //existing delete connections
 		boolean checkImmediateRefTable,
 		String myConstraintName,
 		boolean prevNotCascade,
@@ -755,7 +756,7 @@ public	class	DDUtils
 	 DataDictionary	dd,
 	 TableDescriptor td,
 	 int refActionType,
-	 Hashtable newDconnHashTable,
+	 Hashtable<String,Integer> newDconnHashTable,
 	 String myConstraintName
 	 )
 	throws StandardException
@@ -788,7 +789,7 @@ public	class	DDUtils
 				
 				//Note: More than one table can refer to the same
 				//ReferencedKeyConstraintDescriptor, so we need to find all the tables.
-				Hashtable dConnHashtable = new Hashtable();
+				Hashtable<String,Integer> dConnHashtable = new Hashtable<String,Integer>();
 				for (int inner = 0; inner < size; inner++)
 				{
 					ForeignKeyConstraintDescriptor fkcd = (ForeignKeyConstraintDescriptor) fkcdl.elementAt(inner);
@@ -814,16 +815,16 @@ public	class	DDUtils
 						**referential action and only one SET NULL path.
 						**/
 
-						for (Enumeration e = dConnHashtable.keys() ; e.hasMoreElements() ;) 
+						for (Enumeration<String> e = dConnHashtable.keys() ; e.hasMoreElements() ;) 
 						{
-							String tName = (String) e.nextElement();
+							String tName = e.nextElement();
 							//we should not check for the table name to which  we are
 							//adding the foreign key relation ship.
 							if(!tName.equals(addTableName))
 							{
 								if(newDconnHashTable.containsKey(tName))
 								{
-									int currentDeleteRule = ((Integer)	dConnHashtable.get(tName)).intValue();
+									int currentDeleteRule = (dConnHashtable.get(tName)).intValue();
 									if((currentDeleteRule == StatementType.RA_SETNULL
 										&& raDeleteRuleToAddTable == StatementType.RA_SETNULL) ||
 									   currentDeleteRule  != raDeleteRuleToAddTable)

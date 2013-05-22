@@ -105,7 +105,7 @@ public abstract class EmbedStatement extends ConnectionChild
 
     //in case of batch update, save the individual statements in the batch in this vector
  	//this is only used by JDBC 2.0
- 	Vector batchStatements;
+ 	Vector<Object> batchStatements;
 	
 	// The maximum # of rows to return per result set.
 	// (0 means no limit.)
@@ -1005,7 +1005,7 @@ public abstract class EmbedStatement extends ConnectionChild
 		checkStatus();
   	  synchronized (getConnectionSynchronization()) {
 		  if (batchStatements == null)
-			  batchStatements = new Vector();
+			  batchStatements = new Vector<Object>();
         batchStatements.add(sql);
   		}
 	}
@@ -1069,7 +1069,7 @@ public abstract class EmbedStatement extends ConnectionChild
 			// setup and restore themselves.
 			clearResultSets();
 
-			Vector stmts = batchStatements;
+			Vector<Object> stmts = batchStatements;
 			batchStatements = null;
 			int size;
 			if (stmts == null)

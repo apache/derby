@@ -158,7 +158,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
 
         // Find all unique columns referenced and add those to windowing result
         // set.
-        ArrayList uniqueCols = new ArrayList();
+        ArrayList<ValueNode> uniqueCols = new ArrayList<ValueNode>();
         for (int i= 0; i< colRefs.size(); i++) {
             ColumnReference cr = (ColumnReference) colRefs.get(i);
             if (!colRefAlreadySeen(uniqueCols, cr)) {
@@ -170,11 +170,11 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         // substitute references in original node to point to the Windowing
         // result set. Happens for example when we have a window over a group
         // by.
-        CollectNodesVisitor getVCVisitor =
-            new CollectNodesVisitor(VirtualColumnNode.class);
+        CollectNodesVisitor<VirtualColumnNode> getVCVisitor =
+            new CollectNodesVisitor<VirtualColumnNode>(VirtualColumnNode.class);
 
         parent.getResultColumns().accept(getVCVisitor);
-        List vcs = getVCVisitor.getList();
+        List<VirtualColumnNode> vcs = getVCVisitor.getList();
 
         // Add any virtual columns to windowing result.
         for (int i= 0; i< vcs.size(); i++) {

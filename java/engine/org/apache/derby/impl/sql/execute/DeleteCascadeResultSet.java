@@ -131,7 +131,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			}
 
 			runFkChecker(true); //check for only RESTRICT referential action rule violations
-			Hashtable mntHashTable = new Hashtable(); //Hash Table to identify  mutiple node for same table cases. 
+			Hashtable<String,String> mntHashTable = new Hashtable<String,String>(); //Hash Table to identify  mutiple node for same table cases. 
 			mergeRowHolders(mntHashTable);
 			fireBeforeTriggers(mntHashTable);
 			deleteDeferredRows();
@@ -210,7 +210,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	}
 
 
-	void fireBeforeTriggers(Hashtable msht) throws StandardException
+	void fireBeforeTriggers(Hashtable<String,String> msht) throws StandardException
 	{
 		if(!mainNodeForTable) 
 		{
@@ -351,7 +351,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	//if there is more than one node for the same table, copy the rows
 	// into one node , so that we don't fire trigger more than once.
-	private void mergeRowHolders(Hashtable msht) throws StandardException
+	private void mergeRowHolders(Hashtable<String,String> msht) throws StandardException
 	{
 		if(msht.containsKey(resultSetId) || rowCount ==0)
 		{

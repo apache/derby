@@ -216,7 +216,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    abstract JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    abstract JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 							throws StandardException;
 	/**
 	 * @see ValueNode#preprocess

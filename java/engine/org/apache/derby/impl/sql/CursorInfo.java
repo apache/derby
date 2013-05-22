@@ -59,7 +59,7 @@ public class CursorInfo
 	********************************************************/
 
 	ExecCursorTableReference	targetTable; 
-    List                        updateColumns;
+    List<String>          updateColumns;
 	int 						updateMode;
 
 	/**
@@ -76,13 +76,13 @@ public class CursorInfo
 	(
 		int							updateMode,
 		ExecCursorTableReference	targetTable,
-        List                        updateColumns
+        List<String>             updateColumns
 	)
 	{
 		this.updateMode = updateMode;
 		this.targetTable = targetTable;
         this.updateColumns = (updateColumns == null) ?
-                null : new ArrayList(updateColumns);
+                updateColumns : new ArrayList<String>(updateColumns);
 	}
 
 	//////////////////////////////////////////////

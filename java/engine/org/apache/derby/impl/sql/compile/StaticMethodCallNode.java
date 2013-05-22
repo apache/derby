@@ -176,7 +176,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * @exception StandardException		Thrown on error
 	 */
     JavaValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		// for a function we can get called recursively
@@ -494,7 +494,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * be required.
 	 */
     private void resolveRoutine(FromList fromList, SubqueryList subqueryList,
-                                List aggregates, SchemaDescriptor sd)
+                                List<AggregateNode> aggregates, SchemaDescriptor sd)
             throws StandardException {
 		if (sd.getUUID() != null) {
 
@@ -672,7 +672,7 @@ public class StaticMethodCallNode extends MethodCallNode
         (
          FromList fromList,
          SubqueryList subqueryList,
-         List aggregates,
+         List<AggregateNode> aggregates,
          RoutineAliasInfo rai,
          int    parameterCount, // number of declared routine args
          DataTypeDescriptor paramdtd,   // declared type of routine arg

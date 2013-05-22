@@ -80,7 +80,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 
     private Thread serverThread;
     private static final String serverClassName = "org.apache.derby.impl.drda.NetworkServerControlImpl";
-    private Class serverClass;
+    private Class<?> serverClass;
 	
 	private InetAddress listenAddress =null;
 	private int portNumber = -1;
@@ -137,7 +137,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
      * @throws NoSuchMethodException 
      * @throws SecurityException 
      */
-    private void findStartStopMethods(final Class serverClass)
+    private void findStartStopMethods(final Class<?> serverClass)
         throws SecurityException, NoSuchMethodException
     {
         // Methods are public so no need for privilege blocks.
@@ -179,9 +179,9 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
             Constructor  serverConstructor;
             try
             {
-                serverConstructor = (Constructor) AccessController.doPrivileged(
-			      new PrivilegedExceptionAction() {
-						  public Object run() throws NoSuchMethodException, SecurityException
+                serverConstructor = AccessController.doPrivileged(
+			      new PrivilegedExceptionAction<Constructor>() {
+						  public Constructor run() throws NoSuchMethodException, SecurityException
 						  {
 							  if (listenAddress == null)
 								  return serverClass.getConstructor(
@@ -260,7 +260,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 				serverShutdownMethod.invoke( server,
 											 null);
 				AccessController.doPrivileged(
-							      new PrivilegedAction() {
+							      new PrivilegedAction<Object>() {
 								  public Object run() {
 								      serverThread.interrupt();
 								      return null;

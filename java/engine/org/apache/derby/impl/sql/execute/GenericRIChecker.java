@@ -54,7 +54,7 @@ public abstract class GenericRIChecker
 	protected StaticCompiledOpenConglomInfo refScoci;
 	protected TransactionController		tc;
 
-	private Hashtable 		scanControllers;
+	private Hashtable<Long,ScanController> 		scanControllers;
 	private int				numColumns;
 	private	IndexRow		indexQualifierRow;
 
@@ -69,7 +69,7 @@ public abstract class GenericRIChecker
 	{
 		this.fkInfo = fkinfo;
 		this.tc = tc;
-		scanControllers = new Hashtable();
+		scanControllers = new Hashtable<Long,ScanController>();
 		numColumns = fkInfo.colArray.length;
 		indexQualifierRow = new IndexRow(numColumns);
 
@@ -135,7 +135,7 @@ public abstract class GenericRIChecker
 		** If we haven't already opened this scan controller,
 		** we'll open it now and stick it in the hash table.
 		*/
-		if ((scan = (ScanController)scanControllers.get(hashKey)) == null)
+		if ((scan = scanControllers.get(hashKey)) == null)
 		{
 			setupQualifierRow(searchRow);
 			scan = 
@@ -222,10 +222,10 @@ public abstract class GenericRIChecker
 	void close()
 		throws StandardException
 	{
-		Enumeration e = scanControllers.elements();
+		Enumeration<ScanController> e = scanControllers.elements();
 		while (e.hasMoreElements())
 		{
-			ScanController scan = (ScanController)e.nextElement();
+			ScanController scan = e.nextElement();
 			scan.close();
 		}
 		scanControllers.clear();

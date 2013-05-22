@@ -48,13 +48,13 @@ class EmbedConnectionContext extends ContextImpl
 		collected as modules hold onto the ContextManager and thus there would
 		be a direct reference through this object.
 	*/
-	private java.lang.ref.SoftReference	connRef;
+	private java.lang.ref.SoftReference<EmbedConnection>	connRef;
 
 
 	EmbedConnectionContext(ContextManager cm, EmbedConnection conn) {
 		super(cm, ConnectionContext.CONTEXT_ID);
 
-		connRef = new java.lang.ref.SoftReference(conn);
+		connRef = new java.lang.ref.SoftReference<EmbedConnection>(conn);
 	}
 
 	public void cleanupOnError(Throwable error) {
@@ -62,7 +62,7 @@ class EmbedConnectionContext extends ContextImpl
 		if (connRef == null)
 			return;
 
-		EmbedConnection conn = (EmbedConnection) connRef.get();
+		EmbedConnection conn = connRef.get();
 
 		if (error instanceof StandardException) {
 
@@ -102,7 +102,7 @@ class EmbedConnectionContext extends ContextImpl
 	*/
 	public java.sql.Connection getNestedConnection(boolean internal) throws SQLException {
 
-		EmbedConnection conn = (EmbedConnection) connRef.get();
+		EmbedConnection conn = connRef.get();
 
 		if ((conn == null) || conn.isClosed())
 			throw Util.noCurrentConnection();
@@ -127,7 +127,7 @@ class EmbedConnectionContext extends ContextImpl
 		ResultSet 				executionResultSet
 	) throws SQLException
 	{
-		EmbedConnection conn = (EmbedConnection) connRef.get();
+		EmbedConnection conn = connRef.get();
 
 		EmbedResultSet rs = conn.getLocalDriver().newEmbedResultSet(conn, executionResultSet, 
 							false, (EmbedStatement) null, true);
@@ -146,7 +146,7 @@ class EmbedConnectionContext extends ContextImpl
      *   @see EmbedStatement#processDynamicResult(EmbedConnection, java.sql.ResultSet, EmbedStatement)
      */
     public boolean processInaccessibleDynamicResult(java.sql.ResultSet resultSet) {
-        EmbedConnection conn = (EmbedConnection) connRef.get();
+        EmbedConnection conn = connRef.get();
         if (conn == null)
             return false;
         

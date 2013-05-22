@@ -64,7 +64,7 @@ public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
         bindOperand(fromList, subqueryList, aggregates);

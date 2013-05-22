@@ -129,13 +129,20 @@ public class TriggerEventActivator
 		setupExecutors(triggerInfo);
 	}
 
+    /** Perform the cast needed to a list of triggers from the executorLists */
+    @SuppressWarnings("unchecked")
+    private Vector<TriggerDescriptor>   getTriggers( int idx, Vector[] executorLists )
+    {
+        return (Vector<TriggerDescriptor>) executorLists[ idx ];
+    }
+    
 	private void setupExecutors(TriggerInfo triggerInfo) throws StandardException
 	{
 		executors = new GenericTriggerExecutor[TriggerEvent.MAX_EVENTS][];
 		Vector[] executorLists = new Vector[TriggerEvent.MAX_EVENTS];
 		for (int i = 0; i < TriggerEvent.MAX_EVENTS; i++)
 		{
-			executorLists[i] = new Vector();
+			executorLists[i] = new Vector<TriggerDescriptor>();
 		}
 
 		for (int i = 0; i < triggerInfo.triggerArray.length; i++)
@@ -146,11 +153,11 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_INSERT:
 					if (td.isBeforeTrigger())
 					{
-						executorLists[TriggerEvent.BEFORE_INSERT].addElement(td);
+						getTriggers( TriggerEvent.BEFORE_INSERT, executorLists ).addElement( td );
 					}
 					else
 					{
-						executorLists[TriggerEvent.AFTER_INSERT].addElement(td);
+						getTriggers( TriggerEvent.AFTER_INSERT, executorLists ).addElement( td );
 					}
 					break;
 
@@ -158,22 +165,22 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_DELETE:
 					if (td.isBeforeTrigger())
 					{
-						executorLists[TriggerEvent.BEFORE_DELETE].addElement(td);
+						getTriggers( TriggerEvent.BEFORE_DELETE, executorLists ).addElement( td );
 					}
 					else
 					{
-						executorLists[TriggerEvent.AFTER_DELETE].addElement(td);
+						getTriggers( TriggerEvent.AFTER_DELETE, executorLists ).addElement( td );
 					}
 					break;
 
 				case TriggerDescriptor.TRIGGER_EVENT_UPDATE:
 					if (td.isBeforeTrigger())
 					{
-						executorLists[TriggerEvent.BEFORE_UPDATE].addElement(td);
+						getTriggers( TriggerEvent.BEFORE_UPDATE, executorLists ).addElement( td );
 					}
 					else
 					{
-						executorLists[TriggerEvent.AFTER_UPDATE].addElement(td);
+						getTriggers( TriggerEvent.AFTER_UPDATE, executorLists ).addElement( td );
 					}
 					break;
 				default:

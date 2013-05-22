@@ -68,7 +68,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	/* Hashtable used for tracking the search clause types that have been
 	 * pushed through this predicate (if an equijoin) via transitive closure.
 	 */
-    private Set searchClauses;
+    private Set<Integer> searchClauses;
 
 	// Whether or not this predicate has been scoped; see the
 	// getPredScopedForResultSet() method of this class for more.
@@ -571,7 +571,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	void setTransitiveSearchClauseAdded(RelationalOperator ro)
 	{
         if (searchClauses == null) {
-            searchClauses = new HashSet();
+            searchClauses = new HashSet<Integer>();
         }
 		/* I have to remember that this ro has been added to this predicate as a
 		 * transitive search clause.

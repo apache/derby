@@ -376,7 +376,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	{
 		if (SanityManager.DEBUG)
 		{
-			Map printed =
+			Map<Object,Object> printed =
 				getLanguageConnectionContext().getPrintedObjectsMap();
 
 			if (printed.containsKey(this)) {

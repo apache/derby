@@ -345,10 +345,10 @@ public class JarUtil
         throws IOException
     {
         try {
-            return (InputStream) AccessController.doPrivileged
-            (new java.security.PrivilegedExceptionAction(){
+            return AccessController.doPrivileged
+            (new java.security.PrivilegedExceptionAction<InputStream>(){
                 
-                public Object run() throws IOException {    
+                public InputStream run() throws IOException {    
                     try {
                         return new URL(externalPath).openStream();
                     } catch (MalformedURLException mfurle)
@@ -376,10 +376,10 @@ public class JarUtil
             final long currentGenerationId)
             throws StandardException {
         try {
-            return ((Long) AccessController
-                    .doPrivileged(new java.security.PrivilegedExceptionAction() {
+            return (AccessController
+                    .doPrivileged(new java.security.PrivilegedExceptionAction<Long>() {
 
-                        public Object run() throws StandardException {
+                        public Long run() throws StandardException {
                             long generationId;
                             
                             if (add)

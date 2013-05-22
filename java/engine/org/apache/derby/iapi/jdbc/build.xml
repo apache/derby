@@ -58,7 +58,7 @@
       </classpath>
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/*42.java"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target> 
 
@@ -80,7 +80,7 @@
               <pathelement path="${java18compile.classpath}"/>
           </classpath>
           <include name="${derby.dir}/${cur.dir}/*42.java"/>
-          <!-- <compilerarg value="-Xlint:unchecked"/> -->
+          <compilerarg value="-Xlint:unchecked"/>
       </javac>
   </target> 
 

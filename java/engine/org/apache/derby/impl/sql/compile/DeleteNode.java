@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
 import org.apache.derby.iapi.sql.StatementType;
@@ -688,7 +689,7 @@ public class DeleteNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-        ArrayList conglomerates = new ArrayList();
+        ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
 		relevantTriggers = new GenericDescriptorList();
 
         FormatableBitSet columnMap = DeleteNode.getDeleteReadMap(baseTable,
@@ -914,7 +915,7 @@ public class DeleteNode extends DMLModStatementNode
 	private static FormatableBitSet getDeleteReadMap
 	(
 		TableDescriptor				baseTable,
-        List                        conglomerates,
+        List<ConglomerateDescriptor>  conglomerates,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing
 	)

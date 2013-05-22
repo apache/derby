@@ -132,10 +132,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
     //         ( select * from table (syscs_diag.space_table( systabs.tablename )) as t2 ) tt
     //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
     //
-    private ArrayList   outerFromLists = new ArrayList();
+    private ArrayList<FromList>   outerFromLists = new ArrayList<FromList>();
     
     // for remapping column references in VTI args at code generation time
-    private HashMap argSources = new HashMap();
+    private HashMap<Integer,FromTable> argSources = new HashMap<Integer,FromTable>();
 
     /**
 	 * @param invocation		The constructor or static method for the VTI
@@ -541,7 +541,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * Correlated subqueries are not allowed as parameters to
 		 * a VTI, so pass an empty FromList.
 		 */
-        ArrayList aggregates = new ArrayList();
+        ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
         methodCall.bindExpression(fromListParam, subqueryList, aggregates);
 
 		// Is the parameter list to the constructor valid for a VTI?
@@ -902,7 +902,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * These CRs will have uninitialized column and table numbers.
 		 */
 		List colRefs = getNodesFromParameters(ColumnReference.class);
-        ArrayList aggregates = null;
+        ArrayList<AggregateNode> aggregates = null;
 		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
 			ColumnReference ref = (ColumnReference) it.next();
@@ -929,7 +929,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
                 //
                 for ( int i = 0; i < outerFromLists.size(); i++ )
                 {
-                    FromTable   fromTable = columnInFromList( (FromList) outerFromLists.get( i ), ref );
+                    FromTable   fromTable = columnInFromList( outerFromLists.get( i ), ref );
 
                     if ( fromTable != null )
                     {
@@ -965,7 +965,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 				// we need a fake agg list
                 if (aggregates == null)
 				{
-                    aggregates = new ArrayList();
+                    aggregates = new ArrayList<AggregateNode>();
 				}
 				ref.bindExpression(fromListParam,
 									subqueryList,
@@ -1305,9 +1305,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
      * to the actual names of columns in the table function. This is useful
      * because the predicate refers to the exposed column names.
      */
-    private HashMap computeProjection( ) throws StandardException
+    private HashMap<String,String> computeProjection( ) throws StandardException
     {
-        HashMap  nameMap = new HashMap();
+        HashMap<String,String>  nameMap = new HashMap<String,String>();
 
         ResultColumnList allVTIColumns = getResultColumns();
         int              totalColumnCount = allVTIColumns.size();
@@ -1337,7 +1337,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
      * @param parentPredicates The full list of predicates to be applied by the parent ProjectRestrictNode
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
-    private void computeRestriction( PredicateList parentPredicates, HashMap columnNameMap )
+    private void computeRestriction( PredicateList parentPredicates, HashMap<String,String> columnNameMap )
         throws StandardException
     {
         if ( parentPredicates == null )  { return; }
@@ -1613,7 +1613,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		for (Iterator it = colRefs.iterator(); it.hasNext(); )
 		{
 			ColumnReference ref = (ColumnReference) it.next();
-            FromTable   fromTable = (FromTable) argSources.get( new Integer( ref.getTableNumber() ) );
+            FromTable   fromTable = argSources.get( new Integer( ref.getTableNumber() ) );
 
             if ( fromTable != null )
             {
@@ -2022,8 +2022,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
         throws StandardException
     {
         Constructor     constructor = null;
-        Class           vtiClass = lookupClass( className );
-        Class           vtiCostingClass = lookupClass( VTICosting.class.getName() );
+        Class<?>           vtiClass = lookupClass( className );
+        Class<?>           vtiCostingClass = lookupClass( VTICosting.class.getName() );
 
         try {
             if ( !vtiCostingClass.isAssignableFrom( vtiClass ) ) { return false; }
@@ -2059,7 +2059,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
         if ( !isDerbyStyleTableFunction ) { return (version2) ? (VTICosting) ps : (VTICosting) rs; }
         
         String              className = methodCall.getJavaClassName();
-        Class               vtiClass = lookupClass( className );
+        Class<?>               vtiClass = lookupClass( className );
         
         try {
             Constructor         constructor = vtiClass.getConstructor( new Class[] {} );

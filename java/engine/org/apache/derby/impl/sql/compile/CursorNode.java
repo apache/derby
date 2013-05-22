@@ -63,13 +63,13 @@ public class CursorNode extends DMLStatementNode
 	** There can only be a list of updatable columns when FOR UPDATE
 	** is specified as part of the cursor specification.
 	*/
-	private List updatableColumns;
+	private List<String> updatableColumns;
 	private FromTable updateTable;
     /**
      * List of {@code TableDescriptor}s for base tables whose associated
      * indexes should be checked for stale statistics.
      */
-    private ArrayList statsToUpdate;
+    private ArrayList<TableDescriptor> statsToUpdate;
     private boolean checkIndexStats;
 
 	//If cursor references session schema tables, save the list of those table names in savedObjects in compiler context
@@ -97,7 +97,7 @@ public class CursorNode extends DMLStatementNode
 	 *			provided if the updateMode parameter is
 	 *			CursorNode.UPDATE.
 	 */
-
+    @SuppressWarnings("unchecked")
 	public	void init(
 		Object statementType,
 		Object resultSet,
@@ -118,7 +118,7 @@ public class CursorNode extends DMLStatementNode
         this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		this.updateMode = ((Integer) updateMode).intValue();
-		this.updatableColumns = (List) updatableColumns;
+		this.updatableColumns = (List<String>) updatableColumns;
 
 		/*
 		** This is a sanity check and not an error since the parser
@@ -384,7 +384,7 @@ public class CursorNode extends DMLStatementNode
 		{
 			//If this cursor has references to session schema tables, save the names of those tables into compiler context
 			//so they can be passed to execution phase.
-			ArrayList sessionSchemaTableNames = getSessionSchemaTableNamesForCursor();
+			ArrayList<String> sessionSchemaTableNames = getSessionSchemaTableNamesForCursor();
 			if (sessionSchemaTableNames != null)
 				indexOfSessionTableNamesInSavedObjects = getCompilerContext().addSavedObject(sessionSchemaTableNames);
 		}
@@ -422,7 +422,7 @@ public class CursorNode extends DMLStatementNode
         if (checkIndexStats &&
                 td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
             if (statsToUpdate == null) {
-                statsToUpdate = new ArrayList();
+                statsToUpdate = new ArrayList<TableDescriptor>();
             }
             statsToUpdate.add(td);
         }
@@ -445,13 +445,13 @@ public class CursorNode extends DMLStatementNode
 	//Check if this cursor references any session schema tables. If so, pass those names to execution phase through savedObjects
 	//This list will be used to check if there are any holdable cursors referencing temporary tables at commit time.
 	//If yes, then the data in those temporary tables should be preserved even if they are declared with ON COMMIT DELETE ROWS option
-	protected ArrayList getSessionSchemaTableNamesForCursor()
+	protected ArrayList<String> getSessionSchemaTableNamesForCursor()
 		throws StandardException
 	{
 		FromList fromList = resultSet.getFromList();
 		int fromListSize = fromList.size();
 		FromTable fromTable;
-		ArrayList sessionSchemaTableNames = null;
+		ArrayList<String> sessionSchemaTableNames = null;
 
 		for( int i = 0; i < fromListSize; i++)
 		{
@@ -459,7 +459,7 @@ public class CursorNode extends DMLStatementNode
 			if (fromTable instanceof FromBaseTable && isSessionSchema(fromTable.getTableDescriptor().getSchemaDescriptor()))
 			{
 				if (sessionSchemaTableNames == null)
-					sessionSchemaTableNames = new ArrayList();
+					sessionSchemaTableNames = new ArrayList<String>();
 				sessionSchemaTableNames.add(fromTable.getTableName().getTableName());
 			}
 		}
@@ -732,7 +732,7 @@ public class CursorNode extends DMLStatementNode
 
 		for (int index = 0; index < size; index++)
 		{
-		    columnName = (String) updatableColumns.get(index);
+		    columnName = updatableColumns.get(index);
 		    tableDescriptor = targetTable.getTableDescriptor();
 		    if ( tableDescriptor.getColumnDescriptor(columnName) == null)
 		    {
@@ -777,7 +777,7 @@ public class CursorNode extends DMLStatementNode
         // Iterate backwards to remove elements, chances are high the stats are
         // mostly up-to-date (minor performance optimization to avoid copy).
         for (int i=statsToUpdate.size() -1; i >= 0; i--) {
-            TableDescriptor td = (TableDescriptor)statsToUpdate.get(i);
+            TableDescriptor td = statsToUpdate.get(i);
             if (td.getAndClearIndexStatsIsUpToDate()) {
                 statsToUpdate.remove(i);
             }

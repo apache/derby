@@ -73,7 +73,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 */
 
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		//following is to check if we have something like "? AND 1=1" or "2>1 OR ?" 

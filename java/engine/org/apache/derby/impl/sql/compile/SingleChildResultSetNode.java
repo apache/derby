@@ -499,7 +499,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
         return childResult.isOrderedOn(crs, permuteOrdering, fbtHolder);

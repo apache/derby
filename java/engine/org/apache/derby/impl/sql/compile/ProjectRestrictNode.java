@@ -1811,7 +1811,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			return false;
 		}
 
-		HashSet columns = new HashSet();
+		HashSet<BaseColumnNode> columns = new HashSet<BaseColumnNode>();
 		for (int i = 0; i < resultColumns.size(); i++) {
 			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
 			BaseColumnNode bc = rc.getBaseColumnNode();

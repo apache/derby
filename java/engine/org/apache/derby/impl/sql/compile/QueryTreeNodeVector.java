@@ -35,7 +35,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 abstract class QueryTreeNodeVector extends QueryTreeNode
 {
-	private final ArrayList v = new ArrayList();
+	private final ArrayList<QueryTreeNode> v = new ArrayList<QueryTreeNode>();
 
 	public final int size()
 	{

@@ -122,7 +122,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	) throws StandardException
 	{
 		GenericAggregator 	aggregators[]; 
-		Vector tmpAggregators = new Vector();
+		Vector<GenericAggregator> tmpAggregators = new Vector<GenericAggregator>();
 		ClassFactory		cf = lcc.getLanguageConnectionFactory().getClassFactory();
 
 		int count = list.size();

@@ -73,7 +73,7 @@ public class ClassInspector
 	public boolean instanceOf(String className, Object obj)
 		throws ClassNotFoundException
 	{
-		Class clazz = getClass(className);
+		Class<?> clazz = getClass(className);
 		// is className an untyped null
 		if (clazz == null)
 			return false;
@@ -126,7 +126,7 @@ public class ClassInspector
 	public boolean accessible(String className)
 		throws ClassNotFoundException
 	{
-		Class theClass = getClass(className);
+		Class<?> theClass = getClass(className);
 		if (theClass == null)
 			return false;
 
@@ -355,7 +355,7 @@ public class ClassInspector
 		Exception e = null;
 		try {
 
-			Class receiverClass = getClass(receiverType);
+			Class<?> receiverClass = getClass(receiverType);
 			if (receiverClass == null)
 				return null;
 			if (receiverClass.isArray() || receiverClass.isPrimitive()) {
@@ -831,7 +831,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		@exception ClassNotFoundException Class cannot be found, or
 		a SecurityException or LinkageException was thrown loading the class.
 	*/
-	public Class getClass(String className) throws ClassNotFoundException {
+	public Class<?> getClass(String className) throws ClassNotFoundException {
 
 		if ((className == null) || 
 			(className.length() == 0))

@@ -168,10 +168,10 @@ public class TableElementList extends QueryTreeNodeVector
 		int numAutoCols = 0;
 
 		int			size = size();
-        HashSet columnNames = new HashSet(size + 2, 0.999f);
-        HashSet constraintNames = new HashSet(size + 2, 0.999f);
+        HashSet<String> columnNames = new HashSet<String>(size + 2, 0.999f);
+        HashSet<String> constraintNames = new HashSet<String>(size + 2, 0.999f);
 		//all the primary key/unique key constraints for this table
-        ArrayList constraints = new ArrayList();
+        ArrayList<Object> constraints = new ArrayList<Object>();
 
 		//special case for alter table (td is not null in case of alter table)
 		if (td != null)
@@ -610,7 +610,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 		cc = getCompilerContext();
 
-        ArrayList aggregates = new ArrayList();
+        ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -738,7 +738,7 @@ public class TableElementList extends QueryTreeNodeVector
         
 		cc = getCompilerContext();
 
-        ArrayList aggregates = new ArrayList();
+        ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -887,8 +887,8 @@ public class TableElementList extends QueryTreeNodeVector
 	void findIllegalGenerationReferences( FromList fromList, TableDescriptor baseTable )
 		throws StandardException
 	{
-        ArrayList   generatedColumns = new ArrayList();
-        HashSet     names = new HashSet();
+        ArrayList<ColumnDefinitionNode>   generatedColumns = new ArrayList<ColumnDefinitionNode>();
+        HashSet<String>     names = new HashSet<String>();
 		int         size = size();
 
         // add in existing generated columns if this is an ALTER TABLE statement
@@ -1371,7 +1371,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateColumns(DDLStatementNode ddlStmt,
-									Set seenNames,
+									Set<String> seenNames,
 									String colName)
 			throws StandardException
 	{
@@ -1399,7 +1399,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
 	private void checkForDuplicateConstraintNames(DDLStatementNode ddlStmt,
-									Set seenNames,
+									Set<String> seenNames,
 									String constraintName)
 			throws StandardException
 	{

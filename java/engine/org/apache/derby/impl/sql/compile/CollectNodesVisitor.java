@@ -89,6 +89,7 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 *
 	 * @return me
 	 */
+    @SuppressWarnings("unchecked")
 	public Visitable visit(Visitable node)
 	{
 		if (nodeClass.isInstance(node))

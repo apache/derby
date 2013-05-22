@@ -36,7 +36,7 @@ import java.util.Vector;
  * @see java.util.Vector
  *
  */
-public class AggregatorInfoList extends Vector implements Formatable 
+public class AggregatorInfoList extends Vector<AggregatorInfo> implements Formatable 
 {
 	/********************************************************
 	**

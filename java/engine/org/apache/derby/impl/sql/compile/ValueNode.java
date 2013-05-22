@@ -366,7 +366,7 @@ public abstract class ValueNode extends QueryTreeNode
 
 	
     ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
+            FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 		throws StandardException
 	{
         return bindExpression(fromList, subqueryList, aggregates, false);

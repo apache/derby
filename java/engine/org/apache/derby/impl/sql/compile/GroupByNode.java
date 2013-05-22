@@ -217,7 +217,7 @@ public class GroupByNode extends SingleChildResultSetNode
 				
 			}
 			if (index == glSize) {
-				isInSortedOrder = childResult.isOrderedOn(crs, true, (List)null);
+				isInSortedOrder = childResult.isOrderedOn(crs, true, (List<FromBaseTable>)null);
 			}
 		}
 	}
@@ -351,15 +351,15 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @see #addNewColumnsForAggregation
 	 */
-	private ArrayList addUnAggColumns() throws StandardException
+	private ArrayList<SubstituteExpressionVisitor> addUnAggColumns() throws StandardException
 	{
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
 		ResultColumnList groupByRCL = resultColumns;
 
-		ArrayList referencesToSubstitute = new ArrayList();
-		ArrayList havingRefsToSubstitute = null;
+		ArrayList<SubstituteExpressionVisitor> referencesToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
+		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
 		if (havingClause != null)
-			havingRefsToSubstitute = new ArrayList();
+			havingRefsToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
 		int sz = groupingList.size();
 		for (int i = 0; i < sz; i++) 
 		{
@@ -454,11 +454,11 @@ public class GroupByNode extends SingleChildResultSetNode
 			}
 			gbc.setColumnPosition(bottomRCL.size());
 		}
-		Comparator sorter = new ExpressionSorter();
+		ExpressionSorter sorter = new ExpressionSorter();
 		Collections.sort(referencesToSubstitute,sorter);
 		for (int r = 0; r < referencesToSubstitute.size(); r++)
 			parent.getResultColumns().accept(
-				(SubstituteExpressionVisitor)referencesToSubstitute.get(r));
+				referencesToSubstitute.get(r));
 		if (havingRefsToSubstitute != null)
 		{
 			Collections.sort(havingRefsToSubstitute,sorter);
@@ -547,7 +547,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		throws StandardException
 	{
 		aggInfo = new AggregatorInfoList();
-		ArrayList havingRefsToSubstitute = null;
+		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
 
 		if (groupingList != null)
 		{
@@ -1247,7 +1247,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
                         // Holder list for the FromBaseTable. We expect no more
                         // than one table, hence initial capacity is 1.
-                        ArrayList fbtHolder = new ArrayList(1);
+                        ArrayList<FromBaseTable> fbtHolder = new ArrayList<FromBaseTable>(1);
 
                         boolean minMaxOptimizationPossible = isOrderedOn(crs, false, fbtHolder);
 						if (SanityManager.DEBUG)
@@ -1354,13 +1354,13 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * we'll process those expressions in the order: a*(a+b),
 	 * a+b+c, a+b, then a.
 	 */
-	private static final class ExpressionSorter implements Comparator
+	private static final class ExpressionSorter implements Comparator<SubstituteExpressionVisitor>
 	{
-		public int compare(Object o1, Object o2)
+		public int compare(SubstituteExpressionVisitor o1, SubstituteExpressionVisitor o2)
 		{
 			try {
-				ValueNode v1 = ((SubstituteExpressionVisitor)o1).getSource();
-				ValueNode v2 = ((SubstituteExpressionVisitor)o2).getSource();
+				ValueNode v1 = o1.getSource();
+				ValueNode v2 = o2.getSource();
 				int refCount1, refCount2;
 				CollectNodesVisitor vis = new CollectNodesVisitor(
 				ColumnReference.class);

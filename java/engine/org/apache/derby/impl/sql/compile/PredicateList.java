@@ -1966,7 +1966,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			/* Put all of the join clauses that already have an equivalence 
              * class at the head of the outer list to optimize search.
 			 */
-			ArrayList movePreds = new ArrayList();
+			ArrayList<Predicate> movePreds = new ArrayList<Predicate>();
 			for (int jcIndex = outerJCL.size() - 1; jcIndex >= 0; jcIndex--)
 			{
 				Predicate predicate = (Predicate) outerJCL.elementAt(jcIndex);
@@ -3209,7 +3209,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                 // of Or's in order to first generate the allocateQualArray()
                 // call, then we walk the list assigning each of the OR's to
                 // entries in the array in generateSingleQualifierCode().
-                ArrayList a_list = new ArrayList();
+                ArrayList<RelationalOperator> a_list = new ArrayList<RelationalOperator>();
 
                 QueryTreeNode node = pred.getAndNode().getLeftOperand();
 
@@ -3221,7 +3221,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                     // (ie. A = 1)
                     if (or_node.getLeftOperand() instanceof RelationalOperator)
                     {
-                        a_list.add(or_node.getLeftOperand());
+                        a_list.add( (RelationalOperator) or_node.getLeftOperand());
                     }
 
                     // The next OR node in the list if linked to the right.
@@ -3249,7 +3249,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                             optTable,
                             absolute,
                             acb,
-                            (RelationalOperator) a_list.get(i),
+                            a_list.get(i),
                             qualField,
                             and_idx,
                             i);
@@ -3892,7 +3892,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 *--------------------------------------------------------------------*/
 		double selectivity = 1.0;
 
-		ArrayList maxPreds = new ArrayList();
+		ArrayList<Predicate> maxPreds = new ArrayList<Predicate>();
 
 		while (true)
 		{
@@ -3966,7 +3966,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * choose the statistic which has the maximum match with the predicates.
 	 * value is returned in ret.
 	 */
-	private int chooseLongestMatch(PredicateWrapperList[] predArray, List ret,
+	private int chooseLongestMatch(PredicateWrapperList[] predArray, List<Predicate> ret,
 								   int numWorkingPredicates)
 	{
 		int max = 0, maxWeight = 0;
@@ -4118,14 +4118,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 */
 	private class PredicateWrapperList
 	{
-		private final ArrayList pwList;
+		private final ArrayList<PredicateWrapper> pwList;
 		int numPreds;
 		int numDuplicates;
 		int weight;
 
 		PredicateWrapperList(int maxValue)
 		{
-			pwList = new ArrayList(maxValue);
+			pwList = new ArrayList<PredicateWrapper>(maxValue);
 		}
 		
 		void removeElement(Predicate p)
@@ -4152,7 +4152,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 		PredicateWrapper elementAt(int i)
 		{
-			return (PredicateWrapper)pwList.get(i);
+			return pwList.get(i);
 		}
 
 		void insert(PredicateWrapper pw)
@@ -4232,7 +4232,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 * I need to extract out 0 1 2 3.
 		 * leaving 0 2 3 in there.
 		 */
-		private List createLeadingUnique()
+		private List<PredicateWrapper> createLeadingUnique()
 		{
 			if (numPreds == 0)
 				return null;
@@ -4242,7 +4242,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			if (lastIndexPosition != 0)
 				return null;
 
-            ArrayList scratch = new ArrayList();
+            ArrayList<PredicateWrapper> scratch = new ArrayList<PredicateWrapper>();
 			scratch.add(elementAt(0));	// always add 0.
 
 			for (int i = 1; i < numPreds; i++)

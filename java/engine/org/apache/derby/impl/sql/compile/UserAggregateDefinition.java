@@ -114,8 +114,8 @@ public class UserAggregateDefinition implements AggregateDefinition
             ClassFactory    classFactory = cc.getClassFactory();
             TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 
-            Class   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
-            Class   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
+            Class<?>   derbyAggregatorInterface = classFactory.loadApplicationClass( "org.apache.derby.agg.Aggregator" );
+            Class<?>   userAggregatorClass = classFactory.loadApplicationClass( _alias.getJavaClassName() );
 
             Class[][]   typeBounds = classFactory.getClassInspector().getTypeBounds
                 ( derbyAggregatorInterface, userAggregatorClass );
@@ -143,8 +143,8 @@ public class UserAggregateDefinition implements AggregateDefinition
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
             DataTypeDescriptor  expectedReturnType = DataTypeDescriptor.getType( aai.getReturnType() );
-            Class       expectedInputClass = getJavaClass( classFactory, expectedInputType );
-            Class       expectedReturnClass = getJavaClass( classFactory, expectedReturnType );
+            Class<?>       expectedInputClass = getJavaClass( classFactory, expectedInputType );
+            Class<?>       expectedReturnClass = getJavaClass( classFactory, expectedReturnType );
 
             // the input operand must be coercible to the expected input type of the aggregate
             if ( !tcf.getTypeCompiler( expectedInputType.getTypeId() ).storable( inputType.getTypeId(), classFactory ) )
@@ -158,7 +158,7 @@ public class UserAggregateDefinition implements AggregateDefinition
             for ( int i = 0; i < inputBounds.length; i++ )
             {
                 vetCompatibility
-                    ( inputBounds[ i ], expectedInputClass, SQLState.LANG_UDA_WRONG_INPUT_TYPE );
+                    ( (Class<?>) inputBounds[ i ], expectedInputClass, SQLState.LANG_UDA_WRONG_INPUT_TYPE );
             }
             if ( genericParameterTypes[ INPUT_TYPE ] != null )
             {
@@ -192,7 +192,7 @@ public class UserAggregateDefinition implements AggregateDefinition
     /**
      * Verify that an actual type is compatible with the expected type.
      */
-    private void    vetCompatibility( Class actualClass, Class expectedClass, String sqlState )
+    private void    vetCompatibility( Class<?> actualClass, Class<?> expectedClass, String sqlState )
         throws StandardException
     {
         if ( !actualClass.isAssignableFrom( expectedClass ) )

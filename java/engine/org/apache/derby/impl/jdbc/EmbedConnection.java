@@ -152,7 +152,7 @@ public abstract class EmbedConnection implements EngineConnection
 
 	TransactionResourceImpl tr; // always access tr thru getTR()
 
-	private HashMap lobHashMap = null;
+	private HashMap<Integer,Object> lobHashMap = null;
 	private int lobHMKey = 0;
 
     /**
@@ -160,7 +160,7 @@ public abstract class EmbedConnection implements EngineConnection
      * connection. These lobs will be cleared after the transaction
      * is no longer valid or when connection is closed
      */
-    private WeakHashMap lobReferences = null;
+    private WeakHashMap<Object,Object> lobReferences = null;
 
     // Set to keep track of the open LOBFiles, so they can be closed at the end of 
     // the transaction. This would normally happen as lobReferences are freed as they
@@ -168,7 +168,7 @@ public abstract class EmbedConnection implements EngineConnection
     // possible that finalization will not have occurred before the user tries to 
     // remove the database (DERBY-3655).  Therefore we keep this set so that we can
     // explicitly close the files.
-    private HashSet lobFiles;
+    private HashSet<LOBFile> lobFiles;
     
 	//////////////////////////////////////////////////////////
 	// STATE (copied to new nested connections, but nesting
@@ -3321,9 +3321,9 @@ public abstract class EmbedConnection implements EngineConnection
     private void clearLOBMapping() throws SQLException {
 
 		//free all the lob resources in the HashMap
-		Map map = rootConnection.lobReferences;
+		Map<Object,Object> map = rootConnection.lobReferences;
 		if (map != null) {
-            Iterator it = map.keySet ().iterator ();
+            Iterator<Object> it = map.keySet ().iterator ();
             while (it.hasNext()) {
                 ((EngineLOB)it.next()).free();
 			}
@@ -3338,10 +3338,10 @@ public abstract class EmbedConnection implements EngineConnection
             // can cause problems further down the road.
 			if (lobFiles != null) {       
                 SQLException firstException = null;
-				Iterator it = lobFiles.iterator();
+				Iterator<LOBFile> it = lobFiles.iterator();
                 while (it.hasNext()) {
                     try {
-                        ((LOBFile) it.next()).close();
+                        (it.next()).close();
                     } catch (IOException ioe) {
                         // Discard all exceptions besides the first one.
                         if (firstException == null) {
@@ -3392,7 +3392,7 @@ public abstract class EmbedConnection implements EngineConnection
      */
     void addLOBReference (Object lobReference) {
         if (rootConnection.lobReferences == null) {
-            rootConnection.lobReferences = new WeakHashMap ();
+            rootConnection.lobReferences = new WeakHashMap<Object,Object>();
         }
         rootConnection.lobReferences.put (lobReference, null);
     }
@@ -3401,9 +3401,9 @@ public abstract class EmbedConnection implements EngineConnection
 	* Return the Hash Map in the root connection
 	* @return the HashMap that contains the locator to LOB object mapping
 	*/
-	private HashMap getlobHMObj() {
+	private HashMap<Integer,Object> getlobHMObj() {
 		if (rootConnection.lobHashMap == null) {
-			rootConnection.lobHashMap = new HashMap();
+			rootConnection.lobHashMap = new HashMap<Integer,Object>();
 		}
 		return rootConnection.lobHashMap;
 	}
@@ -3433,7 +3433,7 @@ public abstract class EmbedConnection implements EngineConnection
 	void addLobFile(LOBFile lobFile) {
 		synchronized (this) {
 			if (lobFiles == null)
-				lobFiles = new HashSet();
+				lobFiles = new HashSet<LOBFile>();
 			lobFiles.add(lobFile);
 		}
 	}

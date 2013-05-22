@@ -886,7 +886,7 @@ public final class UpdateNode extends DMLModStatementNode
 		boolean[]	needsDeferredProcessing = new boolean[1];
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
-        ArrayList conglomerates = new ArrayList();
+        ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
 		relevantCdl = new ConstraintDescriptorList();
 		relevantTriggers =  new GenericDescriptorList();
 
@@ -987,7 +987,7 @@ public final class UpdateNode extends DMLModStatementNode
 		DataDictionary		dd,
 		TableDescriptor				baseTable,
 		ResultColumnList			updateColumnList,
-        List                        conglomerates,
+        List<ConglomerateDescriptor>     conglomerates,
 		ConstraintDescriptorList	relevantConstraints,
 		GenericDescriptorList		relevantTriggers,
 		boolean[]					needsDeferredProcessing,
@@ -1225,7 +1225,7 @@ public final class UpdateNode extends DMLModStatementNode
         ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
         int                                 generatedColumnCount = generatedColumns.size();
 		int		                        columnCount = baseTable.getMaxColumnID();
-        HashSet                     updatedColumns = new HashSet();
+        HashSet<String>           updatedColumns = new HashSet<String>();
         UUID                            tableID = baseTable.getObjectID();
         
 		for (int ix = 0; ix < count; ix++)

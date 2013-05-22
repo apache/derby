@@ -308,7 +308,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 	final void bindParameters(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+        FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		/* Bind the parameters */
