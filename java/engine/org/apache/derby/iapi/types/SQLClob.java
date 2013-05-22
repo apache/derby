@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.PushbackInputStream;
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -543,7 +544,7 @@ public class SQLClob
 		throwLangSetMismatch("java.sql.Date");
 	}
 	
-	public void setBigDecimal(Number bigDecimal) throws StandardException
+	public void setBigDecimal(BigDecimal bigDecimal) throws StandardException
 	{
 		throwLangSetMismatch("java.math.BigDecimal");
 	}

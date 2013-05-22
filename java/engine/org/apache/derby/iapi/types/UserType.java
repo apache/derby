@@ -41,6 +41,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
+import java.math.BigDecimal;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -479,7 +481,7 @@ public class UserType extends DataType
 	 * @see UserDataValue#setValue
 	 *
 	 */
-	public void setBigDecimal(Number theValue)
+	public void setBigDecimal(BigDecimal theValue)
 	{
 		// needed to allow serializable BigDecimal
 		setValue((Object) theValue);

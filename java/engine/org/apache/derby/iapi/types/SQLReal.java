@@ -392,7 +392,7 @@ public final class SQLReal
 	/**
 		Called for an application setting this value using a BigDecimal 
 	*/
-	public  void setBigDecimal(Number bigDecimal) throws StandardException
+	public  void setBigDecimal(BigDecimal bigDecimal) throws StandardException
 	{
 		if (objectNull(bigDecimal)) 
 			return;
@@ -406,8 +406,7 @@ public final class SQLReal
         if (v == 0) {
             // We need to catch underflow here, since BigDecimal#floatValue it
             // just returns 0 (i.e. no exception).
-            boolean isZero =
-                ((BigDecimal) bigDecimal).compareTo(BigDecimal.ZERO) == 0;
+            boolean isZero = bigDecimal.compareTo(BigDecimal.ZERO) == 0;
 
             if (!isZero) {
                 throw StandardException.

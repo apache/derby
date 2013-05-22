@@ -24,11 +24,11 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.services.io.Storable;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -489,13 +489,10 @@ public interface DataValueDescriptor extends Storable, Orderable
 		This is to support the PreparedStatement.setBigDecimal method and
 		similar JDBC methods that allow an application to pass in a BigDecimal
 		to any SQL type.
-		Parameter is declared as java.lang.Number to allow compilation
-		under J2ME/CDC/Foundation. This method will not be called in
-		any environment that does not support java.math.BigDecimal.
 
 		@param bigDecimal required to be a BigDecimal or null.
 	 */
-	public void setBigDecimal(Number bigDecimal) throws StandardException;
+	public void setBigDecimal(BigDecimal bigDecimal) throws StandardException;
 
 	/**
 	 * Set the value of this DataValueDescriptor.

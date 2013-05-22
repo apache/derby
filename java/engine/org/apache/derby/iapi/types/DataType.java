@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -525,7 +526,7 @@ public abstract class DataType
 	/**
 		Only to be called when the application sets a value using BigDecimal
 	*/
-	public void setBigDecimal(Number bigDecimal) throws StandardException
+	public void setBigDecimal(BigDecimal bigDecimal) throws StandardException
 	{
 		throwLangSetMismatch("java.math.BigDecimal");
 	}

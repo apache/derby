@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.DataTruncation;
 import java.sql.Date;
@@ -1581,7 +1582,7 @@ readingLoop:
         Only to be called when an application through JDBC is setting a
         SQLChar to a java.math.BigDecimal.
     */
-    public void setBigDecimal(Number bigDecimal)  throws StandardException
+    public void setBigDecimal(BigDecimal bigDecimal)  throws StandardException
     {
         if (bigDecimal == null)
             setToNull();

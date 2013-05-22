@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -418,19 +417,15 @@ public abstract class NumberDataType extends DataType
 		setValue for integral exact numerics. Converts the BigDecimal
 		to a long to preserve precision
 	*/
-    @SuppressWarnings("unchecked")
-	public void setBigDecimal(Number bigDecimal) throws StandardException
+	public void setBigDecimal(BigDecimal bigDecimal) throws StandardException
 	{
 		if (objectNull(bigDecimal))
 			return;
 
-		Comparable  bdc = (Comparable) bigDecimal;
-
-
 		// See comment in SQLDecimal.getLong()
 
-		if (   (bdc.compareTo(NumberDataType.MINLONG_MINUS_ONE) == 1)
-			&& (bdc.compareTo(NumberDataType.MAXLONG_PLUS_ONE) == -1)) {
+		if (   (bigDecimal.compareTo(NumberDataType.MINLONG_MINUS_ONE) == 1)
+			&& (bigDecimal.compareTo(NumberDataType.MAXLONG_PLUS_ONE) == -1)) {
 
 			setValue(bigDecimal.longValue());
 		} else {

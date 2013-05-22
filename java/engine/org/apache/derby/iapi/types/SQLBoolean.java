@@ -35,6 +35,7 @@ import org.apache.derby.iapi.util.StringUtil;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -482,7 +483,7 @@ public final class SQLBoolean
 
 	}
 
-	public void setBigDecimal(Number bigDecimal) throws StandardException
+	public void setBigDecimal(BigDecimal bigDecimal) throws StandardException
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( ! immutable,

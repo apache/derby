@@ -640,9 +640,9 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		Only to be called when the application sets a value using BigDecimal
 		through setBigDecimal calls.
 	*/
-	public void setBigDecimal(Number theValue) throws StandardException
+	public void setBigDecimal(BigDecimal theValue) throws StandardException
 	{
-		setCoreValue((BigDecimal) theValue);
+		setCoreValue(theValue);
 	}
 
 	/**
