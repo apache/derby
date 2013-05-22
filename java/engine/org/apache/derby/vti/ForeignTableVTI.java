@@ -120,7 +120,6 @@ import org.apache.derby.iapi.util.IdUtil;
  * select lastName from foreignEmployee where employeeID = 2;
  * </pre>
  */
-@SuppressWarnings("deprecation")
 public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
 {
     ////////////////////////////////////////////////////////////////////////
@@ -243,7 +242,8 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
     
     public  BigDecimal 	getBigDecimal(int i) throws SQLException
     { return _foreignResultSet.getBigDecimal( mapColumnNumber( i ) ); }
-    
+
+    @Deprecated
     public  BigDecimal 	getBigDecimal(int i, int scale) throws SQLException
     { return _foreignResultSet.getBigDecimal( mapColumnNumber( i ), scale ); }
     

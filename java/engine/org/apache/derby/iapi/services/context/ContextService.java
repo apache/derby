@@ -24,7 +24,7 @@ package org.apache.derby.iapi.services.context;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Stack;
 
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -62,11 +62,11 @@ public final class ContextService //OLD extends Hashtable
             and this is enforced by synchronization outside the ContextManager.
             E.g for JDBC connections, synchronization at the JDBC level.
 
-		<LI> java.util.Stack containing ContextManagers - the current
+        <LI> ContextManagerStack containing ContextManagers - the current
         thread is actively using multiple different ContextManagers,
         with nesting. All ContextManagers in the stack will have
         activeThread set to the current thread, and their activeCount
-        set to -1. This is beacause nesting is soley represented by
+        set to -1. This is because nesting is solely represented by
         the stack, with the current context manager on top of the stack.
         This supports multiple levels of nesting across two stacks, e.g.
         C1->C2->C2->C1->C2.
@@ -94,7 +94,7 @@ public final class ContextService //OLD extends Hashtable
 		for the lifetime of the request. In this case this variable will contain a  WeakReference.
 		</UL>
         <BR>
-        Single thread for Connection exection.
+        Single thread for Connection execution.
         <pre>
         threadContextList.get() == cm
         // while in JDBC engine code
@@ -283,9 +283,7 @@ public final class ContextService //OLD extends Hashtable
 		if (list == null)
 			return null;
 
-		java.util.Stack stack = (java.util.Stack) list;
-		return (ContextManager) (stack.peek());
-
+        return ((ContextManagerStack) list).peek();
 	}
 
     /**
@@ -345,17 +343,17 @@ public final class ContextService //OLD extends Hashtable
 			return;
 		}
 
-		java.util.Stack stack = (java.util.Stack) tcl.get();
+        ContextManagerStack stack = (ContextManagerStack) tcl.get();
 
-		Object oldCM = stack.pop();
+        // Remove the context manager at the top of the stack.
+        stack.pop();
 
-		ContextManager nextCM = (ContextManager) stack.peek();
+        ContextManager nextCM = stack.peek();
 
 		boolean seenMultipleCM = false;
 		boolean seenCM = false;
-		for (int i = 0; i < stack.size(); i++) {
+        for (ContextManager stackCM : stack) {
 
-			Object stackCM = stack.elementAt(i);
 			if (stackCM != nextCM)
 				seenMultipleCM = true;
 
@@ -389,7 +387,6 @@ public final class ContextService //OLD extends Hashtable
      * @see ContextManager#activeCount
      * @see ContextManager#activeThread
     */
-    @SuppressWarnings("unchecked")
 	private boolean addToThreadList(Thread me, ContextManager associateCM) {
 
 		ThreadLocal<Object> tcl = threadContextList;
@@ -412,7 +409,7 @@ public final class ContextService //OLD extends Hashtable
 			return true;
 		}
 
- 		java.util.Stack<ContextManager> stack;
+        ContextManagerStack stack;
 		if (list instanceof ContextManager) {
             
             // Could be two situations:
@@ -432,7 +429,7 @@ public final class ContextService //OLD extends Hashtable
             
             // Nested, need to create a Stack of ContextManagers,
             // the top of the stack will be the active one.
-			stack = new java.util.Stack<ContextManager>();
+            stack = new ContextManagerStack();
 			tcl.set(stack);
             
             // The stack represents the true nesting
@@ -449,7 +446,7 @@ public final class ContextService //OLD extends Hashtable
 		{
             // existing stack, nesting represented
             // by stack entries, not activeCount.
-			stack = (java.util.Stack<ContextManager>) list;
+            stack = (ContextManagerStack) list;
 		}
 
 		stack.push(associateCM);
@@ -545,9 +542,7 @@ public final class ContextService //OLD extends Hashtable
 		Thread me = Thread.currentThread();
 
 		synchronized (this) {
-			for (Iterator<ContextManager> i = allContexts.iterator(); i.hasNext(); ) {
-
-				ContextManager cm = i.next();
+            for (ContextManager cm : allContexts) {
 
 				Thread active = cm.activeThread;
 
@@ -561,8 +556,8 @@ public final class ContextService //OLD extends Hashtable
 				if (cm.setInterrupted(c))
                 {
                     AccessController.doPrivileged(
-                            new PrivilegedAction<Object>() {
-                                public Object run()  {
+                            new PrivilegedAction<Void>() {
+                                public Void run()  {
                                     fActive.interrupt();
                                     return null;
                                 }
@@ -580,5 +575,15 @@ public final class ContextService //OLD extends Hashtable
     {
         if (allContexts != null)
             allContexts.remove( cm);
+    }
+
+    /** Specialized stack class that contains context managers. */
+    private static class ContextManagerStack extends Stack<ContextManager> {
+        // The class is empty. Its primary purpose is to allow type-safe casts
+        // from Object, which are needed because the stacks live in a
+        // ThreadLocal<Object> rather than ThreadLocal<Stack<ContextManager>>.
+        // Casts from Object to Stack<ContextManager> will cause an unchecked
+        // conversion warning, whereas casts from Object to ContextManagerStack
+        // won't.
     }
 }

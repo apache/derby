@@ -201,8 +201,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * class name without the package.
      * 
      */
-    public synchronized Object registerMBean(final Object bean,
-            final Class beanInterface,
+    public synchronized <T> Object registerMBean(final T bean,
+            final Class<T> beanInterface,
             final String keyProperties)
             throws StandardException {
 
@@ -211,7 +211,6 @@ public final class JMXManagementService implements ManagementService, ModuleCont
                     DERBY_JMX_DOMAIN + ":" + keyProperties
                     + ",system=" + systemIdentifier);
 
-            @SuppressWarnings("unchecked")
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface) {
                 

@@ -30,9 +30,9 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 public final class NoManagementService implements ManagementService {
     public NoManagementService() {
     }
-    public Object registerMBean(final Object bean,
-            final Class beanInterface,
-            final String keyProperties)
+    public <T> Object registerMBean(T bean,
+            Class<T> beanInterface,
+            String keyProperties)
     {
         return null;
     }

@@ -62,8 +62,8 @@ public interface ManagementService extends ManagementMBean {
      * 
      * @return An idenitifier that can later be used to unregister the mbean.
      */
-    public Object registerMBean(Object bean,
-            Class beanInterface,
+    public <T> Object registerMBean(T bean,
+            Class<T> beanInterface,
             String keyProperties)
             throws StandardException;
     

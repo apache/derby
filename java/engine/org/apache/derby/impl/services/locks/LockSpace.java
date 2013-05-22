@@ -29,6 +29,7 @@ import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
+import java.util.ArrayDeque;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,7 +57,12 @@ final class LockSpace implements CompatibilitySpace {
 	/** Reference to the owner of this compatibility space. */
 	private final LockOwner owner;
 
-	private HashMap spareGroups[] = new HashMap[3];
+    /** The maximum number of elements to cache in {@link #spareGroups}. */
+    private static final int MAX_CACHED_GROUPS = 3;
+
+    /** Cached HashMaps for storing lock groups. */
+    private final ArrayDeque<HashMap<Lock, Object>> spareGroups =
+            new ArrayDeque<HashMap<Lock, Object>>(MAX_CACHED_GROUPS);
 
 	// the Limit info.
 	private Object callbackGroup;
@@ -143,8 +149,8 @@ final class LockSpace implements CompatibilitySpace {
 		if (dl == null)
 			return;
 
-		for (Iterator list = dl.keySet().iterator(); list.hasNext(); ) {
-			lset.unlock((Lock) list.next(), 0);
+        for (Lock lock : dl.keySet()) {
+            lset.unlock(lock, 0);
 		}
 
 		if ((callbackGroup != null) && group.equals(callbackGroup)) {
@@ -154,17 +160,8 @@ final class LockSpace implements CompatibilitySpace {
 		saveGroup(dl);
 	}
 
-    @SuppressWarnings("unchecked")
 	private HashMap<Lock,Object> getGroupMap(Object group) {
-		HashMap[] sg = spareGroups;
-		HashMap<Lock,Object> dl = null;
-		for (int i = 0; i < 3; i++) {
-			dl = (HashMap<Lock,Object>) sg[i];
-			if (dl != null) {
-				sg[i] = null;
-				break;
-			}
-		}
+        HashMap<Lock,Object> dl = spareGroups.poll();
 
 		if (dl == null)
 			dl = new HashMap<Lock,Object>(5, 0.8f);
@@ -172,15 +169,12 @@ final class LockSpace implements CompatibilitySpace {
 		groups.put(group, dl);
 		return dl;
 	}
-	private void saveGroup(HashMap dl) {
-		HashMap[] sg = spareGroups;
-		for (int i = 0; i < 3; i++) {
-			if (sg[i] == null) {
-				sg[i] = dl;
-				dl.clear();
-				break;
-			}
-		}
+
+    private void saveGroup(HashMap<Lock, Object> dl) {
+        if (spareGroups.size() < MAX_CACHED_GROUPS) {
+            spareGroups.offer(dl);
+            dl.clear();
+        }
 	}
 
 	/**
@@ -192,9 +186,8 @@ final class LockSpace implements CompatibilitySpace {
 			return; //  no group at all
 
 		boolean allUnlocked = true;
-		for (Iterator e = dl.keySet().iterator(); e.hasNext(); ) {
-
-			Lock lock = (Lock) e.next();
+        for (Iterator<Lock> e = dl.keySet().iterator(); e.hasNext(); ) {
+            Lock lock = e.next();
 			if (!key.match(lock.getLockable())) {
 				allUnlocked = false;
 				continue;
@@ -246,9 +239,7 @@ final class LockSpace implements CompatibilitySpace {
 
 	private void mergeGroups(HashMap<Lock,Object> from, HashMap<Lock,Object> into) {
 
-		for (Iterator<Lock> e = from.keySet().iterator(); e.hasNext(); ) {
-
-			Lock lock = e.next();
+        for (Lock lock : from.keySet()) {
 
 			Object lockI = into.get(lock);
 
@@ -356,10 +347,8 @@ final class LockSpace implements CompatibilitySpace {
 
 		int count = 0;
 
-		for (Iterator<HashMap<Lock,Object>> it = groups.values().iterator(); it.hasNext(); ) {
-			HashMap<Lock,Object> group = it.next();
-			for (Iterator<Lock> locks = group.keySet().iterator(); locks.hasNext(); ) {
-					Lock lock = locks.next();
+        for (HashMap<Lock,Object> group: groups.values()) {
+            for (Lock lock: group.keySet()) {
 					count += lock.getCount();
 					if (count > bail)
 						return count;

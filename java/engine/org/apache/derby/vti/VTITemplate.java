@@ -68,7 +68,6 @@ import java.util.Map;
 	For table functions and virtual tables, the database engine only calls methods defined
 	in the JDBC 2.0 definition of java.sql.ResultSet.
  */
-@SuppressWarnings("deprecation")
 public abstract class VTITemplate   implements ResultSet
 {
     public  boolean 	isWrapperFor(Class<?> iface) throws SQLException { throw notImplemented( "isWrapperFor" ); }
@@ -87,6 +86,7 @@ public abstract class VTITemplate   implements ResultSet
     public long getLong(String columnName) throws SQLException { return getLong(findColumn(columnName)); }
     public float getFloat(String columnName) throws SQLException { return getFloat(findColumn(columnName)); }
     public double getDouble(String columnName) throws SQLException { return getDouble(findColumn(columnName)); }
+    @Deprecated
     public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException { return getBigDecimal(findColumn(columnName), scale); }
     public byte[] getBytes(String columnName) throws SQLException { return getBytes(findColumn(columnName)); }
     public java.sql.Date getDate(String columnName) throws SQLException { return getDate(findColumn(columnName)); }
@@ -109,15 +109,18 @@ public abstract class VTITemplate   implements ResultSet
     public long getLong(int columnIndex) throws SQLException { throw notImplemented( "getLong" ); }
     public float getFloat(int columnIndex) throws SQLException { throw notImplemented( "getFloat" ); }
     public double getDouble(int columnIndex) throws SQLException { throw notImplemented( "getDouble" ); }
+    @Deprecated
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException { throw notImplemented( "getBigDecimal" ); }
     public byte[] getBytes(int columnIndex) throws SQLException { throw notImplemented( "] getBytes" ); }
     public java.sql.Date getDate(int columnIndex) throws SQLException { throw notImplemented( "sql.Date getDate" ); }
     public java.sql.Time getTime(int columnIndex) throws SQLException { throw notImplemented( "sql.Time getTime" ); }
     public java.sql.Timestamp getTimestamp(int columnIndex) throws SQLException { throw notImplemented( "sql.Timestamp getTimestamp" ); }
     public java.io.InputStream getAsciiStream(int columnIndex) throws SQLException { throw notImplemented( "io.InputStream getAsciiStream" ); }
+    @Deprecated
     public java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException { throw notImplemented( "io.InputStream getUnicodeStream" ); }
     public java.io.InputStream getBinaryStream(int columnIndex) throws SQLException { throw notImplemented( "io.InputStream getBinaryStream" ); }
     public java.io.InputStream getAsciiStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getAsciiStream" ); }
+    @Deprecated
     public java.io.InputStream getUnicodeStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getUnicodeStream" ); }
     public java.io.InputStream getBinaryStream(String columnName) throws SQLException { throw notImplemented( "io.InputStream getBinaryStream" ); }
     public SQLWarning getWarnings() throws SQLException { return null; }
