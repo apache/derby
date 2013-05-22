@@ -972,11 +972,11 @@
       Create the class size catalog, a java file
 
       Note that checking the up-to-date status of the files scanned by
-      ClassSizeCrawler will not always result in the ClassSizeCatalog
+      ClassSizeCrawler will not always result in the ClassSizeCatalogImpl
       being updated properly. We would have to be able to scan the full
       dependency tree. This does prevent recompilation in most cases,
       and requires it in the most obvious. If there is concern that
-      the ClassSizeCatalog may have changed significantly since the
+      the ClassSizeCatalogImpl may have changed significantly since the
       last build, run clobber and rebuild to regenerate it.
   -->
 
@@ -990,7 +990,7 @@
       </classpath>
       <jvmarg value="-DWS=${workspace}"/>
       <jvmarg value="-DclassDir=${out.dir}"/>
-      <jvmarg value="-Dout=${generated.cache.dir}/ClassSizeCatalog.java"/>
+      <jvmarg value="-Dout=${generated.cache.dir}/ClassSizeCatalogImpl.java"/>
       <jvmarg value="-Dprefix.1=org.apache.derby.iapi.types"/>            
       <jvmarg value="-Dprefix.2=org.apache.derby.impl"/>
       <arg value="org.apache.derby.iapi.types.DataValueDescriptor"/>
@@ -1006,8 +1006,8 @@
     </java>
 
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -1021,7 +1021,7 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       </classpath>
-      <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+      <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
     </javac>
 
   </target>
@@ -1039,7 +1039,7 @@
                   targetfile="${out.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
         <uptodate srcfile="${derby.engine.dir}/iapi/services/cache/SizedCacheable.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
-        <available file="${generated.src.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+        <available file="${generated.src.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
       </and>
     </condition>
   </target>

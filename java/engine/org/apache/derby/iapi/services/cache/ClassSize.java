@@ -29,7 +29,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 
-@SuppressWarnings("unchecked")
 public class ClassSize
 {
     public static final int refSize;
@@ -56,20 +55,8 @@ public class ClassSize
      * Used when the security manager will not let us look at the class fields.
      */
 
-    /* Do not let the compiler see ClassSizeCatalog. Otherwise it will try to
-     * compile it. This may fail because ClassSizeCatalog.java is not created
-     * until everything else has been compiled. Bury ClassSizeCatalog in a string.
-     */
-    private static java.util.Hashtable<String,int[]> catalog;
     static
     {
-        try
-        {
-            catalog = (java.util.Hashtable<String,int[]>)
-              Class.forName( "org.apache.derby.iapi.services.cache.ClassSizeCatalog").newInstance();
-        }
-        catch( Exception e){}
-
         // Figure out whether this is a 32 or 64 bit machine.
         int tmpRefSize = fetchRefSizeFromSystemProperties();
         // If we didn't understand the properties, or were not allowed to read
@@ -215,11 +202,13 @@ public class ClassSize
     {
         if( dummyCatalog)
             return 0;
-        
+
+        ClassSizeCatalog catalog = ClassSizeCatalog.getInstance();
+
         if( SanityManager.DEBUG)
 			SanityManager.ASSERT( catalog != null, "The class size catalog could not be initialized.");
         
-        int[] coeff = (int[]) catalog.get( cls.getName());
+        int[] coeff = catalog.get(cls.getName());
         if( coeff == null)
         {
             try

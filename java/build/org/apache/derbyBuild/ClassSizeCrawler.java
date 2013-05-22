@@ -27,15 +27,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.lang.SecurityException;
-import java.lang.ClassNotFoundException;
 import java.util.Hashtable;
 import java.util.Enumeration;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * This class implements a program that catalogs the size estimate coefficients of various classes.
@@ -56,7 +49,7 @@ import java.util.Date;
  *<p>
  * The catalog is written as a java source file
  * into <i>out-file</i>, by default
- * <i>work-space</i>/java/org.apache.derby.iapi.services.cache.ClassSizeCatalog.java.
+ * <i>work-space</i>/java/org.apache.derby.iapi.services.cache.ClassSizeCatalogImpl.java.
  *<p>
  * <i>work-space</i> is the directory containing the java and classes directories. $WS in the
  * standard development environment. This property is required.
@@ -178,7 +171,7 @@ public class ClassSizeCrawler
 
         baseDir.setLength( baseDirLength);
         String outputFileName =
-          System.getProperty( "out", WS + "/java/org.apache.derby.iapi.services.cache.ClassSizeCatalog.java");
+          System.getProperty( "out", WS + "/java/org.apache.derby.iapi.services.cache.ClassSizeCatalogImpl.java");
         try
         {
             PrintWriter out = new PrintWriter( new FileWriter( outputFileName));
@@ -200,10 +193,9 @@ public class ClassSizeCrawler
                        "   limitations under the License.\n" +
                        " */\n");
             out.print( "package org.apache.derby.iapi.services.cache;\n" +
-                       "import java.util.Hashtable;\n" +
-                       "class ClassSizeCatalog extends java.util.Hashtable\n" +
+                       "class ClassSizeCatalogImpl extends ClassSizeCatalog\n" +
                        "{\n" +
-                       "    ClassSizeCatalog()\n" +
+                       "    ClassSizeCatalogImpl()\n" +
                        "    {\n");
             for( Enumeration e = classSizes.keys();
                  e.hasMoreElements();)
