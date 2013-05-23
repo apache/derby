@@ -53,7 +53,7 @@ import java.util.Locale;
 
 	@see org.apache.derby.tools.JDBCDisplayUtil
  */
-public final class util implements java.security.PrivilegedAction {
+public final class util implements java.security.PrivilegedAction<String> {
 	
 	private static boolean IS_AT_LEAST_JDBC2;
 	
@@ -185,8 +185,8 @@ public final class util implements java.security.PrivilegedAction {
 		final String resource = qualifyResourceName(resourceName,true);
 		if (resource == null) 
 			return null;
-		InputStream is = (InputStream) AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() { 
+		InputStream is = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
+            public InputStream run() { 
                       InputStream locis = 
                           c.getResourceAsStream(resource);
                                   return locis;
@@ -367,7 +367,7 @@ public final class util implements java.security.PrivilegedAction {
 		Object ds = null; // really javax.sql.DataSource
 		try {
 			
-		    Class dc = Class.forName(dsName);
+		    Class<?> dc = Class.forName(dsName);
 		    ds = dc.newInstance();
 		    
 		    // set datasource properties
@@ -695,7 +695,7 @@ AppUI.out.println("SIZE="+l);
 			{
 				util u = new util();
 				u.key = propertyName;
-				return (String) java.security.AccessController.doPrivileged(u);
+				return java.security.AccessController.doPrivileged(u);
 			}
 			else
 			{
@@ -708,7 +708,7 @@ AppUI.out.println("SIZE="+l);
 
 	private String key;
 
-	public final Object run() {
+	public final String run() {
 		return System.getProperty(key);
 	}
 	/** 

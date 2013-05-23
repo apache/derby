@@ -35,7 +35,7 @@
   <property name="cur.dir" value="impl/sql"/>
 
 <!-- Targets -->
-  <target name="parser" depends="chkparser" >
+  <target name="parser" >
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating SQL parser..."/>
       <property name="srcroot" value="engine"/>
@@ -84,36 +84,6 @@
       </fileset>
     </replaceregexp>
 
-    <antcall target="postProcessParser"/>
-
-  </target>
-
-  <target name="postProcessParser" unless="parser.compiled">
-
-    <!-- Generify some types so they will compile cleanly on Java 6. -->
-    <replaceregexp match="java.util.Vector" replace="java.util.Vector&lt;Object&gt;" flags="m">
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
-        <include name="SQLParser.java"/>
-      </fileset>
-    </replaceregexp>
-    <replaceregexp match="java.util.Vector\(\)" replace="java.util.Vector&lt;Object&gt;()" flags="m">
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
-        <include name="SQLParser.java"/>
-      </fileset>
-    </replaceregexp>
-    <replaceregexp match="java.util.Enumeration" replace="java.util.Enumeration&lt;Object&gt;" flags="m">
-      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
-        <include name="SQLParser.java"/>
-      </fileset>
-    </replaceregexp>
-
-  </target>
-
-  <target name="chkparser">
-    <uptodate property="parser.compiled"
-              targetfile="${generated.src.dir}/${derby.dir}/impl/sql/compile/SQLParser.java" >
-      <srcfiles dir="compile"  includes="sqlgrammar.jj" />
-    </uptodate>
   </target>
 
   <target name="compile" depends="parser">

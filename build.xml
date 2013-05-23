@@ -787,6 +787,26 @@
     <!-- IBM JDK 1.3.1. See DERBY-1078                                 -->
     <replaceregexp file="${generated.src.dir}/${directory}/${chkfile}" match="tokenImage" 
                    replace="${constantsfile}.tokenImage"/>
+
+    <antcall  target="postProcessParser"/>
+
+  </target>
+
+  <target name="postProcessParser" unless="parser.done">
+
+    <!-- Suppress some warnings so the grammar will compile cleanly on Java 6. -->
+    <replaceregexp match="private void jj_add_error_token" replace="@SuppressWarnings(&quot;unchecked&quot;) private void jj_add_error_token" flags="m">
+      <fileset dir="${generated.src.dir}/${directory}">
+        <include name="${chkfile}"/>
+      </fileset>
+    </replaceregexp>
+
+    <replaceregexp match="public ParseException generateParseException" replace="@SuppressWarnings(&quot;unchecked&quot;) public ParseException generateParseException" flags="m">
+      <fileset dir="${generated.src.dir}/${directory}">
+        <include name="${chkfile}"/>
+      </fileset>
+    </replaceregexp>
+
   </target>
 
   <target name="chkparser">

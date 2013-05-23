@@ -42,7 +42,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 
  */
 class ConnectionEnv {
-	Hashtable sessions = new Hashtable();
+	Hashtable<String,Session> sessions = new Hashtable<String,Session>();
 	private Session currSession;
 	private String tag;
 	private boolean only;
@@ -66,8 +66,8 @@ class ConnectionEnv {
 		// only load up ij.connection.* properties if there is
 		// only one ConnectionEnv in the system.
 		if (only) {
-            Properties p = (Properties) AccessController.doPrivileged(new PrivilegedAction() {
-            	public Object run() {
+            Properties p = AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+            	public Properties run() {
                 	return System.getProperties();
             	}
             });
@@ -122,13 +122,13 @@ class ConnectionEnv {
     int newNum = 0;
     boolean newConnectionNameOk = false;
     String newConnectionName = "";
-    Enumeration e;
+    Enumeration<String> e;
     while (!newConnectionNameOk){
       newConnectionName = Session.DEFAULT_NAME + newNum;
       newConnectionNameOk = true;
       e = sessions.keys();
       while (e.hasMoreElements() && newConnectionNameOk){
-        if (((String)e.nextElement()).equals(newConnectionName))
+        if ((e.nextElement()).equals(newConnectionName))
            newConnectionNameOk = false;
       }
       newNum = newNum + 1;
@@ -140,16 +140,16 @@ class ConnectionEnv {
 		return currSession;
 	}
 
-	Hashtable getSessions() {
+	Hashtable<String,Session> getSessions() {
 		return sessions;
 	}
 
 	Session getSession(String name) {
-		return (Session) sessions.get(name);
+		return sessions.get(name);
 	}
 
 	Session setCurrentSession(String name) {
-		currSession = (Session) sessions.get(name);
+		currSession = sessions.get(name);
 		return currSession;
 	}
 
@@ -165,7 +165,7 @@ class ConnectionEnv {
 	}
 
 	void removeSession(String name) throws SQLException {
-		Session s = (Session) sessions.remove(name);
+		Session s = sessions.remove(name);
 		s.close();
 		if (currSession == s)
 			currSession = null;
@@ -175,8 +175,8 @@ class ConnectionEnv {
 		if (sessions == null || sessions.size() == 0)
 			return;
 		else
-			for (Enumeration e = sessions.keys(); e.hasMoreElements(); ) {
-				String n = (String)e.nextElement();
+			for (Enumeration<String> e = sessions.keys(); e.hasMoreElements(); ) {
+				String n = e.nextElement();
 				removeSession(n);
 			}
 	}

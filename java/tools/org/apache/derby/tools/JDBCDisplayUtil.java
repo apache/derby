@@ -306,7 +306,7 @@ public class JDBCDisplayUtil {
 
        @exception SQLException on JDBC access failure
     */
-    static public void DisplayMultipleResults(PrintWriter out, List resultSets,
+    static public void DisplayMultipleResults(PrintWriter out, List<ResultSet> resultSets,
                                               Connection conn,
                                               int[] displayColumns,
                                               int[] displayColumnWidths)
@@ -339,14 +339,14 @@ public class JDBCDisplayUtil {
         (PrintWriter out, ResultSet rs, Connection conn, int indentLevel,
          int[] displayColumns, int[] displayColumnWidths)
         throws SQLException {
-        List resultSets = new ArrayList();
+        List<ResultSet> resultSets = new ArrayList<ResultSet>();
         resultSets.add(rs);
         indent_DisplayResults( out, resultSets, conn, 0, displayColumns, 
                                displayColumnWidths);
     }
 
     static private void indent_DisplayResults
-        (PrintWriter out, List resultSets, Connection conn, int indentLevel,
+        (PrintWriter out, List<ResultSet> resultSets, Connection conn, int indentLevel,
          int[] displayColumns, int[] displayColumnWidths)
         throws SQLException {
 
@@ -354,16 +354,16 @@ public class JDBCDisplayUtil {
 
         //get metadata from the first ResultSet
         if (resultSets != null && resultSets.size() > 0)
-            rsmd = ((ResultSet)resultSets.get(0)).getMetaData();
+            rsmd = (resultSets.get(0)).getMetaData();
 
         checkNotNull(rsmd, "ResultSetMetaData");
-        Vector nestedResults;
+        Vector<ResultSet> nestedResults;
         int numberOfRowsSelected = 0;
 
         // autocommit must be off or the nested cursors
         // are closed when the outer statement completes.
         if (!conn.getAutoCommit())
-            nestedResults = new Vector();
+            nestedResults = new Vector<ResultSet>();
         else
             nestedResults = null;
 
@@ -381,7 +381,7 @@ public class JDBCDisplayUtil {
         ResultSet rs = null;
         boolean doNext = true;
         for (int i = 0; i< resultSets.size(); i++) {
-            rs = (ResultSet)resultSets.get(i);
+            rs = resultSets.get(i);
             doNext = true;
             while (doNext){
                 try {
@@ -430,7 +430,7 @@ public class JDBCDisplayUtil {
 
 		@exception SQLException thrown on access error
 	 */
-	static private void DisplayNestedResults(PrintWriter out, Vector nr, Connection conn, int indentLevel )
+	static private void DisplayNestedResults(PrintWriter out, Vector<ResultSet> nr, Connection conn, int indentLevel )
 		throws SQLException {
 
 		if (nr == null) return;
@@ -477,12 +477,12 @@ public class JDBCDisplayUtil {
 											  int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
-		Vector nestedResults;
+		Vector<ResultSet> nestedResults;
 
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
+			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
 
@@ -529,7 +529,7 @@ public class JDBCDisplayUtil {
 												 int indentLevel, int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
-		Vector nestedResults;
+		Vector<ResultSet> nestedResults;
 
 		if (rs == null) {
 			indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_NoCurreRow_19"));
@@ -539,7 +539,7 @@ public class JDBCDisplayUtil {
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
+			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
 
@@ -660,7 +660,7 @@ public class JDBCDisplayUtil {
 
 		@exception SQLException thrown on JDBC access failure
 	 */
-	static private void DisplayRow(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel,
+	static private void DisplayRow(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector<ResultSet> nestedResults, Connection conn, int indentLevel,
 								   int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException
 	{
@@ -691,7 +691,7 @@ public class JDBCDisplayUtil {
 				else if (o instanceof ResultSet && nestedResults != null)
 				{
 					s = LocalizedResource.getMessage("UT_Resul0_20", LocalizedResource.getNumber(nestedResults.size()));
-					nestedResults.addElement(o);
+					nestedResults.addElement( (ResultSet) o);
 				}
 				else
 				{
@@ -927,13 +927,13 @@ public class JDBCDisplayUtil {
 		throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
-		Vector nestedResults;
+		Vector<ResultSet> nestedResults;
     int numberOfRowsSelected = 0;
 
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
+			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
 
@@ -981,7 +981,7 @@ public class JDBCDisplayUtil {
 		nestedResults = null;
 	}
 
-	static private void DisplayNestedResults(PrintStream out, Vector nr, Connection conn, int indentLevel )
+	static private void DisplayNestedResults(PrintStream out, Vector<ResultSet> nr, Connection conn, int indentLevel )
 		throws SQLException {
 
 		if (nr == null) return;
@@ -1003,7 +1003,7 @@ public class JDBCDisplayUtil {
 			System.out.println(b);
 			System.out.println(s+i+" +");
 			System.out.println(b);
-			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn, 
+			indent_DisplayResults(out, nr.elementAt(i), conn, 
 								  indentLevel, null, null);
 		}
 	}
@@ -1019,12 +1019,12 @@ public class JDBCDisplayUtil {
 											  int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
-		Vector nestedResults;
+		Vector<ResultSet> nestedResults;
 
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
+			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
 
@@ -1061,7 +1061,7 @@ public class JDBCDisplayUtil {
 												 int indentLevel, int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
-		Vector nestedResults;
+		Vector<ResultSet> nestedResults;
 
 		if (rs == null) {
 			indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_NoCurreRow_19"));
@@ -1071,7 +1071,7 @@ public class JDBCDisplayUtil {
 		// autocommit must be off or the nested cursors
 		// are closed when the outer statement completes.
 		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
+			nestedResults = new Vector<ResultSet>();
 		else
 			nestedResults = null;
 
@@ -1170,7 +1170,7 @@ public class JDBCDisplayUtil {
 		return rowLen;
 	} // DisplayBanner
 
-	static private void DisplayRow(PrintStream out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel,
+	static private void DisplayRow(PrintStream out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector<ResultSet> nestedResults, Connection conn, int indentLevel,
 								   int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException
 	{
@@ -1201,7 +1201,7 @@ public class JDBCDisplayUtil {
 				else if (o instanceof ResultSet && nestedResults != null)
 				{
 					s = "ResultSet #"+nestedResults.size();
-					nestedResults.addElement(o);
+					nestedResults.addElement( (ResultSet) o);
 				}
 				else
 				{
@@ -1269,10 +1269,10 @@ public class JDBCDisplayUtil {
      */
     private static boolean getSystemBoolean(final String name) {
 
-        return ((Boolean) AccessController
-                .doPrivileged(new java.security.PrivilegedAction() {
+        return (AccessController
+                .doPrivileged(new java.security.PrivilegedAction<Boolean>() {
 
-                    public Object run() {
+                    public Boolean run() {
                         return Boolean.getBoolean(name) ?
                             Boolean.TRUE : Boolean.FALSE;
 

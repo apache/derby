@@ -116,7 +116,7 @@ class ij {
 	utilMain utilInstance = null;
 	Hashtable ignoreErrors = null;
 	String protocol = null;		// the (single) unnamed protocol
-	Hashtable namedProtocols;
+	Hashtable<String,String> namedProtocols;
 
 
 
@@ -141,8 +141,8 @@ class ij {
 
 		// load all protocols specified via properties
 		//
-        Properties p = (Properties) AccessController.doPrivileged(new PrivilegedAction() {
-          	public Object run() {
+        Properties p = AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+          	public Properties run() {
               	return System.getProperties();
             }
         });
@@ -161,11 +161,11 @@ class ij {
 		}
 
 
-		namedProtocols = new Hashtable();
+		namedProtocols = new Hashtable<String,String>();
 		String prefix = PROTOCOL_PROPERTY + ".";
-		for (Enumeration e = p.propertyNames(); e.hasMoreElements(); )
+		for (Enumeration<?> e = p.propertyNames(); e.hasMoreElements(); )
 		{
-			String key = (String)e.nextElement();
+			String key = (String) e.nextElement();
 			if (key.startsWith(prefix)) {
 				String name = key.substring(prefix.length());
 				installProtocol(name.toUpperCase(Locale.ENGLISH), p.getProperty(key));
@@ -513,7 +513,7 @@ class ij {
 	    */
 	public ijResult showConnectionsMethod(boolean ignore0Rows) throws SQLException {
   		Hashtable ss = currentConnEnv.getSessions();
-	  	Vector v = new Vector();
+	  	Vector<Object> v = new Vector<Object>();
 	  	SQLWarning w = null;
         if (ss == null || ss.size() == 0) {
         	if (!ignore0Rows)
@@ -740,7 +740,7 @@ class ij {
                 DatabaseMetaData dbmd = theConnection.getMetaData();
                 ResultSet tablers = dbmd.getTables(null,schema,null,null); 
               
-                List resultSets = new ArrayList();
+                List<ResultSet> resultSets = new ArrayList<ResultSet>();
                 boolean firstIteration = true;
                 ResultSet current_rs = null;
                 while (tablers.next()){
@@ -1785,7 +1785,7 @@ throws SQLException
 
 		// add named protocol if it was specified
 		if (p != null) {
-			String protocol = (String)namedProtocols.get(p);
+			String protocol = namedProtocols.get(p);
 			if (protocol == null) { throw ijException.noSuchProtocol(p); }
 			sVal = protocol + sVal; 
 		}
@@ -1888,13 +1888,13 @@ throws SQLException
 :
 {
 	String			name = null;
-	Vector			idList;
+	Vector<String>			idList;
 	int				idx = 0;
 	int				lastID = 0;
 	StringBuffer	buffer;
 	String			className;
 	String			methodName;
-	Class			classC;
+	Class<?>		classC;
 	Method			method;
 	int				argCount;
 	String[]		args;
@@ -2937,7 +2937,7 @@ Bang() :
 		Process p = Runtime.getRuntime().exec(stringValue(cmd.image));
 		LocalizedInput in = new LocalizedInput(p.getInputStream());
 		int c;
-		Vector v = new Vector();
+		Vector<Object> v = new Vector<Object>();
 		StringBuffer output = new StringBuffer();
 		// echo output
 		while ((c = in.read()) != -1) {
@@ -2967,7 +2967,7 @@ Bang() :
 }
 
 void
-StringList(Vector v) :
+StringList(Vector<Token> v) :
 {
 }
 {
@@ -2975,7 +2975,7 @@ StringList(Vector v) :
 }
 
 void
-StringItem(Vector v) :
+StringItem(Vector<Token> v) :
 {
 	Token s;
 }
@@ -2997,7 +2997,7 @@ HelpStatement() :
 {
 	<HELP>
 	{
-		Vector v = new Vector();
+		Vector<Object> v = new Vector<Object>();
 
                 StringTokenizer st = new StringTokenizer(LocalizedResource.getMessage("IJ_HelpText"), "\n");
 		while (st.hasMoreTokens()) {
@@ -3098,10 +3098,10 @@ intLiteral() throws SQLException :
 	}
 }
 
-Vector
+Vector<String>
 staticMethodName() throws SQLException :
 {
-	Vector	list = new Vector();
+	Vector<String>	list = new Vector<String>();
 }
 {
 	methodLeg( list ) ( <PERIOD> methodLeg( list ) )+
@@ -3111,7 +3111,7 @@ staticMethodName() throws SQLException :
 }
 
 void
-methodLeg( Vector list ) throws SQLException :
+methodLeg( Vector<String> list ) throws SQLException :
 {
 	Token	id;
 }
@@ -3125,7 +3125,7 @@ methodLeg( Vector list ) throws SQLException :
 String[]
 staticMethodArgs() throws SQLException :
 {
-	Vector		list = new Vector();
+	Vector<String>		list = new Vector<String>();
 	String[]	args;
 }
 {
@@ -3141,7 +3141,7 @@ staticMethodArgs() throws SQLException :
 }
 
 void
-oneStaticArg( Vector list ) throws SQLException :
+oneStaticArg( Vector<String> list ) throws SQLException :
 {
 	Token	tok;
 }

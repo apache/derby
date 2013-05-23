@@ -70,9 +70,9 @@ public class CreateXMLFile {
 
         FileOutputStream fos;
         try {
-            fos = (FileOutputStream) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                        public Object run() throws IOException {
+            fos = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileOutputStream>() {
+                        public FileOutputStream run() throws IOException {
                             return new FileOutputStream(file_name);
                         }
                     });

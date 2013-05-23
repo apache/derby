@@ -52,7 +52,7 @@ interface ijResult {
 	Statement getStatement();
 	int getUpdateCount() throws SQLException;
 	ResultSet getResultSet() throws SQLException;
-	List getMultipleResultSets();
+	List<ResultSet> getMultipleResultSets();
 	ResultSet getNextRowOfResultSet();
 	Vector getVector();
 	SQLException getException();

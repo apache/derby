@@ -50,7 +50,7 @@ abstract class ijResultImpl implements ijResult {
 	public Statement getStatement() { return null; }
 	public int getUpdateCount() throws SQLException { return -1; }
 	public ResultSet getResultSet() throws SQLException { return null; }
-	public List getMultipleResultSets() { return null; }
+	public List<ResultSet> getMultipleResultSets() { return null; }
 	public ResultSet getNextRowOfResultSet() { return null; }
 	public Vector getVector() { return null; }
 	public SQLException getException() { return null; }

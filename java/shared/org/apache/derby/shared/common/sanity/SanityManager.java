@@ -72,7 +72,7 @@ public class SanityManager {
 	 * DebugFlags holds the values of all debug flags in
 	 * the configuration file.
 	 */
-	static private Hashtable DebugFlags = new Hashtable();
+	static private Hashtable<String,Boolean> DebugFlags = new Hashtable<String,Boolean>();
 	/**
 	 * AllDebugOn and AllDebugOff override individual flags
 	 */
@@ -226,7 +226,7 @@ public class SanityManager {
 			if (AllDebugOn) return true;
 			else if (AllDebugOff) return false;
 			else {
-					Boolean flagValue = (Boolean) DebugFlags.get(flag);
+					Boolean flagValue = DebugFlags.get(flag);
 					if (! DEBUGDEBUG.equals(flag)) {
 						if (DEBUG_ON(DEBUGDEBUG)) {
 							DEBUG_PRINT(DEBUGDEBUG, "DEBUG_ON: Debug flag "+flag+" = "+flagValue);

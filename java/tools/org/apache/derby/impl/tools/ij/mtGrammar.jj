@@ -145,7 +145,7 @@ runTime() :
 Vector
 cases() :
 {
-	Vector testCases = new Vector(5);	// start with 5
+	Vector<mtTestCase> testCases = new Vector<mtTestCase>(5);	// start with 5
 }
 {
 	(testCase(testCases))+
@@ -157,7 +157,7 @@ cases() :
 
 
 void
-testCase(Vector testCases) :
+testCase(Vector<mtTestCase> testCases) :
 {
 	Token	t;
 	mtTestCase testCase = new mtTestCase();
@@ -171,10 +171,10 @@ testCase(Vector testCases) :
 }
 
 
-Vector
+Vector<mtTestCase>
 init() :
 {
-	Vector testCases = new Vector(5);	// start with 5
+	Vector<mtTestCase> testCases = new Vector<mtTestCase>(5);	// start with 5
 }
 {
 	(initCase(testCases))+ 
@@ -186,7 +186,7 @@ init() :
 
 
 void
-initCase(Vector testCases) :
+initCase(Vector<mtTestCase> testCases) :
 {
 	Token	t;
 	mtTestCase testCase = new mtTestCase();
@@ -202,7 +202,7 @@ initCase(Vector testCases) :
 Vector
 last() :
 {
-	Vector testCases = new Vector(1);	// start with 1
+	Vector<mtTestCase> testCases = new Vector<mtTestCase>(1);	// start with 1
 }
 {
 	(lastCase(testCases))+ 
@@ -214,7 +214,7 @@ last() :
 
 
 void
-lastCase(Vector testCases) :
+lastCase(Vector<mtTestCase> testCases) :
 {
 	Token	t;
 	mtTestCase testCase = new mtTestCase();
@@ -233,7 +233,7 @@ caseInfo(mtTestCase testCase) :
 	String	file;
 	String	prop = null;
 	int	weight = 50;
-	Hashtable errorList = null;
+	Hashtable<String,Integer> errorList = null;
 	String	description = null;
 }
 {
@@ -255,7 +255,7 @@ caseInfo(mtTestCase testCase) :
 	[ errorList=ignoreErrors() ] 
 	{
 		if (errorList == null)
-			errorList = new Hashtable();
+			errorList = new Hashtable<String,Integer>();
 
 		testCase.setIgnoreErrors(errorList);
 	}
@@ -324,12 +324,12 @@ description() :
 	}	
 }
 
-Hashtable
+Hashtable<String,Integer>
 ignoreErrors() :
 {
 	// note: we need a non-null errorlist even
 	// if there is nothing in it
-	Hashtable errorList = new Hashtable();
+	Hashtable<String,Integer> errorList = new Hashtable<String,Integer>();
 }
 {
 	<IGNOREERRORS> getError(errorList) (<COMMA> getError(errorList))*
@@ -339,7 +339,7 @@ ignoreErrors() :
 }
 
 void
-getError(Hashtable errorList) :
+getError(Hashtable<String,Integer> errorList) :
 {
 	String	s;
 }

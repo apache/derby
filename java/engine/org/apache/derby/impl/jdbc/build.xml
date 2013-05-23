@@ -55,7 +55,7 @@
       </classpath>
       <include name="${derby.dir}/impl/jdbc/**"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*42.java"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
   </target>
@@ -79,6 +79,7 @@
             <pathelement path="${java18compile.classpath}"/>
         </classpath>
         <include name="${derby.dir}/impl/jdbc/*42.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
 </target>
 

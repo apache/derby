@@ -40,7 +40,7 @@ public class AttributeHolder {
     String name;
     String value;
     String token;
-    Vector errors = new Vector();
+    Vector<String> errors = new Vector<String>();
 
     public String getName(){
       return name;
@@ -72,14 +72,14 @@ public class AttributeHolder {
     }
     void displayErrors(){
       //If no error are found then nothing is displayed.
-      Enumeration e = errors.elements();
+      Enumeration<String> e = errors.elements();
       //In the first line, show the exact token that was parsed from
       //the URL.
       if (e.hasMoreElements())
         display(LocalizedResource.getMessage("TL_urlLabel1", "[", getToken(), "]"));
       //Show all errors.  More than one error can be found for an attribute.
       while (e.hasMoreElements()){
-        String aString = (String)e.nextElement();
+        String aString = e.nextElement();
         displayIndented(aString);
       }
     }

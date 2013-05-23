@@ -68,6 +68,7 @@
       <classpath>
           <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
   	<javac
@@ -89,6 +90,7 @@
       </classpath>
       <include name="org/apache/derby/shared/**"/>
   	  <exclude name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   	
   	<javac
@@ -108,6 +110,7 @@
   	        <pathelement path="${java16compile.classpath}"/>
   	      </classpath>
   	    <include name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
+      <compilerarg value="-Xlint:unchecked"/>
   	    </javac>
 </target>
   

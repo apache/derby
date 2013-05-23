@@ -117,8 +117,8 @@ public class Main {
     	        } else {
                     try {
                     	final String inFile1 = file;
-                    	in1 = (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-            				public Object run() throws FileNotFoundException {
+                    	in1 = AccessController.doPrivileged(new PrivilegedExceptionAction<FileInputStream>() {
+            				public FileInputStream run() throws FileNotFoundException {
         						return new FileInputStream(inFile1);
             				}
             			});
@@ -140,8 +140,8 @@ public class Main {
 		final String outFile = util.getSystemProperty("ij.outfile");
 		if (outFile != null && outFile.length()>0) {
 			LocalizedOutput oldOut = out;
-			FileOutputStream fos = (FileOutputStream) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
+			FileOutputStream fos = AccessController.doPrivileged(new PrivilegedAction<FileOutputStream>() {
+				public FileOutputStream run() {
 					FileOutputStream out = null;
 					try {
 						out = new FileOutputStream(outFile);

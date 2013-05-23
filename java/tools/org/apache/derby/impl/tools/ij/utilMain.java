@@ -51,7 +51,7 @@ import java.sql.PreparedStatement;
 	single and dual connection ij runs.
 
  */
-public class utilMain implements java.security.PrivilegedAction {
+public class utilMain implements java.security.PrivilegedAction<Object> {
 
 	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
@@ -86,7 +86,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * command can be redirected, so we stack up command
 	 * grabbers as needed.
 	 */
-	Stack oldGrabbers = new Stack();
+	Stack<StatementFinder> oldGrabbers = new Stack<StatementFinder>();
 
 	LocalizedResource langUtil = LocalizedResource.getInstance();
 	/**
@@ -315,7 +315,7 @@ public class utilMain implements java.security.PrivilegedAction {
 				while (command == null && ! oldGrabbers.empty()) {
 					// close the old input file if not System.in
 					if (fileInput) commandGrabber[currCE].close();
-					commandGrabber[currCE] = (StatementFinder)oldGrabbers.pop();
+					commandGrabber[currCE] = oldGrabbers.pop();
 					if (oldGrabbers.empty())
 						fileInput = initialFileInput;
 					command = commandGrabber[currCE].nextStatement();
@@ -488,7 +488,7 @@ public class utilMain implements java.security.PrivilegedAction {
 				}
 				result.closeStatement();
             } else if (result.isMultipleResultSetResult()) {
-              List resultSets = result.getMultipleResultSets();
+              List<ResultSet> resultSets = result.getMultipleResultSets();
               try {
                 JDBCDisplayUtil.DisplayMultipleResults(out,resultSets,
                                      connEnv[currCE].getConnection(),

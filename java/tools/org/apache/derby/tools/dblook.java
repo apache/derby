@@ -64,15 +64,15 @@ public final class dblook {
 
 	// Mappings from id to name for schemas and tables (for ease
 	// of reference).
-	private static HashMap schemaMap;
-	private static HashMap tableIdToNameMap;
+	private static HashMap<String,String> schemaMap;
+	private static HashMap<String,String> tableIdToNameMap;
 
 	// Command-line Parameters.
 	private static String sourceDBUrl;
 	private static String ddlFileName;
 	private static String stmtDelimiter;
 	private static boolean appendLogs;
-	private static ArrayList tableList;
+	private static ArrayList<String> tableList;
 	private static String schemaParam;
 	private static String targetSchema;
 	private static boolean skipViews;
@@ -135,8 +135,8 @@ public final class dblook {
 			return;
 		}
 
-		schemaMap = new HashMap();
-		tableIdToNameMap = new HashMap();
+		schemaMap = new HashMap<String,String>();
+		tableIdToNameMap = new HashMap<String,String>();
 
 		// Now run the utility.
 		go();
@@ -432,7 +432,7 @@ public final class dblook {
 
 		int argIndex = start;
 		int count = 0;
-		tableList = new ArrayList();
+		tableList = new ArrayList<String>();
 		while (argIndex < args.length) {
 
 			if (((args[argIndex].length() > 0) && (args[argIndex].charAt(0) == '-')) ||
@@ -895,7 +895,7 @@ public final class dblook {
 		int strLen = str.length();
 		for (int i = 0; i < tableList.size(); i++) {
 
-			String tableName = (String)tableList.get(i);
+			String tableName = tableList.get(i);
 			tableName = expandDoubleQuotes(stripQuotes(tableName));
 			int nameLen = tableName.length();
 			String strCopy;
@@ -1055,7 +1055,7 @@ public final class dblook {
 
 	public static String lookupSchemaId(String schemaId) {
 
-		return (String)(schemaMap.get(schemaId));
+		return schemaMap.get(schemaId);
 
 	}
 
@@ -1069,7 +1069,7 @@ public final class dblook {
 
 	public static String lookupTableId(String tableId) {
 
-		return (String)(tableIdToNameMap.get(tableId));
+		return tableIdToNameMap.get(tableId);
 
 	}
 

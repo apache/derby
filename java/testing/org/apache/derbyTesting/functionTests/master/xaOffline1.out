@@ -167,8 +167,7 @@ APP     |UserTransaction|ROW     |1   |X   |FOO         |(1,8)     |GRANT|PREPAR
 ij(XA)> xa_end xa_success 2;
 ij(XA)> xa_commit xa_1phase 2;
 ij(XA)> xa_recover xa_startrscan;
-Recovered 1 in-doubt transactions
-Transaction 1 : (1,FILTERED,FILTERED)
+[, Recovered 1 in-doubt transactions, , Transaction 1 : (1,776f6d626174,776f6d626174)]
 ij(XA)> --- xa_datasource 'wombat' shutdown;
 ---------------------------------------------
 -- shutdown the database.
@@ -200,8 +199,7 @@ USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 NULL    |UserTransaction|TABLE   |1   |IX  |FOO         |Tablelock |GRANT|PREPARED
 NULL    |UserTransaction|ROW     |1   |X   |FOO         |(1,8)     |GRANT|PREPARED
 ij(XA)> xa_recover xa_startrscan;
-Recovered 1 in-doubt transactions
-Transaction 1 : (1,FILTERED,FILTERED)
+[, Recovered 1 in-doubt transactions, , Transaction 1 : (1,776f6d626174,776f6d626174)]
 ij(XA)> xa_end xa_success 4;
 ij(XA)> xa_commit xa_1phase 4;
 ij(XA)> ---------------------------------------------
@@ -218,7 +216,7 @@ ij(XA)> select * from lock_table order by tabname, type desc, mode, cnt, locknam
 USERNAME|TRANTYPE       |TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ----------------------------------------------------------------------------------
 ij(XA)> xa_recover xa_startrscan;
-Recovered 0 in-doubt transactions
+[, Recovered 0 in-doubt transactions, ]
 ij(XA)> xa_end xa_success 4;
 ij(XA)> xa_commit xa_1phase 4;
 ij(XA)> ---------------------------------------------

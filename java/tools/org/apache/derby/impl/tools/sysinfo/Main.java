@@ -222,9 +222,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	  String classpath = null;
 
       try {
-          classpath = (String) AccessController.doPrivileged( new PrivilegedAction()
+          classpath = AccessController.doPrivileged( new PrivilegedAction<String>()
               {
-                  public Object run()
+                  public String run()
                   {
                       return System.getProperty("java.class.path");
                   }
@@ -347,9 +347,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     final   String unavailable = nullUnavailable ? null : Main.getTextMessage ("SIF01.H");
 
     try {
-        String  property = (String) AccessController.doPrivileged( new PrivilegedAction()
+        String  property = AccessController.doPrivileged( new PrivilegedAction<String>()
             {
-                public  Object  run()
+                public  String  run()
                 {
                     return System.getProperty (whichProperty, unavailable);
                 }
@@ -376,9 +376,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     private static String getCanonicalPath(final File f) throws IOException {
 
         try {
-            return (String) AccessController
-                    .doPrivileged(new PrivilegedExceptionAction() {
-                        public Object run() throws IOException {
+            return AccessController
+                    .doPrivileged(new PrivilegedExceptionAction<String>() {
+                        public String run() throws IOException {
                             return f.getCanonicalPath();
                         }
                     });
@@ -447,9 +447,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
       final String finalLocaleResource = localeResource;
      
       try {     
-        	InputStream is = (InputStream) AccessController.doPrivileged
-            (new PrivilegedAction() {
-                  public Object run() {
+        	InputStream is = AccessController.doPrivileged
+            (new PrivilegedAction<InputStream>() {
+                  public InputStream run() {
   		            InputStream locis =
   		            	finalp.getClass().getResourceAsStream (finalLocaleResource);
   					return locis;
@@ -825,7 +825,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         {
 			if (classpath != null) {
 				String cp [] = parseClasspath(classpath);
-				Vector v = new Vector();
+				Vector<ZipInfoProperties> v = new Vector<ZipInfoProperties>();
 				for (int i = 0; i < cp.length; i++)
 				{
 					ZipInfoProperties zip = null;
@@ -874,15 +874,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static ZipInfoProperties [] loadZipFromResource()
     {
-		java.util.ArrayList al = new java.util.ArrayList();
+		java.util.ArrayList<ZipInfoProperties> al = new java.util.ArrayList<ZipInfoProperties>();
 
         for (int i = 0; i < infoNames.length; i++)
         {
             final String resource = "/".concat(infoNames[i]);
 
-            InputStream is = (InputStream) AccessController.doPrivileged
-            (new PrivilegedAction() {
-                public Object run() {
+            InputStream is = AccessController.doPrivileged
+            (new PrivilegedAction<InputStream>() {
+                public InputStream run() {
 			        InputStream locis =
                         new Main().getClass().getResourceAsStream(resource);
                             return locis;
@@ -896,9 +896,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 			ZipInfoProperties ze = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(is));
  
                         // get the real location of the info file
-                        URL locUrl = (URL) AccessController.doPrivileged
-                        (new PrivilegedAction() {
-                            public Object run() {
+                        URL locUrl = AccessController.doPrivileged
+                        (new PrivilegedAction<URL>() {
+                            public URL run() {
                                 URL realUrl = new Main().getClass().getResource(resource);
                                 return realUrl;
                             }
@@ -954,9 +954,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static ZipInfoProperties checkForInfo(final String cpEntry)
     {
-        return (ZipInfoProperties) AccessController.doPrivileged( new PrivilegedAction()
+        return AccessController.doPrivileged( new PrivilegedAction<ZipInfoProperties>()
             {
-                public Object run()
+                public ZipInfoProperties run()
                 {
                     File f = new File(cpEntry);
                     if ( ! f.exists())
@@ -1111,9 +1111,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String getFileWhichLoadedClass(final Class cls)
     {
-         return (String)AccessController.doPrivileged( new PrivilegedAction()
+         return AccessController.doPrivileged( new PrivilegedAction<String>()
         {
-            public Object run()
+            public String run()
             {
                 CodeSource cs = null;
                 try {
@@ -1163,7 +1163,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     private static ZipInfoProperties[] mergeZips(ZipInfoProperties[] zip1,
                                                  ZipInfoProperties[] zip2)
     {
-        Vector v = new Vector();
+        Vector<ZipInfoProperties> v = new Vector<ZipInfoProperties>();
         boolean foundDup = false;
   
         // remove duplicates from first array
@@ -1189,7 +1189,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
           {
             for (int k = 0; k < v.size(); k++)
             {
-                ZipInfoProperties z = (ZipInfoProperties)v.get(k);
+                ZipInfoProperties z = v.get(k);
                 if (zip2[j].getLocation().equals(z.getLocation()))
                   foundDup = true;
             }

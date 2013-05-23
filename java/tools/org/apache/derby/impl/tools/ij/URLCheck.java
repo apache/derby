@@ -42,11 +42,11 @@ import java.sql.SQLException;
 
 public class URLCheck {
 
-  private   Vector attributes;
-  private   static Vector booleanAttributes;
+  private   Vector<AttributeHolder> attributes;
+  private   static Vector<String> booleanAttributes;
   //Need so that AppUI class does not get garbage collected
   private   LocalizedResource langUtil = LocalizedResource.getInstance();
-  private   Vector validProps;
+  private   Vector<String> validProps;
 
   public URLCheck(String anURL) {
 
@@ -70,9 +70,9 @@ public class URLCheck {
     }
   }
   public void check(){
-    Enumeration e = attributes.elements();
+    Enumeration<AttributeHolder> e = attributes.elements();
     while (e.hasMoreElements()) {
-      AttributeHolder anAttribute = (AttributeHolder)e.nextElement();
+      AttributeHolder anAttribute = e.nextElement();
       //The check for duplicate must be done at the URLCheck level
       //and not by each specific attribute.  Only URLCheck knowns about
       //all of the attributes and names.
@@ -82,9 +82,9 @@ public class URLCheck {
     }
   }
   public void checkForDuplicate(AttributeHolder anAttribute){
-    Enumeration e = attributes.elements();
+    Enumeration<AttributeHolder> e = attributes.elements();
     while (e.hasMoreElements()) {
-      AttributeHolder aHolder = (AttributeHolder)e.nextElement();
+      AttributeHolder aHolder = e.nextElement();
       //If a duplicate is found, make sure that the message is only shown
       //once for each attribute.
       if (anAttribute != aHolder && anAttribute.getName().equals(aHolder.getName())) {
@@ -113,7 +113,7 @@ public class URLCheck {
 		
 		//Parse the url into attributes and put them in a Properties object.
 		StringTokenizer st = new StringTokenizer(url.substring(protocol.length()), ";:\"");
-		attributes = new Vector();
+		attributes = new Vector<AttributeHolder>();
 		while (st.hasMoreTokens()) {
       AttributeHolder anAttribute = new AttributeHolder();
       String anAtt = "";
@@ -139,9 +139,9 @@ public class URLCheck {
 		return props;
 	}
 
-  public static Vector getBooleanAttributes(){
+  public static Vector<String> getBooleanAttributes(){
     if (booleanAttributes == null) {
-      booleanAttributes = new Vector();
+      booleanAttributes = new Vector<String>();
 		  booleanAttributes.addElement(Attribute.DATA_ENCRYPTION);
 		  booleanAttributes.addElement(Attribute.CREATE_ATTR);
 		  booleanAttributes.addElement(Attribute.SHUTDOWN_ATTR);
@@ -150,14 +150,14 @@ public class URLCheck {
     return booleanAttributes;
   }
 
-    private static Vector validDerbyProps;
-    private Vector getValidDerbyProps()
+    private static Vector<String> validDerbyProps;
+    private Vector<String> getValidDerbyProps()
     {
         if( validDerbyProps == null)
         {
             try
             {
-                Vector props = new Vector();
+                Vector<String> props = new Vector<String>();
                 Class att = Attribute.class;
                 //Use reflection to get the list of valid keys from the Attribute class.
                 //The Attribute class is an interface and therefore all the field
@@ -166,7 +166,7 @@ public class URLCheck {
                 for (int i = 0; i < fields.length; i++)
                 {
                     Field aField = (Field)fields[i];
-                    props.addElement(aField.get(att));
+                    props.addElement( (String) aField.get(att));
                 }
                 validDerbyProps = props;
             }

@@ -39,7 +39,7 @@ import org.apache.derby.iapi.tools.ToolUtils;
  */
 public class ijMultipleResultSetResult extends ijResultImpl {
 
-    private ArrayList resultSets = null;
+    private ArrayList<ResultSet> resultSets = null;
 
     private int[] displayColumns = null;
     private int[] columnWidths = null;
@@ -54,9 +54,9 @@ public class ijMultipleResultSetResult extends ijResultImpl {
      * @param widths  The widths of the columns specified in 'display', or
      *                null to display using default column sizes.
      */
-    public ijMultipleResultSetResult(List resultSets, int[] display,
+    public ijMultipleResultSetResult(List<ResultSet> resultSets, int[] display,
                                      int[] widths) throws SQLException {
-        this.resultSets = new ArrayList();
+        this.resultSets = new ArrayList<ResultSet>();
         this.resultSets.addAll(resultSets);
 
         displayColumns = ToolUtils.copy( display );
@@ -72,15 +72,16 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         return true;
     }
 
-    public List getMultipleResultSets() {
-        return (List) resultSets.clone();
+    @SuppressWarnings("unchecked")
+    public List<ResultSet> getMultipleResultSets() {
+        return (List<ResultSet>) resultSets.clone();
     }
 
     public void closeStatement() throws SQLException {
         if (resultSets != null) {
             ResultSet rs = null;
             for (int i = 0; i<resultSets.size(); i++){
-                rs = (ResultSet)resultSets.get(i);
+                rs = resultSets.get(i);
                 if(rs.getStatement() != null) rs.getStatement().close();
                 else rs.close(); 
             }
@@ -97,7 +98,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         SQLWarning warning = null;
         ResultSet rs = null;
         for (int i=0; i<resultSets.size(); i++){
-            rs = (ResultSet)resultSets.get(i);
+            rs = resultSets.get(i);
             if (rs.getWarnings() != null) {
                 if (warning == null) warning = rs.getWarnings();
                 else                 warning.setNextWarning(rs.getWarnings());
@@ -111,7 +112,7 @@ public class ijMultipleResultSetResult extends ijResultImpl {
      */
     public void clearSQLWarnings() throws SQLException {
         for (int i=0; i<resultSets.size(); i++){
-            ((ResultSet)resultSets.get(i)).clearWarnings();
+            (resultSets.get(i)).clearWarnings();
         }
     }
 }

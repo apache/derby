@@ -46,10 +46,10 @@ class Session {
 	boolean singleSession = true;
 	Connection conn = null;
 	String tag, name;
-	Hashtable prepStmts = new Hashtable();
-	Hashtable cursorStmts = new Hashtable();
-	Hashtable cursors = new Hashtable();
-	Hashtable asyncStmts = new Hashtable();
+	Hashtable<String,PreparedStatement> prepStmts = new Hashtable<String,PreparedStatement>();
+	Hashtable<String,Statement> cursorStmts = new Hashtable<String,Statement>();
+	Hashtable<String,ResultSet> cursors = new Hashtable<String,ResultSet>();
+	Hashtable<String,AsyncStatement> asyncStmts = new Hashtable<String,AsyncStatement>();
 	boolean isJCC= false;      // Is this the IBM UNIVERSAL DRIVER.
 	boolean isDNC = false;     // Is this the Derby Network Client JDBC Driver
 	boolean isEmbeddedDerby = false; // Is this the Derby Embedded JDBC Driver
@@ -97,36 +97,36 @@ class Session {
 		return name;
 	}
 
-	Object addPreparedStatement(String name, PreparedStatement ps) {
+	PreparedStatement addPreparedStatement(String name, PreparedStatement ps) {
 		return prepStmts.put(name,ps);
 	}
 
-	Object addCursorStatement(String name, Statement s) {
+	Statement addCursorStatement(String name, Statement s) {
 		return cursorStmts.put(name, s);
 	}
 
-	Object addCursor(String name, ResultSet rs) {
+	ResultSet addCursor(String name, ResultSet rs) {
 		return cursors.put(name, rs);
 	}
 
-	Object addAsyncStatement(String name, AsyncStatement s) {
+	AsyncStatement addAsyncStatement(String name, AsyncStatement s) {
 		return asyncStmts.put(name, s);
 	}
 
 	PreparedStatement getPreparedStatement(String name) {
-		return (PreparedStatement) prepStmts.get(name);
+		return prepStmts.get(name);
 	}
 
 	Statement getCursorStatement(String name) {
-		return (Statement)cursorStmts.get(name);
+		return cursorStmts.get(name);
 	}
 
 	ResultSet getCursor(String name) {
-		return (ResultSet)cursors.get(name);
+		return cursors.get(name);
 	}
 
 	AsyncStatement getAsyncStatement(String name) {
-		return (AsyncStatement)asyncStmts.get(name);
+		return asyncStmts.get(name);
 	}
 
 	boolean removePreparedStatement(String name) {

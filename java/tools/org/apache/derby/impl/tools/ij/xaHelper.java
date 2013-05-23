@@ -293,7 +293,7 @@ class xaHelper implements xaAbstractHelper
             throw handleException(t);
 		}
 
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		v.addElement("");
 		v.addElement(LocalizedResource.getMessage("IJ_Reco0InDoubT", LocalizedResource.getNumber(val.length)));
 		v.addElement("");

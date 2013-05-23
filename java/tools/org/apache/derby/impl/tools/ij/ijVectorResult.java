@@ -30,10 +30,10 @@ import java.sql.SQLWarning;
  */
 class ijVectorResult extends ijResultImpl {
 
-	Vector vec;
+	Vector<Object> vec;
 	SQLWarning warns;
 
-	ijVectorResult(Vector v, SQLWarning w) {
+	ijVectorResult(Vector<Object> v, SQLWarning w) {
 		vec = v;
 		warns = w;
 	}
@@ -42,7 +42,7 @@ class ijVectorResult extends ijResultImpl {
 	 * Initialize a new vector containing only one object.
 	 */
 	ijVectorResult(Object value, SQLWarning w) {
-		this(new Vector(1), w);
+		this(new Vector<Object>(1), w);
 		vec.add(value);
 	}
 

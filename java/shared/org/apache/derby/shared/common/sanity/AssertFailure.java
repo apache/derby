@@ -166,7 +166,7 @@ public class AssertFailure extends RuntimeException {
         // Load the class and method we need with reflection.
         final Method m;
         try {
-            Class c = Class.forName(
+            Class<?> c = Class.forName(
                     "org.apache.derby.shared.common.sanity.ThreadDump");
             m = c.getMethod("getStackDumpString", new Class[] {});
         } catch (Exception e) {
@@ -179,7 +179,7 @@ public class AssertFailure extends RuntimeException {
         //Try to get a thread dump and deal with various situations.
         try {
             String dump = (String) AccessController.doPrivileged
-            (new PrivilegedExceptionAction(){
+            (new PrivilegedExceptionAction<Object>(){
                 public Object run() throws
                         IllegalArgumentException,
                         IllegalAccessException,

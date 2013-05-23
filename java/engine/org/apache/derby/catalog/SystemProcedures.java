@@ -1782,7 +1782,7 @@ public class SystemProcedures  {
         
         try {
             AccessController.doPrivileged(
-                    new PrivilegedAction() {
+                    new PrivilegedAction<Object>() {
                         public Object run() {
                             Policy.getPolicy().refresh();
                             return null;
