@@ -186,7 +186,6 @@ public	class	DDUtils
 	**checks whether the foreign key relation ships referential action
 	**is violating the restrictions we have in the current system.
 	**/
-    @SuppressWarnings("unchecked")
 	public static void validateReferentialActions
     (
 		DataDictionary	dd,
@@ -235,7 +234,8 @@ public	class	DDUtils
 		int currentSelfRefValue = getCurrentDeleteConnections(dd, td, -1, deleteConnHashtable, false, true);
 		validateDeleteConnection(dd, td, refTd, 
 								 refAction, 
-								 deleteConnHashtable, (Hashtable<String,Integer>) deleteConnHashtable.clone(),
+                                 deleteConnHashtable,
+                                 new Hashtable<String, Integer>(deleteConnHashtable),
 								 true, myConstraintName, false , 
 								 new StringBuffer(0), refTableName,
 								 isSelfReferencingFk,

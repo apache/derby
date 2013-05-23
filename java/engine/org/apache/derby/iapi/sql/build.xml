@@ -53,7 +53,7 @@
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/sql/**"/>
-      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 
