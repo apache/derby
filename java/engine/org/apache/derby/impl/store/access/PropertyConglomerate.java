@@ -96,7 +96,7 @@ class PropertyConglomerate
 	protected long propertiesConglomId;
 	protected Properties serviceProperties;
 	private LockFactory lf;
-	private Dictionary	cachedSet;
+    private Dictionary<String, Object> cachedSet;
 	private CacheLock cachedLock;
 
 	private PropertyFactory  pf;
@@ -271,7 +271,7 @@ class PropertyConglomerate
 		else
 		{
 			synchronized (this) {
-				Hashtable defaults = new Hashtable();
+                Hashtable<Object, Object> defaults = new Hashtable<Object, Object>();
 				getProperties(tc,defaults,false/*!stringsOnly*/,true/*defaultsOnly*/);
 				validate(key,value,defaults);
 				valueToSave = map(key,value,defaults);
@@ -360,13 +360,12 @@ class PropertyConglomerate
 		}
 	}
 
-    @SuppressWarnings("unchecked")
 	void savePropertyDefault(TransactionController tc, String key, Serializable value)
 		 throws StandardException
 	{
 		if (saveServiceProperty(key,value)) return;
 
-		Hashtable<Object,Object> defaults = (Hashtable<Object,Object>)
+        FormatableHashtable defaults = (FormatableHashtable)
             readProperty(tc,AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
 		if (defaults == null) defaults = new FormatableHashtable();
 		if (value==null)
@@ -381,7 +380,7 @@ class PropertyConglomerate
 											 String key, Serializable value, boolean dbOnlyProperty)
 		 throws StandardException
 	{
-		Dictionary d = new Hashtable();
+        Dictionary<Object, Object> d = new Hashtable<Object, Object>();
 		getProperties(tc,d,false/*!stringsOnly*/,false/*!defaultsOnly*/);
 		Serializable mappedValue = pf.doValidateApplyAndMap(tc, key,
 																   value, d, dbOnlyProperty);
@@ -656,13 +655,15 @@ class PropertyConglomerate
 			return getCachedPropertyDefault(tc,key,null);
 		}
 	}
-									
-	private Dictionary<String,Object> copyValues(Dictionary<String,Object> to, Dictionary<String,Object> from, boolean stringsOnly)
+
+    private <K, V> Dictionary<? super K, ? super V> copyValues(
+            Dictionary<? super K, ? super V> to,
+            Dictionary<K, V> from, boolean stringsOnly)
 	{
 		if (from == null) return to; 
-		for (Enumeration keys = from.keys(); keys.hasMoreElements(); ) {
-			String key = (String) keys.nextElement();
-			Object value = from.get(key);
+        for (Enumeration<K> keys = from.keys(); keys.hasMoreElements(); ) {
+            K key = keys.nextElement();
+            V value = from.get(key);
 			if ((value instanceof String) || !stringsOnly)
 				to.put(key, value);
 		}
@@ -679,28 +680,29 @@ class PropertyConglomerate
 		return p;
 	}
 
-    @SuppressWarnings("unchecked")
 	public void getProperties(TransactionController tc,
-							   Dictionary d,
+                               Dictionary<Object, Object> d,
 							   boolean stringsOnly,
 							   boolean defaultsOnly) throws StandardException
 	{
 		// See if I'm the exclusive owner. If so I cannot populate
 		// the cache as it would contain my uncommitted changes.
+        Dictionary<String, Object> dbProps;
 		if (iHoldTheUpdateLock(tc))
 		{
-			Dictionary dbProps = readDbProperties(tc);
-			Dictionary defaults = (Dictionary)dbProps.get(AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
-			copyValues(d,defaults,stringsOnly);
-			if (!defaultsOnly)copyValues(d,dbProps,stringsOnly);
+            dbProps = readDbProperties(tc);
 		}
 		else
 		{	
-			Dictionary dbProps = getCachedDbProperties(tc);
-			Dictionary defaults = (Dictionary)dbProps.get(AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
-			copyValues(d,defaults,stringsOnly);
-			if (!defaultsOnly)copyValues(d,dbProps,stringsOnly);
+            dbProps = getCachedDbProperties(tc);
 		}
+
+        FormatableHashtable defaults = (FormatableHashtable)
+                dbProps.get(AccessFactoryGlobals.DEFAULT_PROPERTY_NAME);
+        copyValues(d, defaults, stringsOnly);
+        if (!defaultsOnly) {
+            copyValues(d, dbProps, stringsOnly);
+        }
 	}
 
 	void resetCache() {cachedSet = null;}
@@ -739,10 +741,11 @@ class PropertyConglomerate
 		return set;
 	}
 
-	private Dictionary getCachedDbProperties(TransactionController tc)
+    private Dictionary<String, Object>
+            getCachedDbProperties(TransactionController tc)
 		 throws StandardException
 	{
-		Dictionary dbProps = cachedSet;
+        Dictionary<String, Object> dbProps = cachedSet;
 		//Get the cached set of properties.
 		if (dbProps == null)
 		{

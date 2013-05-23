@@ -876,7 +876,7 @@ public abstract class RAMAccessManager
 		// set up the initial values by calling the validate and apply methods.
 		// the map methods are not called as they will have been called
 		// at runtime when the user set the property.
-		Dictionary d = new Hashtable();
+        Dictionary<Object, Object> d = new Hashtable<Object, Object>();
 		try {
 			xactProperties.getProperties(tc,d,false/*!stringsOnly*/,false/*!defaultsOnly*/);
 		} catch (StandardException se) {
