@@ -596,7 +596,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
             lookedUpParams = true;
         }
 
-		return (DataTypeDescriptor[]) ArrayUtil.copy( params );
+        return ArrayUtil.copy(params);
 	}
 
 	/**
@@ -606,7 +606,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 */
 	public final synchronized void setParams(DataTypeDescriptor params[])
 	{
-		this.params = (DataTypeDescriptor[]) ArrayUtil.copy( params );
+        this.params = ArrayUtil.copy(params);
 	}
 
 	/**

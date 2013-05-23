@@ -56,7 +56,7 @@ public class RealDeleteCascadeResultSetStatistics
 								)
 	{
 		super(rowCount, deferred, indexesUpdated, tableLock, executeTime, sourceResultSetStatistics);
-		this.dependentTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( dependentTrackingArray );
+        this.dependentTrackingArray = ArrayUtil.copy(dependentTrackingArray);
 	}
 
 

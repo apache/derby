@@ -97,7 +97,7 @@ public class RealProjectRestrictStatistics
 		this.doesProjection = doesProjection;
 		this.restrictionTime = restrictionTime;
 		this.projectionTime = projectionTime;
-		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
+        this.subqueryTrackingArray = ArrayUtil.copy(subqueryTrackingArray);
 		this.childResultSetStatistics = childResultSetStatistics;
 	}
 

@@ -98,7 +98,7 @@ public final class GenericResultDescription
 	public GenericResultDescription(ResultColumnDescriptor[] columns, 
 					String statementType) 
 	{
-		this.columns = (ResultColumnDescriptor[]) ArrayUtil.copy( columns );
+        this.columns = ArrayUtil.copy(columns);
 		this.statementType = statementType;
 	}
 
@@ -146,7 +146,7 @@ public final class GenericResultDescription
 	}
 
 	public ResultColumnDescriptor[] getColumnInfo() {
-		return (ResultColumnDescriptor[]) ArrayUtil.copy( columns );
+        return ArrayUtil.copy(columns);
 	}
 
     public  ResultColumnDescriptor  getColumnInfo( int idx ) { return columns[ idx ]; }

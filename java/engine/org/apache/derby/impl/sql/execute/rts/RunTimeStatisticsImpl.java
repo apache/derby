@@ -103,7 +103,7 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
 		this.endCompilationTimestamp = DataTypeUtilities.clone( endCompilationTimestamp );
 		this.beginExecutionTimestamp = DataTypeUtilities.clone( beginExecutionTimestamp );
 		this.endExecutionTimestamp = DataTypeUtilities.clone( endExecutionTimestamp );
-		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
+        this.subqueryTrackingArray = ArrayUtil.copy(subqueryTrackingArray);
 		this.topResultSetStatistics = topResultSetStatistics;
 	}
 

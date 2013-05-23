@@ -87,7 +87,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( indexRowGenerators == null ) { getAllIndexes(); }
-		return	(IndexRowGenerator[]) ArrayUtil.copy( indexRowGenerators );
+        return ArrayUtil.copy(indexRowGenerators);
 	}
 
     /**
@@ -129,7 +129,7 @@ public class IndexLister
 					throws StandardException
 	{
 		if ( distinctIndexRowGenerators == null ) { getAllIndexes(); }
-		return	(IndexRowGenerator[]) ArrayUtil.copy( distinctIndexRowGenerators );
+        return ArrayUtil.copy(distinctIndexRowGenerators);
 	}
 
     /**

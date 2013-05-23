@@ -110,7 +110,7 @@ public class RealHashTableStatistics
 				this.scanProperties.put(key, scanProperties.get(key));
 			}
 		}
-		this.subqueryTrackingArray = (ResultSetStatistics[]) ArrayUtil.copy( subqueryTrackingArray );
+        this.subqueryTrackingArray = ArrayUtil.copy(subqueryTrackingArray);
 		this.childResultSetStatistics = childResultSetStatistics;
 	}
 

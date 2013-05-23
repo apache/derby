@@ -132,7 +132,7 @@ public class ColumnInfo implements Formatable
 		this.dataType = dataType;
 		this.defaultValue = defaultValue;
 		this.defaultInfo = defaultInfo;
-        this.providers = (ProviderInfo[]) ArrayUtil.copy(providers);
+        this.providers = ArrayUtil.copy(providers);
 		this.newDefaultUUID = newDefaultUUID;
 		this.oldDefaultUUID = oldDefaultUUID;
 		this.action = action;

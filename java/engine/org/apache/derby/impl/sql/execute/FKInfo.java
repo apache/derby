@@ -138,7 +138,7 @@ public class FKInfo implements Formatable
 		this.type = type;
 		this.refUUID = refUUID;
 		this.refConglomNumber = refConglomNumber;
-        this.fkUUIDs = (UUID[]) ArrayUtil.copy(fkUUIDs);
+        this.fkUUIDs = ArrayUtil.copy(fkUUIDs);
         this.fkConglomNumbers = ArrayUtil.copy(fkConglomNumbers);
         this.fkIsSelfReferencing = ArrayUtil.copy(fkIsSelfReferencing);
         this.colArray = ArrayUtil.copy(colArray);

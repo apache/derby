@@ -38,21 +38,16 @@ public abstract class ArrayUtil
 {
 	///////////////////////////////////////////////////////////////////
 	//
-	// Methods to copy arrays. We'd like to use java.util.copyOf(), but
-    // we have to run on Java 5.
+	// Methods to copy arrays.
 	//
 	///////////////////////////////////////////////////////////////////
 
     /** Copy an array of objects; the original array could be null */
-    public  static  Object[]    copy( Object[] original )
+    public  static <T> T[] copy( T[] original )
     {
-        return (original == null) ? null : (Object[]) original.clone();
-    }
-
-    /** Copy a (possibly null) array of strings */
-    public  static  String[]    copy( String[] original )
-    {
-        return (original == null) ? null : (String[]) original.clone();
+        return (original == null) ?
+                null :
+                Arrays.copyOf(original, original.length);
     }
 
     /** Copy a (possibly null) array of booleans */
@@ -97,14 +92,12 @@ public abstract class ArrayUtil
      * Make the contents of an array available as a read-only list. If the
      * array is null, an empty list will be returned.
      */
-    @SuppressWarnings("unchecked")
-    public static List<Object> asReadOnlyList(Object[] array) {
-        return (List<Object>)
-            (
-             array == null ?
-             Collections.EMPTY_LIST :
-             Collections.unmodifiableList(Arrays.asList(array))
-             );
+    public static <T> List<T> asReadOnlyList(T... array) {
+        if (array == null) {
+            return Collections.emptyList();
+        } else {
+            return Collections.unmodifiableList(Arrays.asList(array));
+        }
     }
 
 	///////////////////////////////////////////////////////////////////

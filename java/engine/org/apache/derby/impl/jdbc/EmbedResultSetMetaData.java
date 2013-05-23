@@ -66,7 +66,7 @@ public abstract class EmbedResultSetMetaData
 	// constructor
 	//
 	public EmbedResultSetMetaData(ResultColumnDescriptor[] columnInfo) {
-		this.columnInfo = (ResultColumnDescriptor[]) ArrayUtil.copy( columnInfo );
+        this.columnInfo = ArrayUtil.copy(columnInfo);
 	}
 
 	//

@@ -490,7 +490,7 @@ recompileOutOfDatePlan:
 	}
 
 	public DataTypeDescriptor[]	getParameterTypes()	{
-		return (DataTypeDescriptor[]) ArrayUtil.copy( paramTypeDescriptors );
+        return ArrayUtil.copy(paramTypeDescriptors);
 	}
 
     /** Return the type of the parameter (0-based indexing) */
