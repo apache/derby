@@ -72,9 +72,8 @@ public class ijMultipleResultSetResult extends ijResultImpl {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     public List<ResultSet> getMultipleResultSets() {
-        return (List<ResultSet>) resultSets.clone();
+        return new ArrayList<ResultSet>(resultSets);
     }
 
     public void closeStatement() throws SQLException {
