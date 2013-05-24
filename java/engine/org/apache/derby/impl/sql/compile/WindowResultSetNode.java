@@ -147,20 +147,17 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         // Add all referenced columns in select list to windowing node's RCL
         // and substitute references in original node to point to the Windowing
         // result set. (modelled on GroupByNode's action for addUnAggColumns)
-        CollectNodesVisitor getCRVisitor =
-            new CollectNodesVisitor(ColumnReference.class);
+        CollectNodesVisitor<ColumnReference> getCRVisitor =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
         ResultColumnList prcl = parent.getResultColumns();
 
         parent.getResultColumns().accept(getCRVisitor);
 
-        List colRefs = getCRVisitor.getList();
-
         // Find all unique columns referenced and add those to windowing result
         // set.
         ArrayList<ValueNode> uniqueCols = new ArrayList<ValueNode>();
-        for (int i= 0; i< colRefs.size(); i++) {
-            ColumnReference cr = (ColumnReference) colRefs.get(i);
+        for (ColumnReference cr : getCRVisitor.getList()) {
             if (!colRefAlreadySeen(uniqueCols, cr)) {
                 uniqueCols.add(cr);
             }
@@ -174,12 +171,9 @@ public class WindowResultSetNode extends SingleChildResultSetNode
             new CollectNodesVisitor<VirtualColumnNode>(VirtualColumnNode.class);
 
         parent.getResultColumns().accept(getVCVisitor);
-        List<VirtualColumnNode> vcs = getVCVisitor.getList();
 
         // Add any virtual columns to windowing result.
-        for (int i= 0; i< vcs.size(); i++) {
-            uniqueCols.add(vcs.get(i));
-        }
+        uniqueCols.addAll(getVCVisitor.getList());
 
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = resultColumns;

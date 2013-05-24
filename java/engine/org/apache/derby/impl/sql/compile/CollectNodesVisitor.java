@@ -38,8 +38,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 public class CollectNodesVisitor<T extends Visitable> implements Visitor
 {
     private final List<T> nodeList;
-    private final Class nodeClass;
-    private final Class skipOverClass;
+    private final Class<T> nodeClass;
+    private final Class<? extends Visitable> skipOverClass;
 
 	/**
 	 * Construct a visitor
@@ -47,7 +47,7 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 * @param nodeClass the class of the node that 
 	 * 	we are looking for.
 	 */
-	public CollectNodesVisitor(Class nodeClass)
+    public CollectNodesVisitor(Class<T> nodeClass)
 	{
         this(nodeClass, null);
 	}
@@ -60,7 +60,8 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 * @param skipOverClass do not go below this
 	 * node when searching for nodeClass.
 	 */
-	public CollectNodesVisitor(Class nodeClass, Class skipOverClass)
+    public CollectNodesVisitor(Class<T> nodeClass,
+                               Class<? extends Visitable> skipOverClass)
 	{
         this.nodeList = new ArrayList<T>();
         this.nodeClass = nodeClass;
@@ -89,12 +90,11 @@ public class CollectNodesVisitor<T extends Visitable> implements Visitor
 	 *
 	 * @return me
 	 */
-    @SuppressWarnings("unchecked")
 	public Visitable visit(Visitable node)
 	{
 		if (nodeClass.isInstance(node))
 		{
-			nodeList.add( (T) node);
+            nodeList.add(nodeClass.cast(node));
 		}
 		return node;
 	}

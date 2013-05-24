@@ -174,8 +174,9 @@ public class SelectNode extends ResultSetNode
 		
 		this.originalWhereClauseHadSubqueries = false;
 		if (this.whereClause != null){
-			CollectNodesVisitor cnv = 
-				new CollectNodesVisitor(SubqueryNode.class, SubqueryNode.class);
+            CollectNodesVisitor<SubqueryNode> cnv =
+                new CollectNodesVisitor<SubqueryNode>(
+                    SubqueryNode.class, SubqueryNode.class);
 			this.whereClause.accept(cnv);
 			if (!cnv.getList().isEmpty()){
 				this.originalWhereClauseHadSubqueries = true;
@@ -756,8 +757,9 @@ public class SelectNode extends ResultSetNode
 		 * With a FromSubquery in the FromList we cannot bind target expressions 
 		 * at this level (DERBY-3321)
 		 */
-		CollectNodesVisitor cnv = new CollectNodesVisitor(FromSubquery.class, 
-														  FromSubquery.class);
+        CollectNodesVisitor<FromSubquery> cnv =
+            new CollectNodesVisitor<FromSubquery>(
+                FromSubquery.class, FromSubquery.class);
 		fromList.accept(cnv);
 		if (!cnv.getList().isEmpty()){		
 			bindTargetListOnly = false;
@@ -1312,14 +1314,12 @@ public class SelectNode extends ResultSetNode
 			// Collect window function calls and in-lined window definitions
 			// contained in them from the orderByList.
 
-			CollectNodesVisitor cnvw =
-				new CollectNodesVisitor(WindowFunctionNode.class);
+            CollectNodesVisitor<WindowFunctionNode> cnvw =
+                new CollectNodesVisitor<WindowFunctionNode>(
+                    WindowFunctionNode.class);
             orderByLists[0].accept(cnvw);
-			List wfcInOrderBy = cnvw.getList();
 
-			for (int i=0; i < wfcInOrderBy.size(); i++) {
-				WindowFunctionNode wfn =
-					(WindowFunctionNode) wfcInOrderBy.get(i);
+            for (WindowFunctionNode wfn : cnvw.getList()) {
 				windowFuncCalls.add(wfn);
 
 

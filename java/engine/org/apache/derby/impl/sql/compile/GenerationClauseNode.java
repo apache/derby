@@ -132,10 +132,11 @@ public class GenerationClauseNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    public List findReferencedColumns()
+    public List<ColumnReference> findReferencedColumns()
         throws StandardException
     {
-        CollectNodesVisitor visitor = new CollectNodesVisitor( ColumnReference.class );
+        CollectNodesVisitor<ColumnReference> visitor =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
         _generationExpression.accept( visitor );
 

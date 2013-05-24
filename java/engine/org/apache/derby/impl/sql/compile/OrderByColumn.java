@@ -21,8 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Iterator;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -249,14 +247,13 @@ public class OrderByColumn extends OrderedColumn {
 				String col=null;
 				boolean match=false;
 
-				CollectNodesVisitor collectNodesVisitor =
-					new CollectNodesVisitor(ColumnReference.class);
+                CollectNodesVisitor<ColumnReference> collectNodesVisitor =
+                    new CollectNodesVisitor<ColumnReference>(
+                        ColumnReference.class);
 				expression.accept(collectNodesVisitor);
 
-				for (Iterator it = collectNodesVisitor.getList().iterator();
-				it.hasNext(); )
+                for (ColumnReference cr1 : collectNodesVisitor.getList())
 				{//visits through the columns in this OrderByColumn
-					ColumnReference cr1=(ColumnReference)it.next();
 					col=cr1.getColumnName();
 					match = columnMatchFound(target,cr1);
 					/* breaks if a match not found, this is needed

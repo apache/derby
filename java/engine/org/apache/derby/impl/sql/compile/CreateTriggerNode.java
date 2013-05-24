@@ -719,16 +719,13 @@ public class CreateTriggerNode extends DDLStatementNode
 
         if ( genColCount == 0 ) { return; }
 
-        CollectNodesVisitor     visitor = new CollectNodesVisitor( ColumnReference.class );
+        CollectNodesVisitor<ColumnReference> visitor =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
         actionNode.accept( visitor );
 
-        List columnRefs = visitor.getList();
-        int                             colRefCount = columnRefs.size();
-
-        for ( int crf_idx = 0; crf_idx < colRefCount; crf_idx++ )
+        for (ColumnReference cr : visitor.getList())
         {
-            ColumnReference     cr = (ColumnReference) columnRefs.get( crf_idx );
             String  colRefName = cr.getColumnName();
             String  tabRefName = cr.getTableName();
 

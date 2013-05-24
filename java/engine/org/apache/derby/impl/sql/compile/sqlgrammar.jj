@@ -10063,12 +10063,12 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
         // inside the expression and mark them so that at bind() time
         // we can reject them if they turn out to be user-defined aggregates
         // rather than ordinary function calls.
-        CollectNodesVisitor  functionSniffer = new CollectNodesVisitor( StaticMethodCallNode.class );
+        CollectNodesVisitor<StaticMethodCallNode> functionSniffer =
+            new CollectNodesVisitor<StaticMethodCallNode>(StaticMethodCallNode.class);
         columnExpression.accept( functionSniffer );
-        List functionNodes = functionSniffer.getList();
-        for ( int i = 0; i < functionNodes.size(); i++ )
+        for (StaticMethodCallNode node : functionSniffer.getList())
         {
-            ((StaticMethodCallNode) functionNodes.get(i)).setAppearsInGroupBy();
+            node.setAppearsInGroupBy();
         }
 
 		if (columnExpression.isParameterNode()) 

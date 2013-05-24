@@ -66,7 +66,6 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.sql.LanguageProperties;
 
@@ -2368,13 +2367,13 @@ public class FromBaseTable extends FromTable
 				//Following call is marking the query to run with definer 
 				//privileges. This marking will make sure that we do not collect
 				//any privilege requirement for it.
-                CollectNodesVisitor cnv =
-                    new CollectNodesVisitor(QueryTreeNode.class, null);
+                CollectNodesVisitor<QueryTreeNode> cnv =
+                    new CollectNodesVisitor<QueryTreeNode>(QueryTreeNode.class);
 
                 fsq.accept(cnv);
 
-                for (Iterator it = cnv.getList().iterator(); it.hasNext(); ) {
-                    ((QueryTreeNode)it.next()).disablePrivilegeCollection();
+                for (QueryTreeNode node : cnv.getList()) {
+                    node.disablePrivilegeCollection();
                 }
 
 				fsq.setOrigTableName(this.getOrigTableName());

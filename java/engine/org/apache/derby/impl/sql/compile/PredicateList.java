@@ -58,7 +58,6 @@ import java.lang.reflect.Modifier;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -1463,11 +1462,11 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			Predicate	predicate;
 			predicate = (Predicate) elementAt(index);
 
-			CollectNodesVisitor getCRs = 
-                new CollectNodesVisitor(ColumnReference.class);
+            CollectNodesVisitor<ColumnReference> getCRs =
+                new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
 			predicate.getAndNode().accept(getCRs);
-			List colRefs = getCRs.getList();
+            List<ColumnReference> colRefs = getCRs.getList();
 
 			/* state doesn't become true until we find the 1st
 			 * ColumnReference.  (We probably will always find
@@ -1476,9 +1475,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			boolean state = colRefs.size() > 0;
 			if (state)
 			{
-				for (Iterator it = colRefs.iterator(); it.hasNext(); )
+                for (ColumnReference ref : colRefs)
 				{
-					ColumnReference ref = (ColumnReference) it.next();
 					if (!ref.pointsToColumnReference())
 					{
 						state = false;
@@ -1640,8 +1638,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	void markReferencedColumns()
 		throws StandardException
 	{
-		CollectNodesVisitor collectCRs = 
-            new CollectNodesVisitor(ColumnReference.class);
+        CollectNodesVisitor<ColumnReference> collectCRs =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -1650,10 +1648,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			predicate.getAndNode().accept(collectCRs);
 		}
 
-		List colRefs = collectCRs.getList();
-		for (Iterator it = colRefs.iterator(); it.hasNext(); )
+        for (ColumnReference ref : collectCRs.getList())
 		{
-			ColumnReference ref = (ColumnReference) it.next();
 			ResultColumn source = ref.getSource();
 
             // DERBY-4391: Don't try to call markAllRCsInChainReferenced() if

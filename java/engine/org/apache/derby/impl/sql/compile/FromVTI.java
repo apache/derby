@@ -31,7 +31,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.DefaultInfo;
@@ -54,6 +53,7 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -61,7 +61,6 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -901,12 +900,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * from other VTIs that appear after this one in the FROM list.
 		 * These CRs will have uninitialized column and table numbers.
 		 */
-		List colRefs = getNodesFromParameters(ColumnReference.class);
         ArrayList<AggregateNode> aggregates = null;
-		for (Iterator it = colRefs.iterator(); it.hasNext(); )
+        for (ColumnReference ref : getNodesFromParameters(ColumnReference.class))
 		{
-			ColumnReference ref = (ColumnReference) it.next();
-
             //
             // Table Function parameters may not reference columns from other tables in the
             // FROM list of the current query block. See DERBY-5579. We also do not allow
@@ -1010,10 +1006,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	List getNodesFromParameters(Class nodeClass)
+    <T extends Visitable> List<T> getNodesFromParameters(Class<T> nodeClass)
 		throws StandardException
 	{
-		CollectNodesVisitor getCRs = new CollectNodesVisitor(nodeClass);
+        CollectNodesVisitor<T> getCRs = new CollectNodesVisitor<T>(nodeClass);
 		methodCall.accept(getCRs);
 		return getCRs.getList();
 	}
@@ -1609,10 +1605,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
      */
     private void remapBaseTableColumns() throws StandardException
     {
-		List colRefs = getNodesFromParameters(ColumnReference.class);
-		for (Iterator it = colRefs.iterator(); it.hasNext(); )
+        for (ColumnReference ref : getNodesFromParameters(ColumnReference.class))
 		{
-			ColumnReference ref = (ColumnReference) it.next();
             FromTable   fromTable = argSources.get( new Integer( ref.getTableNumber() ) );
 
             if ( fromTable != null )

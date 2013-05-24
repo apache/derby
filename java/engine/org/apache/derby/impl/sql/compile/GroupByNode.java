@@ -21,7 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
@@ -576,15 +575,13 @@ public class GroupByNode extends SingleChildResultSetNode
 			// it is allright to have columns from parent or child subqueries;
 			//   select * from p where p.p1 in 
 			//      (select c.c1 from c group by c.c1 having count(*) = p.p2
-			CollectNodesVisitor collectNodesVisitor = 
-				new CollectNodesVisitor(ColumnReference.class, AggregateNode.class);
+            CollectNodesVisitor<ColumnReference> collectNodesVisitor =
+                new CollectNodesVisitor<ColumnReference>(
+                    ColumnReference.class, AggregateNode.class);
 			havingClause.accept(collectNodesVisitor);
 
-			for (Iterator it = collectNodesVisitor.getList().iterator();
-			     it.hasNext(); ) 
+            for (ColumnReference cr: collectNodesVisitor.getList())
 			{
-				ColumnReference cr = (ColumnReference)it.next();
-
 				if ( ! (cr.getGeneratedToReplaceAggregate() ||
 						cr.getGeneratedToReplaceWindowFunctionCall()) &&
 					 cr.getSourceLevel() == level) {
@@ -1362,11 +1359,13 @@ public class GroupByNode extends SingleChildResultSetNode
 				ValueNode v1 = o1.getSource();
 				ValueNode v2 = o2.getSource();
 				int refCount1, refCount2;
-				CollectNodesVisitor vis = new CollectNodesVisitor(
-				ColumnReference.class);
+                CollectNodesVisitor<ColumnReference> vis =
+                    new CollectNodesVisitor<ColumnReference>(
+                        ColumnReference.class);
 				v1.accept(vis);
 				refCount1 = vis.getList().size();
-				vis = new CollectNodesVisitor(ColumnReference.class);
+                vis = new CollectNodesVisitor<ColumnReference>(
+                        ColumnReference.class);
 				v2.accept(vis);
 				refCount2 = vis.getList().size();
 				// The ValueNode with the larger number of refs
