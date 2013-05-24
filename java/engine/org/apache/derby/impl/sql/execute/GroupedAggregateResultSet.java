@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
@@ -120,7 +121,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	private boolean resultsComplete;
 	private List<ExecRow> finishedResults;
 	private ExecIndexRow[]			resultRows;
-	private HashSet [][]			distinctValues;
+    private List<List<Set<String>>> distinctValues;
 
 	private boolean rollup;
 	private boolean usingAggregateObserver = false;
@@ -238,15 +239,21 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			else
 				resultRows = new ExecIndexRow[1];
 			if (aggInfoList.hasDistinct())
-			    distinctValues = new HashSet[resultRows.length][aggregates.length];
+            {
+                distinctValues =
+                        new ArrayList<List<Set<String>>>(resultRows.length);
+            }
 			for (int r = 0; r < resultRows.length; r++)
 			{
 				resultRows[r] =
 					(ExecIndexRow) currSortedRow.getClone();
 				initializeVectorAggregation(resultRows[r]);
 				if (aggInfoList.hasDistinct())
-					distinctValues[r] = new HashSet[aggregates.length];
-				initializeDistinctMaps(r, true);
+                {
+                    distinctValues.add(
+                            new ArrayList<Set<String>>(aggregates.length));
+                    initializeDistinctMaps(r, true);
+                }
 			}
 		}
 		} catch (StandardException e) {
@@ -757,12 +764,12 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 				// A NULL value is always distinct, so we only
 				// have to check for duplicate values for
 				// non-NULL values.
-				if (newValue.getString() != null)
+                String str = newValue.getString();
+                if (str != null && !distinctValues.get(level).get(i).add(str))
 				{
-					if (distinctValues[level][i].contains(
-						    newValue.getString()))
-						continue;
-                    addDistinctValue( level, i, newValue );
+                    // The value was already in the set, and we only look
+                    // for distinct values. Skip this value.
+                    continue;
 				}
 			}
 
@@ -771,16 +778,6 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		}
 	}
 
-    /** Helper routine to do casting to shut up the compiler */
-    @SuppressWarnings("unchecked")
-    private void    addDistinctValue( int level, int aggregateNumber, DataValueDescriptor newValue )
-		throws StandardException
-    {
-        HashSet<String> set = (HashSet<String>) distinctValues[ level ][ aggregateNumber ];
-
-        set.add( newValue.getString() );
-    }
-
 	private void initializeDistinctMaps(int r, boolean allocate)
 	    throws StandardException
 	{
@@ -788,15 +785,22 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		{
 			AggregatorInfo aInfo = (AggregatorInfo)
 						aggInfoList.elementAt(a);
+
+            if (allocate) {
+                // Allocate an empty set if the aggregate is distinct.
+                // Otherwise, insert null so that the list is of the right
+                // size and the indexes match those in aggregates[].
+                distinctValues.get(r).add(aInfo.isDistinct() ?
+                        new HashSet<String>() : null);
+            }
+
 			if (aInfo.isDistinct())
 			{
-				if (allocate)
-					distinctValues[r][a] = new HashSet<String>();
-				else
-					distinctValues[r][a].clear();
+                Set<String> set = distinctValues.get(r).get(a);
+                set.clear();
 				DataValueDescriptor newValue =
 					aggregates[a].getInputColumnValue(resultRows[r]);
-                addDistinctValue( r, a, newValue );
+                set.add(newValue.getString());
 			}
 		}
 	}
