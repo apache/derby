@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -91,13 +92,12 @@ public class CursorNode extends DMLStatementNode
 	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 * @param updateMode	The user-specified update mode for the cursor,
 	 *			for example, CursorNode.READ_ONLY
-	 * @param updatableColumns The list of updatable columns specified by
+     * @param updatableColumns The array of updatable columns specified by
 	 *			the user in the FOR UPDATE clause, null if no
 	 *			updatable columns specified.  May only be
 	 *			provided if the updateMode parameter is
 	 *			CursorNode.UPDATE.
 	 */
-    @SuppressWarnings("unchecked")
 	public	void init(
 		Object statementType,
 		Object resultSet,
@@ -118,7 +118,9 @@ public class CursorNode extends DMLStatementNode
         this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		this.updateMode = ((Integer) updateMode).intValue();
-		this.updatableColumns = (List<String>) updatableColumns;
+        this.updatableColumns =
+                updatableColumns == null ?
+                null : Arrays.asList((String[]) updatableColumns);
 
 		/*
 		** This is a sanity check and not an error since the parser

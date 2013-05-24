@@ -3347,7 +3347,9 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 				offsetClauses[ FETCH_FIRST_CLAUSE ],
                 Boolean.valueOf( hasJDBClimitClause ),
 				ReuseFactory.getInteger(forUpdateState),
-				(forUpdateState == CursorNode.READ_ONLY ? null : updateColumns ),
+                forUpdateState == CursorNode.READ_ONLY ?
+                    null :
+                    updateColumns.toArray(new String[updateColumns.size()]),
 				getContextManager());
 
 		if (checkParams)

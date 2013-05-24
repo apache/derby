@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -128,21 +130,15 @@ public class TriggerEventActivator
 								);
 		setupExecutors(triggerInfo);
 	}
-
-    /** Perform the cast needed to a list of triggers from the executorLists */
-    @SuppressWarnings("unchecked")
-    private Vector<TriggerDescriptor>   getTriggers( int idx, Vector[] executorLists )
-    {
-        return (Vector<TriggerDescriptor>) executorLists[ idx ];
-    }
     
 	private void setupExecutors(TriggerInfo triggerInfo) throws StandardException
 	{
 		executors = new GenericTriggerExecutor[TriggerEvent.MAX_EVENTS][];
-		Vector[] executorLists = new Vector[TriggerEvent.MAX_EVENTS];
+        List<List<TriggerDescriptor>> executorLists =
+            new ArrayList<List<TriggerDescriptor>>(TriggerEvent.MAX_EVENTS);
 		for (int i = 0; i < TriggerEvent.MAX_EVENTS; i++)
 		{
-			executorLists[i] = new Vector<TriggerDescriptor>();
+            executorLists.add(new ArrayList<TriggerDescriptor>());
 		}
 
 		for (int i = 0; i < triggerInfo.triggerArray.length; i++)
@@ -153,11 +149,11 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_INSERT:
 					if (td.isBeforeTrigger())
 					{
-						getTriggers( TriggerEvent.BEFORE_INSERT, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.BEFORE_INSERT).add(td);
 					}
 					else
 					{
-						getTriggers( TriggerEvent.AFTER_INSERT, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.AFTER_INSERT).add(td);
 					}
 					break;
 
@@ -165,22 +161,22 @@ public class TriggerEventActivator
 				case TriggerDescriptor.TRIGGER_EVENT_DELETE:
 					if (td.isBeforeTrigger())
 					{
-						getTriggers( TriggerEvent.BEFORE_DELETE, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.BEFORE_DELETE).add(td);
 					}
 					else
 					{
-						getTriggers( TriggerEvent.AFTER_DELETE, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.AFTER_DELETE).add(td);
 					}
 					break;
 
 				case TriggerDescriptor.TRIGGER_EVENT_UPDATE:
 					if (td.isBeforeTrigger())
 					{
-						getTriggers( TriggerEvent.BEFORE_UPDATE, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.BEFORE_UPDATE).add(td);
 					}
 					else
 					{
-						getTriggers( TriggerEvent.AFTER_UPDATE, executorLists ).addElement( td );
+                        executorLists.get(TriggerEvent.AFTER_UPDATE).add(td);
 					}
 					break;
 				default:
@@ -191,15 +187,16 @@ public class TriggerEventActivator
 			}
 		}
 
-		for (int i = 0; i < executorLists.length; i++)
+        for (int i = 0; i < executorLists.size(); i++)
 		{
-			int size = executorLists[i].size();
+            List<TriggerDescriptor> descriptors = executorLists.get(i);
+            int size = descriptors.size();
 			if (size > 0)
 			{
 				executors[i] = new GenericTriggerExecutor[size];
 				for (int j = 0; j < size; j++)
 				{
-					TriggerDescriptor td = (TriggerDescriptor)executorLists[i].elementAt(j);
+                    TriggerDescriptor td = descriptors.get(j);
 					executors[i][j] =  (td.isRowTrigger()) ? 
 								(GenericTriggerExecutor)new RowTriggerExecutor(tec, td, activation, lcc) :
 								(GenericTriggerExecutor)new StatementTriggerExecutor(tec, td, activation, lcc);
