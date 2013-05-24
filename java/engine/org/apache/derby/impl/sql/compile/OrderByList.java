@@ -425,27 +425,33 @@ public class OrderByList extends OrderedColumnList
 
 	/* RequiredRowOrdering interface */
 
-	/**
-	 * @see RequiredRowOrdering#sortRequired
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public int sortRequired(RowOrdering rowOrdering,
-			OptimizableList optimizableList) throws StandardException
-	{
-		return sortRequired(rowOrdering, (JBitSet) null, optimizableList);
-	}
+    /**
+     * @see RequiredRowOrdering#sortRequired(RowOrdering, OptimizableList, int[])
+     *
+     * @exception StandardException     Thrown on error
+     */
+    public int sortRequired(
+        RowOrdering rowOrdering,
+        OptimizableList optimizableList,
+        int[] proposedJoinOrder) throws StandardException
+    {
+        return sortRequired(rowOrdering,
+                            (JBitSet)null,
+                            optimizableList,
+                            proposedJoinOrder);
+    }
 
-	/**
-	 * @see RequiredRowOrdering#sortRequired
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public int sortRequired(RowOrdering rowOrdering, 
-			JBitSet tableMap,
-			OptimizableList optimizableList)
-				throws StandardException
-	{
+    /**
+     * @see RequiredRowOrdering#sortRequired(RowOrdering, JBitSet, OptimizableList, int[])
+     *
+     * @exception StandardException     Thrown on error
+     */
+    public int sortRequired(
+        RowOrdering rowOrdering,
+        JBitSet tableMap,
+        OptimizableList optimizableList,
+        int[] proposedJoinOrder) throws StandardException
+    {
 		/*
 		** Currently, all indexes are ordered ascending, so a descending
 		** ORDER BY always requires a sort.
@@ -574,17 +580,24 @@ public class OrderByList extends OrderedColumnList
 					 * order by column's optimizable and the rows returned 
 					 * from those multiple scans may not be ordered correctly.
 					 */
-					for (int i=0; i < optimizableList.size(); i++)
+
+                   for (int i=0;
+                        i < proposedJoinOrder.length &&
+                            proposedJoinOrder[i] != -1; // -1: partial order
+                        i++)
 					{
-						//Get one outer optimizable at a time from the join
-						//order
-						Optimizable considerOptimizable = 
-							optimizableList.getOptimizable(i);
-						//If we have come across the optimizable for the order 
-						//by column in the join order, then we do not need to 
-						//look at the inner optimizables in the join order. As
-						//long as the outer optimizables are one row resultset,
-						//we are fine to consider sort avoidance.
+                       // Get one outer optimizable at a time from the join
+                       // order
+                        Optimizable considerOptimizable = optimizableList.
+                                getOptimizable(proposedJoinOrder[i]);
+
+                       // If we have come across the optimizable for the order
+                       // by column in the join order, then we do not need to
+                       // look at the inner optimizables in the join order. As
+                       // long as the outer optimizables are one row
+                       // resultset, or is ordered on the order by column (see
+                       // below check), we are fine to consider sort
+                       // avoidance.
 						if (considerOptimizable.getTableNumber() == 
 							cr.getTableNumber())
 							break;

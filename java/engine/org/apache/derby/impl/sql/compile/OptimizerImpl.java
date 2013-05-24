@@ -82,7 +82,9 @@ public class OptimizerImpl implements Optimizer
 
 	/* Bit map of tables that have already been assigned to slots.
 	 * Useful for pushing join clauses as slots are assigned.
-	 */
+     * Enforcement of ordering dependencies is done through
+     * assignedTableMap.
+     */
 	protected JBitSet		 assignedTableMap;
 	protected OptimizableList optimizableList;
 	OptimizablePredicateList predicateList;
@@ -139,11 +141,29 @@ public class OptimizerImpl implements Optimizer
 	protected int maxMemoryPerTable;
 
 	// Whether or not we need to reload the best plan for an Optimizable
-	// when we "pull" it.  If the latest complete join order was the
+    // when we "pull" [1] it.  If the latest complete join order was the
 	// best one so far, then the Optimizable will already have the correct
 	// best plan loaded so we don't need to do the extra work.  But if
 	// the most recent join order was _not_ the best, then this flag tells
 	// us that we need to reload the best plan when pulling.
+    //
+    // [1]: As part of the iteration through the join orders, the optimizer has
+    // to "pull" Optimizables from the the join order before re-placing them in
+    // a different order.  As an example, in order to get from:
+    //
+    //   { HOJ, TAB_V, TAB_D }    to
+    //
+    //   { HOJ, TAB_D, TAB_V}
+    //
+    // the optimizer will first pull TAB_D from the join order, then
+    // it will pull TAB_V, then it will place TAB_D, and finally place
+    // TAB_V.  I.e.:
+    //
+    //   { HOJ, TAB_V, - }
+    //   { HOJ, -, - }
+    //   { HOJ, TAB_D, - }
+    //   { HOJ, TAB_D, TAB_V }
+
 	private boolean reloadBestPlan;
 
 	// Set of optimizer->bestJoinOrder mappings used to keep track of which
@@ -1765,8 +1785,10 @@ public class OptimizerImpl implements Optimizer
 					curOpt.considerSortAvoidancePath())
 				{
 					if (requiredRowOrdering.sortRequired(
-							bestRowOrdering, optimizableList) == 
-								RequiredRowOrdering.NOTHING_REQUIRED)
+                            bestRowOrdering,
+                            optimizableList,
+                            proposedJoinOrder) ==
+                        RequiredRowOrdering.NOTHING_REQUIRED)
 					{
 						if (tracingIsOn()) { tracer().traceCurrentPlanAvoidsSort( bestCost, currentSortAvoidanceCost ); }
 
@@ -2208,8 +2230,9 @@ public class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
-														assignedTableMap,
-														optimizableList)
+                                                     assignedTableMap,
+                                                     optimizableList,
+                                                     proposedJoinOrder)
 										==RequiredRowOrdering.NOTHING_REQUIRED)
 				{
 					ap = optimizable.getBestSortAvoidancePath();
@@ -2337,8 +2360,9 @@ public class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
-														assignedTableMap,
-														optimizableList)
+                                                    assignedTableMap,
+                                                     optimizableList,
+                                                     proposedJoinOrder)
 										== RequiredRowOrdering.NOTHING_REQUIRED)
 				{
 					ap = optimizable.getBestSortAvoidancePath();

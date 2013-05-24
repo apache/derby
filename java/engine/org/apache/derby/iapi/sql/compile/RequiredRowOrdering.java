@@ -38,54 +38,62 @@ public interface RequiredRowOrdering
 	static final int ELIMINATE_DUPS = 2;
 	static final int NOTHING_REQUIRED = 3;
 
-	/**
-	 * Tell whether sorting is required for this RequiredRowOrdering,
-	 * given a RowOrdering.
-	 *
-	 * @param rowOrdering	The order of rows in question
-	 * @param optimizableList	The current join order being considered by 
-	 *    the optimizer. We need to look into this to determine if the outer
-	 *    optimizables are single row resultset if the order by column is
-	 *    on an inner optimizable and that inner optimizable is not a one
-	 *    row resultset. DERBY-3926
-	 *
-	 * @return	SORT_REQUIRED if sorting is required,
-	 *			ELIMINATE_DUPS if no sorting is required but duplicates
-	 *							must be eliminated (i.e. the rows are in
-	 *							the right order but there may be duplicates),
-	 *			NOTHING_REQUIRED is no operation is required
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	int sortRequired(RowOrdering rowOrdering, OptimizableList optimizableList) 
-	throws StandardException;
+    /**
+     * Tell whether sorting is required for this RequiredRowOrdering,
+     * given a RowOrdering.
+     *
+     * @param rowOrdering   The order of rows in question
+     * @param optimizableList The list of join participants
+     * @param proposedJoinOrder The current join order being considered by
+     *    the optimizer. We need to look into this to determine if the outer
+     *    optimizables are single row result set if the order by column is
+     *    on an inner optimizable and that inner optimizable is not a one.
+     *    {@code proposedJoinOrder} is a map onto {@code optimizableList}:
+     *    it contains indexes of optimizables in that list in the join order
+     *    proposed, cf. {@code OptimizerImpl#proposedJoinOrder}.
+     * @return  SORT_REQUIRED if sorting is required,
+     *          ELIMINATE_DUPS if no sorting is required but duplicates
+     *                          must be eliminated (i.e. the rows are in
+     *                          the right order but there may be duplicates),
+     *          NOTHING_REQUIRED is no operation is required
+     *
+     * @exception StandardException     Thrown on error
+     */
+    int sortRequired(RowOrdering rowOrdering,
+                     OptimizableList optimizableList,
+                     int[] proposedJoinOrder) throws StandardException;
 
-	/**
-	 * Tell whether sorting is required for this RequiredRowOrdering,
-	 * given a RowOrdering representing a partial join order, and
-	 * a bit map telling what tables are represented in the join order.
-	 * This is useful for reducing the number of cases the optimizer
-	 * has to consider.
-	 *
-	 * @param rowOrdering	The order of rows in the partial join order
-	 * @param tableMap		A bit map of the tables in the partial join order
-	 * @param optimizableList	The current join order being considered by 
-	 *    the optimizer. We need to look into this to determine if the outer
-	 *    optimizables are single row resultset if the order by column is
-	 *    on an inner optimizable and that inner optimizable is not a one
-	 *    row resultset. DERBY-3926
-	 *
-	 * @return	SORT_REQUIRED if sorting is required,
-	 *			ELIMINATE_DUPS if no sorting is required by duplicates
-	 *							must be eliminated (i.e. the rows are in
-	 *							the right order but there may be duplicates),
-	 *			NOTHING_REQUIRED is no operation is required
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	int sortRequired(RowOrdering rowOrdering, JBitSet tableMap, 
-			OptimizableList optimizableList)
-			throws StandardException;
+   /**
+    * Tell whether sorting is required for this RequiredRowOrdering,
+    * given a RowOrdering representing a partial join order, and
+    * a bit map telling what tables are represented in the join order.
+    * This is useful for reducing the number of cases the optimizer
+    * has to consider.
+    *
+    * @param rowOrdering   The order of rows in the partial join order
+    * @param tableMap      A bit map of the tables in the partial join order
+    * @param optimizableList The list of join participants
+    * @param proposedJoinOrder The current join order being considered by
+    *    the optimizer. We need to look into this to determine if the outer
+    *    optimizables are single row result set if the order by column is
+    *    on an inner optimizable and that inner optimizable is not a one.
+    *    {@code proposedJoinOrder} is a map onto {@code optimizableList}:
+    *    it contains indexes of optimizables in that list in the join order
+    *    proposed, cf. {@code OptimizerImpl#proposedJoinOrder}.
+    *    DERBY-3926 and DERBY-6148
+    *
+    * @return  SORT_REQUIRED if sorting is required,
+    *          ELIMINATE_DUPS if no sorting is required by duplicates
+    *                          must be eliminated (i.e. the rows are in
+    *                          the right order but there may be duplicates),
+    *          NOTHING_REQUIRED is no operation is required
+    *
+    * @exception StandardException     Thrown on error
+    */
+    int sortRequired(RowOrdering rowOrdering,
+                     JBitSet tableMap,
+                     OptimizableList optimizableList,
+                     int[] proposedJoinOrder) throws StandardException;
 
 	/**
 	 * Estimate the cost of doing a sort for this row ordering, given
