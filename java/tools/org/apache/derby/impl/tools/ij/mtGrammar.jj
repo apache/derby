@@ -27,6 +27,7 @@ options {
 	IGNORE_CASE = true;
 	CACHE_TOKENS = true;
 	LOOKAHEAD = 1;
+    JDK_VERSION = "1.5";
 }
 
 PARSER_BEGIN(mtGrammar)

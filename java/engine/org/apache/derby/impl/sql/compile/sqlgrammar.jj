@@ -11,6 +11,7 @@ options
 	COMMON_TOKEN_ACTION = true;
 	CACHE_TOKENS = true;
 	UNICODE_INPUT = true;
+    JDK_VERSION = "1.5";
 }
 
 PARSER_BEGIN(SQLParser)
