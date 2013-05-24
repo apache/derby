@@ -3601,4 +3601,294 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 {"2147483654", "000003", "21857"}};
         JDBC.assertFullResultSet(rs, result);
     }
+
+
+    /*
+     * DERBY-6148. Verifying that permuted join order doesn't
+     * erroneously give sort avoidance under certain index access
+     * paths.
+     */
+    public void testDerby6148() throws SQLException {
+        Statement s = createStatement();
+
+        createTablesForDerby6148(s);
+        insertDataForDerby6148();
+        createIndexesForDerby6148(s);
+
+        // This query failed prior to fixing DERBY-6148
+        final String brokenQuery =
+            "SELECT t.id, t.item, title " +
+            "    FROM d6148_tests t" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP, " +
+            "                             constraint = d6148_tests_1\n" +
+            "       , d6148_item_usage u" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP," +
+            "                             constraint = d6148_item_usage_1\n" +
+            "    WHERE username = 'MICKEY' AND " +
+            "          u.item = t.item " +
+            "ORDER BY t.item, title";
+
+        // These queries worked prior to fixing DERBY-6148
+        final String goodQuery1 = // changed order of FROM tables here:
+            "SELECT t.id, t.item, title " +
+            "    FROM d6148_item_usage u" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP," +
+            "                             constraint = d6148_item_usage_1\n" +
+            "       , d6148_tests t" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP, " +
+            "                             constraint = d6148_tests_1\n" +
+            "    WHERE username = 'MICKEY' AND " +
+            "          u.item = t.item " +
+            "ORDER BY t.item, title";
+
+        final String goodQuery2 = // changed ORDER BY column to other equijoin
+                                  // predicate column
+            "SELECT t.id, t.item, title " +
+            "    FROM d6148_tests t" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP, " +
+            "                             constraint = d6148_tests_1\n" +
+            "       , d6148_item_usage u" +
+            "         -- DERBY-PROPERTIES joinStrategy = NESTEDLOOP," +
+            "                             constraint = d6148_item_usage_1\n" +
+            "    WHERE username = 'MICKEY' AND " +
+            "          u.item = t.item " +
+            "ORDER BY u.item, title";
+
+
+        final String[][] expectedRows = getExpectedRowsDerby6148();
+        JDBC.assertFullResultSet(s.executeQuery(brokenQuery), expectedRows);
+        JDBC.assertFullResultSet(s.executeQuery(goodQuery1), expectedRows);
+        JDBC.assertFullResultSet(s.executeQuery(goodQuery2), expectedRows);
+    }
+
+    private String[][] getExpectedRowsDerby6148() {
+        return new String[][]{
+            {"15", "60001", "Test 15         "},
+            {"19", "60001", "Test 19         "},
+            {"25", "60001", "Test 25         "},
+            {"27", "60001", "Test 27         "},
+            {"28", "60001", "Test 28         "},
+            {"10", "61303", "Test 10         "},
+            {"11", "61303", "Test 11         "},
+            {"13", "61303", "Test 13         "},
+            {"14", "61303", "Test 14         "},
+            {"21", "61303", "Test 21         "},
+            {"35", "61303", "Test 35         "},
+            {"9", "61303", "Test 9          "},
+            {"26", "7205731", "Test 26         "},
+            {"32", "7205731", "Test 32         "},
+            {"4", "7205731", "Test 4          "},
+            {"5", "7205731", "Test 5          "},
+            {"6", "7205731", "Test 6          "},
+            {"7", "7205731", "Test 7          "},
+            {"8", "7205731", "Test 8          "},
+            {"1", "XY101", "Test 1          "},
+            {"12", "XY101", "Test 12         "},
+            {"16", "XY101", "Test 16         "},
+            {"17", "XY101", "Test 17         "},
+            {"18", "XY101", "Test 18         "},
+            {"2", "XY101", "Test 2          "},
+            {"22", "XY101", "Test 22         "},
+            {"23", "XY101", "Test 23         "},
+            {"24", "XY101", "Test 24         "},
+            {"3", "XY101", "Test 3          "},
+            {"31", "XY101", "Test 31         "}};
+    }
+
+    private void createTablesForDerby6148(Statement s) throws SQLException {
+        s.executeUpdate(
+            "create table d6148_tests (" +
+            "    id integer not null generated always as identity " +
+            "        (start with 1, increment by 1), " +
+            "    item varchar(15) not null, " +
+            "    title varchar(255) not null)");
+
+        s.executeUpdate(
+            "create table d6148_item_usage (" +
+            "    username varchar(15) not null, " +
+            "    item varchar(15) not null, " +
+            "    value smallint default 0)");
+
+        s.executeUpdate(
+            "create table d6148_items (" +
+            "    item varchar(15) not null, " +
+            "    name varchar(255) not null, " +
+            "    special char(1) default null)");
+
+        s.executeUpdate(
+            "create table d6148_users (" +
+            "    username varchar(15) not null, " +
+            "    surname varchar(255) not null)");
+
+    }
+
+    private void createIndexesForDerby6148(Statement s) throws SQLException {
+        // Create primary/unique indexes
+        s.executeUpdate(
+            "alter table d6148_items add constraint " +
+            "    d6148_items_pk primary key (item)");
+
+        s.executeUpdate(
+            "alter table d6148_item_usage add constraint " +
+            "    d6148_item_usage_pk primary key (username, item)");
+
+        s.executeUpdate(
+            "alter table d6148_users add constraint " +
+            "    users_pk primary key (username)");
+
+        s.executeUpdate(
+            "alter table d6148_tests add constraint " +
+            "    d6148_tests_pk primary key (id)");
+
+        s.executeUpdate(
+            "alter table d6148_tests add constraint " +
+            "    d6148_tests_1 unique (item, title)");
+
+        // Add foreign key constraints
+        s.executeUpdate(
+            "alter table d6148_item_usage add constraint " +
+            "    d6148_item_usage_2 foreign key (item) references " +
+            "    d6148_items (item) on delete cascade on update no action");
+
+        s.executeUpdate(
+            "alter table d6148_item_usage add constraint " +
+            "    d6148_item_usage_1 foreign key (username) references " +
+            "    d6148_users (username) on delete cascade on update no action");
+
+        s.executeUpdate(
+            "alter table d6148_tests add constraint " +
+            "    d6148_tests_2 foreign key (item) references " +
+            "    d6148_items (item) on delete cascade on update no action");
+    }
+
+    private void insertDataForDerby6148() throws SQLException {
+        String[][] users = {
+            {"ADMIN","Administrator"},
+            {"MINNIE","MOUSE"},
+            {"MICKEY","MOUSE"},
+            {"TEST","Test"},
+            {"PIED","Piper"},
+            {"WINNIE","Pooh"},
+            {"DONALD","Duck"},
+            {"CLARK","Kent"},
+            {"VARG","Veum"},
+            {"TOMMY","Tiger"},
+            {"USER1","?????"},
+            {"DEMO","Demo"},
+            {"BRAM","Stoker"},
+            {"USER2","???????"},
+            {"USER3","?????"}};
+
+        PreparedStatement ps = prepareStatement(
+            "insert into d6148_users values (?,?)");
+
+        for (int i = 0; i < users.length; i++) {
+            String[] u = users[i];
+            ps.setString(1, u[0]);
+            ps.setString(2, u[1]);
+            ps.executeUpdate();
+        }
+
+        String[][] items = {
+            {"XY101","XY101", null},
+            {"61303","61303", null},
+            {"7205731","7205731", null},
+            {"60001","60001", null},
+            {"60001B","60001B", null},
+            {"61108","61108", null}};
+
+        ps = prepareStatement(
+            "insert into d6148_items values (?,?,?)");
+
+        for (int i=0; i < items.length; i++) {
+            String[] it = items[i];
+            ps.setString(1, it[0]);
+            ps.setString(2, it[1]);
+            ps.setString(3, it[2]);
+            ps.executeUpdate();
+        }
+
+        String[][] tests = {
+            {"XY101","Test 1          "},
+            {"XY101","Test 2          "},
+            {"XY101","Test 3          "},
+            {"7205731","Test 4          "},
+            {"7205731","Test 5          "},
+            {"7205731","Test 6          "},
+            {"7205731","Test 7          "},
+            {"7205731","Test 8          "},
+            {"61303","Test 9          "},
+            {"61303","Test 10         "},
+            {"61303","Test 11         "},
+            {"XY101","Test 12         "},
+            {"61303","Test 13         "},
+            {"61303","Test 14         "},
+            {"60001","Test 15         "},
+            {"XY101","Test 16         "},
+            {"XY101","Test 17         "},
+            {"XY101","Test 18         "},
+            {"60001","Test 19         "},
+            {"60001B","Test 20         "},
+            {"61303","Test 21         "},
+            {"XY101","Test 22         "},
+            {"XY101","Test 23         "},
+            {"XY101","Test 24         "},
+            {"60001","Test 25         "},
+            {"7205731","Test 26         "},
+            {"60001","Test 27         "},
+            {"60001","Test 28         "},
+            {"60001B","Test 29         "},
+            {"60001B","Test 30         "},
+            {"XY101","Test 31         "},
+            {"7205731","Test 32         "},
+            {"60001B","Test 33         "},
+            {"60001B","Test 34         "},
+            {"61303","Test 35         "}};
+
+        ps = prepareStatement(
+            "insert into d6148_tests values (default,?,?)");
+
+        for (int i=0; i < tests.length; i++) {
+            String[] t = tests[i];
+            ps.setString(1, t[0]);
+            ps.setString(2, t[1]);
+            ps.executeUpdate();
+        }
+
+        String[][] item_usage = {
+            {"MINNIE","XY101","4"},
+            {"MICKEY","XY101","4"},
+            {"MICKEY","61303","4"},
+            {"MICKEY","7205731","4"},
+            {"PIED","61303","2"},
+            {"TOMMY","60001","1"},
+            {"USER1","60001","0"},
+            {"BRAM","60001","2"},
+            {"WINNIE","7205731","1"},
+            {"MICKEY","60001","4"},
+            {"DONALD","60001","2"},
+            {"PIED","60001","2"},
+            {"VARG","60001","2"},
+            {"CLARK","60001","2"},
+            {"TEST","60001B","0"},
+            {"DEMO","61303","0"},
+            {"DONALD","61303","2"},
+            {"DONALD","60001B","4"},
+            {"DEMO","XY101","0"},
+            {"USER2","61303","0"},
+            {"USER3","61303","0"},
+            {"MICKEY","61108","4"},
+            {"MINNIE","60001B","0"}};
+
+        ps = prepareStatement(
+            "insert into d6148_item_usage values (?,?,?)");
+
+        for (int i=0; i < item_usage.length; i++) {
+            String [] iu = item_usage[i];
+            ps.setString(1, iu[0]);
+            ps.setString(2, iu[1]);
+            ps.setString(3, iu[2]);
+            ps.executeUpdate();
+        }
+    }
 }
