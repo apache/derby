@@ -47,7 +47,7 @@ public class FrameworkUtil {
 	 * will delegate method calls to the vendor FrameworkUtil instance.
 	 */
 
-	private static class ImplHolder implements PrivilegedAction {
+	private static class ImplHolder implements PrivilegedAction<Method> {
 		private static final String	packageProperty	= "org.osgi.vendor.framework";
 		
 		/*
@@ -56,13 +56,13 @@ public class FrameworkUtil {
 		static final Method	createFilter;
 		
 		static {
-			createFilter = (Method) AccessController.doPrivileged(new ImplHolder());
+			createFilter = AccessController.doPrivileged(new ImplHolder());
 		}
 		
 		private ImplHolder() {
 		}
 
-		public Object run() {
+		public Method run() {
 			String packageName = System
 			.getProperty(packageProperty);
 			if (packageName == null) {
@@ -70,7 +70,7 @@ public class FrameworkUtil {
 						+ " property not set");
 			}
 			
-			Class delegateClass;
+			Class<?> delegateClass;
 			try {
 				delegateClass = Class.forName(packageName
 						+ ".FrameworkUtil");

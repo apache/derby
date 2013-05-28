@@ -364,7 +364,7 @@ final class ServicePermissionCollection extends PermissionCollection {
 	 * 
 	 * @serial
 	 */
-	private Hashtable	permissions;
+	private Hashtable<String,Permission>	permissions;
 
 	/**
 	 * Boolean saying if "*" is in the collection.
@@ -378,7 +378,7 @@ final class ServicePermissionCollection extends PermissionCollection {
 	 */
 
 	public ServicePermissionCollection() {
-		permissions = new Hashtable();
+		permissions = new Hashtable<String,Permission>();
 		all_allowed = false;
 	}
 
@@ -502,7 +502,7 @@ final class ServicePermissionCollection extends PermissionCollection {
 	 * @return Enumeration of all the ServicePermission objects.
 	 */
 
-	public Enumeration elements() {
+	public Enumeration<Permission> elements() {
 		return (permissions.elements());
 	}
 }

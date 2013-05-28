@@ -438,7 +438,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 * @serial
 	 */
-	private Hashtable			permissions;
+	private Hashtable<String,Permission>			permissions;
 
 	/**
 	 * Boolean saying if "*" is in the collection.
@@ -453,7 +453,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 */
 
 	public BundlePermissionCollection() {
-		permissions = new Hashtable();
+		permissions = new Hashtable<String,Permission>();
 		all_allowed = false;
 	}
 
@@ -578,7 +578,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * @return Enumeration of all <code>BundlePermission</code> objects.
 	 */
 
-	public Enumeration elements() {
+	public Enumeration<Permission> elements() {
 		return (permissions.elements());
 	}
 }

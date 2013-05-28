@@ -837,6 +837,7 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
      </javac>
 
   </target>

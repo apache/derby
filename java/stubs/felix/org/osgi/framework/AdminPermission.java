@@ -145,12 +145,12 @@ public final class AdminPermission extends BasicPermission {
 	 * class will delegate method calls to the vendor AdminPermission instance.
 	 */
 
-	private static class ImplHolder implements PrivilegedAction {
+	private static class ImplHolder implements PrivilegedAction<Constructor[]> {
 		private static final String			packageProperty		= "org.osgi.vendor.framework";
 		static final Constructor	initStringString;
 		static final Constructor	initBundleString;
 		static {
-			Constructor[] constructors = (Constructor[]) AccessController.doPrivileged(new ImplHolder());
+			Constructor[] constructors = AccessController.doPrivileged(new ImplHolder());
 			
 			initStringString = constructors[0];
 			initBundleString = constructors[1];
@@ -159,7 +159,7 @@ public final class AdminPermission extends BasicPermission {
 		private ImplHolder() {
 		}
 		
-		public Object run() {
+		public Constructor[] run() {
 			String packageName = System
 			.getProperty(packageProperty);
 			if (packageName == null) {
@@ -167,7 +167,7 @@ public final class AdminPermission extends BasicPermission {
 						+ " property not set");
 			}
 			
-			Class delegateClass;
+			Class<?> delegateClass;
 			try {
 				delegateClass = Class.forName(packageName
 						+ ".AdminPermission");

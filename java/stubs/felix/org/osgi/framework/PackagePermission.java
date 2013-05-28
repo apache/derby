@@ -394,7 +394,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 * 
 	 * @serial
 	 */
-	private Hashtable	permissions;
+	private Hashtable<String,Permission>	permissions;
 
 	/**
 	 * Boolean saying if "*" is in the collection.
@@ -408,7 +408,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 */
 
 	public PackagePermissionCollection() {
-		permissions = new Hashtable();
+		permissions = new Hashtable<String,Permission>();
 		all_allowed = false;
 	}
 
@@ -535,7 +535,7 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 * @return Enumeration of all <code>PackagePermission</code> objects.
 	 */
 
-	public Enumeration elements() {
+	public Enumeration<Permission> elements() {
 		return (permissions.elements());
 	}
 }
