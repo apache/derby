@@ -72,10 +72,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -109,7 +111,7 @@ abstract class BaseMonitor
 	// Vector of class objects of implementations, found in the System, application
 	// and default (modules.properties) properties
 
-	Vector[]     implementationSets;
+    private List<List<Class<?>>> implementationSets;
 
 	private Vector<TopService>	  services;					// Vector of TopServices
 
@@ -292,7 +294,7 @@ abstract class BaseMonitor
 			applicationImplementations = getImplementations(applicationProperties, false);
 		}
 
-		Vector defaultImplementations = getDefaultImplementations();
+        Vector<Class<?>> defaultImplementations = getDefaultImplementations();
 
 		int implementationCount = 0;
 		if (bootImplementations != null)
@@ -309,23 +311,22 @@ abstract class BaseMonitor
 
 		if (defaultImplementations != null)
 			implementationCount++;
-		implementationSets = new Vector[implementationCount];
 
-		implementationCount = 0;
+        implementationSets = new ArrayList<List<Class<?>>>(implementationCount);
+
 		if (bootImplementations != null)
-			implementationSets[implementationCount++] = bootImplementations;
+            implementationSets.add(bootImplementations);
 		
 		if (true || SanityManager.DEBUG) {
 			// Don't allow external code to override our implementations.
 			if (systemImplementations != null)
-				implementationSets[implementationCount++] = systemImplementations;
+                implementationSets.add(systemImplementations);
 			if (applicationImplementations != null)
-				implementationSets[implementationCount++] = applicationImplementations;
+                implementationSets.add(applicationImplementations);
 		}
 
 		if (defaultImplementations != null)
-			implementationSets[implementationCount++] = defaultImplementations;
-
+            implementationSets.add(defaultImplementations);
 
 		if (SanityManager.DEBUG) {
 			// Look for the derby.debug.* properties.
@@ -698,8 +699,6 @@ abstract class BaseMonitor
 			t, new Integer(identifier), "XX" /*ci.getClassName()*/);
 	}
 
-	private Boolean exceptionTrace;
-
 	/**
 		load a module instance.
 
@@ -708,7 +707,6 @@ abstract class BaseMonitor
 
 		The module's start or create method is not called.
 	*/
-    @SuppressWarnings("unchecked")
 	protected Object loadInstance(Class<?> factoryInterface, Properties properties) {
 
 		Object instance = null;
@@ -718,8 +716,8 @@ abstract class BaseMonitor
 			instance = loadInstance(localImplementations, factoryInterface, properties);
 		}
 
-		for (int i = 0; i < implementationSets.length; i++) {
-			instance = loadInstance( (Vector<Class<?>>) implementationSets[i], factoryInterface, properties);
+        for (List<Class<?>> set : implementationSets) {
+            instance = loadInstance(set, factoryInterface, properties);
 			if (instance != null)
 				break;
 		}
@@ -727,8 +725,9 @@ abstract class BaseMonitor
 		return instance;
 	}
 
-
-	private Object loadInstance(Vector<Class<?>> implementations, Class<?> factoryInterface, Properties properties) {
+    private Object loadInstance(List<Class<?>> implementations,
+                                Class<?> factoryInterface,
+                                Properties properties) {
 
 		for (int index = 0; true; index++) {
 
@@ -748,10 +747,11 @@ abstract class BaseMonitor
 
 	/**
 		Find a class that implements the required index, return the index
-		into the implementations vecotr of that class. Returns -1 if no class
+        into the implementations vector of that class. Returns -1 if no class
 		could be found.
 	*/
-	private static int findImplementation(Vector<Class<?>> implementations, int startIndex, Class<?> factoryInterface) {
+    private static int findImplementation(List<Class<?>> implementations,
+            int startIndex, Class<?> factoryInterface) {
 
 		for (int i = startIndex; i < implementations.size(); i++) {
 
