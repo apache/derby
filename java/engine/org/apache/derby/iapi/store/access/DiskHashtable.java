@@ -20,10 +20,11 @@
  */
 package org.apache.derby.iapi.store.access;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.Vector;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -251,13 +252,13 @@ public class DiskHashtable
         return getRemove(key, false, false);
     }
 
-    @SuppressWarnings("unchecked")
     private Object getRemove(Object key, boolean remove, boolean existenceOnly)
         throws StandardException
     {
         int hashCode = key.hashCode();
         int rowCount = 0;
-        Object retValue = null;
+        DataValueDescriptor[] firstRow = null;
+        List<DataValueDescriptor[]> allRows = null;
 
         scanKey[0].setValue( hashCode);
         ScanController scan = 
@@ -286,32 +287,29 @@ public class DiskHashtable
                     if( existenceOnly)
                         return this;
 
+                    DataValueDescriptor[] clonedRow =
+                            BackingStoreHashtable.shallowCloneRow(row);
+
                     rowCount++;
                     if( rowCount == 1)
                     {
                         // if there is only one matching row just return row. 
-                        retValue = BackingStoreHashtable.shallowCloneRow( row);
+                        firstRow = clonedRow;
                     }
                     else 
                     {
-                        // if there is more than one row, return a vector of
+                        // If there is more than one row, return a list of
                         // the rows.
                         //
-                        Vector<Object> v;
-                        if( rowCount == 2)
+                        if (allRows == null)
                         {
                             // convert the "single" row retrieved from the
                             // first trip in the loop, to a vector with the
                             // first two rows.
-                            v = new Vector<Object>( 2);
-                            v.add( retValue);
-                            retValue = v;
+                            allRows = new ArrayList<DataValueDescriptor[]>(2);
+                            allRows.add(firstRow);
                         }
-                        else
-                        {
-                            v = (Vector<Object>) retValue;
-                        }
-                        v.add( BackingStoreHashtable.shallowCloneRow( row));
+                        allRows.add(clonedRow);
                     }
                     if( remove)
                     {
@@ -321,7 +319,7 @@ public class DiskHashtable
                     }
                     if( remove_duplicates)
                         // This must be the only row with the key
-                        return retValue;
+                        return clonedRow;
                 }
             }
         }
@@ -329,7 +327,15 @@ public class DiskHashtable
         {
             scan.close();
         }
-        return retValue;
+
+        if (allRows == null) {
+            // No duplicates. Return the single row, or null if no row was
+            // found for the given key.
+            return firstRow;
+        } else {
+            // Return list of all duplicate values.
+            return allRows;
+        }
     } // end of getRemove
 
 

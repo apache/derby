@@ -29,6 +29,7 @@ import java.sql.Statement;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.derby.iapi.error.PublicAPI;
@@ -334,9 +335,9 @@ public class TestDiskHashtable
             }
             if( el instanceof DataValueDescriptor[])
                 checkElement( (DataValueDescriptor[]) el, rowCount, rows, found);
-            else if( el instanceof Vector)
+            else if (el instanceof List)
             {
-                Vector v = (Vector) el;
+                List v = (List) el;
                 for( int i = 0; i < v.size(); i++)
                     checkElement( (DataValueDescriptor[]) v.get(i), rowCount, rows, found);
             }
@@ -397,12 +398,12 @@ public class TestDiskHashtable
             DataValueDescriptor[] row1 = (DataValueDescriptor[]) r1;
             DataValueDescriptor[] row2;
             
-            if( r2 instanceof Vector)
+            if (r2 instanceof List)
             {
-                Vector v2 = (Vector) r2;
+                List v2 = (List) r2;
                 if( v2.size() != 1)
                     return false;
-                row2 = (DataValueDescriptor[]) v2.elementAt(0);
+                row2 = (DataValueDescriptor[]) v2.get(0);
             }
             else if( r2 instanceof DataValueDescriptor[])
                 row2 = (DataValueDescriptor[]) r2;
@@ -418,17 +419,17 @@ public class TestDiskHashtable
             }
             return true;
         }
-        if( r1 instanceof Vector)
+        if (r1 instanceof List)
         {
-            if( !(r2 instanceof Vector))
+            if (!(r2 instanceof List))
                 return false;
-            Vector v1 = (Vector) r1;
-            Vector v2 = (Vector) r2;
+            List v1 = (List) r1;
+            List v2 = (List) r2;
             if( v1.size() != v2.size())
                 return false;
             for( int i = v1.size() - 1; i >= 0; i--)
             {
-                if( ! rowsEqual( v1.elementAt( i), v2.elementAt(i)))
+                if (!rowsEqual(v1.get(i), v2.get(i)))
                     return false;
             }
             return true;
