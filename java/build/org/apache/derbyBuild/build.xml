@@ -39,8 +39,8 @@
     <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
 
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -56,6 +56,7 @@
         <pathelement path="${ant.core.lib}"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 </project>

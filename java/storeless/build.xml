@@ -60,8 +60,8 @@
           </fileset>
         </copy>
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -76,6 +76,7 @@
       	  <pathelement path="${out.dir}"/>
           <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
  

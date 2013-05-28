@@ -135,7 +135,7 @@ public class SimpleApp
 	/* This ArrayList usage may cause a warning when compiling this class
 	 * with a compiler for J2SE 5.0 or newer. We are not using generics
 	 * because we want the source to support J2SE 1.4.2 environments. */
-        ArrayList statements = new ArrayList(); // list of Statements, PreparedStatements
+        ArrayList<Statement> statements = new ArrayList<Statement>(); // list of Statements, PreparedStatements
         PreparedStatement psInsert = null;
         PreparedStatement psUpdate = null;
         Statement s = null;

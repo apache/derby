@@ -168,7 +168,7 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 	public javax.sql.DataSource getClientDataSource(String database, String user, String
 									  password) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
 	{
-		Class nsDataSource = Class.forName(jdbcDataSource);
+		Class<?> nsDataSource = Class.forName(jdbcDataSource);
 		DataSource ds = (DataSource) nsDataSource.newInstance();
 
 		// can also include Derby URL attributes along with the database name

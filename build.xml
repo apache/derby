@@ -146,7 +146,7 @@
     <property name="showenv.done" value="true"/>
   </target>
 
-  <!--  Make sure compiler level is Java 5 level or higher -->
+  <!--  Make sure compiler level is Java 6 level or higher -->
   <target name="checkCompilerLevel">
 
     <!--
@@ -154,17 +154,15 @@
        If we can find the following class, then we assume that the compiler
        is at least Java 6 level.
     -->
-    <available classname="java.sql.Wrapper" property="compilerLevel16" value="1.6"/>
-    <property name="compilerLevel16" value="1.5"/>
+    <available property="compilerAtCorrectLevel" classname="java.sql.Wrapper"/>
+    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 6 or later."/>
 
-    <javac source="1.5" srcdir="${basedir}" failonerror="false"
+    <property name="compilerLevel16" value="1.6"/>
+
+    <javac source="1.6" srcdir="${basedir}" failonerror="false"
            includeantruntime="false">
       <include name="${dummy.src}"/>
     </javac>
-
-    <available property="compilerAtCorrectLevel" classname="java.util.Queue"/>
-
-    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 5 or later."/>
 
     <antcall target="checkVMLevel"/>
     
@@ -795,8 +793,8 @@
     <mkdir dir="${out.jdbc4.dir}"/>
 
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -810,6 +808,7 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
      </javac>
 
   </target>
@@ -1282,7 +1281,7 @@
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
        Footer="${javadoc.Footer}"
        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
-       source="1.5"
+       source="1.6"
      >
       <fileset dir="${derby.testing.src.dir}"
                excludesfile="${javadoc.exclusions}"/>

@@ -31,8 +31,8 @@
 
   <target name="compile">
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       nowarn="on"
       debug="true"
       depend="${depend}"
@@ -47,6 +47,7 @@
       <classpath>
         <pathelement path="${ant.core.lib}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 </project>

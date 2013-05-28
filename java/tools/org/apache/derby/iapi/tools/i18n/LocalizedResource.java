@@ -44,7 +44,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 
-public final class LocalizedResource  implements java.security.PrivilegedAction {
+public final class LocalizedResource  implements java.security.PrivilegedAction<String> {
 
 	private static final boolean SUPPORTS_BIG_DECIMAL_CALLS;
 	
@@ -458,7 +458,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		 try
 		  {
 				resourceKey =  key;
-				s = (String) java.security.AccessController.doPrivileged(this);
+				s = java.security.AccessController.doPrivileged(this);
 		}
 		catch (SecurityException se) {
 			s = null;
@@ -466,7 +466,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		//System.out.println("{"+resourceKey+"="+s+"}");
 		return s;
 	}
-	public final Object run() {
+	public final String run() {
 		String s = System.getProperty(resourceKey);
 		return s;
 	}

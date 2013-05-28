@@ -36,8 +36,8 @@
 
   <target name="compile">
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -52,10 +52,11 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -71,11 +72,12 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -90,10 +92,11 @@
         <pathelement location="${javasrc.dir}"/>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -108,6 +111,7 @@
         <pathelement location="${javasrc.dir}"/>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <ant target="compile" dir="toursdb"/>
   </target>
@@ -127,8 +131,8 @@
 
   <target name="compile-vtidemo">
     <javac
-      source="1.5"
-      target="1.5"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -142,7 +146,7 @@
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
-       <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
 

@@ -55,6 +55,7 @@ import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
@@ -622,13 +623,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
-	public List getDependentsDescriptorList(String dependentID)
+	public List<DependencyDescriptor> getDependentsDescriptorList(String dependentID)
 			throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}
 
-	public List getProvidersDescriptorList(String providerID)
+	public List<DependencyDescriptor> getProvidersDescriptorList(String providerID)
 			throws StandardException {
 		// Auto-generated method stub
 		return null;
@@ -777,7 +778,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
-	public List getStatisticsDescriptors(TableDescriptor td)
+	public List<StatisticsDescriptor> getStatisticsDescriptors(TableDescriptor td)
 			throws StandardException {
 		// Auto-generated method stub
 		return null;
