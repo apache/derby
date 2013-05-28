@@ -21,46 +21,12 @@
 
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
-import org.apache.derby.impl.jdbc.Util;
-
 /**
-
-    This datasource is suitable for an application using embedded Derby,
-    running on the following platforms:
-    <p>
-    <ul>
-      <li>Java SE 7 (JDBC 4.1) and
-     <li>full Java SE 8 (JDBC 4.2).
-    </ul>
-    <p>
-    Use BasicEmbeddedXADataSource40 if your application runs on Java 8
-    Compact Profile 2.
-    <p>
-    Use EmbeddedXADataSource if your application runs on the following
-    platforms:
-    <p>
-    <ul>
-      <li> JDBC 3.0 - J2SE 5.0 </li>
-      <li> JDBC 4.0 - Java SE 6 </li>
-    </ul>
-    <p>
-    EmbeddedXADataSource40 is an XADataSource implementation.
-
-   <p>An XADataSource is a factory for XAConnection objects.  It
-   represents a RM in a DTP environment.  An object that implements
-   the XADataSource interface is typically registered with a JNDI
-   service provider.
-
-   <p> EmbeddedXADataSource40 object only works on a local database.
-   There is no client/server support.  An EmbeddedXADataSource40
-   object must live in the same jvm as the database.
-
-	<P>EmbeddedXADataSource40 is serializable and referenceable.
-
-	<P>See EmbeddedDataSource40 for DataSource properties.
-
+   <P>
+   This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
+   separate datasources for Java 5 and Java 6.
+   Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedXADataSource.
+   </P>
  */
 public class EmbeddedXADataSource40 extends EmbeddedXADataSource
     implements javax.sql.XADataSource /* compile-time check for 4.1 extension */
@@ -68,20 +34,6 @@ public class EmbeddedXADataSource40 extends EmbeddedXADataSource
    private static final long serialVersionUID = 4048303427908481258L;
 
     /** Creates a new instance of EmbeddedXADataSource40 */
-    public EmbeddedXADataSource40() {
-        super();
-    }
+    public EmbeddedXADataSource40() { super(); }
     
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
-    }
-	
 }

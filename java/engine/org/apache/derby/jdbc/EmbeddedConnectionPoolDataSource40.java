@@ -20,40 +20,12 @@
  */
 package org.apache.derby.jdbc;
 
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
-import org.apache.derby.impl.jdbc.Util;
-
 /** 
-    This datasource is suitable for an application using embedded Derby,
-    running on the following platforms:
-    <p>
-    <ul>
-      <li>Java SE 7 (JDBC 4.1) and
-      <li>full Java SE 8 (JDBC 4.2).
-    </ul>
-    <p>
-    Use BasicEmbeddedConnectionPoolDataSource40 if your application
-    runs on Java 8 Compact Profile 2.
-    <p>
-    Use EmbeddedConnectionPoolDataSource if your application
-    runs on the following platforms:
-    <p>
-    <ul>
-      <li> JDBC 3.0 - J2SE 5.0 </li>
-      <li> JDBC 4.0 - Java SE 6 </li>
-    </ul>
-    <p>EmbeddedConnectionPoolDataSource40 is a ConnectionPoolDataSource
-    implementation.
-
-	<P>A ConnectionPoolDataSource is a factory for PooledConnection
-	objects. An object that implements this interface will typically be
-	registered with a JNDI service.
-
-	<P>EmbeddedConnectionPoolDataSource40 is serializable and referenceable.
-
-	<P>See EmbeddedDataSource40 for DataSource properties.
-
+   <P>
+   This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
+   separate datasources for Java 5 and Java 6.
+   Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedConnectionPoolDataSource.
+   </P>
  */
 public class EmbeddedConnectionPoolDataSource40 
     extends EmbeddedConnectionPoolDataSource

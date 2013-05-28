@@ -33,30 +33,41 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 /**
 
+   <P>
     This datasource is suitable for an application using embedded Derby,
-    running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
-    If running on Java SE 7 or higher, consider a more capable data source.
-    <p/>
+    running on full Java SE 6 or higher, corresponding to JDBC 4.0 and higher.
     EmbeddedXADataSource is an XADataSource implementation.
+    <P/>
 
 	<P>An XADataSource is a factory for XAConnection objects.  It represents a
 	RM in a DTP environment.  An object that implements the XADataSource
-	interface is typically registered with a JNDI service provider.   	
+	interface is typically registered with a JNDI service provider.
+    </P>
+    
 	<P>
 	EmbeddedXADataSource automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
+    </P>
+    
 	<UL>
-    <LI> JDBC 3.0 - J2SE 5.0 </LI>
-    <LI> JDBC 4.0 - Java SE 6 </LI>
+    <LI>JDBC 4.0 - Java SE 6 </LI>
+    <LI>JDBC 4.1 - Java SE 7</LI>
+    <LI>JDBC 4.2 - full Java SE 8</LI>
 	</UL>
+
+    <P>
+    Use BasicEmbeddedXADataSource40 if your application runs on Java 8
+    Compact Profile 2.
+    </P>
 
 	<P>EmbeddedXADataSource object only works on a local database.  There is no
 	client/server support.  An EmbeddedXADataSource object must live in the same jvm as
-	the database. 
+	the database.
+    </P>
 
-	<P>EmbeddedXADataSource is serializable and referenceable.
+	<P>EmbeddedXADataSource is serializable and referenceable.</P>
 
-	<P>See EmbeddedDataSource for DataSource properties.
+	<P>See EmbeddedDataSource for DataSource properties.</P>
 
  */
 public class EmbeddedXADataSource extends EmbeddedDataSource implements EmbeddedXADataSourceInterface

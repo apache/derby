@@ -43,14 +43,4 @@ import org.apache.derby.impl.jdbc.Util;
 
     public BasicEmbeddedDataSource40() {}
 
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        throw (SQLFeatureNotSupportedException)Util.notImplemented(
-                "getParentLogger()");
-    }
 }

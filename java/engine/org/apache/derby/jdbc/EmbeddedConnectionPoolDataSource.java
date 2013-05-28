@@ -28,29 +28,36 @@ import javax.sql.PooledConnection;
 
 import org.apache.derby.impl.jdbc.Util;
 
-/** 
+/**
+   <P>
     This datasource is suitable for an application using embedded Derby,
-    running on full Java SE 5 or 6, corresponding to JDBC 3.0 and 4.0.
-    If running on Java SE 7 or higher, consider a more capable data source.
-    <p/>
+    running on full Java SE 6 and higher, corresponding to 4.0 and higher.
    EmbeddedConnectionPoolDataSource is a ConnectionPoolDataSource
    implementation.
+    </P>
 	
-
 	<P>A ConnectionPoolDataSource is a factory for PooledConnection
 	objects. An object that implements this interface will typically be
-	registered with a JNDI service.
+	registered with a JNDI service.</P>
+    
 	<P>
 	EmbeddedConnectionPoolDataSource automatically supports the correct JDBC specification version
-	for the Java Virtual Machine's environment.
+	for the Java Virtual Machine's environment.</P>
+    
 	<UL>
-    <LI> JDBC 3.0 - J2SE 5.0 </LI>
-    <LI> JDBC 4.0 - Java SE 6 </LI>
+    <LI>JDBC 4.0 - Java SE 6</LI>
+    <LI>JDBC 4.1 - Java SE 7</LI>
+    <LI>JDBC 4.2 - full Java SE 8</LI>
 	</UL>
 
-	<P>EmbeddedConnectionPoolDataSource is serializable and referenceable.
+    <P>
+    Use BasicEmbeddedConnectionPoolDataSource40 if your application runs on Java 8
+    Compact Profile 2.
+    </P>
 
-	<P>See EmbeddedDataSource for DataSource properties.
+	<P>EmbeddedConnectionPoolDataSource is serializable and referenceable.</P>
+
+	<P>See EmbeddedDataSource for DataSource properties.</P>
 
  */
 public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
@@ -134,18 +141,6 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
          */
         return ((Driver30) findDriver()).getNewPooledConnection(
             this, user, password, requestPassword);
-    }
-
-    ////////////////////////////////////////////////////////////////////
-    //
-    // INTRODUCED BY JDBC 4.1 IN JAVA 7
-    //
-    ////////////////////////////////////////////////////////////////////
-
-    public  Logger getParentLogger()
-        throws SQLFeatureNotSupportedException
-    {
-        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
     }
 
 }
