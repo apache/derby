@@ -394,7 +394,6 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    @SuppressWarnings("unchecked")
     private void add_row_to_hash_table(DataValueDescriptor[] row, boolean needsToClone)
 		throws StandardException
     {
@@ -405,30 +404,31 @@ public class BackingStoreHashtable
         {
             row = cloneRow(row);
         }
-        Object key = KeyHasher.buildHashKey(row, key_column_numbers);
-        Object  duplicate_value = null;
 
-        if ((duplicate_value = hash_table.put(key, row)) == null)
+        Object key = KeyHasher.buildHashKey(row, key_column_numbers);
+        Object duplicate_value = hash_table.put(key, row);
+
+        if (duplicate_value == null)
             doSpaceAccounting( row, false);
         else
         {
             if (!remove_duplicates)
             {
-                List<Object> row_vec;
+                RowList row_vec;
 
                 // inserted a duplicate
-                if (duplicate_value instanceof List)
+                if (duplicate_value instanceof RowList)
                 {
                     doSpaceAccounting( row, false);
-                    row_vec = (List<Object>) duplicate_value;
+                    row_vec = (RowList) duplicate_value;
                 }
                 else
                 {
                     // allocate list to hold duplicates
-                    row_vec = new ArrayList<Object>(2);
+                    row_vec = new RowList(2);
 
                     // insert original row into vector
-                    row_vec.add(duplicate_value);
+                    row_vec.add((DataValueDescriptor[]) duplicate_value);
                     doSpaceAccounting( row, true);
                 }
 
@@ -441,8 +441,6 @@ public class BackingStoreHashtable
                 hash_table.put(key, row_vec);
             }
         }
-
-        row = null;
     }
 
     private void doSpaceAccounting(DataValueDescriptor[] row,
@@ -792,4 +790,26 @@ public class BackingStoreHashtable
             return diskEnumeration.nextElement();
         }
     } // end of class BackingStoreHashtableEnumeration
+
+    /**
+     * List of {@code DataValueDescriptor[]} instances that represent rows.
+     * This class is used when the hash table contains multiple rows for the
+     * same hash key.
+     */
+    private static class RowList extends ArrayList<DataValueDescriptor[]> {
+
+        private RowList(int initialCapacity) {
+            super(initialCapacity);
+        }
+
+        // The class is mostly empty and provides no functionality in addition
+        // to what's provided by ArrayList<DataValueDescriptor[]>. The main
+        // purpose of the class is to allow type-safe casts from Object. These
+        // casts are needed because the hash table can store both DVD[] and
+        // List<DVD[]>, so its declared type is HashMap<Object, Object>.
+        // Because of type erasure, casts to ArrayList<DataValueDescriptor[]>
+        // will make the compiler generate unchecked conversion warnings.
+        // Casts to RowList, on the other hand, won't cause warnings, as there
+        // are no parameterized types and type erasure doesn't come into play.
+    }
 }
