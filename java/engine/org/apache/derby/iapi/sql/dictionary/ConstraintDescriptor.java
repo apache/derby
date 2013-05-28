@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import java.util.Arrays;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.depend.Provider;
@@ -456,8 +455,7 @@ public abstract class ConstraintDescriptor
 				"constraintId: " + constraintId + "\n" +
 				"deferrable: " + deferrable + "\n" +
 				"initiallyDeferred: " + initiallyDeferred + "\n" +
-               "referencedColumns: " +
-                    Arrays.toString(referencedColumns) + "\n" +
+				"referencedColumns: " + referencedColumns + "\n" +
 				"schemaDesc: " + schemaDesc + "\n"
 				;
 		}
