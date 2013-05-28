@@ -84,7 +84,7 @@ If you are reading these instructions, chances
 
     <TR>
       <TD><b><i>Java Development Kit</i></b></TD>
-      <TD>You need to install a Java 5 or later JDK. Probably, your machine
+      <TD>You need to install a Java 6 or later JDK. Probably, your machine
       already has this JDK. If not, Sun and IBM supply free JDKs for many machines.</TD>
     </TR>
 
@@ -135,7 +135,7 @@ test harness also:
 Before building Derby, cd
 to the root of your Derby source distribution. That is the top level
 directory which contains the LICENSE and NOTICE files. In addition,
-make sure that the version of Java which you are using is Java 5 or
+make sure that the version of Java which you are using is Java 6 or
 later. You can verify this by checking the output of the following command:
 </p>
 
@@ -420,6 +420,11 @@ Derby is supposed to run in all of the following environments:
     </TR>
 
     <TR>
+      <TD><b><i>Java 8</i></b></TD>
+      <TD><b><i>JDBC 4.2</i></b></TD>
+    </TR>
+
+    <TR>
       <TD><b><i>Java 7</i></b></TD>
       <TD><b><i>JDBC 4.1</i></b></TD>
     </TR>
@@ -427,16 +432,6 @@ Derby is supposed to run in all of the following environments:
     <TR>
       <TD><b><i>Java 6</i></b></TD>
       <TD><b><i>JDBC 4.0</i></b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Java 5</i></b></TD>
-      <TD><b><i>JDBC 3</i></b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Small Device (CDC/FP 1.1)</i></b></TD>
-      <TD><b><i>JSR169</i></b></TD>
     </TR>
 
   </TBODY>
@@ -475,10 +470,20 @@ enforces compile-time contracts for the supported platforms:
     </TR>
 
     <TR>
+      <TD><b><i>Java 8</i></b></TD>
+      <TD><b><i>java18compile.classpath</i></b></TD>
+      <TD>The set of libraries in the Java 8 JDK. The build fails if
+      your environment isn't a Java 6, 7, or 8 JDK.</TD>
+      <TD>The set of system jars in your JDK if your environment is
+      JDK 8. Otherwise,
+      <i>${java17compile.classpath}</i></TD>
+    </TR>
+
+    <TR>
       <TD><b><i>Java 7</i></b></TD>
       <TD><b><i>java17compile.classpath</i></b></TD>
       <TD>The set of libraries in the Java 7 JDK. The build fails if
-      your environment isn't a Java 5, 6 or 7 JDK.</TD>
+      your environment isn't a Java 6, 7, or 8 JDK.</TD>
       <TD>The set of system jars in your JDK if your environment is
       JDK 7. Otherwise,
       <i>${java16compile.classpath}</i></TD>
@@ -488,33 +493,11 @@ enforces compile-time contracts for the supported platforms:
       <TD><b><i>Java 6</i></b></TD>
       <TD><b><i>java16compile.classpath</i></b></TD>
       <TD>The set of libraries in the Java 6 JDK. The build fails if
-      your environment isn't a Java 5, 6 or 7 JDK.</TD>
+      your environment isn't a Java 6, 7, or 8 JDK.</TD>
       <TD>The set of system jars in your JDK if your environment is
-      JDK 6. Otherwise, <i>classes/stubs/jdbc4:${java15compile.classpath}</i> if your environment
-      is JDK 5. Otherwise
+      JDK 6. Otherwise, <i>classes/stubs/jdbc4:${java18compile.classpath}</i> if your environment
+      is JDK 8. Otherwise
       <i>${java17compile.classpath}</i></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Java 5</i></b></TD>
-      <TD><b><i>java15compile.classpath</i></b></TD>
-      <TD>The set of libraries in the Java 5 JDK. The build fails if
-      your environment isn't a Java 5, 6 or 7 JDK.</TD>
-      <TD>The set of system jars in your JDK if your environment is
-      JDK 5. Otherwise,
-      <i>classes/stubs/jdbc3:${java16compile.classpath}</i></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>Small Device (CDC/FP 1.1)</i></b></TD>
-      <TD><b><i>jsr169compile.classpath</i></b></TD>
-      <TD>This should be set to the list of small device libraries on
-      your machine--if you have them. That is, the CDC/FP 1.1 jars and
-      the jsr169 jar. To get a set of small device libraries, see
-      <a href="http://blogs.sun.com/wittyman/entry/javadb_on_sun_javame_cdc">Oracle's instructions</a>
-      or download IBM's WCTME 5.7.
-      </TD>
-      <TD><i>classes/stubs/jsr169:${java15compile.classpath}</i></TD>
     </TR>
 
   </TBODY>
@@ -537,15 +520,6 @@ library variables in <i>ant.properties</i>:
     </TR>
 
     <TR>
-      <TD><b><i>j15lib</i></b></TD>
-      <TD>If you set this variable to be the directory which contains
-      your Java 5 jars, then the Derby build will set
-      <i>java15compile.classpath</i> to be the list of jars in that directory.
-      </TD>
-      <TD>Optional variable. No default value.</TD>
-    </TR>
-
-    <TR>
       <TD><b><i>j16lib</i></b></TD>
       <TD>If you set this variable to be the directory which contains
       your Java 6 jars, then the Derby build will set
@@ -559,6 +533,15 @@ library variables in <i>ant.properties</i>:
       <TD>If you set this variable to be the directory which contains
       your Java 7 jars, then the Derby build will set
       <i>java17compile.classpath</i> to be the list of jars in that directory.
+      </TD>
+      <TD>Optional variable. No default value.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>j18lib</i></b></TD>
+      <TD>If you set this variable to be the directory which contains
+      your Java 8 jars, then the Derby build will set
+      <i>java18compile.classpath</i> to be the list of jars in that directory.
       </TD>
       <TD>Optional variable. No default value.</TD>
     </TR>
@@ -585,10 +568,6 @@ java16compile.classpath=/System/Library/Frameworks/JavaVM.framework/Versions/1.6
     /System/Library/Frameworks/JavaVM.framework/Versions/1.6/Classes/laf.jar: \
     /System/Library/Frameworks/JavaVM.framework/Versions/1.6/Classes/management-agent: \
     /System/Library/Frameworks/JavaVM.framework/Versions/1.6/Classes/ui.jar
-
-jsr169compile.classpath=/Users/myself/sw/phoneME/phoneme_advanced_mr2/lib/btclasses.zip: \
-    /Users/myself/sw/phoneME/phoneme_advanced_mr2/lib/basis.jar: \
-    /Users/myself/sw/jsr169Support/jdbc.jar
 </font></b></pre>
 </blockquote>
 

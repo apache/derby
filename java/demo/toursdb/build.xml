@@ -50,7 +50,7 @@
       srcdir="${derby.demo.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="toursdb/insertMaps.java"/>
     </javac>

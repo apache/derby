@@ -74,7 +74,7 @@
       destdir="${out.storeless.dir}">
       <classpath>
       	  <pathelement path="${out.dir}"/>
-          <pathelement path="${java15compile.classpath}"/>
+          <pathelement path="${java16compile.classpath}"/>
       </classpath>
     </javac>
   </target>

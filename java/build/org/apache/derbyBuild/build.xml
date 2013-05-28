@@ -52,7 +52,7 @@
       srcdir="${derby.build.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath};${java.home}/../lib/tools.jar"/>
+        <pathelement path="${java16compile.classpath};${java.home}/../lib/tools.jar"/>
         <pathelement path="${ant.core.lib}"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>

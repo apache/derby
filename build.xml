@@ -49,7 +49,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -287,8 +287,9 @@
     />
 
     <!-- 
-            After setting the JDK properties, we expect that java15compile.classpath or
-            java16compile.classpath will be set. If neither is set, PropertySetter aborts the build.
+            After setting the JDK properties, we expect that java16compile.classpath,
+            java17compile.classpath, or java18compile.classpath will be set. 
+            If none of these are set, then PropertySetter aborts the build.
     -->
     <setJdkProperties/>
 
@@ -299,35 +300,26 @@
 
 
     <!-- 
-            If a Java 6 JDK isn't present, then use the Java 5 environment to build the JDBC 4 support.
-            If a Java 5 JDK also isn't present then use the Java 7 environment to build the JDBC 4 support
+            If a Java 6 JDK isn't present, then use the Java 7 environment to build the JDBC 4 support
     -->
     <condition property="java17compile.classpath" value="${out.jdbc4.dir}:${java18compile.classpath}">
           <isset property="java18compile.classpath"/>
     </condition>
-    <condition property="java16compile.classpath" value="${out.jdbc4.dir}:${java15compile.classpath}" else="${java17compile.classpath}">
-          <isset property="java15compile.classpath"/>
-    </condition>
-
-    <!-- 
-            If a Java 5 JDK isn't present, then use the Java 6 environment to build the Java 5 support
-    -->
-    <property name="java15compile.classpath" value="${out.jdbc3.dir}:${java16compile.classpath}"/>
+    <property name="java16compile.classpath" value="${java17compile.classpath}"/>
 
     <!-- 
             If a Java 7 JDK isn't present, then use the Java 6 environment.
     -->
     <property name="java17compile.classpath" value="${java16compile.classpath}"/>
 
+    <!-- 
+            If a Java 8 JDK isn't present, then use the Java 7 environment.
+    -->
+    <property name="java18compile.classpath" value="${java17compile.classpath}"/>
+
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
-
-    <!-- 
-            If the user hasn't already set this property, point it at our stub
-            implementation of JSR169.
-    -->
-    <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java15compile.classpath}"/>
 
     <!-- 
             The lowest common denominator compile path for Derby. We expect that
@@ -359,13 +351,12 @@
     <echo message="${checkEvent} compilerPropsAlreadySet = ${compilerPropsAlreadySet}"/>
     <echo message="${checkEvent} compilerLevel16 = ${compilerLevel16}"/>
     <echo message="${checkEvent} compile.classpath = ${compile.classpath}"/>
-    <echo message="${checkEvent} jsr169compile.classpath = ${jsr169compile.classpath}"/>
-    <echo message="${checkEvent} j15lib = ${j15lib}"/>
-    <echo message="${checkEvent} java15compile.classpath = ${java15compile.classpath}"/>
     <echo message="${checkEvent} j16lib = ${j16lib}"/>
     <echo message="${checkEvent} java16compile.classpath = ${java16compile.classpath}"/>
     <echo message="${checkEvent} j17lib = ${j17lib}"/>
     <echo message="${checkEvent} java17compile.classpath = ${java17compile.classpath}"/>
+    <echo message="${checkEvent} j18lib = ${j18lib}"/>
+    <echo message="${checkEvent} java18compile.classpath = ${java18compile.classpath}"/>
 
   </target>
 
@@ -797,59 +788,6 @@
   </target>
 
 <!-- =================================================================== -->
-<!--                     Build the stub implementation of JSR169                  -->
-<!-- =================================================================== -->
-  <target name="jsr169stubs">
-    <mkdir dir="${out.stubs.dir}"/>
-    <mkdir dir="${out.jsr169.dir}"/>
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.jsr169.src.dir}"
-      destdir="${out.jsr169.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-     </javac>
-
-  </target>
-
-<!-- =================================================================== -->
-<!--                     Build the stub implementation of JDBC3                  -->
-<!-- =================================================================== -->
-  <target name="jdbc3stubs">
-    <mkdir dir="${out.stubs.dir}"/>
-    <mkdir dir="${out.jdbc3.dir}"/>
-
-    <javac
-      source="1.5"
-      target="1.5"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.jdbc3.src.dir}"
-      destdir="${out.jdbc3.dir}">
-      <classpath>
-        <pathelement path="${java15compile.classpath}"/>
-      </classpath>
-     </javac>
-
-  </target>
-
-<!-- =================================================================== -->
 <!--                     Build the stub implementation of JDBC4                  -->
 <!-- =================================================================== -->
   <target name="jdbc4stubs">
@@ -884,8 +822,8 @@
     <mkdir dir="${out.felix.dir}"/>
 
     <javac
-      source="1.4"
-      target="1.4"
+      source="1.6"
+      target="1.6"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -897,7 +835,7 @@
       srcdir="${derby.felix.src.dir}"
       destdir="${out.felix.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
      </javac>
 
