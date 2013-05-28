@@ -30,7 +30,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 6, 7 or 8, corresponding to JDBC 4.0, 4.1 and 4.2.
+ * running on full Java SE 6 and higher, corresponding to JDBC 4.0 and higher.
  * <p/>
  * ClientConnectionPoolDataSource is a factory for PooledConnection objects.
  * An object that implements this interface

@@ -27,7 +27,7 @@ import javax.sql.XAConnection;
 /**
  * <p>
  * This datasource is suitable for a client/server use of Derby,
- * running on full Java SE 6, 7 or 8, corresponding to JDBC 4.0, 4.1 and 4.2.
+ * running on full Java SE 6 and higher, corresponding to JDBC 4.0 and higher.
  * </p>
  * An XADataSource is a factory for XAConnection objects.  It represents a
  * RM in a DTP environment.  An object that implements the XADataSource

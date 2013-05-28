@@ -24,37 +24,12 @@ package org.apache.derby.jdbc;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
- * <p>
- * This datasource is suitable for a client/server use of Derby,
- * running on the following platforms:
- * </p>
- *
- * <p>
- * <ul>
- *   <li>Java SE 6 (JDBC 4.0) and</li>
- *   <li>Java SE 7 (JDBC 4.1) and</li>
- *   <li>full Java SE 8 (JDBC 4.2).</li>
- * </ul>
- * </p>
- *
- * <p>
- * Those platforms are also supported by {@code ClientConnectionPoolDataSource}
- * now, and applications should use {@code ClientConnectionPoolDataSource}
- * instead of this class. This class is provided only for backward
- * compatibility and may be removed in later versions of Derby.
- * </p>
- *
- * <p>
- * Use BasicClientConnectionPoolDataSource40 if your application
- * runs on Java 8 Compact Profile 2.
- * </p>
- *
- * <p>
- * ClientConnectionPoolDataSource40 is a factory for PooledConnection objects.
- * An object that implements this interface
- * will typically be registered with a naming service that is based on the
- * Java Naming and Directory Interface (JNDI).
- * </p>
+   <P>
+   This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
+   separate datasources for Java 5 and Java 6.
+   Now that we no longer support Java 5, all functionality has migrated into the superclass, ClientConnectionPoolDataSource.
+   This class is preserved for backward compatibility reasons.
+   </P>
  */
 public class ClientConnectionPoolDataSource40
     extends ClientConnectionPoolDataSource

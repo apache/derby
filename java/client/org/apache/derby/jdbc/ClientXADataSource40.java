@@ -24,40 +24,12 @@ package org.apache.derby.jdbc;
 import javax.sql.XADataSource;
 
 /**
- * <p>
- * This datasource is suitable for a client/server use of Derby,
- * running on the following platforms:
- * </p>
- *
- * <p>
- * <ul>
- *   <li>Java SE 6 (JDBC 4.0) and</li>
- *   <li>Java SE 7 (JDBC 4.1) and</li>
- *   <li>full Java SE 8 (JDBC 4.2).</li>
- * </ul>
- * </p>
- *
- * <p>
- * Those platforms are also supported by {@code ClientXADataSource}
- * now, and applications should use {@code ClientXADataSource}
- * instead of this class. This class is provided only for backward
- * compatibility and may be removed in later versions of Derby.
- * </p>
- *
- * <p>
- * Use BasicClientXADataSource40 if your application runs on Java 8
- * Compact Profile 2.
- * </p>
- *
- * <p>
- * An XADataSource is a factory for XAConnection objects.  It represents a
- * RM in a DTP environment.  An object that implements the XADataSource
- * interface is typically registered with a JNDI service provider.
- * </p>
- *
- * <P>ClientXADataSource40 is serializable and referenceable.</p>
- *
- * <P>See ClientDataSource40 for DataSource properties.</p>
+   <P>
+   This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
+   separate datasources for Java 5 and Java 6.
+   Now that we no longer support Java 5, all functionality has migrated into the superclass, ClientXADataSource.
+   This class is preserved for backward compatibility reasons.
+   </P>
  */
 public class ClientXADataSource40 extends ClientXADataSource
     implements XADataSource /* compile-time check for 4.1 extension */
