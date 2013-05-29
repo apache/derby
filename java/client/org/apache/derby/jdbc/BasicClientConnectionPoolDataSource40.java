@@ -39,7 +39,7 @@ import org.apache.derby.shared.common.reference.MessageId;
  *
  * @see ClientConnectionPoolDataSource40
  */
-class BasicClientConnectionPoolDataSource40
+public class BasicClientConnectionPoolDataSource40
         extends BasicClientDataSource40
         implements ConnectionPoolDataSource,
                    ClientConnectionPoolDataSourceInterface {
