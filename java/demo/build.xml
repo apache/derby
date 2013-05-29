@@ -74,7 +74,7 @@
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
-    <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
+    <!-- "simple" demos under java/demo/ (SimpleApp) -->
     <javac
       source="1.6"
       target="1.6"
@@ -86,7 +86,7 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.demo.src.dir}/simple:${derby.demo.src.dir}/simplemobile"
+      srcdir="${derby.demo.src.dir}/simple"
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
