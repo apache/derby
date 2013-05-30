@@ -23,7 +23,7 @@ package org.apache.derby.client.am;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.reference.DRDAConstants;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -64,12 +64,11 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding            encoding of buffer data
      * @return  Date translated from  buffer with specified encoding
-     * @throws UnsupportedEncodingException
      */
     static final Date dateBytesToDate(byte[] buffer,
             int offset,
             Calendar recyclableCal,
-            String encoding) throws UnsupportedEncodingException {
+            Charset encoding) {
 
         int year, month, day;
 
@@ -118,13 +117,12 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding           encoding of buffer
      * @return  Time translated from buffer with specified encoding
-     * @throws UnsupportedEncodingException
      */
     static final Time timeBytesToTime(byte[] buffer,
-                                                      int offset,
-                                                      Calendar recyclableCal,
-                                                      String encoding) 
-    throws UnsupportedEncodingException {
+                                      int offset,
+                                      Calendar recyclableCal,
+                                      Charset encoding)
+    {
         int hour, minute, second;
 
         String time = new String(buffer, offset, 
@@ -158,14 +156,10 @@ public class DateTime {
      * @param encoding                encoding of buffer
      * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
      * @return TimeStamp translated from buffer with specified encoding
-     * @throws UnsupportedEncodingException
      */
-    static final Timestamp timestampBytesToTimestamp(byte[] buffer,
-                                                                     int offset,
-                                                                     Calendar recyclableCal, 
-                                                                     String encoding,
-                                                                     boolean supportsTimestampNanoseconds) 
-    throws UnsupportedEncodingException
+    static final Timestamp timestampBytesToTimestamp(
+            byte[] buffer, int offset, Calendar recyclableCal,
+            Charset encoding, boolean supportsTimestampNanoseconds)
     {
         int year, month, day, hour, minute, second, fraction;
         String timestamp = new String
@@ -263,12 +257,11 @@ public class DateTime {
      * @return DateTime.dateRepresentationLength. This is the fixed length in 
      * bytes taken to represent the date value
      * @throws SqlException
-     * @throws UnsupportedEncodingException if UTF8 Encoding is not supported
      */
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
                                             DateTimeValue date)
-    throws SqlException,UnsupportedEncodingException {
+    throws SqlException {
         int year = date.getYear();
         if (year > 9999) {
             throw new SqlException(null,
@@ -310,12 +303,11 @@ public class DateTime {
      * @param time  java.sql.Time value
      * @return DateTime.timeRepresentationLength. This is the fixed length in 
      * bytes taken to represent the time value
-     * @throws UnsupportedEncodingException
      */
     public static final int timeToTimeBytes(byte[] buffer,
                                             int offset,
                                             DateTimeValue time)
-    throws UnsupportedEncodingException {
+    {
         int hour = time.getHours();
         int minute = time.getMinutes();
         int second = time.getSeconds();
@@ -349,13 +341,12 @@ public class DateTime {
      * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
      * @return DateTime.timestampRepresentationLength. This is the fixed  length in bytes, taken to represent the timestamp value
      * @throws SqlException
-     * @throws UnsupportedEncodingException
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
                                                       DateTimeValue timestamp,
                                                       boolean supportsTimestampNanoseconds) 
-    throws SqlException,UnsupportedEncodingException {
+    throws SqlException {
         int year = timestamp.getYear();
         if (year > 9999) {
             throw new SqlException(null,
@@ -433,13 +424,12 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding                encoding of buffer
      * @return Timestamp translated from buffer with specified encoding
-     * @throws UnsupportedEncodingException
      */
     static final Timestamp dateBytesToTimestamp(byte[] buffer,
                                                                 int offset,
                                                                 Calendar recyclableCal,
-                                                                String encoding) 
-    throws UnsupportedEncodingException {
+                                                                Charset encoding)
+    {
         int year, month, day;
 
         String date = new String(buffer, offset, DateTime.dateRepresentationLength,
@@ -484,14 +474,13 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding                 encoding of buffer
      * @return Timestamp translated from buffer with specified encoding 
-     * @throws UnsupportedEncodingException
      * 
      */
     static final Timestamp timeBytesToTimestamp(byte[] buffer,
-                                                                int offset,
-                                                                Calendar recyclableCal, 
-                                                                String encoding)
-    throws UnsupportedEncodingException {
+                                                int offset,
+                                                Calendar recyclableCal,
+                                                Charset encoding)
+{
         int hour, minute, second;
 
         String time = new String(buffer, offset, 
@@ -536,13 +525,11 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding             encoding of buffer
      * @return Date translated from buffer with specified encoding
-     * @throws UnsupportedEncodingException
      */
     static final Date timestampBytesToDate(byte[] buffer,
-                                                           int offset,
-                                                           Calendar recyclableCal, 
-                                                           String encoding) 
-    throws UnsupportedEncodingException 
+                                           int offset,
+                                           Calendar recyclableCal,
+                                           Charset encoding)
      {
         int year, month, day;
 
@@ -578,13 +565,11 @@ public class DateTime {
      * @param recyclableCal
      * @param encoding            encoding of buffer
      * @return  Time translated from buffer with specified Encoding
-     * @throws UnsupportedEncodingException
      */
     static final Time timestampBytesToTime(byte[] buffer,
-                                                           int offset,
-                                                           Calendar recyclableCal, 
-                                                           String encoding) 
-    throws  UnsupportedEncodingException
+                                           int offset,
+                                           Calendar recyclableCal,
+                                           Charset encoding)
     {
         /* When getting a java.sql.Time object from a TIMESTAMP value we
          * need to preserve the milliseconds from the timestamp.

@@ -1051,7 +1051,7 @@ public class ClientPreparedStatement extends ClientStatement
                 }
                 checkStreamLength(length);
                 setInput(parameterIndex,
-                         new ClientClob(agent_, x, "ISO-8859-1", (int)length));
+                    new ClientClob(agent_, x, Cursor.ISO_8859_1, (int) length));
             }
         }
         catch ( SqlException se )
@@ -2511,7 +2511,7 @@ public class ClientPreparedStatement extends ClientStatement
                     return;
                 }
                 setInput(parameterIndex,
-                         new ClientClob(agent_, x, "ISO-8859-1"));
+                         new ClientClob(agent_, x, Cursor.ISO_8859_1));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }

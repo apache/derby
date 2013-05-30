@@ -21,7 +21,7 @@
 
 package org.apache.derby.client.net;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -863,25 +863,15 @@ class NetCursor extends Cursor {
     }
 
     // This is not used for column data.
-    private String readFdocaString(int length, String encoding) throws DisconnectException, SqlException {
+    private String readFdocaString(int length, Charset encoding)
+            throws SqlException {
         if (length == 0) {
             return null;
         }
 
         checkForSplitRowAndComplete(length);
 
-        String s = null;
-
-        try {
-            s = new String(dataBuffer_, position_, length, encoding);
-        } catch (UnsupportedEncodingException e) {
-            netAgent_.accumulateChainBreakingReadExceptionAndThrow(
-                new DisconnectException(
-                    netAgent_, 
-                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
-                    e));
-        }
-
+        String s = new String(dataBuffer_, position_, length, encoding);
         position_ += length;
         return s;
     }
@@ -1010,7 +1000,7 @@ class NetCursor extends Cursor {
             } else {
                 dataOffset = 1;
             }
-            clob = new ClientClob(agent, data, charsetName_[index], dataOffset);
+            clob = new ClientClob(agent, data, charset_[index], dataOffset);
         } else {
             // the locator is not valid, it is a zero-length LOB
             clob = new ClientClob(agent, "");

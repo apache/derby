@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.net;
 
+import java.nio.charset.Charset;
 import java.sql.Types;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.DisconnectException;
@@ -157,7 +158,7 @@ public class Typdef implements Cloneable {
     // lob length
     static final short LOBLENGTH = 4;
 
-    public static final String UTF8ENCODING = "UTF8";
+    public static final Charset UTF8ENCODING = Charset.forName("UTF-8");
 
     private static final int OVERRIDE_TABLE_SIZE = 0xff;
 
@@ -902,16 +903,16 @@ public class Typdef implements Cloneable {
 
     private int ccsidSbc_;
     private boolean ccsidSbcSet_;
-    private String ccsidSbcEncoding_;
+    private Charset ccsidSbcEncoding_;
 
     private int ccsidDbc_;
     private boolean ccsidDbcSet_;
-    private String ccsidDbcEncoding_;
+    private Charset ccsidDbcEncoding_;
 
 
     private int ccsidMbc_;
     private boolean ccsidMbcSet_;
-    private String ccsidMbcEncoding_;
+    private Charset ccsidMbcEncoding_;
 
 
     private boolean mddOverride_ = false;
@@ -983,7 +984,7 @@ public class Typdef implements Cloneable {
     }
 
     // analyze exception handling some more here
-    String getCcsidSbcEncoding() throws DisconnectException {
+    Charset getCcsidSbcEncoding() throws DisconnectException {
         if (ccsidSbcEncoding_ == null) {
             ccsidSbcEncoding_ = UTF8ENCODING;
         }
@@ -1005,7 +1006,7 @@ public class Typdef implements Cloneable {
     }
 
     // analyze exception handling some more here
-    private String getCcsidDbcEncoding() throws DisconnectException {
+    private Charset getCcsidDbcEncoding() throws DisconnectException {
         if (ccsidDbcEncoding_ == null) {
             ccsidDbcEncoding_ = UTF8ENCODING;
         }
@@ -1027,7 +1028,7 @@ public class Typdef implements Cloneable {
     }
 
     // analyze exception handling some more here
-    String getCcsidMbcEncoding() throws DisconnectException {
+    Charset getCcsidMbcEncoding() throws DisconnectException {
         if (ccsidMbcEncoding_ == null) {
             ccsidMbcEncoding_ = UTF8ENCODING;
         }
@@ -1068,30 +1069,30 @@ public class Typdef implements Cloneable {
         //    The typdef object should store the java encoding,
         switch (sda.ccsid_) {
         case CCSIDSBC:
-            netCursor.charsetName_[columnIndex] = getCcsidSbcEncoding();
+            netCursor.charset_[columnIndex] = getCcsidSbcEncoding();
             netCursor.ccsid_[columnIndex] = this.ccsidSbc_;
             break;
         case CCSIDMBC:
             if (isCcsidMbcSet() && (ccsidMbc_ != 0)) {
-                netCursor.charsetName_[columnIndex] = getCcsidMbcEncoding();
+                netCursor.charset_[columnIndex] = getCcsidMbcEncoding();
                 netCursor.ccsid_[columnIndex] = ccsidMbc_;
             } else {
                 // if the server didn't return a mixed byte ccsid, set both the
                 // encoding and the btc reference to null. see CCSIDDBC comment below.
-                netCursor.charsetName_[columnIndex] = null;
+                netCursor.charset_[columnIndex] = null;
                 netCursor.ccsid_[columnIndex] = 0;
             }
             break;
         case CCSIDDBC:
             if (isCcsidDbcSet() && (ccsidDbc_ != 0)) {
-                netCursor.charsetName_[columnIndex] = getCcsidDbcEncoding();
+                netCursor.charset_[columnIndex] = getCcsidDbcEncoding();
                 netCursor.ccsid_[columnIndex] = this.ccsidDbc_;
             } else {
                 // if the server didn't return a double byte ccsid, set both the
                 // encoding and the btc reference to null.  later an exception will
                 // be thrown on the getXXX method.  calling the getCcsidDbcEncoding method
                 // will throw the exception here and this is not desirable.
-                netCursor.charsetName_[columnIndex] = null;
+                netCursor.charset_[columnIndex] = null;
                 netCursor.ccsid_[columnIndex] = 0;
             }
             break;
@@ -1101,7 +1102,7 @@ public class Typdef implements Cloneable {
             // otherwise the sda.ccsid_ is a placeholder:
             //  CCSIDMBC, CCSIDDDBC, CCSIDSBC to indicate that
             // the actual ccsid is the connection's ccsid (in protocol lingo the connection's typdef ccsid).
-            netCursor.charsetName_[columnIndex] = UTF8ENCODING;
+            netCursor.charset_[columnIndex] = UTF8ENCODING;
             netCursor.ccsid_[columnIndex] = sda.ccsid_;
             break;
         }

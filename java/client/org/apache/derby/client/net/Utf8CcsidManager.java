@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.net;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -32,7 +31,6 @@ import java.nio.charset.CoderResult;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Utf8CcsidManager extends CcsidManager {
@@ -93,18 +91,7 @@ public class Utf8CcsidManager extends CcsidManager {
      * Offset and numToConvert are given in terms of bytes! Not characters!
      */
     public String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
-        try {
-            // Here we'd rather specify the encoding using a Charset object to
-            // avoid the need to handle UnsupportedEncodingException, but that
-            // constructor wasn't introduced until Java 6.
-            return new String(sourceBytes, offset, numToConvert, UTF8);
-        } catch (UnsupportedEncodingException e) {
-            // We don't have an agent in this method
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding with offset",e);
-            }
-        }
-        return null;
+        return new String(sourceBytes, offset, numToConvert, UTF8_CHARSET);
     }
 
     public void startEncoding() {

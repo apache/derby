@@ -32,8 +32,8 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -64,6 +64,11 @@ public abstract class Cursor {
     // unused protocol element: VARIABLE_BYTES = 5;
     // unused protocol element: VARIABLE_SHORT_BYTES = 6;
     public final static int NULL_TERMINATED_BYTES = 7;
+
+    // Charsets
+    static final Charset UTF_16BE = Charset.forName("UTF-16BE");
+    static final Charset UTF_8 = Charset.forName("UTF-8");
+    static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     // unused protocol element: SBCS_CLOB = 8;
     // unused protocol element: MBCS_CLOB = 9;
@@ -123,7 +128,7 @@ public abstract class Cursor {
     public int[] jdbcTypes_;
     public int columns_;
     public boolean[] nullable_;
-    public String[] charsetName_;
+    public Charset[] charset_;
     public boolean[] isNull_;
     public int[] fdocaLength_; // this is the max length for
 
@@ -146,7 +151,7 @@ public abstract class Cursor {
 
         columns_ = numberOfColumns;
         nullable_ = new boolean[numberOfColumns];
-        charsetName_ = new String[numberOfColumns];
+        charset_ = new Charset[numberOfColumns];
 
         ccsid_ = new int[numberOfColumns];
 
@@ -372,16 +377,10 @@ public abstract class Cursor {
 
     // Build a java.math.BigDecimal from a fixed point decimal byte representation.
     private final BigDecimal get_DECIMAL(int column) throws SqlException {
-        try {
-            return Decimal.getBigDecimal(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    getColumnPrecision(column - 1),
-                    getColumnScale(column - 1));
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING),  
-                "DECIMAL", "java.math.BigDecimal", e);
-        }
+        return Decimal.getBigDecimal(dataBuffer_,
+                columnDataPosition_[column - 1],
+                getColumnPrecision(column - 1),
+                getColumnScale(column - 1));
     }
 
 
@@ -396,10 +395,6 @@ public abstract class Cursor {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
                 "double", e);
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                "DECIMAL", "double", e);
         }
     }
 
@@ -419,10 +414,6 @@ public abstract class Cursor {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
                 targetType, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                "DECIMAL", targetType, e);
         }
     }
 
@@ -433,33 +424,28 @@ public abstract class Cursor {
     // for all other cases length is the number of bytes.
     // The length does not include the null terminator.
     private String getVARCHAR(int column) throws SqlException {
-        try {
-            if (ccsid_[column - 1] == 1200) {
-                return getStringWithoutConvert(columnDataPosition_[column - 1] + 2, columnDataComputedLength_[column - 1] - 2);
-            }
-
-            // check for null encoding is needed because the net layer
-            // will no longer throw an exception if the server didn't specify
-            // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
-            // cursor is only required for types which can have mixed or double
-            // byte ccsids.
-            if (charsetName_[column - 1] == null) {
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
-            }
-
-            String tempString = new String(dataBuffer_,
-                    columnDataPosition_[column - 1] + 2,
-                    columnDataComputedLength_[column - 1] - 2,
-                    charsetName_[column - 1]);
-            return (maxFieldSize_ == 0) ? tempString :
-                    tempString.substring(0, Math.min(maxFieldSize_,
-                                                     tempString.length()));
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                    "VARCHAR", "String", e);
+        if (ccsid_[column - 1] == 1200) {
+            return getStringWithoutConvert(columnDataPosition_[column - 1] + 2,
+                    columnDataComputedLength_[column - 1] - 2);
         }
+
+        // check for null encoding is needed because the net layer
+        // will no longer throw an exception if the server didn't specify
+        // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
+        // cursor is only required for types which can have mixed or double
+        // byte ccsids.
+        if (charset_[column - 1] == null) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
+        }
+
+        String tempString = new String(dataBuffer_,
+                columnDataPosition_[column - 1] + 2,
+                columnDataComputedLength_[column - 1] - 2,
+                charset_[column - 1]);
+        return (maxFieldSize_ == 0) ? tempString :
+                tempString.substring(0, Math.min(maxFieldSize_,
+                                                 tempString.length()));
     }
 
     // Build a Java String from a database CHAR field.
@@ -468,137 +454,86 @@ public abstract class Cursor {
             return getStringWithoutConvert(columnDataPosition_[column - 1], columnDataComputedLength_[column - 1]);
         }
 
-        try {
-            // check for null encoding is needed because the net layer
-            // will no longer throw an exception if the server didn't specify
-            // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
-            // cursor is only required for types which can have mixed or double
-            // byte ccsids.
-            if (charsetName_[column - 1] == null) {
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
-            }
-
-            String tempString = new String(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    columnDataComputedLength_[column - 1],
-                    charsetName_[column - 1]);
-            return (maxFieldSize_ == 0) ? tempString :
-                    tempString.substring(0, Math.min(maxFieldSize_,
-                                                     tempString.length()));
-        } catch (UnsupportedEncodingException e) {
+        // check for null encoding is needed because the net layer
+        // will no longer throw an exception if the server didn't specify
+        // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
+        // cursor is only required for types which can have mixed or double
+        // byte ccsids.
+        if (charset_[column - 1] == null) {
             throw new SqlException(agent_.logWriter_,
-                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING),
-                "CHAR", "String", e);
+                new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
         }
+
+        String tempString = new String(dataBuffer_,
+                columnDataPosition_[column - 1],
+                columnDataComputedLength_[column - 1],
+                charset_[column - 1]);
+        return (maxFieldSize_ == 0) ? tempString :
+                tempString.substring(0, Math.min(maxFieldSize_,
+                                                 tempString.length()));
     }
 
     // Build a JDBC Date object from the DERBY ISO DATE field.
     private Date getDATE(int column, Calendar cal) throws SqlException {
-        try {
-            return DateTime.dateBytesToDate(dataBuffer_,
-                columnDataPosition_[column - 1],
-                cal,
-                charsetName_[column - 1]);
-        }catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "DATE", "java.sql.Date", e);
-        }
-
-        
+        return DateTime.dateBytesToDate(dataBuffer_,
+            columnDataPosition_[column - 1],
+            cal,
+            charset_[column - 1]);
     }
 
     // Build a JDBC Time object from the DERBY ISO TIME field.
     private Time getTIME(int column, Calendar cal) throws SqlException {
-        try {
-            return DateTime.timeBytesToTime(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    cal,
-                    charsetName_[column - 1]);
-        } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "TIME", "java.sql.Time", e);
-        }
+        return DateTime.timeBytesToTime(dataBuffer_,
+                columnDataPosition_[column - 1],
+                cal,
+                charset_[column - 1]);
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIMESTAMP field.
     private final Timestamp getTIMESTAMP(int column, Calendar cal)
             throws SqlException {
-
-        try {
-            return DateTime.timestampBytesToTimestamp(
-                dataBuffer_,
-                columnDataPosition_[column - 1],
-                cal,
-                charsetName_[column - 1],
-                agent_.connection_.serverSupportsTimestampNanoseconds());
-    } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "TIMESTAMP", "java.sql.Timestamp", e);
-    }
+        return DateTime.timestampBytesToTimestamp(
+            dataBuffer_,
+            columnDataPosition_[column - 1],
+            cal,
+            charset_[column - 1],
+            agent_.connection_.serverSupportsTimestampNanoseconds());
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO DATE field.
     private final Timestamp getTimestampFromDATE(
             int column, Calendar cal) throws SqlException {
-        try {
-            return DateTime.dateBytesToTimestamp(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    cal,
-                    charsetName_[column -1]);
-        } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "DATE", "java.sql.Timestamp", e);
-        }
+        return DateTime.dateBytesToTimestamp(dataBuffer_,
+                columnDataPosition_[column - 1],
+                cal,
+                charset_[column -1]);
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIME field.
     private final Timestamp getTimestampFromTIME(
             int column, Calendar cal) throws SqlException {
-        try {
-            return DateTime.timeBytesToTimestamp(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    cal,
-                    charsetName_[column -1]);
-        } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "TIME", "java.sql.Timestamp", e);
-        }
+        return DateTime.timeBytesToTimestamp(dataBuffer_,
+                columnDataPosition_[column - 1],
+                cal,
+                charset_[column -1]);
     }
 
     // Build a JDBC Date object from the DERBY ISO TIMESTAMP field.
     private final Date getDateFromTIMESTAMP(int column, Calendar cal)
             throws SqlException {
-        try {
-            return DateTime.timestampBytesToDate(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    cal,
-                    charsetName_[column -1]);
-        } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "TIMESTAMP", "java.sql.Date", e);
-        }
+        return DateTime.timestampBytesToDate(dataBuffer_,
+                columnDataPosition_[column - 1],
+                cal,
+                charset_[column -1]);
     }
 
     // Build a JDBC Time object from the DERBY ISO TIMESTAMP field.
     private final Time getTimeFromTIMESTAMP(int column, Calendar cal)
             throws SqlException {
-        try {
-            return DateTime.timestampBytesToTime(dataBuffer_,
-                    columnDataPosition_[column - 1],
-                    cal,
-                    charsetName_[column -1]);
-        } catch (UnsupportedEncodingException e) {
-             throw new SqlException(agent_.logWriter_, 
-                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                 "TIMESTAMP", "java.sql.Time", e);
-        }
+        return DateTime.timestampBytesToTime(dataBuffer_,
+                columnDataPosition_[column - 1],
+                cal,
+                charset_[column -1]);
     }
 
     private String getStringFromDATE(int column) throws SqlException {
@@ -1145,24 +1080,12 @@ public abstract class Cursor {
                     return c.getAsciiStreamX();
                 }
             case Types.CHAR:
-                try {
-                    return new ByteArrayInputStream(
-                        getCHAR(column).getBytes("ISO-8859-1"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "CHAR", "java.io.InputStream", e);
-                }
+                return new ByteArrayInputStream(
+                        getCHAR(column).getBytes(ISO_8859_1));
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
-                try {
-                    return new ByteArrayInputStream(
-                        getVARCHAR(column).getBytes("ISO-8859-1"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "VARCHAR/LONGVARCHAR", "java.io.InputStream", e);
-                }
+                return new ByteArrayInputStream(
+                        getVARCHAR(column).getBytes(ISO_8859_1));
             case Types.BINARY:
                 return new ByteArrayInputStream(get_CHAR_FOR_BIT_DATA(column));
             case Types.VARBINARY:
@@ -1195,35 +1118,16 @@ public abstract class Cursor {
             case Types.LONGVARCHAR:
                 return new StringReader(getVARCHAR(column));
             case Types.BINARY:
-                try {
-                    return new InputStreamReader(
-                        new ByteArrayInputStream(
-                            get_CHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-                } catch (UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "BINARY", "java.io.Reader", e);
-                }
+                return new InputStreamReader(
+                    new ByteArrayInputStream(
+                        get_CHAR_FOR_BIT_DATA(column)), UTF_16BE);
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
-                try {
-                    return new InputStreamReader(
-                        new ByteArrayInputStream(
-                            get_VARCHAR_FOR_BIT_DATA(column)), "UTF-16BE");
-                } catch (UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "VARBINARY/LONGVARBINARY", "java.io.Reader", e);
-                }
+                return new InputStreamReader(
+                    new ByteArrayInputStream(
+                        get_VARCHAR_FOR_BIT_DATA(column)), UTF_16BE);
             case Types.BLOB:
-                try {
-                    return new InputStreamReader(getBinaryStream(column),
-                                                         "UTF-16BE");
-                } catch (UnsupportedEncodingException e) {
-                    throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                            "BLOB", "java.io.Reader", e);
-                }
+                return new InputStreamReader(getBinaryStream(column), UTF_16BE);
             default:
                 throw coercionError( "java.io.Reader", column );
             }
@@ -1352,7 +1256,7 @@ public abstract class Cursor {
         columnDataIsNullCache_ = null;
         jdbcTypes_ = null;
         nullable_ = null;
-        charsetName_ = null;
+        charset_ = null;
         this.ccsid_ = null;
         isUpdateDeleteHoleCache_ = null;
         isNull_ = null;

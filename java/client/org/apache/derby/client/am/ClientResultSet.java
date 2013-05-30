@@ -28,6 +28,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -3116,7 +3117,8 @@ public abstract class ClientResultSet implements ResultSet,
                     agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
                 }
                 checkUpdatePreconditions(column, "updateAsciiStream");
-                updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "ISO-8859-1", length));
+                updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(
+                        resultSetMetaData_.types_[column - 1], x, Cursor.ISO_8859_1, length));
             }
         }
         catch ( SqlException se )
@@ -5661,7 +5663,7 @@ public abstract class ClientResultSet implements ResultSet,
                         agent_.crossConverters_.setObjectFromCharacterStream(
                             resultSetMetaData_.types_[columnIndex -1],
                             x,
-                            "ISO-8859-1",
+                            Cursor.ISO_8859_1,
                             CrossConverters.UNKNOWN_LENGTH));
             } catch (SqlException se) {
                 throw se.getSQLException();

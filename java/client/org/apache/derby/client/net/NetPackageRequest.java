@@ -166,30 +166,20 @@ class NetPackageRequest extends NetConnectionRequest {
         return (length > lengthRequiringScldta);
     }
 
-    private byte[] getBytes(String string, String encoding) throws SqlException {
-        try {
-            return string.getBytes(encoding);
-        } catch (Exception e) {
-            throw new SqlException(netAgent_.logWriter_, 
-                new ClientMessageId(SQLState.JAVA_EXCEPTION), 
-                e.getClass().getName(), e.getMessage(), e);
-        }
-    }
-
     private void buildNOCMorNOCS(String string) throws SqlException {
         if (string == null) {
             write2Bytes(0xffff);
         } else {
-            byte[] sqlBytes;
-
             if (netAgent_.typdef_.isCcsidMbcSet()) {
-                sqlBytes = getBytes(string, netAgent_.typdef_.getCcsidMbcEncoding());
+                byte[] sqlBytes =
+                    string.getBytes(netAgent_.typdef_.getCcsidMbcEncoding());
                 write1Byte(0x00);
                 write4Bytes(sqlBytes.length);
                 writeBytes(sqlBytes, sqlBytes.length);
                 write1Byte(0xff);
             } else {
-                sqlBytes = getBytes(string, netAgent_.typdef_.getCcsidSbcEncoding());
+                byte[] sqlBytes =
+                    string.getBytes(netAgent_.typdef_.getCcsidSbcEncoding());
                 write1Byte(0xff);
                 write1Byte(0x00);
                 write4Bytes(sqlBytes.length);

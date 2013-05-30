@@ -22,10 +22,6 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.Sqlca;
-import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.SqlException;
-import java.io.UnsupportedEncodingException;
 import org.apache.derby.client.am.ClientConnection;
 
 class NetSqlca extends Sqlca {
@@ -45,18 +41,10 @@ class NetSqlca extends Sqlca {
     NetSqlca(ClientConnection connection,
             int sqlCode,
             byte[] sqlState,
-            byte[] sqlErrpBytes) throws SqlException {
+            byte[] sqlErrpBytes) {
        super(connection);
        sqlCode_ = sqlCode;
-       try
-       {
-           sqlState_ = bytes2String(sqlState,0,sqlState.length);
-       }catch(UnsupportedEncodingException uee)
-       {
-            throw new SqlException(null, 
-                  new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                       "sqlstate bytes", "SQLSTATE",uee);
-       }
+       sqlState_ = bytes2String(sqlState,0,sqlState.length);
        sqlErrpBytes_ = sqlErrpBytes;
     }
 

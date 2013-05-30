@@ -26,9 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.ByteArrayInputStream;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
+import java.nio.charset.Charset;
 
 /**
  * Create an encoded stream from a <code>Reader</code>.
@@ -45,6 +43,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  */
 public final class EncodedInputStream extends InputStream {
 
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static final Charset UTF_16BE = Charset.forName("UTF-16BE");
+
     /**
      * Create a UTF-8 encoded stream from the given <code>Reader</code>.
      *
@@ -53,7 +54,7 @@ public final class EncodedInputStream extends InputStream {
      */
     public static EncodedInputStream createUTF8Stream(Reader reader) {
         return new EncodedInputStream(reader, 
-                                      "UTF8",
+                                      UTF_8,
                                       BUFFERED_CHAR_LEN,
                                       BUFFERED_CHAR_LEN*3);
     }
@@ -66,7 +67,7 @@ public final class EncodedInputStream extends InputStream {
      */
     static EncodedInputStream createUTF16BEStream(Reader reader) {
         return new EncodedInputStream(reader,
-                                      "UTF-16BE",
+                                      UTF_16BE,
                                       BUFFERED_CHAR_LEN,
                                       BUFFERED_CHAR_LEN*2);
     }
@@ -93,7 +94,7 @@ public final class EncodedInputStream extends InputStream {
      *      holding the encoded bytes
      */
     private EncodedInputStream(Reader reader,
-                               String encoding,
+                               Charset encoding,
                                int charBufferSize,
                                int initialByteBufferSize) {
     
@@ -103,19 +104,9 @@ public final class EncodedInputStream extends InputStream {
         encodedOutputStream_ = new PublicBufferOutputStream(
                 initialByteBufferSize);
         
-        try{
-            encodedStreamWriter_ = new OutputStreamWriter(encodedOutputStream_,
-                                                          encoding);
-            
-        }catch(UnsupportedEncodingException e){
-            // Should never happen. It is up to the caller to ensure the
-            // specified encoding is available.
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT("Unavailable encoding specified: " +
-                        encoding, e);
-            }
-        }
-    
+        encodedStreamWriter_ =
+                new OutputStreamWriter(encodedOutputStream_, encoding);
+
         encodedInputStream_ = suspendMarker;
     
     }

@@ -28,8 +28,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.sql.Clob;
 import java.sql.SQLException;
 
@@ -69,64 +69,51 @@ public class ClientClob extends Lob implements Clob {
     // CTOR for output, when a btc isn't available; the encoding is
     public ClientClob(Agent agent,
                 byte[] unconvertedBytes,
-                String charsetName,
+                Charset charset,
                 int dataOffset) throws SqlException {
 
         this(agent,
              false);
 
-        try {
-            // check for null encoding is needed because the net layer
-            // will no longer throw an exception if the server didn't specify
-            // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
-            // cursor is only required for types which can have mixed or double
-            // byte ccsids.
-            if (charsetName == null) {
-                throw new SqlException(agent.logWriter_,
-                    new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
-            }
-
-            string_ = new String(unconvertedBytes,
-                    dataOffset,
-                    unconvertedBytes.length - dataOffset,
-                    charsetName);
-            setSqlLength(string_.length());
-            dataType_ |= STRING;
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                "byte[]", charsetName + " String", e);
-
+        // check for null encoding is needed because the net layer
+        // will no longer throw an exception if the server didn't specify
+        // a mixed or double byte ccsid (ccsid = 0).  this check for null in the
+        // cursor is only required for types which can have mixed or double
+        // byte ccsids.
+        if (charset == null) {
+            throw new SqlException(agent.logWriter_,
+                new ClientMessageId(SQLState.CHARACTER_CONVERTER_NOT_AVAILABLE));
         }
+
+        string_ = new String(unconvertedBytes,
+                dataOffset,
+                unconvertedBytes.length - dataOffset,
+                charset);
+        setSqlLength(string_.length());
+        dataType_ |= STRING;
     }
 
     // CTOR for ascii/unicode stream input
     //"ISO-8859-1", "UTF-8", or "UnicodeBigUnmarked"
     public ClientClob(Agent agent,
                 InputStream inputStream,
-                String encoding,
-                int length) throws SqlException {
+                Charset encoding,
+                int length) {
 
         this(agent,
              false);
 
         setSqlLength(length);
 
-        if (encoding.equals("ISO-8859-1")) {
+        if (encoding.equals(Cursor.ISO_8859_1)) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
-        } else if (encoding.equals("UTF-8")) { // "UTF-8"
+        } else if (encoding.equals(Cursor.UTF_8)) {
             unicodeStream_ = inputStream;
             dataType_ |= UNICODE_STREAM;
-        } else if (encoding.equals("UnicodeBigUnmarked")) { // "UnicodeBigUnmarked"
-            try {
-                characterStream_ =
-                    new InputStreamReader(inputStream, "UnicodeBigUnmarked");
-            } catch (UnsupportedEncodingException e) {
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                    "UnicodeBigUnmarked", "InputStreamReader", e);
-            }
+        } else if (encoding.equals(Cursor.UTF_16BE)) {
+            characterStream_ =
+                    new InputStreamReader(inputStream, Cursor.UTF_16BE);
             dataType_ |= CHARACTER_STREAM;
             setSqlLength(length / 2);
         }
@@ -145,13 +132,13 @@ public class ClientClob extends Lob implements Clob {
      * @param encoding encoding to use for characters. Only "ISO-8859-1" is
      *      allowed.
      */
-    ClientClob(Agent agent, InputStream inputStream, String encoding)
+    ClientClob(Agent agent, InputStream inputStream, Charset encoding)
             throws SqlException {
 
         this(agent,
              isLayerBStreamingPossible( agent ));
 
-        if (encoding.equals("ISO-8859-1")) {
+        if (encoding.equals(Cursor.ISO_8859_1)) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
         } else {
@@ -975,19 +962,13 @@ public class ClientClob extends Lob implements Clob {
 
     // Return the length of the equivalent UTF-8 string
     // precondition: string_ is not null and dataType_ includes STRING
-    public int getUTF8Length() throws SqlException {
+    public int getUTF8Length() {
         if (utf8String_ != null) {
             return utf8String_.length;
         }
 
-        try {
-            utf8String_ = string_.getBytes("UTF-8");
-            return utf8String_.length;
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                "String", "UTF8 byte[]", e);
-        }
+        utf8String_ = string_.getBytes(Cursor.UTF_8);
+        return utf8String_.length;
     }
 
     /**

@@ -20,7 +20,6 @@
 */
 package org.apache.derby.client.am;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -151,7 +150,7 @@ public class Decimal {
             byte[] buffer,
             int offset,
             int precision,
-            int scale) throws UnsupportedEncodingException {
+            int scale) {
 
         // The byte-length of a packed decimal with precision <code>p</code> is always <code>p/2 + 1</code>
         int length = precision / 2 + 1;
@@ -247,7 +246,7 @@ public class Decimal {
             byte[] buffer,
             int offset,
             int precision,
-            int scale) throws UnsupportedEncodingException {
+            int scale) {
 
         // The byte-length of a packed decimal with precision <code>p</code> is always <code>p/2 + 1</code>
         int length = precision / 2 + 1;
@@ -312,7 +311,7 @@ public class Decimal {
             byte[] buffer,
             int offset,
             int precision,
-            int scale) throws UnsupportedEncodingException {
+            int scale) {
 
         if (precision > 31) {
             // throw an exception here if nibbles is greater than 31

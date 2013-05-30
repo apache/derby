@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.DataTruncation;
 import java.sql.Types;
 import java.util.Locale;
@@ -208,15 +207,8 @@ public abstract class Sqlca {
             return null;
         }
 
-        try {
-            sqlErrp_ = bytes2String(sqlErrpBytes_,
-                    0,
-                    sqlErrpBytes_.length);
-            return sqlErrp_;
-        } catch (UnsupportedEncodingException e) {
-            // leave sqlErrp as null.
-            return null;
-        }
+        sqlErrp_ = bytes2String(sqlErrpBytes_, 0, sqlErrpBytes_.length);
+        return sqlErrp_;
     }
 
     private int[] getSqlErrd() {
@@ -237,12 +229,7 @@ public abstract class Sqlca {
     synchronized public String getSqlWarn() {
         if (sqlWarn_ == null) {
             if (sqlWarnBytes_ != null) {
-                try {
-                    sqlWarn_ =
-                        bytes2String(sqlWarnBytes_, 0, sqlWarnBytes_.length);
-                } catch (UnsupportedEncodingException e) {
-                    sqlWarn_ = elevenBlanks;
-                }
+                sqlWarn_ = bytes2String(sqlWarnBytes_, 0, sqlWarnBytes_.length);
             } else {
                 sqlWarn_ = elevenBlanks;
             }
@@ -445,30 +432,25 @@ public abstract class Sqlca {
             return;
         }
 
-        try {
-            // tokenize and convert tokenBytes
-            String fullString = bytes2String(tokenBytes, 0, length);
-            String[] tokens = fullString.split("\\u0014{3}");
-            String[] states = new String[tokens.length];
-            states[0] = getSqlState();
-            for (int i = 1; i < tokens.length; i++) {
-                // All but the first message are preceded by the SQL state
-                // (five characters) and a colon. Extract the SQL state and
-                // clean up the token. See
-                // DRDAConnThread.buildTokenizedSqlerrmc() for more details.
-                int colonpos = tokens[i].indexOf(":");
-                states[i] = tokens[i].substring(0, colonpos);
-                tokens[i] = tokens[i].substring(colonpos + 1);
-            }
-            sqlStates_ = states;
-            sqlErrmcMessages_ = tokens;
-        } catch (UnsupportedEncodingException e) {
-            /* do nothing, the arrays continue to be null */
+        // tokenize and convert tokenBytes
+        String fullString = bytes2String(tokenBytes, 0, length);
+        String[] tokens = fullString.split("\\u0014{3}");
+        String[] states = new String[tokens.length];
+        states[0] = getSqlState();
+        for (int i = 1; i < tokens.length; i++) {
+            // All but the first message are preceded by the SQL state
+            // (five characters) and a colon. Extract the SQL state and
+            // clean up the token. See
+            // DRDAConnThread.buildTokenizedSqlerrmc() for more details.
+            int colonpos = tokens[i].indexOf(":");
+            states[i] = tokens[i].substring(0, colonpos);
+            tokens[i] = tokens[i].substring(colonpos + 1);
         }
+        sqlStates_ = states;
+        sqlErrmcMessages_ = tokens;
     }
 
-    protected String bytes2String(byte[] bytes, int offset, int length)
-            throws UnsupportedEncodingException {
+    protected String bytes2String(byte[] bytes, int offset, int length) {
         // Network server uses utf8 encoding
         return new String(bytes, offset, length, Typdef.UTF8ENCODING);
     }

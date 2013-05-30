@@ -24,7 +24,7 @@ package org.apache.derby.client.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import org.apache.derby.client.am.Agent;
 
@@ -632,20 +632,11 @@ class Reply {
         return (byte) (buffer_[pos_++] & 0xff);
     }
 
-    final String readString(int length, String encoding) throws DisconnectException {
+    final String readString(int length, Charset encoding)
+            throws DisconnectException {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
-        String s = null;
-
-        try {
-            s = new String(buffer_, pos_, length, encoding);
-        } catch (UnsupportedEncodingException e) {
-            agent_.accumulateChainBreakingReadExceptionAndThrow(
-                new DisconnectException(agent_,
-                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED), 
-                    e));
-        }
-
+        String s = new String(buffer_, pos_, length, encoding);
         pos_ += length;
         return s;
     }
@@ -1216,17 +1207,8 @@ class Reply {
         }
     }
 
-    final String readFastString(int length, String encoding) throws DisconnectException {
-        String s = null;
-
-        try {
-            s = new String(buffer_, pos_, length, encoding);
-        } catch (UnsupportedEncodingException e) {
-            agent_.accumulateChainBreakingReadExceptionAndThrow(
-                new DisconnectException(agent_,
-                    new ClientMessageId(SQLState.NET_ENCODING_NOT_SUPPORTED),
-                    e));
-        }
+    final String readFastString(int length, Charset encoding) {
+        String s = new String(buffer_, pos_, length, encoding);
         pos_ += length;
         return s;
     }

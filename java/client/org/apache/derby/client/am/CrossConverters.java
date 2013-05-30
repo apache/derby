@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -807,7 +807,7 @@ final class CrossConverters {
     final Object setObjectFromCharacterStream(
             int targetType,
             InputStream source,
-            String encoding,
+            Charset encoding,
             int length) throws SqlException {
 
         switch (targetType) {
@@ -835,10 +835,9 @@ final class CrossConverters {
     // create a String by reading all of the bytes from inputStream, applying encoding
     private String setStringFromStream(
             InputStream is,
-            String encoding,
+            Charset encoding,
             int length) throws SqlException {
 
-        try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             int totalRead = 0;
 
@@ -862,11 +861,6 @@ final class CrossConverters {
             }
 
             return new String(baos.toByteArray(), encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent_.logWriter_,
-                new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                    "java.io.InputStream", "String", e);
-        }
     }
 
     // Convert from Blob source to target type

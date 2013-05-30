@@ -3290,7 +3290,7 @@ class NetConnectionReply extends Reply
                 case CodePoint.PBSD_SCHEMA:
                     netAgent_.netConnection_.
                         completeInitialPiggyBackSchema
-                            (readString(getDdmLength(), "UTF-8"));
+                            (readString(getDdmLength(), Typdef.UTF8ENCODING));
                     break;
                 default:
                     parseCommonError(peekCP);
@@ -3319,7 +3319,7 @@ class NetConnectionReply extends Reply
             case CodePoint.PBSD_SCHEMA:
                 netAgent_.netConnection_.
                     completePiggyBackSchema
-                    (readString(getDdmLength(), "UTF-8"));
+                    (readString(getDdmLength(), Typdef.UTF8ENCODING));
                 break;
             default:
                 parseCommonError(peekCP);

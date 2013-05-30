@@ -36,10 +36,10 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.util.Hashtable;
 
 
@@ -1297,44 +1297,25 @@ class Request {
     }
 
     final void writeDate(DateTimeValue date) throws SqlException {
-        try
-        {
-            ensureLength(10);
-            DateTime.dateToDateBytes(buffer.array(), buffer.position(), date);
-            buffer.position(buffer.position() + 10);
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(netAgent_.logWriter_, 
-                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                    "java.sql.Date", "DATE", e);
-        }
+        ensureLength(10);
+        DateTime.dateToDateBytes(buffer.array(), buffer.position(), date);
+        buffer.position(buffer.position() + 10);
     }
 
-    final void writeTime(DateTimeValue time) throws SqlException {
-        try{
-            ensureLength(8);
-            DateTime.timeToTimeBytes(buffer.array(), buffer.position(), time);
-            buffer.position(buffer.position() + 8);
-        } catch(UnsupportedEncodingException e) {
-            throw new SqlException(netAgent_.logWriter_, 
-                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                    "java.sql.Time", "TIME", e);
-      }
+    final void writeTime(DateTimeValue time) {
+        ensureLength(8);
+        DateTime.timeToTimeBytes(buffer.array(), buffer.position(), time);
+        buffer.position(buffer.position() + 8);
     }
 
     final void writeTimestamp(DateTimeValue timestamp) throws SqlException {
-        try{
-            boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
-            int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );
-            ensureLength(length);
-            DateTime.timestampToTimestampBytes(
-                    buffer.array(), buffer.position(),
-                    timestamp, supportsTimestampNanoseconds);
-            buffer.position(buffer.position() + length);
-        }catch(UnsupportedEncodingException e) {
-            throw new SqlException(netAgent_.logWriter_,  
-                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                    "java.sql.Timestamp", "TIMESTAMP", e);
-        }
+        boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
+        int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );
+        ensureLength(length);
+        DateTime.timestampToTimestampBytes(
+                buffer.array(), buffer.position(),
+                timestamp, supportsTimestampNanoseconds);
+        buffer.position(buffer.position() + length);
     }
 
     // insert a java boolean into the buffer.  the boolean is written
@@ -1348,15 +1329,8 @@ class Request {
     // should this throw SqlException
     // Will write a varchar mixed or single
     //  this was writeLDString
-    final void writeSingleorMixedCcsidLDString(String s, String encoding) throws SqlException {
-        byte[] b;
-        try {
-            b = s.getBytes(encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(netAgent_.logWriter_,  
-                    new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                    "String", "byte", e);
-        }
+    final void writeSingleorMixedCcsidLDString(String s, Charset encoding) throws SqlException {
+        byte[] b = s.getBytes(encoding);
         if (b.length > 0x7FFF) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_STRING_TOO_LONG),

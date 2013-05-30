@@ -21,7 +21,6 @@
 package org.apache.derby.client.net;
 
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -1221,34 +1220,25 @@ class NetStatementRequest extends NetPackageRequest
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                        ByteArrayInputStream bais = null;
-                        byte[] ba = null;
-                        try {
-                            ba = s.getBytes("UTF-8");
-                            bais = new ByteArrayInputStream(ba);
-                            ClientClob c = new ClientClob(
-                                netAgent_, bais, "UTF-8", ba.length);
-                            // inputRow[i] = c;
-                            // Place the new Lob in the promototedParameter_ collection for
-                            // NetStatementRequest use
-                            promototedParameters_.put(i, c);
-                            
-                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                        byte[] ba = s.getBytes(Typdef.UTF8ENCODING);
+                        ByteArrayInputStream bais = new ByteArrayInputStream(ba);
+                        ClientClob c = new ClientClob(
+                            netAgent_, bais, Typdef.UTF8ENCODING, ba.length);
+                        // inputRow[i] = c;
+                        // Place the new Lob in the promototedParameter_ collection for
+                        // NetStatementRequest use
+                        promototedParameters_.put(i, c);
 
-                            if( c.willBeLayerBStreamed() ){
-                                
-                                //Correspond to totalLength 0 as default length for unknown
-                                lidAndLengths[i][1] = 0x8002;
-                                
-                            }else {
-                                lidAndLengths[i][1] = buildPlaceholderLength(c.length());
-                                
-                            }
-                            
-                        } catch (UnsupportedEncodingException e) {
-                            throw new SqlException(netAgent_.logWriter_, 
-                                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                                "byte array", "Clob", e);
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+
+                        if( c.willBeLayerBStreamed() ){
+
+                            //Correspond to totalLength 0 as default length for unknown
+                            lidAndLengths[i][1] = 0x8002;
+
+                        }else {
+                            lidAndLengths[i][1] = buildPlaceholderLength(c.length());
+
                         }
                     }
                     break;
@@ -1369,26 +1359,18 @@ class NetStatementRequest extends NetPackageRequest
                         lidAndLengths[i][1] = 32767;
                     } else {
                         // Flow the data as CLOB data if the data too large to for LONGVARCHAR
-                        ByteArrayInputStream bais = null;
-                        byte[] ba = null;
-                        try {
-                            ba = s.getBytes("UTF-8");
-                            bais = new ByteArrayInputStream(ba);
-                            ClientClob c = new ClientClob(
-                                netAgent_, bais, "UTF-8", ba.length);
+                        byte[] ba = s.getBytes(Typdef.UTF8ENCODING);
+                        ByteArrayInputStream bais = new ByteArrayInputStream(ba);
+                        ClientClob c = new ClientClob(
+                            netAgent_, bais, Typdef.UTF8ENCODING, ba.length);
 
-                            // inputRow[i] = c;
-                            // Place the new Lob in the promototedParameter_ collection for
-                            // NetStatementRequest use
-                            promototedParameters_.put(i, c);
+                        // inputRow[i] = c;
+                        // Place the new Lob in the promototedParameter_ collection for
+                        // NetStatementRequest use
+                        promototedParameters_.put(i, c);
 
-                            lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                            lidAndLengths[i][1] = buildPlaceholderLength(c.length());
-                        } catch (UnsupportedEncodingException e) {
-                            throw new SqlException(netAgent_.logWriter_, 
-                                new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
-                                "byte array", "Clob");
-                        }
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
+                        lidAndLengths[i][1] = buildPlaceholderLength(c.length());
                     }
                     break;
                 case Types.BINARY:
