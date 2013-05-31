@@ -21,12 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.InputStreamReader;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Types;
 
 import junit.framework.Test;
@@ -37,6 +34,7 @@ import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -78,18 +76,27 @@ public class XMLBindingTest extends BaseJDBCTestCase {
              * database before the embedded and client suites.  This ensures
              * that we do not remove the objects created by XBindTestSetup.
              */
-            suite.addTest(
-                TestConfiguration.defaultSuite(XMLBindingTest.class, false));
+            Test test =
+                TestConfiguration.defaultSuite(XMLBindingTest.class, false);
 
-            XBindTestSetup wrapper = new XBindTestSetup(suite);
+            test = new XBindTestSetup(test);
 
             /* XML parser needs to read "personal.dtd" for schema-based
              * insertion, so copy it to user directory.
              */
-            return new SupportFilesSetup(wrapper,
+            test = new SupportFilesSetup(test,
                 new String [] {
                     "functionTests/tests/lang/xmlTestFiles/personal.dtd"
                 });
+
+            // JEP 185 (http://openjdk.java.net/jeps/185) in Java SE 8 added
+            // restrictions on access to external resources. This system
+            // property loosens the restriction so that the XML parser is
+            // allowed to read the DTD.
+            test = SystemPropertyTestSetup.singleProperty(
+                    test, "javax.xml.accessExternalDTD", "file");
+
+            suite.addTest(test);
         }
 
         return suite;
@@ -266,8 +273,8 @@ public class XMLBindingTest extends BaseJDBCTestCase {
      */
     private static class XBindTestSetup extends BaseJDBCTestSetup
     {
-        public XBindTestSetup(TestSuite tSuite) {
-            super(tSuite);
+        public XBindTestSetup(Test test) {
+            super(test);
         }
 
         /**
