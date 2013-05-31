@@ -2804,7 +2804,33 @@ public class FromBaseTable extends FromTable
 									FromList fromList)
 								throws StandardException
 	{
-		/* Generate the referenced table map */
+        //
+        // We're done with binding, so we should know which columns
+        // are referenced. We check to see if SYSUSERS.PASSWORD is referenced.
+        // Even the DBO is not allowed to SELECT that column.
+        // This is to prevent us from instantiating the password as a
+        // String. See DERBY-866.
+        // We do this check before optimization because the optimizer may
+        // change the result column list as it experiments with different access paths.
+        // At preprocess() time, the result column list should be the columns in the base
+        // table.
+        //
+        if ( authorizeSYSUSERS )
+        {
+            int passwordColNum = SYSUSERSRowFactory.PASSWORD_COL_NUM;
+
+            FormatableBitSet    refCols = resultColumns.getReferencedFormatableBitSet( false, true, false );
+
+            if (
+                (refCols.getLength() >= passwordColNum ) && refCols.isSet( passwordColNum - 1 )
+               )
+            {
+                throw StandardException.newException
+                    ( SQLState.HIDDEN_COLUMN, SYSUSERSRowFactory.TABLE_NAME, SYSUSERSRowFactory.PASSWORD_COL_NAME );
+            }
+        }
+        
+        /* Generate the referenced table map */
 		referencedTableMap = new JBitSet(numTables);
 		referencedTableMap.set(tableNumber);
 
@@ -3279,31 +3305,7 @@ public class FromBaseTable extends FromTable
 	public void generate(ActivationClassBuilder acb,
 								MethodBuilder mb)
 							throws StandardException
-	{
-        //
-        // By now the map of referenced columns has been filled in.
-        // We check to see if SYSUSERS.PASSWORD is referenced.
-        // Even the DBO is not allowed to SELECT that column.
-        // This is to prevent us from instantiating the password as a
-        // String. The char[] inside the String can hang around, unzeroed
-        // and be read by a memory-sniffer. See DERBY-866.
-        //
-        if ( authorizeSYSUSERS )
-        {
-            int passwordColNum = SYSUSERSRowFactory.PASSWORD_COL_NUM;
-            
-            if (
-                ( referencedCols == null ) || // select * from sys.sysusers results in a null referecedCols
-                (
-                 (referencedCols.getLength() >= passwordColNum ) && referencedCols.isSet( passwordColNum - 1 )
-                )
-               )
-            {
-                throw StandardException.newException
-                    ( SQLState.HIDDEN_COLUMN, SYSUSERSRowFactory.TABLE_NAME, SYSUSERSRowFactory.PASSWORD_COL_NAME );
-            }
-        }
-        
+	{        
 		generateResultSet( acb, mb );
 
 		/*

@@ -188,6 +188,9 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "create view v2 as select username, hashingscheme, lastmodified from sys.sysusers" );
         if ( authorizationIsOn() ) { goodStatement( dboConnection, "grant select on v2 to public" ); }
 
+        goodStatement( dboConnection, "create view v3 as select username, hashingscheme, lastmodified from sys.sysusers where password is null" );
+        if ( authorizationIsOn() ) { goodStatement( dboConnection, "grant select on v3 to public" ); }
+
         vetDBO_OKProbes( dboConnection, true );
         vetDBO_OKProbes( janetConnection, !authorizationIsOn() );
 
@@ -202,6 +205,8 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         vetUserProbes( conn, shouldSucceed, "select count(*) from sys.sysusers", ONLY_DBO );
         vetUserProbes( conn, shouldSucceed, "select username, hashingscheme, lastmodified from sys.sysusers", ONLY_DBO );
         vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers where username = 'FRED'", ONLY_DBO );
 
         // can't use views to subvert authorization checks
         vetUserProbes( conn, shouldSucceed, "select count(*) from test_dbo.v2", ONLY_DBO );
@@ -218,6 +223,8 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         vetUserProbes( conn, shouldSucceed, "select password from sys.sysusers", expectedSQLState );
         vetUserProbes( conn, shouldSucceed, "select username, password from sys.sysusers", expectedSQLState );
         vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers where password = 'foo'", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select username, lastmodified from sys.sysusers where password is not null", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select * from test_dbo.v3", expectedSQLState );
     }
     private void    vetUserProbes
         ( Connection conn, boolean shouldSucceed, String query, String expectedSQLState )
