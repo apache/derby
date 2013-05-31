@@ -29,6 +29,9 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 import java.io.PrintStream;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -66,7 +69,7 @@ public class AutoloadedDriver implements Driver
 	
 
     // This is the driver that memorizes the autoloadeddriver (DERBY-2905)
-    private static Driver _autoloadedDriver;
+    private static AutoloadedDriver _autoloadedDriver;
 
 	//
 	// This is the driver that's specific to the JDBC level we're running at.
@@ -260,20 +263,39 @@ public class AutoloadedDriver implements Driver
         try {
             // deregister is false if user set deregister=false attribute (DERBY-2905)
             if (InternalDriver.getDeregister() && _autoloadedDriver != null) {
-                DriverManager.deregisterDriver(_autoloadedDriver);
+                deregisterDriver(_autoloadedDriver);
                 _autoloadedDriver = null;
-            } else {
-                DriverManager.deregisterDriver(_driverModule);
-                //DERBY 5085, need to restore the default value
-                InternalDriver.setDeregister(true);
             }
+
+            // DERBY-5085, need to restore the default value
+            InternalDriver.setDeregister(true);
+
             _driverModule = null;
         } catch (SQLException e) {
             if (SanityManager.DEBUG)
                 SanityManager.THROWASSERT(e);
         }
 	}
-	
+
+    private static void deregisterDriver(final AutoloadedDriver driver)
+            throws SQLException {
+        // DERBY-6224: DriverManager.deregisterDriver() requires a special
+        // permission in JDBC 4.2 and later. Call it in a privileged block
+        // so that the permission doesn't have to be granted to code that
+        // invokes engine shutdown.
+        try {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                public Void run() throws SQLException {
+                    // Requires SQLPermission("deregisterDriver")
+                    DriverManager.deregisterDriver(driver);
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            throw (SQLException) pae.getCause();
+        }
+    }
 
 	/*
 	** Return true if the engine has been booted.

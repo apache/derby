@@ -136,6 +136,10 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 
   // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
   permission java.sql.SQLPermission "callAbort";
+
+  // This permission is needed to call DriverManager.deregisterDriver()
+  // on Java SE 8 and later.
+  permission java.sql.SQLPermission "deregisterDriver";
 };
 
 //
@@ -364,6 +368,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.lang.RuntimePermission "accessUserInformation";
   permission java.lang.RuntimePermission "getFileStoreAttributes";
 
+  // This permission is needed to call DriverManager.deregisterDriver()
+  // on Java SE 8 and later.
+  permission java.sql.SQLPermission "deregisterDriver";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
