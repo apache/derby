@@ -21,7 +21,10 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derby.tools.ij;
+
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 
 
 import java.sql.*;
@@ -261,7 +264,8 @@ public class parameterMapping {
 			// make the initial connection.
 			 ij.getPropertyArg(args);
 			 Connection conn = ij.startJBMS();
-
+			 testDERBY6237(conn);
+			 
 			 conn.setAutoCommit(false);
 
 			 //create simple a table with BLOB and CLOB thta
@@ -2965,4 +2969,82 @@ public class parameterMapping {
 
 		return "0x" + Integer.toHexString(((int) b1) & 0xff) + "," + "0x" + Integer.toHexString(((int) b2) & 0xff);
 	}
+	
+	//numberOfRowsToUpdate - value 1 or 2
+	//testVariation - if 1 then update CLOB with short data
+	//                if 2 then update CLOB with large data
+	private static void helperTestDerby6237(int numberOfRowsToUpdate, 
+            int testVariation,
+            Connection conn) throws Exception
+	{
+        CharAlphabet a1 = CharAlphabet.singleChar('a');
+
+        PreparedStatement ps = conn.prepareStatement(
+            "UPDATE TestUpdateCharStream SET c3 = ?, " + 
+            "c2 = c2 + 1 WHERE c1 IN (?, ?)");
+
+        switch (testVariation) {
+        case 1 :
+        	//test short data
+            ps.setCharacterStream(1,
+                    new LoopingAlphabetReader(50, a1), 50);
+            break;
+        case 2 :
+        	//test large data
+            ps.setCharacterStream(1,
+                    new LoopingAlphabetReader(50000, a1), 50000);
+            break;
+        }
+        
+        //First value in IN clause is getting set to 'AAAAA'
+        // Using setCharacterStream on VARCHAR to set the value
+        ps.setCharacterStream(2, new CharArrayReader("AAAAA".toCharArray()), 5);
+        
+        if (numberOfRowsToUpdate == 1 ) {
+            //Second value in IN clause is also getting set to 'AAAAA', which 
+            // means prepared statement will update only one row
+            ps.setObject(3, "AAAAA", Types.VARCHAR);
+        } else {
+            //Second value in IN clause is also getting set to 'EEEEE', which 
+            // means prepared statement will update two rows
+            ps.setObject(3, "EEEEE", Types.VARCHAR);
+        }
+        	
+        ps.execute();
+        ps.close();
+
+    }
+
+    /**
+     * DERBY-6237(PreparedStatement.execute() fails starting 10.2 when 
+     *  multiple rows are updated and 
+     *  PreparedStatement.setCharacterStream(int, Reader, int) is used) 
+     * In 10.1, setCharacterStream to update CLOB and varchar columns
+     *  work even when update is going to update more than one row
+     * @throws Exception
+     */
+	private static void testDERBY6237(Connection conn) throws Exception
+	{
+        Statement s = conn.createStatement();
+        s.executeUpdate("CREATE TABLE TestUpdateCharStream ("+
+                "c1 VARCHAR(64) NOT NULL, " +
+          	    "c2 INTEGER, " +
+                "c3 CLOB)"); 
+        s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
+                "VALUES ('AAAAA', 1)");
+        s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
+                "VALUES ('EEEEE', 1)");
+        
+        //update only one row and use short data
+        helperTestDerby6237(1,1,conn);
+        //update only one row and use large data
+        helperTestDerby6237(1,2,conn);
+        //update two rows and use short data
+        helperTestDerby6237(2,1,conn);
+        //update two rows and use large data
+        helperTestDerby6237(2,2,conn);
+        s.execute("DROP TABLE TestUpdateCharStream");
+        s.close();
+    }
+
 }
