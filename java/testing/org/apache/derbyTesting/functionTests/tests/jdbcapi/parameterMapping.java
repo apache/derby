@@ -28,6 +28,7 @@ import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 
 
 import java.sql.*;
+import java.util.Arrays;
 import java.math.*;
 import java.io.*;
 
@@ -2979,6 +2980,7 @@ public class parameterMapping {
 	{
         CharAlphabet a1 = CharAlphabet.singleChar('a');
 
+        //Following will update one or 2 rows depending on the 1st param
         PreparedStatement ps = conn.prepareStatement(
             "UPDATE TestUpdateCharStream SET c3 = ?, " + 
             "c2 = c2 + 1 WHERE c1 IN (?, ?)");
@@ -3008,12 +3010,63 @@ public class parameterMapping {
             //Second value in IN clause is also getting set to 'EEEEE', which 
             // means prepared statement will update two rows
             ps.setObject(3, "EEEEE", Types.VARCHAR);
-        }
-        	
+        }        	
         ps.execute();
+        
+        //verify updated data
+        ResultSet rs;
+        ps = conn.prepareStatement(
+                "select c3 from TestUpdateCharStream " + 
+                "WHERE c1 IN (?, ?)");
+        ps.setCharacterStream(1, new CharArrayReader("AAAAA".toCharArray()), 5);
+        if (numberOfRowsToUpdate == 1 ) {
+            ps.setObject(2, "AAAAA", Types.VARCHAR);
+        } else {
+            ps.setObject(2, "EEEEE", Types.VARCHAR);
+        }
+    	rs = ps.executeQuery();
+    	char[] c;
+    	if (testVariation == 1){
+        	//we are here to test short data 
+            c = new char[50];
+            Arrays.fill(c, 'a'); 
+    	} else {
+        	//we are here to test large data 
+            c = new char[50000];
+            Arrays.fill(c, 'a');         		
+    	}
+    	for (int i=0;i<numberOfRowsToUpdate;i++) {
+        	rs.next();
+        	if (!compareClobReader2CharArray(c,rs.getCharacterStream(1))) {
+    			System.out.println("FAIL: data should have matched");
+    			rs.close();
+    			ps.close();
+    			return;
+        	}
+    	}
+    	rs.close();
         ps.close();
 
     }
+
+	private static boolean compareClobReader2CharArray
+		(char[] cArray, Reader charReader) throws Exception {
+		char[] clobChars = new char[cArray.length];
+
+		int readChars = 0;
+		int totalCharsRead = 0;
+
+		do {
+			readChars = charReader.read(clobChars, totalCharsRead, cArray.length - totalCharsRead);
+			if (readChars != -1) 
+				totalCharsRead += readChars;
+		} while (readChars != -1 && totalCharsRead < cArray.length);
+		charReader.close();
+		if (!java.util.Arrays.equals(cArray, clobChars))
+			return false;
+
+		return true;
+	}
 
     /**
      * DERBY-6237(PreparedStatement.execute() fails starting 10.2 when 
