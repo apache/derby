@@ -52,7 +52,7 @@ public interface Property {
 
 	/**
 		By convention properties that must not be stored any persistent form of
-		service properties start with this prefix.
+		service properties start with this prefix. These properties are not documented.
 	*/
 	public static final String PROPERTY_RUNTIME_PREFIX = "derby.__rt.";
 
@@ -326,6 +326,8 @@ public interface Property {
 
 	/**
 		internal use only, passes the database classpathinto the class manager
+
+        Undocumented.
 	*/
 	String BOOT_DB_CLASSPATH = PROPERTY_RUNTIME_PREFIX + "database.classpath";
 
@@ -359,9 +361,15 @@ public interface Property {
 	*/
 
     /**
+     * <p>
      * Creation of an access factory should be done with no logging.
 	 * This is a run-time property that should not make it to disk
 	 * in the service.properties file.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      **/
 	public static final String CREATE_WITH_NO_LOG =
 		PROPERTY_RUNTIME_PREFIX + "storage.createWithNoLog";
@@ -489,7 +497,11 @@ public interface Property {
      * When set, the store system will use sync() call on the log at 
      * commit instead of doing  a write sync on all writes to  the log;
 	 * even if the write sync mode (rws) is supported in the JVM. 
-     * <p>
+     * </p>
+     *
+	 * <p>
+	 * Undocumented.
+     * </p>
      *
      **/
 	public static final String FILESYNC_TRANSACTION_LOG = 
@@ -609,10 +621,14 @@ public interface Property {
 	String	LANG_PERMISSIONS_CACHE_SIZE = "derby.language.permissionsCacheSize";
 	int		LANG_PERMISSIONS_CACHE_SIZE_DEFAULT = 64;
 	/**
+     * <p>
 	 * The size of the stored prepared statment descriptor cache 
 	 * used by the data dictionary.  Database.  Static.
-	 * <p>
-	 * Externally visible.
+	 * </p>
+     *
+     * <p>
+	 * Externally visible but undocumented.
+	 * </p>
 	 */
 	String	LANG_SPS_CACHE_SIZE = "derby.language.spsCacheSize";
 	int		LANG_SPS_CACHE_SIZE_DEFAULT =32;
@@ -621,7 +637,7 @@ public interface Property {
 	 * The size of the sequence generator cache 
 	 * used by the data dictionary.  Database.  Static.
 	 * <p>
-	 * Externally visible.
+	 * Externally visible but undocumented.
 	 */
 	String	LANG_SEQGEN_CACHE_SIZE = "derby.language.sequenceGeneratorCacheSize";
 	int		LANG_SEQGEN_CACHE_SIZE_DEFAULT =32;
@@ -643,7 +659,7 @@ public interface Property {
 	  be executed before checking whether its plan is stale.  Database.
 	  Dynamic.
 	  <P>
-	  Externally visible.
+	  Externally visible but undocumented.
 	 */
 	String LANGUAGE_STALE_PLAN_CHECK_INTERVAL =
 								"derby.language.stalePlanCheckInterval";
@@ -681,47 +697,91 @@ public interface Property {
     String STORAGE_AUTO_INDEX_STATS_TRACING = "derby.storage.indexStats.trace";
 
     /**
+     * <p>
      * Specifies the lower threshold for the number of rows in a table before
      * creating statistics for the associated indexes.
+     * </p>
+     *
      * <p>
      * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD =
             "derby.storage.indexStats.debug.createThreshold";
     int STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD_DEFAULT = 100;
 
     /**
+     * <p>
      * Specifies the lower threshold for the absolute difference between the
      * row estimate for the table and the row estimate for the index before
      * creating statistics for the associated indexes.
+     * </p>
+     *
      * <p>
      * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD =
             "derby.storage.indexStats.debug.absdiffThreshold";
     int STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD_DEFAULT = 1000;
 
     /**
+     * <p>
      * Specifies the lower threshold for the logarithmical (natural logarithm e)
      * difference between the row estimate for the table and the row estimate
      * for the index before creating statistics for the associated indexes.
+     * </p>
+     *
      * <p>
      * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD =
             "derby.storage.indexStats.debug.lndiffThreshold";
     double STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD_DEFAULT = 1.0;
 
     /**
+     * <p>
      * Specifies the size of the work unit queue in the index statistics update
      * daemon.
+     * </p>
+     *
+     * <p>
+     * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE =
             "derby.storage.indexStats.debug.queueSize";
     int STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE_DEFAULT = 20;
 
     /**
+     * <p>
      * Specifies whether to revert to 10.8 behavior and keep disposable stats.
+     * </p>
+     *
+     * <p>
+     * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_KEEP_DISPOSABLE_STATS =
             "derby.storage.indexStats.debug.keepDisposableStats";
@@ -790,6 +850,8 @@ public interface Property {
 								"derby.authentication.provider";
 
 	// This is the user property used by Derby and LDAP schemes
+    //
+    // Should not be documented any longer.
 	public static final String USER_PROPERTY_PREFIX = "derby.user.";
 
 	// These are the different built-in providers Derby supports
@@ -831,8 +893,10 @@ public interface Property {
     
 
     /**
+     * <p>
      * Property that specifies the name of the hash algorithm to use with
      * the configurable hash authentication scheme.
+     * </p>
      */
     public static final String AUTHENTICATION_BUILTIN_ALGORITHM =
             "derby.authentication.builtin.algorithm";
@@ -853,9 +917,11 @@ public interface Property {
             "SHA-1";
 
     /**
+     * <p>
      * Property that specifies the number of bytes with random salt to use
      * when hashing credentials using the configurable hash authentication
      * scheme.
+     * </p>
      */
     public static final String AUTHENTICATION_BUILTIN_SALT_LENGTH =
             "derby.authentication.builtin.saltLength";
@@ -866,8 +932,10 @@ public interface Property {
     public static final int AUTHENTICATION_BUILTIN_SALT_LENGTH_DEFAULT = 16;
 
     /**
+     * <p>
      * Property that specifies the number of times to apply the hash
      * function in the configurable hash authentication scheme.
+     * </p>
      */
     public static final String AUTHENTICATION_BUILTIN_ITERATIONS =
             "derby.authentication.builtin.iterations";
@@ -883,21 +951,22 @@ public interface Property {
 
 	/**
 		Property name for specifying log switch interval
+
+        Undocumented.
 	 */
 	public static final String LOG_SWITCH_INTERVAL = "derby.storage.logSwitchInterval";
 
 	/**
 		Property name for specifying checkpoint interval
+
+        Undocumented.
 	 */
 	public static final String CHECKPOINT_INTERVAL = "derby.storage.checkpointInterval";
 
 	/**
-		Property name for specifying log archival location
-	 */
-	public static final String LOG_ARCHIVAL_DIRECTORY = "derby.storage.logArchive";
-
-	/**
 		Property name for specifying log Buffer Size
+
+        Undocumented.
 	 */
 	public static final String LOG_BUFFER_SIZE = "derby.storage.logBufferSize";
 	
@@ -924,9 +993,15 @@ public interface Property {
 	*/
 	
 	/**
+     * <p>
 	 * Allow database upgrade during alpha/beta time. Only intended
 	 * to be used to allow Derby developers to test their upgrade code.
 	 * Only supported as a system/application (derby.properties) property.
+     * </p>
+     *
+     * <p>
+     * Undocumented.
+     * </p>
 	 */
 	String ALPHA_BETA_ALLOW_UPGRADE = "derby.database.allowPreReleaseUpgrade";
 	    
@@ -958,31 +1033,57 @@ public interface Property {
 	public static final String HTTP_DB_FILE_NAME =   "db2j.http.file.name";
 
     /**
+     * <p>
      * derby.drda.startNetworkServer
-     *<BR>
+     * </p>
+     *
+     *<p>
      * If true then we will attempt to start a DRDA network server when Derby 
      * boots, turning the current JVM into a server.
-     *<BR>
+     *</p>
+     *
+     * <p>
      * Default: false
+     * </p>
      */
     public static final String START_DRDA = "derby.drda.startNetworkServer";
 
     /**
+     * <p>
      * derby.drda.logConnections
-     *<BR>
+     *</p>
+     *
+     * <p>
      * Indicates whether to log connections and disconnections.
-     *<BR>
+     *</p>
+     *
+     * <p>
      * Default: false
+     * </p>
      */
 	public final static String DRDA_PROP_LOGCONNECTIONS = "derby.drda.logConnections";
+
     /**
+     * <p>
      * derby.drda.traceAll
-     *<BR>
+     *</p>
+     *
+     * <p>
      * Turns tracing on for all sessions.
-     *<BR>
+     *</p>
      * Default: false
+     *
+     * <p>
+     * Default: false
+     * </p>
      */
 	public final static String DRDA_PROP_TRACEALL = "derby.drda.traceAll";
+
+    /**
+     * <p>
+     * derby.drda.trace
+     *</p>
+     */
 	public final static String DRDA_PROP_TRACE = "derby.drda.trace";
 
     /**
@@ -1066,6 +1167,7 @@ public interface Property {
 	public static final String SERVICE_PROTOCOL = "derby.serviceProtocol";
 	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
+    // Undocumented
 	public static final String COLLATION = "derby.database.collation";
 	// These are the six possible values for collation type if the collation
 	// derivation is not NONE. If collation derivation is NONE, then collation
