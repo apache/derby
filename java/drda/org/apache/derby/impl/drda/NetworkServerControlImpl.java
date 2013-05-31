@@ -904,7 +904,14 @@ public final class NetworkServerControlImpl {
                         if (passwordArg != null) {
                             p.setProperty("password", passwordArg);
                         }
-                        cloudscapeDriver.connect("jdbc:derby:;shutdown=true", p);
+                        // DERBY-6224: DriverManager.deregisterDriver() requires
+                        // an extra permission in JDBC 4.2 and later. Invoke
+                        // system shutdown with deregister=false to avoid the
+                        // need for the extre permission in the default server
+                        // policy. Since the JVM is about to terminate, we don't
+                        // care whether the JDBC driver is deregistered.
+                        cloudscapeDriver.connect(
+                            "jdbc:derby:;shutdown=true;deregister=false", p);
                     }
                 } catch (SQLException sqle) {
                     // If we can't shutdown Derby, perhaps, authentication has
