@@ -68,6 +68,31 @@ public class SystemPropertyTestSetup extends TestSetup {
 		this.newValues = newValues;
 		this.staticProperties = false;
 	}
+
+    /**
+     * Decorate a test so that it sets a single system property in
+     * {@code setUp()} and resets it in {@code tearDown()}. The engine is
+     * not shut down after the property is set.
+     */
+    public static Test singleProperty(Test test, String property, String value)
+    {
+        return singleProperty(test, property, value, false);
+    }
+
+    /**
+     * Decorate a test so that it sets a single system property in
+     * {@code setUp()} and resets it in {@code tearDown()}. The engine is
+     * shut down after the property is set if {@code staticProperty} is
+     * {@code true}.
+     */
+    public static Test singleProperty(Test test, String property, String value,
+            boolean staticProperty)
+    {
+        Properties properties = new Properties();
+        properties.setProperty(property, value);
+        return new SystemPropertyTestSetup(test, properties, staticProperty);
+    }
+
 	/**
 	 * For each property store the current value and
 	 * replace it with the new value, unless there is no change.
