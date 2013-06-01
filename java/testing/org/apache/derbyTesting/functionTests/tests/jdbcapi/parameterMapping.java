@@ -265,7 +265,10 @@ public class parameterMapping {
 			// make the initial connection.
 			 ij.getPropertyArg(args);
 			 Connection conn = ij.startJBMS();
-			 testDERBY6237(conn);
+			 //test setCharacterStream on CLOB
+			 testDERBY6237(conn,true);
+			 //test setCharacterStream on VARCHAR
+			 testDERBY6237(conn,false);
 			 
 			 conn.setAutoCommit(false);
 
@@ -2974,53 +2977,67 @@ public class parameterMapping {
 	//numberOfRowsToUpdate - value 1 or 2
 	//testVariation - if 1 then update CLOB with short data
 	//                if 2 then update CLOB with large data
+    //testCLOB - true means test setCharacterStream on CLOB
+    //         - false means test setCharacterStream on VARCHAR
 	private static void helperTestDerby6237(int numberOfRowsToUpdate, 
             int testVariation,
-            Connection conn) throws Exception
+            Connection conn,
+            boolean testCLOB) throws Exception
 	{
         CharAlphabet a1 = CharAlphabet.singleChar('a');
 
         //Following will update one or 2 rows depending on the 1st param
+        //Following will update CLOB column or VARCHAR column with short
+        // or large data depending on param 2
+        //Following will update CLOB column or VARCHAR column depending
+        // on 3rd param
         PreparedStatement ps = conn.prepareStatement(
-            "UPDATE TestUpdateCharStream SET c3 = ?, c4 = ?, " + 
-            "c2 = c2 + 1 WHERE c1 IN (?, ?)");
+                "UPDATE TestUpdateCharStream SET " +
+                (testCLOB==true ? "c3" : "c4") + " = ?, " + 
+                "c2 = c2 + 1 WHERE c1 IN (?, ?)");
 
         switch (testVariation) {
         case 1 :
         	//test short data
             ps.setCharacterStream(1,
                     new LoopingAlphabetReader(50, a1), 50);
-            ps.setCharacterStream(2,
-                    new LoopingAlphabetReader(50, a1), 50);
             break;
         case 2 :
         	//test large data
-            ps.setCharacterStream(1,
-                    new LoopingAlphabetReader(50000, a1), 50000);
-            ps.setCharacterStream(2,
-                    new LoopingAlphabetReader(32000, a1), 32000);
+        	if (testCLOB) {
+        		//for CLOB column, use 50K data
+                ps.setCharacterStream(1,
+                        new LoopingAlphabetReader(50000, a1), 50000);
+        	} else {
+        		//for VARCHAR column, use 32K data
+	            ps.setCharacterStream(1,
+	                    new LoopingAlphabetReader(32000, a1), 32000);
+        	}
             break;
         }
         
         //First value in IN clause is getting set to 'AAAAA'
         // Using setCharacterStream on VARCHAR to set the value
-        ps.setCharacterStream(3, new CharArrayReader("AAAAA".toCharArray()), 5);
+        ps.setCharacterStream(2, new CharArrayReader("AAAAA".toCharArray()), 5);
         
         if (numberOfRowsToUpdate == 1 ) {
             //Second value in IN clause is also getting set to 'AAAAA', which 
             // means prepared statement will update only one row
-            ps.setObject(4, "AAAAA", Types.VARCHAR);
+            ps.setObject(3, "AAAAA", Types.VARCHAR);
         } else {
             //Second value in IN clause is also getting set to 'EEEEE', which 
             // means prepared statement will update two rows
-            ps.setObject(4, "EEEEE", Types.VARCHAR);
+            ps.setObject(3, "EEEEE", Types.VARCHAR);
         }        	
         ps.execute();
         
-        //verify updated data
+        //verify updated data. Update happened to either CLOB column or VARCHAR
+        // column. It is decided by param 3
         ResultSet rs;
         ps = conn.prepareStatement(
-                "select c3, c4 from TestUpdateCharStream " + 
+                "select " +
+                (testCLOB==true ? "c3 " : "c4 ") + 
+                "from TestUpdateCharStream " + 
                 "WHERE c1 IN (?, ?)");
         ps.setCharacterStream(1, new CharArrayReader("AAAAA".toCharArray()), 5);
         if (numberOfRowsToUpdate == 1 ) {
@@ -3029,30 +3046,23 @@ public class parameterMapping {
             ps.setObject(2, "EEEEE", Types.VARCHAR);
         }
     	rs = ps.executeQuery();
-    	char[] c, c1;
+    	char[] c;
     	if (testVariation == 1){
         	//we are here to test short data 
             c = new char[50];
-            Arrays.fill(c, 'a'); 
-            c1 = new char[50];
-            Arrays.fill(c1, 'a'); 
     	} else {
         	//we are here to test large data 
-            c = new char[50000];
-            Arrays.fill(c, 'a');         		
-            c1 = new char[32000];
-            Arrays.fill(c1, 'a');         		
+    		if (testCLOB)
+    			c = new char[50000];
+    		else
+                c = new char[32000];
     	}
+        Arrays.fill(c, 'a'); 
     	for (int i=0;i<numberOfRowsToUpdate;i++) {
         	rs.next();
         	if (!compareClobReader2CharArray(c,rs.getCharacterStream(1))) {
-    			System.out.println("FAIL: CLOB data should have matched");
-    			rs.close();
-    			ps.close();
-    			return;
-        	}
-        	if (!compareClobReader2CharArray(c1,rs.getCharacterStream(2))) {
-    			System.out.println("FAIL: VARCHAR data should have matched");
+    			System.out.println("FAIL: " + 
+            	        (testCLOB ? "CLOB " : "VARCHAR ") + "data should have matched");
     			rs.close();
     			ps.close();
     			return;
@@ -3089,9 +3099,14 @@ public class parameterMapping {
      *  PreparedStatement.setCharacterStream(int, Reader, int) is used) 
      * In 10.1, setCharacterStream to update CLOB and varchar columns
      *  work even when update is going to update more than one row
+     *  
+     *  @param 	conn - Connection object
+     *  @param 	testCLOB - true means test setCharacterStream on CLOB
+     *                   - false means test setCharacterStream on VARCHAR
      * @throws Exception
      */
-	private static void testDERBY6237(Connection conn) throws Exception
+	private static void testDERBY6237(Connection conn,
+			boolean testCLOB) throws Exception
 	{
         Statement s = conn.createStatement();
         s.executeUpdate("CREATE TABLE TestUpdateCharStream ("+
@@ -3105,13 +3120,13 @@ public class parameterMapping {
                 "VALUES ('EEEEE', 1)");
         
         //update only one row and use short data
-        helperTestDerby6237(1,1,conn);
+        helperTestDerby6237(1,1,conn, testCLOB);
         //update only one row and use large data
-        helperTestDerby6237(1,2,conn);
+        helperTestDerby6237(1,2,conn, testCLOB);
         //update two rows and use short data
-        helperTestDerby6237(2,1,conn);
+        helperTestDerby6237(2,1,conn, testCLOB);
         //update two rows and use large data
-        helperTestDerby6237(2,2,conn);
+        helperTestDerby6237(2,2,conn, testCLOB);
         s.execute("DROP TABLE TestUpdateCharStream");
         s.close();
     }
