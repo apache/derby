@@ -2982,7 +2982,7 @@ public class parameterMapping {
 
         //Following will update one or 2 rows depending on the 1st param
         PreparedStatement ps = conn.prepareStatement(
-            "UPDATE TestUpdateCharStream SET c3 = ?, " + 
+            "UPDATE TestUpdateCharStream SET c3 = ?, c4 = ?, " + 
             "c2 = c2 + 1 WHERE c1 IN (?, ?)");
 
         switch (testVariation) {
@@ -2990,33 +2990,37 @@ public class parameterMapping {
         	//test short data
             ps.setCharacterStream(1,
                     new LoopingAlphabetReader(50, a1), 50);
+            ps.setCharacterStream(2,
+                    new LoopingAlphabetReader(50, a1), 50);
             break;
         case 2 :
         	//test large data
             ps.setCharacterStream(1,
                     new LoopingAlphabetReader(50000, a1), 50000);
+            ps.setCharacterStream(2,
+                    new LoopingAlphabetReader(32000, a1), 32000);
             break;
         }
         
         //First value in IN clause is getting set to 'AAAAA'
         // Using setCharacterStream on VARCHAR to set the value
-        ps.setCharacterStream(2, new CharArrayReader("AAAAA".toCharArray()), 5);
+        ps.setCharacterStream(3, new CharArrayReader("AAAAA".toCharArray()), 5);
         
         if (numberOfRowsToUpdate == 1 ) {
             //Second value in IN clause is also getting set to 'AAAAA', which 
             // means prepared statement will update only one row
-            ps.setObject(3, "AAAAA", Types.VARCHAR);
+            ps.setObject(4, "AAAAA", Types.VARCHAR);
         } else {
             //Second value in IN clause is also getting set to 'EEEEE', which 
             // means prepared statement will update two rows
-            ps.setObject(3, "EEEEE", Types.VARCHAR);
+            ps.setObject(4, "EEEEE", Types.VARCHAR);
         }        	
         ps.execute();
         
         //verify updated data
         ResultSet rs;
         ps = conn.prepareStatement(
-                "select c3 from TestUpdateCharStream " + 
+                "select c3, c4 from TestUpdateCharStream " + 
                 "WHERE c1 IN (?, ?)");
         ps.setCharacterStream(1, new CharArrayReader("AAAAA".toCharArray()), 5);
         if (numberOfRowsToUpdate == 1 ) {
@@ -3025,20 +3029,30 @@ public class parameterMapping {
             ps.setObject(2, "EEEEE", Types.VARCHAR);
         }
     	rs = ps.executeQuery();
-    	char[] c;
+    	char[] c, c1;
     	if (testVariation == 1){
         	//we are here to test short data 
             c = new char[50];
             Arrays.fill(c, 'a'); 
+            c1 = new char[50];
+            Arrays.fill(c1, 'a'); 
     	} else {
         	//we are here to test large data 
             c = new char[50000];
             Arrays.fill(c, 'a');         		
+            c1 = new char[32000];
+            Arrays.fill(c1, 'a');         		
     	}
     	for (int i=0;i<numberOfRowsToUpdate;i++) {
         	rs.next();
         	if (!compareClobReader2CharArray(c,rs.getCharacterStream(1))) {
-    			System.out.println("FAIL: data should have matched");
+    			System.out.println("FAIL: CLOB data should have matched");
+    			rs.close();
+    			ps.close();
+    			return;
+        	}
+        	if (!compareClobReader2CharArray(c1,rs.getCharacterStream(2))) {
+    			System.out.println("FAIL: VARCHAR data should have matched");
     			rs.close();
     			ps.close();
     			return;
@@ -3062,8 +3076,9 @@ public class parameterMapping {
 				totalCharsRead += readChars;
 		} while (readChars != -1 && totalCharsRead < cArray.length);
 		charReader.close();
-		if (!java.util.Arrays.equals(cArray, clobChars))
+		if (!java.util.Arrays.equals(cArray, clobChars)) {
 			return false;
+		}
 
 		return true;
 	}
@@ -3082,7 +3097,8 @@ public class parameterMapping {
         s.executeUpdate("CREATE TABLE TestUpdateCharStream ("+
                 "c1 VARCHAR(64) NOT NULL, " +
           	    "c2 INTEGER, " +
-                "c3 CLOB)"); 
+                "c3 CLOB, " +
+          	    "c4 VARCHAR(32000))"); 
         s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
                 "VALUES ('AAAAA', 1)");
         s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
