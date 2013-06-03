@@ -21,7 +21,6 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -76,8 +75,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	 * One set of grant/revoke tests for either client/server or embedded.
 	 */
 	public static Test basesuite() {
-		Test basesuite = new TestSuite(GrantRevokeTest.class);
-		Test clean = new CleanDatabaseTestSetup(basesuite) {
+        Test test = new TestSuite(GrantRevokeTest.class);
+
+        // DERBY-6238: Dump the contents of the lock table on lock timeout.
+        // Helps debug intermittent lock timeouts seen in the test.
+        test = DatabasePropertyTestSetup.singleProperty(
+                test, "derby.locks.deadlockTrace", "true");
+
+        test = new CleanDatabaseTestSetup(test) {
 	    	protected void decorateSQL(Statement s) throws SQLException {
 	    		s.execute("create schema s1");
 	    		s.execute("create schema s2");
@@ -180,8 +185,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
                    "         WHERE p.\"TaskID\" = t.\"TaskID\")");
 	    	}
 	    };
-		Test test = DatabasePropertyTestSetup.builtinAuthentication(
-				clean, users, "grantrevoke");
+        test = DatabasePropertyTestSetup.builtinAuthentication(
+                test, users, "grantrevoke");
         test = TestConfiguration.sqlAuthorizationDecorator(test);
 	    
 	    return test;
@@ -1064,16 +1069,13 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	Statement s = c.createStatement();
     	try {
     	    boolean b = s.execute("select " + columnListAsString(columns) + " from " + schema + "." + table);
-            
-            if (!hasPrivilege)
-                fail("expected no SELECT permission on table");
-
+            assertTrue("expected no SELECT permission on table", hasPrivilege);
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42502", e);
     		} else {
-    			e.printStackTrace();
-    			fail("Unexpected lack of select privilege.");
+                printStackTrace(e);
+                fail("Unexpected lack of select privilege", e);
     		}
     	}
         s.close();
@@ -1096,15 +1098,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	Statement s = c.createStatement();
     	try {
     	    boolean b = s.execute("delete from " + schema + "." + table);
-            if (!hasPrivilege)
-                fail("expected no DELETE permission on table");
+            assertTrue("expected no DELETE permission on table", hasPrivilege);
 
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42500", e);
     		} else {
-    			fail("Unexpected lack of delete privilege.");
-    			e.printStackTrace();
+                printStackTrace(e);
+                fail("Unexpected lack of delete privilege", e);
     		}
     	}
     	s.close();
@@ -1145,14 +1146,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             rs.close();
             command.append(")");
     	    int i = s.executeUpdate(command.toString());
-            if (!hasPrivilege)
-               fail("expected no INSERT permission on table");
+            assertTrue("expected no INSERT permission on table", hasPrivilege);
 
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42500", e);
     		} else {
-    			fail("Unexpected lack of insert privilege on " + schema + "." + table + " by " + user);
+                fail("Unexpected lack of insert privilege on " +
+                     JDBC.escape(schema, table) + " by " + user, e);
     		}
     	}
     	s.close();
@@ -1194,6 +1195,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     			} catch (SQLException e) {
                     // may not have select privilege on the column, in
     				// which case, we simply don't verify the count.
+                    assertSQLState("42502", e);
     			}
     			
     			StringBuffer command = new StringBuffer("update " + schema + "." + table + " set " + checkColumns[i] + "=");
@@ -1210,16 +1212,17 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    	// update count should equal select count
         	        assertEquals(columnCount, actualCount);
         	    }
-                
-                if (!hasPrivilege)
-                  fail("expected no UPDATE permission on table");
+
+                assertTrue("expected no UPDATE permission on table",
+                           hasPrivilege);
 
     		} catch (SQLException e) {
         		if (!hasPrivilege) {
         			assertSQLState("42502", e);
         		} else {
-        			e.printStackTrace();
-        			fail("Unexpected lack of privilege to update on " + schema + "." + table + " by " + user);
+                    printStackTrace(e);
+                    fail("Unexpected lack of privilege to update on " +
+                         JDBC.escape(schema, table) + " by " + user, e);
         		}
         	}
         }
@@ -1265,8 +1268,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         		if (!hasPrivilege) {
         			assertSQLState("42502", e);
         		} else {
-        			e.printStackTrace();
-        			fail("Unexpected lack of references privilege");
+                    printStackTrace(e);
+                    fail("Unexpected lack of references privilege", e);
         		}
         	}
         	// no rows updated, so false.
@@ -1299,15 +1302,15 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    {
     	        assertEquals(0, i); 
     	    }
-            if (!hasPrivilege)
-                fail("expected no TRIGGER permission on table");
+            assertTrue("expected no TRIGGER permission on table", hasPrivilege);
 
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42500", e);
     		} else {
-    			e.printStackTrace();
-    			fail("Unexpected lack of trigger privilege on " + schema + "." + table + " by " + user);
+                printStackTrace(e);
+                fail("Unexpected lack of trigger privilege on " +
+                     JDBC.escape(schema, table) + " by " + user, e);
     		}
     	}
     	
@@ -1339,8 +1342,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		try {
 		    ps = c.prepareStatement(functioncall);
 		    rs = ps.executeQuery();
-            if (!hasPrivilege)
-                fail("expected no EXECUTE permission on function");
+            assertTrue("expected no EXECUTE permission on function",
+                       hasPrivilege);
 
 		} catch (SQLException e) {
 			if (!hasPrivilege){
@@ -1349,14 +1352,16 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 				else 
 					assertSQLState("42504", e);
 			} else {
-				e.printStackTrace();
-				fail("Unexpected lack of function execute privilege");
+                printStackTrace(e);
+                fail("Unexpected lack of function execute privilege", e);
 			}
 		}
 		if (ps != null)
 			ps.close();
 		if (rs != null)
 			rs.close();
+
+        c.close();
     }
     
     /**
@@ -1378,15 +1383,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		try {
 			ps.execute();
 			rs = ps.getResultSet();
-            if (!hasPrivilege)
-                fail("expected no EXECUTE permission on procedure");
-
+            assertTrue("expected no EXECUTE permission on procedure",
+                       hasPrivilege);
 		} catch (SQLException e) {
 			if (!hasPrivilege)
 				assertSQLState("42504", e);
 			else {
-				e.printStackTrace();
-				fail("Unexpected lack of procedure execute privilege.");
+                printStackTrace(e);
+                fail("Unexpected lack of procedure execute privilege", e);
 			}
 		}
 		ps.close();
