@@ -92,6 +92,13 @@ public class CharAlphabet {
         return new CharAlphabet("Tamil", CharAlphabet.TAMIL);
     }
 
+    /**
+     * Get an alphabet consisting of a single character.
+     */
+    public static CharAlphabet singleChar(char ch) {
+        return new CharAlphabet("Single char: " + ch, new char[] { ch });
+    }
+
     /** Name of the alphabet. */
     private final String name;
     /** Characters in the alphabet. */

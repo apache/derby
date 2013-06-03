@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -38,6 +39,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -47,6 +49,9 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
+
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 
 /**
  * 
@@ -3786,6 +3791,196 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 inout[0] = inout[0].add(new BigDecimal(2.3));
                 out[0] = new BigDecimal(84.1);
         }
+
+    	private static boolean compareClobReader2CharArray
+    		(char[] cArray, Reader charReader) throws Exception {
+    		char[] clobChars = new char[cArray.length];
+
+    		int readChars = 0;
+    		int totalCharsRead = 0;
+
+    		do {
+    			readChars = charReader.read(clobChars, totalCharsRead, cArray.length - totalCharsRead);
+    			if (readChars != -1) 
+    				totalCharsRead += readChars;
+    		} while (readChars != -1 && totalCharsRead < cArray.length);
+    		charReader.close();
+    		if (!java.util.Arrays.equals(cArray, clobChars)) {
+    			return false;
+    		}
+
+    		return true;
+    	}
+
+	    /**
+	     * DERBY-6237(PreparedStatement.execute() fails starting 10.2 when 
+	     *  multiple rows are updated and 
+	     *  PreparedStatement.setCharacterStream(int, Reader, int) is used)  
+    	 * Test setCharacterStream on CLOB column 
+	     */
+    	public void testUpdateSetCharacterStreamClob() throws Exception
+        {
+    		helperTestClobOrVarchar(true);
+        }
+        
+	    /**
+	     * DERBY-6237(PreparedStatement.execute() fails starting 10.2 when 
+	     *  multiple rows are updated and 
+	     *  PreparedStatement.setCharacterStream(int, Reader, int) is used)  
+    	 * Test setCharacterStream on VARCHAR column 
+	     */
+    	public void testUpdateSetCharacterStreamVarchar() throws Exception
+        {
+    		helperTestClobOrVarchar(false);
+        }
+    	
+	    /**
+	     * DERBY-6237(PreparedStatement.execute() fails starting 10.2 when 
+	     *  multiple rows are updated and 
+	     *  PreparedStatement.setCharacterStream(int, Reader, int) is used) 
+	     * In 10.1, setCharacterStream to update CLOB and varchar columns
+	     *  work even when update is going to update more than one row
+	     *  
+	     *  @param 	conn - Connection object
+	     *  @param 	testCLOB - true means test setCharacterStream on CLOB
+	     *                   - false means test setCharacterStream on VARCHAR
+	     * @throws Exception
+	     */
+		private void helperTestClobOrVarchar(
+				boolean testCLOB) throws Exception
+		{
+	        Statement s = createStatement();
+	        dropTable("TESTUPDATECHARSTREAM");
+	        s.executeUpdate("CREATE TABLE TestUpdateCharStream ("+
+	                "c1 VARCHAR(64) NOT NULL, " +
+	          	    "c2 INTEGER, " +
+	                "c3 CLOB, " +
+	          	    "c4 VARCHAR(32000))"); 
+	        s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
+	                "VALUES ('AAAAA', 1)");
+	        s.executeUpdate("INSERT INTO TestUpdateCharStream (c1, c2) " +
+	                "VALUES ('EEEEE', 1)");
+	        
+	        //update only one row and use short data
+	        helperTestDerby6237(1,1, testCLOB);
+	        //update only one row and use large data
+	        helperTestDerby6237(1,2, testCLOB);
+	        //update two rows and use short data
+	        //Once DERBY-6237 is fixed, we should remove following if condition
+	        // Following if condition will skip the test for 2 row update when
+	        //  testing CLOB columns in both embedded and network server with 
+	        //  short data. This results in failure in 10.4
+	        if ((!testCLOB))
+	            helperTestDerby6237(2,1, testCLOB);
+	        //update two rows and use large data
+	        //Once DERBY-6237 is fixed, we should remove following if condition
+	        // Following if condition will skip the test for 2 row update when
+	        //  testing CLOB columns in both embedded and network server with 
+	        //  large data. This results in failure in 10.4
+	        if (!(testCLOB))
+	            helperTestDerby6237(2,2, testCLOB);
+
+	        dropTable("TESTUPDATECHARSTREAM");
+	        s.close();
+        }
+
+    	//numberOfRowsToUpdate - value 1 or 2
+    	//testVariation - if 1 then update CLOB/VARCHAR with short data
+    	//                if 2 then update CLOB/VARCHAR with large data
+        //testCLOB - true means test setCharacterStream on CLOB
+        //         - false means test setCharacterStream on VARCHAR
+    	private void helperTestDerby6237(int numberOfRowsToUpdate, 
+                int testVariation,
+                boolean testCLOB) throws Exception
+        {
+            CharAlphabet a1 = CharAlphabet.singleChar('a');
+
+            //Following will update one or 2 rows depending on the 1st param
+            //Following will update CLOB column or VARCHAR column with short
+            // or large data depending on param 2
+            //Following will update CLOB column or VARCHAR column depending
+            // on 3rd param
+            PreparedStatement ps = prepareStatement(
+                    "UPDATE TestUpdateCharStream SET " +
+                    (testCLOB==true ? "c3" : "c4") + " = ?, " + 
+                    "c2 = c2 + 1 WHERE c1 IN (?, ?)");
+            switch (testVariation) {
+            case 1 :
+            	//test short data
+                ps.setCharacterStream(1,
+                        new LoopingAlphabetReader(50, a1), 50);
+                break;
+            case 2 :
+            	//test large data
+            	if (testCLOB) {
+            		//for CLOB column, use 50K data
+                    ps.setCharacterStream(1,
+                            new LoopingAlphabetReader(50000, a1), 50000);
+            	} else {
+            		//for VARCHAR column, use 32K data
+    	            ps.setCharacterStream(1,
+    	                    new LoopingAlphabetReader(32000, a1), 32000);
+            	}
+                break;
+            }
+
+            //First value in IN clause is getting set to 'AAAAA'
+            // Using setCharacterStream on VARCHAR to set the value
+            ps.setCharacterStream(2, new CharArrayReader("AAAAA".toCharArray()), 5);
+            
+            if (numberOfRowsToUpdate == 1 ) {
+                //Second value in IN clause is also getting set to 'AAAAA', which 
+                // means prepared statement will update only one row
+                ps.setObject(3, "AAAAA", Types.VARCHAR);
+            } else {
+                //Second value in IN clause is also getting set to 'EEEEE', which 
+                // means prepared statement will update two rows
+                ps.setObject(3, "EEEEE", Types.VARCHAR);
+            }        	
+            ps.execute();
+            
+            //verify updated data. Update happened to either CLOB column or VARCHAR
+            // column. It is decided by param 3
+            ResultSet rs;
+            ps = prepareStatement(
+                    "select " +
+                    (testCLOB==true ? "c3 " : "c4 ") + 
+                    "from TestUpdateCharStream " + 
+                    "WHERE c1 IN (?, ?)");
+            ps.setCharacterStream(1, new CharArrayReader("AAAAA".toCharArray()), 5);
+            if (numberOfRowsToUpdate == 1 ) {
+                ps.setObject(2, "AAAAA", Types.VARCHAR);
+            } else {
+                ps.setObject(2, "EEEEE", Types.VARCHAR);
+            }
+        	rs = ps.executeQuery();
+        	char[] c;
+        	if (testVariation == 1){
+            	//we are here to test short data 
+                c = new char[50];
+        	} else {
+            	//we are here to test large data 
+        		if (testCLOB)
+        			c = new char[50000];
+        		else
+                    c = new char[32000];
+        	}
+            Arrays.fill(c, 'a'); 
+        	for (int i=0;i<numberOfRowsToUpdate;i++) {
+            	rs.next();
+            	if (!compareClobReader2CharArray(c,rs.getCharacterStream(1))) {
+        			System.out.println("FAIL: " + 
+            	        (testCLOB ? "CLOB " : "VARCHAR ") + "data should have matched");
+        			rs.close();
+        			ps.close();
+        			return;
+            	}
+        	}
+        	rs.close();
+            ps.close();
+
+        }
+
 
 }
 
