@@ -98,56 +98,13 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	private long     backupBlockingOperations = 0;
 	private boolean  inBackup = false;
 
-    /**
-     * An instance of a helper class that provides maps with different
-     * concurrency properties depending on the platform. Used by
-     * {@code TransactionTable}.
-     */
-    private static TransactionMapFactory mapFactory;
-
 	/*
 	** Constructor
 	*/
 
 	public XactFactory() {
 		super();
-        setMapFactory();
 	}
-
-    /**
-     * Create a {@code TransactionMapFactory} instance. This method can be
-     * overridden by sub-classes in order to provide a factory that produces
-     * maps that give higher concurrency, if supported by the platform.
-     *
-     * @return a {@code TransactionMapFactory} suitable for this platform
-     */
-    TransactionMapFactory createMapFactory() {
-        return new TransactionMapFactory();
-    }
-
-    /**
-     * Set the default map factory to use for this system, if it's not already
-     * set. The value will be stored in a static variable so that it will only
-     * be set by the first {@code XactFactory} that's booted.
-     */
-    private void setMapFactory() {
-        synchronized (XactFactory.class) {
-            if (mapFactory == null) {
-                mapFactory = createMapFactory();
-            }
-        }
-    }
-
-    /**
-     * Get the map factory for this platform. This can be used by {@code
-     * TransactionTable} in order to produce the sort of map that has the best
-     * concurrency properties available on this platform.
-     *
-     * @return a map factory
-     */
-    static synchronized TransactionMapFactory getMapFactory() {
-        return mapFactory;
-    }
 
 	/*
 	** Methods of ModuleControl
