@@ -22,11 +22,9 @@
 package org.apache.derby.catalog;
 
 import java.sql.Types;
-import java.lang.reflect.*;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
-import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
@@ -35,7 +33,6 @@ import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
-import org.apache.derby.shared.common.reference.JDBC40Translation;
 /**
     <P>Use of VirtualTableInterface to provide support for
     DatabaseMetaData.getProcedureColumns().
@@ -89,17 +86,17 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		if (!isFunction) { return val; }
 		switch (val) {
 		case DatabaseMetaData.procedureColumnUnknown:
-			return JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN;	
+            return DatabaseMetaData.functionColumnUnknown;
 		case DatabaseMetaData.procedureColumnIn:
-			return JDBC40Translation.FUNCTION_PARAMETER_IN;
+            return DatabaseMetaData.functionColumnIn;
 		case DatabaseMetaData.procedureColumnInOut:
-			return JDBC40Translation.FUNCTION_PARAMETER_INOUT;	
+            return DatabaseMetaData.functionColumnInOut;
 		case DatabaseMetaData.procedureColumnOut:
-			return JDBC40Translation.FUNCTION_PARAMETER_OUT;
+            return DatabaseMetaData.functionColumnOut;
 		case DatabaseMetaData.procedureColumnReturn:
-			return JDBC40Translation.FUNCTION_RETURN;
+            return DatabaseMetaData.functionReturn;
 		default:
-			return JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN;	
+            return DatabaseMetaData.functionColumnUnknown;
 		}
     }
 
@@ -156,10 +153,10 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		}
 
 		if (isFunction) {
-			nullable = (short) JDBC40Translation.FUNCTION_NULLABLE;
+            nullable = (short) DatabaseMetaData.functionNullable;
 			sqlType = procedure.getReturnType();
 			columnName = "";  // COLUMN_NAME is VARCHAR NOT NULL
-			columnType = (short) JDBC40Translation.FUNCTION_RETURN;
+            columnType = (short) DatabaseMetaData.functionReturn;
 			paramCursor = functionParamCursor;
 			return;
 		}
@@ -177,7 +174,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
             
 			sqlType      = tableFunctionReturnType.getRowTypes()[ idx ];
 			columnName   = tableFunctionReturnType.getRowColumnNames()[ idx ];
-			columnType   = (short) JDBC40Translation.FUNCTION_COLUMN_RESULT;
+            columnType   = (short) DatabaseMetaData.functionColumnResult;
 		}
 		else if (paramCursor > -1) {
 			sqlType      = procedure.getParameterTypes()[paramCursor];

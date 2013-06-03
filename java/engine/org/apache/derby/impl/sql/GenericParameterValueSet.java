@@ -24,18 +24,15 @@ package org.apache.derby.impl.sql;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.UserDataValue;
-import org.apache.derby.iapi.types.SQLBit;
-import org.apache.derby.iapi.types.SQLBlob;
-import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.io.InputStream;
+import java.sql.ParameterMetaData;
 import java.sql.Types;
 
 /**
@@ -157,7 +154,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 		try {
 
 			GenericParameter gp = parms[position];
-			if (gp.parameterMode == JDBC30Translation.PARAMETER_MODE_OUT)
+            if (gp.parameterMode == (ParameterMetaData.parameterModeOut))
 				throw StandardException.newException(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET);
 
 			gp.isSet = true;
@@ -177,8 +174,8 @@ final class GenericParameterValueSet implements ParameterValueSet
 			GenericParameter gp = parms[position];
 
 			switch (gp.parameterMode) {
-			case JDBC30Translation.PARAMETER_MODE_IN:
-			case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+            case (ParameterMetaData.parameterModeIn):
+            case (ParameterMetaData.parameterModeUnknown):
 				throw StandardException.newException(SQLState.LANG_NOT_OUTPUT_PARAMETER, Integer.toString(position + 1));
 			}
 
@@ -229,11 +226,11 @@ final class GenericParameterValueSet implements ParameterValueSet
 			if (!gp.isSet)
 			{
 				switch (gp.parameterMode) {
-				case JDBC30Translation.PARAMETER_MODE_OUT:
+                case (ParameterMetaData.parameterModeOut):
 					break;
-				case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-				case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
-				case JDBC30Translation.PARAMETER_MODE_IN:
+                case (ParameterMetaData.parameterModeInOut):
+                case (ParameterMetaData.parameterModeUnknown):
+                case (ParameterMetaData.parameterModeIn):
 					return false;
 				}
 			}
@@ -410,14 +407,14 @@ final class GenericParameterValueSet implements ParameterValueSet
 			GenericParameter gp = parms[i];
 
 			switch (gp.parameterMode) {
-			case JDBC30Translation.PARAMETER_MODE_IN:
+            case (ParameterMetaData.parameterModeIn):
 				break;
-			case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-			case JDBC30Translation.PARAMETER_MODE_OUT:
+            case (ParameterMetaData.parameterModeInOut):
+            case (ParameterMetaData.parameterModeOut):
 				hasDeclaredOutputParameter = true;
 				break;
-			case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
-				gp.parameterMode = JDBC30Translation.PARAMETER_MODE_IN;
+            case (ParameterMetaData.parameterModeUnknown):
+                gp.parameterMode = (ParameterMetaData.parameterModeIn);
 				break;
 			}
 		}

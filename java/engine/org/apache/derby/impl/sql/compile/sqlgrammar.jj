@@ -50,7 +50,6 @@ import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
@@ -67,8 +66,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -89,6 +86,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.IdUtil;
 
+import java.sql.ParameterMetaData;
 import java.sql.Types;
 import java.util.List;
 import java.util.ArrayList;
@@ -4466,8 +4464,7 @@ XMLType() throws StandardException :
 	<XML>
 	{
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "XML");
-		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-			JDBC40Translation.SQLXML);
+        return DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SQLXML);
 	}
 }
 
@@ -10893,13 +10890,13 @@ procedureParameterDefinition
 Integer
 inoutParameter() :
 {
-	int mode = JDBC30Translation.PARAMETER_MODE_IN;
+    int mode = ParameterMetaData.parameterModeIn;
 }
 {
 	[
 		  <IN> { }
-		| <OUT> { mode = JDBC30Translation.PARAMETER_MODE_OUT; }
-		| <INOUT> { mode = JDBC30Translation.PARAMETER_MODE_IN_OUT; }
+        | <OUT> { mode = ParameterMetaData.parameterModeOut; }
+        | <INOUT> { mode = ParameterMetaData.parameterModeInOut; }
 	]
 	{ return ReuseFactory.getInteger(mode); }
 }
@@ -11005,7 +11002,7 @@ functionParameterDefinition
 	{
 		names.add(parameterName);
 		types.add(typeDescriptor.getCatalogType());
-		inOut.add(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
+        inOut.add(ReuseFactory.getInteger(ParameterMetaData.parameterModeIn));
 	}
 }
 
@@ -11063,7 +11060,7 @@ functionTableType() throws StandardException :
 		//
 		for ( int i = 0; i < columnCount; i++ )
 		{
-		    if ( typeArray[ i ].getJDBCTypeId() == JDBC40Translation.SQLXML )
+            if ( typeArray[ i ].getJDBCTypeId() == Types.SQLXML )
 		    { throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS ); }
 		}
 

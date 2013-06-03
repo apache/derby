@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.sql.Types;
 import java.util.List;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
@@ -29,7 +30,6 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.UDTAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -151,8 +151,8 @@ public class CreateAliasNode extends DDLStatementNode
 
                 // XML not allowed because SQLXML support has not been implemented
                 if (
-                    (aggForType.getJDBCTypeId() == JDBC40Translation.SQLXML) ||
-                    (aggReturnType.getJDBCTypeId() == JDBC40Translation.SQLXML)
+                    (aggForType.getJDBCTypeId() == Types.SQLXML) ||
+                    (aggReturnType.getJDBCTypeId() == Types.SQLXML)
                    )
                 {
                     throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS );

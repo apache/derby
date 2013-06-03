@@ -39,7 +39,6 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -54,6 +53,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import java.lang.reflect.Modifier;
+import java.sql.ParameterMetaData;
 import java.util.List;
 
 /**
@@ -544,7 +544,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				// if it's an OUT or INOUT parameter we need an array.
 				int parameterMode = rai.getParameterModes()[ getRoutineArgIdx( rai, p ) ];
 
-				if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
+                if (parameterMode != (ParameterMetaData.parameterModeIn)) {
 
 					String arrayType;
 					switch (typeId.getJDBCTypeId()) {
@@ -695,7 +695,7 @@ public class StaticMethodCallNode extends MethodCallNode
         boolean isParameterMarker = true;
         if ((sqlParamNode == null) || !sqlParamNode.requiresTypeFromContext())
         {
-            if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN)
+            if (parameterMode != (ParameterMetaData.parameterModeIn))
             {
                 throw StandardException.newException
                     (
@@ -777,7 +777,7 @@ public class StaticMethodCallNode extends MethodCallNode
             // correctly as 10 characters long.
             if (parameterTypeId.variableLength())
             {
-                if (parameterMode != JDBC30Translation.PARAMETER_MODE_OUT)
+                if (parameterMode != (ParameterMetaData.parameterModeOut))
                 { needCast = true; }
             }
         }
@@ -907,7 +907,7 @@ public class StaticMethodCallNode extends MethodCallNode
 			// may be registered as an IN OUT parameter. For a static method argument to be
 			// a dynmaically registered out parameter it must be a simple ? parameter
 
-			parameterMode = JDBC30Translation.PARAMETER_MODE_IN;
+            parameterMode = (ParameterMetaData.parameterModeIn);
 
 			if (sql2j != null) {
 				if (sql2j.getSQLValueNode().requiresTypeFromContext()) {
@@ -931,7 +931,7 @@ public class StaticMethodCallNode extends MethodCallNode
 											"getParameterValueSet", ClassName.ParameterValueSet, 0);
 
 						constructor.push(applicationParameterNumber);
-						constructor.push(JDBC30Translation.PARAMETER_MODE_UNKNOWN);
+                        constructor.push(ParameterMetaData.parameterModeUnknown);
 						constructor.callMethod(VMOpcode.INVOKEINTERFACE, null,
 											"setParameterMode", "void", 2);
 						constructor.endStatement();
@@ -941,27 +941,27 @@ public class StaticMethodCallNode extends MethodCallNode
 		}
 
 		switch (parameterMode) {
-		case JDBC30Translation.PARAMETER_MODE_IN:
-		case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-		case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+        case (ParameterMetaData.parameterModeIn):
+        case (ParameterMetaData.parameterModeInOut):
+        case (ParameterMetaData.parameterModeUnknown):
 			if (sql2j != null)
 				sql2j.returnsNullOnNullState = returnsNullOnNullState;
 			super.generateOneParameter(acb, mb, parameterNumber);
 			break;
 
-		case JDBC30Translation.PARAMETER_MODE_OUT:
+        case (ParameterMetaData.parameterModeOut):
 			// For an OUT parameter we require nothing to be pushed into the
 			// method call from the parameter node.
 			break;
 		}
 
 		switch (parameterMode) {
-		case JDBC30Translation.PARAMETER_MODE_IN:
-		case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+        case (ParameterMetaData.parameterModeIn):
+        case (ParameterMetaData.parameterModeUnknown):
 			break;
 
-		case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-		case JDBC30Translation.PARAMETER_MODE_OUT:
+        case (ParameterMetaData.parameterModeInOut):
+        case (ParameterMetaData.parameterModeOut):
 		{
 			// Create the array used to pass into the method. We create a
 			// new array for each call as there is a small chance the
@@ -989,7 +989,7 @@ public class StaticMethodCallNode extends MethodCallNode
 			mb.putField(lf);
 
 			// set the IN part of the parameter into the INOUT parameter.
-			if (parameterMode != JDBC30Translation.PARAMETER_MODE_OUT) {
+            if (parameterMode != (ParameterMetaData.parameterModeOut)) {
 				mb.swap();
 				mb.setArrayElement(0);
 				mb.getField(lf);
@@ -1352,7 +1352,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 					int parameterMode = parameterModes[ getRoutineArgIdx( i ) ];
                     
-					if (parameterMode != JDBC30Translation.PARAMETER_MODE_IN) {
+                    if (parameterMode != (ParameterMetaData.parameterModeIn)) {
 
 						// must be a parameter if it is INOUT or OUT.
 						ValueNode sqlParamNode = ((SQLToJavaValueNode) methodParms[i]).getSQLValueNode();

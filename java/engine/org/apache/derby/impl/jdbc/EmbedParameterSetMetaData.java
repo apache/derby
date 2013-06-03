@@ -21,16 +21,14 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 
+import java.sql.ParameterMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * This class immitates to implement the ParameterMetaData interface from JDBC3.0
@@ -88,9 +86,9 @@ public class EmbedParameterSetMetaData implements EngineParameterMetaData
    		checkPosition(param);
 
    		if (types[param - 1].isNullable())
-			return JDBC30Translation.PARAMETER_NULLABLE;
+            return (ParameterMetaData.parameterNullable);
    		else
-			return JDBC30Translation.PARAMETER_NO_NULLS;
+            return (ParameterMetaData.parameterNoNulls);
     }
 
 	/**
@@ -213,7 +211,7 @@ public class EmbedParameterSetMetaData implements EngineParameterMetaData
    		//bug 4857 - only the return parameter is of type OUT. All the other output
    		//parameter are IN_OUT (it doesn't matter if their value is set or not).
    		if ((param == 1) && pvs.hasReturnOutputParameter())//only the first parameter can be of return type
-				return JDBC30Translation.PARAMETER_MODE_OUT;
+                return (ParameterMetaData.parameterModeOut);
    		return pvs.getParameterMode(param);
     }
 

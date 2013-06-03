@@ -24,7 +24,6 @@ package org.apache.derby.impl.sql.catalog;
 import java.io.File;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
@@ -180,6 +179,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.sql.ParameterMetaData;
 import java.sql.Types;
 import java.util.Map;
 import org.apache.derby.iapi.store.access.FileResource;
@@ -7841,7 +7841,7 @@ public final class	DataDictionaryImpl
                                     details[SYSFUN_FIRST_PARAMETER_INDEX +i]).getCatalogType();
                         paramNames[i] = "P" + (i +1); // Dummy names
                         // All parameters must be IN.
-                        paramModes[i] = JDBC30Translation.PARAMETER_MODE_IN;
+                        paramModes[i] = (ParameterMetaData.parameterModeIn);
                     }
 
 					// details[3] = java method
@@ -10758,9 +10758,9 @@ public final class	DataDictionaryImpl
             arg_modes = new int[num_args];
 			int num_in_param = num_args - num_out_param;
             for (int i = 0; i < num_in_param; i++)
-                arg_modes[i] = JDBC30Translation.PARAMETER_MODE_IN;
+                arg_modes[i] = (ParameterMetaData.parameterModeIn);
             for (int i = 0; i < num_out_param; i++)
-                arg_modes[num_in_param + i] = JDBC30Translation.PARAMETER_MODE_OUT;
+                arg_modes[num_in_param + i] = (ParameterMetaData.parameterModeOut);
         }
 
         RoutineAliasInfo routine_alias_info = 

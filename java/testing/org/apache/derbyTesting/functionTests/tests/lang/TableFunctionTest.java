@@ -26,7 +26,6 @@ import java.sql.*;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
-import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
@@ -238,11 +237,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   String  SFT_RETURN_TYPE = "TABLE ( \"INTCOL\" INTEGER, \"VARCHARCOL\" VARCHAR(10) )";
     private static  final   String  RADT_RETURN_TYPE = "TABLE ( \"COLUMN0\" BIGINT, \"COLUMN1\" BLOB(2147483647), \"COLUMN2\" CHAR(10), \"COLUMN3\" CHAR (10) FOR BIT DATA, \"COLUMN4\" CLOB(2147483647), \"COLUMN5\" DATE, \"COLUMN6\" DECIMAL(5,0), \"COLUMN7\" DOUBLE, \"COLUMN8\" DOUBLE, \"COLUMN9\" REAL, \"COLUMN10\" DOUBLE, \"COLUMN11\" INTEGER, \"COLUMN12\" LONG VARCHAR, \"COLUMN13\" LONG VARCHAR FOR BIT DATA, \"COLUMN14\" NUMERIC(5,0), \"COLUMN15\" REAL, \"COLUMN16\" SMALLINT, \"COLUMN17\" TIME, \"COLUMN18\" TIMESTAMP, \"COLUMN19\" VARCHAR(10), \"COLUMN20\" VARCHAR (10) FOR BIT DATA, \"COLUMN21\" BOOLEAN )";
     
-    private static  final   Integer FUNCTION_COLUMN_IN = new Integer( JDBC40Translation.FUNCTION_PARAMETER_IN );
-    private static  final   Integer FUNCTION_RETURN_VALUE = new Integer( JDBC40Translation.FUNCTION_RETURN );
-    private static  final   Integer FUNCTION_RESULT_COLUMN = new Integer( JDBC40Translation.FUNCTION_COLUMN_RESULT );
+    private static  final   Integer FUNCTION_COLUMN_IN = DatabaseMetaData.functionColumnIn;
+    private static  final   Integer FUNCTION_RETURN_VALUE = DatabaseMetaData.functionReturn;
+    private static  final   Integer FUNCTION_RESULT_COLUMN = DatabaseMetaData.functionColumnResult;
 
-    private static  final   Integer FUNCTION_RETURNS_TABLE = new Integer( JDBC40Translation.FUNCTION_RETURNS_TABLE );
+    private static  final   Integer FUNCTION_RETURNS_TABLE = DatabaseMetaData.functionReturnsTable;
 
 
     private static  final   Integer JDBC_TYPE_OTHER = new Integer( Types.OTHER );
@@ -284,7 +283,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
     private static  final   Object  NO_CATALOG = null;
     private static  final   String  RETURN_VALUE_NAME = "";
-    private static  final   Integer ALLOWS_NULLS = new Integer( JDBC40Translation.FUNCTION_NULLABLE );
+    private static  final   Integer ALLOWS_NULLS = DatabaseMetaData.functionNullable;
     private static  final   Object  EMPTY_REMARKS = null;
     private static  final   Object  UNDEFINED_CHAR_OCTET_LENGTH = null;
     private static  final   String  IS_NULLABLE = "YES";

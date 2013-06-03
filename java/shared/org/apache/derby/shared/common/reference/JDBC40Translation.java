@@ -28,44 +28,26 @@ package org.apache.derby.shared.common.reference;
         will be available in jdbc 4.0, it becomes possible to refer to
         these constants when compiling against older jdk versions.
 
-        <P>The test <code>jdbc4/JDBC40TranslationTest.junit</code>,
-        which is compiled against jdk16, contains tests that verifies
-        that these hard coded constants are in fact equal to those
-        found in jdk16.
+        <p>
+        This class also contains some constants shared by the network server and client.
+        </p>
 
-        <P>
+        <p>
         This class should not be shipped with the product.
+        </p>
 
-        <P>
+        <p>
         This class has no methods, all it contains are constants
         are public, static and final since they are declared in an interface.
+        </p>
 */
 
 public interface JDBC40Translation {
-    /*
-    ** public statics from 4.0 version of java.sql.DatabaseMetaData
-    */
-    public static final int FUNCTION_PARAMETER_UNKNOWN = 0;
-    public static final int FUNCTION_PARAMETER_IN      = 1;
-    public static final int FUNCTION_PARAMETER_INOUT   = 2;
-    public static final int FUNCTION_PARAMETER_OUT     = 3;
-    public static final int FUNCTION_RETURN            = 4;
-    public static final int FUNCTION_COLUMN_RESULT            = 5;
-    
-    public static final int FUNCTION_NO_NULLS          = 0;
-    public static final int FUNCTION_NULLABLE          = 1;
-    public static final int FUNCTION_NULLABLE_UNKNOWN  = 2;
-
-    public static final int FUNCTION_RESULT_UNKNOWN          = 0;
-    public static final int FUNCTION_NO_TABLE          = 1;
-    public static final int FUNCTION_RETURNS_TABLE  = 2;
+    // Constants shared by network client and server
+    public static final int DEFAULT_COLUMN_DISPLAY_SIZE = 15;
+    public static final int UNKNOWN_SCALE = 0;
+    public static final int UNKNOWN_PRECISION = 0;
 
     // constants from java.sql.Types
-    public static final int NCHAR = -15;
-    public static final int NVARCHAR = -9;
-    public static final int LONGNVARCHAR = -16;
-    public static final int NCLOB = 2011;
-    public static final int ROWID = -8;
     public static final int REF_CURSOR = 2012;
-    public static final int SQLXML = 2009;
 }

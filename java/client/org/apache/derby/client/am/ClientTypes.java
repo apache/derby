@@ -22,7 +22,6 @@ package org.apache.derby.client.am;
 
 import java.sql.Types;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 
 // This enumeration of types represents the typing scheme used by our jdbc driver.
 // Once this is finished, we need to review our switches to make sure they are exhaustive
@@ -110,8 +109,8 @@ public class ClientTypes {
             case Types.ARRAY: return "ARRAY";
             case Types.DATALINK: return "DATALINK";
             case Types.REF: return "REF";
-            case JDBC40Translation.ROWID: return "ROWID";
-            case JDBC40Translation.SQLXML: return "SQLXML";
+            case Types.ROWID: return "ROWID";
+            case Types.SQLXML: return "SQLXML";
             case Types.STRUCT: return "STRUCT";
             // Unknown type:
             default:            return "<UNKNOWN>";

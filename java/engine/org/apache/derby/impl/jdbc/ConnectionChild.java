@@ -22,12 +22,9 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.jdbc.InternalDriver;
-import org.apache.derby.iapi.reference.JDBC40Translation;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
 	Any class in the embedded JDBC driver (ie this package) that needs to

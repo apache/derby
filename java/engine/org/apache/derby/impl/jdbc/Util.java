@@ -45,8 +45,6 @@ import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 
 /**
 	This class understands the message protocol and looks up
@@ -255,16 +253,16 @@ public abstract class Util  {
         case Types.ARRAY:
         case Types.DATALINK:
         case Types.DISTINCT:
-        case JDBC40Translation.NCHAR:
-        case JDBC40Translation.NCLOB:
-        case JDBC40Translation.NVARCHAR:
-        case JDBC40Translation.LONGNVARCHAR:
+        case Types.NCHAR:
+        case Types.NCLOB:
+        case Types.NVARCHAR:
+        case Types.LONGNVARCHAR:
         case Types.NULL:
         case Types.OTHER:
         case Types.REF:
         case JDBC40Translation.REF_CURSOR:
-        case JDBC40Translation.ROWID:
-        case JDBC40Translation.SQLXML:
+        case Types.ROWID:
+        case Types.SQLXML:
         case Types.STRUCT:
             return false;
         }
@@ -511,10 +509,10 @@ public abstract class Util  {
 			case Types.JAVA_OBJECT	:  return "Types.JAVA_OBJECT";
 			case Types.REF : return TypeId.REF_NAME;
 			case JDBC40Translation.REF_CURSOR: return TypeId.REF_CURSOR;
-			case JDBC40Translation.ROWID: return TypeId.ROWID_NAME;
+            case Types.ROWID: return TypeId.ROWID_NAME;
 			case Types.STRUCT: return TypeId.STRUCT_NAME;
 			case StoredFormatIds.XML_TYPE_ID :  return TypeId.XML_NAME;
-			case JDBC40Translation.SQLXML: return TypeId.SQLXML_NAME;
+            case Types.SQLXML: return TypeId.SQLXML_NAME;
 			default : return String.valueOf(jdbcType);
 		}
 	}

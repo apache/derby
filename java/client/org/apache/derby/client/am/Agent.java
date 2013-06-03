@@ -82,16 +82,16 @@ public abstract class Agent {
         case Types.ARRAY:
         case Types.DATALINK:
         case Types.DISTINCT:
-        case JDBC40Translation.NCHAR:
-        case JDBC40Translation.NCLOB:
-        case JDBC40Translation.NVARCHAR:
-        case JDBC40Translation.LONGNVARCHAR:
+        case Types.NCHAR:
+        case Types.NCLOB:
+        case Types.NVARCHAR:
+        case Types.LONGNVARCHAR:
         case Types.NULL:
         case Types.OTHER:
         case Types.REF:
         case JDBC40Translation.REF_CURSOR:
-        case JDBC40Translation.ROWID:
-        case JDBC40Translation.SQLXML:
+        case Types.ROWID:
+        case Types.SQLXML:
         case Types.STRUCT:
             throw new SqlException
                 (logWriter_,

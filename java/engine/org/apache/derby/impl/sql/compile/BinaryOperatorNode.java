@@ -29,12 +29,12 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
 import java.lang.reflect.Modifier;
+import java.sql.Types;
 import java.util.List;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -379,7 +379,7 @@ public class BinaryOperatorNode extends OperatorNode
         // XML data value, per SQL/XML spec 6.17: "...yielding a value
         // X1 of an XML type."
             setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    JDBC40Translation.SQLXML));
+                    Types.SQLXML));
         }
 
         return genSQLJavaSQLTree();

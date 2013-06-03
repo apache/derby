@@ -22,7 +22,6 @@
 package org.apache.derby.impl.jdbc;
 
 import java.math.BigDecimal;
-import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Date;
 import java.sql.Time;
@@ -43,22 +42,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.ParameterMetaData;
 
 import java.util.Calendar;
 
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
-import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedResultSet;
-
 
 /**
  * This class extends the EmbedCallableStatement class in order to support new
@@ -1029,8 +1020,8 @@ public abstract class EmbedCallableStatement20
         checkStatus();
         // Make sure the specified parameter has mode OUT or IN/OUT.
         switch (getParms().getParameterMode(parameterIndex)) {
-            case JDBC30Translation.PARAMETER_MODE_IN:
-            case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+            case (ParameterMetaData.parameterModeIn):
+            case (ParameterMetaData.parameterModeUnknown):
                 throw newSQLException(SQLState.LANG_NOT_OUTPUT_PARAMETER,
                                       Integer.toString(parameterIndex));
         }

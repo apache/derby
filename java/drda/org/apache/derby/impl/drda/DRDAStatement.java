@@ -38,8 +38,6 @@ import java.util.Hashtable;
 import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
@@ -1439,13 +1437,13 @@ class DRDAStatement
                         int parameterScale = pmeta.getScale(i + 1);
 
             switch (parameterMode) {
-                case JDBC30Translation.PARAMETER_MODE_IN:
+                case (ParameterMetaData.parameterModeIn):
                     break;
-                case JDBC30Translation.PARAMETER_MODE_OUT:
-                case JDBC30Translation.PARAMETER_MODE_IN_OUT:
+                case (ParameterMetaData.parameterModeOut):
+                case (ParameterMetaData.parameterModeInOut):
                     outputFlag = true;
                     break;
-                case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+                case (ParameterMetaData.parameterModeUnknown):
                     // It's only unknown if array
                     String objectType = pmeta.getParameterClassName(i+1);
                     parameterType =

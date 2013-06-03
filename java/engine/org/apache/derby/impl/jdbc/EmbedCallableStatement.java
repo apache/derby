@@ -28,7 +28,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.math.BigDecimal;
@@ -38,6 +37,7 @@ import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Date;
+import java.sql.ParameterMetaData;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -656,11 +656,11 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 		for (int j=1; j<=numberOfParameters; j++) {
 
 			switch (pvs.getParameterMode(j)) {
-			case JDBC30Translation.PARAMETER_MODE_IN:
-			case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+            case (ParameterMetaData.parameterModeIn):
+            case (ParameterMetaData.parameterModeUnknown):
 				break;
-			case JDBC30Translation.PARAMETER_MODE_OUT:
-			case JDBC30Translation.PARAMETER_MODE_IN_OUT:
+            case (ParameterMetaData.parameterModeOut):
+            case (ParameterMetaData.parameterModeInOut):
 				throw newSQLException(SQLState.OUTPUT_PARAMS_NOT_ALLOWED);
 			}
 		}

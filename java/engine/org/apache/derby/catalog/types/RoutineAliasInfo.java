@@ -23,11 +23,11 @@ package org.apache.derby.catalog.types;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.catalog.TypeDescriptor;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.sql.ParameterMetaData;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.IdUtil;
@@ -459,11 +459,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
 	public static String parameterMode(int parameterMode) {
 		switch (parameterMode) {
-		case JDBC30Translation.PARAMETER_MODE_IN:
+        case (ParameterMetaData.parameterModeIn):
 			return "IN";
-		case JDBC30Translation.PARAMETER_MODE_OUT:
+        case (ParameterMetaData.parameterModeOut):
 			return "OUT";
-		case JDBC30Translation.PARAMETER_MODE_IN_OUT:
+        case (ParameterMetaData.parameterModeInOut):
 			return "INOUT";
 		default:
 			return "UNKNOWN";

@@ -21,11 +21,7 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -59,7 +55,7 @@ public abstract class DataTypeUtilities  {
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
 		case Types.BLOB:
-		case JDBC40Translation.SQLXML:
+        case Types.SQLXML:
 				return dtd.getMaximumWidth();
 			case Types.SMALLINT:
 				return 5;
@@ -113,7 +109,7 @@ public abstract class DataTypeUtilities  {
 		          typeId == Types.VARCHAR ||
 		          typeId == Types.CLOB ||
 		          typeId == Types.LONGVARCHAR ||
-		          typeId == JDBC40Translation.SQLXML);
+                  typeId == Types.SQLXML);
 	}
 	/**
 		Is the data type nullable.
@@ -209,7 +205,7 @@ public abstract class DataTypeUtilities  {
 			default: 
 				// MaximumWidth is -1 when it is unknown.
 				int w = storageLength;
-				size = (w > 0 ? w : JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE);
+                size = (w > 0 ? w : JDBC40Translation.DEFAULT_COLUMN_DISPLAY_SIZE);
 				break;
 		}
 		return size;

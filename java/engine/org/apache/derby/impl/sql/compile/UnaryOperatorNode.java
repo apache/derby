@@ -25,7 +25,6 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.sql.compile.Visitor;
 
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
@@ -381,7 +380,7 @@ public class UnaryOperatorNode extends OperatorNode
 
         // The result type of XMLParse() is always an XML type.
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                JDBC40Translation.SQLXML));
+                Types.SQLXML));
     }
 
     /**

@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.IdUtil;
@@ -467,7 +466,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.XML_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.XML_NAME;
-              JDBCTypeId = JDBC40Translation.SQLXML;
+              JDBCTypeId = Types.SQLXML;
               break;
 
           default:

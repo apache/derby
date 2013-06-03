@@ -32,7 +32,6 @@ import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -883,7 +882,7 @@ public abstract class QueryTreeNode implements Node, Visitable
               constantNodeType = C_NodeTypes.BLOB_CONSTANT_NODE;
 			break;
 
-		  case JDBC40Translation.SQLXML:
+          case Types.SQLXML:
               constantNodeType = C_NodeTypes.XML_CONSTANT_NODE;
 			break;
             

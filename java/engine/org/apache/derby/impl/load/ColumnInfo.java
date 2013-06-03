@@ -22,17 +22,12 @@
 package org.apache.derby.impl.load;
 
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.reference.JDBC40Translation;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.Connection;
-import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
+import java.sql.Types;
 import java.util.*;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 
@@ -255,7 +250,7 @@ class ColumnInfo {
 
 		return !(type == java.sql.Types.BIT ||
 				 type == java.sql.Types.OTHER ||
-				 type == JDBC40Translation.SQLXML ); 
+                 type == Types.SQLXML );
 	}
 
 

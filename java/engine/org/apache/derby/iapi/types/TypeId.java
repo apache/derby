@@ -29,7 +29,6 @@ import org.apache.derby.catalog.types.DecimalTypeIdImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -410,7 +409,7 @@ public final class TypeId
         case Types.CLOB:
             return CLOB_ID;
 
-        case JDBC40Translation.SQLXML:
+        case Types.SQLXML:
             return XML_ID;
             
         default:

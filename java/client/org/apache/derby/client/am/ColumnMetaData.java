@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Hashtable;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // Under JDBC 2, we must new up our parameter meta data as column meta data instances
@@ -313,7 +313,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             case ClientTypes.TIMESTAMP:
                 return 29;
             case ClientTypes.JAVA_OBJECT:
-                return JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
+                return JDBC40Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
             case ClientTypes.BINARY:
             case ClientTypes.VARBINARY:
             case ClientTypes.LONGVARBINARY:
@@ -447,7 +447,7 @@ public class ColumnMetaData implements ResultSetMetaData {
             case ClientTypes.TIMESTAMP:
                 return 29;
             case ClientTypes.JAVA_OBJECT:
-                return JDBC30Translation.UNKNOWN_PRECISION;
+                return JDBC40Translation.UNKNOWN_PRECISION;
             default:
                 throw new SqlException(logWriter_, 
                         new ClientMessageId (SQLState.UNSUPPORTED_TYPE));

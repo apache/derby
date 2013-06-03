@@ -27,11 +27,11 @@ import java.io.ObjectOutput;
 import java.sql.Types;
 
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.shared.common.reference.JDBC30Translation;
-                             
+
 public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 {
 	/********************************************************
@@ -137,8 +137,8 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.isNullable = isNullable;
 		this.maximumWidth = maximumWidth;
 
-        this.scale = JDBC30Translation.UNKNOWN_SCALE;
-        this.precision = JDBC30Translation.UNKNOWN_PRECISION;
+        this.scale = JDBC40Translation.UNKNOWN_SCALE;
+        this.precision = JDBC40Translation.UNKNOWN_PRECISION;
 	}
 
 	/**

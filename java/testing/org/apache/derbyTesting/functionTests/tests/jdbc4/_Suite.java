@@ -55,7 +55,6 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(ClobTest.suite());
 		suite.addTest(ConnectionTest.suite());
 		suite.addTest(DataSourceTest.suite());
-		suite.addTest(JDBC40TranslationTest.suite());
 		suite.addTest(ParameterMetaDataWrapperTest.suite());
 		suite.addTest(PreparedStatementTest.suite());
 		suite.addTest(ResultSetMetaDataTest.suite());

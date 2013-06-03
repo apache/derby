@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -30,6 +29,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
+import java.sql.ParameterMetaData;
 import java.sql.Types;
 
 /**
@@ -111,7 +111,7 @@ final class GenericParameter
 	{
 		this.pvs = pvs;
 		parameterMode = (this.isReturnOutputParameter = isReturnOutputParameter)
-			? (short) JDBC30Translation.PARAMETER_MODE_OUT : (short) JDBC30Translation.PARAMETER_MODE_IN;
+            ? (short) (ParameterMetaData.parameterModeOut) : (short) (ParameterMetaData.parameterModeIn);
 	}
 
 	/**
@@ -191,13 +191,13 @@ final class GenericParameter
 		}
 
 		switch (parameterMode) {
-		case JDBC30Translation.PARAMETER_MODE_IN:
-		case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+        case (ParameterMetaData.parameterModeIn):
+        case (ParameterMetaData.parameterModeUnknown):
 		default:
 			throw StandardException.newException(SQLState.LANG_NOT_OUT_PARAM, getJDBCParameterNumberStr());
 
-		case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-		case JDBC30Translation.PARAMETER_MODE_OUT:
+        case (ParameterMetaData.parameterModeInOut):
+        case (ParameterMetaData.parameterModeOut):
 			// Declared/Java procedure parameter.
 			if (!DataTypeDescriptor.isJDBCTypeEquivalent(jdbcTypeId, sqlType))
 				throw throwInvalidOutParamMap(sqlType);
@@ -244,12 +244,12 @@ final class GenericParameter
 	void validate() throws StandardException
 	{
 		switch (parameterMode) {
-		case JDBC30Translation.PARAMETER_MODE_UNKNOWN:
+        case (ParameterMetaData.parameterModeUnknown):
 			break;
-		case JDBC30Translation.PARAMETER_MODE_IN:
+        case (ParameterMetaData.parameterModeIn):
 			break;
-		case JDBC30Translation.PARAMETER_MODE_IN_OUT:
-		case JDBC30Translation.PARAMETER_MODE_OUT:
+        case (ParameterMetaData.parameterModeInOut):
+        case (ParameterMetaData.parameterModeOut):
 			if (registerOutType == Types.NULL) {
 				throw StandardException.newException(SQLState.NEED_TO_REGISTER_PARAM,
 					getJDBCParameterNumberStr(),

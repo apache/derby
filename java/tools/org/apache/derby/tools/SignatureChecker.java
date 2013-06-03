@@ -29,9 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.jdbc.EmbeddedDataSource40;
-import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
@@ -350,7 +348,7 @@ public class SignatureChecker
                 if ( isSystemSchema( schema ) ) { continue; }
 
                 boolean isTableFunction;
-                if ( functionType == JDBC40Translation.FUNCTION_RETURNS_TABLE ) { isTableFunction = true; }
+                if ( functionType == DatabaseMetaData.functionReturnsTable ) { isTableFunction = true; }
                 else { isTableFunction = false; }
 
                 putFunction( schema, name, isTableFunction );
@@ -392,8 +390,8 @@ public class SignatureChecker
                     // Skip all columns in the returned result set if this is a
                     // table function.
                     //
-                    if ( columnType == JDBC40Translation.FUNCTION_RETURN ) { continue; }
-                    if ( columnType == JDBC40Translation.FUNCTION_COLUMN_RESULT ) { continue; }
+                    if ( columnType == DatabaseMetaData.functionReturn ) { continue; }
+                    if ( columnType == DatabaseMetaData.functionColumnResult ) { continue; }
                     
                     function.addArg( rs.getString( 7 ) );
                 }

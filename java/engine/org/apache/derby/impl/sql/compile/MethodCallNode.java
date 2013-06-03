@@ -47,7 +47,6 @@ import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
@@ -58,8 +57,8 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 
+import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -649,7 +648,7 @@ abstract class MethodCallNode extends JavaValueNode
         // must strip another array level off of out and in/out parameters
         if ( routineInfo != null )
         {
-            if ( routineInfo.getParameterModes()[ firstVarargIdx ] != JDBC30Translation.PARAMETER_MODE_IN )
+            if ( routineInfo.getParameterModes()[ firstVarargIdx ] != (ParameterMetaData.parameterModeIn) )
             {
                 varargType = stripOneArrayLevel( varargType );
             }
@@ -979,15 +978,15 @@ abstract class MethodCallNode extends JavaValueNode
 					int parameterMode = routineInfo.getParameterModes()[ getRoutineArgIdx( i ) ];
 
 					switch (parameterMode) {
-					case JDBC30Translation.PARAMETER_MODE_IN:
+                    case (ParameterMetaData.parameterModeIn):
 						break;
-					case JDBC30Translation.PARAMETER_MODE_IN_OUT:
+                    case (ParameterMetaData.parameterModeInOut):
 						// we need to see if the type of the array is
 						// primitive, not the array itself.
 						methodParameter = stripOneArrayLevel( methodParameter );
 						break;
 
-					case JDBC30Translation.PARAMETER_MODE_OUT:
+                    case (ParameterMetaData.parameterModeOut):
 						// value is not obtained *from* parameter.
 						continue;
 					}
