@@ -117,8 +117,7 @@ abstract class DatabaseClasses
 	}
 
     /**
-     * For creating the class inspector. On Java 5 and higher, we have a more
-     * capable class inspector.
+     * For creating the class inspector.
      */
     protected   ClassInspector  makeClassInspector( DatabaseClasses dc )
     {

@@ -28,6 +28,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
 	Methods to find out relationships between classes and methods within a class.
@@ -501,36 +503,83 @@ public class ClassInspector
 
 	/**
 	 * Given an implementation of a parameterized interface, return
-     * the bounds on the type variables. This method raises an exception if the
-     * JVM does not support generics. May return null if type resolution fails.
+     * the bounds on the type variables. May return null if type resolution
+     * fails.
 	 */
 	public Class[][] getTypeBounds( Class parameterizedInterface, Class implementation )
         throws StandardException
 	{
-		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
+        if ( implementation == null ) { return null; }
+
+        Type[]  genericInterfaces = implementation.getGenericInterfaces();
+        for ( Type genericInterface : genericInterfaces )
+        {
+            //
+            // Look for the generic interface whose raw type is the
+            // parameterized interface we're interested in.
+            //
+            if ( genericInterface instanceof ParameterizedType )
+            {
+                ParameterizedType   pt = (ParameterizedType) genericInterface;
+                Type    rawType = pt.getRawType();
+
+                // found it!
+                if ( parameterizedInterface == rawType )
+                {
+                    return findTypeBounds( pt );
+                }
+            }
+        }
+
+        // couldn't find the interface we're looking for. check our superclass.
+        return getTypeBounds( parameterizedInterface, implementation.getSuperclass() );
     }
-    
+
 	/**
 	 * Return true if the method or constructor supports varargs.
 	 */
 	public boolean  isVarArgsMethod( Member member )
 	{
-        // Varargs were introduced by Java 5. So this 1.4 ClassInspector always
-        // return false;
-        return false;
+        if (member instanceof Method) {
+            return ((Method) member).isVarArgs();
+        } else if (member instanceof Constructor) {
+            return ((Constructor) member).isVarArgs();
+        } else {
+            return false;
+        }
     }
-    
+
 	/**
 	 * Given an implementation of a parameterized interface, return
-     * the actual types of the interface type variables. This method raises an exception if the
-     * JVM does not support generics. May return null or an array of nulls if type resolution fails.
+     * the actual types of the interface type variables.
+     * May return null or an array of nulls if type resolution fails.
 	 */
     public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
         throws StandardException
 	{
-		throw StandardException.newException( SQLState.VM_LEVEL_TOO_LOW, "Java 5" );
+        // construct the inheritance chain stretching from the parameterized
+        // type down to the concrete implemention
+        ArrayList<Class<?>> chain =
+                getTypeChain(parameterizedType, implementation);
+
+        // walk the chain, filling in a map of generic types to their
+        // resolved types
+        HashMap<Type, Type> resolvedTypes = getResolvedTypes(chain);
+
+        // compose the resolved types together in order to compute the actual
+        // classes which are plugged into the variables of the parameterized
+        // type
+        ArrayList<Class<?>> parameterTypes =
+                getParameterTypes(parameterizedType, resolvedTypes);
+
+        // turn the list into an array
+        if (parameterTypes == null) {
+            return null;
+        }
+
+        return parameterTypes.toArray(new Class[parameterTypes.size()]);
     }
-    
+
 	/**
 	 * Get the parameter types for a method described by a Member as a String[].
 	 *
@@ -904,31 +953,6 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		return Array.newInstance(baseClass, new int[arrayDepth]).getClass();
 	}
 
-
-	/**
-		Is method/constructor T more or equally specific than method U.
-
-		See the Java Language Specification section 15.11.2.2.
-	*/
-	private boolean isMethodMoreSpecificOrEqual(Member T, Member U, boolean[] isParam) {
-
-		Class[] TC;
-		Class[] UC;
-
-		if (T instanceof Method) {
-			if (!classConvertableFromTo(T.getDeclaringClass(), U.getDeclaringClass(), true))
-				return false;
-
-			TC = ((Method) T).getParameterTypes();
-			UC = ((Method) U).getParameterTypes();
-		} else {
-			TC = ((Constructor) T).getParameterTypes();
-			UC = ((Constructor) U).getParameterTypes();
-		}
-
-		return signatureConvertableFromTo(TC, null, UC, isParam, true);
-	}
-
 	/**
 	 *  Can we convert a signature from fromTypes(primFromTypes) to toTypes.
 	 *  "mixTypes" is a flag to show if object/primitive type conversion is
@@ -1128,5 +1152,179 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		return method.getDeclaringClass().getName();
 	}		
 
+    /////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS FOR getTypeBounds()
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the type bounds for all of the type variables of the given
+     * parameterized type.
+     */
+    private Class[][] findTypeBounds(ParameterizedType pt) {
+        Type[] actualTypeArguments = pt.getActualTypeArguments();
+        int argCount = actualTypeArguments.length;
+        Class[][] retval = new Class[argCount][];
+
+        for (int i = 0; i < argCount; i++) {
+            retval[ i] = boundType(actualTypeArguments[ i]);
+        }
+
+        return retval;
+    }
+
+    /**
+     * Get the bounds for a single type variable.
+     */
+    private Class[] boundType(Type type) {
+        if (type instanceof Class) {
+            return new Class[]{(Class) type};
+        } else if (type instanceof TypeVariable) {
+            Type[] bounds = ((TypeVariable) type).getBounds();
+            int count = bounds.length;
+            Class[] retval = new Class[count];
+
+            for (int i = 0; i < count; i++) {
+                retval[ i] = getRawType(bounds[ i]);
+            }
+
+            return retval;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the raw type of a type bound.
+     */
+    private Class getRawType(Type bound) {
+        if (bound instanceof Class) {
+            return (Class) bound;
+        } else if (bound instanceof ParameterizedType) {
+            return getRawType(((ParameterizedType) bound).getRawType());
+        } else {
+            return null;
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS FOR getGenericParameterTypes()
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Construct an inheritance chain of types stretching from a supertype down
+     * to a concrete implementation.
+     */
+    private ArrayList<Class<?>> getTypeChain(Class<?> chainEnd, Class<?> start) {
+        ArrayList<Class<?>> result = null;
+
+        if (start == null) {
+            return null;
+        }
+
+        if (!chainEnd.isAssignableFrom(start)) {
+            return null;
+        }
+
+        if (start == chainEnd) {
+            result = new ArrayList<Class<?>>();
+        }
+
+        if (result == null) {
+            result = getTypeChain(chainEnd, start.getSuperclass());
+
+            if (result == null) {
+                for (Class<?> iface : start.getInterfaces()) {
+                    result = getTypeChain(chainEnd, iface);
+                    if (result != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (result != null) {
+            result.add(start);
+        }
+
+        return result;
+    }
+
+    /**
+     * Given an inheritance chain of types, stretching from a superclass down
+     * to a terminal concrete class, construct a map of generic types to their
+     * resolved types.
+     */
+    private HashMap<Type, Type> getResolvedTypes(ArrayList<Class<?>> chain) {
+        if (chain == null) {
+            return null;
+        }
+
+        HashMap<Type, Type> resolvedTypes = new HashMap<Type, Type>();
+
+        for (Class<?> klass : chain) {
+            addResolvedTypes(resolvedTypes, klass.getGenericSuperclass());
+
+            for (Type iface : klass.getGenericInterfaces()) {
+                addResolvedTypes(resolvedTypes, iface);
+            }
+        }
+
+        return resolvedTypes;
+    }
+
+    /**
+     * Given a generic type, add its parameter types to an evolving
+     * map of resolved types. Some of the resolved types may be
+     * generic type variables which will need further resolution from
+     * other generic types.
+     */
+    private void addResolvedTypes(HashMap<Type, Type> resolvedTypes,
+                                  Type genericType) {
+        if (genericType == null) {
+            return;
+        }
+
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) genericType;
+            Class rawType = (Class) pt.getRawType();
+
+            Type[] actualTypeArguments = pt.getActualTypeArguments();
+            TypeVariable[] typeParameters = rawType.getTypeParameters();
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                resolvedTypes.put(typeParameters[i], actualTypeArguments[i]);
+            }
+        }
+    }
+
+    /**
+     * Given a map of resolved types, compose them together in order
+     * to resolve the actual concrete types that are plugged into the
+     * parameterized type.
+     */
+    private ArrayList<Class<?>> getParameterTypes(
+            Class<?> parameterizedType, HashMap<Type, Type> resolvedTypes) {
+        if (resolvedTypes == null) {
+            return null;
+        }
+
+        Type[] actualTypeArguments = parameterizedType.getTypeParameters();
+
+        ArrayList<Class<?>> result = new ArrayList<Class<?>>();
+
+        // resolve types by composing type variables.
+        for (Type baseType : actualTypeArguments) {
+            while (resolvedTypes.containsKey(baseType)) {
+                baseType = resolvedTypes.get(baseType);
+            }
+
+            result.add(getRawType(baseType));
+        }
+
+        return result;
+    }
 }
 

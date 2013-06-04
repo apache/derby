@@ -25,7 +25,6 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Test case for ungroupedAggregatesNegative.sql. 
@@ -103,37 +102,5 @@ public class UngroupedAggregatesNegativeTest extends BaseJDBCTestCase {
         Statement st = createStatement();
         assertStatementError("21000", st, sql);
         st.close();
-    }
-
-    /**
-     * Test that we get a reasonable error when trying to invoke
-     * a user-defined aggregate on a vm which doesn't support generics.
-     */
-    public  void    testUDAWithoutGenerics() throws Exception
-    {
-        if (JDBC.vmSupportsJDBC3()) { return; }
-        
-        Statement st = createStatement();
-
-        st.execute
-            (
-             "create derby aggregate bad_mode for int\n" +
-             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'"
-             );
-        
-        try {
-            st.execute
-                (
-                 "select bad_mode( columnnumber ) from sys.syscolumns" 
-                 );
-            fail( "Aggregate unexpectedly succeeded." );
-        } catch (SQLException se)
-        {
-            String  actualSQLState = se.getSQLState();
-            if ( !"XBCM5".equals( actualSQLState ) && !"XJ001".equals( actualSQLState )  && !"42ZC8".equals( actualSQLState ) )
-            {
-                fail( "Unexpected SQLState: " + actualSQLState );
-            }
-        }
     }
 }

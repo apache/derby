@@ -218,7 +218,6 @@ public interface SQLState {
 	String GENERATED_CLASS_INSTANCE_ERROR	= "XBCM2.S";
 	String GENERATED_CLASS_NO_SUCH_METHOD	= "XBCM3.S";
 	String GENERATED_CLASS_LIMIT_EXCEEDED	= "XBCM4.S";
-	String VM_LEVEL_TOO_LOW	= "XBCM5.S";
 
 	/*
 	** Cryptography

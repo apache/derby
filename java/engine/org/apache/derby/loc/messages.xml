@@ -3686,12 +3686,6 @@ Guide.
                 <arg>limitDescriptor</arg>
             </msg>
 
-            <msg>
-                <name>XBCM5.S</name>
-                <text>This operation requires that the JVM level be at least {0}.</text>
-                <arg>vmLevel</arg>
-            </msg>
-
         </family>
 
 
