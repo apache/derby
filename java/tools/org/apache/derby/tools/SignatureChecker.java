@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import org.apache.derby.jdbc.EmbeddedDataSource40;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
@@ -138,10 +137,7 @@ public class SignatureChecker
     private void    execute()
     {
         try {
-            Connection  conn;
-        
-            if ( _parsedArgs.isJ2ME() ) { conn = getJ2MEConnection(); }
-            else { conn = getJ2SEConnection(); }
+            Connection conn = getJ2SEConnection();
 
             if ( conn == null )
             {
@@ -427,16 +423,6 @@ public class SignatureChecker
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private Connection  getJ2MEConnection()
-        throws SQLException
-    {
-        EmbeddedDataSource40    dataSource = new EmbeddedDataSource40();
-
-        dataSource.setDatabaseName( _parsedArgs.getJ2meDatabaseName() );
-
-        return dataSource.getConnection();
-    }
-
     /**
      * We use reflection to get the J2SE connection so that references to
      * DriverManager will not generate linkage errors on old J2ME platforms
@@ -582,53 +568,25 @@ public class SignatureChecker
     static class ParsedArgs
     {
         private boolean _isValid;
-        private boolean _isJ2ME;
         private String _j2seConnectionUrl;
-        private String _j2meDatabaseName;
 
         public  ParsedArgs( String[] args )
         {
             _isValid = false;
-            
-            _isJ2ME = !classExists( "java.sql.DriverManager" );
-
             parseArgs( args );
         }
 
         public boolean isValid() { return _isValid; }
-        public boolean isJ2ME() { return _isJ2ME; }
 
         public String getJ2seConnectionUrl() { return _j2seConnectionUrl; }
-        public String getJ2meDatabaseName() { return _j2meDatabaseName; }
 
         private void parseArgs( String[] args )
         {
             if ( args == null ) { return; }
-            if ( args.length == 0 ) { return; }
-            
-            if ( isJ2ME() )
-            {
-                if ( args.length != 1 ) { return; }
+            if ( args.length != 1 ) { return; }
 
-                _j2meDatabaseName = args[ 0 ];
-                _isValid = true;
-            }
-            else
-            {
-                if ( args.length != 1 ) { return; }
-
-                _j2seConnectionUrl = args[ 0 ];
-                _isValid = true;
-            }
-        }
-
-        private boolean classExists( String className )
-        {
-            try {
-                Class.forName( className );
-
-                return true;
-            } catch (Throwable t) { return false; }
+            _j2seConnectionUrl = args[ 0 ];
+            _isValid = true;
         }
     }
 

@@ -30,6 +30,7 @@ import javax.sql.DataSource;
    Now that we no longer support Java 5, all functionality has migrated into the superclass, ClientDataSource.
    This class is preserved for backward compatibility reasons.
    </P>
+   @deprecated Use {@link ClientDataSource} instead.
  */
 public class ClientDataSource40 extends ClientDataSource
     implements DataSource /* compile-time check for 4.1 extension */

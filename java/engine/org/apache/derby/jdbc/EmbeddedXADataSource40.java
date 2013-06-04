@@ -28,6 +28,7 @@ package org.apache.derby.jdbc;
    Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedXADataSource.
    This class is preserved for backward compatibility reasons.
    </P>
+   @deprecated Use {@link EmbeddedXADataSource} instead.
  */
 public class EmbeddedXADataSource40 extends EmbeddedXADataSource
     implements javax.sql.XADataSource /* compile-time check for 4.1 extension */

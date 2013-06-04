@@ -27,6 +27,7 @@ package org.apache.derby.jdbc;
    Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedConnectionPoolDataSource.
    This class is preserved for backward compatibility reasons.
    </P>
+   @deprecated Use {@link EmbeddedConnectionPoolDataSource} instead.
  */
 public class EmbeddedConnectionPoolDataSource40 
     extends EmbeddedConnectionPoolDataSource

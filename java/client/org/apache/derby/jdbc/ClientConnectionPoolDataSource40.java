@@ -30,6 +30,7 @@ import javax.sql.ConnectionPoolDataSource;
    Now that we no longer support Java 5, all functionality has migrated into the superclass, ClientConnectionPoolDataSource.
    This class is preserved for backward compatibility reasons.
    </P>
+   @deprecated Use {@link ClientConnectionPoolDataSource} instead.
  */
 public class ClientConnectionPoolDataSource40
     extends ClientConnectionPoolDataSource

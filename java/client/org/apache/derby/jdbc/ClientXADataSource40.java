@@ -30,6 +30,7 @@ import javax.sql.XADataSource;
    Now that we no longer support Java 5, all functionality has migrated into the superclass, ClientXADataSource.
    This class is preserved for backward compatibility reasons.
    </P>
+   @deprecated Use {@link ClientXADataSource} instead.
  */
 public class ClientXADataSource40 extends ClientXADataSource
     implements XADataSource /* compile-time check for 4.1 extension */

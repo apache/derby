@@ -24,14 +24,14 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import javax.sql.CommonDataSource;
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource40;
-import org.apache.derby.jdbc.ClientDataSource40;
-import org.apache.derby.jdbc.ClientXADataSource40;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40;
-import org.apache.derby.jdbc.EmbeddedDataSource40;
-import org.apache.derby.jdbc.EmbeddedXADataSource40;
 import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
+import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientXADataSource;
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
+import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
@@ -47,14 +47,14 @@ public  class   Wrapper41DataSource
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private EmbeddedDataSource40    _embedded;
-    private EmbeddedConnectionPoolDataSource40    _ecpds;
-    private EmbeddedXADataSource40    _exads;
+    private EmbeddedDataSource               _embedded;
+    private EmbeddedConnectionPoolDataSource _ecpds;
+    private EmbeddedXADataSource             _exads;
     private BasicEmbeddedDataSource40    _basicembedded;
 
-    private ClientDataSource40      _netclient;
-    private ClientConnectionPoolDataSource40      _ccpds;
-    private ClientXADataSource40      _cxads;
+    private ClientDataSource               _netclient;
+    private ClientConnectionPoolDataSource _ccpds;
+    private ClientXADataSource             _cxads;
     private BasicClientDataSource40      _basicnetclient;
 
 
@@ -67,18 +67,18 @@ public  class   Wrapper41DataSource
     public Wrapper41DataSource( Object wrapped ) throws Exception
     {
         if (JDBC.vmSupportsJNDI()) {
-            if ( wrapped instanceof EmbeddedDataSource40  ) {
-                _embedded = (EmbeddedDataSource40 ) wrapped; }
-            else if ( wrapped instanceof EmbeddedConnectionPoolDataSource40 ) {
-                _ecpds = (EmbeddedConnectionPoolDataSource40) wrapped; }
-            else if ( wrapped instanceof EmbeddedXADataSource40 ) {
-                _exads = (EmbeddedXADataSource40) wrapped; }
-            else if ( wrapped instanceof ClientDataSource40 ) {
-                _netclient = (ClientDataSource40) wrapped; }
-            else if ( wrapped instanceof ClientConnectionPoolDataSource40 ) {
-                _ccpds = (ClientConnectionPoolDataSource40) wrapped; }
-            else if ( wrapped instanceof ClientXADataSource40 ) {
-                _cxads = (ClientXADataSource40) wrapped; }
+            if ( wrapped instanceof EmbeddedDataSource  ) {
+                _embedded = (EmbeddedDataSource) wrapped; }
+            else if ( wrapped instanceof EmbeddedConnectionPoolDataSource ) {
+                _ecpds = (EmbeddedConnectionPoolDataSource) wrapped; }
+            else if ( wrapped instanceof EmbeddedXADataSource ) {
+                _exads = (EmbeddedXADataSource) wrapped; }
+            else if ( wrapped instanceof ClientDataSource ) {
+                _netclient = (ClientDataSource) wrapped; }
+            else if ( wrapped instanceof ClientConnectionPoolDataSource ) {
+                _ccpds = (ClientConnectionPoolDataSource) wrapped; }
+            else if ( wrapped instanceof ClientXADataSource ) {
+                _cxads = (ClientXADataSource) wrapped; }
             else { throw nothingWrapped(); }
         } else {
             if ( wrapped instanceof BasicEmbeddedDataSource40  ) {
