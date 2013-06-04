@@ -3840,7 +3840,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 	     * In 10.1, setCharacterStream to update CLOB and varchar columns
 	     *  work even when update is going to update more than one row
 	     *  
-	     *  @param 	conn - Connection object
 	     *  @param 	testCLOB - true means test setCharacterStream on CLOB
 	     *                   - false means test setCharacterStream on VARCHAR
 	     * @throws Exception
@@ -3868,14 +3867,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 	        //Once DERBY-6237 is fixed, we should remove following if condition
 	        // Following if condition will skip the test for 2 row update when
 	        //  testing CLOB columns in both embedded and network server with 
-	        //  short data. This results in failure in 10.3
+	        //  short data.
 	        if ((!testCLOB))
 	            helperTestDerby6237(2,1, testCLOB);
 	        //update two rows and use large data
 	        //Once DERBY-6237 is fixed, we should remove following if condition
 	        // Following if condition will skip the test for 2 row update when
 	        //  testing CLOB columns in both embedded and network server with 
-	        //  large data. This results in failure in 10.3
+	        //  large data.
 	        if (!(testCLOB))
 	            helperTestDerby6237(2,2, testCLOB);
 
