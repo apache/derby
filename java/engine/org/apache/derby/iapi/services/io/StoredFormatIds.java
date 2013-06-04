@@ -1085,24 +1085,6 @@ public interface StoredFormatIds {
     //static public final int INDEX_ROW_V01_ID =
     //       (MIN_ID_2 + 238);
 
-    /**
-      class org.apache.derby.impl.sql.execute.AddJarConstantAction;
-     */
-    static public final int ADD_JAR_CONSTANT_ACTION_V01_ID =
-            (MIN_ID_2 + 211);
-
-    /**
-      class org.apache.derby.impl.sql.execute.DropJarConstantAction;
-     */
-    static public final int DROP_JAR_CONSTANT_ACTION_V01_ID =
-            (MIN_ID_2 + 212);
-
-    /**
-      class org.apache.derby.impl.sql.execute.ReplaceJarConstantAction;
-     */
-    static public final int REPLACE_JAR_CONSTANT_ACTION_V01_ID =
-            (MIN_ID_2 + 213);
-
      /**
     class org.apache.derby.Database.Language.Execution.ConstraintInfo
      */
@@ -1685,25 +1667,6 @@ public interface StoredFormatIds {
     /* org.apache.derby.impl.store.raw.xact.TransactionTable */
     public static final int RAW_STORE_TRANSACTION_TABLE =
             (MIN_ID_2 + 262);
-
-            
-    /******************************************************************
-    **
-    **  LocalDriver Formatables.
-    **
-    ******************************************************************/
-
-    /* NOT USED = org.apache.derby.impl.jdbc.ExternalizableConnection */
-    public static final int EXTERNALIZABLE_CONNECTION_ID = (MIN_ID_2 + 192);
-
-
-    /******************************************************************
-    **
-    **      InternalUtils MODULE CLASSES
-    **
-    ******************************************************************/
-    /* org.apache.derby.iapi.util.ByteArray */
-    public static final int FORMATABLE_BYTE_ARRAY_V01_ID = (MIN_ID_2 + 219);
 
 
    /******************************************************************
