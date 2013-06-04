@@ -165,11 +165,7 @@ implements Resetable, CloneableStream
             }
             catch (StandardException se)
             {
-                // Simplify this code when we can use the Java 1.5 constructor
-                // taking the cause as an argument.
-                IOException ioe = new IOException(se.toString());
-                ioe.initCause(se);
-                throw ioe;
+                throw new IOException(se);
             }
 
             this.bh.startReading();

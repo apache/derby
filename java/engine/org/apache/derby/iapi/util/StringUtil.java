@@ -462,29 +462,6 @@ public class StringUtil
         return quoteString(string, '\'');
     }
 
-    /**
-     * Turn an array of ints into a printable string. Returns what's returned
-     * in Java 5 by java.util.Arrays.toString(int[]).
-     */
-    public  static  String  stringify( int[] raw )
-    {
-        if ( raw == null ) { return "null"; }
-        
-        StringBuffer    buffer = new StringBuffer();
-        int                 count = raw.length;
-
-        buffer.append( "[ " );
-        for ( int i = 0; i < count; i++ )
-        {
-            if ( i > 0 ) { buffer.append( ", " ); }
-            buffer.append( raw[ i ] );
-        }
-        buffer.append( " ]" );
-
-        return buffer.toString();
-    }
-
-
 	/**
 	 * Utility for formatting which bends a multi-line string into shape for
 	 * outputting it in a context where there is <i>depth</i> tabs. Trailing

@@ -720,31 +720,18 @@ public class SqlXmlUtil
             // BigDecimal doesn't know how to handle NaN or +/- infinity, so
             // use Double to handle those cases.
             return Double.toString(d);
+        } else if (d == 0.0d) {
+            // If the result is zero, return plain "0". This special case is
+            // needed because BigDecimal.stripTrailingZeros() does not remove
+            // trailing zeros from zero, and will end up producing "0.0", see
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
+            return "0";
         } else {
             // Otherwise, use BigDecimal to format the number the way we want.
-            // Ideally, we'd just return
-            // BigDecimal.valueOf(d).stripTrailingZeros().toPlainString(),
-            // but valueOf(double), stripTrailingZeros() and toPlainString()
-            // were all introduced in Java 5, and we still need to support
-            // older platforms.
-            BigDecimal dec = new BigDecimal(Double.toString(d));
-
-            // See how many trailing zeros we have after the decimal point.
-            long unscaledValue = dec.unscaledValue().longValue();
-            int scale = dec.scale();
-            while (scale > 0 && unscaledValue % 10 == 0) {
-                scale--;
-                unscaledValue /= 10;
-            }
-
-            // If we have trailing zeros after the decimal point, remove them.
-            if (scale != dec.scale()) {
-                dec = BigDecimal.valueOf(unscaledValue, scale);
-            }
-
-            // Finally, convert the value to a string. The method
-            // BigDecimal.toPlainString() formats the number the way we want.
-            return dec.toPlainString();
+            // We could have used Double to format it, but then the resulting
+            // string would have been in scientific format (like 1.0e-3), and
+            // we want it to be in plain format (like 0.001).
+            return BigDecimal.valueOf(d).stripTrailingZeros().toPlainString();
         }
     }
 
