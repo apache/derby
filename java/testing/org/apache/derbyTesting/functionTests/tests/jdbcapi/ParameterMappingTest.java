@@ -5232,7 +5232,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      * In 10.1, setCharacterStream to update CLOB and varchar columns
      *  work even when update is going to update more than one row
      *  
-     *  @param 	conn - Connection object
      *  @param 	testCLOB - true means test setCharacterStream on CLOB
      *                   - false means test setCharacterStream on VARCHAR
      * @throws Exception
