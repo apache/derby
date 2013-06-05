@@ -213,7 +213,7 @@ public class Decorator {
      * @param test Test to decorate
      * @return Decorated test
      */
-    private static Test attributesDatabase(
+    public static Test attributesDatabase(
             final Properties attributes, Test test)
     {
         test = new ChangeConfigurationSetup(test) {
