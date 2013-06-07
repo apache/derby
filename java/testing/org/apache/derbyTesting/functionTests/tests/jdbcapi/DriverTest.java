@@ -69,6 +69,7 @@ public class DriverTest extends BaseJDBCTestCase {
         "testcreatedb1", 
         "testcreatedb2",
         "testcreatedb3",
+        "trailblank",
         "'wombat'"
     };
     
@@ -131,7 +132,7 @@ public class DriverTest extends BaseJDBCTestCase {
         }
 
         TestConfiguration config = TestConfiguration.getCurrent();
-        for (String dbName : ADDITIONAL_DBS) {
+                for (String dbName : ADDITIONAL_DBS) {
             removeDirectory(config.getDatabasePath(dbName));
         }
 
@@ -472,6 +473,22 @@ public class DriverTest extends BaseJDBCTestCase {
         
         assertConnect(false, url, null);
         shutdownDB(shuturl, null);
+        
+        // Test trailing spaces - Beetle 4653. Moved from urlLocale.sql
+        url = TestConfiguration.getCurrent().getJDBCUrl("trailblank");
+        url += ";create=true";
+        assertConnect(false,url,null);
+        
+        // regular connection with trailing spaces
+        url = TestConfiguration.getCurrent().
+                getJDBCUrl("trailblank     ");
+        assertConnect(true, url, null);
+        
+        // shutdown with trailing spaces
+        url = TestConfiguration.getCurrent().
+                getJDBCUrl("trailblank     ");
+        url += ";shutdown=true";
+        shutdownDB(url,null);
     }
     
     /**

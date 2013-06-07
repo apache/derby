@@ -58,6 +58,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LocalizedDisplayScriptTest.suite());
         suite.addTest(JapanCodeConversionTest.suite());
         suite.addTest(CaseI_tr_TRTest.suite());
+        suite.addTest(UrlLocaleTest.suite());
 
         return suite;
 	}
