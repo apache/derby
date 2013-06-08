@@ -242,6 +242,22 @@ public class SupportFilesSetup extends TestSetup {
             }
         });
     }
+    
+    /**
+     * Get the full name of the file.
+     * @param name short name of file
+     * @return absolute path of file in EXTINOUT
+     */
+    public static String getReadWriteFileName(final String name)
+    {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<String>() {
+            public String run() {
+                return getReadWrite(name).getAbsolutePath();
+            }
+        });
+    }
+    
     /**
      * Obtain a File for the local copy of a read-write resource.
      * @param name Base name for the resouce.

@@ -68,8 +68,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         s.executeUpdate("call checkRDefaultLoc()");
         
             // create a swiss database
-        String url = TestConfiguration.getCurrent().
-                getJDBCUrl(SupportFilesSetup.getReadWrite("swissdb").getPath());
+        String url = getReadWriteJDBCURL("swissdb");
         url += ";create=true;territory=fr_CH";
         Connection locConn = DriverManager.getConnection(url);
         createLocaleProcedures(locConn);
@@ -80,8 +79,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         
         //-- create a Hindi in India database (hi_IN)
         
-        url = TestConfiguration.getCurrent().getJDBCUrl(
-                SupportFilesSetup.getReadWrite("hindi").getPath());
+        url = getReadWriteJDBCURL("hindi");
         url += ";create=true;territory=hi_IN";
         locConn = DriverManager.getConnection(url);
         createLocaleProcedures(locConn);
@@ -91,8 +89,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         locConn.close();
        //- now try one with a variant
        // -- create a English in Israel database for JavaOS en_IL_JavaOS
-        url = TestConfiguration.getCurrent().
-                getJDBCUrl(SupportFilesSetup.getReadWrite("Israel").getPath());
+        url = getReadWriteJDBCURL("Israel");
         url += ";create=true;territory=en_IL_JavaOS";
         locConn = DriverManager.getConnection(url);
         createLocaleProcedures(locConn);
@@ -103,8 +100,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         
         // now try with just a language - we support this
         // as some vms do.
-        url = TestConfiguration.getCurrent().
-                getJDBCUrl(SupportFilesSetup.getReadWrite("bacon").getPath());
+        url = getReadWriteJDBCURL("bacon");
         url += ";create=true;territory=da";
         locConn = DriverManager.getConnection(url);
         createLocaleProcedures(locConn);
@@ -152,6 +148,16 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         }
     }
     
+    /**
+     * Get JDBC URL for database to be accessed in the read-write directory
+     * @param dbname short database name to be created 
+     * @return
+     */
+    private static String getReadWriteJDBCURL(String dbname)
+   {
+        return TestConfiguration.getCurrent().
+        getJDBCUrl(SupportFilesSetup.getReadWriteFileName(dbname));
+    }
     
     /**
      * Create procedures to test current territory value
