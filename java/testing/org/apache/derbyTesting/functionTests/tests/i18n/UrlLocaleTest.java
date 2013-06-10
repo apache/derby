@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 
 import junit.framework.Test;
@@ -31,6 +32,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -120,7 +122,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         //Connection without territory specified in territory attribute        
         String url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail1");
         url += ";create=true;territory=";
-        testInvalidTerritoryFormat(url);
+        checkInvalidTerritoryFormat(url);
         //- database will not have been created so this connection will fail
         url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail1");
         try {
@@ -130,13 +132,133 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
             assertSQLState("XJ004", se);
           }
         //Invalid territory specification
-        testInvalidTerritoryFormat("en_");
-        testInvalidTerritoryFormat("en_d");
-        testInvalidTerritoryFormat("en-US");
+        checkInvalidTerritoryFormat("en_");
+        checkInvalidTerritoryFormat("en_d");
+        checkInvalidTerritoryFormat("en-US");
         
     }
+    /**
+     * Test valid message resolution for Locale
+     * converted from i18n/messageLocale.sql
+     * 
+     */
+    public void testMessageLocale()  throws SQLException {
+        // Test with unknown Locale. Should have all English messages
+        LocaleTestSetup.setDefaultLocale(
+            new java.util.Locale("rr", "TT"));
+        String url = getReadWriteJDBCURL("rrTTdb");
+        url += ";create=true";
+        Connection locConn = DriverManager.getConnection(url);
+        Statement s = locConn.createStatement();
+        createLocaleProcedures(locConn);
+        // check this current database was created with the default locale rr_TT
+        s.executeUpdate("call checkDefaultLoc()");
+        // check database Locale
+        s.executeUpdate("call checkDatabaseLoc('rr_TT')");
+        // Expect an error in English because rr_TT has no translated messages.
+        // Language is determined by choosing a random word (that we hope 
+        // won't change) in the current 
+        try {
+            s.executeUpdate("create table t1 oops (i int)");
+        } catch (SQLException se) {
+            assertSQLState("42X01", se);
+            assertTrue("Expected English Message with \"Encountered\" " ,
+                      (se.getMessage().indexOf("Encountered") != -1));
+            
+        }
+        // Setup for warning
+        s.executeUpdate("create table t2 (i int)");
+        s.executeUpdate("create index i2_a on t2(i)");
 
-    private void testInvalidTerritoryFormat(String territory) {
+        // Expect WARNING to also be English. Index is a duplicate
+        s.executeUpdate("create index i2_b on t2(i)");
+        SQLWarning sqlw = s.getWarnings();
+        assertSQLState("01504", sqlw);
+        assertTrue("Expected English warning", 
+                sqlw.getMessage().indexOf("duplicate") != -1);
+        
+        s.close();
+        locConn.close();
+      
+        
+       // Set default Locale to German
+        LocaleTestSetup.setDefaultLocale(new java.util.Locale("de","DE"));
+        
+        //create a database with a locale that has a small
+        // number of messages. Missing ones will default to
+        // the locale of the default locale: German;
+        url =  getReadWriteJDBCURL("qqPPdb");
+        url += ";create=true;territory=qq_PP_testOnly";
+        locConn = DriverManager.getConnection(url);
+        s = locConn.createStatement();
+        s.executeUpdate("create table t2 (i int)");
+        s.executeUpdate("create index i2_a on t2(i)");
+        // Error that is in qq_PP messages
+        try {
+            s.executeUpdate("create table t1 oops (i int)");
+        } catch (SQLException se) {
+            assertSQLState("42X01", se);
+            assertTrue("Expected qq_PP Message with \"Encountered\" " ,
+                      (se.getMessage().indexOf("Encountered") != -1));
+            
+        }
+        
+        // Expect WARNING to be in German (default) because there is no 
+        //qq_PP message. Index is a duplicate
+        s.executeUpdate("create index i2_b on t2(i)");
+        sqlw = s.getWarnings();
+        assertSQLState("01504", sqlw);
+        assertTrue("Expected German warning with Duplikat", 
+                sqlw.getMessage().indexOf(" Duplikat") != -1);
+        
+        // Error from default German Locale as it does not exist in qq_PP
+        // from default locale (German);
+        try {
+            s.executeUpdate("drop table t3");
+        } catch (SQLException se) {
+            assertSQLState("42Y55", se);
+            assertTrue("Expected German Message with vorhanden"  ,
+                      (se.getMessage().indexOf("vorhanden") != -1));
+            
+        }
+        
+        //Now all English messages
+        url =  getReadWriteJDBCURL("enUSdb");
+        url += ";create=true;territory=en_US";
+        locConn = DriverManager.getConnection(url);
+        s = locConn.createStatement();
+        s.executeUpdate("create table t2 (i int)");
+        s.executeUpdate("create index i2_a on t2(i)");
+
+        try {
+            s.executeUpdate("create table t1 oops (i int)");
+        } catch (SQLException se) {
+            assertSQLState("42X01", se);
+            assertTrue("Expected English message with \"Encountered\" " ,
+                      (se.getMessage().indexOf("Encountered") != -1));
+            
+        }
+        
+        // Expect WARNING to be in English because it is English db
+        // Even though German default Locale still
+        s.executeUpdate("create index i2_b on t2(i)");
+         sqlw = s.getWarnings();
+        assertSQLState("01504", sqlw);
+        assertTrue("Expected English warning with duplicate", 
+                sqlw.getMessage().indexOf("duplicate") != -1);
+ 
+        try {
+            s.executeUpdate("drop table t3");
+        } catch (SQLException se) {
+            assertSQLState("42Y55", se);
+            assertTrue("Expected English Message with performed"  ,
+                      (se.getMessage().indexOf("performed") != -1));
+            
+        }
+        
+    }
+  
+    private void checkInvalidTerritoryFormat(String territory) {
         try {
             String url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail3");
             url += ";create=true;territory=" + territory;
@@ -173,7 +295,10 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
                     "style java language java external name " +
                     "'org.apache.derbyTesting.functionTests.tests.i18n." +
                     "DefaultLocale.checkRDefaultLocale'");
-
+        s.executeUpdate("create procedure checkDefaultLoc() parameter " +
+                "style java language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.i18n." +
+                "DefaultLocale.checkDefaultLocale'");
     }
     
     public static Test suite() {
