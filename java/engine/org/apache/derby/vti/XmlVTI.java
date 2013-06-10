@@ -21,19 +21,25 @@ limitations under the License.
 
 package org.apache.derby.vti;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.InputStream;
 import java.net.URL;
-import java.sql.*;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
+import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <p>
  * This is a VTI designed to read XML files which are structured like row sets.
- * This VTI takes the following arguments:
+ * One form of this VTI takes the following arguments. This form is useful when
+ * all of the columns in the row can be constructed from data nested INSIDE the row Element.
  * </p>
  *
  * <ul>
@@ -43,7 +49,7 @@ import org.w3c.dom.*;
  * </ul>
  *
  * <p>
- * Here is a sample declaration:
+ * Here is a sample declaration of this first form of the XmlVTI:
  * </p>
  *
  * <pre>
@@ -76,6 +82,70 @@ import org.w3c.dom.*;
  * 
  * select * from findbugs where bugCount != 0;
  * </pre>
+ *
+ * <p>
+ * A second form of this VTI takes the following arguments. This form is useful when
+ * some of the columns in the row are "inherited" from outer elements inside which the
+ * row element nests:
+ * </p>
+ *
+ * <ul>
+ * <li>xmlResourceName - An URL identifying an xml resource.</li>
+ * <li>rowTag - The tag of the element which contains the row-structured content.</li>
+ * <li>parentTags - Attributes and elements (to be treated as columns) from outer elements in which the rowTag is nested.</li>
+ * <li>childTags - Attributes and elements (to be treated as columns) inside the row element.</li>
+ * </ul>
+ *
+ *
+ * <p>
+ * Here is a sample declaration of this second form of the XmlVTI. Using the second form
+ * involves declaring an ArrayList type and a factory method too:
+ * </p>
+ *
+ * <pre>
+ * create type ArrayList external name 'java.util.ArrayList' language java;
+ * 
+ * create function asList( cell varchar( 32672 ) ... ) returns ArrayList
+ * language java parameter style derby no sql
+ * external name 'org.apache.derby.vti.XmlVTI.asList';
+ * 
+ * create function optTrace
+ * (
+ *     xmlResourceName varchar( 32672 ),
+ *     rowTag varchar( 32672 ),
+ *     parentTags ArrayList,
+ *     childTags ArrayList
+ * )
+ * returns table
+ * (
+ *     stmtID    int,
+ *     queryID   int,
+ *     complete  boolean,
+ *     summary   varchar( 32672 ),
+ *     type        varchar( 50 ),
+ *     estimatedCost        double,
+ *     estimatedRowCount    int
+ * )
+ * language java parameter style derby_jdbc_result_set no sql
+ * external name 'org.apache.derby.vti.XmlVTI.xmlVTI';
+ * 
+ * create view optTrace as
+ *        select *
+ *        from table
+ *        (
+ *             optTrace
+ *             (
+ *                 'file:///Users/me/derby/mainline/z.xml',
+ *                 'planCost',
+ *                 asList( 'stmtID', 'queryID', 'complete' ),
+ *                 asList( 'summary', 'type', 'estimatedCost', 'estimatedRowCount' )
+ *             )
+ *         ) v
+ * ;
+ * 
+ * select * from optTrace
+ * where stmtID = 6 and complete
+ * order by estimatedCost * </pre>
  */
 public  class   XmlVTI  extends StringColumnVTI
 {
@@ -101,6 +171,13 @@ public  class   XmlVTI  extends StringColumnVTI
     private DocumentBuilder _builder;
     private NodeList    _rawRows;
 
+    //
+    // The first n column names are attribute/element tags from parent
+    // elements. The trailing column names are attribute/element tags from
+    // the row element or its children.
+    //
+    private int     _firstChildTagIdx;  // first attribute/element to be found in the row or below
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTRUCTORS
@@ -113,24 +190,46 @@ public  class   XmlVTI  extends StringColumnVTI
      * element, and an array of attribute-names/element-tags underneath the row element
      * </p>
      */
-    public  XmlVTI( String xmlResourceName, String rowTag, String... childTags )
+    public  XmlVTI( String xmlResourceName, String rowTag, int firstChildTagIdx, String... columnTags )
     {
-        super( childTags );
+        super( columnTags );
 
         _xmlResourceName = xmlResourceName;
         _rowTag = rowTag;
+        _firstChildTagIdx = firstChildTagIdx;
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // ENTRY POINT (SQL FUNCTION)
+    // ENTRY POINTS (SQL FUNCTIONS)
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** This is the static method bound to the function */
+    /** This is the static method for creating functions with only child tags */
     public  static  XmlVTI  xmlVTI( String xmlResourceName, String rowTag, String... childTags )
     {
-        return new XmlVTI( xmlResourceName, rowTag, childTags );
+        return new XmlVTI( xmlResourceName, rowTag, 0, childTags );
+    }
+    
+    /** This is the static method for creating functions with both parent and child tags */
+    public  static  XmlVTI  xmlVTI
+        ( String xmlResourceName, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
+    {
+        String[]    allTags = new String[ parentTags.size() + childTags.size() ];
+        int     idx = 0;
+        for ( String tag : parentTags ) { allTags[ idx++ ] = tag; }
+        for ( String tag : childTags ) { allTags[ idx++ ] = tag; }
+        
+        return new XmlVTI( xmlResourceName, rowTag, parentTags.size(), allTags );
+    }
+
+    /** Factory method to create an ArrayList<String> */
+    public  static  ArrayList<String>   asList( String... cells )
+    {
+        ArrayList<String>   retval = new ArrayList<String>();
+        for ( String cell : cells ) { retval.add( cell ); }
+        
+        return retval;
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +302,7 @@ public  class   XmlVTI  extends StringColumnVTI
      * Fault in the list of rows.
      * </p>
      */
-     private    void    readRows() throws Exception
+    private    void    readRows() throws Exception
     {
         DocumentBuilderFactory  factory = DocumentBuilderFactory.newInstance();
         
@@ -225,7 +324,7 @@ public  class   XmlVTI  extends StringColumnVTI
      * Parse a row into columns.
      * </p>
      */
-     private    void    parseRow( int rowNumber ) throws Exception
+    private    void    parseRow( int rowNumber ) throws Exception
     {
         Element         rawRow = (Element) _rawRows.item( rowNumber );
         int                 columnCount = getColumnCount();
@@ -234,35 +333,59 @@ public  class   XmlVTI  extends StringColumnVTI
 
         for ( int i = 0; i < columnCount; i++ )
         {
-            // first look for an attribute by the column name
-            String      columnName = getColumnName( i + 1 );
-            String      contents = rawRow.getAttribute( columnName );
-
-            // if there is not attribute by that name, then look for descendent elements by
-            // that name. concatenate them all.
-            if ( (contents == null) ||  "".equals( contents ) )
-            {
-                NodeList    children = rawRow.getElementsByTagName( columnName );
-
-                if ( (children != null) && (children.getLength() > 0) )
-                {
-                    int                 childCount = children.getLength();
-                    StringBuffer    buffer = new StringBuffer();
-
-                    for ( int j = 0; j < childCount; j++ )
-                    {
-                        Element     child = (Element) children.item( j );
-                        // separate values with spaces.
-                        if (j != 0)
-                            buffer.append(" ");
-                        buffer.append( squeezeText( child ) );
-                    }
-                    contents = buffer.toString();
-                }
-            }
-
-            _currentRow[ i ] = contents;
+            _currentRow[ i ] = findColumnValue( rawRow, i );
         }
+    }
+
+    /**
+     * <p>
+     * Find the value of a column inside an element. The columnNumber is 0-based.
+     * </p>
+     */
+    private String  findColumnValue( Element rawRow, int columnNumber )
+        throws Exception
+    {
+        // handle tags which are supposed to come from outer elements
+        boolean     inParent = (columnNumber < _firstChildTagIdx);
+        if ( inParent )
+        {
+            Node    parent = rawRow.getParentNode();
+            if ( (parent == null ) || !( parent instanceof Element) ) { return null; }
+            else { rawRow = (Element) parent; }
+        }
+        
+        // first look for an attribute by the column name
+        String      columnName = getColumnName( columnNumber + 1 );
+        String      contents = rawRow.getAttribute( columnName );
+
+        // missing attributes turn up as empty strings. make them null instead
+        if ( "".equals( contents ) ) { contents = null; }
+
+        // if there is not attribute by that name, then look for descendent elements by
+        // that name. concatenate them all.
+        if ( contents == null )
+        {
+            NodeList    children = rawRow.getElementsByTagName( columnName );
+
+            if ( (children != null) && (children.getLength() > 0) )
+            {
+                int                 childCount = children.getLength();
+                StringBuilder    buffer = new StringBuilder();
+
+                for ( int j = 0; j < childCount; j++ )
+                {
+                    Element     child = (Element) children.item( j );
+                    // separate values with spaces.
+                    if (j != 0){ buffer.append(" "); }
+                    buffer.append( squeezeText( child ) );
+                }
+                contents = buffer.toString();
+            }
+        }
+
+        // recurse if looking in parent element
+        if ( inParent && (contents == null) ) { return findColumnValue( rawRow, columnNumber ); }
+        else { return contents; }
     }
     
     /**
