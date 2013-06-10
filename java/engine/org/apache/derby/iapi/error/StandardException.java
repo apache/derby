@@ -71,11 +71,6 @@ public class StandardException extends Exception
 
 	}
 
-	protected StandardException(String messageID, Object[] args)
-	{
-		this(messageID, (Throwable) null, args);
-	}
-
 	protected StandardException(String messageID, Throwable t, Object[] args)
 	{
 		super(messageID);
@@ -260,38 +255,17 @@ public class StandardException extends Exception
 		return se;
 	}
 
-	/* 0 arguments */
+    public static StandardException
+            newException(String messageId, Object... args) {
+        return newException(messageId, (Throwable) null, args);
+    }
 
-	public static StandardException newException(String messageID) {
-		return new StandardException(messageID);
-	}
-	public static StandardException newException(String messageID, Throwable t) {
-		return new StandardException(messageID, t, (Object[]) null);
-	}
-
-	/* 1 argument */
-
-	public static StandardException newException(String messageID, Object a1) {
-		Object[] oa = new Object[] {a1};
-		return new StandardException(messageID, oa);
-	}
-
-	public static StandardException newException(String messageID,
-												 Object[] a1) {
-		return new StandardException(messageID, a1);
-	}
-
-	public static StandardException newException(String messageID, Throwable t, Object a1) {
-		Object[] oa = new Object[] {a1};
-		return new StandardException(messageID, t, oa);
-	}
+    public static StandardException
+            newException(String messageId, Throwable t, Object... args) {
+        return new StandardException(messageId, t, args);
+    }
 
 	/* 2 arguments */
-
-	public static StandardException newException(String messageID, Object a1, Object a2) {
-		Object[] oa = new Object[] {a1, a2};
-		return new StandardException(messageID, oa);
-	}
 
     /**
      * Dummy exception to catch incorrect use of
@@ -321,18 +295,8 @@ public class StandardException extends Exception
         throw new BadMessageArgumentException();
     }
 
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2) {
-		Object[] oa = new Object[] {a1, a2};
-		return new StandardException(messageID, t, oa);
-	}
-
 	/* 3 arguments */
 
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3) {
-		Object[] oa = new Object[] {a1, a2, a3};
-		return new StandardException(messageID, oa);
-	}
-    
     /**
      * Dummy overload which should never be called. Only used to
      * detect incorrect usage, at compile time.
@@ -350,62 +314,6 @@ public class StandardException extends Exception
         throws BadMessageArgumentException {
         throw new BadMessageArgumentException(); 
     }
-
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3) {
-		Object[] oa = new Object[] {a1, a2, a3};
-		return new StandardException(messageID, t, oa);
-	}
-
-	/* 4 arguments */
-
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3, Object a4) {
-		Object[] oa = new Object[] {a1, a2, a3, a4};
-		return new StandardException(messageID, oa);
-	}
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3, Object a4) {
-		Object[] oa = new Object[] {a1, a2, a3, a4};
-		return new StandardException(messageID, t, oa);
-	}
- 
-	/* 5 arguments */
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5};
-		return new StandardException(messageID, oa);
-	}
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3, Object a4, Object a5) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5};
-		return new StandardException(messageID, t, oa);
-	}
-
-	/* 6 arguments */
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6};
-		return new StandardException(messageID, oa);
-	}
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6};
-		return new StandardException(messageID, t, oa);
-	}
-
-	/* 7 arguments */
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6, a7};
-		return new StandardException(messageID, oa);
-	}
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6, a7};
-		return new StandardException(messageID, t, oa);
-	}
-
-	/* 8 arguments */
-	public static StandardException newException(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7, Object a8) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6, a7, a8};
-		return new StandardException(messageID, oa);
-	}
-	public static StandardException newException(String messageID, Throwable t, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7, Object a8) {
-		Object[] oa = new Object[] {a1, a2, a3, a4, a5, a6, a7, a8};
-		return new StandardException(messageID, t, oa);
-	}
 
     /**
      * Creates a new StandardException using message text that has already been localized.
@@ -693,27 +601,7 @@ public class StandardException extends Exception
 	** SQL warnings
 	*/
 
-	public static SQLWarning newWarning(String messageId) {
-
-		return newWarningCommon( messageId, (Object[]) null );
-
-	}
-
-	public static SQLWarning newWarning(String messageId, Object a1) {
-
-		Object[] oa = new Object[] {a1};
-
-		return newWarningCommon( messageId, oa );
-	}
-
-	public static SQLWarning newWarning(String messageId, Object a1, Object a2) {
-
-		Object[] oa = new Object[] {a1, a2};
-
-		return newWarningCommon( messageId, oa );
-	}
-
-	private	static	SQLWarning	newWarningCommon( String messageId, Object[] oa )
+    public static SQLWarning newWarning(String messageId, Object... oa)
 	{
 		String		message = MessageService.getCompleteMessage(messageId, oa);
 		String		state = StandardException.getSQLStateFromIdentifier(messageId);
