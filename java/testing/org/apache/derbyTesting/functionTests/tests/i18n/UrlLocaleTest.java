@@ -120,13 +120,13 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
      */
     public void testUrlLocaleNegative() throws SQLException {
         //Connection without territory specified in territory attribute        
-        String url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail1");
+        String url = getReadWriteJDBCURL("fail1");
         url += ";create=true;territory=";
         checkInvalidTerritoryFormat(url);
         //- database will not have been created so this connection will fail
-        url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail1");
+        url = getReadWriteJDBCURL("fail1");
         try {
-            Connection locConn = DriverManager.getConnection(url);
+            DriverManager.getConnection(url);
             fail("Database connect " + url + " should fail because db does not exist");
         }    catch (SQLException se ) {   
             assertSQLState("XJ004", se);
@@ -260,9 +260,9 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
   
     private void checkInvalidTerritoryFormat(String territory) {
         try {
-            String url = TestConfiguration.getCurrent().getJDBCUrl("../extinout/fail3");
+            String url = getReadWriteJDBCURL("fail3");
             url += ";create=true;territory=" + territory;
-            Connection locConn = DriverManager.getConnection(url);
+            DriverManager.getConnection(url);
             fail("connection without territory: " + url + "should have failed");
         } catch (SQLException se ) {
           assertSQLState("XJ041", se);
