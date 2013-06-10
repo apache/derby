@@ -151,7 +151,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
     /**
      * Get JDBC URL for database to be accessed in the read-write directory
      * @param dbname short database name to be created 
-     * @return
+     * @return the JDBC URL for the database
      */
     private static String getReadWriteJDBCURL(String dbname)
    {
