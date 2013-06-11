@@ -90,11 +90,11 @@ For both conditions the performance of the database should be about the same.
 2. Make sure to copy the derby.properties file provided under the directory org/apache/derbyTesting/system/mailjdbc
 3. Run java org.apache.derbyTesting.system.mailjdbc.MailJdbc embedded
  or
- java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer (To run in the NetworkServer mode you should start the n/w server manually)
+ java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer (To run in the NetworkServer mode you should start the n/w server manually. You also need to start NetworkServer from the same directory as the client, otherwise, the client threads attempting to run compress will fail to find the database.)
 4. If you want to use the same database as the previous run, 
    Run java org.apache.derbyTesting.system.mailjdbc.MailJdbc embedded samedb
  or
-  java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer samedb (To run in the NetworkServer mode you should start the n/w server manually)
+  java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer samedb (To run in the NetworkServer mode you should start the n/w server manually. You also need to start NetworkServer from the same directory as the client, otherwise, the client threads attempting to run compress will fail to find the database.)
 
 There are 2 output files. 
 1. Activity.out - which will give all the activities done by the test
