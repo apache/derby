@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 
 /**
@@ -88,7 +89,7 @@ public  class   DummyOptTrace   implements  OptTrace
     //
     // Don't need to bother implementing the rest of the behavior.
     //
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID ) {}
+    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList ) {}
     public  void    traceTimeout( long currentTime, CostEstimate bestCost ) {}
     public  void    traceVacuous() {}
     public  void    traceCompleteJoinOrder() {}
@@ -105,7 +106,8 @@ public  class   DummyOptTrace   implements  OptTrace
     public  void    traceCurrentPlanAvoidsSort( CostEstimate bestCost, CostEstimate currentSortAvoidanceCost ) {}
     public  void    traceCheapestPlanSoFar( int planType, CostEstimate currentCost ) {}
     public  void    traceSortNeededForOrdering( int planType, RequiredRowOrdering requiredRowOrdering ) {}
-    public  void    traceRememberingBestJoinOrder( int joinPosition, int[] bestJoinOrder, JBitSet assignedTableMap ) {}
+    public  void    traceRememberingBestJoinOrder
+        ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap ) {}
     public  void    traceSkippingBecauseTooMuchMemory( int maxMemoryPerTable ) {}
     public  void    traceCostOfNScans( int tableNumber, double rowCount, CostEstimate cost ) {}
     public  void    traceSkipUnmaterializableHashJoin() {}

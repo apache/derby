@@ -298,6 +298,10 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		return StoreCostController.STORECOST_SCAN_SET;
 	}
 
+	/** @see JoinStrategy#getOperatorSymbol */
+    public  String  getOperatorSymbol() { return "#"; }
+
+
 	/** @see JoinStrategy#resultSetMethodName */
 	public String resultSetMethodName(boolean bulkFetch, boolean multiprobe) {
 		return "getHashScanResultSet";

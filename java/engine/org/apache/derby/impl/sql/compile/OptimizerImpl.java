@@ -1864,7 +1864,8 @@ public class OptimizerImpl implements Optimizer
 		if (tracingIsOn())
 		{
 			if (requiredRowOrdering != null)    { tracer().traceSortNeededForOrdering( planType, requiredRowOrdering ); }
-            tracer().traceRememberingBestJoinOrder( joinPosition, ArrayUtil.copy( bestJoinOrder ), (JBitSet) assignedTableMap.clone() );
+            tracer().traceRememberingBestJoinOrder
+                ( joinPosition, ArrayUtil.copy( bestJoinOrder ), planType, currentCost, (JBitSet) assignedTableMap.clone() );
 		}
 	}
 

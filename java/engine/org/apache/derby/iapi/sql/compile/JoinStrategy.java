@@ -176,6 +176,9 @@ public interface JoinStrategy {
 	/** Get the costing type, for use with StoreCostController.getScanCost */
 	int scanCostType();
 
+    /** Get the operator symbol used to represent this join strategy in optimizer traces */
+    String  getOperatorSymbol();
+
 	/**
 	 * Get the name of the result set method for base table scans
 	 *

@@ -47,7 +47,7 @@ public  interface   OptTrace
     public  void    traceStartStatement( String statementText );
 
     /** Start optimizer tracing. */
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID );
+    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList );
 
     /** Say that the optimizer ran out of time. */
     public  void    traceTimeout( long currentTime, CostEstimate bestCost );
@@ -98,7 +98,8 @@ public  interface   OptTrace
     public  void    traceSortNeededForOrdering( int planType, RequiredRowOrdering requiredRowOrdering );
 
     /** Say that we are remembering the current plan as the best join order so far. */
-    public  void    traceRememberingBestJoinOrder( int joinPosition, int[] bestJoinOrder, JBitSet assignedTableMap );
+    public  void    traceRememberingBestJoinOrder
+        ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap );
 
     /** Say that we are skipping a plan because it consumes too much memory. */
     public  void    traceSkippingBecauseTooMuchMemory( int maxMemoryPerTable );

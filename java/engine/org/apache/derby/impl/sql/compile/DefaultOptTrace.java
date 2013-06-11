@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
@@ -78,7 +79,7 @@ public  class   DefaultOptTrace implements  OptTrace
         appendTraceString( statementText );
     }
     
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID )
+    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList )
     {
         appendTraceString
             (
@@ -199,7 +200,8 @@ public  class   DefaultOptTrace implements  OptTrace
              );
     }
 
-    public  void    traceRememberingBestJoinOrder( int joinPosition, int[] bestJoinOrder, JBitSet assignedTableMap )
+    public  void    traceRememberingBestJoinOrder
+        ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap )
     {
         appendTraceString
             (

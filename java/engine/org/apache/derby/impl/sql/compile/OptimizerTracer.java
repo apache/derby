@@ -73,6 +73,8 @@ public	class   OptimizerTracer  implements OptionalTool
      * </p>
      *
      * <ul>
+     * <li>xml - If the first arg is the "xml" literal, then trace output will be
+     * formatted as xml.</li>
      * <li>custom, $class - If the first arg is the "custom" literal, then the next arg must be
      * the name of a class which implements org.apache.derby.iapi.sql.compile.OptTrace
      * and which has a 0-arg constructor. The 0-arg constructor is called and the resulting
@@ -87,6 +89,13 @@ public	class   OptimizerTracer  implements OptionalTool
         if ( (configurationParameters == null) || (configurationParameters.length == 0) )
         {
             tracer = new DefaultOptTrace();
+        }
+        else if ( "xml".equals( configurationParameters[ 0 ] ) )
+        {
+            try {
+                tracer = new XMLOptTrace();
+            }
+            catch (Throwable t) { throw wrap( t ); }
         }
         else if ( "custom".equals( configurationParameters[ 0 ] ) )
         {

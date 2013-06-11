@@ -66,7 +66,7 @@ public class Level2OptimizerImpl extends OptimizerImpl
 		this.lcc = lcc;
 
 		// Optimization started
-		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode() ); }
+		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode(), optimizableList ); }
 	}
 
 	/** @see Optimizer#getLevel */
