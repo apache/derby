@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Locale;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -137,15 +138,15 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         checkInvalidTerritoryFormat("en-US");
         
     }
+
     /**
-     * Test valid message resolution for Locale
+     * Test valid message resolution for an unknown Locale.
      * converted from i18n/messageLocale.sql
-     * 
+     *
+     * This test case must run in a decorator that sets the locale to one
+     * that is not recognized by Derby.
      */
-    public void testMessageLocale()  throws SQLException {
-        // Test with unknown Locale. Should have all English messages
-        LocaleTestSetup.setDefaultLocale(
-            new java.util.Locale("rr", "TT"));
+    public void messageLocale_unknown() throws SQLException {
         String url = getReadWriteJDBCURL("rrTTdb");
         url += ";create=true";
         Connection locConn = DriverManager.getConnection(url);
@@ -179,18 +180,23 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         
         s.close();
         locConn.close();
-      
+    }
         
-       // Set default Locale to German
-        LocaleTestSetup.setDefaultLocale(new java.util.Locale("de","DE"));
-        
+    /**
+     * Test valid message resolution for German Locale.
+     * converted from i18n/messageLocale.sql
+     *
+     * This test case must run in a decorator that sets the default locale
+     * to Locale.GERMANY.
+     */
+    public void messageLocale_Germany() throws SQLException {
         //create a database with a locale that has a small
         // number of messages. Missing ones will default to
         // the locale of the default locale: German;
-        url =  getReadWriteJDBCURL("qqPPdb");
+        String url = getReadWriteJDBCURL("qqPPdb");
         url += ";create=true;territory=qq_PP_testOnly";
-        locConn = DriverManager.getConnection(url);
-        s = locConn.createStatement();
+        Connection locConn = DriverManager.getConnection(url);
+        Statement s = locConn.createStatement();
         s.executeUpdate("create table t2 (i int)");
         s.executeUpdate("create index i2_a on t2(i)");
         // Error that is in qq_PP messages
@@ -206,7 +212,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         // Expect WARNING to be in German (default) because there is no 
         //qq_PP message. Index is a duplicate
         s.executeUpdate("create index i2_b on t2(i)");
-        sqlw = s.getWarnings();
+        SQLWarning sqlw = s.getWarnings();
         assertSQLState("01504", sqlw);
         assertTrue("Expected German warning with Duplikat", 
                 sqlw.getMessage().indexOf(" Duplikat") != -1);
@@ -304,6 +310,13 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(UrlLocaleTest.class);
+        suite.addTest(new LocaleTestSetup(
+                new UrlLocaleTest("messageLocale_unknown"),
+                new Locale("rr", "TT")));
+        suite.addTest(new LocaleTestSetup(
+                new UrlLocaleTest("messageLocale_Germany"),
+                Locale.GERMANY));
+
         Test tsuite =  new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the table used in the test cases.
