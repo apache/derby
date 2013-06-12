@@ -59,7 +59,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(JapanCodeConversionTest.suite());
         suite.addTest(CaseI_tr_TRTest.suite());
         suite.addTest(UrlLocaleTest.suite());
-
+        suite.addTest(I18NImportExport.suite());
+        suite.addTest(ImportExportProcedureESTest.suite());
         return suite;
 	}
 }

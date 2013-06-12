@@ -42,7 +42,7 @@ import junit.framework.TestSuite;
  * Converted from ieptests.sql
  *
  */
-public final class ImportExportProcedureTest extends BaseJDBCTestCase {
+public class ImportExportProcedureTest extends BaseJDBCTestCase {
 
     /**
      * Public constructor required for running test as standalone JUnit.
