@@ -371,6 +371,12 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         checkAccessToOwner(
             fbd, true, POSITIVE);
 
+        // DERBY-6258: When taking a backup, a file called BACKUP.HISTORY
+        // is created in the original database directory. Verify that its
+        // permissions are restricted.
+        final File db = new File(home, dbName);
+        checkAccessToOwner(db, true, POSITIVE);
+
         // Prepare to restore
         TestConfiguration.getCurrent().shutdownDatabase();
 
@@ -383,7 +389,6 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
             ds, "connectionAttributes", "restoreFrom=" + fullRestoreDir);
         final Connection con = ds.getConnection();
 
-        final File db = new File(home, dbName);
         checkAccessToOwner(
             db, true, POSITIVE);
 
@@ -771,8 +776,8 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                     } else {
                                         if (expectedOutcome == POSITIVE) {
                                             fail(
-                                                "unexpected uid has access: " +
-                                                princName);
+                                                "unexpected uid " + princName +
+                                                " can access file " + file);
                                         } else {
                                             someThingBeyondOwnerFound = true;
                                         }
@@ -794,6 +799,10 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                 Object perm = i.next();
 
                                 if (unwantedPermissions.contains(perm)) {
+                                    if (expectedOutcome == POSITIVE) {
+                                        fail("unwanted permission " + perm +
+                                             " for file " + file);
+                                    }
                                     someThingBeyondOwnerFound = true;
                                     break;
                                 }

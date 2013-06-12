@@ -37,6 +37,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
@@ -111,7 +112,16 @@ class DirFile4 extends DirFile
      */
     public OutputStream getOutputStream( final boolean append) throws FileNotFoundException
     {
-        return new FileOutputStream( (File) this, append);
+        boolean existed = exists();
+        OutputStream result = new FileOutputStream( (File) this, append);
+
+        if (!existed) {
+            // The file didn't exist before and was created when the stream
+            // was opened. Restrict the permissions of the newly created file.
+            FileUtil.limitAccessToOwner(this);
+        }
+
+        return result;
     }
 
     public synchronized int getExclusiveFileLock() throws StandardException
