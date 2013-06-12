@@ -50,7 +50,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.SQLState;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Timer;
 import java.util.TimerTask;
 
 /**
@@ -184,8 +183,12 @@ final class GenericStatementContext
             synchronized (this) {
                 statementContext = null;
             }
-            cancel();
+            getTimerFactory().cancel(this);
         }
+    }
+
+    private static TimerFactory getTimerFactory() {
+        return Monitor.getMonitor().getTimerFactory();
     }
 
 	// StatementContext Interface
@@ -209,10 +212,8 @@ final class GenericStatementContext
 		this.pvs = pvs;
 		rollbackParentContext = false;
         if (timeoutMillis > 0) {
-            TimerFactory factory = Monitor.getMonitor().getTimerFactory();
-            Timer timer = factory.getCancellationTimer();
             cancelTask = new CancelQueryTask(this);
-            timer.schedule(cancelTask, timeoutMillis);
+            getTimerFactory().schedule(cancelTask, timeoutMillis);
         }
 	}
 

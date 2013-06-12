@@ -43,8 +43,6 @@ public class _Suite extends BaseJDBCTestCase {
         suite.addTest(Derby3009Test.suite());
         suite.addTest(Derby5730Test.suite());
         suite.addTest(MemoryLeakFixesTest.suite());
-
-        // DERBY-5394: Let this test run as the last test - it eats up memory.
         suite.addTest(XAMemTest.suite());
         return suite;
     }
