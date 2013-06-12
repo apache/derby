@@ -52,7 +52,7 @@ import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 /**
  * Optimizer tracer which produces output in an xml format.
  */
-public  class   XMLOptTrace implements  OptTrace
+class   XMLOptTrace implements  OptTrace
 {
     ////////////////////////////////////////////////////////////////////////
     //
