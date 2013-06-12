@@ -35,9 +35,10 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
 import org.apache.derbyTesting.functionTests.harness.RunTest;
 
@@ -105,7 +106,6 @@ public class TestUtil {
 	private static String XA_DATASOURCE_STRING = "XA";
 	private static String CONNECTION_POOL_DATASOURCE_STRING = "ConnectionPool";
 	private static String REGULAR_DATASOURCE_STRING = "";
-	private static String JSR169_DATASOURCE_STRING = "Simple";
 	
 	// Methods for making framework dependent decisions in tests.
 
@@ -312,26 +312,13 @@ public class TestUtil {
 	 *                will mean ds.setDatabaseName("wombat") will be called
 	 *  @return datasource for current framework
 	 */
-	public static javax.sql.DataSource getDataSource(Properties attrs)
+    public static DataSource getDataSource(Properties attrs)
 	{
-		String classname;
-		if(HAVE_DRIVER_CLASS)
-		{
-			classname = getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource";
-			classname = checkForJDBC40Implementation(classname);
-			return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
-		}
-		else
-			return getSimpleDataSource(attrs);
-		
+        String classname =
+            getDataSourcePrefix() + REGULAR_DATASOURCE_STRING + "DataSource40";
+        return (DataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
-	public static DataSource getSimpleDataSource(Properties attrs)
-	{
-		String classname = getDataSourcePrefix() + JSR169_DATASOURCE_STRING + "DataSource";
-		return (javax.sql.DataSource) getDataSourceWithReflection(classname, attrs);
-	}
-	
 	/**
 	 * Get an xa  data source for the appropriate framework
 	 * @param attrs  A set of attribute values to set on the datasource.
@@ -340,12 +327,11 @@ public class TestUtil {
 	 *                will mean ds.setDatabaseName("wombat") will be called
 	 *  @return datasource for current framework
 	 */
-	public static javax.sql.XADataSource getXADataSource(Properties attrs)
+    public static XADataSource getXADataSource(Properties attrs)
 	{
-		
-		String classname = getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource";
-		classname = checkForJDBC40Implementation(classname);
-		return (javax.sql.XADataSource) getDataSourceWithReflection(classname, attrs);
+        String classname =
+            getDataSourcePrefix() + XA_DATASOURCE_STRING + "DataSource40";
+        return (XADataSource) getDataSourceWithReflection(classname, attrs);
 	}
 
 	
@@ -357,35 +343,14 @@ public class TestUtil {
 	 *                will mean ds.setDatabaseName("wombat") will be called
 	 *  @return datasource for current framework
 	 */
-	public static javax.sql.ConnectionPoolDataSource getConnectionPoolDataSource(Properties attrs)
+    public static ConnectionPoolDataSource
+            getConnectionPoolDataSource(Properties attrs)
 	{
-		String classname = getDataSourcePrefix() + CONNECTION_POOL_DATASOURCE_STRING + "DataSource";
-                classname = checkForJDBC40Implementation(classname);
-		return (javax.sql.ConnectionPoolDataSource) getDataSourceWithReflection(classname, attrs);
+        String classname = getDataSourcePrefix() +
+                CONNECTION_POOL_DATASOURCE_STRING + "DataSource40";
+        return (ConnectionPoolDataSource)
+                getDataSourceWithReflection(classname, attrs);
 	}
-        
-        /**
-         * returns the class name for the JDBC40 implementation
-         * if present. otherwise returns the class name of the class
-         * written for the lower jdk versions
-         * @param classname String
-         * @return String containing the name of the appropriate 
-         *         implementation
-         */
-        public static String checkForJDBC40Implementation(String classname) {
-                String classname_ = classname;
-                // The JDBC 4.0 implementation of the  
-                // interface is suffixed with "40". Use it if it is available 
-                // and the JVM version is at least 1.6.
-                if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
-                        String classname40 = classname_ + "40";
-                        try {
-                                Class.forName(classname40);
-                                classname_ = classname40;
-                        } catch (ClassNotFoundException e) {}
-                }
-                return classname_;
-        }
 
 	public static String getDataSourcePrefix()
 		{

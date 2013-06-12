@@ -23,7 +23,6 @@ package org.apache.derbyTesting.unitTests.junit;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.sanity.AssertFailure;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -76,7 +75,7 @@ public class AssertFailureTest extends BaseTestCase {
 
     /**
      * Test that AssertFailure's message string is correct when we have
-     * permisssion to do thread dumps. Must be run with correct permissions, ie.
+     * permission to do thread dumps. Must be run with correct permissions, ie.
      * with java.lang.RuntimePermission "getStackTrace" and
      * java.lang.RuntimePermission "modifyThreadGroup".
      */
@@ -87,25 +86,17 @@ public class AssertFailureTest extends BaseTestCase {
 
         // Assert that the string is correct, by checking that
         // it starts the right way.
-        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15) {
-            String expected = "---------------\n" +
+        String expected = "---------------\n" +
             		"Stack traces for all live threads:\nThread name=";
 
-            assertTrue("String not correct. Expected to start with:\n<"
+        assertTrue("String not correct. Expected to start with:\n<"
                 + expected + ">...\nWas:\n<" + s + ">.\n" ,
                 s.startsWith(expected));
-
-        } else {
-            String expected = "(Skipping thread dump because it is not " +
-            		"supported on JVM 1.4)";
-
-            assertEquals("String not correct.", expected, s.trim());
-        }
     }
 
     /**
      * Test that AssertFailure's log entry is correct when we DON'T have
-     * permisssion to to thread dumps. Must be run with correct permissions, ie.
+     * permission to to thread dumps. Must be run with correct permissions, ie.
      * WITHOUT java.lang.RuntimePermission "getStackTrace" and
      * java.lang.RuntimePermission "modifyThreadGroup";
      */
@@ -116,18 +107,10 @@ public class AssertFailureTest extends BaseTestCase {
 
         // Assert that the string is correct, by checking that is starts
         // the right way.
-        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15) {
-            String expected = "(Skipping thread dump because of insufficient " +
+        String expected = "(Skipping thread dump because of insufficient " +
             		"permissions:\njava.security.AccessControlException:";
 
-            assertTrue("String not correct. Expected: <" + expected +
+        assertTrue("String not correct. Expected: <" + expected +
                 ">\nWas:\n<" + s + ">", s.startsWith(expected));
-
-        } else {
-            String expected = "(Skipping thread dump because it is not " +
-                "supported on JVM 1.4)";
-
-            assertEquals("String not correct.", expected, s.trim());
-        }
     }
 }

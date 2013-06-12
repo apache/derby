@@ -44,9 +44,9 @@ public abstract class JVMInfo
 		<UL>
 		<LI> 1 - not used was JDK 1.1
 		<LI> 2 - not used, was for JDK 1.2 and 1.3
-		<LI> 4 - J2SE_14 - JDK 1.4.0 or 1.4.1
-		<LI> 5 - J2SE_142 - JDK 1.4.2
-		<LI> 6 - J2SE_15 - JDK 1.5
+        <LI> 4 - not used, was for JDK 1.4.0 or 1.4.1
+        <LI> 5 - not used, was for JDK 1.4.2
+        <LI> 6 - not used, was for JDK 1.5
 		<LI> 7 - J2SE_16 - JDK 1.6
         <LI> 8 - J2SE_17 - JDK 1.7
         <LI> 9 - J2SE_18 - JDK 1.8
@@ -54,9 +54,6 @@ public abstract class JVMInfo
 	*/
 	public static final int JDK_ID;
 
-	public static final int J2SE_14 = 4;
-	public static final int J2SE_142 = 5;
-	public static final int J2SE_15 = 6; // aka J2SE 5.0
 	public static final int J2SE_16 = 7; // Java SE 6, not J2SE
     public static final int J2SE_17 = 8; // Java SE 7
     public static final int J2SE_18 = 9;
@@ -74,33 +71,21 @@ public abstract class JVMInfo
 		// 
 		// Otherwise, see if we recognize what is set in java.version.
 		// If we don't recognize that, or if the property is not set, assume
-		// version 1.4.
+        // version 1.6, which is the lowest level we support.
 		//
 		String javaVersion;
 
 		try {
-			javaVersion = System.getProperty("java.specification.version", "1.4");
+            javaVersion =
+                System.getProperty("java.specification.version", "1.6");
 
 		} catch (SecurityException se) {
 			// some vms do not know about this property so they
 			// throw a security exception when access is restricted.
-			javaVersion = "1.4";
+            javaVersion = "1.6";
 		}
 
-        if (javaVersion.equals("1.4"))
-        {
-            String vmVersion = System.getProperty("java.version", "1.4.0");
-
-            if (JVMInfo.vmCheck(vmVersion, "1.4.0") || JVMInfo.vmCheck(vmVersion, "1.4.1"))
-                id = J2SE_14;
-            else
-                id = J2SE_142;
-        }
-        else if (javaVersion.equals("1.5"))
-        {
-            id = J2SE_15;
-        }
-        else if (javaVersion.equals("1.6"))
+        if (javaVersion.equals("1.6"))
         {
             id = J2SE_16;
         }
@@ -113,9 +98,9 @@ public abstract class JVMInfo
         }
         else
         {
-            // aussme our lowest support unless the java spec
+            // Assume our lowest support unless the java spec
             // is greater than our highest level.
-            id = J2SE_14;
+            id = J2SE_16;
 
             try {
 
@@ -129,24 +114,12 @@ public abstract class JVMInfo
 	}
 
 	/**
-		Check the vmVersion against a speciifc value.
-		Sun jvms are of the form
-	*/
-	private static boolean vmCheck(String vmVersion, String id)
-	{
-		return vmVersion.equals(id) || vmVersion.startsWith(id + "_");
-	}
-
-	/**
 		Return Derby's understanding of the virtual machine's environment.
 	*/
 	public static String derbyVMLevel()
 	{
 		switch (JDK_ID)
 		{
-		case J2SE_14: return "J2SE 1.4 - JDBC 3.0";
-		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
-		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
         case J2SE_16: return "Java SE 6 - JDBC 4.1";
         case J2SE_17: return "Java SE 7 - JDBC 4.1";
         case J2SE_18: return "Java SE 8 - JDBC 4.1";
