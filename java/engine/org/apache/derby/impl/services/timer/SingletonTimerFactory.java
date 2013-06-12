@@ -29,6 +29,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Timer;
 import java.util.Properties;
+import java.util.TimerTask;
 
 
 /**
@@ -119,16 +120,26 @@ public class SingletonTimerFactory
      * Returns a Timer object that can be used for adding TimerTasks
      * that cancel executing statements.
      *
-     * Implements the TimerFactory interface.
-     *
      * @return a Timer object for cancelling statements.
-     *
-     * @see TimerFactory
      */
-    public Timer getCancellationTimer()
+    Timer getCancellationTimer()
     {
         return singletonTimer;
     }
+
+    // TimerFactory interface methods
+
+    /** {@inheritDoc} */
+    public void schedule(TimerTask task, long delay) {
+        singletonTimer.schedule(task, delay);
+    }
+
+    /** {@inheritDoc} */
+    public void cancel(TimerTask task) {
+        task.cancel();
+    }
+
+    // ModuleControl interface methods
 
     /**
      * Currently does nothing, singleton Timer instance is initialized

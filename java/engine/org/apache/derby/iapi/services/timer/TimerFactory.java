@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.timer;
 
-import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This class provides access to Timer objects for various purposes.
@@ -30,10 +30,17 @@ import java.util.Timer;
 public interface TimerFactory
 {
     /**
-     * Returns a Timer object that can be used for adding TimerTasks
-     * that cancel executing statements.
+     * Schedule a task.
      *
-     * @return a Timer object for cancelling statements.
+     * @param task the task to schedule
+     * @param delay how many milliseconds to wait before executing the task
      */
-    public Timer getCancellationTimer();
+    void schedule(TimerTask task, long delay);
+
+    /**
+     * Cancel a task.
+     *
+     * @param task the task to cancel
+     */
+    void cancel(TimerTask task);
 }
