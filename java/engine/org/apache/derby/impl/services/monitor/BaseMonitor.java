@@ -1656,14 +1656,8 @@ nextModule:
 
     private static final HashMap<String,String> storageFactories = new HashMap<String,String>();
     static {
-		String dirStorageFactoryClass;
-        if (!JVMInfo.J2ME)
-            dirStorageFactoryClass = "org.apache.derby.impl.io.DirStorageFactory4";
-        else
-            dirStorageFactoryClass = "org.apache.derby.impl.io.DirStorageFactory";
-
-
-        storageFactories.put( PersistentService.DIRECTORY, dirStorageFactoryClass);
+        storageFactories.put( PersistentService.DIRECTORY,
+                                "org.apache.derby.impl.io.DirStorageFactory");
         storageFactories.put( PersistentService.CLASSPATH,
                                 "org.apache.derby.impl.io.CPStorageFactory");
         storageFactories.put( PersistentService.JAR,

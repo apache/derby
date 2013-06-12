@@ -21,22 +21,15 @@
 
 package org.apache.derby.impl.io;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.io.StorageRandomAccessFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.SyncFailedException;
 
-import java.util.Properties;
 
 /**
  * This class provides a disk based implementation of the StorageFactory interface. It is used by the
@@ -159,7 +152,7 @@ public class DirStorageFactory extends BaseStorageFactory
      */
     public boolean supportsWriteSync()
     {
-        return false;
+        return true;
     }
 
     public boolean isReadOnlyDatabase()

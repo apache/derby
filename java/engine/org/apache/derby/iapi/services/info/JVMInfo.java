@@ -61,8 +61,6 @@ public abstract class JVMInfo
     public static final int J2SE_17 = 8; // Java SE 7
     public static final int J2SE_18 = 9;
 
-	public static final boolean J2ME;
-
 	static 
 	{
 		int id;
@@ -79,16 +77,6 @@ public abstract class JVMInfo
 		// version 1.4.
 		//
 		String javaVersion;
-		String javaSpec;
-		boolean isJ2ME;
-
-		try {
-			javaSpec = System.getProperty("java.specification.name");
-		} catch (SecurityException se) {
-			// some vms do not know about this property so they
-			// throw a security exception when access is restricted.
-			javaSpec = null;
-		}
 
 		try {
 			javaVersion = System.getProperty("java.specification.version", "1.4");
@@ -99,66 +87,45 @@ public abstract class JVMInfo
 			javaVersion = "1.4";
 		}
 
-		if (javaSpec != null &&
-            (
-             javaSpec.startsWith("J2ME") || // recognize IBM WCTME
-             javaSpec.startsWith("CDC")  || // Oracle Java ME Embedded Client
-             (
-              (javaSpec.indexOf( "Profile" ) > -1) && // recognize phoneME
-              (javaSpec.indexOf( "Specification" ) > -1)
-             )
-            )
-            )
-		{
-			id = J2SE_14;
-			isJ2ME = true;
-		}
-		else
-		{
-			// J2SE/J2EE
-			isJ2ME = false;
+        if (javaVersion.equals("1.4"))
+        {
+            String vmVersion = System.getProperty("java.version", "1.4.0");
 
-			if (javaVersion.equals("1.4"))
-			{
-				String vmVersion = System.getProperty("java.version", "1.4.0");
+            if (JVMInfo.vmCheck(vmVersion, "1.4.0") || JVMInfo.vmCheck(vmVersion, "1.4.1"))
+                id = J2SE_14;
+            else
+                id = J2SE_142;
+        }
+        else if (javaVersion.equals("1.5"))
+        {
+            id = J2SE_15;
+        }
+        else if (javaVersion.equals("1.6"))
+        {
+            id = J2SE_16;
+        }
+        else if (javaVersion.equals("1.7"))
+        {
+            id = J2SE_17;
+        }
+        else if (javaVersion.equals("1.8")) {
+            id = J2SE_18;
+        }
+        else
+        {
+            // aussme our lowest support unless the java spec
+            // is greater than our highest level.
+            id = J2SE_14;
 
-				if (JVMInfo.vmCheck(vmVersion, "1.4.0") || JVMInfo.vmCheck(vmVersion, "1.4.1"))
-					id = J2SE_14;
-				else
-					id = J2SE_142;
-			}
-			else if (javaVersion.equals("1.5"))
-			{
-				id = J2SE_15;
-			}
-			else if (javaVersion.equals("1.6"))
-			{
-				id = J2SE_16;
-			}
-            else if (javaVersion.equals("1.7"))
-            {
-                id = J2SE_17;
+            try {
+
+                if (Float.parseFloat(javaVersion) > 1.8f)
+                    id = J2SE_18;
+            } catch (NumberFormatException nfe) {
             }
-            else if (javaVersion.equals("1.8")) {
-                id = J2SE_18;
-            }
-			else
-			{
-				// aussme our lowest support unless the java spec
-				// is greater than our highest level.
-				id = J2SE_14;
-
-				try {
-
-                    if (Float.parseFloat(javaVersion) > 1.8f)
-                        id = J2SE_18;
-				} catch (NumberFormatException nfe) {
-				}
-			}
-		}
+        }
 
 		JDK_ID = id;
-		J2ME = isJ2ME;
 	}
 
 	/**
@@ -177,7 +144,7 @@ public abstract class JVMInfo
 	{
 		switch (JDK_ID)
 		{
-		case J2SE_14: return J2ME ? "J2ME - JDBC for CDC/FP 1.1" : "J2SE 1.4 - JDBC 3.0";
+		case J2SE_14: return "J2SE 1.4 - JDBC 3.0";
 		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
 		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
         case J2SE_16: return "Java SE 6 - JDBC 4.1";

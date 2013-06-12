@@ -36,11 +36,13 @@ import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessControlException;
+import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.InterruptStatus;
-import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This class provides a disk based implementation of the StorageFile interface. It is used by the
@@ -48,6 +50,9 @@ import org.apache.derby.shared.common.reference.SQLState;
  */
 class DirFile extends File implements StorageFile
 {
+    private RandomAccessFile lockFileOpen;
+    private FileChannel lockFileChannel;
+    private FileLock dbLock;
 
     /**
      * Construct a DirFile from a path name.
@@ -132,7 +137,7 @@ class DirFile extends File implements StorageFile
     public OutputStream getOutputStream( final boolean append) throws FileNotFoundException
     {
         boolean exists = exists();
-        OutputStream result = new FileOutputStream( getPath(), append);
+        OutputStream result = new FileOutputStream(this, append);
 
         if (!exists) {
             FileUtil.limitAccessToOwner(this);
@@ -163,44 +168,163 @@ class DirFile extends File implements StorageFile
      *    NO_FILE_LOCK_SUPPORT if the system does not support exclusive locks.<br>
      */
     public synchronized int getExclusiveFileLock() throws StandardException
-	{
-		if (exists())
-		{
-			delete();
-		}
-		try
+    {
+        boolean validExclusiveLock = false;
+        int status;
+
+        /*
+        ** There can be  a scenario where there is some other JVM that is before jkdk1.4
+        ** had booted the system and jdk1.4 trying to boot it, in this case we will get the
+        ** Exclusive Lock even though some other JVM has already booted the database. But
+        ** the lock is not a reliable one , so we should  still throw the warning.
+        ** The Way we identify this case is if "dbex.lck" file size  is differen
+        ** for pre jdk1.4 jvms and jdk1.4 or above.
+        ** Zero size "dbex.lck" file  is created by a jvm i.e before jdk1.4 and
+        ** File created by jdk1.4 or above writes EXCLUSIVE_FILE_LOCK value into the file.
+        ** If we are unable to acquire the lock means other JVM that
+        ** currently booted the system is also JDK1.4 or above;
+        ** In this case we could confidently throw a exception instead of
+        ** of a warning.
+        **/
+
+        try
         {
-			//Just create an empty file
-			RandomAccessFile lockFileOpen = new RandomAccessFile( (File) this, "rw");
-            limitAccessToOwner();
-			lockFileOpen.getFD().sync( );
-			lockFileOpen.close();
-		}catch(IOException ioe)
-		{
-			// do nothing - it may be read only medium, who knows what the
-			// problem is
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT(
-                    "Unable to create Exclusive Lock File " + getPath(), ioe);
-			}
-		}
-		
-		return NO_FILE_LOCK_SUPPORT;
-	} // end of getExclusiveFileLock
+            //create the file that us used to acquire exclusive lock if it does not exists.
+            if (createNewFile())
+            {
+                validExclusiveLock = true;
+            }
+            else if (length() > 0)
+            {
+                validExclusiveLock = true;
+            }
+
+            //If we can acquire a reliable exclusive lock , try to get it.
+            if (validExclusiveLock)
+            {
+                int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
+                while (true) {
+                    lockFileOpen = new RandomAccessFile((File) this, "rw");
+                    limitAccessToOwner(); // tamper-proof..
+                    lockFileChannel = lockFileOpen.getChannel();
+
+                    try {
+                        dbLock =lockFileChannel.tryLock();
+                        if(dbLock == null) {
+                            lockFileChannel.close();
+                            lockFileChannel=null;
+                            lockFileOpen.close();
+                            lockFileOpen = null;
+                            status = EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE;
+                        } else {
+                            lockFileOpen.writeInt(EXCLUSIVE_FILE_LOCK);
+                            lockFileChannel.force(true);
+                            status = EXCLUSIVE_FILE_LOCK;
+                        }
+                    } catch (AsynchronousCloseException e) {
+                        // JDK bug 6979009: use AsynchronousCloseException
+                        // instead of the logically correct
+                        // ClosedByInterruptException
+
+                        InterruptStatus.setInterrupted();
+                        lockFileOpen.close();
+
+                        if (retries-- > 0) {
+                            continue;
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    break;
+                }
+            }
+            else
+            {
+                status = NO_FILE_LOCK_SUPPORT;
+            }
+
+        } catch(IOException ioe)
+        {
+            // do nothing - it may be read only medium, who knows what the
+            // problem is
+
+            //release all the possible resource we created in this functions.
+            releaseExclusiveFileLock();
+            status = NO_FILE_LOCK_SUPPORT;
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT("Unable to Acquire Exclusive Lock on "
+                                          + getPath(), ioe);
+            }
+        } catch (OverlappingFileLockException ofle)
+        {
+            //
+            // Under Java 6 and later, this exception is raised if the database
+            // has been opened by another Derby instance in a different
+            // ClassLoader in this VM. See DERBY-700.
+            //
+            // The OverlappingFileLockException is raised by the
+            // lockFileChannel.tryLock() call above.
+            //
+            try {
+                lockFileChannel.close();
+                lockFileOpen.close();
+            } catch (IOException e)
+            {
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.THROWASSERT("Error closing file channel "
+                                              + getPath(), e);
+                }
+            }
+            lockFileChannel = null;
+            lockFileOpen = null;
+            status = EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE;
+        }
+
+        return status;
+    } // end of getExclusiveFileLock
 
 	/**
      * Release the resource associated with an earlier acquired exclusive lock
      *
      * @see #getExclusiveFileLock
      */
-	public synchronized void releaseExclusiveFileLock()
-	{
-		if( exists())
-		{
-			delete(); 
-		}
-	} // End of releaseExclusiveFileLock
+    public synchronized void releaseExclusiveFileLock()
+    {
+        try
+        {
+            if (dbLock!=null)
+            {
+                dbLock.release();
+                dbLock = null;
+            }
+
+            if (lockFileChannel != null)
+            {
+                lockFileChannel.close();
+                lockFileChannel = null;
+            }
+
+            if (lockFileOpen != null)
+            {
+                lockFileOpen.close();
+                lockFileOpen = null;
+            }
+
+            // delete the exclusive lock file name.
+            if (exists())
+            {
+                delete();
+            }
+        }
+        catch (IOException ioe)
+        {
+            // do nothing - it may be read only medium, who knows what the
+            // problem is
+        }
+    } // End of releaseExclusiveFileLock
 
     /**
      * Get a random access (read/write) file.
@@ -224,9 +348,6 @@ class DirFile extends File implements StorageFile
      */
     public StorageRandomAccessFile getRandomAccessFile( String mode) throws FileNotFoundException
     {
-        // Assume that modes "rws" and "rwd" are not supported.
-        if( "rws".equals( mode) || "rwd".equals( mode))
-            mode = "rw";
         return new DirRandomAccessFile( (File) this, mode);
     } // end of getRandomAccessFile
 

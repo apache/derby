@@ -69,7 +69,7 @@ public class CorruptDiskStorageFactory extends CorruptBaseStorageFactory
 	WritableStorageFactory getRealStorageFactory()
 	{
 		String dirStorageFactoryClass =
-                "org.apache.derby.impl.io.DirStorageFactory4";
+                "org.apache.derby.impl.io.DirStorageFactory";
 		
 		WritableStorageFactory storageFactory = null;
 		try{

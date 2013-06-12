@@ -30,7 +30,6 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.types.SQLDouble;
 import org.apache.derby.iapi.types.SQLInteger;
@@ -41,10 +40,6 @@ import org.apache.derby.iapi.types.SQLTinyint;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.NumberDataValue;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.Types;
 
@@ -235,13 +230,9 @@ public final class NumericConstantNode extends ConstantNode
 			mb.push(value.getShort());
 			break;
 		case C_NodeTypes.DECIMAL_CONSTANT_NODE:
-			// No java.math.BigDecimal class in J2ME so the constant
-			// from the input SQL is handled directly as a String.
-			if (!JVMInfo.J2ME)
-				mb.pushNewStart("java.math.BigDecimal");
+            mb.pushNewStart("java.math.BigDecimal");
 			mb.push(value.getString());
-			if (!JVMInfo.J2ME)
-				mb.pushNewComplete(1);
+            mb.pushNewComplete(1);
 			break;
 		case C_NodeTypes.DOUBLE_CONSTANT_NODE:
 			mb.push(value.getDouble());
