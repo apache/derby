@@ -26,17 +26,16 @@ import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection40;
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement40;
-import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
 import org.apache.derby.impl.jdbc.EmbedConnection40;
+import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
+import org.apache.derby.impl.jdbc.EmbedStatement;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
 import org.apache.derby.impl.jdbc.SQLExceptionFactory40;
-import org.apache.derby.impl.jdbc.EmbedStatement40;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.impl.jdbc.Util;
@@ -83,8 +82,8 @@ public class Driver40 extends Driver30 {
 				int resultSetConcurrency,
 				int resultSetHoldability)
 	{
-		return new EmbedStatement40(conn, forMetaData, resultSetType, resultSetConcurrency,
-		resultSetHoldability);
+        return new EmbedStatement(conn, forMetaData, resultSetType,
+                resultSetConcurrency, resultSetHoldability);
 	}
     
     public PreparedStatement
@@ -99,7 +98,7 @@ public class Driver40 extends Driver30 {
         int[] columnIndexes,
         String[] columnNames)
         throws SQLException {
-        return new EmbedPreparedStatement40(conn,
+        return new EmbedPreparedStatement(conn,
             stmt,
             forMetaData,
             resultSetType,
@@ -118,7 +117,7 @@ public class Driver40 extends Driver30 {
         int resultSetConcurrency,
         int resultSetHoldability)
         throws SQLException {
-        return new EmbedCallableStatement40(conn,
+        return new EmbedCallableStatement(conn,
             stmt,
             resultSetType,
             resultSetConcurrency,

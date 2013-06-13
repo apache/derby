@@ -9432,8 +9432,6 @@ class DRDAConnThread extends Thread {
                                          String encoding)
            throws IOException, SQLException {
         PreparedStatement ps = stmt.getPreparedStatement();
-        EnginePreparedStatement engnps = 
-            ( EnginePreparedStatement ) ps;
         
         // DERBY-3085. Save the stream so it can be drained later
         // if not  used.
@@ -9450,7 +9448,7 @@ class DRDAConnThread extends Thread {
             new InputStreamReader( is,
                                    encoding ) ;
         
-        engnps.setCharacterStream(i, streamReader);
+        ps.setCharacterStream(i, streamReader);
     }
 
     /**
@@ -9485,7 +9483,7 @@ class DRDAConnThread extends Thread {
                 ps.setBinaryStream(index, stream, length);
 
             } else {
-                ((EnginePreparedStatement)ps).setBinaryStream(index, stream);
+                ps.setBinaryStream(index, stream);
             }
         } else {
             if (stream == null) {

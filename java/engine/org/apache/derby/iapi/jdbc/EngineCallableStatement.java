@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.jdbc.EngineCallableStatement40
+   Derby - Class org.apache.derby.iapi.jdbc.EngineCallableStatement
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * Additional methods the engine exposes on its CallableStatement object
  * implementations, whose signatures are not compatible with older platforms.
  */
-public interface EngineCallableStatement40
+public interface EngineCallableStatement
         extends EngineStatement, CallableStatement {
     // JDBC 4.1 methods that use generics and won't compile on CDC.
     <T> T getObject(int parameterIndex, Class<T> type) throws SQLException;

@@ -26,7 +26,7 @@ import org.apache.derby.client.am.ClientCallableStatement;
 import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement40;
-import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
 
 /**
@@ -44,7 +44,7 @@ public  class   Wrapper41
 
     private EmbedResultSet40    _embedded;
     private ClientResultSet      _netclient;
-    private EmbedCallableStatement40 _embedCallableStatement;
+    private EmbedCallableStatement _embedCallableStatement;
     private ClientCallableStatement _callableStatement;
     private BrokeredCallableStatement40 _brokeredCallableStatement;
     private LogicalCallableStatement _logicalCallableStatement;
@@ -58,7 +58,7 @@ public  class   Wrapper41
     public Wrapper41( Object wrapped ) throws Exception
     {
         if ( wrapped instanceof EmbedResultSet40 ) { _embedded = (EmbedResultSet40) wrapped; }
-        else if ( wrapped instanceof EmbedCallableStatement40 ) { _embedCallableStatement = (EmbedCallableStatement40) wrapped; }
+        else if ( wrapped instanceof EmbedCallableStatement ) { _embedCallableStatement = (EmbedCallableStatement) wrapped; }
         else if ( wrapped instanceof BrokeredCallableStatement40 ) { _brokeredCallableStatement = (BrokeredCallableStatement40) wrapped; }
         else if ( wrapped instanceof ClientResultSet ) { _netclient = (ClientResultSet) wrapped; }
         else if ( wrapped instanceof ClientCallableStatement ) { _callableStatement = (ClientCallableStatement) wrapped; }

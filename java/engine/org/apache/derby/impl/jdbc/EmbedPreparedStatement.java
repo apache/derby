@@ -60,6 +60,12 @@ import java.sql.Blob;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Array;
+import java.sql.NClob;
+import java.sql.ParameterMetaData;
+import java.sql.Ref;
+import java.sql.RowId;
+import java.sql.SQLXML;
 import java.sql.Types;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
@@ -71,15 +77,10 @@ import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
- *
  * EmbedPreparedStatement is a local JDBC statement.
-  <P><B>Supports</B>
-   <UL>
-   <LI> JSR169
-   </UL>
+ * It supports JDBC 4.1.
  */
-public abstract class EmbedPreparedStatement
-	extends EmbedStatement
+public class EmbedPreparedStatement extends EmbedStatement
 	implements EnginePreparedStatement
 {
 
@@ -1166,6 +1167,32 @@ public abstract class EmbedPreparedStatement
 		return rMetaData;
 	}
 
+    /**
+     * JDBC 2.0
+     *
+     * Set a REF(&lt;structured-type&gt;) parameter.
+     *
+     * @param i the first parameter is 1, the second is 2, ...
+     * @param x an object representing data of an SQL REF Type
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final void setRef(int i, Ref x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Set an Array parameter.
+     *
+     * @param i the first parameter is 1, the second is 2, ...
+     * @param x an object representing an SQL array
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final void setArray(int i, Array x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
     //----------------------------------------------------------------------
     // Advanced features:
 
@@ -1660,6 +1687,24 @@ public abstract class EmbedPreparedStatement
 		throw Util.notImplemented();
 	}
 
+    /**
+     * JDBC 3.0
+     *
+     * Retrieves the number, types and properties of this PreparedStatement
+     * object's parameters.
+     *
+     * @return a ParameterMetaData object that contains information about the
+     * number, types and properties of this PreparedStatement object's
+     * parameters.
+     * @exception SQLException if a database access error occurs
+     */
+    public final ParameterMetaData getParameterMetaData()
+            throws SQLException {
+        checkStatus();
+        return new EmbedParameterMetaData30(
+                getParms(), preparedStatement.getParameterTypes());
+    }
+
 	//
 	// methods to be overridden in subimplementations
 	// that want to stay within their subimplementation.
@@ -1913,6 +1958,41 @@ public abstract class EmbedPreparedStatement
         if (getParameterJDBCType(parameterIndex) != Types.BLOB) {
             throw dataTypeConversion(parameterIndex, "java.sql.Blob");
         }
+    }
+
+    public final void setRowId(int parameterIndex, RowId x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNString(int index, String value) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNCharacterStream(int index, Reader value, long length) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNClob(int index, NClob value) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setNClob(int parameterIndex, Reader reader, long length)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public final void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
+        throw Util.notImplemented();
     }
 
     public final long getVersionCounter() throws SQLException {

@@ -46,19 +46,10 @@ import java.sql.ResultSet;
 */
 
 /**
- *
  * EmbedStatement is a local JDBC statement.
- *
-   <P><B>Supports</B>
-   <UL>
-   <LI> JSR169 - no subsetting for java.sql.Statement
-   <LI> JDBC 2.0
-   <LI> JDBC 3.0 - no new dependencies on new JDBC 3.0 or JDK 1.4 classes,
-        new methods can safely be added into implementation.
-   </UL>
-
+ * It supports JDBC 4.1.
  */
-public abstract class EmbedStatement extends ConnectionChild
+public class EmbedStatement extends ConnectionChild
     implements EngineStatement {
 
 	private final java.sql.Connection applicationConnection;
@@ -1873,6 +1864,37 @@ public abstract class EmbedStatement extends ConnectionChild
 
 		isPoolable = poolable;
 	}
+
+    /**
+     * Returns false unless {@code interfaces} is implemented.
+     *
+     * @param interfaces a Class defining an interface.
+     * @return true if this implements the interface or directly or indirectly
+     * wraps an object that does.
+     * @throws SQLException if an error occurs while determining
+     * whether this is a wrapper for an object with the given interface.
+     */
+    public final boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkStatus();
+        return interfaces.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the interface.
+     *
+     * @param interfaces a Class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object if found that implements the interface
+     */
+    public final <T> T unwrap(java.lang.Class<T> interfaces)
+            throws SQLException {
+        checkStatus();
+        try {
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw newSQLException(SQLState.UNABLE_TO_UNWRAP, interfaces);
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////
     //

@@ -32,26 +32,7 @@ import java.sql.Statement;
  * 
  */
 public interface EngineStatement extends Statement {
-    
-    /**
-     * Identical to the JDBC 3 getMoreResults(int).
-     * 
-     * @see java.sql.Statement#getMoreResults(int)
-     */
-    public boolean getMoreResults(int current) throws SQLException;
-    
-    /**
-     * Identical to the JDBC 3 getResultSetHoldability(int).
-     * 
-     * @see java.sql.Statement#getResultSetHoldability()
-     */ 
-    public int getResultSetHoldability() throws SQLException;
 
-    /**
-     * Identical to the JDBC 4 isClosed() method.
-     */
-    public boolean isClosed() throws SQLException;
-    
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

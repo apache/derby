@@ -509,16 +509,11 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
         return engnps.executeLargeUpdate();
     }    
     
-    // JDBC 4.0 methods exposed via the EnginePreparedStatement interface
-    
     public void setBinaryStream(int parameterIndex, 
                                 InputStream x)
         throws SQLException {
-        
-        final EnginePreparedStatement engnps = 
-            (EnginePreparedStatement) getPreparedStatement();  
 
-        engnps.setBinaryStream(parameterIndex, x);
+        getPreparedStatement().setBinaryStream(parameterIndex, x);
 
     }
     
@@ -526,12 +521,9 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
     public void setCharacterStream(int parameterIndex, 
                                    Reader reader)
         throws SQLException{
-        
-        final EnginePreparedStatement engnps = 
-            (EnginePreparedStatement) getPreparedStatement();  
 
-        engnps.setCharacterStream(parameterIndex, reader);
-        
+        getPreparedStatement().setCharacterStream(parameterIndex, reader);
+
     }
 
     // JDBC 3.0 methods

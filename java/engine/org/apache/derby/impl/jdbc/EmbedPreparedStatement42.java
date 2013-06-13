@@ -21,19 +21,15 @@
 
 package org.apache.derby.impl.jdbc;
 
-import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.sql.SQLType;
-import java.sql.Types;
-
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * <p>
  * PreparedStatement methods added by JDBC 4.2 which require Java 8.
  * </p>
  */
-public class EmbedPreparedStatement42 extends EmbedPreparedStatement40
+public class EmbedPreparedStatement42 extends EmbedPreparedStatement
 {    
     public EmbedPreparedStatement42
         (

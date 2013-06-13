@@ -23,9 +23,8 @@ package org.apache.derby.impl.jdbc;
 
 import java.sql.SQLException;
 import java.sql.SQLType;
-import org.apache.derby.iapi.reference.SQLState;
 
-public class EmbedCallableStatement42 extends EmbedCallableStatement40
+public class EmbedCallableStatement42 extends EmbedCallableStatement
 {
         
     /** Creates a new instance of EmbedCallableStatement42 */

@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 
 public class BrokeredCallableStatement40 extends BrokeredCallableStatement
-        implements EngineCallableStatement40 {
+        implements EngineCallableStatement {
     
     public BrokeredCallableStatement40(BrokeredStatementControl control, String sql) throws SQLException{
         super(control, sql);
@@ -392,14 +392,14 @@ public class BrokeredCallableStatement40 extends BrokeredCallableStatement
     public <T> T getObject( int parameterIndex, Class<T> type )
         throws SQLException
     {
-        return ((EngineCallableStatement40) getCallableStatement())
+        return ((EngineCallableStatement) getCallableStatement())
                 .getObject(parameterIndex, type);
     }
     
     public <T> T getObject(String parameterName, Class<T> type)
         throws SQLException
     {
-        return ((EngineCallableStatement40) getCallableStatement())
+        return ((EngineCallableStatement) getCallableStatement())
                 .getObject(parameterName, type);
     }
 }

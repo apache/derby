@@ -20,8 +20,6 @@
  */
 package org.apache.derby.iapi.jdbc;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
@@ -34,12 +32,6 @@ import java.sql.PreparedStatement;
  */
 public interface EnginePreparedStatement extends PreparedStatement, EngineStatement {
     
-    public void setBinaryStream(int parameterIndex, InputStream x)
-        throws SQLException; 
-    
-    public void setCharacterStream(int parameterIndex, Reader reader)
-        throws SQLException;
-
     /**
      * Get the version of the prepared statement. If this has not been changed,
      * the caller may assume that a recompilation has not taken place, i.e.

@@ -432,7 +432,7 @@ public abstract class BrokeredStatement implements EngineStatement
      */
 	public final boolean getMoreResults(int current) throws SQLException
     {
-        return ((EngineStatement) getStatement()).getMoreResults( current);
+        return getStatement().getMoreResults(current);
 	}
 
     /**
@@ -462,8 +462,7 @@ public abstract class BrokeredStatement implements EngineStatement
 	public final int getResultSetHoldability()
         throws SQLException
 	{
-        int holdability =
-            ((EngineStatement) getStatement()).getResultSetHoldability();
+        int holdability = getStatement().getResultSetHoldability();
         
         // Holdability might be downgraded.
         return controlCheck().checkHoldCursors(holdability);
@@ -570,7 +569,7 @@ public abstract class BrokeredStatement implements EngineStatement
      * @exception SQLException if an error occurs
      */
     public final boolean isClosed() throws SQLException {
-        return ((EngineStatement) getStatement()).isClosed();
+        return getStatement().isClosed();
     }
 
     /**
