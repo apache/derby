@@ -53,12 +53,6 @@ import org.apache.derby.iapi.util.StringUtil;
 import java.util.HashMap;
 
 /**
- * This will be the Level 1 Optimizer.
- * RESOLVE - it's a level 0 optimizer right now.
- * Current State:
- *	o  No costing services
- *	o  We can only cost a derived table with a join once.
- *  
  * Optimizer uses OptimizableList to keep track of the best join order as it
  * builds it.  For each available slot in the join order, we cost all of the
  * Optimizables from that slot til the end of the OptimizableList.  Later,
@@ -210,7 +204,8 @@ public class OptimizerImpl implements Optimizer
 				  JoinStrategy[] joinStrategies,
 				  int tableLockThreshold,
 				  RequiredRowOrdering requiredRowOrdering,
-				  int numTablesInQuery)
+                  int numTablesInQuery,
+                  LanguageConnectionContext lcc )
 		throws StandardException
 	{
 		if (SanityManager.DEBUG) {
@@ -256,6 +251,7 @@ public class OptimizerImpl implements Optimizer
 		this.tableLockThreshold = tableLockThreshold;
 		this.requiredRowOrdering = requiredRowOrdering;
 		this.useStatistics = useStatistics;
+        this.lcc = lcc;
 
 		/* initialize variables for tracking permutations */
 		assignedTableMap = new JBitSet(numTablesInQuery);
@@ -281,6 +277,9 @@ public class OptimizerImpl implements Optimizer
 
 		usingPredsPushedFromAbove = false;
 		bestJoinOrderUsedPredsFromAbove = false;
+
+		// Optimization started
+		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode(), optimizableList ); }
 	}
 
 	/**
@@ -2613,7 +2612,7 @@ public class OptimizerImpl implements Optimizer
 	/** @see Optimizer#getLevel */
 	public int getLevel()
 	{
-		return 1;
+		return 2;
 	}
 
 	public CostEstimateImpl getNewCostEstimate(double theCost,

@@ -325,4 +325,12 @@ public class CostEstimateImpl implements CostEstimate {
 
 		return retval;
 	}
+    
+	public String toString() 
+	{
+		return "CostEstimateImpl: at " + hashCode() + ", cost == " + cost +
+				", rowCount == " + rowCount + 
+				", singleScanRowCount == " + singleScanRowCount;
+	}
+
 }

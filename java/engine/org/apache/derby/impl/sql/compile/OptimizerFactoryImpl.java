@@ -181,7 +181,7 @@ public class OptimizerFactoryImpl
 	 */
 	public boolean supportsOptimizerTrace()
 	{
-		return false;
+		return true;
 	}
 
 	//
@@ -210,7 +210,8 @@ public class OptimizerFactoryImpl
 							joinStrategySet,
 							lcc.getLockEscalationThreshold(),
 							requiredRowOrdering,
-							numTablesInQuery);
+							numTablesInQuery,
+                            lcc);
 	}
 
 	/**

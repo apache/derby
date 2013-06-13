@@ -153,7 +153,7 @@ public class Sed
         searchStrings.addElement("^The selected victim is XID : .*");
         // Filters for build numbers
         searchStrings.addElement("(beta - )\\(([0-9]*)\\)");
-        searchStrings.addElement("Level2CostEstimateImpl: .*");
+        searchStrings.addElement("CostEstimateImpl: .*");
         // Filter for xa tests for the numbers representing the db name (it can change)
         searchStrings.addElement("^Transaction ([0-9])* : \\(([0-9]*)\\,([0-9a-f]*)\\,([0-9a-f]*)\\)");
         // Filter for optimizer number for zindexesLevel1 test (due to a change in display width for the test)
@@ -224,7 +224,7 @@ public class Sed
         subStrings.addElement("The selected victim is XID : VVV");
         // sub build numbers
         subStrings.addElement("$1(xxXXxxFILTERED-BUILD-NUMBERxxXXxx)");
-        subStrings.addElement("Level2CostEstimateImpl: xxXXxxFILTERED-INFORMATIONxxXXxx");
+        subStrings.addElement("CostEstimateImpl: xxXXxxFILTERED-INFORMATIONxxXXxx");
         // sub for db name in xa tests (it can change)
         subStrings.addElement("Transaction $1 : ($2,FILTERED,FILTERED)");
         // sub for optimizer number for zindexesLevel1 test
