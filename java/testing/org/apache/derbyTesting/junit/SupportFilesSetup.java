@@ -29,6 +29,8 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -250,6 +252,17 @@ public class SupportFilesSetup extends TestSetup {
             throw e.getException();
         } 
     }
+    /**
+     * Get the full name of the file.
+     * @param name short name of file
+     * @return absolute path of file in EXTINOUT
+     */
+    public static String getReadWriteFileName(final String name)
+    {
+        return 
+                PrivilegedFileOpsForTests.getAbsolutePath(getReadWrite(name));
+    }
+    
     /**
      * Obtain a File for the local copy of a read-write resource.
      * @param name Base name for the resouce.
