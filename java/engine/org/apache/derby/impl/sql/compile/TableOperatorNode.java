@@ -126,8 +126,7 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				leftOptimizer.modifyAccessPaths();
 				leftResultSet = (ResultSetNode)
-					((OptimizerImpl)leftOptimizer)
-						.optimizableList.getOptimizable(0);
+					leftOptimizer.getOptimizable(0);
 			}
 			else
 			{
@@ -153,8 +152,7 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				rightOptimizer.modifyAccessPaths();
 				rightResultSet = (ResultSetNode)
-					((OptimizerImpl)rightOptimizer)
-						.optimizableList.getOptimizable(0);
+					rightOptimizer.getOptimizable(0);
 			}
 			else
 			{
@@ -747,8 +745,7 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				leftOptimizer.modifyAccessPaths();
 				leftResultSet = (ResultSetNode)
-					((OptimizerImpl)leftOptimizer)
-						.optimizableList.getOptimizable(0);
+					leftOptimizer.getOptimizable(0);
 			}
 			else
 			{
@@ -778,8 +775,7 @@ abstract class TableOperatorNode extends FromTable
 				 */
 				rightOptimizer.modifyAccessPaths();
 				rightResultSet = (ResultSetNode)
-					((OptimizerImpl)rightOptimizer)
-						.optimizableList.getOptimizable(0);
+					rightOptimizer.getOptimizable(0);
 			}
 			else
 			{

@@ -290,4 +290,32 @@ public interface Optimizer
      * @return the maximum number of bytes to be used per table.
      */
     public int getMaxMemoryPerTable();
+
+    /**
+     * Get the number of optimizables being considered by this Optimizer.
+     */
+    public  int getOptimizableCount();
+
+    /**
+     * Get the ith (0-based) Optimizable being considered by this Optimizer.
+     */
+    public  Optimizable getOptimizable( int idx );
+
+	/**
+	 * Process (i.e. add, load, or remove) current best join order as the
+	 * best one for some outer query or ancestor node, represented by another
+	 * Optimizer or an instance of FromTable, respectively. Then
+	 * iterate through our optimizableList and tell each Optimizable
+	 * to do the same.  See Optimizable.updateBestPlan() for more on why
+	 * this is necessary.
+	 *
+	 * @param action Indicates whether to add, load, or remove the plan
+	 * @param planKey Object to use as the map key when adding/looking up
+	 *  a plan.  If this is an instance of Optimizer then it corresponds
+	 *  to an outer query; otherwise it's some Optimizable above this
+	 *  Optimizer that could potentially reject plans chosen by this
+	 *  Optimizer.
+	 */
+	public void updateBestPlanMaps(short action, Object planKey)
+        throws StandardException;
 }

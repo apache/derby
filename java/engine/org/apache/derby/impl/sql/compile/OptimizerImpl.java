@@ -64,30 +64,30 @@ import java.util.HashMap;
  * clauses between permutations yet.)
  */
 
-public class OptimizerImpl implements Optimizer 
+class OptimizerImpl implements Optimizer 
 {
-	protected LanguageConnectionContext lcc;
+	private LanguageConnectionContext lcc;
 
-	DataDictionary			 dDictionary;
+	private DataDictionary			 dDictionary;
 	/* The number of tables in the query as a whole.  (Size of bit maps.) */
-	int						 numTablesInQuery;
+	private int						 numTablesInQuery;
 	/* The number of optimizables in the list to optimize */
-	int						 numOptimizables;
+	private int						 numOptimizables;
 
 	/* Bit map of tables that have already been assigned to slots.
 	 * Useful for pushing join clauses as slots are assigned.
      * Enforcement of ordering dependencies is done through
      * assignedTableMap.
      */
-	protected JBitSet		 assignedTableMap;
-	protected OptimizableList optimizableList;
-	OptimizablePredicateList predicateList;
-	JBitSet					 nonCorrelatedTableMap;
+	private JBitSet		 assignedTableMap;
+	private OptimizableList optimizableList;
+	private OptimizablePredicateList predicateList;
+	private JBitSet					 nonCorrelatedTableMap;
 
-	protected int[]			 proposedJoinOrder;
-	protected int[]					 bestJoinOrder;
-	protected int			 joinPosition;
-	boolean					 desiredJoinOrderFound;
+	private int[]			 proposedJoinOrder;
+	private int[]					 bestJoinOrder;
+	private int			 joinPosition;
+	private boolean					 desiredJoinOrderFound;
 
 	/* This implements a state machine to jump start to a appearingly good join
 	 * order, when the number of tables is high, and the optimization could take
@@ -107,24 +107,24 @@ public class OptimizerImpl implements Optimizer
 	private boolean			 ruleBasedOptimization;
 
 	private CostEstimateImpl outermostCostEstimate;
-	protected CostEstimateImpl currentCost;
-	protected CostEstimateImpl currentSortAvoidanceCost;
-	protected CostEstimateImpl bestCost;
+	private CostEstimateImpl currentCost;
+	private CostEstimateImpl currentSortAvoidanceCost;
+	private CostEstimateImpl bestCost;
 
-	protected long			 timeOptimizationStarted;
-	protected long			 currentTime;
-	protected boolean		 timeExceeded;
+	private long			 timeOptimizationStarted;
+	private long			 currentTime;
+	private boolean		 timeExceeded;
 	private boolean			 noTimeout;
 	private boolean 		 useStatistics;
 	private int				 tableLockThreshold;
 
 	private JoinStrategy[]	joinStrategies;
 
-	protected RequiredRowOrdering	requiredRowOrdering;
+	private RequiredRowOrdering	requiredRowOrdering;
 
 	private boolean			 foundABestPlan;
 
-	protected CostEstimate sortCost;
+	private CostEstimate sortCost;
 
 	private RowOrdering currentRowOrdering = new RowOrderingImpl();
 	private RowOrdering bestRowOrdering = new RowOrderingImpl();
@@ -132,7 +132,7 @@ public class OptimizerImpl implements Optimizer
 	private boolean	conglomerate_OneRowResultSet;
 
 	// max memory use per table
-	protected int maxMemoryPerTable;
+	private int maxMemoryPerTable;
 
 	// Whether or not we need to reload the best plan for an Optimizable
     // when we "pull" [1] it.  If the latest complete join order was the
@@ -170,11 +170,11 @@ public class OptimizerImpl implements Optimizer
 
 	// Value used to figure out when/if we've timed out for this
 	// Optimizable.
-	protected double timeLimit;
+	private double timeLimit;
 
 	// Cost estimate for the final "best join order" that we chose--i.e.
 	// the one that's actually going to be generated.
-	CostEstimate finalCostEstimate;
+	private CostEstimate finalCostEstimate;
 
 	/* Status variables used for "jumping" to previous best join
 	 * order when possible.  In particular, this helps when this
@@ -194,7 +194,7 @@ public class OptimizerImpl implements Optimizer
 	private boolean usingPredsPushedFromAbove;
 	private boolean bestJoinOrderUsedPredsFromAbove;
 
-	protected  OptimizerImpl(OptimizableList optimizableList, 
+	OptimizerImpl(OptimizableList optimizableList, 
 				  OptimizablePredicateList predicateList,
 				  DataDictionary dDictionary,
 				  boolean ruleBasedOptimization,
@@ -2640,7 +2640,7 @@ public class OptimizerImpl implements Optimizer
 	 *  OptimizerImpl that could potentially reject plans chosen by this
 	 *  OptimizerImpl.
 	 */
-	protected void updateBestPlanMaps(short action,
+	public void updateBestPlanMaps(short action,
 		Object planKey) throws StandardException
 	{
 		// First we process this OptimizerImpl's best join order.  If there's
@@ -2724,10 +2724,13 @@ public class OptimizerImpl implements Optimizer
 	 * clears out any scoped predicates that might be sitting in
 	 * OptimizerImpl's list from the last round of optimizing.
 	 *
+	 * This method should be in the Optimizer interface, but it relies
+     * on an argument type (PredicateList) which lives in an impl package.
+	 *
 	 * @param pList List of predicates to add to this OptimizerImpl's
 	 *  own list for pushing.
 	 */
-	protected void addScopedPredicatesToList(PredicateList pList)
+	void addScopedPredicatesToList(PredicateList pList)
 		throws StandardException
 	{
 		if ((pList == null) || (pList == predicateList))
@@ -2774,4 +2777,7 @@ public class OptimizerImpl implements Optimizer
     /** Get the trace machinery */
     public  OptTrace    tracer()    { return lcc.getOptimizerTracer(); }
 
+    public  int getOptimizableCount() { return optimizableList.size(); }
+
+    public  Optimizable getOptimizable( int idx ) { return optimizableList.getOptimizable( idx ); }
 }
