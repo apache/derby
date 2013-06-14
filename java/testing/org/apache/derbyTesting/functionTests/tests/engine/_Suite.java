@@ -53,6 +53,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(RestrictiveFilePermissionsTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
         suite.addTest(ReadMeFilesTest.suite());
+        suite.addTest(ShutdownWithoutDeregisterPermissionTest.suite());
 
         return suite;
     }

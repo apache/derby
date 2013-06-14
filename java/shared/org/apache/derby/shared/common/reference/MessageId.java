@@ -174,6 +174,9 @@ public interface MessageId {
     String CONN_XA_TRANSACTION_TIMED_OUT                    = "J135";
     String CONN_CLOSE_XA_TRANSACTION_ROLLED_BACK            = "J136";
 
+    /** Shutdown couldn't deregister driver because of missing permission. */
+    String CONN_DEREGISTER_NOT_PERMITTED = "J137";
+
 	/*
 	** Authentication
 	*/

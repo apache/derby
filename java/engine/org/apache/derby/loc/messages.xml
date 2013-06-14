@@ -8222,6 +8222,11 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
                 <text>There was an XA transaction associated with the connection being closed. The transaction is going to be rolled back. The transaction Xid is {0}.</text>
                 <arg>transactionXid</arg>
             </msg>
+
+            <msg>
+                <name>J137</name>
+                <text>Could not deregister the JDBC driver when shutting down the Derby engine. Make sure SQLPermission("deregisterDriver") is granted to derby.jar.</text>
+            </msg>
         </family>
 
 
