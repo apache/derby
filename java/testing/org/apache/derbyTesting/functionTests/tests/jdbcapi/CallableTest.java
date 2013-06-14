@@ -61,8 +61,6 @@ import junit.framework.TestSuite;
  */
 public class CallableTest extends BaseJDBCTestCase {
 
-    private static final String NOT_IMPLEMENTED = "0A000";
-
     /**
      * Routines that should be created before the tests are run and
      * dropped when the tests have finished. 
@@ -473,7 +471,7 @@ public class CallableTest extends BaseJDBCTestCase {
 
         assertSameDate(d, cal1, cs.getDate(5, cal2), cal2);
         assertSameTime(t, cal1, cs.getTime(6, cal2), cal2);
-        assertSameTimestamp(ts, cal1, cs.getTimestamp(7, cal2), cal2);
+        vetTimestamp(ts, cal1, cs.getTimestamp(7, cal2), cal2);
     }
 
     /**
@@ -527,19 +525,55 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Assert that two Timestamp values have the same representation in their
-     * respective time zones.
+     * Check that a {@code Timestamp} value is as expected when it has been
+     * passed to a stored procedure and read back again from that procedure,
+     * using different calendars for the {@code setTimestamp()} and
+     * {@code getTimestamp()} calls.
      *
-     * @param expected the expected time
-     * @param cal1 a calendar representing the time zone of the expected time
-     * @param actual the actual time
-     * @param cal2 a calendar representing the time zone of the actual time
+     * @param original the original timestamp that was passed to the procedure
+     * @param cal1 the calendar object passed to {@code setTimestamp()} before
+     * calling the procedure
+     * @param returned the timestamp returned from the procedure
+     * @param cal2 the calendar object passed to {@code getTimestamp()} when
+     * reading the value returned by the procedure
      */
-    private void assertSameTimestamp(Timestamp expected, Calendar cal1,
-                                     Timestamp actual, Calendar cal2) {
-        assertSameDate(expected, cal1, actual, cal2);
-        assertSameTime(expected, cal1, actual, cal2);
-        assertEquals("nanos", expected.getNanos(), actual.getNanos());
+    private void vetTimestamp(Timestamp original, Calendar cal1,
+                              Timestamp returned, Calendar cal2) {
+
+        // Initialize cal1 with values from the original timestamp.
+        cal1.clear();
+        cal1.setTime(original);
+
+        // The stored procedure itself doesn't have any knowledge about the
+        // calendar passed to setTimestamp() or getTimestamp(), so it will
+        // see the timestamp in the local timezone. Find out what it looks
+        // like in this intermediate state.
+        Calendar intermediate = Calendar.getInstance();
+        intermediate.set(cal1.get(Calendar.YEAR),
+                cal1.get(Calendar.MONTH),
+                cal1.get(Calendar.DATE),
+                cal1.get(Calendar.HOUR_OF_DAY),
+                cal1.get(Calendar.MINUTE),
+                cal1.get(Calendar.SECOND));
+
+        // The returned timestamp will be based on the values in the
+        // intermediate representation, but using the calendar passed to
+        // getTimestamp().
+        cal2.clear();
+        cal2.set(intermediate.get(Calendar.YEAR),
+                intermediate.get(Calendar.MONTH),
+                intermediate.get(Calendar.DATE),
+                intermediate.get(Calendar.HOUR_OF_DAY),
+                intermediate.get(Calendar.MINUTE),
+                intermediate.get(Calendar.SECOND));
+
+        // Construct a new timestamp with the value we expect to be returned
+        // from getTimestamp().
+        Timestamp expected = new Timestamp(cal2.getTimeInMillis());
+        expected.setNanos(original.getNanos());
+
+        // Compare it with the actually returned value.
+        assertEquals(expected, returned);
     }
 
     /**
