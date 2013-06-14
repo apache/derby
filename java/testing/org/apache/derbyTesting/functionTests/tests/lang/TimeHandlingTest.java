@@ -20,8 +20,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.UnsupportedEncodingException;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -126,9 +124,8 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * Simple set up, just get a Calendar
      * and ensure the table T_ALL is empty.
      * @throws SQLException 
-     * @throws UnsupportedEncodingException 
      */
-    protected void setUp() throws UnsupportedEncodingException, SQLException
+    protected void setUp() throws SQLException
     {
         cal = Calendar.getInstance();
         Statement s  = createStatement();
@@ -139,16 +136,15 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     /**
      * Test inserting and selecting of TIME values.
      * A set of random TIME values are inserted along with an
-     * identifer that encodes the time value. The values are then
+     * identifier that encodes the time value. The values are then
      * fetched and compared to a value calculated from the identifier.
      * The returned values are fetched using checkTimeValue thus inheriting
      * all the checks within that method.
      * <BR>
      * 
      * @throws SQLException
-     * @throws UnsupportedEncodingException 
      */
-    public void testInertTime() throws SQLException, UnsupportedEncodingException
+    public void testInsertTime() throws SQLException
     {
         getConnection().setAutoCommit(false);
         // Insert a set of time values, 
@@ -642,10 +638,32 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         long now2 = System.currentTimeMillis();
         assertNotNull(tsv);
         assertFalse(rs.wasNull());
-        
-        // Check the TIME portion is set to the same as tv
-        assertTimeEqual(tv, tsv);
-        
+
+        // Check if the timestamp is as expected. Skip the check if the test
+        // runs around midnight, since we don't know which date to expect in
+        // that case.
+        if (isDateEqual(now, new Timestamp(now2))) {
+            // When reading a TIME value with getTimestamp(), the date
+            // component of the timestamp will be based on the current date.
+            // See DERBY-889.
+            cal.clear();
+            cal.setTimeInMillis(now);
+            int thisYear = cal.get(Calendar.YEAR);
+            int thisMonth = cal.get(Calendar.MONTH);
+            int thisDate = cal.get(Calendar.DATE);
+
+            // Construct a new timestamp based on the time component of the
+            // TIME value and the date component of the current time.
+            cal.clear();
+            cal.setTime(tv);
+            cal.set(thisYear, thisMonth, thisDate);
+
+            // Verify that the timestamp returned from getTimestamp() is as
+            // expected.
+            Timestamp expectedValue = new Timestamp(cal.getTimeInMillis());
+            assertTimeEqual(expectedValue, tsv);
+        }
+
         // DERBY-1811, DERBY-889 being fixed could add tests
         // Check the returned date portion is the current date
         // using the value from 'now' and 'now2'. Double check
@@ -820,14 +838,10 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private Time getTime19700101(int hour, int min, int sec)
     {
         cal.clear();
-        cal.set(1970, Calendar.JANUARY, 1);
+        cal.set(1970, Calendar.JANUARY, 1, hour, min, sec);
         cal.set(Calendar.MILLISECOND, 0);
-        
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, min);
-        cal.set(Calendar.SECOND, sec);
-        
-        Time to =  new Time(cal.getTime().getTime());
+
+        Time to = new Time(cal.getTimeInMillis());
         assertTime1970(to);
         return to;
     }
@@ -845,13 +859,11 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private Time getTime19700101(long t, Calendar cal)
     {
         cal.clear();
-        // JDK 1.3 can't call this!
-        // cal.setTimeInMillis(t);
-        cal.setTime(new Date(t));
+        cal.setTimeInMillis(t);
         cal.set(1970, Calendar.JANUARY, 1);
         cal.set(Calendar.MILLISECOND, 0);
-        
-        Time to =  new Time(cal.getTime().getTime());
+
+        Time to = new Time(cal.getTimeInMillis());
         assertTime1970(to);
         return to;
     }
@@ -868,16 +880,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     private Time getTime19700101(String s, Calendar cal)
     {
-        cal.clear();
-        // JDK 1.3 can't call this!
-        // cal.setTimeInMillis(t);
-        cal.setTime(Time.valueOf(s));
-        cal.set(1970, Calendar.JANUARY, 1);
-        cal.set(Calendar.MILLISECOND, 0);
-        
-        Time to =  new Time(cal.getTime().getTime());
-        assertTime1970(to);
-        return to;
+        return getTime19700101(Time.valueOf(s).getTime(), cal);
     }
     
     /**
@@ -938,7 +941,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     private boolean isDateEqual(long d, Timestamp tsv)
     {
         cal.clear();
-        cal.setTime(new java.util.Date(d));
+        cal.setTimeInMillis(d);
         int day = cal.get(Calendar.DAY_OF_MONTH);
         int month = cal.get(Calendar.MONTH);
         int year = cal.get(Calendar.YEAR);
