@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -793,4 +794,22 @@ public class CursorNode extends DMLStatementNode
             return tmp;
         }
     }
+    
+	/**
+	 * Accept the visitor for all visitable children of this node.
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	void acceptChildren(Visitor v)
+		throws StandardException
+	{
+        super.acceptChildren(v);
+
+        if (orderByList != null) { orderByList.acceptChildren( v ); }
+        if (offset != null) { offset.acceptChildren( v ); }
+        if (fetchFirst != null) { fetchFirst.acceptChildren( v ); }
+	}
+
 }
