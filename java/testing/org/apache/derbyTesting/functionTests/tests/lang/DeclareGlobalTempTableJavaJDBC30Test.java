@@ -927,5 +927,26 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(s.executeQuery(
                 "select count(*) from SESSION.tx") , "3");
         s.executeUpdate("drop table SESSION.tx");
-    }	
+    }
+
+    /**
+     * Test that we don't get an NPE when re-using a PreparedStatement
+     * on a temp table declared and then rolled back. See DERBY-6189.
+     */
+    public  void    test_derby_6189() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        conn.prepareStatement
+            ( "DECLARE GLOBAL TEMPORARY TABLE SESSION.t6189( c21 int, c22 int) not logged on commit preserve rows" )
+            .execute();        
+        PreparedStatement pStmtInsert = conn.prepareStatement( "insert into SESSION.t6189 values (23, 1)" );
+
+        pStmtInsert.execute();
+
+        conn.rollback();
+
+        assertStatementError("42X05", pStmtInsert); 
+    }
+    
 }
