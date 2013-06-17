@@ -2533,6 +2533,49 @@ public class SelectNode extends ResultSetNode
 		if (havingClause != null) {
 			havingClause = (ValueNode)havingClause.accept(v);
 		}
+
+        // visiting these clauses was added as part of DERBY-6263. a better fix might be to fix the
+        // visitor rather than skip it.
+        if ( !(v instanceof HasCorrelatedCRsVisitor) )
+        {
+            if (selectSubquerys != null)
+            {
+                selectSubquerys = (SubqueryList) selectSubquerys.accept( v );
+            }
+
+            if (whereSubquerys != null)
+            {
+                whereSubquerys = (SubqueryList) whereSubquerys.accept( v );
+            }
+
+            if (groupByList != null) {
+                groupByList = (GroupByList) groupByList.accept( v );
+            }
+        
+            if (orderByLists[0] != null) {
+                for (int i = 0; i < orderByLists.length; i++) {
+                    orderByLists[i] = (OrderByList) orderByLists[ i ].accept( v );
+                }
+            }
+
+            if (offset != null) {
+                offset = (ValueNode) offset.accept( v );
+            }
+            
+            if (fetchFirst != null) {
+                fetchFirst = (ValueNode) fetchFirst.accept( v );
+            }
+            
+            if (preJoinFL != null)
+            {
+                preJoinFL = (FromList) preJoinFL.accept( v );
+            }
+            
+            if (windows != null)
+            {
+                windows = (WindowList) windows.accept( v );
+            }
+        }
 	}
 
 	/**
