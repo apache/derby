@@ -1943,7 +1943,7 @@ public class BaseDataFileFactory
                 {
 
                     String warningMsg = 
-                      MessageService.getCompleteMessage(
+                      MessageService.getTextMessage(
                           SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
 
                     logMsg(warningMsg);

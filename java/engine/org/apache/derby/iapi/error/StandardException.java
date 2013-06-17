@@ -551,8 +551,10 @@ public class StandardException extends Exception
 	*/
 
 	public String getMessage() {
-		if (textMessage == null)
-			textMessage = MessageService.getCompleteMessage(getMessageId(), getArguments());
+        if (textMessage == null) {
+            textMessage = MessageService.getTextMessage(
+                                getMessageId(), getArguments());
+        }
 
 		return textMessage;
 	}
@@ -602,7 +604,7 @@ public class StandardException extends Exception
 
     public static SQLWarning newWarning(String messageId, Object... oa)
 	{
-		String		message = MessageService.getCompleteMessage(messageId, oa);
+        String      message = MessageService.getTextMessage(messageId, oa);
 		String		state = StandardException.getSQLStateFromIdentifier(messageId);
 		SQLWarning	sqlw = new SQLWarning(message, state, ExceptionSeverity.WARNING_SEVERITY);
 

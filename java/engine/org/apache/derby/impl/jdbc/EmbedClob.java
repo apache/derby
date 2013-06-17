@@ -215,7 +215,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 reader = this.clob.getInternalReader(pos);
             } catch (EOFException eofe) {
                 throw Util.generateCsSQLException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos), eofe);
+                        SQLState.BLOB_POSITION_TOO_LARGE, eofe, pos);
             }
             char[] chars = new char[length];
             int charsRead = 0;
@@ -401,7 +401,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         } catch (EOFException eofe) {
             restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.generateCsSQLException(
-                                        SQLState.BLOB_POSITION_TOO_LARGE, eofe);
+                    SQLState.BLOB_POSITION_TOO_LARGE, eofe, start);
         } catch (IOException ioe) {
             restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.setStreamFailure(ioe);
@@ -677,7 +677,7 @@ restartScan:
         catch (EOFException eofe) {
             throw Util.generateCsSQLException(
                         SQLState.BLOB_LENGTH_TOO_LONG,
-                        new Long(len), eofe);
+                        eofe, len);
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
         }

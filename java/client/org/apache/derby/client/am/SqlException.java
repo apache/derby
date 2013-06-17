@@ -158,9 +158,7 @@ public class SqlException extends Exception implements Diagnosable {
      *      Can be null.  Indicates the cause of this exception.  If this is
      *      an instance of SqlException or java.sql.SQLException then the exception
      *      is chained into the nextException chain.  Otherwise it is chained
-     *      using initCause().  On JDK 1.3, since initCause() does not exist,
-     *      a non-SQL exception can not be chained.  Instead, the exception class
-     *      and message text is appended to the message for this exception.
+     *      using initCause().
      */
     SqlException(LogWriter logwriter,
         ClientMessageId msgid, Object[] args, Throwable cause)
@@ -211,23 +209,13 @@ public class SqlException extends Exception implements Diagnosable {
         this (logwriter, msgid, (Object[])null, cause);
     }
     
-    private SqlException(LogWriter logwriter,
-                         ClientMessageId msgid,
-                         Object[] args)
+    public SqlException(LogWriter logwriter,
+                        ClientMessageId msgid,
+                        Object... args)
     {
         this(logwriter, msgid, args, (Throwable)null);
     }
-    
-    public SqlException (LogWriter logwriter, ClientMessageId msgid)
-    {
-        this(logwriter, msgid, (Object[])null);
-    }
-    
-    public SqlException(LogWriter logwriter, ClientMessageId msgid, Object arg1)
-    {
-        this(logwriter, msgid, new Object[] { arg1 });
-    }
-    
+
     public SqlException(LogWriter logwriter, ClientMessageId msgid, 
             Object arg1, Throwable cause)
     {
@@ -240,18 +228,6 @@ public class SqlException extends Exception implements Diagnosable {
         this(logwriter, msgid, new Object[] { arg1, arg2 }, cause);
     }
     
-    public SqlException(LogWriter logwriter,
-        ClientMessageId msgid, Object arg1, Object arg2)
-    {
-        this(logwriter, msgid, new Object[] { arg1, arg2 });
-    }
-    
-    public SqlException(LogWriter logwriter,
-        ClientMessageId msgid, Object arg1, Object arg2, Object arg3)
-    {
-        this(logwriter, msgid, new Object[] { arg1, arg2, arg3 });
-    }
-
     /**
      * Create an exception for an engine generated error.
      *

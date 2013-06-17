@@ -685,20 +685,8 @@ public class Monitor {
 		getStream().println(messageText);
 	}
 
-	public static void logTextMessage(String messageID) {
-		getStream().println(MessageService.getTextMessage(messageID));
-	}
-	public static void logTextMessage(String messageID, Object a1) {
-		getStream().println(MessageService.getTextMessage(messageID, a1));
-	}
-	public static void logTextMessage(String messageID, Object a1, Object a2) {
-		getStream().println(MessageService.getTextMessage(messageID, a1, a2));
-	}
-	public static void logTextMessage(String messageID, Object a1, Object a2, Object a3) {
-		getStream().println(MessageService.getTextMessage(messageID, a1, a2, a3));
-	}
-	public static void logTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4) {
-		getStream().println(MessageService.getTextMessage(messageID, a1, a2, a3, a4));
+    public static void logTextMessage(String messageID, Object... args) {
+        getStream().println(MessageService.getTextMessage(messageID, args));
 	}
 
 	/**

@@ -34,20 +34,9 @@ public class SqlWarning extends SqlException implements Diagnosable {
 
     private SqlWarning nextWarning_;
     
-    SqlWarning (LogWriter logwriter, ClientMessageId msgid)
+    SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object... args)
     {
-        super(logwriter, msgid);
-    }
-    
-    SqlWarning(LogWriter logwriter, ClientMessageId msgid, Object arg1)
-    {
-        super(logwriter, msgid, arg1);
-    }
-    
-    SqlWarning(LogWriter logwriter,
-        ClientMessageId msgid, Object arg1, Object arg2)
-    {
-        super(logwriter, msgid, arg1, arg2);
+        super(logwriter, msgid, args);
     }
     
     public SqlWarning(LogWriter logWriter, Sqlca sqlca)

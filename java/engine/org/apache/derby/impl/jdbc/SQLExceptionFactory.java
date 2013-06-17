@@ -116,7 +116,7 @@ public class SQLExceptionFactory extends ExceptionFactory {
     @Override
     public final SQLException getSQLException(String messageId,
             SQLException next, Throwable cause, Object... args) {
-        String message = MessageService.getCompleteMessage(messageId, args);
+        String message = MessageService.getTextMessage(messageId, args);
         int severity = StandardException.getSeverityFromIdentifier(messageId);
         return getSQLException(message, messageId, next, severity, cause, args);
     }

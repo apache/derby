@@ -54,36 +54,11 @@ public class MessageUtil
         this.resourceBundleName = resourceBundleName;
     }
     
-    /** Get a message with default locale - no arguments */
-       public String getTextMessage(String messageID) 
-    {
-        return getCompleteMessage(messageID, (Object[]) null);
-    }
-    
-    /** Get a message with default locale - one argument */
-    public String getTextMessage(String messageID, Object a1) 
-    {
-        return getCompleteMessage(messageID, new Object[]{a1});
-    }
-    
-    /** Get a message with default locale - two arguments */
-    public String getTextMessage(String messageID, Object a1, Object a2) 
-    {
-        return getCompleteMessage(messageID, new Object[]{a1, a2});
-    }
-    
-    /** Get a message with default locale - three arguments */
-    public String getTextMessage(String messageID, Object a1, Object a2, 
-        Object a3) 
-    {
-        return getCompleteMessage(messageID, new Object[]{a1, a2, a3});
-    }
-    
-    /** Get a message with default locale - four arguments */
-    public String getTextMessage(String messageID, Object a1, Object a2, 
-        Object a3, Object a4) 
-    {
-        return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4});
+    /**
+     * Get a message with default locale.
+     */
+    public String getTextMessage(String messageID, Object... args) {
+        return getCompleteMessage(messageID, args);
     }
     
     /** 

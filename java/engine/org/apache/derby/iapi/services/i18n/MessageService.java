@@ -61,26 +61,6 @@ public final class MessageService {
 		finder = theFinder;
 	}
 
-	public static String getTextMessage(String messageID) {
-		return getCompleteMessage(messageID, (Object[]) null);
-	}
-	public static String getTextMessage(String messageID, Object a1) {
-
-		return getCompleteMessage(messageID, new Object[]{a1});
-	}
-	public static String getTextMessage(String messageID, Object a1, Object a2) {
-		return getCompleteMessage(messageID, new Object[]{a1, a2});
-	}
-	public static String getTextMessage(String messageID, Object a1, Object a2, Object a3) {
-		return getCompleteMessage(messageID, new Object[]{a1, a2, a3});
-	}
-	public static String getTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4) {
-		return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4});
-	}
-    public static String getTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5) {
-        return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4, a5});
-    }
-
 	/**
 	  Transform the message from messageID to the actual error, warning, or
 	  info message using the correct locale.
@@ -91,8 +71,7 @@ public final class MessageService {
 	  object back from this array.
 
 	 */
-	public static String getCompleteMessage(String messageId, Object[] arguments) {
-
+    public static String getTextMessage(String messageId, Object... arguments) {
 		try {
 			return formatMessage(getBundle(messageId), messageId, arguments, true);
 		} catch (MissingResourceException mre) {

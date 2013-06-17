@@ -137,8 +137,7 @@ public abstract class Util  {
 
 	private static SQLException newEmbedSQLException(String messageId,
 			Object[] args, SQLException next, int severity, Throwable t) {
-        String message = MessageService.getCompleteMessage
-                                        (messageId, args);
+        String message = MessageService.getTextMessage(messageId, args);
         return ExceptionFactory.getInstance().getSQLException(
 			    message, messageId, next, severity, t, args);
 	}
@@ -282,10 +281,10 @@ public abstract class Util  {
         		StandardException.getSeverityFromIdentifier(error));
 	}
 
-	static SQLException generateCsSQLException(
-                    String error, Object arg1, Throwable t) {
+    static SQLException generateCsSQLException(
+                    String error, Throwable t, Object... args) {
 		return newEmbedSQLException(error,
-			new Object[] {arg1},
+                args,
                 StandardException.getSeverityFromIdentifier(error), t);
 	}
 
@@ -362,7 +361,7 @@ public abstract class Util  {
 		msg = e.getMessage();
 		if (msg == null) 
 			msg = e.getClass().getName();
-        return generateCsSQLException(SQLState.SET_STREAM_FAILURE, msg, e);
+        return generateCsSQLException(SQLState.SET_STREAM_FAILURE, e, msg);
 	}
 
 	static SQLException typeMisMatch(int targetSQLType) {
