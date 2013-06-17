@@ -88,7 +88,6 @@ import java.util.Iterator;
 import java.util.concurrent.Executor;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.jdbc.FailedProperties40;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.sql.conn.StatementContext;
@@ -3183,11 +3182,6 @@ public abstract class EmbedConnection implements EngineConnection
 			return rootConnection.resultSetId++;
 		}
 	}
-
-    /** Get the exception factory for this connection. */
-    public ExceptionFactory getExceptionFactory() {
-        return Util.getExceptionFactory();
-    }
 
 	protected static SQLException newSQLException(String messageId) {
 		return Util.generateCsSQLException(messageId);

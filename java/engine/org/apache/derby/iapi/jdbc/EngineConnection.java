@@ -21,7 +21,6 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
@@ -109,14 +108,6 @@ public interface EngineConnection extends Connection {
      * schema are reset.
      */
     public void resetFromPool() throws SQLException;
-
-    /**
-     * Return an exception factory that could be used to generate
-     * {@code SQLException}s raised by this connection.
-     *
-     * @return an exception factory instance
-     */
-    public ExceptionFactory getExceptionFactory();
 
     ////////////////////////////////////////////////////////////////////
     //

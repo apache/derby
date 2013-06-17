@@ -47,9 +47,6 @@ public abstract class BrokeredConnection implements EngineConnection
 	protected boolean isClosed;
         private String connString;
 
-    /** Exception factory for the underlying connection. */
-    private final ExceptionFactory exceptionFactory;
-
 	/**
 		Maintain state as seen by this Connection handle, not the state
 		of the underlying Connection it is attached to.
@@ -68,8 +65,6 @@ public abstract class BrokeredConnection implements EngineConnection
             throws SQLException
 	{
 		this.control = control;
-        this.exceptionFactory =
-                control.getRealConnection().getExceptionFactory();
 	}
 
     // JDBC 2.0 methods
@@ -505,7 +500,7 @@ public abstract class BrokeredConnection implements EngineConnection
      * @return a no-current-connection exception
      */
     final SQLException noCurrentConnection() {
-        return exceptionFactory.getSQLException(
+        return ExceptionFactory.getInstance().getSQLException(
                 SQLState.NO_CURRENT_CONNECTION, null, null, null);
     }
 
@@ -773,13 +768,6 @@ public abstract class BrokeredConnection implements EngineConnection
         getRealConnection().resetFromPool();
     }
 
-    /**
-     * Return the exception factory for the underlying connection.
-     */
-    public final ExceptionFactory getExceptionFactory() {
-        return exceptionFactory;
-    }
-    
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

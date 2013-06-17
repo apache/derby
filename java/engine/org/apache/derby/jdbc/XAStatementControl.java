@@ -26,7 +26,6 @@ import org.apache.derby.iapi.jdbc.BrokeredStatementControl;
 import org.apache.derby.iapi.jdbc.BrokeredStatement;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedStatement;
@@ -241,11 +240,4 @@ final class XAStatementControl implements BrokeredStatementControl {
 	public int checkHoldCursors(int holdability) throws SQLException {
 		return xaConnection.checkHoldCursors(holdability, true);
  	}
-
-    /**
-     * Return the exception factory for the underlying connection.
-     */
-    public ExceptionFactory getExceptionFactory() {
-        return applicationConnection.getExceptionFactory();
-    }
 }

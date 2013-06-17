@@ -582,7 +582,7 @@ public abstract class BrokeredStatement implements EngineStatement
         throws SQLException
     {
         if (isClosed()) {
-            throw control.getExceptionFactory().getSQLException(
+            throw ExceptionFactory.getInstance().getSQLException(
                     SQLState.ALREADY_CLOSED, null, null,
                     new Object[]{ "Statement" });
         }
@@ -596,7 +596,7 @@ public abstract class BrokeredStatement implements EngineStatement
      * @return an exception indicating that unwrap failed
      */
     final SQLException unableToUnwrap(Class iface) {
-        return control.getExceptionFactory().getSQLException(
+        return ExceptionFactory.getInstance().getSQLException(
                 SQLState.UNABLE_TO_UNWRAP, null, null,
                 new Object[]{ iface });
     }

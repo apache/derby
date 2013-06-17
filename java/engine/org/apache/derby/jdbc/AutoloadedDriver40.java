@@ -24,7 +24,6 @@ package org.apache.derby.jdbc;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-import org.apache.derby.impl.jdbc.SQLExceptionFactory40;
 import org.apache.derby.impl.jdbc.Util;
 
 /**
@@ -35,7 +34,6 @@ public class AutoloadedDriver40 extends AutoloadedDriver
 	static
 	{
         registerMe( new AutoloadedDriver40() );
-        Util.setExceptionFactory (new SQLExceptionFactory40 ());
 	}
 
     ////////////////////////////////////////////////////////////////////

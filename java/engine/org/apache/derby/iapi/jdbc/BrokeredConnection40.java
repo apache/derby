@@ -320,7 +320,7 @@ public class BrokeredConnection40
             try {
                 return interfaces.cast(this);
             } catch (ClassCastException cce) {
-                throw getExceptionFactory().getSQLException(
+                throw ExceptionFactory.getInstance().getSQLException(
                         SQLState.UNABLE_TO_UNWRAP, null, null,
                         new Object[]{ interfaces });
             }

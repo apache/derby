@@ -1380,8 +1380,7 @@ class DRDAConnThread extends Thread {
         boolean authFail = false;
 
         // get exception which carries Derby messageID and args
-        SQLException se = Util.getExceptionFactory().
-            getArgumentFerry(sqlException);
+        SQLException se = StandardException.getArgumentFerry(sqlException);
 
         if (se instanceof EmbedSQLException) {
             // DERBY-3060: if this is an EmbedSQLException, we can
@@ -6446,7 +6445,7 @@ class DRDAConnThread extends Thread {
         String sqlerrmc;
 
         // get exception which carries Derby messageID and args, per DERBY-1178
-        se = Util.getExceptionFactory().getArgumentFerry( se );
+        se = StandardException.getArgumentFerry( se );
         
         if (se instanceof EmbedSQLException  && ! severe) {
             sqlerrmc = buildTokenizedSqlerrmc(se);

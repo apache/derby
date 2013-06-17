@@ -26,20 +26,35 @@ import java.sql.SQLException;
 /**
  * An exception factory is used to create SQLExceptions of the correct type.
  */
-public interface ExceptionFactory {
+public abstract class ExceptionFactory {
+
+    /** The singleton ExceptionFactory instance. */
+    private static final ExceptionFactory INSTANCE;
+    static {
+        // Initialize the singleton instance. Use reflection so that there
+        // is no compile-time dependency on implementation classes from iapi.
+        // Currently, there is only one implementation. There used to be two;
+        // one for JDBC 3.0 and lower, and one for JDBC 4.0 and higher. If
+        // the need for more than one implementation ever arises again, the
+        // code below should be changed to load the correct factory for the
+        // run-time platform.
+        String impl = "org.apache.derby.impl.jdbc.SQLExceptionFactory";
+        ExceptionFactory factory = null;
+        try {
+            factory = (ExceptionFactory) Class.forName(impl).newInstance();
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(e);
+        }
+        INSTANCE = factory;
+    }
 
     /**
-     * Unpack a SQL exception, looking for an EmbedSQLException which carries
-     * the Derby messageID and args which we will serialize across DRDA so
-     * that the client can reconstitute a SQLException with appropriate text.
-     * If we are running JDBC 3, then we hope that the passed-in
-     * exception is already an EmbedSQLException, which carries all the
-     * information we need.
-     *
-     * @param se the exception to unpack
-     * @return the argument ferry for the exception
+     * Get the singleton exception factory instance.
+     * @return an {@code ExceptionFactory} instance
      */
-    SQLException getArgumentFerry(SQLException se);
+    public static ExceptionFactory getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * Construct an SQLException whose message and severity are specified
@@ -53,8 +68,8 @@ public interface ExceptionFactory {
      * @param args the message arguments
      * @return an SQLException
      */
-    SQLException getSQLException(String message, String messageId,
-            SQLException next, int severity, Throwable cause, Object[] args);
+    public abstract SQLException getSQLException(String message, String messageId,
+            SQLException next, int severity, Throwable cause, Object... args);
 
     /**
      * Construct an SQLException whose message and severity are derived from
@@ -66,7 +81,6 @@ public interface ExceptionFactory {
      * @param args the message arguments
      * @return an SQLException
      */
-    SQLException getSQLException(String messageId, SQLException next,
-            Throwable cause, Object[] args);
-
+    public abstract SQLException getSQLException(String messageId,
+            SQLException next, Throwable cause, Object... args);
 }

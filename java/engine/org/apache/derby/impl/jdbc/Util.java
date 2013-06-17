@@ -23,6 +23,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
@@ -69,11 +70,6 @@ import java.io.IOException;
 //p4 number for it will have the details of all the files impacted and
 //the actual changes made.
 public abstract class Util  {
-
-
-    private static SQLExceptionFactory exceptionFactory = 
-                                    new SQLExceptionFactory ();
-
 
 	private static int logSeverityLevel = PropertyUtil.getSystemInt(Property.LOG_SEVERITY_LEVEL,
 		SanityManager.DEBUG ? 0 : ExceptionSeverity.SESSION_SEVERITY);
@@ -143,7 +139,7 @@ public abstract class Util  {
 			Object[] args, SQLException next, int severity, Throwable t) {
         String message = MessageService.getCompleteMessage
                                         (messageId, args);
-        return exceptionFactory.getSQLException (
+        return ExceptionFactory.getInstance().getSQLException(
 			    message, messageId, next, severity, t, args);
 	}
 
@@ -279,40 +275,12 @@ public abstract class Util  {
 	** they don't directly do a new Util.
 	*/
 
-	/* 3 arguments */
-	static SQLException newException(String messageID, Object a1,
-			Object a2, Object a3) {
-		return newEmbedSQLException(messageID, new Object[] {a1, a2, a3},
-        		StandardException.getSeverityFromIdentifier(messageID));
-	}
-
-
-	public static SQLException generateCsSQLException(String error) {
+    public static SQLException generateCsSQLException(
+            String error, Object... args) {
 		return newEmbedSQLException(error,
+                args,
         		StandardException.getSeverityFromIdentifier(error));
 	}
-
-	public static SQLException generateCsSQLException(String error, Object arg1)     {
-		return newEmbedSQLException(error,
-			new Object[] {arg1},
-                StandardException.getSeverityFromIdentifier(error));
-	}
-
-	public static SQLException generateCsSQLException(
-                             String error, Object arg1, Object arg2){
-		return newEmbedSQLException(error,
-			new Object[] {arg1, arg2},
-                StandardException.getSeverityFromIdentifier(error));
-	}
-
-	public static SQLException generateCsSQLException(
-		String error, Object arg1, Object arg2, Object arg3) {
-
-		return newEmbedSQLException(error,
-			new Object[] {arg1, arg2, arg3},
-                StandardException.getSeverityFromIdentifier(error));
-	}
-
 
 	static SQLException generateCsSQLException(
                     String error, Object arg1, Throwable t) {
@@ -322,7 +290,7 @@ public abstract class Util  {
 	}
 
 	public static SQLException generateCsSQLException(StandardException se) {
-        return exceptionFactory.getSQLException(
+        return ExceptionFactory.getInstance().getSQLException(
                 se.getMessage(), se.getMessageId(), (SQLException) null,
                 se.getSeverity(), se, se.getArguments());
     }
@@ -453,25 +421,8 @@ public abstract class Util  {
      * @return an {@code IOException} linked to {@code cause}
      */
     static IOException newIOException(Throwable cause) {
-        IOException ioe = new IOException(cause.getMessage());
-        ioe.initCause(cause);
-        return ioe;
+        return new IOException(cause);
     }
-
-    /**
-     * this method is called to replace the exception factory to be 
-     * used to generate the SQLException or the subclass
-     */
-
-    public static void setExceptionFactory (SQLExceptionFactory factory) {
-        exceptionFactory = factory;
-    }
-
-    /**
-     * Get the exception factory specific to the version of JDBC which
-	 * we are running.
-     */
-	public	static	SQLExceptionFactory	getExceptionFactory() { return exceptionFactory; }
 
 	public static String typeName(int jdbcType) {
 		switch (jdbcType) {
