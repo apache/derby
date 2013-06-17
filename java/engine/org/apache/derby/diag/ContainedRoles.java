@@ -37,7 +37,6 @@ import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.vti.VTITemplate;
 
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 
 /**
@@ -172,6 +171,6 @@ public class ContainedRoles extends VTITemplate {
     };
 
     private static final ResultSetMetaData metadata =
-        new EmbedResultSetMetaData40(columnInfo);
+        new EmbedResultSetMetaData(columnInfo);
 
 }

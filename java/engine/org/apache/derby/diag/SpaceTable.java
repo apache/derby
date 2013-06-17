@@ -21,7 +21,6 @@
 
 package org.apache.derby.diag;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -31,7 +30,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.SpaceInfo;
@@ -39,7 +37,6 @@ import org.apache.derby.iapi.error.PublicAPI;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -378,7 +375,8 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 		EmbedResultSetMetaData.getResultColumnDescriptor("TABLEID",  Types.CHAR, false, 36),
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 
 }
 

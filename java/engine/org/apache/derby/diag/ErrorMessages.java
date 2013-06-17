@@ -21,8 +21,6 @@
 
 package org.apache.derby.diag;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -30,9 +28,6 @@ import java.util.Properties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
-import org.apache.derby.vti.VTICosting;
-import org.apache.derby.vti.VTIEnvironment;
-import java.lang.Math;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -44,7 +39,6 @@ import org.apache.derby.vti.VTICosting;
 import org.apache.derby.vti.VTIEnvironment;
 
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 
@@ -233,7 +227,8 @@ public final class ErrorMessages extends VTITemplate implements VTICosting, java
 		EmbedResultSetMetaData.getResultColumnDescriptor("MESSAGE",    Types.VARCHAR, true, Limits.DB2_VARCHAR_MAXWIDTH),
 		EmbedResultSetMetaData.getResultColumnDescriptor("SEVERITY",   Types.INTEGER, true),
 	};
-	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 
 }

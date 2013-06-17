@@ -25,25 +25,14 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 
 import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 
 /**
- * This class immitates to implement the ParameterMetaData interface from JDBC3.0
- * We want to provide the functionality to JDKs before JDBC3.0. We put it here
- * instead of in Local20 because we want to make it available for CallableStatement.
- * It provides the parameter meta data for callable & prepared statements.
- * The subclass in Local30 actually implements ParameterMetaData interface.
- *
- * For use of ParameterMetaData functionality in network server, please do not use
- * this class directly. Instead use the method available on EnginePreparedStatement
- * @see org.apache.derby.iapi.jdbc.EngineParameterMetaData
- * @see org.apache.derby.iapi.jdbc.EnginePreparedStatement
+ * This class implements the ParameterMetaData interface from JDBC 3.0.
  */
-public class EmbedParameterSetMetaData implements EngineParameterMetaData
-    {
+public class EmbedParameterSetMetaData implements ParameterMetaData {
 
     private final ParameterValueSet pvs;
     private final DataTypeDescriptor[] types;
@@ -229,5 +218,39 @@ public class EmbedParameterSetMetaData implements EngineParameterMetaData
             new Integer(parameterIndex), new Integer(paramCount));
 		}
     }
+
+    // java.sql.Wrapper interface methods
+
+    /**
+     * Returns false unless {@code iface} is implemented.
+     *
+     * @param iface a class defining an interface
+     * @return true if this implements the interface or directly or indirectly
+     * wraps an object that does
+     * @throws SQLException if an error occurs while determining whether this is
+     * a wrapper for an object with the given interface.
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the specified interface.
+     *
+     * @param iface a class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the interface
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        // Derby does not implement non-standard methods on JDBC objects,
+        // hence return this if this class implements the interface, or
+        // throw an SQLException.
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP, iface);
+        }
+    }
+
 }
 

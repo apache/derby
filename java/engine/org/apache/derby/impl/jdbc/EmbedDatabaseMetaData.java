@@ -35,7 +35,6 @@ import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
-import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
@@ -47,6 +46,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.RowIdLifetime;
 import java.sql.Types;
 
 import java.io.IOException;
@@ -86,7 +86,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
  *
  * @see <a href="http://java.sun.com/products/jdbc/download.html#corespec30">JDBC 3.0 Specification</a>
  */
-public abstract class EmbedDatabaseMetaData extends ConnectionChild 
+public class EmbedDatabaseMetaData extends ConnectionChild
 	implements DatabaseMetaData, java.security.PrivilegedAction<Object> {
 
     private static final int ILLEGAL_UDT_TYPE = 0;
@@ -3294,7 +3294,7 @@ public abstract class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getJDBCMajorVersion()
 	{
-		return 3;
+        return 4;
 	}
 
 	/**
@@ -3306,7 +3306,7 @@ public abstract class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getJDBCMinorVersion()
 	{
-		return 0;
+        return 1;
 	}
 
 	/**
@@ -3465,6 +3465,56 @@ public abstract class EmbedDatabaseMetaData extends ConnectionChild
         s.setString(1, swapNull(catalog));
         s.setString(2, swapNull(schemaPattern));
         return s.executeQuery();
+    }
+
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
+        return RowIdLifetime.ROWID_UNSUPPORTED;
+    }
+
+    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+        return true;
+    }
+
+    /**
+     * Returns whether or not all open {@code ResultSet}s on a {@code
+     * Connection} are closed if an error occurs when auto-commit in enabled.
+     *
+     * @return {@code true}, since the embedded driver will close the open
+     * {@code ResultSet}s
+     */
+    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+        return true;
+    }
+
+    // java.sql.Wrapper interface methods
+
+    /**
+     * Returns whether or not this instance implements the specified interface.
+     *
+     * @param iface the interface to check for
+     * @return true if this implements the interface
+     */
+    public final boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the interface.
+     *
+     * @param iface the interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public final <T> T unwrap(Class<T> iface) throws SQLException {
+        // Derby does not implement non-standard methods on JDBC objects,
+        // hence return this if this class implements the interface
+        // or throw an SQLException.
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw newSQLException(SQLState.UNABLE_TO_UNWRAP, iface);
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////

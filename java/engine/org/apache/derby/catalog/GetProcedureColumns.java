@@ -30,7 +30,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 /**
@@ -330,5 +329,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("METHOD_ID",				 Types.SMALLINT, false),
 		EmbedResultSetMetaData.getResultColumnDescriptor("PARAMETER_ID",			 Types.SMALLINT, false),
 	};
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 }

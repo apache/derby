@@ -29,9 +29,6 @@ import java.io.FileInputStream;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Properties;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -43,7 +40,6 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 /**
 
@@ -348,7 +344,9 @@ public class ErrorLogReader extends VTITemplate
 		EmbedResultSetMetaData.getResultColumnDescriptor("DRDAID", Types.VARCHAR, true, 50),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LOGTEXT",Types.VARCHAR, false, Limits.DB2_VARCHAR_MAXWIDTH)
 	};
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 
 }
 

@@ -27,7 +27,7 @@ import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.iapi.jdbc.BrokeredCallableStatement40;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement;
-import org.apache.derby.impl.jdbc.EmbedResultSet40;
+import org.apache.derby.impl.jdbc.EmbedResultSet;
 
 /**
  * A wrapper around the getObject() overloads added by JDBC 4.1.
@@ -42,7 +42,7 @@ public  class   Wrapper41
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private EmbedResultSet40    _embedded;
+    private EmbedResultSet    _embedded;
     private ClientResultSet      _netclient;
     private EmbedCallableStatement _embedCallableStatement;
     private ClientCallableStatement _callableStatement;
@@ -57,7 +57,7 @@ public  class   Wrapper41
 
     public Wrapper41( Object wrapped ) throws Exception
     {
-        if ( wrapped instanceof EmbedResultSet40 ) { _embedded = (EmbedResultSet40) wrapped; }
+        if ( wrapped instanceof EmbedResultSet ) { _embedded = (EmbedResultSet) wrapped; }
         else if ( wrapped instanceof EmbedCallableStatement ) { _embedCallableStatement = (EmbedCallableStatement) wrapped; }
         else if ( wrapped instanceof BrokeredCallableStatement40 ) { _brokeredCallableStatement = (BrokeredCallableStatement40) wrapped; }
         else if ( wrapped instanceof ClientResultSet ) { _netclient = (ClientResultSet) wrapped; }

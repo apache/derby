@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
-import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
@@ -734,7 +733,7 @@ class DRDAStatement
             {
                 //For callable statement, get holdability of statement generating the result set
                 if(isCallable)
-                    addResultSet(rs, ((EngineResultSet) rs).getHoldability());
+                    addResultSet(rs, rs.getHoldability());
                 else
                     addResultSet(rs,withHoldCursor);
                 hasResultSet = true;

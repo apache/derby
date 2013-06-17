@@ -23,16 +23,13 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.sql.ResultSet;
 
-import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.sql.SQLType;
-
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * JDBC 4.2 specific methods that cannot be implemented in superclasses.
  */
-public class EmbedResultSet42 extends org.apache.derby.impl.jdbc.EmbedResultSet40
+public class EmbedResultSet42 extends EmbedResultSet
 {
     
     /** Creates a new instance of EmbedResultSet42 */

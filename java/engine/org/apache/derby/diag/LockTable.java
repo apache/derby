@@ -38,7 +38,6 @@ import org.apache.derby.iapi.error.PublicAPI;
 
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -341,6 +340,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 		EmbedResultSetMetaData.getResultColumnDescriptor(VirtualLockTable.INDEXNAME, Types.VARCHAR, true,  128)
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 }
 

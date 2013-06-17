@@ -29,12 +29,11 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedConnection40;
+import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
-import org.apache.derby.impl.jdbc.EmbedResultSet40;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 import org.apache.derby.impl.jdbc.EmbedStatement;
-import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.impl.jdbc.Util;
 import java.sql.Connection;
@@ -128,26 +127,26 @@ public class Driver40 extends Driver30 {
     }
     
     public EmbedResultSet newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, org.apache.derby.impl.jdbc.EmbedStatement statement,boolean isAtomic) throws SQLException {
-        return new EmbedResultSet40(conn, results, forMetaData, statement,
+        return new EmbedResultSet(conn, results, forMetaData, statement,
             isAtomic);
     }
     
     public DatabaseMetaData newEmbedDatabaseMetaData(EmbedConnection conn, String dbname) 
         throws SQLException {
-		return new EmbedDatabaseMetaData40(conn,dbname);
+        return new EmbedDatabaseMetaData(conn, dbname);
     }
     
-        /**
-         * Returns a new java.sql.ResultSetMetaData for this implementation
-         *
-         * @param  columnInfo a ResultColumnDescriptor that stores information 
-         *                    about the columns in a ResultSet
-         * @return ResultSetMetaData
-         */
-        public EmbedResultSetMetaData40 newEmbedResultSetMetaData
-                             (ResultColumnDescriptor[] columnInfo) {
-            return new EmbedResultSetMetaData40(columnInfo);
-        }
+    /**
+     * Returns a new java.sql.ResultSetMetaData for this implementation
+     *
+     * @param columnInfo a ResultColumnDescriptor that stores information about
+     * the columns in a ResultSet
+     * @return ResultSetMetaData
+     */
+    public EmbedResultSetMetaData newEmbedResultSetMetaData(
+            ResultColumnDescriptor[] columnInfo) {
+        return new EmbedResultSetMetaData(columnInfo);
+    }
 
     /**
      * Create and return an EmbedPooledConnection from the received instance

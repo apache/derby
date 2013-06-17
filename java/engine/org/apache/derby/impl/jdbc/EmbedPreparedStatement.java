@@ -69,7 +69,6 @@ import java.sql.SQLXML;
 import java.sql.Types;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
-import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -959,7 +958,7 @@ public class EmbedPreparedStatement extends EmbedStatement
         // in that case the cast to int would not be appropriate.
         if ( !lengthLess && length > Integer.MAX_VALUE ) {
             throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
-               getEmbedParameterSetMetaData().getParameterTypeName(
+               getParameterMetaData().getParameterTypeName(
                    parameterIndex));
         }
 
@@ -1652,25 +1651,6 @@ public class EmbedPreparedStatement extends EmbedStatement
 		}
 	}
 
-
-	/**
-    * Immitate the function in JDBC 3.0
-    *
-    * Retrieves the number, types and properties of this PreparedStatement
-    * object's parameters.
-    *
-    * @return a EngineParameterMetaData object that contains information about the
-    * number, types and properties of this PreparedStatement object's parameters.
-    * @exception SQLException if a database access error occurs
-	*/
-	private EngineParameterMetaData getEmbedParameterSetMetaData()
-    	throws SQLException
-	{
-	  checkExecStatus();
-	  return new EmbedParameterSetMetaData(
-				getParms(), preparedStatement.getParameterTypes());
-
-	}
 	/**
     * JDBC 3.0
     *
@@ -1701,7 +1681,7 @@ public class EmbedPreparedStatement extends EmbedStatement
     public final ParameterMetaData getParameterMetaData()
             throws SQLException {
         checkStatus();
-        return new EmbedParameterMetaData30(
+        return new EmbedParameterSetMetaData(
                 getParms(), preparedStatement.getParameterTypes());
     }
 
@@ -1742,9 +1722,9 @@ public class EmbedPreparedStatement extends EmbedStatement
 
 	final SQLException dataTypeConversion(int column, String sourceType)
 		throws SQLException {
-		SQLException se = newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH, getEmbedParameterSetMetaData().getParameterTypeName(column),
+        return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
+            getParameterMetaData().getParameterTypeName(column),
 			sourceType);
-		return se;
 	}
         /**
          * This method is used to initialize the BrokeredConnectionControl 

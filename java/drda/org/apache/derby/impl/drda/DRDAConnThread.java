@@ -55,7 +55,6 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
-import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Property;
@@ -4546,7 +4545,7 @@ class DRDAConnThread extends Thread {
         writer.createDssObject();
         writer.startDdm(CodePoint.SQLCINRD);
         if (sqlamLevel >= MGRLVL_7) {
-            writeSQLDHROW(((EngineResultSet) rs).getHoldability());
+            writeSQLDHROW(rs.getHoldability());
         }
 
         ResultSetMetaData rsmeta = rs.getMetaData();

@@ -22,20 +22,15 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.sql.ResultSet;
 
 /**
  * A ResultSetMetaData object can be used to find out about the types
@@ -57,8 +52,7 @@ import java.sql.ResultSet;
    this sharing must be removed.
  *
  */
-public abstract class EmbedResultSetMetaData
-	implements ResultSetMetaData {
+public class EmbedResultSetMetaData implements ResultSetMetaData {
 
 	private final ResultColumnDescriptor[] columnInfo;
 
@@ -388,4 +382,35 @@ public abstract class EmbedResultSetMetaData
 	public static ResultColumnDescriptor getResultColumnDescriptor(String name, DataTypeDescriptor dtd) {
 		return new org.apache.derby.impl.sql.GenericColumnDescriptor(name, dtd);
 	}
+
+    // JDBC 4.0 - java.sql.Wrapper interface
+
+    /**
+     * Returns whether or not this instance implements the specified interface.
+     *
+     * @param iface the interface to check for
+     * @return true if this implements the interface
+     */
+    public final boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
+    }
+
+    /**
+     * Returns {@code this} if this class implements the interface.
+     *
+     * @param iface the interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object is found that implements the
+     * interface
+     */
+    public final <T> T unwrap(Class<T> iface) throws SQLException {
+        // Derby does not implement non-standard methods on JDBC objects,
+        // hence return this if this class implements the interface
+        // or throw an SQLException.
+        try {
+            return iface.cast(this);
+        } catch (ClassCastException cce) {
+            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP, iface);
+        }
+    }
 }

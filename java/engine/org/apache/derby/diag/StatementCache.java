@@ -22,7 +22,6 @@
 package org.apache.derby.diag;
 
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Collection;
@@ -37,7 +36,6 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
 import org.apache.derby.impl.sql.conn.CachedStatement;
@@ -176,7 +174,8 @@ public final class StatementCache extends VTITemplate {
 
 	};
 	
-	private static final ResultSetMetaData metadata = new EmbedResultSetMetaData40(columnInfo);
+    private static final ResultSetMetaData metadata =
+        new EmbedResultSetMetaData(columnInfo);
 
 	public ResultSetMetaData getMetaData() {
 

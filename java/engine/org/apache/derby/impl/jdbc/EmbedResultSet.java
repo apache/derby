@@ -49,7 +49,6 @@ import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derby.iapi.types.UserDataValue;
 import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.services.io.StreamStorable;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -72,27 +71,32 @@ import java.sql.Types;
 import java.io.Reader;
 import java.io.InputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Array;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.RowId;
+import java.sql.SQLXML;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Map;
 
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.services.io.CloseFilterInputStream;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.types.SQLDecimal;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
- * A EmbedResultSet for results from the EmbedStatement family. 
-    <P><B>Supports</B>
-   <UL>
-   <LI> JSR 169
-   </UL>
+ * A EmbedResultSet for results from the EmbedStatement family.
+ * Supports JDBC 4.1.
  */
 
-public abstract class EmbedResultSet extends ConnectionChild
+public class EmbedResultSet extends ConnectionChild
     implements EngineResultSet, Comparable {
 
     /** For use in debugging setLargeMaxRows() method added by JDBC 4.2 */
@@ -1421,6 +1425,71 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
     /**
+     * Get the value of a column in the current row as a java.lang.BigDecimal
+     * object.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param scale the number of digits to the right of the decimal
+     * @return the column value; if the value is SQL NULL, the result is null
+     * @exception SQLException thrown on failure.
+     */
+    @Deprecated
+    public final BigDecimal getBigDecimal(int columnIndex, int scale)
+            throws SQLException {
+
+        BigDecimal ret = getBigDecimal(columnIndex);
+        if (ret != null) {
+            return ret.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
+        }
+        return null;
+    }
+
+    public final BigDecimal getBigDecimal(int columnIndex)
+            throws SQLException {
+        checkIfClosed("getBigDecimal");
+        try {
+
+            DataValueDescriptor dvd = getColumn(columnIndex);
+
+            if (wasNull = dvd.isNull()) {
+                return null;
+            }
+
+            return SQLDecimal.getBigDecimal(dvd);
+
+        } catch (StandardException t) {
+            throw noStateChangeException(t);
+        }
+    }
+
+    /**
+     * Get the value of a column in the current row as a java.lang.BigDecimal
+     * object.
+     *
+     * @param columnName is the SQL name of the column
+     * @param scale the number of digits to the right of the decimal
+     * @return the column value; if the value is SQL NULL, the result is null
+     * @exception SQLException thrown on failure.
+     */
+    @Deprecated
+    public final BigDecimal getBigDecimal(String columnName, int scale)
+            throws SQLException {
+        checkIfClosed("getBigDecimal");
+        return getBigDecimal(findColumnName(columnName), scale);
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Get the value of a column in the current row as a java.math.BigDecimal
+     * object.
+     */
+    public final BigDecimal getBigDecimal(String columnName) throws SQLException {
+        checkIfClosed("getBigDecimal");
+        return getBigDecimal(findColumnName(columnName));
+    }
+
+    /**
      * Get the value of a column in the current row as a Java byte array.
      * The bytes represent the raw values returned by the driver.
      *
@@ -1522,6 +1591,28 @@ public abstract class EmbedResultSet extends ConnectionChild
         checkIfClosed("getBinaryStream");
     	return (getBinaryStream(findColumnName(columnName)));
 	}
+
+    /**
+     * JDBC 2.0
+     *
+     * Deprecated in JDBC 2.0, not supported by JCC.
+     *
+     * @exception SQLException thrown on failure.
+     */
+    @Deprecated
+    public final java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
+        throw Util.notImplemented("getUnicodeStream");
+    }
+
+    /**
+     * Deprecated in JDBC 2.0, not supported by JCC.
+     *
+     * @exception SQLException thrown on failure.
+     */
+    @Deprecated
+    public final java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
+        throw Util.notImplemented("getUnicodeStream");
+    }
 
     /**
 	 * JDBC 3.0
@@ -1761,6 +1852,48 @@ public abstract class EmbedResultSet extends ConnectionChild
     	return (getObject(findColumnName(columnName)));
 	}
 
+    /**
+     * JDBC 2.0
+     *
+     * Returns the value of column {@code i} as a Java object. Use the param map
+     * to determine the class from which to construct data of SQL structured and
+     * distinct types.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param map the mapping from SQL type names to Java classes
+     * @return an object representing the SQL value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
+        checkIfClosed("getObject");
+        if (map == null) {
+            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER, map, "map",
+                    "java.sql.ResultSet.getObject");
+        }
+        if (!(map.isEmpty())) {
+            throw Util.notImplemented();
+        }
+        // Map is empty call the normal getObject method.
+        return getObject(columnIndex);
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Returns the value of column {@code i} as a Java object. Use the param map
+     * to determine the class from which to construct data of SQL structured and
+     * distinct types.
+     *
+     * @param colName the column name
+     * @param map the mapping from SQL type names to Java classes
+     * @return an object representing the SQL value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public Object getObject(String colName, Map<String, Class<?>> map)
+            throws SQLException {
+        checkIfClosed("getObject");
+        return getObject(findColumn(colName), map);
+    }
 
     //----------------------------------------------------------------
 
@@ -1811,6 +1944,58 @@ public abstract class EmbedResultSet extends ConnectionChild
     public final void setApplicationStatement(Statement applicationStmt)
     {
         this.applicationStmt = applicationStmt;
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Get a REF(&lt;structured-type&gt;) column.
+     *
+     * @param i the first column is 1, the second is 2, ...
+     * @return an object representing data of an SQL REF type
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final Ref getRef(int i) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Get an array column.
+     *
+     * @param i the first column is 1, the second is 2, ...
+     * @return an object representing an SQL array
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final Array getArray(int i) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Get a REF(&lt;structured-type&gt;) column.
+     *
+     * @param colName the column name
+     * @return an object representing data of an SQL REF type
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final Ref getRef(String colName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Get an array column.
+     *
+     * @param colName the column name
+     * @return an object representing an SQL array
+     * @exception SQLException Feature not implemented for now.
+     */
+    public final Array getArray(String colName) throws SQLException {
+        throw Util.notImplemented();
     }
 
 	//---------------------------------------------------------------------
@@ -2581,6 +2766,35 @@ public abstract class EmbedResultSet extends ConnectionChild
 		}
 	}
 
+    public void updateBigDecimal(int columnIndex, BigDecimal x)
+            throws SQLException {
+        try {
+            getDVDforColumnToBeUpdated(columnIndex, "updateBigDecimal").setBigDecimal(x);
+        } catch (StandardException t) {
+            throw noStateChangeException(t);
+        }
+    }
+
+    /**
+     * JDBC 2.0
+     *
+     * Update a column with a BigDecimal value.
+     *
+     * The updateXXX() methods are used to update column values in the current
+     * row, or the insert row. The updateXXX() methods do not update the
+     * underlying database, instead the updateRow() or insertRow() methods are
+     * called to update the database.
+     *
+     * @param columnName the name of the column
+     * @param x the new column value
+     * @exception SQLException if a database-access error occurs
+     */
+    public void updateBigDecimal(String columnName, BigDecimal x)
+            throws SQLException {
+        checkIfClosed("updateBigDecimal");
+        updateBigDecimal(findColumnName(columnName), x);
+    }
+
 	/**
 	 * JDBC 2.0
 	 * 
@@ -3168,6 +3382,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 			updateDouble(columnIndex, ((Double) x).doubleValue());
 			return;
 		}
+
+        if (x instanceof BigDecimal) {
+            updateBigDecimal(columnIndex, (BigDecimal) x);
+            return;
+        }
 
 		if (x instanceof byte[]) {
 			updateBytes(columnIndex, (byte[]) x);
@@ -5196,7 +5415,327 @@ public abstract class EmbedResultSet extends ConnectionChild
        checkIfClosed("updateClob");
        updateClob(findColumnName(columnName), x);
     }
+
+    /**
+     * JDBC 3.0
+     *
+     * Updates the designated column with a java.sql.Ref value. The updater
+     * methods are used to update column values in the current row or the insert
+     * row. The updater methods do not update the underlying database; instead
+     * the updateRow or insertRow methods are called to update the database.
+     *
+     * @param columnIndex - the first column is 1, the second is 2
+     * @param x - the new column value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public void updateRef(int columnIndex, Ref x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 3.0
+     *
+     * Updates the designated column with a java.sql.Ref value. The updater
+     * methods are used to update column values in the current row or the insert
+     * row. The updater methods do not update the underlying database; instead
+     * the updateRow or insertRow methods are called to update the database.
+     *
+     * @param columnName - the SQL name of the column
+     * @param x - the new column value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public void updateRef(String columnName, Ref x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 3.0
+     *
+     * Updates the designated column with a java.sql.Array value. The updater
+     * methods are used to update column values in the current row or the insert
+     * row. The updater methods do not update the underlying database; instead
+     * the updateRow or insertRow methods are called to update the database.
+     *
+     * @param columnIndex - the first column is 1, the second is 2
+     * @param x - the new column value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public void updateArray(int columnIndex, Array x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * JDBC 3.0
+     *
+     * Updates the designated column with a java.sql.Array value. The updater
+     * methods are used to update column values in the current row or the insert
+     * row. The updater methods do not update the underlying database; instead
+     * the updateRow or insertRow methods are called to update the database.
+     *
+     * @param columnName - the SQL name of the column
+     * @param x - the new column value
+     * @exception SQLException Feature not implemented for now.
+     */
+    public void updateArray(String columnName, Array x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
     
+    // JDBC 4.0 methods
+
+    public RowId getRowId(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public RowId getRowId(String columnName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNCharacterStream(int columnIndex, Reader x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNCharacterStream(int columnIndex, Reader x, long length)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNCharacterStream(String columnName, Reader x)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNCharacterStream(String columnName, Reader x, long length)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNString(int columnIndex, String nString) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNString(String columnName, String nString) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNClob(int columnIndex, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNClob(String columnName, NClob nClob) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateNClob(String columnName, Reader reader)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public Reader getNCharacterStream(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public Reader getNCharacterStream(String columnName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public NClob getNClob(int i) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public NClob getNClob(String colName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public String getNString(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public String getNString(String columnName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateRowId(int columnIndex, RowId x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateRowId(String columnName, RowId x) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public SQLXML getSQLXML(int columnIndex) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public SQLXML getSQLXML(String colName) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    public void updateSQLXML(String columnName, SQLXML xmlObject) throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * Returns false unless
+     * <code>interfaces</code> is implemented
+     *
+     * @param interfaces a Class defining an interface.
+     * @return true if this implements the interface or directly or indirectly
+     * wraps an object that does.
+     * @throws java.sql.SQLException if an error occurs while determining
+     * whether this is a wrapper for an object with the given interface.
+     */
+    public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
+        checkIfClosed("isWrapperFor");
+        return interfaces.isInstance(this);
+    }
+
+    /**
+     * Returns
+     * <code>this</code> if this class implements the interface
+     *
+     * @param interfaces a Class defining an interface
+     * @return an object that implements the interface
+     * @throws java.sql.SQLExption if no object if found that implements the
+     * interface
+     */
+    public <T> T unwrap(java.lang.Class<T> interfaces)
+            throws SQLException {
+        checkIfClosed("unwrap");
+        //Derby does not implement non-standard methods on
+        //JDBC objects
+        //hence return this if this class implements the interface
+        //or throw an SQLException
+        try {
+            return interfaces.cast(this);
+        } catch (ClassCastException cce) {
+            throw newSQLException(SQLState.UNABLE_TO_UNWRAP, interfaces);
+        }
+    }
+
+    /**
+     *
+     * Updates the designated column using the given Reader object, which is the
+     * given number of characters long.
+     *
+     * @param columnIndex - the first column is 1, the second is 2
+     * @param x - the new column value
+     * @param length - the length of the stream
+     *
+     * @exception SQLException Feature not implemented for now.
+     */
+    public void updateNClob(int columnIndex, Reader x, long length)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    /**
+     * Updates the designated column using the given Reader object, which is the
+     * given number of characters long.
+     *
+     * @param columnName - the Name of the column to be updated
+     * @param x - the new column value
+     * @param length - the length of the stream
+     *
+     * @exception SQLException Feature not implemented for now.
+     *
+     */
+    public void updateNClob(String columnName, Reader x, long length)
+            throws SQLException {
+        throw Util.notImplemented();
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Retrieve the column as an object of the desired type.
+     */
+    public <T> T getObject(int columnIndex, Class<T> type)
+            throws SQLException {
+        checkIfClosed("getObject");
+
+        if (type == null) {
+            throw mismatchException("NULL", columnIndex);
+        }
+
+        Object retval;
+
+        if (String.class.equals(type)) {
+            retval = getString(columnIndex);
+        } else if (BigDecimal.class.equals(type)) {
+            retval = getBigDecimal(columnIndex);
+        } else if (Boolean.class.equals(type)) {
+            retval = getBoolean(columnIndex);
+        } else if (Byte.class.equals(type)) {
+            retval = getByte(columnIndex);
+        } else if (Short.class.equals(type)) {
+            retval = getShort(columnIndex);
+        } else if (Integer.class.equals(type)) {
+            retval = getInt(columnIndex);
+        } else if (Long.class.equals(type)) {
+            retval = getLong(columnIndex);
+        } else if (Float.class.equals(type)) {
+            retval = getFloat(columnIndex);
+        } else if (Double.class.equals(type)) {
+            retval = getDouble(columnIndex);
+        } else if (Date.class.equals(type)) {
+            retval = getDate(columnIndex);
+        } else if (Time.class.equals(type)) {
+            retval = getTime(columnIndex);
+        } else if (Timestamp.class.equals(type)) {
+            retval = getTimestamp(columnIndex);
+        } else if (Blob.class.equals(type)) {
+            retval = getBlob(columnIndex);
+        } else if (Clob.class.equals(type)) {
+            retval = getClob(columnIndex);
+        } else if (type.isArray() && type.getComponentType().equals(byte.class)) {
+            retval = getBytes(columnIndex);
+        } else {
+            retval = getObject(columnIndex);
+        }
+
+        if (wasNull()) {
+            retval = null;
+        }
+
+        if ((retval == null) || (type.isInstance(retval))) {
+            return type.cast(retval);
+        }
+
+        throw mismatchException(type.getName(), columnIndex);
+    }
+
+    private SQLException mismatchException(String targetTypeName, int columnIndex)
+            throws SQLException {
+        String sourceTypeName = getMetaData().getColumnTypeName(columnIndex);
+        return newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
+                               targetTypeName, sourceTypeName);
+    }
+
+    public <T> T getObject(String columnName, Class<T> type)
+            throws SQLException {
+        checkIfClosed("getObject");
+        return getObject(findColumn(columnName), type);
+    }
+
+
     /* 
      * @see org.apache.derby.iapi.jdbc.EngineResultSet#isNull(int)
      */

@@ -23,7 +23,6 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.error.StandardException;
 /**
  * Additional methods the embedded engine exposes on its ResultSet object
  * implementations. An internal api only, mainly for the network
@@ -56,13 +55,5 @@ public interface EngineResultSet extends ResultSet {
      * @see org.apache.derby.iapi.types.DataValueDescriptor#getLength() 
      */
     public int getLength(int columnIndex) throws SQLException;
-    
-    /**
-     * Fetch the holdability of this ResultSet which may be different
-     * from the holdability of its Statement.
-     * @return HOLD_CURSORS_OVER_COMMIT or CLOSE_CURSORS_AT_COMMIT
-     * @throws SQLException Error.
-     */
-    public int getHoldability() throws SQLException;
     
 }
