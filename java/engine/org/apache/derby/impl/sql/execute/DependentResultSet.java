@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.Properties;
 import java.util.Vector;
+import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -94,9 +95,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	protected int startSearchOperator;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
-	public String tableName;
 	public String userSuppliedOptimizerOverrides;
-	public String indexName;
 	protected boolean runTimeStatisticsOn;
 	public int rowsPerRead;
 	public boolean forUpdate;
@@ -693,6 +692,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		String idt = "";
 		return idt + MessageService.getTextMessage(SQLState.LANG_NONE);
 	}
+
 }
 
 

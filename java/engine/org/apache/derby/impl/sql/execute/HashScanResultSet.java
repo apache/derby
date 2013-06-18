@@ -82,9 +82,7 @@ public class HashScanResultSet extends ScanResultSet
 	private int initialCapacity;
 	private float loadFactor;
 	private int maxCapacity;
-	public String tableName;
 	public String userSuppliedOptimizerOverrides;
-	public String indexName;
 	public boolean forUpdate;
 	private boolean runTimeStatisticsOn;
 	public int[] keyColumns;

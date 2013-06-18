@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.sql.SQLWarning;
 import java.sql.Timestamp;
+import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -765,5 +766,10 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	public SQLWarning getWarnings() {
 		return null;
 	}
+
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        return BasicNoPutResultSetImpl.childrenToXML( BasicNoPutResultSetImpl.toXML( parentNode, tag, this ), this );
+    }
 
 }

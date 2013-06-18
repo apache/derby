@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.sql.SQLWarning;
 import java.sql.Timestamp;
+import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -1349,4 +1350,10 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	public final Activation getActivation() {
 		return holder.activation;
 	}
+    
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        return BasicNoPutResultSetImpl.childrenToXML( BasicNoPutResultSetImpl.toXML( parentNode, tag, this ), this );
+    }
+
 }

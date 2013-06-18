@@ -19,6 +19,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.w3c.dom.Element;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -87,6 +89,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      * Set from the PreparedStatement's saved objects, if it exists.
      */
     protected final FormatableBitSet accessedCols;
+
+	public String tableName;
+	public String indexName;
 
     /**
      * Construct a <code>ScanResultSet</code>.
@@ -244,5 +249,14 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         // Prepare row array for reuse (DERBY-827).
         candidate.resetRowArray();
         super.close();
+    }
+    
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        Element myNode = super.toXML( parentNode, tag );
+        if ( tableName != null ) { myNode.setAttribute( "tableName", tableName ); }
+        if ( indexName != null ) { myNode.setAttribute( "indexName", indexName ); }
+        
+        return myNode;
     }
 }

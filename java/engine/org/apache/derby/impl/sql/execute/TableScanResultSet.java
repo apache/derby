@@ -72,9 +72,7 @@ class TableScanResultSet extends ScanResultSet
 	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	public    Qualifier[][] qualifiers;
-	public String tableName;
 	public String userSuppliedOptimizerOverrides;
-	public String indexName;
 	protected boolean runTimeStatisticsOn;
     protected int[] indexCols;		//index keys base column position array
 	public int rowsPerRead;

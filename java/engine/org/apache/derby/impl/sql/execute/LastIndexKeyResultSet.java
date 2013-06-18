@@ -43,9 +43,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	protected int startSearchOperator;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
-	public String tableName;
 	public String userSuppliedOptimizerOverrides;
-	public String indexName;
 	protected boolean runTimeStatisticsOn;
 
 	// Run time statistics

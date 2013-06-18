@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.Row;
 
 import java.sql.Timestamp;
 import java.sql.SQLWarning;
+import org.w3c.dom.Element;
 
 /**
  * The ResultSet interface provides a method to tell whether a statement
@@ -347,4 +348,18 @@ public interface ResultSet
 		this result set. The warnings are cleared once this call returns.
 	*/
 	public SQLWarning getWarnings();
+    
+	/**
+	 * <p>
+     * Produce an xml image of this ResultSet and its descendant ResultSets.
+     * Appends an element to the parentNode and returns the appended element.
+     * </p>
+     *
+     * @param   parentNode  Node to put content into.
+     * @param   tag             Element tag for content
+     *
+     * @return  the content as an element with the given tag name
+	 */
+	public Element toXML( Element parentNode, String tag ) throws Exception;
+
 }

@@ -21,8 +21,13 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.lang.reflect.Field;
 import java.sql.SQLWarning;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Comparator;
+import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -1043,4 +1048,82 @@ implements NoPutResultSet
 		warnings = null;
 		return w;
 	}
+
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        return childrenToXML( toXML( parentNode, tag, this ), this );
+    }
+
+    /**
+     * <p>
+     * Pretty-print a ResultSet as an xml child of a parent node.
+     * Return the node representing the ResultSet child.
+     * </p>
+     */
+    public  static  Element    toXML( Element parentNode, String childTag, ResultSet rs ) throws Exception
+    {
+        String  childClassName = rs.getClass().getName();
+        String  typeAttribute = childClassName.substring( childClassName.lastIndexOf( "." ) + 1 );
+        Element result = parentNode.getOwnerDocument().createElement( childTag );
+        result.setAttribute( "type", typeAttribute );
+
+        parentNode.appendChild( result );
+        return result;
+    }
+
+    /**
+     * <p>
+     * Pretty-print the inner ResultSet fields inside an outer ResultSet.
+     * Returns the outerNode.
+     * </p>
+     */
+    public  static  Element    childrenToXML
+        ( Element outerNode, ResultSet outerRS ) throws Exception
+    {
+        ArrayList<Field>    fieldList = new ArrayList<Field>();
+        findResultSetFields( fieldList, outerRS.getClass() );
+
+        //
+        // Get a array of all the ResultSet fields inside the outerRS,
+        // ordered by field name.
+        //
+        Field[] fields = new Field[ fieldList.size() ];
+        fieldList.toArray( fields );
+        Arrays.sort( fields, new FieldComparator() );
+
+        // Add those fields as children of the outer element.
+        for ( Field field : fields )
+        {
+            ResultSet   innerRS = (ResultSet) field.get( outerRS );
+
+            if ( innerRS != null) { innerRS.toXML( outerNode, field.getName() ); }
+        }
+
+        return outerNode;
+    }
+
+    /**
+     * <p>
+     * Find all fields of type ResultSet.
+     * </p>
+     */
+    private static  void    findResultSetFields( ArrayList<Field> fieldList, Class<?> klass )
+        throws Exception
+    {
+        if ( klass == null ) { return; }
+        
+        Field[] fields = klass.getDeclaredFields();
+
+        for ( Field field : fields )
+        {
+            if ( ResultSet.class.isAssignableFrom( field.getType() ) ) { fieldList.add( field ); }
+        }
+
+        findResultSetFields( fieldList, klass.getSuperclass() );
+    }
+
+    public  static  final   class   FieldComparator implements Comparator<Field>
+    {
+        public  int compare( Field left, Field right ) { return left.getName().compareTo( right.getName() ); }
+    }
 }
