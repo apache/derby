@@ -339,10 +339,15 @@ public class SelectNode extends ResultSetNode
 				havingClause.treePrint(depth + 1);
 			}
 
-            if (orderByLists[0] != null) {
-                for (int i = 0; i < orderByLists.length; i++) {
-                    printLabel(depth, "orderByLists[" + i + "]:");
-                    orderByLists[i].treePrint(depth + 1);
+            if (orderByLists != null)
+            {
+                for (int i = 0; i < orderByLists.length; i++)
+                {
+                    if ( orderByLists[i] != null )
+                    {
+                        printLabel(depth, "orderByLists[" + i + "]:");
+                        orderByLists[i].treePrint(depth + 1);
+                    }
                 }
 			}
 
@@ -2552,9 +2557,14 @@ public class SelectNode extends ResultSetNode
                 groupByList = (GroupByList) groupByList.accept( v );
             }
         
-            if (orderByLists[0] != null) {
-                for (int i = 0; i < orderByLists.length; i++) {
-                    orderByLists[i] = (OrderByList) orderByLists[ i ].accept( v );
+            if (orderByLists != null)
+            {
+                for (int i = 0; i < orderByLists.length; i++)
+                {
+                    if ( orderByLists[ i ] != null )
+                    {
+                        orderByLists[i] = (OrderByList) orderByLists[ i ].accept( v );
+                    }
                 }
             }
 
