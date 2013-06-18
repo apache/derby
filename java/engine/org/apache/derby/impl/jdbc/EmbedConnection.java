@@ -117,14 +117,14 @@ import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
  * the a synchronized object return by the rootConnection.
    <P><B>Supports</B>
    <UL>
-   <LI> JDBC 3.0
+   <LI> JDBC 4.2
    </UL>
  * 
  *
  * @see TransactionResourceImpl
  *
  */
-public abstract class EmbedConnection implements EngineConnection
+public class EmbedConnection implements EngineConnection
 {
 
 	protected static final StandardException exceptionClose = StandardException.closeException();

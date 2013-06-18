@@ -23,8 +23,7 @@ package org.apache.derby.iapi.jdbc;
 
 import java.sql.SQLException;
 
-public class BrokeredConnection42
-        extends BrokeredConnection40
+public class BrokeredConnection42 extends BrokeredConnection
 {
     /** Creates a new instance of BrokeredConnection40 */
     public BrokeredConnection42(BrokeredConnectionControl control)

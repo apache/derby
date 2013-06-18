@@ -33,9 +33,9 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAResource;
 
-import org.apache.derby.iapi.jdbc.BrokeredStatement40;
-import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement40;
-import org.apache.derby.iapi.jdbc.BrokeredCallableStatement40;
+import org.apache.derby.iapi.jdbc.BrokeredStatement;
+import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
+import org.apache.derby.iapi.jdbc.BrokeredCallableStatement;
 
 
 /**
@@ -115,9 +115,9 @@ public class XA40Test extends BaseJDBCTestCase {
     public void testStatementPoolable() throws SQLException {
         Statement s = con.createStatement();
         if (usingEmbedded()) {
-            assertTrue("s must be an instance of BrokeredStatement40, " + 
+            assertTrue("s must be an instance of BrokeredStatement, " +
                        "but is " + s.getClass(), 
-                       (s instanceof BrokeredStatement40));
+                       (s instanceof BrokeredStatement));
         }
         assertFalse("Statement must not be poolable by default", 
                     s.isPoolable()); 
@@ -140,9 +140,9 @@ public class XA40Test extends BaseJDBCTestCase {
             con.prepareStatement("CREATE TABLE foo(i int)");
         if (usingEmbedded()) {
             assertTrue("ps must be an instance of " + 
-                       "BrokeredPreparedStatement40, " + 
+                       "BrokeredPreparedStatement, " +
                        "but is " + ps.getClass(), 
-                       (ps instanceof BrokeredPreparedStatement40));
+                       (ps instanceof BrokeredPreparedStatement));
         }
         assertTrue("PreparedStatement must be poolable by default", 
                     ps.isPoolable()); 
@@ -165,9 +165,9 @@ public class XA40Test extends BaseJDBCTestCase {
             con.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
         if (usingEmbedded()) {
             assertTrue("cs must be an instance of " + 
-                       "BrokeredCallableStatement40, " + 
+                       "BrokeredCallableStatement, " +
                        "but is " + cs.getClass(), 
-                       (cs instanceof BrokeredCallableStatement40));
+                       (cs instanceof BrokeredCallableStatement));
         }
         assertTrue("CallableStatement must be poolable by default", 
                     cs.isPoolable()); 

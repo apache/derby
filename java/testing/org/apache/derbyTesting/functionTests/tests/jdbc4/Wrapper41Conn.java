@@ -25,8 +25,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.Executor;
 
-import org.apache.derby.impl.jdbc.EmbedConnection40;
-import org.apache.derby.iapi.jdbc.BrokeredConnection40;
+import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.net.NetConnection;
 
@@ -43,9 +43,9 @@ public  class   Wrapper41Conn
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private EmbedConnection40    _embedded;
+    private EmbedConnection    _embedded;
     private NetConnection      _netclient;
-    private BrokeredConnection40 _brokeredConnection;
+    private BrokeredConnection _brokeredConnection;
     private LogicalConnection _logicalConnection;
     
     ///////////////////////////////////////////////////////////////////////
@@ -56,8 +56,8 @@ public  class   Wrapper41Conn
 
     public Wrapper41Conn( Object wrapped ) throws Exception
     {
-        if ( wrapped instanceof EmbedConnection40 ) { _embedded = (EmbedConnection40) wrapped; }
-        else if ( wrapped instanceof BrokeredConnection40 ) { _brokeredConnection = (BrokeredConnection40) wrapped; }
+        if ( wrapped instanceof EmbedConnection ) { _embedded = (EmbedConnection) wrapped; }
+        else if ( wrapped instanceof BrokeredConnection ) { _brokeredConnection = (BrokeredConnection) wrapped; }
         else if ( wrapped instanceof NetConnection) { _netclient = (NetConnection) wrapped; }
         else if ( wrapped instanceof LogicalConnection ) { _logicalConnection = (LogicalConnection) wrapped; }
         else { throw nothingWrapped(); }

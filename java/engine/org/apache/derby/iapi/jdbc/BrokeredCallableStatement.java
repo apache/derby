@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.*;
 import java.math.BigDecimal;
 
@@ -29,9 +31,10 @@ import java.util.Map;
 
 
 /**
- * JDBC 3 brokered CallableStatement
+ * Brokered CallableStatement.
+ * This class implements the JDBC 4.1 interface.
  */
-public abstract class BrokeredCallableStatement extends BrokeredPreparedStatement
+public class BrokeredCallableStatement extends BrokeredPreparedStatement
           implements CallableStatement
 {
 
@@ -426,6 +429,185 @@ public abstract class BrokeredCallableStatement extends BrokeredPreparedStatemen
 
     public final void registerOutParameter(String a, int b, String c) throws SQLException {
         getCallableStatement().registerOutParameter(a, b, c);
+    }
+
+    // JDBC 4.0 methods
+
+    public final Reader getCharacterStream(int parameterIndex)
+            throws SQLException {
+        return getCallableStatement().getCharacterStream(parameterIndex);
+    }
+
+    public final Reader getCharacterStream(String parameterName)
+            throws SQLException {
+        return getCallableStatement().getCharacterStream(parameterName);
+    }
+
+    public final Reader getNCharacterStream(int parameterIndex)
+            throws SQLException {
+        return getCallableStatement().getNCharacterStream(parameterIndex);
+    }
+
+    public final Reader getNCharacterStream(String parameterName)
+            throws SQLException {
+        return getCallableStatement().getNCharacterStream(parameterName);
+    }
+
+    public final String getNString(int parameterIndex)
+            throws SQLException {
+        return getCallableStatement().getNString(parameterIndex);
+    }
+
+    public final String getNString(String parameterName)
+            throws SQLException {
+        return getCallableStatement().getNString(parameterName);
+    }
+
+    public final RowId getRowId(int parameterIndex) throws SQLException {
+        return getCallableStatement().getRowId(parameterIndex);
+    }
+
+    public final RowId getRowId(String parameterName) throws SQLException {
+        return getCallableStatement().getRowId(parameterName);
+    }
+
+    public final void setRowId(String parameterName, RowId x)
+            throws SQLException {
+        getCallableStatement().setRowId(parameterName, x);
+    }
+
+    public final void setBlob(String parameterName, Blob x)
+            throws SQLException {
+        getCallableStatement().setBlob(parameterName, x);
+    }
+
+    public final void setClob(String parameterName, Clob x)
+            throws SQLException {
+        getCallableStatement().setClob(parameterName, x);
+    }
+
+    public final void setNString(String parameterName, String value)
+            throws SQLException {
+        getCallableStatement().setNString(parameterName, value);
+    }
+
+    public final void setNCharacterStream(String parameterName, Reader value)
+            throws SQLException {
+        getCallableStatement().setNCharacterStream(parameterName, value);
+    }
+
+    public final void setNCharacterStream(String parameterName, Reader value,
+                                          long length)
+            throws SQLException {
+        getCallableStatement().setNCharacterStream(
+                parameterName, value, length);
+    }
+
+    public final void setNClob(String parameterName, NClob value)
+            throws SQLException {
+        getCallableStatement().setNClob(parameterName, value);
+    }
+
+    public final void setClob(String parameterName, Reader reader)
+            throws SQLException {
+        getCallableStatement().setClob(parameterName, reader);
+    }
+
+    public final void setClob(String parameterName, Reader reader, long length)
+            throws SQLException {
+        getCallableStatement().setClob(parameterName, reader, length);
+    }
+
+    public final void setBlob(String parameterName, InputStream inputStream)
+            throws SQLException {
+        getCallableStatement().setBlob(parameterName, inputStream);
+    }
+
+    public final void setBlob(String parameterName, InputStream inputStream,
+                              long length)
+            throws SQLException {
+        getCallableStatement().setBlob(parameterName, inputStream, length);
+    }
+
+    public final void setNClob(String parameterName, Reader reader)
+            throws SQLException {
+        getCallableStatement().setNClob(parameterName, reader);
+    }
+
+    public final void setNClob(String parameterName, Reader reader, long length)
+            throws SQLException {
+        getCallableStatement().setNClob(parameterName, reader, length);
+    }
+
+    public NClob getNClob(int i) throws SQLException {
+        return getCallableStatement().getNClob(i);
+    }
+
+    public NClob getNClob(String parameterName) throws SQLException {
+        return getCallableStatement().getNClob(parameterName);
+    }
+
+    public final void setSQLXML(String parameterName, SQLXML xmlObject)
+            throws SQLException {
+        getCallableStatement().setSQLXML(parameterName, xmlObject);
+    }
+
+    public SQLXML getSQLXML(int parameterIndex) throws SQLException {
+        return getCallableStatement().getSQLXML(parameterIndex);
+    }
+
+    public SQLXML getSQLXML(String parametername) throws SQLException {
+        return getCallableStatement().getSQLXML(parametername);
+    }
+
+    public final void setAsciiStream(String parameterName, InputStream x)
+            throws SQLException {
+        getCallableStatement().setAsciiStream(parameterName, x);
+    }
+
+    public final void setAsciiStream(String parameterName, InputStream x,
+                                     long length)
+            throws SQLException {
+        getCallableStatement().setAsciiStream(parameterName, x, length);
+    }
+
+    public final void setBinaryStream(String parameterName, InputStream x)
+            throws SQLException {
+        getCallableStatement().setBinaryStream(parameterName, x);
+    }
+
+    public final void setBinaryStream(String parameterName, InputStream x,
+                                      long length)
+            throws SQLException {
+        getCallableStatement().setBinaryStream(parameterName, x, length);
+    }
+
+    public final void setCharacterStream(String parameterName, Reader x)
+            throws SQLException {
+        getCallableStatement().setCharacterStream(parameterName, x);
+    }
+
+    public final void setCharacterStream(String parameterName, Reader x,
+                                         long length)
+            throws SQLException {
+        getCallableStatement().setCharacterStream(parameterName, x, length);
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    public final <T> T getObject(int parameterIndex, Class<T> type)
+            throws SQLException {
+        return ((EngineCallableStatement) getCallableStatement())
+                .getObject(parameterIndex, type);
+    }
+
+    public final <T> T getObject(String parameterName, Class<T> type)
+            throws SQLException {
+        return ((EngineCallableStatement) getCallableStatement())
+                .getObject(parameterName, type);
     }
 
 	/*

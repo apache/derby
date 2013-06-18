@@ -28,10 +28,12 @@ import java.sql.*;
 import java.util.Calendar;
 
 /**
-	JDBC 3 brokered PreparedStatement. Forwards calls off to a real prepared statement
-	obtained through the BrokeredStatementControl getRealPreparedStatement method.
+ * A brokered {@code PreparedStatement} that forwards calls off to a real
+ * {@code PreparedStatement} obtained through the
+ * {@link BrokeredStatementControl#getRealPreparedStatement} method.
+ * This class implements the JDBC 4.1 interface.
  */
-public abstract class BrokeredPreparedStatement extends BrokeredStatement
+public class BrokeredPreparedStatement extends BrokeredStatement
 	implements EnginePreparedStatement
 {
 
@@ -534,6 +536,151 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 
     public final ParameterMetaData getParameterMetaData() throws SQLException {
         return getPreparedStatement().getParameterMetaData();
+    }
+
+    // JDBC 4.0 methods
+
+    public final void setRowId(int parameterIndex, RowId x)
+            throws SQLException {
+        getPreparedStatement().setRowId(parameterIndex, x);
+    }
+
+    public final void setNString(int index, String value) throws SQLException {
+        getPreparedStatement().setNString(index, value);
+    }
+
+    public final void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException {
+        getPreparedStatement().setNCharacterStream(parameterIndex, value);
+    }
+
+    public final void setNCharacterStream(int index, Reader value, long length)
+            throws SQLException {
+        getPreparedStatement().setNCharacterStream(index, value, length);
+    }
+
+    public final void setNClob(int index, NClob value) throws SQLException {
+        getPreparedStatement().setNClob(index, value);
+    }
+
+    public final void setClob(int parameterIndex, Reader reader, long length)
+            throws SQLException {
+        getPreparedStatement().setClob(parameterIndex, reader, length);
+    }
+
+    public final void setBlob(int parameterIndex, InputStream inputStream,
+                              long length)
+            throws SQLException {
+        getPreparedStatement().setBlob(parameterIndex, inputStream, length);
+    }
+
+    public final void setNClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        getPreparedStatement().setNClob(parameterIndex, reader);
+    }
+
+    public final void setNClob(int parameterIndex, Reader reader, long length)
+            throws SQLException {
+        getPreparedStatement().setNClob(parameterIndex, reader, length);
+    }
+
+    public final void setSQLXML(int parameterIndex, SQLXML xmlObject)
+            throws SQLException {
+        getPreparedStatement().setSQLXML(parameterIndex, xmlObject);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the Java input stream that contains the ASCII parameter value
+     * @throws SQLException if a database access error occurs or this method is
+     * called on a closed {@code PreparedStatement}
+     */
+    public final void setAsciiStream(int parameterIndex, InputStream x)
+            throws SQLException {
+        getPreparedStatement().setAsciiStream(parameterIndex, x);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the ASCII parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+    public final void setAsciiStream(int parameterIndex, InputStream x,
+                                     long length)
+            throws SQLException {
+        getPreparedStatement().setAsciiStream(parameterIndex, x, length);
+    }
+
+    /**
+     * Sets the designated parameter to the given input stream, which will have
+     * the specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java input stream which contains the binary parameter value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+    public final void setBinaryStream(int parameterIndex, InputStream x,
+                                      long length)
+            throws SQLException {
+        getPreparedStatement().setBinaryStream(parameterIndex, x, length);
+    }
+
+    /**
+     * Sets the designated parameter to a {@code InputStream} object. This
+     * method differs from the {@code setBinaryStream(int, InputStream)} method
+     * because it informs the driver that the parameter value should be sent to
+     * the server as a {@code BLOB}.
+     *
+     * @param inputStream an object that contains the data to set the parameter
+     * value to.
+     * @throws SQLException if a database access error occurs, this method is
+     * called on a closed {@code PreparedStatement}
+     */
+    public final void setBlob(int parameterIndex, InputStream inputStream)
+            throws SQLException {
+        getPreparedStatement().setBlob(parameterIndex, inputStream);
+    }
+
+    /**
+     * Sets the designated parameter to the given Reader, which will have the
+     * specified number of bytes.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the java Reader which contains the UNICODE value
+     * @param length the number of bytes in the stream
+     * @exception SQLException thrown on failure.
+     *
+     */
+    public final void setCharacterStream(int parameterIndex, Reader x,
+                                         long length)
+            throws SQLException {
+        getPreparedStatement().setCharacterStream(parameterIndex, x, length);
+    }
+
+    /**
+     * Sets the designated parameter to a {@code Reader} object. This method
+     * differs from the {@code setCharacterStream(int,Reader)} method because
+     * it informs the driver that the parameter value should be sent to the
+     * server as a {@code CLOB}.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param reader an object that contains the data to set the parameter value
+     * to.
+     * @throws SQLException if a database access error occurs, this method is
+     * called on a closed PreparedStatement
+     */
+    public final void setClob(int parameterIndex, Reader reader)
+            throws SQLException {
+        getPreparedStatement().setClob(parameterIndex, reader);
     }
 
 	/*

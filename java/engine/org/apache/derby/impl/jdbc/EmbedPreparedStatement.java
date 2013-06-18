@@ -227,7 +227,7 @@ public class EmbedPreparedStatement extends EmbedStatement
 	 *      </code>
 	 *
 	 * In the above case the PreparedStatement will actually be a 
-	 * BrokeredPreparedStatement40 object. Hence when we call 
+     * BrokeredPreparedStatement object. Hence when we call
 	 * bcc.onStatementClose and pass the PreparedStatement that caused it
 	 * applicationStatement will be the appropriate choice since it will 
 	 * contain the appropriate instance of PreparedStatement in each case
@@ -1756,7 +1756,7 @@ public class EmbedPreparedStatement extends EmbedStatement
          *      </code>
          *
          * In the above case the PreparedStatement will actually be a 
-         * BrokeredPreparedStatement40 object. Hence when we call 
+         * BrokeredPreparedStatement object. Hence when we call
          * bcc.onStatementClose and pass the PreparedStatement that caused it
          * applicationStatement will be the appropriate choice since it will 
          * contain the appropriate instance of PreparedStatement in each case

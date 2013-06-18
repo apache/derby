@@ -24,7 +24,7 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.SQLException;
 import java.sql.SQLType;
 
-public class BrokeredPreparedStatement42 extends BrokeredPreparedStatement40
+public class BrokeredPreparedStatement42 extends BrokeredPreparedStatement
 {
     public BrokeredPreparedStatement42
         (BrokeredStatementControl control, String sql, Object generatedKeys) throws SQLException

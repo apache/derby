@@ -23,6 +23,7 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -67,15 +68,6 @@ public interface EngineConnection extends Connection {
     public int getPrepareIsolation()
         throws SQLException;
 
-    /**
-     * Get the holdability of the connection. 
-     * Identical to JDBC 3.0 method, to allow holdabilty
-     * to be supported in JDK 1.3 by the network server,
-     * e.g. when the client is jdk 1.4 or above.
-     * Can be removed once JDK 1.3 is no longer supported.
-     */
-    public int getHoldability() throws SQLException;
-    
     /**
      * Add a SQLWarning to this Connection object.
      * @param newWarning Warning to be added, will be chained to any
@@ -124,5 +116,10 @@ public interface EngineConnection extends Connection {
      * Set the default schema for the Connection.
      */
     public void   setSchema(  String schemaName ) throws SQLException;
-    
+
+    void abort(Executor executor) throws SQLException;
+
+    void setNetworkTimeout(Executor executor, int millis) throws SQLException;
+
+    int getNetworkTimeout() throws SQLException;
 }

@@ -21,15 +21,24 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
+import java.util.Properties;
+import java.util.concurrent.Executor;
 import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -37,7 +46,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * This is a rudimentary connection that delegates
  * EVERYTHING to Connection.
  */
-public abstract class BrokeredConnection implements EngineConnection
+public class BrokeredConnection implements EngineConnection
 {
 	
 	// default for Derby
@@ -570,15 +579,37 @@ public abstract class BrokeredConnection implements EngineConnection
 		}
 	}
 
-	public abstract BrokeredStatement newBrokeredStatement(BrokeredStatementControl statementControl) throws SQLException;
+    public final BrokeredStatement newBrokeredStatement(
+            BrokeredStatementControl statementControl) throws SQLException {
+        try {
+            return new BrokeredStatement(statementControl);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
 
-    public abstract BrokeredPreparedStatement newBrokeredStatement(
-            BrokeredStatementControl statementControl, String sql,
-            Object generatedKeys) throws SQLException;
+    public BrokeredPreparedStatement newBrokeredStatement(
+            BrokeredStatementControl statementControl,
+            String sql, Object generatedKeys) throws SQLException {
+        try {
+            return new BrokeredPreparedStatement(statementControl, sql, generatedKeys);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
 
-    public abstract BrokeredCallableStatement newBrokeredStatement(
+    public BrokeredCallableStatement newBrokeredStatement(
             BrokeredStatementControl statementControl, String sql)
-        throws SQLException;
+            throws SQLException {
+        try {
+            return new BrokeredCallableStatement(statementControl, sql);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
 
 	/**
 	 *  set the DrdaId for this connection. The drdaID prints with the 
@@ -665,7 +696,7 @@ public abstract class BrokeredConnection implements EngineConnection
     }
 
     /*
-     * JDBC 3.0 methods that are exposed through EngineConnection.
+     * JDBC 3.0 methods.
      */
     
     /**
@@ -702,7 +733,253 @@ public abstract class BrokeredConnection implements EngineConnection
     		throw se;
     	}
     }
-    
+
+    // JDBC 4.0 methods
+
+    public final Array createArrayOf(String typeName, Object[] elements)
+            throws SQLException {
+        try {
+            return getRealConnection().createArrayOf(typeName, elements);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     *
+     * Constructs an object that implements the {@code Blob} interface. The
+     * object returned initially contains no data. The {@code setBinaryStream}
+     * and {@code setBytes} methods of the {@code Blob} interface may be used to
+     * add data to the {@code Blob}.
+     *
+     * @return An object that implements the {@code Blob} interface
+     * @throws SQLException if an object that implements the {@code Blob}
+     * interface can not be constructed, this method is called on a closed
+     * connection or a database access error occurs.
+     *
+     */
+    public final Blob createBlob() throws SQLException {
+        // Forward the createBlob call to the physical connection
+        try {
+            return getRealConnection().createBlob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     *
+     * Constructs an object that implements the {@code Clob} interface. The
+     * object returned initially contains no data. The {@code setAsciiStream},
+     * {@code setCharacterStream} and {@code setString} methods of the
+     * {@code Clob} interface may be used to add data to the {@code Clob}.
+     *
+     * @return An object that implements the {@code Clob} interface
+     * @throws SQLException if an object that implements the {@code Clob}
+     * interface can not be constructed, this method is called on a closed
+     * connection or a database access error occurs.
+     *
+     */
+    public final Clob createClob() throws SQLException {
+        // Forward the createClob call to the physical connection
+        try {
+            return getRealConnection().createClob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public final NClob createNClob() throws SQLException {
+        try {
+            return getRealConnection().createNClob();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public final SQLXML createSQLXML() throws SQLException {
+        try {
+            return getRealConnection().createSQLXML();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public final Struct createStruct(String typeName, Object[] attributes)
+            throws SQLException {
+        try {
+            return getRealConnection().createStruct(typeName, attributes);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * Checks if the connection has not been closed and is still valid. The
+     * validity is checked by running a simple query against the database.
+     *
+     * @param timeout The time in seconds to wait for the database operation
+     * used to validate the connection to complete. If the timeout period
+     * expires before the operation completes, this method returns false. A
+     * value of 0 indicates a timeout is not applied to the database operation.
+     * @return true if the connection is valid, false otherwise
+     * @throws SQLException if the call on the physical connection throws an
+     * exception.
+     */
+    public final boolean isValid(int timeout) throws SQLException {
+        // Check first if the Brokered connection is closed
+        if (isClosed()) {
+            return false;
+        }
+
+        // Forward the isValid call to the physical connection
+        try {
+            return getRealConnection().isValid(timeout);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * {@code setClientInfo} forwards to the real connection.
+     *
+     * @param name the property key {@code String}
+     * @param value the property value {@code String}
+     * @exception SQLClientInfoException if the property is not supported or the
+     * real connection could not be obtained.
+     */
+    public final void setClientInfo(String name, String value)
+            throws SQLClientInfoException {
+        try {
+            getRealConnection().setClientInfo(name, value);
+        } catch (SQLClientInfoException se) {
+            notifyException(se);
+            throw se;
+        } catch (SQLException se) {
+            notifyException(se);
+            throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
+                    se.getErrorCode(),
+                    new FailedProperties40(
+                        FailedProperties40.makeProperties(name, value))
+                            .getProperties());
+        }
+    }
+
+    /**
+     * {@code setClientInfo} forwards to the real connection. If the call to
+     * {@code getRealConnection} fails the resulting {@code SQLException} is
+     * wrapped in a {@code SQLClientInfoException} to satisfy the specified
+     * signature.
+     *
+     * @param properties a {@code Properties} object with the properties to set.
+     * @exception SQLClientInfoException if the properties are not supported or
+     * the real connection could not be obtained.
+     */
+    public final void setClientInfo(Properties properties)
+            throws SQLClientInfoException {
+        try {
+            getRealConnection().setClientInfo(properties);
+        } catch (SQLClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+        } catch (SQLException se) {
+            notifyException(se);
+            throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
+                    se.getErrorCode(),
+                    (new FailedProperties40(properties)).getProperties());
+        }
+    }
+
+    /**
+     * {@code getClientInfo} forwards to the real connection.
+     *
+     * @param name a {@code String} that is the property key to get.
+     * @return a {@code String} that is returned from the real connection.
+     * @exception SQLException if a database access error occurs.
+     */
+    public final String getClientInfo(String name)
+            throws SQLException {
+        try {
+            return getRealConnection().getClientInfo(name);
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
+    }
+
+    /**
+     * {@code getClientInfo} forwards to the real connection.
+     *
+     * @return a {@code Properties} object from the real connection.
+     * @exception SQLException if a database access error occurs.
+     */
+    public final Properties getClientInfo()
+            throws SQLException {
+        try {
+            return getRealConnection().getClientInfo();
+        } catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
+    }
+
+    /**
+     * Returns false unless {@code iface} is implemented.
+     *
+     * @param iface a Class defining an interface.
+     * @return true if this implements the interface or directly or indirectly
+     * wraps an object that does.
+     * @throws SQLException if an error occurs while determining
+     * whether this is a wrapper for an object with the given interface.
+     */
+    public final boolean isWrapperFor(Class<?> iface) throws SQLException {
+        try {
+            if (getRealConnection().isClosed()) {
+                throw noCurrentConnection();
+            }
+            return iface.isInstance(this);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * Returns {@code this} if this class implements the interface.
+     *
+     * @param iface a Class defining an interface
+     * @return an object that implements the interface
+     * @throws SQLException if no object if found that implements the
+     * interface
+     */
+    public final <T> T unwrap(Class<T> iface)
+            throws SQLException {
+        try {
+            if (getRealConnection().isClosed()) {
+                throw noCurrentConnection();
+            }
+            // Derby does not implement non-standard methods on
+            // JDBC objects.
+            try {
+                return iface.cast(this);
+            } catch (ClassCastException cce) {
+                throw ExceptionFactory.getInstance().getSQLException(
+                        SQLState.UNABLE_TO_UNWRAP,
+                        (SQLException) null, (Throwable) null, iface);
+            }
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
     /*
     ** Methods private to the class.
     */
@@ -802,6 +1079,32 @@ public abstract class BrokeredConnection implements EngineConnection
     		notifyException(se);
     		throw se;
     	}
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        if (!isClosed) {
+            ((EngineConnection) getRealConnection()).abort(executor);
+        }
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        try {
+            return ((EngineConnection) getRealConnection()).getNetworkTimeout();
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds)
+            throws SQLException {
+        try {
+            ((EngineConnection) getRealConnection())
+                    .setNetworkTimeout(executor, milliseconds);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
 
 }

@@ -24,11 +24,9 @@ package org.apache.derby.jdbc;
 import java.sql.DatabaseMetaData;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
-import org.apache.derby.iapi.jdbc.BrokeredConnection40;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
@@ -52,13 +50,13 @@ import javax.sql.XAConnection;
 public class Driver40 extends Driver30 {
     
     public Connection getNewNestedConnection(EmbedConnection conn) {
-        return new EmbedConnection40(conn);
+        return new EmbedConnection(conn);
     }
     
     
     protected EmbedConnection getNewEmbedConnection(String url, Properties info)
     throws SQLException {
-        return new EmbedConnection40(this, url, info);
+        return new EmbedConnection(this, url, info);
     }
     
     /**
@@ -123,7 +121,7 @@ public class Driver40 extends Driver30 {
 
     public BrokeredConnection newBrokeredConnection(
             BrokeredConnectionControl control) throws SQLException {
-        return new BrokeredConnection40(control);
+        return new BrokeredConnection(control);
     }
     
     public EmbedResultSet newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, org.apache.derby.impl.jdbc.EmbedStatement statement,boolean isAtomic) throws SQLException {

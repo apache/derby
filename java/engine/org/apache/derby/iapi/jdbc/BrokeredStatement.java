@@ -31,8 +31,9 @@ import java.sql.Statement;
 
 /**
 	A Statement implementation that forwards all of its requests to an underlying Statement.
+    This class implements the JDBC 4.1 interface.
  */
-public abstract class BrokeredStatement implements EngineStatement
+public class BrokeredStatement implements EngineStatement
 {
 
 	/**
@@ -600,7 +601,27 @@ public abstract class BrokeredStatement implements EngineStatement
                 SQLState.UNABLE_TO_UNWRAP, null, null,
                 new Object[]{ iface });
     }
-    
+
+    /**
+     * Forwards to the real Statement.
+     *
+     * @return true if the underlying Statement is poolable, false otherwise.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public final boolean isPoolable() throws SQLException {
+        return getStatement().isPoolable();
+    }
+
+    /**
+     * Forwards to the real Statement.
+     *
+     * @param poolable the new value for the poolable hint.
+     * @throws SQLException if the forwarding call fails.
+     */
+    public final void setPoolable(boolean poolable) throws SQLException {
+        getStatement().setPoolable(poolable);
+    }
+
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7
