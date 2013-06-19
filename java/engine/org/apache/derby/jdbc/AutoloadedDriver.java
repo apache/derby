@@ -27,18 +27,17 @@ import java.sql.Connection;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 
-import java.io.PrintStream;
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.jdbc.JDBCBoot;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.impl.jdbc.Util;
 
 
@@ -281,6 +280,14 @@ public class AutoloadedDriver implements Driver
             });
         } catch (PrivilegedActionException pae) {
             throw (SQLException) pae.getCause();
+        } catch (AccessControlException ace) {
+            // Since no permission was needed for deregisterDriver() before
+            // Java 8, applications may be surprised to find that engine
+            // shutdown fails because of it. For backward compatibility,
+            // don't fail shutdown if the permission is missing. Instead,
+            // log a message saying the driver could not be deregistered.
+            Monitor.logTextMessage(MessageId.CONN_DEREGISTER_NOT_PERMITTED);
+            Monitor.logThrowable(ace);
         }
     }
 
