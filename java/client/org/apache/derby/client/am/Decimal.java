@@ -372,7 +372,7 @@ public class Decimal {
         if (bigPrecision > 31) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
-                "packed decimal", new SqlCode(-405));
+                new SqlCode(-405), "packed decimal");
         }
 
         int bigScale = b.scale();
@@ -383,7 +383,7 @@ public class Decimal {
             if (bigWholeIntegerLength > declaredWholeIntegerLength) {
                 throw new SqlException(null,
                     new ClientMessageId(SQLState.NUMERIC_OVERFLOW),
-                    b.toString(), "packed decimal", new SqlCode(-413));
+                    new SqlCode(-413), b.toString(), "packed decimal");
             }
         }
 

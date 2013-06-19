@@ -142,9 +142,9 @@ public class NetAgent extends Agent {
         } catch (PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),
-                new Object[] { e.getException().getClass().getName(), server, 
-                    Integer.toString(port), e.getException().getMessage() },
-                e.getException());
+                e.getException(),
+                e.getException().getClass().getName(), server, port,
+                e.getException().getMessage());
         }
 
         // Set TCP/IP Socket Properties
@@ -161,7 +161,7 @@ public class NetAgent extends Agent {
             }
             exceptionOpeningSocket_ = new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_SOCKET_EXCEPTION),
-                e.getMessage(), e);
+                e, e.getMessage());
         }
 
         try {
@@ -176,7 +176,7 @@ public class NetAgent extends Agent {
             }
             exceptionOpeningSocket_ = new DisconnectException(this, 
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_OPEN_SOCKET_STREAM),
-                e.getMessage(), e);
+                e, e.getMessage());
         }
 
         ebcdicCcsidManager_ = new EbcdicCcsidManager();
@@ -257,7 +257,7 @@ public class NetAgent extends Agent {
             }
             throw new SqlException(logWriter_, 
                 new ClientMessageId(SQLState.SOCKET_EXCEPTION),
-                e.getMessage(), e);
+                e, e.getMessage());
         }
     }
 
@@ -295,7 +295,7 @@ public class NetAgent extends Agent {
                 // changing {4} to e.getMessage() may require pub changes
                 accumulatedExceptions = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
-                    e.getMessage(), e);
+                    e, e.getMessage());
             } finally {
                 rawSocketInputStream_ = null;
             }
@@ -311,7 +311,7 @@ public class NetAgent extends Agent {
                 // changing {4} to e.getMessage() may require pub changes
                 SqlException latestException = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
-                    e.getMessage(), e);
+                    e, e.getMessage());
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
                 rawSocketOutputStream_ = null;
@@ -328,7 +328,7 @@ public class NetAgent extends Agent {
                 // add this to the message pubs.
                 SqlException latestException = new SqlException(logWriter_,
                     new ClientMessageId(SQLState.COMMUNICATION_ERROR),
-                        e.getMessage(), e);
+                        e, e.getMessage());
                 accumulatedExceptions = Utils.accumulateSQLException(latestException, accumulatedExceptions);
             } finally {
                 socket_ = null;
@@ -432,7 +432,7 @@ public class NetAgent extends Agent {
         accumulateChainBreakingReadExceptionAndThrow(
             new DisconnectException(this,
                 new ClientMessageId(SQLState.COMMUNICATION_ERROR),
-                cause.getMessage(), cause));
+                cause, cause.getMessage()));
     }
         
     // ----------------------- call-down methods ---------------------------------

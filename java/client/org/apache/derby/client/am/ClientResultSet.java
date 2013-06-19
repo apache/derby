@@ -5515,7 +5515,7 @@ public abstract class ClientResultSet implements ResultSet,
             } catch (IOException ioe) {                
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.JAVA_EXCEPTION), 
-                        "java.io.IOException", ioe.getMessage(), ioe);
+                        ioe, "java.io.IOException", ioe.getMessage());
             }
             currentStream = null;
         }
@@ -5526,7 +5526,7 @@ public abstract class ClientResultSet implements ResultSet,
             } catch (IOException ioe) {                
                 throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.JAVA_EXCEPTION), 
-                        "java.io.IOException", ioe.getMessage(), ioe);
+                        ioe, "java.io.IOException", ioe.getMessage());
             }
             currentReader = null;
         }

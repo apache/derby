@@ -34,43 +34,20 @@ public class DisconnectException extends SqlException {
             agent.disconnectEvent();
         }
     }
-    
-    private DisconnectException(Agent agent, ClientMessageId msgid,
-        Object[] args, SqlCode sqlcode) {
-        this(agent, msgid, args, sqlcode, (Throwable)null);
-    }
 
-    private DisconnectException(Agent agent, ClientMessageId msgid,
-        Object[] args) {
-        this(agent, msgid, args, SqlCode.disconnectError);
-    }
-    
     public DisconnectException(Agent agent, ClientMessageId msgid,
-        Object[] args, Throwable t) {
+                               Throwable t, Object... args) {
         this(agent, msgid, args, SqlCode.disconnectError, (Throwable)t);
     }
-    
-    public DisconnectException(Agent agent, ClientMessageId msgid,
-        Object arg1, Throwable t) {
-        this(agent, msgid, new Object[] { arg1 }, t);
-    }
 
-    public DisconnectException(Agent agent, ClientMessageId msgid) {
-        this(agent, msgid, (Object[])null);
-    }
-    
-    public DisconnectException(Agent agent, ClientMessageId msgid, Object arg1) {
-        this(agent, msgid, new Object[] { arg1 });
-    }
-        
-    public DisconnectException(Agent agent, ClientMessageId msgid, Object arg1,
-        Object arg2) {
-        this(agent, msgid, new Object[] { arg1, arg2 });
+    public DisconnectException(Agent agent, ClientMessageId msgid,
+                               Object... args) {
+        this(agent, msgid, (Throwable) null, args);
     }
     
     public DisconnectException(Agent agent, SqlException e) {
         super(agent.logWriter_,
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
-            e.getMessage(), e);
+            e, e.getMessage());
     }
 }

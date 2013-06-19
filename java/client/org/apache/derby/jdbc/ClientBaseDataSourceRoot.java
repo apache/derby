@@ -685,7 +685,7 @@ public abstract class ClientBaseDataSourceRoot implements
             // automatically traced
             throw new SqlException(null,
                 new ClientMessageId(SQLState.INVALID_ATTRIBUTE_SYNTAX),
-                attributeString, e);
+                e, attributeString);
         }
         checkBoolean(augmentedProperties,
                      Attribute.CLIENT_RETIEVE_MESSAGE_TEXT);
@@ -1110,7 +1110,7 @@ public abstract class ClientBaseDataSourceRoot implements
             // consistent with the embedded driver.
             throw new SqlException(logWriter,
                     new ClientMessageId(SQLState.MALFORMED_URL),
-                    constructUrl(), sqle).getSQLException();
+                    sqle, constructUrl()).getSQLException();
 
         }
     }

@@ -852,10 +852,8 @@ class NetConnectionReply extends Reply
             new DisconnectException(
                 agent_,
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
-                msgutil_.getTextMessage(
-                    MessageId.CONN_DRDA_CMDCHKRM),
-                new SqlException(agent_.logWriter_,
-                                 netSqlca)));
+                new SqlException(agent_.logWriter_, netSqlca),
+                msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM)));
     }
 
 

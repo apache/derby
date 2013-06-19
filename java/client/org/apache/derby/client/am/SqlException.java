@@ -181,32 +181,19 @@ public class SqlException extends Exception implements Diagnosable {
         this.errorcode_ = sqlcode.getCode();
     }
 
-    private SqlException(
-        LogWriter logWriter,
-        ClientMessageId msgid,
-        Object[] args,
-        SqlCode sqlcode) {
-
+    public SqlException(LogWriter logWriter, ClientMessageId msgid,
+                        SqlCode sqlcode, Object... args) {
         this(logWriter, msgid, args, sqlcode, (Throwable)null);
     }
-        
-    SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
-        SqlCode sqlcode) {
-        this(logWriter, msgid, new Object[] {arg1}, sqlcode);
-    }
-        
-    public SqlException(LogWriter logWriter, ClientMessageId msgid, Object arg1,
-        Object arg2, SqlCode sqlcode) {
-        this(logWriter, msgid, new Object[] {arg1, arg2}, sqlcode);
-    }
- 
+
     // The following constructors are all wrappers around the base constructor,
     // created to make it easy to code against them (you don't have to pass
     // null arguments or construct object arrays).  See the javadoc for the
     // "base" constructor for an explanation of the parameters
-    public SqlException (LogWriter logwriter, 
-            ClientMessageId msgid, Throwable cause) {
-        this (logwriter, msgid, (Object[])null, cause);
+
+    public SqlException(LogWriter logWriter, ClientMessageId msgid,
+                        Throwable cause, Object... args) {
+        this(logWriter, msgid, args, cause);
     }
     
     public SqlException(LogWriter logwriter,
@@ -216,18 +203,6 @@ public class SqlException extends Exception implements Diagnosable {
         this(logwriter, msgid, args, (Throwable)null);
     }
 
-    public SqlException(LogWriter logwriter, ClientMessageId msgid, 
-            Object arg1, Throwable cause)
-    {
-        this(logwriter, msgid, new Object[] { arg1 }, cause);
-    }
-    
-    public SqlException(LogWriter logwriter, ClientMessageId msgid,
-        Object arg1, Object arg2, Throwable cause)
-    {
-        this(logwriter, msgid, new Object[] { arg1, arg2 }, cause);
-    }
-    
     /**
      * Create an exception for an engine generated error.
      *

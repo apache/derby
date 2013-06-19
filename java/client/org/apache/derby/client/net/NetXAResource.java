@@ -878,9 +878,9 @@ public class NetXAResource implements XAResource {
             // create an SqlException to report this error within
             SqlException accumSql = new SqlException(conn_.netAgent_.logWriter_,
                 new ClientMessageId(SQLState.NET_XARETVAL_ERROR),
+                SqlCode.queuedXAError,
                 getXAFuncStr(callInfo.xaFunction_),
-                getXAExceptionText(rc),
-                SqlCode.queuedXAError);
+                getXAExceptionText(rc));
             exceptionsOnXA = Utils.accumulateSQLException
                     (accumSql, exceptionsOnXA);
 

@@ -394,7 +394,7 @@ public abstract class Cursor {
         } catch (IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
-                "double", e);
+                e, "double");
         }
     }
 
@@ -409,11 +409,11 @@ public abstract class Cursor {
         } catch (ArithmeticException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
-                targetType, e);
+                e, targetType);
         } catch (IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
-                targetType, e);
+                e, targetType);
         }
     }
 
@@ -599,8 +599,8 @@ public abstract class Cursor {
                 (
                  agent_.logWriter_, 
                  new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
-                 e.getMessage(),
-                 e
+                 e,
+                 e.getMessage()
                  );
         }
     }

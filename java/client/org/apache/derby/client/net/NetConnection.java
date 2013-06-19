@@ -425,7 +425,7 @@ public class NetConnection extends ClientConnection {
             {
                 exceptionToBeThrown = new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.JAVA_EXCEPTION),
-                    e.getClass().getName(), e.getMessage(), e);
+                    e, e.getClass().getName(), e.getMessage());
             }
 
             try {
@@ -474,7 +474,7 @@ public class NetConnection extends ClientConnection {
             {
                 exceptionToBeThrown = new SqlException(agent_.logWriter_,
                     new ClientMessageId(SQLState.JAVA_EXCEPTION),
-                    e.getClass().getName(), e.getMessage(), e);
+                    e, e.getClass().getName(), e.getMessage());
             }
 
             try {

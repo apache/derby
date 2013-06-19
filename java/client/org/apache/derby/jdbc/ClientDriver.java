@@ -122,7 +122,7 @@ public class ClientDriver implements Driver {
                     // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                     throw new SqlException(null, 
                         new ClientMessageId(SQLState.MALFORMED_URL),
-                        url, e);
+                        e, url);
                 }
             }
             String server = tokenizeServerName(urlTokenizer, url);    // "/server"
@@ -392,7 +392,7 @@ public class ClientDriver implements Driver {
         } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, 
-                new ClientMessageId(SQLState.MALFORMED_URL), url, e);
+                new ClientMessageId(SQLState.MALFORMED_URL), e, url);
         }
     }
 
@@ -406,7 +406,7 @@ public class ClientDriver implements Driver {
         } catch (NoSuchElementException e) {
             // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
             throw new SqlException(null, 
-                new ClientMessageId(SQLState.MALFORMED_URL), url, e);
+                new ClientMessageId(SQLState.MALFORMED_URL), e, url);
         }
     }
 

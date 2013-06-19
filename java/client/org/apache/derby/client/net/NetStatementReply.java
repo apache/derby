@@ -1552,7 +1552,7 @@ class NetStatementReply extends NetPackageReply
             netCursor.extdtaData_.add(data);
         } catch (OutOfMemoryError e) {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-                new ClientMessageId(SQLState.NET_LOB_DATA_TOO_LARGE_FOR_JVM), null, e));
+                new ClientMessageId(SQLState.NET_LOB_DATA_TOO_LARGE_FOR_JVM), e));
         }
     }
 

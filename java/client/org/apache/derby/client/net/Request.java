@@ -324,7 +324,7 @@ class Request {
                         new SqlException(
                             netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-                            parameterIndex, e.getMessage(), e));
+                            e, parameterIndex, e.getMessage()));
 
                     return;
                 }
@@ -365,7 +365,7 @@ class Request {
                     netAgent_.logWriter_,
                     new ClientMessageId(
                         SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
-                    parameterIndex, e.getMessage(), e));
+                    e, parameterIndex, e.getMessage()));
         }
         // Write the status byte to the send buffer.
         if (writeEXTDTAStatusByte) {
@@ -467,7 +467,7 @@ class Request {
             final SqlException sqlex = 
                 new SqlException(netAgent_.logWriter_,
                                  new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-                                 parameterIndex, e.getMessage(), e);
+                                 e, parameterIndex, e.getMessage());
 
             netAgent_.accumulateReadException(sqlex);
             
@@ -1382,8 +1382,8 @@ class Request {
                 (
                  netAgent_.logWriter_, 
                  new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
-                 e.getMessage(),
-                 e
+                 e,
+                 e.getMessage()
                  );
         }
 
