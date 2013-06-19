@@ -30,8 +30,6 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.BrokeredConnection42;
 import org.apache.derby.iapi.sql.ResultSet;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement42;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -43,7 +41,7 @@ import org.apache.derby.impl.jdbc.EmbedResultSet42;
  * Embedded JDBC driver for JDBC 4.2.
  * </p>
  */
-public class Driver42 extends Driver40
+public class Driver42 extends InternalDriver
 {
     public PreparedStatement newEmbedPreparedStatement
         (

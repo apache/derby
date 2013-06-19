@@ -44,7 +44,6 @@ import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /* -- New jdbc 20 extension types --- */
 import javax.sql.ConnectionEventListener;
@@ -186,7 +185,7 @@ abstract class EmbedPooledConnection implements javax.sql.PooledConnection, Brok
 
 	final Connection getNewCurrentConnectionHandle() throws SQLException {
 		Connection applicationConnection = currentConnectionHandle =
-			((org.apache.derby.jdbc.Driver20) (realConnection.getLocalDriver())).newBrokeredConnection(this);
+            realConnection.getLocalDriver().newBrokeredConnection(this);
 		realConnection.setApplicationConnection(applicationConnection);
 		return applicationConnection;
 

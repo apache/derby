@@ -172,7 +172,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements Embedded
          * instantiating EmbeddedXADataSource) instead of the newer one
          * (EmbeddedXADataSource40).
          */
-        return ((Driver30) findDriver()).getNewXAConnection(
+        return findDriver().getNewXAConnection(
             this, ra, user, password, requestPassword);
     }
 

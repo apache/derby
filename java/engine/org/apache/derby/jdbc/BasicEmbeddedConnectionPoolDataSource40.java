@@ -85,7 +85,7 @@ public class BasicEmbeddedConnectionPoolDataSource40
             String password,
             boolean requestPassword) throws SQLException {
 
-        return ((Driver30) findDriver()).getNewPooledConnection(
+        return findDriver().getNewPooledConnection(
             this, user, password, requestPassword);
     }
 }

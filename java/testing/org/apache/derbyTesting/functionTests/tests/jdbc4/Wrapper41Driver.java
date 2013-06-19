@@ -25,9 +25,9 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import org.apache.derby.jdbc.AutoloadedDriver40;
+import org.apache.derby.jdbc.AutoloadedDriver;
 import org.apache.derby.jdbc.ClientDriver;
-import org.apache.derby.jdbc.Driver40;
+import org.apache.derby.jdbc.InternalDriver;
 
 /**
  * A wrapper around the methods added by JDBC 4.1.
@@ -42,8 +42,8 @@ public  class   Wrapper41Driver
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private AutoloadedDriver40    _embedded;
-    private Driver40            _driver40;
+    private AutoloadedDriver    _embedded;
+    private InternalDriver      _driver40;
     private ClientDriver      _netclient;
     
     ///////////////////////////////////////////////////////////////////////
@@ -54,8 +54,8 @@ public  class   Wrapper41Driver
 
     public Wrapper41Driver( Object wrapped ) throws Exception
     {
-        if ( wrapped instanceof AutoloadedDriver40 ) { _embedded = (AutoloadedDriver40) wrapped; }
-        else if ( wrapped instanceof Driver40 ) { _driver40 = (Driver40) wrapped; }
+        if ( wrapped instanceof AutoloadedDriver ) { _embedded = (AutoloadedDriver) wrapped; }
+        else if ( wrapped instanceof InternalDriver ) { _driver40 = (InternalDriver) wrapped; }
         else if ( wrapped instanceof ClientDriver ) { _netclient = (ClientDriver) wrapped; }
         else { throw nothingWrapped( wrapped ); }
     }

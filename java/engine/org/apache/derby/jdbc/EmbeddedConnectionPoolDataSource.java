@@ -139,7 +139,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
          * instantiating EmbeddedConnectionPoolDataSource) instead of
          * the newer one (EmbeddedConnectionPoolDataSource40).
          */
-        return ((Driver30) findDriver()).getNewPooledConnection(
+        return findDriver().getNewPooledConnection(
             this, user, password, requestPassword);
     }
 

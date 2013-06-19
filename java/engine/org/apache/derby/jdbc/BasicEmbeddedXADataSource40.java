@@ -104,7 +104,7 @@ public class BasicEmbeddedXADataSource40
             boolean requestPassword) throws SQLException {
 
         // See comment for EmbeddedXADataSource#createXAConnection
-        return ((Driver30) findDriver()).getNewXAConnection(
+        return findDriver().getNewXAConnection(
             this, ra, user, password, requestPassword);
     }
 

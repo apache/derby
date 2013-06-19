@@ -313,18 +313,15 @@ public class AutoloadedDriver implements Driver
 	}
 	
     /**
-     * load slightly more capable driver if possible.
+     * Load the most capable driver available.
      * But if the vm level doesn't support it, then we fall
-     * back on the JDBC3 level driver.
+     * back on a lower-level driver.
      * @return AutoloadedDriver 
      */
     private static AutoloadedDriver makeAutoloadedDriver() 
-    { 
-        try { 
-            return (AutoloadedDriver) Class.forName( "org.apache.derby.jdbc.AutoloadedDriver40" ).newInstance(); 
-        } 
-        catch (Throwable t) {} 
-
+    {
+        // Currently, there's only one driver, and it supports all the JDBC
+        // levels that Derby supports. Return an instance of it.
         return new AutoloadedDriver(); 
     } 
 }

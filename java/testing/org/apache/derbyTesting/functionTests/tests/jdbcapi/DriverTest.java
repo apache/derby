@@ -167,15 +167,11 @@ public class DriverTest extends BaseJDBCTestCase {
         assertEquals(dbmd.getDriverMajorVersion(), driver.getMajorVersion());
         assertEquals(dbmd.getDriverMinorVersion(), driver.getMinorVersion());
 
-        // test that the driver is one of the special 40 versions if we are running
-        // on Java 6 or higher
+        // Test that the driver class is the expected one. Currently, the same
+        // driver class is used regardless of JDBC version.
         println( "Driver is a " + driver.getClass().getName() );
-        if (usingEmbedded()) {
-            assertEquals( JDBC.vmSupportsJDBC4(), driver.getClass().getName().endsWith( "40" ) );
-        } else {
-            // The same client driver class is used regardless of JDBC version.
-            assertEquals("ClientDriver", driver.getClass().getSimpleName());
-        }
+        assertEquals(usingEmbedded() ? "AutoloadedDriver" : "ClientDriver",
+                     driver.getClass().getSimpleName());
 
         // test that null connection URLs raise a SQLException per JDBC 4.2 spec clarification
         try {

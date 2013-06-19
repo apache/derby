@@ -22,51 +22,61 @@
 
 package org.apache.derby.jdbc;
 
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.Module;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.services.io.FormatableProperties;
-
-import org.apache.derby.iapi.jdbc.ConnectionContext;
-
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.jmx.ManagementService;
-
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-
-import org.apache.derby.security.SystemPermission;
-
-import org.apache.derby.impl.jdbc.*;
-import org.apache.derby.mbeans.JDBCMBean;
-
+import java.security.AccessControlException;
+import java.security.Permission;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
-import java.security.Permission;
-import java.security.AccessControlException;
-
-import org.apache.derby.iapi.util.IdUtil;
-
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.ConnectionContext;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Module;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.security.SecurityUtil;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.iapi.services.jmx.ManagementService;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.util.InterruptStatus;
+import org.apache.derby.impl.jdbc.*;
+import org.apache.derby.mbeans.JDBCMBean;
+import org.apache.derby.security.SystemPermission;
 
 /**
-	Abstract factory class and api for JDBC objects.
-*/
-
-public abstract class InternalDriver implements ModuleControl {
+ * Factory class and API for JDBC objects.
+ */
+public class InternalDriver implements ModuleControl, Driver {
     
 	private static final Object syncMe = new Object();
 	private static InternalDriver activeDriver;
@@ -83,6 +93,13 @@ public abstract class InternalDriver implements ModuleControl {
      * set to false by the user (DERBY-2905).
      */
     private static boolean deregister = true;
+
+    private static final ThreadPoolExecutor _executorPool =
+            new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+                                   new SynchronousQueue<Runnable>());
+    static {
+        _executorPool.setThreadFactory(new DaemonThreadFactory());
+    }
 
 	public static final InternalDriver activeDriver()
 	{
@@ -111,6 +128,9 @@ public abstract class InternalDriver implements ModuleControl {
                    new JDBC(this),
                    JDBCMBean.class,
                    "type=JDBC");
+
+        // Register with the driver manager
+        AutoloadedDriver.registerDriverModule(this);
 	}
 
 	public void stop() {
@@ -127,6 +147,8 @@ public abstract class InternalDriver implements ModuleControl {
 		active = false;
 
 		contextServiceFactory = null;
+
+        AutoloadedDriver.unregisterDriverModule();
 	}
 
 	/*
@@ -287,23 +309,100 @@ public abstract class InternalDriver implements ModuleControl {
     /**
      * Enforce the login timeout.
      */
-    protected abstract EmbedConnection  timeLogin( String url, Properties info, int loginTimeoutSeconds )
-        throws SQLException;
-    
+    EmbedConnection timeLogin(
+            String url, Properties info, int loginTimeoutSeconds)
+        throws SQLException
+    {
+        try {
+            LoginCallable callable = new LoginCallable(this, url, info);
+            Future<EmbedConnection> task = _executorPool.submit(callable);
+            long startTime = System.currentTimeMillis();
+            long interruptedTime = startTime;
+
+            while ((startTime - interruptedTime) / 1000.0
+                        < loginTimeoutSeconds) {
+                try {
+                    return task.get(loginTimeoutSeconds, TimeUnit.SECONDS);
+                } catch (InterruptedException ie) {
+                    interruptedTime = System.currentTimeMillis();
+                    InterruptStatus.setInterrupted();
+                    continue;
+                } catch (ExecutionException ee) {
+                    throw processException(ee);
+                } catch (TimeoutException te) {
+                    throw Util.generateCsSQLException(SQLState.LOGIN_TIMEOUT);
+                }
+            }
+
+            // Timed out due to interrupts, throw.
+            throw Util.generateCsSQLException(SQLState.LOGIN_TIMEOUT);
+        } finally {
+            InterruptStatus.restoreIntrFlagIfSeen();
+        }
+    }
+
+    /** Process exceptions raised while running a timed login. */
+    private SQLException processException(Throwable t) {
+        Throwable cause = t.getCause();
+        if (cause instanceof SQLException) {
+            return (SQLException) cause;
+        } else {
+            return Util.javaException(t);
+        }
+    }
+
+    /**
+     * Thread factory to produce daemon threads which don't block VM shutdown.
+     */
+    private static final class DaemonThreadFactory implements ThreadFactory {
+        public Thread newThread(Runnable r) {
+            Thread result = new Thread(r);
+            result.setDaemon(true);
+            return result;
+        }
+    }
+
+    /**
+     * This code is called in a thread which puts time limits on it.
+     */
+    public static final class LoginCallable implements
+            Callable<EmbedConnection> {
+
+        private InternalDriver _driver;
+        private String _url;
+        private Properties _info;
+
+        public LoginCallable(InternalDriver driver, String url, Properties info) {
+            _driver = driver;
+            _url = url;
+            _info = info;
+        }
+
+        public EmbedConnection call() throws SQLException {
+            // Erase the state variables after we use them.
+            // Might be paranoid but there could be security-sensitive info
+            // in here.
+            String url = _url;
+            Properties info = _info;
+            InternalDriver driver = _driver;
+            _url = null;
+            _info = null;
+            _driver = null;
+
+            return driver.getNewEmbedConnection(url, info);
+        }
+    }
+
     /**
      * Checks for System Privileges.
-     *
-     * Abstract since some of the javax security classes are not available
-     * on all platforms.
      *
      * @param user The user to be checked for having the permission
      * @param perm The permission to be checked
      * @throws AccessControlException if permissions are missing
-     * @throws Exception if the privileges check fails for some other reason
      */
-    abstract public void checkSystemPrivileges(String user,
-                                               Permission perm)
-        throws Exception;
+    public void checkSystemPrivileges(String user, Permission perm) {
+        SecurityUtil.checkUserHasPermission(user, perm);
+    }
 
     /**
      * Checks for shutdown System Privileges.
@@ -529,9 +628,10 @@ public abstract class InternalDriver implements ModuleControl {
 		Methods to be overloaded in sub-implementations such as
 		a tracing driver.
 	 */
-	protected abstract EmbedConnection getNewEmbedConnection(String url, Properties info) 
-		 throws SQLException ;
-
+    EmbedConnection getNewEmbedConnection(String url, Properties info)
+            throws SQLException {
+        return new EmbedConnection(this, url, info);
+    }
 
 	private ConnectionContext getConnectionContext() {
 
@@ -575,23 +675,30 @@ public abstract class InternalDriver implements ModuleControl {
 	 * @return A nested connection object.
 	 *
 	 */
-	public abstract Connection getNewNestedConnection(EmbedConnection conn);
+    public Connection getNewNestedConnection(EmbedConnection conn) {
+        return new EmbedConnection(conn);
+    }
 
 	/*
 	** methods to be overridden by subimplementations wishing to insert
 	** their classes into the mix.
 	*/
 
-	public abstract java.sql.Statement newEmbedStatement(
+    public Statement newEmbedStatement(
 				EmbedConnection conn,
 				boolean forMetaData,
 				int resultSetType,
 				int resultSetConcurrency,
-				int resultSetHoldability);
+                int resultSetHoldability)
+    {
+        return new EmbedStatement(conn, forMetaData, resultSetType,
+                resultSetConcurrency, resultSetHoldability);
+    }
+
 	/**
 	 	@exception SQLException if fails to create statement
 	 */
-	public abstract java.sql.PreparedStatement newEmbedPreparedStatement(
+    public PreparedStatement newEmbedPreparedStatement(
 				EmbedConnection conn,
 				String stmt, 
 				boolean forMetaData, 
@@ -601,25 +708,37 @@ public abstract class InternalDriver implements ModuleControl {
 				int autoGeneratedKeys,
 				int[] columnIndexes,
 				String[] columnNames)
-		throws SQLException;
+        throws SQLException
+    {
+        return new EmbedPreparedStatement(conn,
+                stmt, forMetaData, resultSetType, resultSetConcurrency,
+                resultSetHoldability, autoGeneratedKeys, columnIndexes,
+                columnNames);
+    }
 
 	/**
 	 	@exception SQLException if fails to create statement
 	 */
-	public abstract java.sql.CallableStatement newEmbedCallableStatement(
+    public CallableStatement newEmbedCallableStatement(
 				EmbedConnection conn,
 				String stmt, 
 				int resultSetType,
 				int resultSetConcurrency,
 				int resultSetHoldability)
-		throws SQLException;
+        throws SQLException
+    {
+        return new EmbedCallableStatement(conn, stmt, resultSetType,
+                resultSetConcurrency, resultSetHoldability);
+    }
 
 	/**
 	 * Return a new java.sql.DatabaseMetaData instance for this implementation.
 	 	@exception SQLException on failure to create.
 	 */
-	public abstract DatabaseMetaData newEmbedDatabaseMetaData
-        (EmbedConnection conn, String dbname) throws SQLException;
+    public DatabaseMetaData newEmbedDatabaseMetaData(
+            EmbedConnection conn, String dbname) throws SQLException {
+        return new EmbedDatabaseMetaData(conn, dbname);
+    }
 
 	/**
 	 * Return a new java.sql.ResultSet instance for this implementation.
@@ -631,17 +750,187 @@ public abstract class InternalDriver implements ModuleControl {
 	 * @return a new java.sql.ResultSet
 	 * @throws SQLException
 	 */
-	public abstract EmbedResultSet
-		newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, EmbedStatement statement, boolean isAtomic) throws SQLException;
+    public EmbedResultSet newEmbedResultSet(EmbedConnection conn,
+            ResultSet results, boolean forMetaData, EmbedStatement statement,
+            boolean isAtomic) throws SQLException {
+        return new EmbedResultSet(conn, results, forMetaData, statement,
+                isAtomic);
+    }
         
-        /**
-         * Returns a new java.sql.ResultSetMetaData for this implementation
-         *
-         * @param columnInfo a ResultColumnDescriptor that stores information 
-         *        about the columns in a ResultSet
-         */
-        public abstract EmbedResultSetMetaData newEmbedResultSetMetaData
-            (ResultColumnDescriptor[] columnInfo);
+    /**
+     * Returns a new java.sql.ResultSetMetaData for this implementation
+     *
+     * @param columnInfo a ResultColumnDescriptor that stores information
+     *        about the columns in a ResultSet
+     */
+    public EmbedResultSetMetaData newEmbedResultSetMetaData(
+            ResultColumnDescriptor[] columnInfo) {
+        return new EmbedResultSetMetaData(columnInfo);
+    }
+
+    /**
+     * Return a new BrokeredConnection for this implementation.
+     */
+    BrokeredConnection newBrokeredConnection(
+            BrokeredConnectionControl control) throws SQLException {
+        return new BrokeredConnection(control);
+    }
+
+    /**
+     * Create and return an EmbedPooledConnection from the received instance of
+     * EmbeddedDataSource.
+     */
+    protected PooledConnection getNewPooledConnection(
+            EmbeddedBaseDataSource eds, String user, String password,
+            boolean requestPassword) throws SQLException {
+        return new EmbedPooledConnection40(
+                eds, user, password, requestPassword);
+    }
+
+    /**
+     * Create and return an EmbedXAConnection from the received instance of
+     * EmbeddedBaseDataSource.
+     */
+    protected XAConnection getNewXAConnection(
+            EmbeddedBaseDataSource eds, ResourceAdapter ra,
+            String user, String password, boolean requestPassword)
+            throws SQLException {
+        return new EmbedXAConnection40(
+                eds, ra, user, password, requestPassword);
+    }
+
+    private static final String[] BOOLEAN_CHOICES = {"false", "true"};
+
+    /**
+     * <p>The getPropertyInfo method is intended to allow a generic GUI tool to
+     * discover what properties it should prompt a human for in order to get
+     * enough information to connect to a database.  Note that depending on
+     * the values the human has supplied so far, additional values may become
+     * necessary, so it may be necessary to iterate though several calls
+     * to getPropertyInfo.
+     *
+     * @param url The URL of the database to connect to.
+     * @param info A proposed list of tag/value pairs that will be sent on
+     *          connect open.
+     * @return An array of DriverPropertyInfo objects describing possible
+     *          properties.  This array may be an empty array if no properties
+     *          are required.
+     * @exception SQLException if a database-access error occurs.
+     */
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
+            throws SQLException {
+
+        // RESOLVE other properties should be added into this method in the future ...
+
+        if (info != null) {
+            if (Boolean.valueOf(info.getProperty(Attribute.SHUTDOWN_ATTR)).booleanValue()) {
+
+                // no other options possible when shutdown is set to be true
+                return new DriverPropertyInfo[0];
+            }
+        }
+
+        // at this point we have databaseName,
+
+        String dbname = InternalDriver.getDatabaseName(url, info);
+
+        // convert the ;name=value attributes in the URL into
+        // properties.
+        FormatableProperties finfo = getAttributes(url, info);
+        info = null; // ensure we don't use this reference directly again.
+        boolean encryptDB = Boolean.valueOf(finfo.getProperty(Attribute.DATA_ENCRYPTION)).booleanValue();
+        String encryptpassword = finfo.getProperty(Attribute.BOOT_PASSWORD);
+
+        if (dbname.length() == 0 || (encryptDB && encryptpassword == null)) {
+
+            // with no database name we can have shutdown or a database name
+
+            // In future, if any new attribute info needs to be included in this
+            // method, it just has to be added to either string or boolean or secret array
+            // depending on whether it accepts string or boolean or secret(ie passwords) value.
+
+            String[][] connStringAttributes = {
+                {Attribute.DBNAME_ATTR, MessageId.CONN_DATABASE_IDENTITY},
+                {Attribute.CRYPTO_PROVIDER, MessageId.CONN_CRYPTO_PROVIDER},
+                {Attribute.CRYPTO_ALGORITHM, MessageId.CONN_CRYPTO_ALGORITHM},
+                {Attribute.CRYPTO_KEY_LENGTH, MessageId.CONN_CRYPTO_KEY_LENGTH},
+                {Attribute.CRYPTO_EXTERNAL_KEY, MessageId.CONN_CRYPTO_EXTERNAL_KEY},
+                {Attribute.TERRITORY, MessageId.CONN_LOCALE},
+                {Attribute.COLLATION, MessageId.CONN_COLLATION},
+                {Attribute.USERNAME_ATTR, MessageId.CONN_USERNAME_ATTR},
+                {Attribute.LOG_DEVICE, MessageId.CONN_LOG_DEVICE},
+                {Attribute.ROLL_FORWARD_RECOVERY_FROM, MessageId.CONN_ROLL_FORWARD_RECOVERY_FROM},
+                {Attribute.CREATE_FROM, MessageId.CONN_CREATE_FROM},
+                {Attribute.RESTORE_FROM, MessageId.CONN_RESTORE_FROM},
+            };
+
+            String[][] connBooleanAttributes = {
+                {Attribute.SHUTDOWN_ATTR, MessageId.CONN_SHUT_DOWN_CLOUDSCAPE},
+                {Attribute.DEREGISTER_ATTR, MessageId.CONN_DEREGISTER_AUTOLOADEDDRIVER},
+                {Attribute.CREATE_ATTR, MessageId.CONN_CREATE_DATABASE},
+                {Attribute.DATA_ENCRYPTION, MessageId.CONN_DATA_ENCRYPTION},
+                {Attribute.UPGRADE_ATTR, MessageId.CONN_UPGRADE_DATABASE},
+                };
+
+            String[][] connStringSecretAttributes = {
+                {Attribute.BOOT_PASSWORD, MessageId.CONN_BOOT_PASSWORD},
+                {Attribute.PASSWORD_ATTR, MessageId.CONN_PASSWORD_ATTR},
+                };
+
+
+            DriverPropertyInfo[] optionsNoDB = new  DriverPropertyInfo[connStringAttributes.length+
+                                                                      connBooleanAttributes.length+
+                                                                      connStringSecretAttributes.length];
+
+            int attrIndex = 0;
+            for( int i = 0; i < connStringAttributes.length; i++, attrIndex++ )
+            {
+                optionsNoDB[attrIndex] = new DriverPropertyInfo(connStringAttributes[i][0],
+                                      finfo.getProperty(connStringAttributes[i][0]));
+                optionsNoDB[attrIndex].description = MessageService.getTextMessage(connStringAttributes[i][1]);
+            }
+
+            optionsNoDB[0].choices = Monitor.getMonitor().getServiceList(Property.DATABASE_MODULE);
+            // since database name is not stored in FormatableProperties, we
+            // assign here explicitly
+            optionsNoDB[0].value = dbname;
+
+            for( int i = 0; i < connStringSecretAttributes.length; i++, attrIndex++ )
+            {
+                optionsNoDB[attrIndex] = new DriverPropertyInfo(connStringSecretAttributes[i][0],
+                                      (finfo.getProperty(connStringSecretAttributes[i][0]) == null? "" : "****"));
+                optionsNoDB[attrIndex].description = MessageService.getTextMessage(connStringSecretAttributes[i][1]);
+            }
+
+            for( int i = 0; i < connBooleanAttributes.length; i++, attrIndex++ )
+            {
+                optionsNoDB[attrIndex] = new DriverPropertyInfo(connBooleanAttributes[i][0],
+                    Boolean.valueOf(finfo == null? "" : finfo.getProperty(connBooleanAttributes[i][0])).toString());
+                optionsNoDB[attrIndex].description = MessageService.getTextMessage(connBooleanAttributes[i][1]);
+                optionsNoDB[attrIndex].choices = BOOLEAN_CHOICES;
+            }
+
+            return optionsNoDB;
+        }
+
+        return new DriverPropertyInfo[0];
+    }
+
+    public Connection connect(String url, Properties info) throws SQLException {
+        return connect(url, info, DriverManager.getLoginTimeout());
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public Logger getParentLogger()
+            throws SQLFeatureNotSupportedException {
+        throw (SQLFeatureNotSupportedException)
+                Util.notImplemented("getParentLogger()");
+    }
 
     /**
      * Indicate to {@code AutoloadedDriver} whether it should deregister
