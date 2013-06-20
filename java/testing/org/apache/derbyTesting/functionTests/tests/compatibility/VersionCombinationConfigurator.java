@@ -72,6 +72,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class VersionCombinationConfigurator {
 
+    private static final String EMB_DRIVER =
+                                    "org.apache.derby.jdbc.EmbeddedDriver";
+
     /** Name of the configuration, only used for informational purposes. */
     private final String name;
     /** Decides if combinations have to involve trunk (as server or client). */
@@ -281,25 +284,46 @@ public class VersionCombinationConfigurator {
      * Returns the running distribution, which is typically trunk.
      *
      * @return Information about the running distribution.
-     * @throws IllegalArgumentException if parsing the version string fails, or
-     *      if trunk is run off the classes directory
+     * @throws IllegalStateException if parsing the version string fails, if
+     *      required Derby classes are missing, or if trunk is run off the
+     *      classes directory
      */
     private DerbyDistribution getRunningDistribution() {
-        File libDir = new File(getClassURI(getClass()));
-        if (libDir.isDirectory()) {
-            throw new IllegalStateException("only running off jars is " +
-                    "supported, currently running off " + libDir);
+        File libDir;
+        try {
+            libDir = getJarDirectoryOf(Class.forName(EMB_DRIVER));
+        } catch (ClassNotFoundException cnfe) {
+            // Add relevant information to the error message, the cause and
+            // its stack trace is not printed by default in this context.
+            throw new IllegalStateException(
+                    "missing Derby class: " + cnfe.getMessage(), cnfe);
         }
-        // Get the directory the JAR file is living in.
-        libDir = libDir.getParentFile();
+        File testingDir = getJarDirectoryOf(getClass());
         DerbyVersion version = DerbyVersion.parseVersionString(
                 sysinfo.getVersionString());
-        DerbyDistribution dist = DerbyDistribution.getInstance(libDir, version);
+        DerbyDistribution dist = DerbyDistribution.newInstance(
+                                                version, libDir, testingDir);
         if (dist == null) {
             throw new IllegalStateException(
                     "failed to get running distribution (programming error?)");
         }
         return dist;
+    }
+
+    /**
+     * Returns the directory for the JAR file containing the given class.
+     *
+     * @return A directory path.
+     * @throws IllegalStateException if the class isn't loaded from a JAR
+     */
+    private File getJarDirectoryOf(Class clazz) {
+        File jarPath = new File(getClassURI(clazz));
+        if (jarPath.isDirectory()) {
+            throw new IllegalStateException("only running off jars is " +
+                    "supported, currently running off directory " + jarPath);
+        }
+        // Get the directory the JAR file is living in.
+        return jarPath.getParentFile();
     }
 
     /**

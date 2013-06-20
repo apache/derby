@@ -192,8 +192,8 @@ public class ReleaseRepository {
                         dir.getAbsolutePath());
                 continue;
             }
-            DerbyDistribution dist = DerbyDistribution.getInstance(
-                    dir, version);
+            DerbyDistribution dist = DerbyDistribution.newInstance(
+                    version, dir);
             // TODO: 10.0.1.2 is considered invalid because it doesn't have a
             //       a client JAR. Accept, ignore, or warn all the time?
             if (dist == null) {
