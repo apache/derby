@@ -48,6 +48,9 @@ import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * Optimizer tracer which produces output in an xml format.
@@ -118,6 +121,9 @@ class   XMLOptTrace implements  OptTrace
     private static  final   String  SEL_COUNT = "selCount";
     private static  final   String  SEL_SELECTIVITY = "selSelectivity";
 
+    // distinguish table function names from conglomerate names
+    private static  final   String  TABLE_FUNCTION_FLAG = "()";
+    
     //
     // Statement and view for declaring a table function which reads the planCost element.
     // This table function is an instance of the XmlVTI and assumes that you have
@@ -246,7 +252,8 @@ class   XMLOptTrace implements  OptTrace
             for ( int i = 0; i < _currentOptimizableList.size(); i++ )
             {
                 Optimizable opt = _currentOptimizableList.getOptimizable( i );
-                Element optElement = createElement( _currentQuery, QBLOCK_OPTIMIZABLE, getOptimizableName( opt ) );
+                Element optElement = createElement
+                    ( _currentQuery, QBLOCK_OPTIMIZABLE, getOptimizableName( opt ).getFullSQLName() );
                 optElement.setAttribute( QBLOCK_OPT_TABLE_NUMBER, Integer.toString( opt.getTableNumber() ) );
             }
         }
@@ -293,7 +300,7 @@ class   XMLOptTrace implements  OptTrace
         Element skip = formatSkip
             (
              _currentQuery, QBLOCK_SKIP,
-             "Useless join order. " + getOptimizableName( opt ) + " depends on tables after it in the join order"
+             "Useless join order. " + getOptimizableName( opt ).getFullSQLName() + " depends on tables after it in the join order"
              );
         formatJoinOrder( skip, proposedJoinOrder );
     }
@@ -376,7 +383,7 @@ class   XMLOptTrace implements  OptTrace
         _currentDecoration = createElement( _currentJoinsElement, DECORATION, null );
 
         _currentDecoration.setAttribute( DECORATION_CONGLOM_NAME, cd.getConglomerateName() );
-        _currentDecoration.setAttribute( DECORATION_TABLE_NAME, getOptimizableName( opt ) );
+        _currentDecoration.setAttribute( DECORATION_TABLE_NAME, getOptimizableName( opt ).toString() );
         _currentDecoration.setAttribute( DECORATION_JOIN_STRATEGY, _currentDecorationStrategy.getName() );
         
 		String[]	columnNames = cd.getColumnNames();
@@ -483,38 +490,78 @@ class   XMLOptTrace implements  OptTrace
         return null;
     }
 
-    /** Get the name of a optimizables */
-    private String    getOptimizableName( Optimizable optimizable )
+    /** Get the name of an optimizable */
+    private TableName    getOptimizableName( Optimizable optimizable )
     {
-        String  name = null;
-        
-        if ( optimizable instanceof ProjectRestrictNode )
-        {
-            ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
-            ResultSetNode   rsn = prn.getChildResult();
-            if ( rsn instanceof FromBaseTable )
+        try {
+            if ( isBaseTable( optimizable ) )
             {
-                try {
-                    name = ((FromBaseTable) rsn).getTableName().getFullTableName();
-                }
-                catch (StandardException e)
-                {
-                    // Technically, an exception could occur here if the table name
-                    // was not previously bound and if an error occured while binding it.
-                    // But the FromBaseTable should have been bound long before optimization,
-                    // so this should not be a problem.
-                }
+                TableDescriptor td = ((FromBaseTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableDescriptor();
+                return makeTableName( td.getSchemaName(), td.getName() );
+            }
+            else if ( isTableFunction( optimizable ) )
+            {
+                AliasDescriptor ad =
+                    ((StaticMethodCallNode) ((FromVTI) ((ProjectRestrictNode) optimizable).getChildResult()).getMethodCall() ).ad;
+                return makeTableName( ad.getSchemaName(), ad.getName() );
+            }
+            else if ( isFromTable( optimizable ) )
+            {
+                return ((FromTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableName();
             }
         }
-
-        // fallback
-        if ( name == null )
+        catch (StandardException e)
         {
-            String  nodeClass = optimizable.getClass().getName();
-            name = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
+            // Technically, an exception could occur here if the table name
+            // was not previously bound and if an error occured while binding it.
+            // But the optimizable should have been bound long before optimization,
+            // so this should not be a problem.
         }
 
-        return name;
+        String  nodeClass = optimizable.getClass().getName();
+        String  unqualifiedName = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
+
+        return makeTableName( null, unqualifiedName );
+    }
+
+    /** Return true if the optimizable is a base table */
+    private boolean isBaseTable( Optimizable optimizable )
+    {
+        if ( !( optimizable instanceof ProjectRestrictNode ) ) { return false; }
+
+        ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
+
+        return ( rsn instanceof FromBaseTable );
+    }
+
+    /** Return true if the optimizable is a FromTable */
+    private boolean isFromTable( Optimizable optimizable )
+    {
+        if ( !( optimizable instanceof ProjectRestrictNode ) ) { return false; }
+
+        ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
+
+        return ( rsn instanceof FromTable );
+    }
+
+    /** Return true if the optimizable is a table function */
+    private boolean isTableFunction( Optimizable optimizable )
+    {
+        if ( !( optimizable instanceof ProjectRestrictNode ) ) { return false; }
+
+        ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
+        if ( !( rsn instanceof FromVTI ) ) { return false; }
+
+        return ( ((FromVTI) rsn).getMethodCall() instanceof StaticMethodCallNode );
+    }
+
+    /** Make a TableName */
+    private TableName   makeTableName( String schemaName, String unqualifiedName )
+    {
+        TableName   result = new TableName();
+        result.init( schemaName, unqualifiedName );
+
+        return result;
     }
 
     /** Print an exception to the log file */
@@ -607,7 +654,7 @@ class   XMLOptTrace implements  OptTrace
                 if ( optimizableNumber >= 0 )
                 {
                     Optimizable optimizable = _currentOptimizableList.getOptimizable( optimizableNumber );
-                    createElement( parent, JO_SLOT, getOptimizableName( optimizable ) );
+                    createElement( parent, JO_SLOT, getOptimizableName( optimizable ).getFullSQLName() );
                 }
             }
         }
@@ -661,7 +708,7 @@ class   XMLOptTrace implements  OptTrace
             AccessPath  ap = avoidSort ?
                 optimizable.getBestSortAvoidancePath() : optimizable.getBestAccessPath();
             ConglomerateDescriptor  cd = ap.getConglomerateDescriptor();
-            String  conglomerateName = getConglomerateName( optimizable, cd, verbose );
+            String  conglomerateName = getSQLName( optimizable, cd, verbose );
             JoinStrategy    js = ap.getJoinStrategy();
 
             //
@@ -684,14 +731,22 @@ class   XMLOptTrace implements  OptTrace
      * Get a human-readable name for a conglomerate.
      * </p>
      */
-    private String  getConglomerateName( Optimizable optimizable, ConglomerateDescriptor cd, boolean verbose )
+    private String  getSQLName( Optimizable optimizable, ConglomerateDescriptor cd, boolean verbose )
     {
-        if ( !verbose ) { return cd.getConglomerateName(); }
+        if ( !verbose && (cd != null) )
+        {
+            String  schemaName = getOptimizableName( optimizable ).getSchemaName();
+            String  conglomerateName = cd.getConglomerateName();
 
+            return IdUtil.mkQualifiedName( schemaName, conglomerateName );
+        }
+
+        boolean isTableFunction = isTableFunction( optimizable );
         StringBuilder   buffer = new StringBuilder();
-        buffer.append( getOptimizableName( optimizable ) );
+        buffer.append( getOptimizableName( optimizable ).getFullSQLName() );
+        if ( isTableFunction ) { buffer.append( TABLE_FUNCTION_FLAG ); }
         
-        if ( cd.isIndex() )
+        if ( (cd != null) && cd.isIndex() )
         {
             buffer.append( "{" );
             String[]	columnNames = cd.getColumnNames();

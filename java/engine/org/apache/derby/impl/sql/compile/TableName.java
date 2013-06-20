@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * A TableName represents a qualified name, externally represented as a schema name
@@ -142,6 +143,14 @@ public class TableName extends QueryTreeNode
 		else
 			return tableName;
 	}
+
+    /**
+     * Get the full SQL name of this object, properly quoted and escaped.
+     */
+    public  String  getFullSQLName()
+    {
+        return IdUtil.mkQualifiedName( schemaName, tableName );
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
