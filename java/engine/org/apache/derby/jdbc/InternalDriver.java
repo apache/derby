@@ -783,8 +783,7 @@ public class InternalDriver implements ModuleControl, Driver {
     protected PooledConnection getNewPooledConnection(
             EmbeddedBaseDataSource eds, String user, String password,
             boolean requestPassword) throws SQLException {
-        return new EmbedPooledConnection40(
-                eds, user, password, requestPassword);
+        return new EmbedPooledConnection(eds, user, password, requestPassword);
     }
 
     /**
@@ -795,8 +794,7 @@ public class InternalDriver implements ModuleControl, Driver {
             EmbeddedBaseDataSource eds, ResourceAdapter ra,
             String user, String password, boolean requestPassword)
             throws SQLException {
-        return new EmbedXAConnection40(
-                eds, ra, user, password, requestPassword);
+        return new EmbedXAConnection(eds, ra, user, password, requestPassword);
     }
 
     private static final String[] BOOLEAN_CHOICES = {"false", "true"};

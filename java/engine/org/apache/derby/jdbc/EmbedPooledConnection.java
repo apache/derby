@@ -44,10 +44,13 @@ import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /* -- New jdbc 20 extension types --- */
 import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionEvent;
+import javax.sql.StatementEvent;
+import javax.sql.StatementEventListener;
 
 /** 
 	A PooledConnection object is a connection object that provides hooks for
@@ -56,12 +59,13 @@ import javax.sql.ConnectionEvent;
 	<P>This is Derby's implementation of a PooledConnection for use in
 	the following environments:
 	<UL>
-	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
+    <LI> JDBC 4.2 - Java SE 8 </LI>
+    <LI> JDBC 4.1 - Java SE 7 </LI>
+    <LI> JDBC 4.0 - Java SE 6 </LI>
 	</UL>
 
  */
-abstract class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
+class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
     /** the connection string */
     private String connString;
@@ -71,6 +75,15 @@ abstract class EmbedPooledConnection implements javax.sql.PooledConnection, Brok
      * null} and will be initialized lazily when the first listener is added.
      */
     private ArrayList<ConnectionEventListener> eventListener;
+
+    /**
+     * List of statement event listeners. The list is copied on each write,
+     * ensuring that it can be safely iterated over even if other threads or
+     * the listeners fired in the same thread add or remove listeners.
+     */
+    private final CopyOnWriteArrayList<StatementEventListener>
+            statementEventListeners =
+                    new CopyOnWriteArrayList<StatementEventListener>();
 
     /**
      * The number of iterators going through the list of connection event
@@ -562,31 +575,75 @@ abstract class EmbedPooledConnection implements javax.sql.PooledConnection, Brok
     
     /*-----------------------------------------------------------------*/
     /*
-     * These methods are from the BrokeredConnectionControl interface. 
-     * These methods are needed to provide StatementEvent support for 
-     * derby. 
-     * They are actually implemented in EmbedPooledConnection40 but have
-     * a dummy implementation here so that the compilation wont fail when they
-     * are compiled with jdk1.4
+     * These methods are from the BrokeredConnectionControl interface.
+     * These methods are needed to provide StatementEvent support for
+     * derby.
      */
-    
+
     /**
-     * Dummy implementation for the actual methods found in 
-     * org.apache.derby.jdbc.EmbedPooledConnection40
-     * @param statement PreparedStatement
+     * Raise the statementClosed event for all the listeners when the
+     * corresponding events occurs
+     *
+     * @param statement the {@code PreparedStatement} that was closed
      */
     public void onStatementClose(PreparedStatement statement) {
-        
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this, statement);
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementClosed(event);
+            }
+        }
     }
-    
+
     /**
-     * Dummy implementation for the actual methods found in 
-     * org.apache.derby.jdbc.EmbedPooledConnection40
-     * @param statement PreparedStatement
-     * @param sqle      SQLException 
+     * Raise the statementErrorOccurred event for all the listeners when the
+     * corresponding events occurs
+     *
+     * @param statement the {@code PreparedStatement} in which the
+     *                  error occurred
+     * @param sqle the {@code SQLException} that was thrown
      */
     public void onStatementErrorOccurred(PreparedStatement statement,
             SQLException sqle) {
-        
+        if (!statementEventListeners.isEmpty()) {
+            StatementEvent event = new StatementEvent(this, statement, sqle);
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementErrorOccurred(event);
+            }
+        }
+    }
+
+    // JDBC 4.0 methods
+
+    /**
+     * Removes the specified {@code StatementEventListener} from the list of
+     * components that will be notified when the driver detects that a
+     * {@code PreparedStatement} has been closed or is invalid.
+     *
+     * @param listener the component which implements the
+     * {@code StatementEventListener} interface that was previously registered
+     * with this {@code PooledConnection} object
+     */
+    public void removeStatementEventListener(StatementEventListener listener) {
+        if (listener != null) {
+            statementEventListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Registers a {@code StatementEventListener} with this
+     * {@code PooledConnection} object. Components that wish to be notified when
+     * {@code PreparedStatement}s created by the connection are closed or are
+     * detected to be invalid may use this method to register a
+     * {@code StatementEventListener} with this {@code PooledConnection} object.
+     *
+     * @param listener an component which implements the
+     * {@code StatementEventListener} interface that is to be registered with
+     * this {@code PooledConnection} object
+     */
+    public void addStatementEventListener(StatementEventListener listener) {
+        if (isActive && listener != null) {
+            statementEventListeners.add(listener);
+        }
     }
 }

@@ -41,10 +41,7 @@ import javax.sql.XAConnection;
 
 /** 
  */
-abstract class EmbedXAConnection extends EmbedPooledConnection
-		implements XAConnection
-
-{
+class EmbedXAConnection extends EmbedPooledConnection implements XAConnection {
 
         private EmbedXAResource xaRes;
 
