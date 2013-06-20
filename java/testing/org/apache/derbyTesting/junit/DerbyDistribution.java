@@ -35,12 +35,13 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
  * based on the version of the Derby distribution.
  * <p>
  * <em>Implementation note</em>: For simplicity distributions off the classes
- * directory has been forbidden. The main reason for this is that it is
+ * directory have been forbidden. The main reason for this is that it is
  * sometimes a hard requirement that you must include only a single JAR from a
  * distribution on the classpath. One such example is the compatibility test,
  * where you need the testing code from one distribution and the client driver
- * from another. While it is possible to support such a configuration in many
- * scenarios, it complicates things quite a bit. Generating the JARs when
+ * from another. While it is possible to support such a configuration running
+ * off the {@code classes}-directory in many scenarios, it complicates
+ * the creation and handling of classpath string. Generating the JARs when
  * testing on trunk seems like an acceptable price to pay.
  */
 public class DerbyDistribution
@@ -296,22 +297,49 @@ public class DerbyDistribution
     }
 
     /**
-     * Returns an instance based on the given library directory and version.
      * <p>
-     * This method is capable of understanding the difference of JAR based
-     * distribution and a distribution running off the classes-directory.
+     * Returns a distribution with the specified version, based on the given
+     * library directory.
+     * </p>
      *
-     * @param dir the base directory for the distribution (either the classes
-     *      directory or a directory holding the Derby JAR files)
+     * <p>
+     * It is the responsibility of the caller to ensure that the specified
+     * version matches the JARs in the given directory.
+     * </p>
+     *
      * @param version the version of the distribution
+     * @param baseDir the base dir for the distribution, holding the Derby JARs
      * @return A representation of the distribution, or {@code null} if
-     *      the specified directory is determined to be invalid.
+     *      the specified directory doesn't contain a valid distribution.
      * @throws IllegalArgumentException if {@code version} is {@code null}
      */
-    public static DerbyDistribution getInstance(File dir,
-                                                DerbyVersion version) {
-        File[] productionJars = getProductionJars(dir);
-        File[] testingJars = getTestingJars(dir);
+    public static DerbyDistribution newInstance(DerbyVersion version,
+                                                File baseDir) {
+        return newInstance(version, baseDir, baseDir);
+    }
+
+    /**
+     * <p>
+     * Returns a distribution with the specified version, based on the given
+     * library and testing directories.
+     * </p>
+     *
+     * <p>
+     * It is the responsibility of the caller to ensure that the specified
+     * version matches the JARs in the given directories.
+     * </p>
+     *
+     * @param version the version of the distribution
+     * @param baseDir the directory holding the production JARs
+     * @param testDir the directory holding the testing JAR
+     * @return A representation of the distribution, or {@code null} if
+     *      the specified directories don't make up a valid distribution.
+     * @throws IllegalArgumentException if {@code version} is {@code null}
+     */
+    public static DerbyDistribution newInstance(DerbyVersion version,
+                                                File baseDir, File testDir) {
+        File[] productionJars = getProductionJars(baseDir);
+        File[] testingJars = getTestingJars(testDir);
         List tmpJars = new ArrayList();
         tmpJars.addAll(Arrays.asList(productionJars));
         tmpJars.addAll(Arrays.asList(testingJars));
@@ -320,7 +348,9 @@ public class DerbyDistribution
         }
         // Invalid distribution, ignore it.
         BaseTestCase.println("Distribution deemed invalid (note that running " +
-                "off classes isn't supported): " + dir.getAbsolutePath());
+                "off classes isn't supported): " + baseDir.getAbsolutePath() +
+                (baseDir.equals(testDir) ? ""
+                                         : ", " + testDir.getAbsolutePath()));
         return null;
     }
 }
