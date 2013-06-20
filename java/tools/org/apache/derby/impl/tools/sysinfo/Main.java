@@ -1079,26 +1079,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	** Message handling
 	*/
 
-	public static String getTextMessage(String msgId) {
-		return getCompleteMessage(msgId, new Object[0]);
-	}
-	public static String getTextMessage(String msgId, Object a1) {
-
-		return getCompleteMessage(msgId, new Object[] {a1});
-	}
-	public static String getTextMessage(String msgId, Object a1, Object a2) {
-		return getCompleteMessage(msgId, new Object[] {a1, a2});
-	}
-	public static String getTextMessage(String msgId, Object a1, Object a2, Object a3) {
-		return getCompleteMessage(msgId, new Object[] {a1, a2, a3});
-	}
-	public static String getTextMessage(String msgId, Object a1, Object a2, Object a3, Object a4) {
-		return getCompleteMessage(msgId, new Object[] {a1, a2, a3, a4});
-	}
-
-	/**
-	 */
-	public static String getCompleteMessage(String msgId, Object[] arguments) {
+    public static String getTextMessage(String msgId, Object... arguments) {
         return LOCALIZED_RESOURCE.getTextMessage(msgId, arguments);
 	}
 

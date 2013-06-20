@@ -522,27 +522,11 @@ public class SignatureChecker
     }
 
     /**
-     * Format a localizable message with 0 args.
+     * Format a localizable message.
      */
-    private static  String  formatMessage( String key )
+    private static String formatMessage(String key, Object... args)
     {
-        return getMessageFormatter().getTextMessage( key );
-    }
-    
-    /**
-     * Format a localizable message with 1 arg.
-     */
-    private static  String  formatMessage( String key, String arg0 )
-    {
-        return getMessageFormatter().getTextMessage( key, arg0 );
-    }
-    
-    /**
-     * Format a localizable message with 2 args.
-     */
-    private static  String  formatMessage( String key, String arg0, String arg1 )
-    {
-        return getMessageFormatter().getTextMessage( key, arg0, arg1 );
+        return getMessageFormatter().getTextMessage(key, args);
     }
     
     /**

@@ -269,25 +269,6 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	    out = new LocalizedOutput(o, encoding);
 	    return out;
 	}
-	public String getTextMessage(String key ) {
-        return getTextMessage(key, new Object[0]);
-	}
-	public String getTextMessage(String key, Object o){
-			Object [] att=new Object[] {o};
-			return getTextMessage(key,att);
-	}
-	public String getTextMessage(String key, Object o1, Object o2){
-			Object [] att=new Object[] {o1,o2};
-			return getTextMessage(key,att);
-	}
-	public String getTextMessage(String key, Object o1, Object o2, Object o3){
-			Object [] att=new Object[] {o1,o2,o3};
-			return getTextMessage(key,att);
-	}
-	public String getTextMessage(String key, Object o1, Object o2, Object o3, Object o4){
-			Object [] att=new Object[] {o1,o2,o3,o4};
-			return getTextMessage(key,att);
-	}
 	private Locale getNewLocale(String locStr){
 			String l="", r="", v="";
 			StringTokenizer st;
@@ -306,7 +287,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 				return null;
 			}
 	}
-	public String getTextMessage(String key, Object [] objectArr) {
+    public String getTextMessage(String key, Object... objectArr) {
 		if (res == null){
 			setResource();
 		}
@@ -479,21 +460,9 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public boolean isLocalized(){
 		return getInstance().enableLocalized;
 	}
-	public static String getMessage(String key){
-		return getInstance().getTextMessage(key);
-	}
-	public static String getMessage(String key, Object o1){
-		return getInstance().getTextMessage(key,o1);
-	}
-	public static String getMessage(String key, Object o1, Object o2){
-		return getInstance().getTextMessage(key,o1,o2);
-	}
-	public static String getMessage(String key, Object o1, Object o2, Object o3){
-		return getInstance().getTextMessage(key,o1,o2,o3);
-	}
-	public static String getMessage(String key, Object o1, Object o2, Object o3, Object o4){
-		return getInstance().getTextMessage(key,o1,o2,o3,o4);
-	}
+    public static String getMessage(String key, Object... args) {
+        return getInstance().getTextMessage(key, args);
+    }
 	public static LocalizedOutput OutputWriter(){
 		return getInstance().out;
 	}

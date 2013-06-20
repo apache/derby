@@ -3496,11 +3496,12 @@ public final class NetworkServerControlImpl {
      */
     private String localizeMessage(String msgProp, LocalizedResource localLangUtil, String [] args)
     {
-        String locMsg = null;
+        Object[] argMsg = null;
+
         //check if the argument is a property
         if (args != null)
         {
-            String [] argMsg = new String[args.length];
+            argMsg = new String[args.length];
             for (int i = 0; i < args.length; i++)
             {
                 if (isMsgProperty(args[i]))
@@ -3508,27 +3509,9 @@ public final class NetworkServerControlImpl {
                 else
                     argMsg[i] = args[i];
             }
-            switch (args.length)
-            {
-                case 1:
-                    locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0]);
-                    break;
-                case 2:
-                    locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0], argMsg[1]);
-                    break;
-                case 3:
-                    locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0], argMsg[1], argMsg[2]);
-                    break;
-                case 4:
-                    locMsg = localLangUtil.getTextMessage(msgProp, argMsg[0], argMsg[1], argMsg[2], argMsg[3]);
-                    break;
-                default:
-                    //shouldn't get here
-            }
         }
-        else
-            locMsg = localLangUtil.getTextMessage(msgProp);
-        return locMsg;
+
+        return localLangUtil.getTextMessage(msgProp, argMsg);
     }
     /**
      * Determine type of message
