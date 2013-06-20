@@ -62,7 +62,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
     private final String derbyRunJarPath;
     /** Path to derbyclient.jar. */
     private final String derbyClientJarPath;
-    /** Path to derbyengine.jar. */
+    /** Path to derby.jar. */
     private final String derbyEngineJarPath;
     /** Path to derbynet.jar. */
     private final String derbyNetJarPath;
@@ -78,7 +78,7 @@ public class DerbyDistribution implements Comparable<DerbyDistribution> {
      * Derives the information for a Derby distribution.
      *
      * @throws NullPointerException if version is {@code null}
-     * @see #getInstance
+     * @see #newInstance(DerbyVersion, File)
      */
     private DerbyDistribution(DerbyVersion version,
                               File[] productionJars, File[] testingJars) {
