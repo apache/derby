@@ -587,7 +587,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 *
 	 * @param dataDictionary		The DataDictionary
-	 * @param nodeFactory			Where to get query tree nodes.
 	 * @param targetTableDescriptor	The TableDescriptor
 	 * @param dependent			Parent object that will depend on all the constraints
 	 *							that we look up. If this argument is null, then we

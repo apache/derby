@@ -66,7 +66,7 @@ public final class RowCountNode extends SingleChildResultSetNode
      * @param rcl                The result columns we want
      * @param offset             The offset, if any, in the result set
      * @param fetchFirst         The number of rows to inspect to get
-     * @param hasJDBClimitClause {@true} if a JDBC limit syntax was used
+     * @param hasJDBClimitClause {@code true} if a JDBC limit syntax was used
      * @param cm                 The context manager
      * @throws StandardException
      */

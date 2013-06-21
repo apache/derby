@@ -134,11 +134,6 @@ class UnaryOperatorNode extends OperatorNode
      * @param operatorType  Either 1) the name of the operator,
      *                      OR 2) an Integer holding the operatorType
      *                      for this operator.
-     * @param methodNameOrAddedArgs
-     *                      Either 1) name of the method to call for
-     *                      this operator, or 2) an array of Objects
-     *                      from which primitive method parameters can
-     *                      be retrieved.
      * @param cm            The context manager
 	 */
     UnaryOperatorNode(int                nodeType,
