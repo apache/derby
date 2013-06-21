@@ -127,15 +127,6 @@ public class StoreScriptsTest extends ScriptTestCase {
     public static Test suite() {        
         Properties props = new Properties();
 
-        // When running on JSR-169 platforms, we need to use a data source
-        // instead of a JDBC URL since DriverManager isn't available.
-        if (JDBC.vmSupportsJSR169()) {
-            props.setProperty("ij.dataSource",
-                              "org.apache.derby.jdbc.EmbeddedSimpleDataSource");
-            props.setProperty("ij.dataSource.databaseName", "wombat");
-            props.setProperty("ij.dataSource.createDatabase", "create");
-        }
-
         props.setProperty("derby.infolog.append", "true");  
         props.setProperty("ij.protocol", "jdbc:derby:");
         props.setProperty("ij.database", "wombat;create=true");

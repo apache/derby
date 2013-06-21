@@ -61,17 +61,6 @@ public final class JDBCClient {
             "jdbc:derby:");
     
     /**
-     * The embedded JDBC client for JSR 169
-     */
-    private static final JDBCClient EMBEDDED_169 = new JDBCClient(
-            "Embedded_169", 
-            null, // No driver
-            "org.apache.derby.jdbc.EmbeddedSimpleDataSource", 
-            null, // No connection pooling
-            null, // No XA
-            null); // No JDBC URLs
-    
-    /**
      * Return the default embedded client for this JVM.
      */
     static JDBCClient getDefaultEmbedded()
@@ -80,8 +69,6 @@ public final class JDBCClient {
             return EMBEDDED_40;
         if (JDBC.vmSupportsJDBC3())
             return EMBEDDED_30;
-        if (JDBC.vmSupportsJSR169())
-            return EMBEDDED_169;
         
         Assert.fail("Unknown JVM environment");
         return null;

@@ -43,15 +43,6 @@ public class ij3Test extends ScriptTestCase {
         props.setProperty("ij.showNoConnectionsAtStart", "true");
         props.setProperty("ij.showNoCountForSelect", "true");
 
-        // When running on JSR-169 platforms, we need to use a data source
-        // instead of a JDBC URL since DriverManager isn't available.
-        if (JDBC.vmSupportsJSR169()) {
-            props.setProperty("ij.dataSource",
-                              "org.apache.derby.jdbc.EmbeddedSimpleDataSource");
-            props.setProperty("ij.dataSource.databaseName", "wombat");
-            props.setProperty("ij.dataSource.createDatabase", "create");
-        }
-
         Test test = new SystemPropertyTestSetup(new ij3Test("ij3"), props);
         test = new CleanDatabaseTestSetup(test);   
         

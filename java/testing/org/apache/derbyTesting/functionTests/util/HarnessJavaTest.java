@@ -113,20 +113,6 @@ public abstract class HarnessJavaTest extends CanonTestCase {
                         "ij.database", 
                         config.getJDBCUrl());
                 }
-                else if (JDBC.vmSupportsJSR169())
-                {
-                    // Use a data source and set its database name.
-                    // The database will be created by the CleanDatabaseTestSetup
-                    // used for each individual fixture/test.
-                    
-                    newValues.setProperty(
-                        "ij.dataSource", 
-                        "org.apache.derby.jdbc.EmbeddedSimpleDataSource");
-                    
-                    newValues.setProperty(
-                        "ij.dataSource.databaseName",
-                        config.getDefaultDatabaseName());
-                }
                 super.setUp();
             }
         };

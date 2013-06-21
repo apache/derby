@@ -46,7 +46,6 @@ public class SecurityCheck {
 	{
 		"org.apache.derby.jdbc.EmbeddedDriver",
 		"org.apache.derby.jdbc.EmbeddedDataSource",
-		"org.apache.derby.jdbc.EmbeddedSimpleDataSource",
 		"org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource",
 		"org.apache.derby.jdbc.EmbeddedXADataSource",
 		"org.apache.derby.authentication.UserAuthenticator",

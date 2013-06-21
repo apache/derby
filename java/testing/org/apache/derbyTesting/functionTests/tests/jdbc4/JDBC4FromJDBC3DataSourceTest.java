@@ -44,8 +44,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * </p>
  *
  * <p>
- * Note that after DERBY-5868 and DERBY-5880, all the data sources (except
- * EmbeddedSimpleDataSource for JSR-169) implement all JDBC 4.0 methods.
+ * Note that after DERBY-5868 and DERBY-5880, all the data sources implement all JDBC 4.0 methods.
  * </p>
  *
  * <p>
