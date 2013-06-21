@@ -86,7 +86,7 @@ class CurrentRowLocationNode extends ValueNode
 	 *
 	 *		...
 	 *
-     *      DataValueDescriptor exprx()
+     *      protected DataValueDescriptor exprx()
 	 *				throws StandardException
 	 *		{
 	 *			return fieldx = <SQLRefConstructor>(

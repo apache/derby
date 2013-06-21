@@ -80,12 +80,12 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/**
 	 * By the time this is done, it has constructed the following class:
 	 * <pre>
-	 *    public class #className extends #superClass {
+	 *    final public class #className extends #superClass {
 	 *		// public void reset() { return; }
 	 *		protected ResultSet doExecute() throws StandardException {
 	 *			// statements must be added here
 	 *		}
-     *      #className() { super(); }
+     *      public #className() { super(); }
 	 *    }
 	 * </pre>
 	 *
